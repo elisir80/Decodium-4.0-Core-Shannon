@@ -4425,11 +4425,24 @@ void DecodiumBridge::startPersistenceWorker()
 void DecodiumBridge::enqueuePersistDecode(QVariantMap const& entry)
 {
     if (!m_persistenceWorker) return;
+    // 1.0.242: arricchisce entry con dialFreqHz + bandLabel correnti del
+    // bridge. entry["freq"] da decoder e' audio offset Hz, non RF assoluta;
+    // il worker calcola RF = dialFreqHz + audioOffsetHz. bandLabel viene da
+    // BandManager (es "20m", "FT8 14.074") quando disponibile.
+    QVariantMap enriched = entry;
+    enriched.insert(QStringLiteral("dialFreqHz"),
+                    static_cast<qint64>(m_frequency));
+    if (m_bandManager) {
+        QString const band = m_bandManager->currentBandLambda().trimmed();
+        if (!band.isEmpty()) {
+            enriched.insert(QStringLiteral("bandLabel"), band);
+        }
+    }
     // QueuedConnection: l'event va in coda sul thread del worker. Cost lato
     // GUI = alloc QMetaCallEvent + push in QObjectPrivate::postEvent (~µs).
     QMetaObject::invokeMethod(m_persistenceWorker, "enqueueDecode",
                               Qt::QueuedConnection,
-                              Q_ARG(QVariantMap, entry));
+                              Q_ARG(QVariantMap, enriched));
 }
 
 void DecodiumBridge::stopPersistenceWorker()

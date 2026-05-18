@@ -63,24 +63,32 @@ qint64 parseTimestampMs(QVariantMap const& entry)
 
 qint64 parseFreqHz(QVariantMap const& entry)
 {
+    // 1.0.242: entry["freq"] da decoder Decodium e' AUDIO OFFSET Hz literal
+    // (es. "683", "1495", "2100" — range tipico FT8 200..3000 Hz).
+    // RF assoluta = dialFreqHz + audioOffset. Il bridge inserisce
+    // entry["dialFreqHz"] in enqueuePersistDecode (vedi DecodiumBridge.cpp).
+    qint64 const dialHz = entry.value(QStringLiteral("dialFreqHz")).toLongLong();
+
     QString s = entry.value(QStringLiteral("freq")).toString().trimmed();
-    if (s.isEmpty()) return 0;
-    // freq e' tipicamente in MHz come "14074.123" o "14.074123" a seconda
-    // del contesto. Heuristica: se contiene un punto e parte intera <= 4
-    // cifre, assumiamo MHz, altrimenti kHz/Hz literal.
+    if (s.isEmpty()) return dialHz;
+
     bool ok = false;
     double const v = s.toDouble(&ok);
-    if (!ok) return 0;
-    // Tipico FT8: "14074.123" -> 14.074123 MHz -> 14074123 Hz. Treat as kHz
-    // when integer part > ~999 (e.g. 14074 looks like kHz already).
-    // Treat as MHz when integer part <= ~999 (e.g. 14.074).
+    if (!ok) return dialHz;
+
+    // Se ho la dial dal bridge, assumo SEMPRE che entry["freq"] sia audio
+    // offset Hz literal (path principale Decodium 1.0.242+).
+    if (dialHz > 0) {
+        return dialHz + static_cast<qint64>(v + 0.5);
+    }
+
+    // Fallback compat per entry pre-1.0.242 (no dialFreqHz): heuristic
+    // kHz/MHz su intDigits. Conservata per casi residui (es. import futuri).
     int const dotIdx = s.indexOf(QLatin1Char('.'));
     int const intDigits = (dotIdx >= 0) ? dotIdx : s.size();
     if (intDigits >= 4) {
-        // "14074.123" -> kHz
         return static_cast<qint64>(v * 1000.0 + 0.5);
     }
-    // "14.074123" -> MHz
     return static_cast<qint64>(v * 1000000.0 + 0.5);
 }
 
@@ -156,6 +164,11 @@ QString bandFromFreqHz(qint64 hz)
 
 QString resolveBand(QVariantMap const& entry, qint64 freqHz)
 {
+    // 1.0.242: priorita' bandLabel iniettata da DecodiumBridge::enqueuePersistDecode
+    // (BandManager::currentBandLambda), poi entry["band"] (mai presente in
+    // pratica), poi derivata da freqHz.
+    QString const label = entry.value(QStringLiteral("bandLabel")).toString();
+    if (!label.isEmpty()) return label;
     QString const explicit_ = entry.value(QStringLiteral("band")).toString();
     if (!explicit_.isEmpty()) return explicit_;
     return bandFromFreqHz(freqHz);
