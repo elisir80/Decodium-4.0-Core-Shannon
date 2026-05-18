@@ -4772,6 +4772,12 @@ void DecodiumBridge::setActiveRhiBackend(QString const& backend)
 void DecodiumBridge::setDevOverlayActive(bool v)
 {
     if (m_devOverlayActive == v) return;
+    bridgeLog(QStringLiteral("[DevOverlay] setDevOverlayActive(%1) "
+                             "totalFrames=%2 totalDecRecv=%3 totalDecComm=%4")
+              .arg(v ? "true" : "false")
+              .arg(m_totalFrameSamples.load())
+              .arg(m_totalDecodesReceived.load())
+              .arg(m_totalDecodesCommitted.load()));
     m_devOverlayActive = v;
     if (v) {
         // Reset state quando l'overlay viene mostrato: counter atomic +
@@ -4810,6 +4816,18 @@ void DecodiumBridge::setDevOverlayActive(bool v)
                 int const comm = m_decodeRateCommittedCounter.exchange(0, std::memory_order_relaxed);
                 m_decodeRateReceivedHz  = double(recv) * 4.0;
                 m_decodeRateCommittedHz = double(comm) * 4.0;
+                // 1.0.246 debug: log ogni 8 tick (2s) per vedere se il timer
+                // scatta davvero ed esegue il sample-and-clear.
+                static int s_tickCount = 0;
+                if (++s_tickCount % 8 == 0) {
+                    bridgeLog(QStringLiteral(
+                        "[DevOverlay tick #%1] recv=%2 comm=%3 ringFilled=%4 "
+                        "lastMs=%5 meanMs=%6 active=%7")
+                        .arg(s_tickCount).arg(recv).arg(comm).arg(n)
+                        .arg(m_lastFrameTimeMs, 0, 'f', 2)
+                        .arg(m_meanFrameTimeMs, 0, 'f', 2)
+                        .arg(m_devOverlayActive ? "true" : "false"));
+                }
                 emit perfMetricsChanged();
             });
         }
