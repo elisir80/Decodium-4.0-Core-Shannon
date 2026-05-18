@@ -4251,6 +4251,10 @@ void DecodiumBridge::setSmoothDecodeFlow(bool v)
     if (!v && !m_pendingDecodeReleaseQueue.isEmpty()) {
         for (auto const& entry : std::as_const(m_pendingDecodeReleaseQueue)) {
             m_decodeList.append(QVariant(entry));
+            // 1.0.239 (Phase 5.2 fix): hook persistenza + counter anche
+            // sul path smooth-flow (vedi appendDecodeMapToList).
+            noteDecodeCommitted();
+            enqueuePersistDecode(entry);
         }
         m_pendingDecodeReleaseQueue.clear();
         if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
@@ -4475,8 +4479,13 @@ void DecodiumBridge::drainDecodeReleaseQueue()
     int const take = qMin(m_decodeReleaseChunkSize,
                           m_pendingDecodeReleaseQueue.size());
     for (int i = 0; i < take; ++i) {
-        m_decodeList.append(QVariant(m_pendingDecodeReleaseQueue.first()));
+        QVariantMap const entry = m_pendingDecodeReleaseQueue.first();
+        m_decodeList.append(QVariant(entry));
         m_pendingDecodeReleaseQueue.removeFirst();
+        // 1.0.239 (Phase 5.2 fix): hook persistenza + counter sul path
+        // smooth-flow drain chunked (vedi appendDecodeMapToList).
+        noteDecodeCommitted();
+        enqueuePersistDecode(entry);
     }
     trimDecodeListsIfNeeded();  // 1.0.206 cap
     emitDecodeListChangedThrottled();
@@ -22274,6 +22283,10 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             && m_lastReleaseSerial != static_cast<qint64>(serial)) {
             for (auto const& e : std::as_const(m_pendingDecodeReleaseQueue)) {
                 m_decodeList.append(QVariant(e));
+                // 1.0.239 (Phase 5.2 fix): hook persistenza + counter sul
+                // flush-serial-change smooth-flow path.
+                noteDecodeCommitted();
+                enqueuePersistDecode(e);
             }
             m_pendingDecodeReleaseQueue.clear();
             trimDecodeListsIfNeeded();  // 1.0.206 cap
@@ -22446,8 +22459,10 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             if (useSmoothFlow) {
                 m_pendingDecodeReleaseQueue.append(entry);
             } else {
-                m_decodeList.append(QVariant(entry));
-                trimDecodeListsIfNeeded();  // 1.0.206 cap
+                // 1.0.239 (Phase 5.2 fix): usa appendDecodeMapToList per il
+                // path legacy inline. Garantisce hook noteDecodeCommitted +
+                // enqueuePersistDecode senza duplicare.
+                appendDecodeMapToList(entry);
             }
             appendRxDecodeEntry(entry);
             appendLegacyAllTxtDecodeLine(entry);
