@@ -4715,7 +4715,10 @@ void DecodiumBridge::recordFrameTimestamp()
 {
     // 1.0.245 debug: counter cumulativo PRIMA del gate per diagnosi.
     m_totalFrameSamples.fetch_add(1, std::memory_order_relaxed);
-    if (!m_devOverlayActive) return;
+    // 1.0.247 fix: load() esplicito per evitare bug conversione implicita
+    // atomic<bool>->bool con MinGW gcc 15.2 (diagnosi 1.0.246: tick logga
+    // active=true ma noteDecodeReceived gate-out comunque).
+    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
     if (!m_perfFrameElapsedStarted) {
         m_perfFrameElapsed.start();
         m_perfFrameElapsedStarted = true;
@@ -4734,7 +4737,8 @@ void DecodiumBridge::noteDecodeReceived() const
 {
     // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
     m_totalDecodesReceived.fetch_add(1, std::memory_order_relaxed);
-    if (!m_devOverlayActive) return;
+    // 1.0.247 fix: load() esplicito.
+    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
     m_decodeRateReceivedCounter.fetch_add(1, std::memory_order_relaxed);
 }
 
@@ -4742,7 +4746,8 @@ void DecodiumBridge::noteDecodeCommitted()
 {
     // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
     m_totalDecodesCommitted.fetch_add(1, std::memory_order_relaxed);
-    if (!m_devOverlayActive) return;
+    // 1.0.247 fix: load() esplicito.
+    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
     m_decodeRateCommittedCounter.fetch_add(1, std::memory_order_relaxed);
 }
 
