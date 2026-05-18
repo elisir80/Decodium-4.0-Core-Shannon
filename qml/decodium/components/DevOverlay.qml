@@ -18,11 +18,27 @@ Item {
 
     property var target: typeof bridge !== "undefined" ? bridge : null
     property real appStartMs: Date.now()
-    readonly property real uptimeSec: (Date.now() - appStartMs) / 1000.0
+    // 1.0.244 fix: Date.now() non e' osservabile in QML -> uptimeSec era
+    // calcolato solo al primo eval del binding (subito dopo apertura).
+    // _liveTick e' aggiornato da Timer 1s -> forza re-eval ogni secondo.
+    property real _liveTick: 0
+    readonly property real uptimeSec: {
+        var _ = _liveTick  // dependency capture
+        return (Date.now() - appStartMs) / 1000.0
+    }
+    readonly property bool warmingUp: uptimeSec < 5
     // 1.0.243 fix: era hardcoded "1.0.233" -> mostrava versione obsoleta nel
     // snapshot. Usa bridge.version() (Q_INVOKABLE, FORK_RELEASE_VERSION live).
     readonly property string forkVersion: (target && target.version)
         ? target.version() : "?"
+
+    Timer {
+        id: liveTickTimer
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: _liveTick = Date.now()
+    }
 
     function fmt(v, digits) {
         if (v === undefined || v === null || isNaN(v)) return "--"
@@ -67,12 +83,12 @@ Item {
         var rm = t ? modelCount(t.rxDecodeModel) : -1
         lines.push("  bandActivityModel : " + (bm < 0 ? "n/a" : bm))
         lines.push("  rxDecodeModel     : " + (rm < 0 ? "n/a" : rm))
-        // 1.0.243: hint quando metrics non popolate (uptime < 2s = primo
-        // tick QTimer 250ms ancora non scattato dopo apertura overlay).
-        if (uptimeSec < 2.0) {
+        // 1.0.244: hint quando metrics non popolate. warmingUp = uptime<5s.
+        if (warmingUp) {
             lines.push("")
-            lines.push("(Note: uptime < 2s -- wait at least 5-10s before")
-            lines.push(" copying diagnostics for meaningful samples.)")
+            lines.push("(Note: still warming up uptime=" + fmt(uptimeSec, 0) +
+                       "s -- wait at least 10s after Ctrl+Shift+F")
+            lines.push(" before clicking Copy diagnostics for meaningful samples.)")
         }
         // Snapshot deliberatamente privo di callsign/grid/freq specifiche (no PII).
         return lines.join("\n")
@@ -165,18 +181,24 @@ Item {
 
                 Text { text: "Frame (ms):"; color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
-                    text: fmt(target ? target.lastFrameTimeMs : 0, 2)
-                          + "  mean " + fmt(target ? target.meanFrameTimeMs : 0, 2)
-                          + "  p99 " + fmt(target ? target.p99FrameTimeMs : 0, 2)
-                    color: "#E0E0E0"; font.pixelSize: 10
+                    text: warmingUp
+                          ? "warming up... " + fmt(uptimeSec, 0) + "/5s"
+                          : (fmt(target ? target.lastFrameTimeMs : 0, 2)
+                             + "  mean " + fmt(target ? target.meanFrameTimeMs : 0, 2)
+                             + "  p99 " + fmt(target ? target.p99FrameTimeMs : 0, 2))
+                    color: warmingUp ? "#7088A0" : "#E0E0E0"
+                    font.pixelSize: 10
                     Layout.fillWidth: true
                 }
 
                 Text { text: "Decode Hz:"; color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
-                    text: "rx " + fmt(target ? target.decodeRateReceivedHz : 0, 1)
-                          + "  ok " + fmt(target ? target.decodeRateCommittedHz : 0, 1)
-                    color: "#E0E0E0"; font.pixelSize: 10
+                    text: warmingUp
+                          ? "warming up..."
+                          : ("rx " + fmt(target ? target.decodeRateReceivedHz : 0, 1)
+                             + "  ok " + fmt(target ? target.decodeRateCommittedHz : 0, 1))
+                    color: warmingUp ? "#7088A0" : "#E0E0E0"
+                    font.pixelSize: 10
                     Layout.fillWidth: true
                 }
 
@@ -200,6 +222,7 @@ Item {
 
                 Text { text: "Uptime:"; color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
+                    // 1.0.244 fix: binding rilegge ad ogni Timer 1s tick.
                     text: fmt(uptimeSec, 0) + " s"
                     color: "#E0E0E0"; font.pixelSize: 10
                     Layout.fillWidth: true
