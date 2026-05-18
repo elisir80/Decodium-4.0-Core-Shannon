@@ -22808,6 +22808,10 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
 
         m_decodeList.append(QVariant(entry));
         trimDecodeListsIfNeeded();  // 1.0.206 cap
+        // 1.0.240 (Phase 5.2 fix iter2): hook persistence + counter sul
+        // path FT2-async (decoder principale). Vedi appendDecodeMapToList.
+        noteDecodeCommitted();
+        enqueuePersistDecode(entry);
         appendRxDecodeEntry(entry);
         appendLegacyAllTxtDecodeLine(entry);
         // 1.0.212 — Live Map feed incrementale per FT2 async (vedi nota FT8)
@@ -23028,6 +23032,10 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         tryStartWaitPounceFromEntry(entry, m_decodeList, QStringLiteral("legacy-jt"));
         m_decodeList.append(QVariant(entry));
         trimDecodeListsIfNeeded();  // 1.0.206 cap
+        // 1.0.240 (Phase 5.2 fix iter2): hook persistence + counter sul
+        // path legacy-jt (JT9/JT65/Q65/WSPR via legacy backend).
+        noteDecodeCommitted();
+        enqueuePersistDecode(entry);
         appendRxDecodeEntry(entry);
         // 1.0.162 — DecoSyncTime fase 4: feed dt al self-calibrator
         if (m_decoSyncTime && !entry.value("isTx").toBool()) {
