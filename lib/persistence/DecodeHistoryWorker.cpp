@@ -129,6 +129,38 @@ QVariant strOrNull(QString const& s)
     return s.isEmpty() ? QVariant(QMetaType(QMetaType::QString)) : QVariant(s);
 }
 
+// 1.0.241 (Phase 5.2 fix iter3): se entry["band"] e' vuoto, deriva la
+// stringa banda dai Hz. Schema decodes.band e' NOT NULL: rilasciare
+// constraint richiederebbe migration SQLite (DROP+CREATE+COPY). Piu'
+// semplice fornire un valore sensato sempre.
+QString bandFromFreqHz(qint64 hz)
+{
+    if (hz < 100000)            return QStringLiteral("?");
+    if (hz < 1900000)           return QStringLiteral("160m");
+    if (hz < 4000000)           return QStringLiteral("80m");
+    if (hz < 5500000)           return QStringLiteral("60m");
+    if (hz < 7500000)           return QStringLiteral("40m");
+    if (hz < 10500000)          return QStringLiteral("30m");
+    if (hz < 14500000)          return QStringLiteral("20m");
+    if (hz < 18500000)          return QStringLiteral("17m");
+    if (hz < 21500000)          return QStringLiteral("15m");
+    if (hz < 25000000)          return QStringLiteral("12m");
+    if (hz < 30000000)          return QStringLiteral("10m");
+    if (hz < 55000000)          return QStringLiteral("6m");
+    if (hz < 72000000)          return QStringLiteral("4m");
+    if (hz < 150000000)         return QStringLiteral("2m");
+    if (hz < 230000000)         return QStringLiteral("1.25m");
+    if (hz < 460000000)         return QStringLiteral("70cm");
+    return QStringLiteral("?");
+}
+
+QString resolveBand(QVariantMap const& entry, qint64 freqHz)
+{
+    QString const explicit_ = entry.value(QStringLiteral("band")).toString();
+    if (!explicit_.isEmpty()) return explicit_;
+    return bandFromFreqHz(freqHz);
+}
+
 } // namespace
 
 DecodeHistoryWorker::DecodeHistoryWorker(QString dbPath,
@@ -278,14 +310,21 @@ void DecodeHistoryWorker::flushBuffer()
 
     int inserted = 0;
     for (QVariantMap const& e : batch) {
+        qint64 const freqHz = parseFreqHz(e);
         m_insertStmt.bindValue(QStringLiteral(":ts_utc"),
                                parseTimestampMs(e));
+        // 1.0.241 fix: entry decodium NON ha "band" come role; il worker
+        // deriva la banda da freq_hz via bandFromFreqHz. Schema NOT NULL
+        // satisfied senza migration.
         m_insertStmt.bindValue(QStringLiteral(":band"),
-                               strOrNull(e.value(QStringLiteral("band")).toString()));
-        m_insertStmt.bindValue(QStringLiteral(":freq_hz"),
-                               parseFreqHz(e));
-        m_insertStmt.bindValue(QStringLiteral(":mode"),
-                               e.value(QStringLiteral("mode")).toString());
+                               resolveBand(e, freqHz));
+        m_insertStmt.bindValue(QStringLiteral(":freq_hz"), freqHz);
+        // 1.0.241 fix: mode fallback "?" se assente. NOT NULL satisfied.
+        {
+            QString modeStr = e.value(QStringLiteral("mode")).toString();
+            if (modeStr.isEmpty()) modeStr = QStringLiteral("?");
+            m_insertStmt.bindValue(QStringLiteral(":mode"), modeStr);
+        }
         m_insertStmt.bindValue(QStringLiteral(":submode"),
                                strOrNull(e.value(QStringLiteral("submode")).toString()));
         m_insertStmt.bindValue(QStringLiteral(":callsign_dx"),
@@ -300,8 +339,13 @@ void DecodeHistoryWorker::flushBuffer()
                                parseDt(e));
         m_insertStmt.bindValue(QStringLiteral(":df_hz"),
                                parseDfHz(e));
-        m_insertStmt.bindValue(QStringLiteral(":message"),
-                               e.value(QStringLiteral("message")).toString());
+        // 1.0.241 fix: message NOT NULL satisfied con stringa vuota fallback
+        // (alcuni decode entry edge case potrebbero arrivare senza message).
+        {
+            QString msgStr = e.value(QStringLiteral("message")).toString();
+            if (msgStr.isEmpty()) msgStr = QStringLiteral("");
+            m_insertStmt.bindValue(QStringLiteral(":message"), msgStr);
+        }
         m_insertStmt.bindValue(QStringLiteral(":confidence"),
                                parseConfidence(e));
         m_insertStmt.bindValue(QStringLiteral(":session_id"),
