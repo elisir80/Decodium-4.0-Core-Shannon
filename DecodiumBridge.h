@@ -69,6 +69,7 @@ namespace decodium {
 
 class RemoteCommandServer;
 class DecodeListModel;  // 1.0.143 fase 2: model nativo per ListView decode
+class DecodeHistoryWorker;  // 1.0.238 Phase 5.2 perf roadmap: write-behind SQLite
 
 class DecodiumBridge : public QObject
 {
@@ -2108,6 +2109,15 @@ private:
     // compat con tutto il codice esistente. Default ON.
     DecoSyncTime* m_decoSyncTime {nullptr};
     DecodiumWebServer* m_webServer {nullptr};
+    // 1.0.238 (Phase 5.2 perf roadmap): write-behind worker per persistere la
+    // decode history su SQLite in modo asincrono. Il worker vive su un
+    // QThread dedicato (m_persistenceThread); il bridge gli invia entry via
+    // QMetaObject::invokeMethod(... QueuedConnection ...) da
+    // appendDecodeMapToList(). m_currentSessionId e' la PK in `sessions`
+    // creata al boot del bridge.
+    QThread* m_persistenceThread {nullptr};
+    DecodeHistoryWorker* m_persistenceWorker {nullptr};
+    qint64   m_currentSessionId {-1};
     NtpClient* m_ntpClient      {nullptr};
     bool   m_ntpEnabled         {false};
     QString m_ntpCustomServer;
@@ -2324,6 +2334,16 @@ private:
     // 1.0.179 — Smooth Decode Flow helpers
     bool isUiStallActive(int thresholdMs, int windowMs) const;
     void appendDecodeMapToList(QVariantMap const& entry);
+
+    // 1.0.238 (Phase 5.2): write-behind persistence helpers.
+    // startPersistenceWorker(): chiamato durante l'init del bridge, crea una
+    //   riga in `sessions`, lancia il QThread worker e connette i signal.
+    // enqueuePersistDecode(): chiamato da appendDecodeMapToList(); fa solo
+    //   QMetaObject::invokeMethod sul worker (~µs sul thread GUI).
+    // stopPersistenceWorker(): cleanup nel distruttore.
+    void startPersistenceWorker();
+    void enqueuePersistDecode(QVariantMap const& entry);
+    void stopPersistenceWorker();
 
     void refreshDecodeListDxcc();
     QStringList parseFt8Row(const QString& row) const;

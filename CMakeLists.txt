@@ -1511,6 +1511,8 @@ add_executable (decodium_qml
   DecodiumBridge.h
   DecodeListModel.cpp
   DecodeListModel.h
+  lib/persistence/DecodeHistoryWorker.cpp
+  lib/persistence/DecodeHistoryWorker.h
   Web/DecodiumWebServer.cpp
   Web/DecodiumWebServer.hpp
   DecodiumDiagnostics.cpp
@@ -1619,6 +1621,7 @@ target_link_libraries (decodium_qml
   Qt6::Multimedia
   Qt6::Network
   Qt6::SerialPort
+  Qt6::Sql           # 1.0.238 Phase 5.2: decode history worker thread
   Qt6::WebSockets
   wsjt_qtmm
   wsjt_qt

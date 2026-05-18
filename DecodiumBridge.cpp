@@ -1,5 +1,6 @@
 #include "DecodiumBridge.h"
 #include "DecodeListModel.h"
+#include "lib/persistence/DecodeHistoryWorker.h"  // 1.0.238 Phase 5.2 perf roadmap
 #include "DecodiumLogging.hpp"
 #include "DecodiumAlertManager.h"
 #include "DecodiumDiagnostics.h"
@@ -78,6 +79,9 @@
 #include <QUrlQuery>
 #include <QStandardPaths>
 #include <QDir>
+#include <QSqlDatabase>      // 1.0.238 Phase 5.2: session row in `sessions` table
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QPointer>
@@ -4334,6 +4338,115 @@ void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
     m_decodeList.append(QVariant(entry));
     trimDecodeListsIfNeeded();
     noteDecodeCommitted();  // 1.0.233 DevOverlay counter (no-op se overlay off)
+    // 1.0.238 (Phase 5.2 perf roadmap): write-behind SQLite persistence.
+    // Spedisce la entry al worker thread tramite slot QueuedConnection: il
+    // costo lato GUI thread e' solo l'allocazione di un QMetaCallEvent
+    // (alcune centinaia di ns). NO blocco I/O.
+    enqueuePersistDecode(entry);
+}
+
+// 1.0.238 (Phase 5.2 perf roadmap): bootstrap del write-behind worker per la
+// decode history. Sequenza:
+//   1. Apre la connessione SQLite default (gia' creata in main_qml.cpp:
+//      ensureLegacySqliteDatabase) e inserisce una nuova riga in `sessions`.
+//   2. Memorizza il rowid in m_currentSessionId.
+//   3. Crea il QThread + DecodeHistoryWorker, moveToThread() e starta.
+//   4. Connette QThread::started -> worker::initialize (init SQLite sul
+//      thread giusto), QThread::finished -> worker::deleteLater.
+// Chiamato dal costruttore del bridge subito dopo che gli altri member sono
+// stati inizializzati.
+void DecodiumBridge::startPersistenceWorker()
+{
+    if (m_persistenceWorker || m_persistenceThread) return;
+
+    QString const dbPath = QDir(QStandardPaths::writableLocation(
+        QStandardPaths::AppLocalDataLocation))
+        .absoluteFilePath(QStringLiteral("db.sqlite"));
+
+    // 1. INSERT in sessions usando la connessione default (main thread).
+    {
+        QSqlDatabase db = QSqlDatabase::database(QSqlDatabase::defaultConnection);
+        if (!db.isValid() || !db.isOpen()) {
+            bridgeLog(QStringLiteral("[Phase5.2] sessions: default DB connection "
+                                     "unavailable, persistence disabled"));
+            return;
+        }
+        QSqlQuery q(db);
+        if (!q.prepare(QStringLiteral(
+                "INSERT INTO sessions (started_utc, decodium_ver) "
+                "VALUES (:ts, :ver)"))) {
+            bridgeLog(QStringLiteral("[Phase5.2] sessions INSERT prepare failed: %1")
+                          .arg(q.lastError().text()));
+            return;
+        }
+        q.bindValue(QStringLiteral(":ts"),
+                    QDateTime::currentMSecsSinceEpoch());
+        q.bindValue(QStringLiteral(":ver"),
+                    QString::fromLatin1(FORK_RELEASE_VERSION));
+        if (!q.exec()) {
+            bridgeLog(QStringLiteral("[Phase5.2] sessions INSERT failed: %1")
+                          .arg(q.lastError().text()));
+            return;
+        }
+        m_currentSessionId = q.lastInsertId().toLongLong();
+    }
+
+    // 2/3. Spin-up del worker thread.
+    m_persistenceThread = new QThread(this);
+    m_persistenceThread->setObjectName(QStringLiteral("DecodeHistoryWorker"));
+    m_persistenceWorker = new DecodeHistoryWorker(dbPath, m_currentSessionId);
+    m_persistenceWorker->moveToThread(m_persistenceThread);
+
+    connect(m_persistenceThread, &QThread::started,
+            m_persistenceWorker, &DecodeHistoryWorker::initialize);
+    connect(m_persistenceThread, &QThread::finished,
+            m_persistenceWorker, &QObject::deleteLater);
+    connect(m_persistenceWorker, &DecodeHistoryWorker::decodesPersisted,
+            this, [](int count, qint64 sessionId) {
+                // 1.0.238: log su counter mod 200 per evitare flood.
+                static int s_total = 0;
+                s_total += count;
+                if ((s_total / 200) != ((s_total - count) / 200)) {
+                    bridgeLog(QStringLiteral("[Phase5.2] persisted %1 decodes "
+                                             "(session=%2)").arg(s_total)
+                                  .arg(sessionId));
+                }
+            });
+
+    m_persistenceThread->start();
+    bridgeLog(QStringLiteral("[Phase5.2] decode history worker started, "
+                             "session_id=%1").arg(m_currentSessionId));
+}
+
+void DecodiumBridge::enqueuePersistDecode(QVariantMap const& entry)
+{
+    if (!m_persistenceWorker) return;
+    // QueuedConnection: l'event va in coda sul thread del worker. Cost lato
+    // GUI = alloc QMetaCallEvent + push in QObjectPrivate::postEvent (~µs).
+    QMetaObject::invokeMethod(m_persistenceWorker, "enqueueDecode",
+                              Qt::QueuedConnection,
+                              Q_ARG(QVariantMap, entry));
+}
+
+void DecodiumBridge::stopPersistenceWorker()
+{
+    if (!m_persistenceThread) return;
+    if (m_persistenceWorker) {
+        // Forza flush + chiusura DB sul thread worker via Queued: l'event
+        // loop processa il metodo prima di tornare a quit().
+        QMetaObject::invokeMethod(m_persistenceWorker, "shutdown",
+                                  Qt::BlockingQueuedConnection);
+    }
+    m_persistenceThread->quit();
+    if (!m_persistenceThread->wait(5000)) {
+        qWarning("~DecodiumBridge: persistence thread did not finish in 5s, "
+                 "terminating");
+        m_persistenceThread->terminate();
+        m_persistenceThread->wait(2000);
+    }
+    // worker deletato via deleteLater on QThread::finished signal; thread
+    // ha this come parent quindi distrutto col bridge.
+    m_persistenceWorker = nullptr;
 }
 
 // 1.0.206 — Cap m_decodeList/m_rxDecodeList per evitare crescita illimitata.
@@ -5764,11 +5877,21 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     if ((usingLegacyBackendForTx() || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) && m_legacyStateTimer) {
         m_legacyStateTimer->start();
     }
+
+    // 1.0.238 (Phase 5.2 perf roadmap): avvia il worker di persistenza decode
+    // history su thread separato. Va fatto DOPO il setup di tutti i member
+    // perche' il worker usa enrichDecodeEntry-style entry maps che dipendono
+    // dal contesto del bridge gia' inizializzato.
+    startPersistenceWorker();
 }
 
 DecodiumBridge::~DecodiumBridge()
 {
     beginDecodeCallbackShutdown();
+    // 1.0.238 (Phase 5.2 perf roadmap): ferma il worker di persistenza PRIMA
+    // di teardown decoder/audio. Flush sincrono delle entry pendenti +
+    // chiusura connessione SQLite "decode_history_worker" sul thread giusto.
+    stopPersistenceWorker();
     // 1.0.179 — Smooth Decode Flow: ferma drain timer e svuota coda prima
     // di teardown per evitare timer callback su this in distruzione.
     if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
