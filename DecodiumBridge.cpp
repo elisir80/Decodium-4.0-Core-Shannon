@@ -4715,10 +4715,11 @@ void DecodiumBridge::recordFrameTimestamp()
 {
     // 1.0.245 debug: counter cumulativo PRIMA del gate per diagnosi.
     m_totalFrameSamples.fetch_add(1, std::memory_order_relaxed);
-    // 1.0.247 fix: load() esplicito per evitare bug conversione implicita
-    // atomic<bool>->bool con MinGW gcc 15.2 (diagnosi 1.0.246: tick logga
-    // active=true ma noteDecodeReceived gate-out comunque).
-    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
+    // 1.0.248: gate atomic<bool> RIMOSSO. Diagnosi 1.0.246-247: tick lambda
+    // legge m_devOverlayActive=true mentre noteDecodeReceived legge false
+    // su stesso atomic, stesso main thread -- root cause sconosciuto (forse
+    // bug MinGW 15.2 atomic<bool> in const methods). Overhead a riposo
+    // (overlay chiuso) e' una scrittura atomic + paio di double assignment.
     if (!m_perfFrameElapsedStarted) {
         m_perfFrameElapsed.start();
         m_perfFrameElapsedStarted = true;
@@ -4735,19 +4736,15 @@ void DecodiumBridge::recordFrameTimestamp()
 
 void DecodiumBridge::noteDecodeReceived() const
 {
-    // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
     m_totalDecodesReceived.fetch_add(1, std::memory_order_relaxed);
-    // 1.0.247 fix: load() esplicito.
-    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
+    // 1.0.248: gate atomic<bool> RIMOSSO (vedi recordFrameTimestamp).
     m_decodeRateReceivedCounter.fetch_add(1, std::memory_order_relaxed);
 }
 
 void DecodiumBridge::noteDecodeCommitted()
 {
-    // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
     m_totalDecodesCommitted.fetch_add(1, std::memory_order_relaxed);
-    // 1.0.247 fix: load() esplicito.
-    if (!m_devOverlayActive.load(std::memory_order_relaxed)) return;
+    // 1.0.248: gate atomic<bool> RIMOSSO.
     m_decodeRateCommittedCounter.fetch_add(1, std::memory_order_relaxed);
 }
 
