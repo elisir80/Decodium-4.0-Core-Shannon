@@ -4713,6 +4713,8 @@ void DecodiumBridge::rebuildRxDecodeModel()
 // body short-circuita early. Il QTimer perf 250ms parte/ferma con il toggle.
 void DecodiumBridge::recordFrameTimestamp()
 {
+    // 1.0.245 debug: counter cumulativo PRIMA del gate per diagnosi.
+    m_totalFrameSamples.fetch_add(1, std::memory_order_relaxed);
     if (!m_devOverlayActive) return;
     if (!m_perfFrameElapsedStarted) {
         m_perfFrameElapsed.start();
@@ -4730,12 +4732,16 @@ void DecodiumBridge::recordFrameTimestamp()
 
 void DecodiumBridge::noteDecodeReceived() const
 {
+    // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
+    m_totalDecodesReceived.fetch_add(1, std::memory_order_relaxed);
     if (!m_devOverlayActive) return;
     m_decodeRateReceivedCounter.fetch_add(1, std::memory_order_relaxed);
 }
 
 void DecodiumBridge::noteDecodeCommitted()
 {
+    // 1.0.245 debug: cumulativo PRIMA del gate per diagnosi.
+    m_totalDecodesCommitted.fetch_add(1, std::memory_order_relaxed);
     if (!m_devOverlayActive) return;
     m_decodeRateCommittedCounter.fetch_add(1, std::memory_order_relaxed);
 }

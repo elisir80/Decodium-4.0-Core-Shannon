@@ -83,6 +83,15 @@ Item {
         var rm = t ? modelCount(t.rxDecodeModel) : -1
         lines.push("  bandActivityModel : " + (bm < 0 ? "n/a" : bm))
         lines.push("  rxDecodeModel     : " + (rm < 0 ? "n/a" : rm))
+        lines.push("")
+        lines.push("[Cumulative counters (debug)]")
+        // 1.0.245: incrementati PRIMA del gate m_devOverlayActive.
+        // Se totalFrameSamples > 0 ma mean=0 -> bug downstream QTimer/emit.
+        // Se totalFrameSamples == 0 -> connect frameSwapped non funziona.
+        lines.push("  totalFrameSamples       : " + (t ? t.totalFrameSamples : 0))
+        lines.push("  totalDecodesReceived    : " + (t ? t.totalDecodesReceived : 0))
+        lines.push("  totalDecodesCommitted   : " + (t ? t.totalDecodesCommitted : 0))
+        lines.push("  devOverlayActive (gate) : " + (t ? t.devOverlayActive : false))
         // 1.0.244: hint quando metrics non popolate. warmingUp = uptime<5s.
         if (warmingUp) {
             lines.push("")

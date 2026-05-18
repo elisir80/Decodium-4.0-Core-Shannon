@@ -116,6 +116,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString activeRhiBackend READ activeRhiBackend CONSTANT)
     Q_PROPERTY(bool devOverlayActive READ devOverlayActive WRITE setDevOverlayActive NOTIFY devOverlayActiveChanged)
     Q_PROPERTY(QVariantList frameTimeSamples READ frameTimeSamples NOTIFY perfMetricsChanged)
+    // 1.0.245 debug: cumulativi NON resettati, diagnosi gate.
+    Q_PROPERTY(qint64 totalFrameSamples READ totalFrameSamples NOTIFY perfMetricsChanged)
+    Q_PROPERTY(qint64 totalDecodesReceived READ totalDecodesReceived NOTIFY perfMetricsChanged)
+    Q_PROPERTY(qint64 totalDecodesCommitted READ totalDecodesCommitted NOTIFY perfMetricsChanged)
     // 1.0.143 fase 2: model nativi per le 2 ListView. Sostituiscono i JS-filter
     // array (filteredDecodeEntries, currentRxDecodes) con QAbstractListModel +
     // diff incrementale → elimina rebuild totale ad ogni decodeListChanged.
@@ -1574,8 +1578,14 @@ private:
     mutable std::atomic<int> m_decodeRateCommittedCounter {0};
     double  m_decodeRateReceivedHz {0.0};
     double  m_decodeRateCommittedHz {0.0};
+    // 1.0.245 debug: cumulativi NON resettati, per diagnosi gate
+    // m_devOverlayActive: se totFrames=0 nello snapshot, recordFrameTimestamp
+    // non e' mai stato chiamato con gate==true.
+    mutable std::atomic<qint64> m_totalFrameSamples {0};
+    mutable std::atomic<qint64> m_totalDecodesReceived {0};
+    mutable std::atomic<qint64> m_totalDecodesCommitted {0};
     QTimer* m_perfMetricsTimer {nullptr};
-    bool    m_devOverlayActive {false};
+    std::atomic<bool>  m_devOverlayActive {false};
     QString m_activeRhiBackend {QStringLiteral("unknown")};
     // 1.0.143 fase 2: model nativi per le 2 ListView (Band Activity + Signal RX).
     // Sostituiscono i JS-filter array di DecodeWindow.qml. Vengono syncati
@@ -2317,6 +2327,9 @@ public:
     double  decodeRateCommittedHz()const { return m_decodeRateCommittedHz; }
     QString activeRhiBackend()     const { return m_activeRhiBackend; }
     bool    devOverlayActive()     const { return m_devOverlayActive; }
+    qint64  totalFrameSamples()    const { return m_totalFrameSamples; }
+    qint64  totalDecodesReceived() const { return m_totalDecodesReceived; }
+    qint64  totalDecodesCommitted()const { return m_totalDecodesCommitted; }
     QVariantList frameTimeSamples() const;
     void    setActiveRhiBackend(QString const& backend);
     void    setDevOverlayActive(bool v);
