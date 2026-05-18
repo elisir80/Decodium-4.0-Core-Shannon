@@ -19,7 +19,10 @@ Item {
     property var target: typeof bridge !== "undefined" ? bridge : null
     property real appStartMs: Date.now()
     readonly property real uptimeSec: (Date.now() - appStartMs) / 1000.0
-    readonly property string forkVersion: "1.0.233"
+    // 1.0.243 fix: era hardcoded "1.0.233" -> mostrava versione obsoleta nel
+    // snapshot. Usa bridge.version() (Q_INVOKABLE, FORK_RELEASE_VERSION live).
+    readonly property string forkVersion: (target && target.version)
+        ? target.version() : "?"
 
     function fmt(v, digits) {
         if (v === undefined || v === null || isNaN(v)) return "--"
@@ -64,6 +67,13 @@ Item {
         var rm = t ? modelCount(t.rxDecodeModel) : -1
         lines.push("  bandActivityModel : " + (bm < 0 ? "n/a" : bm))
         lines.push("  rxDecodeModel     : " + (rm < 0 ? "n/a" : rm))
+        // 1.0.243: hint quando metrics non popolate (uptime < 2s = primo
+        // tick QTimer 250ms ancora non scattato dopo apertura overlay).
+        if (uptimeSec < 2.0) {
+            lines.push("")
+            lines.push("(Note: uptime < 2s -- wait at least 5-10s before")
+            lines.push(" copying diagnostics for meaningful samples.)")
+        }
         // Snapshot deliberatamente privo di callsign/grid/freq specifiche (no PII).
         return lines.join("\n")
     }

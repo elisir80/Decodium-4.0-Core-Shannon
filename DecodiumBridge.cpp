@@ -4808,6 +4808,13 @@ void DecodiumBridge::setDevOverlayActive(bool v)
             });
         }
         m_perfMetricsTimer->start();
+        // 1.0.243 fix: forza un primo tick a 100ms invece di aspettare i
+        // 250ms standard. Con questo, dopo aver premuto Ctrl+Shift+F l'utente
+        // vede subito numeri (anche se mean su 1 sample). Migliora UX
+        // "Copy diagnostics" appena aperto.
+        QTimer::singleShot(100, this, [this]() {
+            if (m_devOverlayActive) emit perfMetricsChanged();
+        });
     } else {
         if (m_perfMetricsTimer) m_perfMetricsTimer->stop();
     }
