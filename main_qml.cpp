@@ -618,6 +618,55 @@ static bool ensureLegacySqliteDatabase()
     applyPragma("PRAGMA journal_mode=WAL");
     applyPragma("PRAGMA synchronous=NORMAL");
     applyPragma("PRAGMA busy_timeout=5000");
+    // 1.0.237 (Phase 5.1 perf roadmap): PRAGMA aggiuntivi per persistence
+    // di decode history. mmap 256MB + cache 64MB + temp in RAM riducono
+    // I/O su SSD durante batch insert.
+    applyPragma("PRAGMA temp_store=MEMORY");
+    applyPragma("PRAGMA mmap_size=268435456");
+    applyPragma("PRAGMA cache_size=-65536");
+
+    // 1.0.237 (Phase 5.1): schema decode history. Tabelle vuote in 5.1,
+    // populated dal write-behind worker thread in Phase 5.2.
+    // Schema dalla roadmap performance: sessions + decodes con indici
+    // per query (ts_utc, callsign_dx, band+mode).
+    auto execDdl = [&db](char const* ddl) {
+        QSqlQuery query = db.exec(QString::fromLatin1(ddl));
+        if (query.lastError().isValid()) {
+            L(("SQLite DDL failed: " + query.lastError().text().toLocal8Bit()
+               + " | " + QByteArray(ddl)).constData());
+        }
+    };
+    execDdl(
+        "CREATE TABLE IF NOT EXISTS sessions ("
+        "  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  started_utc INTEGER NOT NULL,"
+        "  ended_utc   INTEGER,"
+        "  operator    TEXT,"
+        "  station     TEXT,"
+        "  decodium_ver TEXT NOT NULL"
+        ")");
+    execDdl(
+        "CREATE TABLE IF NOT EXISTS decodes ("
+        "  id          INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  ts_utc      INTEGER NOT NULL,"
+        "  band        TEXT NOT NULL,"
+        "  freq_hz     INTEGER NOT NULL,"
+        "  mode        TEXT NOT NULL,"
+        "  submode     TEXT,"
+        "  callsign_dx TEXT,"
+        "  callsign_de TEXT,"
+        "  grid        TEXT,"
+        "  snr_db      INTEGER,"
+        "  dt_s        REAL,"
+        "  df_hz       INTEGER,"
+        "  message     TEXT NOT NULL,"
+        "  confidence  INTEGER,"
+        "  session_id  INTEGER NOT NULL,"
+        "  FOREIGN KEY(session_id) REFERENCES sessions(id)"
+        ")");
+    execDdl("CREATE INDEX IF NOT EXISTS idx_decodes_ts ON decodes(ts_utc)");
+    execDdl("CREATE INDEX IF NOT EXISTS idx_decodes_callsign ON decodes(callsign_dx)");
+    execDdl("CREATE INDEX IF NOT EXISTS idx_decodes_band_mode ON decodes(band, mode)");
 
     L(("SQLite database OK: " + dbPath.toLocal8Bit()).constData());
     return true;
