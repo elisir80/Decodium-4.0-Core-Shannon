@@ -5994,6 +5994,7 @@ NumberAnimation {
                                         property bool followTail: true
                                         property bool tailFollowPending: false
 	                                        property bool tailFollowQueued: false
+	                                        property int pendingNewDecodes: 0
 	                                        function isNearTail() {
 	                                            return contentHeight <= height + 2
 	                                                || contentY >= Math.max(0, contentHeight - height - 48)
