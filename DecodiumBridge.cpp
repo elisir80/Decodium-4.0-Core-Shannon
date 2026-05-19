@@ -22186,7 +22186,12 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
             // Qt.rgba(...,0.15) / Qt.rgba(...,0.05) in QML.
             QColor tinted = base;
             tinted.setAlphaF(isCQEntry ? 0.15 : 0.05);
-            bgHex = tinted.name(QColor::HexArgb);
+            // 1.0.254 fix: skip bgColorHex se base color invalido o alpha
+            // quasi-zero (theme non ancora pronto -> #00000000 truthy ma
+            // visivamente trasparente -> Rectangle nero in QML).
+            if (base.isValid() && tinted.alphaF() > 0.02) {
+                bgHex = tinted.name(QColor::HexArgb);
+            }
         }
         entry[QStringLiteral("bgColorHex")] = bgHex;
     }

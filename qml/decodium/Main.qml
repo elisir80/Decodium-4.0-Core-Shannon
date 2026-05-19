@@ -6165,7 +6165,12 @@ NumberAnimation {
                                             readonly property bool isPeriodSeparator: hasEntry && entry.isSeparator === true
                                             width: rxFrequencyList.width - 8
                                             // 1.0.253 — height adattiva compact mode Signal RX
-                                            height: !hasEntry ? 0 : isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
+                                            // 1.0.254 fix: rimosso `!hasEntry ? 0` clamp. Quando
+                                            // modelData diventa transient-undefined durante shift-diff,
+                                            // height collassa a 0 -> addDisplaced YAnimator chain crea
+                                            // "blocchi neri mobili" durante scroll. Lasciare height
+                                            // stabile e affidarsi al guard color in 6171.
+                                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
                                             color: isPeriodSeparator ? "transparent" :
                                                    entry.isTx ? Qt.rgba(241/255, 196/255, 15/255, 0.3) :
                                                    entry.isMyCall ? Qt.rgba(244/255, 67/255, 54/255, 0.3) :
@@ -10321,7 +10326,12 @@ NumberAnimation {
 	                            // 1.0.253 — height adattiva compact mode Signal RX
 	                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
 	                            radius: 3
-	                            color: isPeriodSeparator ? "transparent" :
+	                            // 1.0.254 fix: guard !modelData mancante (era in evenPeriodList
+	                            // e period1FloatingList dal 1.0.205, dimenticato qui).
+	                            // Durante shift-diff + scroll concorrenti, modelData diventa
+	                            // undefined per 1-2 frame -> color="" -> Rectangle nero.
+	                            color: !modelData ? "transparent" :
+	                                   isPeriodSeparator ? "transparent" :
 	                                   modelData.bgColorHex ? modelData.bgColorHex :
 	                                   modelData.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05)
 
