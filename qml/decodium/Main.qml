@@ -628,7 +628,19 @@ ApplicationWindow {
     // decode sono tanti (es. FT8 burst 20+ per slot). Opt-in default OFF.
     property bool compactFullSpectrum: bridge ? !!bridge.getSetting("CompactFullSpectrum", false) : false
     property int fullSpectrumRowHeight: compactFullSpectrum ? 14 : 26
+    // 1.0.255 — flag transitioning per disabilitare YAnimator displaced
+    // durante toggle compact/full (height cambia su TUTTI i delegate
+    // contemporaneamente -> blink per 100ms di animation displaced).
+    property bool compactToggling: false
+    Timer {
+        id: compactToggleTimer
+        interval: 220  // > 100ms animation + 100ms padding
+        repeat: false
+        onTriggered: compactToggling = false
+    }
     function toggleCompactFullSpectrum() {
+        compactToggling = true
+        compactToggleTimer.restart()
         compactFullSpectrum = !compactFullSpectrum
         if (bridge)
             bridge.setSetting("CompactFullSpectrum", compactFullSpectrum)
@@ -638,6 +650,8 @@ ApplicationWindow {
     property bool compactSignalRx: bridge ? !!bridge.getSetting("CompactSignalRx", false) : false
     property int signalRxRowHeight: compactSignalRx ? 14 : 26
     function toggleCompactSignalRx() {
+        compactToggling = true
+        compactToggleTimer.restart()
         compactSignalRx = !compactSignalRx
         if (bridge)
             bridge.setSetting("CompactSignalRx", compactSignalRx)
@@ -5540,20 +5554,23 @@ NumberAnimation {
 	                                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
 	                                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                                        // pattern allineato a DecodeList.qml:243-251.
+	                                        // 1.0.255: !mainWindow.compactToggling -> disabilita displaced
+	                                        // animations durante toggle compact (height change su tutti i
+	                                        // delegate causa blink di 100ms).
 	                                        add: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        addDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 
@@ -6135,20 +6152,20 @@ NumberAnimation {
 	                                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                                        // pattern allineato a DecodeList.qml:243-251.
 	                                        add: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
-	                                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
+OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        addDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
+YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
+YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
-	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
+YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 
                                         ScrollBar.vertical: ScrollBar {
@@ -9756,19 +9773,19 @@ NumberAnimation {
 	                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                        // pattern allineato a DecodeList.qml:243-251.
 	                        add: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        addDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
@@ -10299,19 +10316,19 @@ NumberAnimation {
 	                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                        // pattern allineato a DecodeList.qml:243-251.
 	                        add: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        addDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
-	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low"
+	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
 	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
