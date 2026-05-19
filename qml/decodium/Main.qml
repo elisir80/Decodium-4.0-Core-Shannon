@@ -114,6 +114,34 @@ ApplicationWindow {
         return fallback
     }
 
+    function coerceBool(value, fallback) {
+        if (value === undefined || value === null)
+            return !!fallback
+        if (typeof value === "boolean")
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off")
+            return false
+        return !!fallback
+    }
+
+    function settingBool(key, fallback) {
+        return coerceBool(safeBridgeSetting(key, fallback), fallback)
+    }
+
+    function persistUiSetting(key, value) {
+        if (!bridge)
+            return
+        bridge.setSetting(key, value)
+        if (!windowStateRestoreInProgress)
+            scheduleSave()
+    }
+
     function safeWindowState(key) {
         try {
             if (bridge && typeof bridge.loadWindowState === "function")
@@ -235,9 +263,9 @@ ApplicationWindow {
     Component.onCompleted: {
         startupCompletedStartedMs = Date.now()
         startupLog("Component.onCompleted begin")
-        callerQueuePanelVisible = !!safeBridgeSetting("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
+        callerQueuePanelVisible = settingBool("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
         startupLog("fox/caller queue state restored")
-        decodePanelLayoutSaved = !!safeBridgeSetting("uiDecodePanelsLayoutSaved", false)
+        decodePanelLayoutSaved = settingBool("uiDecodePanelsLayoutSaved", false)
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
         savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
@@ -308,9 +336,12 @@ ApplicationWindow {
         }
     }
     // Funzione helper chiamabile da qualsiasi parte del QML
-    function scheduleSave() { saveTimer.restart() }
+    function scheduleSave() {
+        if (typeof saveTimer !== "undefined" && saveTimer)
+            saveTimer.restart()
+    }
     function scheduleWindowStateSave() {
-        if (!windowStateRestoreInProgress) {
+        if (!windowStateRestoreInProgress && typeof windowStateSaveTimer !== "undefined" && windowStateSaveTimer) {
             windowStateSaveTimer.restart()
         }
     }
@@ -322,7 +353,7 @@ ApplicationWindow {
 
     function restoreFloatingWindowState(windowRef, key, detachedPropName, minimizedPropName) {
         if (!windowRef)
-            return
+            return {}
         var state = safeWindowState(key)
         var restoredWidth = safeNumber(state.width, windowRef.width)
         var restoredHeight = safeNumber(state.height, windowRef.height)
@@ -347,6 +378,7 @@ ApplicationWindow {
                 windowRef.visible = true
             }
         }
+        return state
     }
 
     function minimizeFloatingWindow(windowRef, minimizedPropName) {
@@ -626,7 +658,7 @@ ApplicationWindow {
     // 1.0.229 — Compact mode Full Spectrum: row height ridotta per
     // raddoppiare le righe visibili nella stessa viewport quando i
     // decode sono tanti (es. FT8 burst 20+ per slot). Opt-in default OFF.
-    property bool compactFullSpectrum: bridge ? !!bridge.getSetting("CompactFullSpectrum", false) : false
+    property bool compactFullSpectrum: settingBool("CompactFullSpectrum", false)
     property int fullSpectrumRowHeight: compactFullSpectrum ? 14 : 26
     // 1.0.255 — flag transitioning per disabilitare YAnimator displaced
     // durante toggle compact/full (height cambia su TUTTI i delegate
@@ -642,19 +674,17 @@ ApplicationWindow {
         compactToggling = true
         compactToggleTimer.restart()
         compactFullSpectrum = !compactFullSpectrum
-        if (bridge)
-            bridge.setSetting("CompactFullSpectrum", compactFullSpectrum)
+        persistUiSetting("CompactFullSpectrum", compactFullSpectrum)
     }
     // 1.0.253 — Compact mode Signal RX: stesso pattern di Full Spectrum
     // ma indipendente. Opt-in default OFF.
-    property bool compactSignalRx: bridge ? !!bridge.getSetting("CompactSignalRx", false) : false
+    property bool compactSignalRx: settingBool("CompactSignalRx", false)
     property int signalRxRowHeight: compactSignalRx ? 14 : 26
     function toggleCompactSignalRx() {
         compactToggling = true
         compactToggleTimer.restart()
         compactSignalRx = !compactSignalRx
-        if (bridge)
-            bridge.setSetting("CompactSignalRx", compactSignalRx)
+        persistUiSetting("CompactSignalRx", compactSignalRx)
     }
     property bool period2Detached: false
     property bool period2Minimized: false
@@ -697,16 +727,16 @@ ApplicationWindow {
     onLiveMapMinimizedChanged: scheduleWindowStateSave()
 
     // === GAP 3 — Nuovi pannelli (A3, B9, A4, C14) ===
-    property bool timeSyncPanelVisible:       !!bridge.getSetting("uiTimeSyncPanelVisible", false)
-    property bool activeStationsPanelVisible: !!bridge.getSetting("uiActiveStationsPanelVisible", false)
-    property bool callerQueuePanelVisible:    !!bridge.getSetting("uiCallerQueuePanelVisible", false)
-    property bool astroPanelVisible:          !!bridge.getSetting("uiAstroPanelVisible", false)
-    property bool dxClusterPanelVisible:      !!bridge.getSetting("uiDxClusterPanelVisible", false)
-    property bool dxClusterToolbarVisible:    !!bridge.getSetting("uiDxClusterToolbarVisible", true)
-    property bool pskReporterToolbarVisible: !!bridge.getSetting("uiPskReporterToolbarVisible", true)
-    property bool asyncIconVisible:          !!bridge.getSetting("uiAsyncIconVisible", true)
-    property bool liveMapPanelVisible:        bridge.getSetting("WorldMapDisplayed", true)
-    property bool decoSyncMonitorVisible:     !!bridge.getSetting("uiDecoSyncMonitorVisible", false)
+    property bool timeSyncPanelVisible:       settingBool("uiTimeSyncPanelVisible", false)
+    property bool activeStationsPanelVisible: settingBool("uiActiveStationsPanelVisible", false)
+    property bool callerQueuePanelVisible:    settingBool("uiCallerQueuePanelVisible", false)
+    property bool astroPanelVisible:          settingBool("uiAstroPanelVisible", false)
+    property bool dxClusterPanelVisible:      settingBool("uiDxClusterPanelVisible", false)
+    property bool dxClusterToolbarVisible:    settingBool("uiDxClusterToolbarVisible", true)
+    property bool pskReporterToolbarVisible: settingBool("uiPskReporterToolbarVisible", true)
+    property bool asyncIconVisible:           settingBool("uiAsyncIconVisible", true)
+    property bool liveMapPanelVisible:        settingBool("WorldMapDisplayed", true)
+    property bool decoSyncMonitorVisible:     settingBool("uiDecoSyncMonitorVisible", false)
     property string uiLanguage: normalizeUiLanguage(String(bridge.getSetting("UILanguage", "en") || "en"))
     readonly property var uiLanguageOptions: [
         { code: "en", name: "English" },
@@ -760,26 +790,26 @@ ApplicationWindow {
     }
     function setDxClusterToolbarVisible(visible) {
         dxClusterToolbarVisible = visible
-        bridge.setSetting("uiDxClusterToolbarVisible", visible)
+        persistUiSetting("uiDxClusterToolbarVisible", visible)
         if (!visible)
             dxClusterPanelVisible = false
     }
     function setPskReporterToolbarVisible(visible) {
         pskReporterToolbarVisible = visible
-        bridge.setSetting("uiPskReporterToolbarVisible", visible)
+        persistUiSetting("uiPskReporterToolbarVisible", visible)
         if (!visible && typeof pskSearchPopup !== "undefined")
             pskSearchPopup.close()
     }
     function setAsyncIconVisible(visible) {
         asyncIconVisible = visible
-        bridge.setSetting("uiAsyncIconVisible", visible)
+        persistUiSetting("uiAsyncIconVisible", visible)
     }
-    onTimeSyncPanelVisibleChanged: bridge.setSetting("uiTimeSyncPanelVisible", timeSyncPanelVisible)
-    onActiveStationsPanelVisibleChanged: bridge.setSetting("uiActiveStationsPanelVisible", activeStationsPanelVisible)
-    onCallerQueuePanelVisibleChanged: bridge.setSetting("uiCallerQueuePanelVisible", callerQueuePanelVisible)
-    onAstroPanelVisibleChanged: bridge.setSetting("uiAstroPanelVisible", astroPanelVisible)
-    onDxClusterPanelVisibleChanged: bridge.setSetting("uiDxClusterPanelVisible", dxClusterPanelVisible)
-    onDecoSyncMonitorVisibleChanged: bridge.setSetting("uiDecoSyncMonitorVisible", decoSyncMonitorVisible)
+    onTimeSyncPanelVisibleChanged: persistUiSetting("uiTimeSyncPanelVisible", timeSyncPanelVisible)
+    onActiveStationsPanelVisibleChanged: persistUiSetting("uiActiveStationsPanelVisible", activeStationsPanelVisible)
+    onCallerQueuePanelVisibleChanged: persistUiSetting("uiCallerQueuePanelVisible", callerQueuePanelVisible)
+    onAstroPanelVisibleChanged: persistUiSetting("uiAstroPanelVisible", astroPanelVisible)
+    onDxClusterPanelVisibleChanged: persistUiSetting("uiDxClusterPanelVisible", dxClusterPanelVisible)
+    onDecoSyncMonitorVisibleChanged: persistUiSetting("uiDecoSyncMonitorVisible", decoSyncMonitorVisible)
     function syncLiveMapFloatingVisibility(activate) {
         if (typeof liveMapFloatingWindow === "undefined" || !liveMapFloatingWindow)
             return
@@ -810,7 +840,6 @@ ApplicationWindow {
 	    }
 	    function detachLiveMapPanel() {
 	        mainWindow.liveMapPanelVisible = true
-	        bridge.setSetting("WorldMapDisplayed", true)
 	        mainWindow.liveMapDetached = true
         mainWindow.liveMapMinimized = false
         mainWindow.syncLiveMapFloatingVisibility(true)
@@ -853,9 +882,9 @@ ApplicationWindow {
 	        mainWindow.rxFreqMinimized = false
 	        rxFreqFloatingWindow.hide()
 	        Qt.callLater(mainWindow.restoreDecodePanelWidths)
-	    }
+    }
     onLiveMapPanelVisibleChanged: {
-        bridge.setSetting("WorldMapDisplayed", liveMapPanelVisible)
+        persistUiSetting("WorldMapDisplayed", liveMapPanelVisible)
         Qt.callLater(function() {
             mainWindow.syncLiveMapFloatingVisibility(false)
             if (mainWindow.decodePanelLayoutSaved)
@@ -998,15 +1027,33 @@ ApplicationWindow {
             else if (key === "DecodedTextFont")
                 mainWindow.refreshDecodedTextFont()
             else if (key === "WorldMapDisplayed")
-                mainWindow.liveMapPanelVisible = !!value
+                mainWindow.liveMapPanelVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiTimeSyncPanelVisible")
+                mainWindow.timeSyncPanelVisible = mainWindow.coerceBool(value, false)
+            else if (key === "uiActiveStationsPanelVisible")
+                mainWindow.activeStationsPanelVisible = mainWindow.coerceBool(value, false)
+            else if (key === "uiCallerQueuePanelVisible")
+                mainWindow.callerQueuePanelVisible = mainWindow.coerceBool(value, false)
+            else if (key === "uiAstroPanelVisible")
+                mainWindow.astroPanelVisible = mainWindow.coerceBool(value, false)
+            else if (key === "uiDxClusterPanelVisible")
+                mainWindow.dxClusterPanelVisible = mainWindow.coerceBool(value, false)
             else if (key === "uiDxClusterToolbarVisible")
-                mainWindow.dxClusterToolbarVisible = !!value
+                mainWindow.dxClusterToolbarVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiPskReporterToolbarVisible")
-                mainWindow.pskReporterToolbarVisible = !!value
+                mainWindow.pskReporterToolbarVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiAsyncIconVisible")
+                mainWindow.asyncIconVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiDecoSyncMonitorVisible")
+                mainWindow.decoSyncMonitorVisible = mainWindow.coerceBool(value, false)
+            else if (key === "CompactFullSpectrum")
+                mainWindow.compactFullSpectrum = mainWindow.coerceBool(value, false)
+            else if (key === "CompactSignalRx")
+                mainWindow.compactSignalRx = mainWindow.coerceBool(value, false)
             else if (key === "UILanguage")
                 mainWindow.uiLanguage = mainWindow.normalizeUiLanguage(String(value || "en"))
             else if (key === "uiDecodePanelsLayoutSaved")
-                mainWindow.decodePanelLayoutSaved = !!value
+                mainWindow.decodePanelLayoutSaved = mainWindow.coerceBool(value, false)
         }
         function onColorCQChanged() { mainWindow.refreshDecodeColors() }
         function onColorMyCallChanged() { mainWindow.refreshDecodeColors() }
@@ -2752,10 +2799,10 @@ ApplicationWindow {
 	                    property int minutes: 0
 	                    property int seconds: 0
 	                    property string dateStr: ""
-	                    property bool showWorldClock: !!bridge.getSetting("uiWorldClockVisible", true)
-	                    property bool showAnalogClock: !!bridge.getSetting("uiWorldClockShowAnalog", true)
-	                    property bool showDigitalClock: !!bridge.getSetting("uiWorldClockShowDigital", true)
-	                    property bool showWorldClockCities: !!bridge.getSetting("uiWorldClockShowCities", true)
+	                    property bool showWorldClock: mainWindow.settingBool("uiWorldClockVisible", true)
+	                    property bool showAnalogClock: mainWindow.settingBool("uiWorldClockShowAnalog", true)
+	                    property bool showDigitalClock: mainWindow.settingBool("uiWorldClockShowDigital", true)
+	                    property bool showWorldClockCities: mainWindow.settingBool("uiWorldClockShowCities", true)
 
 	                    Timer {
 	                        interval: 1000
@@ -2786,9 +2833,9 @@ ApplicationWindow {
 	                        }
 
 	                        ensureVisiblePart()
-	                        bridge.setSetting("uiWorldClockShowAnalog", showAnalogClock)
-	                        bridge.setSetting("uiWorldClockShowDigital", showDigitalClock)
-	                        bridge.setSetting("uiWorldClockShowCities", showWorldClockCities)
+	                        mainWindow.persistUiSetting("uiWorldClockShowAnalog", showAnalogClock)
+	                        mainWindow.persistUiSetting("uiWorldClockShowDigital", showDigitalClock)
+	                        mainWindow.persistUiSetting("uiWorldClockShowCities", showWorldClockCities)
 	                    }
 
 	                    function setClockVisible(visible) {
@@ -2797,7 +2844,7 @@ ApplicationWindow {
 	                            ensureVisiblePart()
 	                            updateTime()
 	                        }
-	                        bridge.setSetting("uiWorldClockVisible", showWorldClock)
+	                        mainWindow.persistUiSetting("uiWorldClockVisible", showWorldClock)
 	                    }
 
                     function refreshCitySearch() {
@@ -2813,8 +2860,8 @@ ApplicationWindow {
                             return
                         selectedZoneId = option.zoneId
                         selectedCityName = option.name || option.zoneId
-                        bridge.setSetting("uiWorldClockZoneId", selectedZoneId)
-                        bridge.setSetting("uiWorldClockCityName", selectedCityName)
+                        mainWindow.persistUiSetting("uiWorldClockZoneId", selectedZoneId)
+                        mainWindow.persistUiSetting("uiWorldClockCityName", selectedCityName)
                         updateTime()
                         citySearchPopup.close()
                     }
@@ -3402,7 +3449,6 @@ ApplicationWindow {
                                 liveMapFloatingWindow.requestActivate()
                             } else {
                                 mainWindow.liveMapPanelVisible = true
-                                bridge.setSetting("WorldMapDisplayed", true)
                             }
                         }
                     }
@@ -7897,10 +7943,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
         MenuItem {
             text: (liveMapPanelVisible ? "✓ " : "☐ ") + qsTr("Live Map")
-            onTriggered: {
-                liveMapPanelVisible = !liveMapPanelVisible
-                bridge.setSetting("WorldMapDisplayed", liveMapPanelVisible)
-            }
+            onTriggered: liveMapPanelVisible = !liveMapPanelVisible
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
                 radius: 6
@@ -9405,14 +9448,19 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             running: false
             repeat: false
             onTriggered: {
-                mainWindow.restoreFloatingWindowState(period1FloatingWindow, "period1FloatingWindow", "period1Detached", "period1Minimized")
+                var restoredState = mainWindow.restoreFloatingWindowState(period1FloatingWindow, "period1FloatingWindow", "period1Detached", "period1Minimized")
                 // 1.0.186 — Auto-detach Full Spectrum di default. Pasquale-pattern:
                 // pop-out in Window separata -> render thread isolato -> niente stall
                 // main-thread durante drain ListView / texture upload waterfall.
                 // 1.0.201 — default ripristinato a true (1.0.197 upstream lo aveva
                 // spento, causando regressione performance progressiva).
                 // Disattivabile da Settings -> "Detach Full Spectrum".
+                // Non sovrascrivere pero' una scelta utente gia' salvata:
+                // se WindowState/period1FloatingWindow contiene "detached=false",
+                // l'utente ha dockato/chiuso il pannello e al riavvio deve restare docked.
+                var hasSavedDetachedChoice = restoredState && restoredState.detached !== undefined
                 if (!mainWindow.period1Detached
+                        && !hasSavedDetachedChoice
                         && bridge && bridge.autoDetachFullSpectrum) {
                     mainWindow.detachFullSpectrumPanel()
                 }
@@ -10770,9 +10818,9 @@ NumberAnimation {
         id: timeSyncOverlay
         readonly property int panelMargin: 12
         readonly property int topRailY: 10
-        property bool userPositioned: !!bridge.getSetting("uiTimeSyncPanelUserPositioned", false)
-        property real savedX: Number(bridge.getSetting("uiTimeSyncPanelX", -1))
-        property real savedY: Number(bridge.getSetting("uiTimeSyncPanelY", -1))
+        property bool userPositioned: mainWindow.settingBool("uiTimeSyncPanelUserPositioned", false)
+        property real savedX: Number(mainWindow.safeBridgeSetting("uiTimeSyncPanelX", -1))
+        property real savedY: Number(mainWindow.safeBridgeSetting("uiTimeSyncPanelY", -1))
         readonly property bool headerWrapped: headerFlow.height > 110
         readonly property bool headerRightRailOccupied: headerFlow.childrenRect.x + headerFlow.childrenRect.width
                                                    > mainWindow.width - width - panelMargin * 2
@@ -10791,9 +10839,9 @@ NumberAnimation {
             savedY = boundedY(y)
             x = savedX
             y = savedY
-            bridge.setSetting("uiTimeSyncPanelUserPositioned", true)
-            bridge.setSetting("uiTimeSyncPanelX", savedX)
-            bridge.setSetting("uiTimeSyncPanelY", savedY)
+            mainWindow.persistUiSetting("uiTimeSyncPanelUserPositioned", true)
+            mainWindow.persistUiSetting("uiTimeSyncPanelX", savedX)
+            mainWindow.persistUiSetting("uiTimeSyncPanelY", savedY)
         }
         function clampSavedPosition() {
             if (!userPositioned)
@@ -10802,8 +10850,8 @@ NumberAnimation {
             savedY = boundedY(savedY)
             x = savedX
             y = savedY
-            bridge.setSetting("uiTimeSyncPanelX", savedX)
-            bridge.setSetting("uiTimeSyncPanelY", savedY)
+            mainWindow.persistUiSetting("uiTimeSyncPanelX", savedX)
+            mainWindow.persistUiSetting("uiTimeSyncPanelY", savedY)
         }
         function headerRows() {
             var rows = []
@@ -10936,12 +10984,51 @@ NumberAnimation {
         id: activeStationsOverlay
         visible: activeStationsPanelVisible
         z: 200
-        x: Math.max(12, mainWindow.width - width - 12)
-        y: Math.min(timeSyncPanelVisible ? timeSyncOverlay.y + timeSyncOverlay.height + 8
-                                         : Math.max(100, headerBar.y + headerBar.height + 8),
-                    Math.max(12, mainWindow.height - height - 12))
+        property bool userPositioned: mainWindow.settingBool("uiActiveStationsPanelUserPositioned", false)
+        property real savedX: Number(mainWindow.safeBridgeSetting("uiActiveStationsPanelX", -1))
+        property real savedY: Number(mainWindow.safeBridgeSetting("uiActiveStationsPanelY", -1))
+        function boundedX(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.width - width)))
+        }
+        function boundedY(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.height - height)))
+        }
+        function defaultX() {
+            return Math.max(12, mainWindow.width - width - 12)
+        }
+        function defaultY() {
+            return Math.min(timeSyncPanelVisible ? timeSyncOverlay.y + timeSyncOverlay.height + 8
+                                                 : Math.max(100, headerBar.y + headerBar.height + 8),
+                            Math.max(12, mainWindow.height - height - 12))
+        }
+        function savePosition() {
+            userPositioned = true
+            savedX = boundedX(x)
+            savedY = boundedY(y)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiActiveStationsPanelUserPositioned", true)
+            mainWindow.persistUiSetting("uiActiveStationsPanelX", savedX)
+            mainWindow.persistUiSetting("uiActiveStationsPanelY", savedY)
+        }
+        function clampSavedPosition() {
+            if (!userPositioned)
+                return
+            savedX = boundedX(savedX)
+            savedY = boundedY(savedY)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiActiveStationsPanelX", savedX)
+            mainWindow.persistUiSetting("uiActiveStationsPanelY", savedY)
+        }
+        x: userPositioned ? boundedX(savedX) : defaultX()
+        y: userPositioned ? boundedY(savedY) : defaultY()
         width: Math.min(360, Math.max(280, mainWindow.width - 24))
         height: 280
+        onWidthChanged: Qt.callLater(clampSavedPosition)
+        onHeightChanged: Qt.callLater(clampSavedPosition)
 
         MouseArea {
             anchors.fill: parent
@@ -10949,6 +11036,7 @@ NumberAnimation {
             drag.axis: Drag.XAndYAxis
             drag.minimumX: 0; drag.maximumX: Math.max(0, mainWindow.width - activeStationsOverlay.width)
             drag.minimumY: 0; drag.maximumY: Math.max(0, mainWindow.height - activeStationsOverlay.height)
+            onReleased: activeStationsOverlay.savePosition()
         }
 
         Loader {
@@ -11005,7 +11093,8 @@ NumberAnimation {
         target: bridge
         ignoreUnknownSignals: true
         function onFoxModeChanged() {
-            callerQueuePanelVisible = bridge.foxMode
+            if (!bridge.foxMode)
+                callerQueuePanelVisible = false
         }
     }
 
@@ -11014,10 +11103,43 @@ NumberAnimation {
         id: astroPanelOverlay
         visible: astroPanelVisible
         z: 200
-        x: 12
-        y: mainWindow.height - height - 180
+        property bool userPositioned: mainWindow.settingBool("uiAstroPanelUserPositioned", false)
+        property real savedX: Number(mainWindow.safeBridgeSetting("uiAstroPanelX", -1))
+        property real savedY: Number(mainWindow.safeBridgeSetting("uiAstroPanelY", -1))
+        function boundedX(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.width - width)))
+        }
+        function boundedY(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.height - height)))
+        }
+        function savePosition() {
+            userPositioned = true
+            savedX = boundedX(x)
+            savedY = boundedY(y)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiAstroPanelUserPositioned", true)
+            mainWindow.persistUiSetting("uiAstroPanelX", savedX)
+            mainWindow.persistUiSetting("uiAstroPanelY", savedY)
+        }
+        function clampSavedPosition() {
+            if (!userPositioned)
+                return
+            savedX = boundedX(savedX)
+            savedY = boundedY(savedY)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiAstroPanelX", savedX)
+            mainWindow.persistUiSetting("uiAstroPanelY", savedY)
+        }
+        x: userPositioned ? boundedX(savedX) : 12
+        y: userPositioned ? boundedY(savedY) : mainWindow.height - height - 180
         width: 320
         height: 230
+        onWidthChanged: Qt.callLater(clampSavedPosition)
+        onHeightChanged: Qt.callLater(clampSavedPosition)
 
         MouseArea {
             anchors.fill: parent
@@ -11025,6 +11147,7 @@ NumberAnimation {
             drag.axis: Drag.XAndYAxis
             drag.minimumX: 0; drag.maximumX: mainWindow.width - astroPanelOverlay.width
             drag.minimumY: 0; drag.maximumY: mainWindow.height - 50
+            onReleased: astroPanelOverlay.savePosition()
         }
 
         Loader {
@@ -11048,9 +11171,43 @@ NumberAnimation {
         id: dxClusterOverlay
         visible: dxClusterPanelVisible
         z: 9000
-        x: Math.max(0, mainWindow.width - width - 12)
-        y: 60
+        property bool userPositioned: mainWindow.settingBool("uiDxClusterPanelUserPositioned", false)
+        property real savedX: Number(mainWindow.safeBridgeSetting("uiDxClusterPanelX", -1))
+        property real savedY: Number(mainWindow.safeBridgeSetting("uiDxClusterPanelY", -1))
+        function boundedX(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.width - width)))
+        }
+        function boundedY(value) {
+            return Math.round(Math.min(Math.max(0, Number(value) || 0),
+                                       Math.max(0, mainWindow.height - height)))
+        }
+        function savePosition() {
+            userPositioned = true
+            savedX = boundedX(x)
+            savedY = boundedY(y)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiDxClusterPanelUserPositioned", true)
+            mainWindow.persistUiSetting("uiDxClusterPanelX", savedX)
+            mainWindow.persistUiSetting("uiDxClusterPanelY", savedY)
+        }
+        function clampSavedPosition() {
+            if (!userPositioned)
+                return
+            savedX = boundedX(savedX)
+            savedY = boundedY(savedY)
+            x = savedX
+            y = savedY
+            mainWindow.persistUiSetting("uiDxClusterPanelX", savedX)
+            mainWindow.persistUiSetting("uiDxClusterPanelY", savedY)
+        }
+        x: userPositioned ? boundedX(savedX) : Math.max(0, mainWindow.width - width - 12)
+        y: userPositioned ? boundedY(savedY) : 60
+        onWidthChanged: Qt.callLater(clampSavedPosition)
+        onHeightChanged: Qt.callLater(clampSavedPosition)
         onCloseRequested: dxClusterPanelVisible = false
+        onPositionCommitted: savePosition()
     }
 
     // ── DecoSyncTime Monitor floating window ─────────────────────────────

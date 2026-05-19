@@ -1459,6 +1459,19 @@ static QDateTime approxUtcDateTimeForDisplayToken(QString const& utcToken)
     return nowUtc;
 }
 
+static qint64 decodeEntryTimestampMsecs(QString const& utcToken, qint64 fallbackMs)
+{
+    if (utcToken.trimmed().isEmpty()) {
+        return fallbackMs;
+    }
+
+    QDateTime const approxUtc = approxUtcDateTimeForDisplayToken(utcToken);
+    if (!approxUtc.isValid()) {
+        return fallbackMs;
+    }
+    return approxUtc.toMSecsSinceEpoch();
+}
+
 static qint64 decodeDisplaySortMsecs(QVariantMap const& entry, QDateTime const& nowUtc)
 {
     // 1.0.139: preferisci entry["timestamp"] ms epoch (sempre popolato in FT2
@@ -4379,7 +4392,9 @@ void DecodiumBridge::setAutoDetachFullSpectrum(bool v)
 {
     if (m_autoDetachFullSpectrum == v) return;
     m_autoDetachFullSpectrum = v;
-    QSettings().setValue(QStringLiteral("UI/AutoDetachFullSpectrum"), v);
+    QSettings settings;
+    settings.setValue(QStringLiteral("UI/AutoDetachFullSpectrum"), v);
+    settings.sync();
     emit autoDetachFullSpectrumChanged();
     bridgeLog(QStringLiteral("[UI] AutoDetachFullSpectrum = %1").arg(v ? "ON" : "OFF"));
 }
@@ -4404,7 +4419,9 @@ void DecodiumBridge::setUiFramelessPopouts(bool v)
 {
     if (m_uiFramelessPopouts == v) return;
     m_uiFramelessPopouts = v;
-    QSettings().setValue(QStringLiteral("UI/FramelessPopouts"), v);
+    QSettings settings;
+    settings.setValue(QStringLiteral("UI/FramelessPopouts"), v);
+    settings.sync();
     emit uiFramelessPopoutsChanged();
     bridgeLog(QStringLiteral("[UI] FramelessPopouts = %1").arg(v ? "ON" : "OFF"));
 }
@@ -8034,7 +8051,10 @@ void DecodiumBridge::appendTxDecodeEntry(const QString& message)
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
 
     QVariantMap txEntry;
-    txEntry["time"]     = currentTxVisualTimeToken(m_mode);
+    QString const txTime = currentTxVisualTimeToken(m_mode);
+    txEntry["time"]     = txTime;
+    txEntry["timestamp"] = static_cast<qulonglong>(
+        decodeEntryTimestampMsecs(txTime, QDateTime::currentMSecsSinceEpoch()));
     txEntry["db"]       = "TX";
     txEntry["dt"]       = "0.0";
     txEntry["freq"]     = QString::number(m_txFrequency);
@@ -17918,6 +17938,52 @@ bool DecodiumBridge::shouldSuppressConflictingDirectedReportDecode(const QString
     return false;
 }
 
+bool DecodiumBridge::shouldSuppressRecentLocalTxEchoDecode(const QString& message,
+                                                           const QString& source,
+                                                           QString* reason) const
+{
+    if (m_mode.trimmed().toUpper() != QStringLiteral("FT2")) {
+        return false;
+    }
+
+    QString const canonicalMessage = canonicalDecodeMessage(message);
+    QString const canonicalLastTx = canonicalDecodeMessage(m_lastTransmittedMessage);
+    if (canonicalMessage.isEmpty()
+        || canonicalLastTx.isEmpty()
+        || canonicalMessage != canonicalLastTx) {
+        return false;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const periodMs = qMax<qint64>(1, periodMsForMode(QStringLiteral("FT2")));
+    qint64 const echoWindowMs = qMax<qint64>(15000, periodMs * 4);
+    bool const txStillActive = m_transmitting || m_tuning;
+    qint64 lastLocalTxMs = m_asyncLastTxEndMs;
+    if (m_lastTxActivityUtc.isValid()) {
+        lastLocalTxMs = qMax(lastLocalTxMs, m_lastTxActivityUtc.toUTC().toMSecsSinceEpoch());
+    }
+    bool const txRecentlyEnded =
+        lastLocalTxMs > 0
+        && nowMs >= lastLocalTxMs
+        && nowMs - lastLocalTxMs <= echoWindowMs;
+    if (!txStillActive && !txRecentlyEnded) {
+        return false;
+    }
+
+    if (reason) {
+        *reason = txStillActive
+            ? QStringLiteral("matches active local TX")
+            : QStringLiteral("matches recent local TX %1ms ago").arg(nowMs - lastLocalTxMs);
+    }
+    bridgeLog(QStringLiteral("decode self-echo suppressed (%1): %2%3")
+                  .arg(source,
+                       canonicalMessage,
+                       reason && !reason->isEmpty()
+                           ? QStringLiteral(" [") + *reason + QLatin1Char(']')
+                           : QString()));
+    return true;
+}
+
 bool DecodiumBridge::usesDeferredManualSyncTx() const
 {
     return !usingLegacyBackendForTx()
@@ -20202,6 +20268,7 @@ void DecodiumBridge::saveWindowState(const QString& key,
     s.setValue(QStringLiteral("detached"), detached);
     s.setValue(QStringLiteral("minimized"), minimized);
     s.endGroup();
+    s.sync();
 }
 
 QVariantMap DecodiumBridge::primaryScreenAvailableGeometry() const
@@ -23468,6 +23535,13 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             ++semanticFiltered;
             continue;
         }
+        QString localTxEchoReason;
+        if (shouldSuppressRecentLocalTxEchoDecode(f[4],
+                                                  QStringLiteral("ft-sync-ui"),
+                                                  &localTxEchoReason)) {
+            ++duplicatesSkipped;
+            continue;
+        }
         QString reportConflictReason;
         if (shouldSuppressConflictingDirectedReportDecode(f,
                                                           QStringLiteral("ft8-ui"),
@@ -23511,6 +23585,8 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         entry["fromCall"] = fromCall;
         entry["hasUnresolvedPeer"] = hasUnresolvedPlaceholder;
         entry["decodeSessionId"] = static_cast<qulonglong>(m_decodeSessionId);
+        entry["timestamp"] = static_cast<qulonglong>(
+            decodeEntryTimestampMsecs(entryTime, QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
@@ -23674,6 +23750,12 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             if (f.size() < 5) continue;
             QString msgText = f[4];
             if (!shouldAcceptDecodedMessage(msgText)) continue;
+            QString localTxEchoReason;
+            if (shouldSuppressRecentLocalTxEchoDecode(msgText,
+                                                      QStringLiteral("ft-sync-autoseq"),
+                                                      &localTxEchoReason)) {
+                continue;
+            }
             if (messageContainsCallToken(msgText, m_callsign.trimmed().toUpper(),
                                          normalizedBaseCall(m_callsign.trimmed().toUpper()))) {
                 autoSequenceStep(f);
@@ -23805,6 +23887,12 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;
             if (!shouldAcceptDecodedMessage(f[4])) continue;
+            QString localTxEchoReason;
+            if (shouldSuppressRecentLocalTxEchoDecode(f[4],
+                                                      QStringLiteral("ft2-autoseq"),
+                                                      &localTxEchoReason)) {
+                continue;
+            }
             if (messageContainsCallToken(f[4], myCallUpper, myBaseUpper)) {
                 autoSequenceStep(f);
                 gotResponse = true;
@@ -23885,6 +23973,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             ++semanticFiltered;
             continue;
         }
+        QString localTxEchoReason;
+        if (shouldSuppressRecentLocalTxEchoDecode(msg,
+                                                  QStringLiteral("ft2-ui"),
+                                                  &localTxEchoReason)) {
+            ++duplicatesSkipped;
+            continue;
+        }
         QString reportConflictReason;
         if (shouldSuppressConflictingDirectedReportDecode(f,
                                                           QStringLiteral("ft2-ui"),
@@ -23916,9 +24011,11 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         entry["isMyCall"] = isMyCall;
         entry["fromCall"] = extractDecodedCallsign(msg, isCQ);
         entry["decodeSessionId"] = static_cast<qulonglong>(m_decodeSessionId);
-        // 1.0.121: timestamp ms epoch per separatore periodi QML in FT2 async
-        // (dove entry["time"] è "" perché nutc==0 e parseFt8Row non lo popola).
-        entry["timestamp"] = static_cast<qulonglong>(QDateTime::currentMSecsSinceEpoch());
+        // Keep the model timestamp tied to the decoded FT2 window, not to the
+        // delayed callback delivery time. Otherwise late async rows can show an
+        // old UTC label after newer TX/RX rows in Signal RX.
+        entry["timestamp"] = static_cast<qulonglong>(
+            decodeEntryTimestampMsecs(f[0], QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {

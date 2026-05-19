@@ -10,6 +10,7 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     signal closeRequested()
+    signal positionCommitted()
 
     property color bgDeep:        bridge.themeManager.bgDeep
     property color secondaryCyan: bridge.themeManager.secondaryColor
@@ -54,6 +55,7 @@ Rectangle {
             hoverEnabled: true
             cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
             onPressed: root.z = 250
+            onReleased: root.positionCommitted()
         }
 
         RowLayout {

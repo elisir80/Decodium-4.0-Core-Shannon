@@ -19,14 +19,15 @@ Rectangle {
     property int gpuFrameCount: 0
     property int gpuFps: 0
     property double gpuActivity: 0.0
+    readonly property double estimatedGpuActivity: Math.max(0.0, Math.min(1.0, gpuActivity))
     readonly property double displayedGpuActivity: realGpuUsageAvailable
         ? Math.max(0.0, Math.min(1.0, processGpuUsage))
-        : 0.0
+        : estimatedGpuActivity
     readonly property double gpuLoadPercentValue: displayedGpuActivity * 100.0
     readonly property int gpuLoadPercent: Math.round(gpuLoadPercentValue)
     readonly property string gpuLoadText: realGpuUsageAvailable
         ? (gpuLoadPercentValue < 10.0 ? gpuLoadPercentValue.toFixed(1) + "%" : gpuLoadPercent.toFixed(0) + "%")
-        : "n/a"
+        : gpuLoadPercent.toFixed(0) + "%"
     readonly property string gpuLabelText: "GPU:"
     readonly property bool gpuMonitorVisible: Qt.platform.os !== "osx"
     property double rigPowerWatts: bridge ? bridge.rigPowerWatts : 0.0
@@ -528,8 +529,7 @@ Rectangle {
                         anchors.margins: 2
                         width: Math.max(0, Math.min(parent.width - 4, (parent.width - 4) * displayedGpuActivity))
                         radius: 1
-                        color: !realGpuUsageAvailable ? Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.35) :
-                               displayedGpuActivity < 0.5 ? secondaryCyan :
+                        color: displayedGpuActivity < 0.5 ? secondaryCyan :
                                displayedGpuActivity < 0.8 ? colorOrange : colorRed
                     }
                 }
@@ -556,8 +556,8 @@ Rectangle {
                           ? "Real Decodium GPU process usage\n"
                             + gpuLoadText + " from OS GPU counters\n"
                             + gpuFps + " rendered frames/s"
-                          : "Process GPU counter unavailable\n"
-                            + "No reliable OS counter exposed to Decodium on this platform\n"
+                          : "GPU process counter unavailable\n"
+                            + "Estimated render activity\n"
                             + gpuFps + " rendered frames/s"
                 }
             }

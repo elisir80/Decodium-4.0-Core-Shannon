@@ -1411,6 +1411,9 @@ private:
     bool shouldSuppressConflictingDirectedReportDecode(const QStringList& fields,
                                                        const QString& source,
                                                        QString* reason = nullptr);
+    bool shouldSuppressRecentLocalTxEchoDecode(const QString& message,
+                                               const QString& source,
+                                               QString* reason = nullptr) const;
     bool tryStartWaitPounceFromEntry(const QVariantMap& entry,
                                      const QVariantList& previousEntries,
                                      const QString& source);
