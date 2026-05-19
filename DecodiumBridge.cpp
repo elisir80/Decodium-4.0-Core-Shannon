@@ -4713,16 +4713,13 @@ void DecodiumBridge::rebuildRxDecodeModel()
 // body short-circuita early. Il QTimer perf 250ms parte/ferma con il toggle.
 void DecodiumBridge::recordFrameTimestamp()
 {
-    // 1.0.245 debug: counter cumulativo PRIMA del gate per diagnosi.
     m_totalFrameSamples.fetch_add(1, std::memory_order_relaxed);
-    // 1.0.248: gate atomic<bool> RIMOSSO. Diagnosi 1.0.246-247: tick lambda
-    // legge m_devOverlayActive=true mentre noteDecodeReceived legge false
-    // su stesso atomic, stesso main thread -- root cause sconosciuto (forse
-    // bug MinGW 15.2 atomic<bool> in const methods). Overhead a riposo
-    // (overlay chiuso) e' una scrittura atomic + paio di double assignment.
+    // 1.0.251 debug: log al primo entry post-init.
     if (!m_perfFrameElapsedStarted) {
         m_perfFrameElapsed.start();
         m_perfFrameElapsedStarted = true;
+        bridgeLog(QStringLiteral("[FT] perfFrame elapsed STARTED total=%1")
+                  .arg(m_totalFrameSamples.load()));
         return;
     }
     qint64 const ns = m_perfFrameElapsed.nsecsElapsed();
@@ -4732,6 +4729,14 @@ void DecodiumBridge::recordFrameTimestamp()
     m_frameTimeRing[m_frameTimeRingPos] = ms;
     m_frameTimeRingPos = (m_frameTimeRingPos + 1) % kPerfFrameRingSize;
     if (m_frameTimeRingFilled < kPerfFrameRingSize) ++m_frameTimeRingFilled;
+    // 1.0.251 debug: log ogni 100 body invocations.
+    static int s_bodyCnt = 0;
+    if (++s_bodyCnt % 100 == 0) {
+        bridgeLog(QStringLiteral("[FT] body #%1 ms=%2 ringFilled=%3 lastMs=%4 meanMs=%5")
+                  .arg(s_bodyCnt).arg(ms, 0, 'f', 2)
+                  .arg(m_frameTimeRingFilled).arg(m_lastFrameTimeMs, 0, 'f', 2)
+                  .arg(m_meanFrameTimeMs, 0, 'f', 2));
+    }
 }
 
 void DecodiumBridge::noteDecodeReceived() const
