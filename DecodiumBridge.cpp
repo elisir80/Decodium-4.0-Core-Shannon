@@ -89,6 +89,7 @@
 #include <QRunnable>
 #include <QTimeZone>
 #include <QTimer>
+#include <QScopeGuard>
 #include <QThreadPool>
 #include <QOperatingSystemVersion>
 #include "Network/FoxVerifier.hpp"
@@ -11703,21 +11704,14 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
                 }
             });
         }
-        // Il secondo singleShot 220ms e' un fallback per casi in cui il
-        // primo (0ms) trovi m_transmitting ancora true. Mantenuto ma
-        // gated dallo stesso flag: se il primo gia' fired, il secondo
-        // re-trigger (se serve, m_periodicTxCheckScheduled e' false).
-        QTimer::singleShot(220, this, [this]() {
-            if (m_periodicTxCheckScheduled) return;
-            m_periodicTxCheckScheduled = true;
-            QTimer::singleShot(0, this, [this]() {
-                m_periodicTxCheckScheduled = false;
-                if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled &&
-                    m_txEnabled && !m_transmitting && !m_tuning) {
-                    checkAndStartPeriodicTx();
-                }
-            });
-        });
+        // 1.0.256 fix BUG #2 audit agente-tx: rimosso secondo singleShot
+        // 220ms fallback. Pre-1.0.256 se il primo singleShot(0) abortiva
+        // startTx (msg empty / stale partner repair fail), m_transmitting
+        // restava false e il fallback 220ms rilanciava -> SECONDA TX su
+        // stesso slot ("singhiozzo"). Con il guard universale
+        // m_periodicTxInFlight in checkAndStartPeriodicTx il fallback e'
+        // ridondante: gli altri trigger path (slot boundary, smart-Ft2-async,
+        // decode-driven) gestiscono il retry naturale.
     }
 
     if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled && m_qsoProgress == 1 && !m_holdTxFreq) {
@@ -17749,6 +17743,17 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
 
 void DecodiumBridge::checkAndStartPeriodicTx()
 {
+    // 1.0.256 fix BUG #1 audit agente-tx: guard reentry UNIVERSALE (RAII).
+    // Pre-1.0.256 il guard era solo su 2 dei 11 call site, e quelli senza
+    // (setTxEnabled QTimer singleShot, AutoCQ rearm, advanceQsoState post
+    // double-click, deferred manual sync, smart Ft2 async retry, decode-
+    // driven response, period UTC boundary, engageDxClusterSpot) potevano
+    // far entrare 2 chiamate in startTx() prima che m_transmitting=true ->
+    // doppia TX FT2 "singhiozzo".
+    if (m_periodicTxInFlight) return;
+    m_periodicTxInFlight = true;
+    auto inFlightReset = qScopeGuard([this]() { m_periodicTxInFlight = false; });
+
     if (m_manualTxHold || !m_monitoring || m_transmitting || m_tuning) return;
     if (!m_txEnabled) {
         if (!m_autoCqRepeat) return;
@@ -17812,7 +17817,10 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             if (!m_txEnabled) {
                 setTxEnabled(true);
             }
-            startTx();
+            // 1.0.256 fix BUG #1 FT8/FT4 audit: usa checkAndStartPeriodicTx
+            // invece di startTx() diretto. startTx() non valida la parita'
+            // slot -> in FT8/FT4 puo' partire TX nello slot partner.
+            checkAndStartPeriodicTx();
         }
     };
 
@@ -18043,7 +18051,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                             if (!m_txEnabled) {
                                 setTxEnabled(true);
                             }
-                            startTx();
+                            // 1.0.256 fix BUG #1 FT8/FT4: parity check
+                            checkAndStartPeriodicTx();
                         }
                     });
                 } else {
@@ -18051,7 +18060,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                     if (!m_txEnabled) {
                         setTxEnabled(true);
                     }
-                    startTx();
+                    // 1.0.256 fix BUG #1 FT8/FT4: parity check
+                    checkAndStartPeriodicTx();
                 }
             }
             return;
@@ -18491,7 +18501,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             if (!m_txEnabled) {
                 setTxEnabled(true);
             }
-            startTx();
+            // 1.0.256 fix BUG #1 FT8/FT4: parity check
+            checkAndStartPeriodicTx();
         }
     };
 

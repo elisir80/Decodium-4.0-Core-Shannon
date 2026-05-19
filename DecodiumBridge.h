@@ -1608,6 +1608,12 @@ private:
     // m_periodicTxCheckScheduled=true, gli altri short-circuit; il
     // callback resetta a false prima di entrare nel body.
     bool m_periodicTxCheckScheduled {false};
+    // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
+    // a true a entry function, false via qScopeGuard al return. Copre i 11
+    // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo
+    // FT2 doppia TX in 1.0.255 era due chiamate concorrenti entrare prima
+    // che m_transmitting fosse true.
+    bool m_periodicTxInFlight {false};
     // 1.0.174 — FT2 weak-signal pack master flag (opt-in, default OFF).
     bool m_ft2Conservative {false};
     // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory state
