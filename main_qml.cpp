@@ -1365,7 +1365,15 @@ int main(int argc, char* argv[])
         }
         QString rhiName = QStringLiteral("unknown");
         for (QQuickWindow* qw : std::as_const(windows)) {
+            // 1.0.250: connetto BOTH frameSwapped E afterRendering.
+            // 1.0.249 mostrava totalFrameSamples=205 fisso anche con
+            // connect all-windows: frameSwapped non scatta dopo init su
+            // Qt 6.11 con RHI in alcune pipeline. afterRendering invece
+            // emette piu' affidabilmente per ogni render pass.
             QObject::connect(qw, &QQuickWindow::frameSwapped,
+                             &bridge, &DecodiumBridge::recordFrameTimestamp,
+                             Qt::QueuedConnection);
+            QObject::connect(qw, &QQuickWindow::afterRendering,
                              &bridge, &DecodiumBridge::recordFrameTimestamp,
                              Qt::QueuedConnection);
             if (rhiName == QStringLiteral("unknown") && qw->rendererInterface()) {
