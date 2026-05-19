@@ -392,6 +392,8 @@ set (wsjtx_CXXSRCS
   main.cpp
   DecodiumBridge.cpp
   DecodiumBridge.h
+  lib/persistence/DecodeHistoryWorker.cpp
+  lib/persistence/DecodeHistoryWorker.h
   DecodeListModel.cpp
   DecodeListModel.h
   DecodiumDiagnostics.cpp
@@ -1440,7 +1442,7 @@ if (${OPENMP_FOUND} AND NOT APPLE)
       )
     endif ()
 endif ()
-target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::WebSockets wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::Sql Qt6::WebSockets wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
 if (WIN32)
   target_link_libraries (wsjtx Pdh Qt6::AxContainer)
 endif ()
