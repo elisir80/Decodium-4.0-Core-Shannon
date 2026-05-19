@@ -4043,6 +4043,44 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
         if (distOk && distKm > 10000.0) return true;
     }
 
+    // Stronger third-party ghost signature: a weak, non-CQ decode reports a
+    // locator thousands of km away from the DXCC implied by the callsign.
+    // Example seen in FT2: "HH8ZXU SP2CTC/P NC87" maps a Polish /P call to
+    // Antarctica. Real portable activity should carry a matching prefix; this
+    // pattern is much more likely an LDPC false decode and pollutes Signal RX
+    // and Live Map.
+    bool const isCQ = entry.value(QStringLiteral("isCQ")).toBool();
+    if (!isCQ && db <= -16 && !isPartnerOfActiveQso && !m_grid.trimmed().isEmpty()) {
+        QString grid = entry.value(QStringLiteral("dxGrid")).toString().trimmed().toUpper();
+        if (isGridTokenStrict(grid) && m_dxccLookup && m_dxccLookup->isLoaded()) {
+            QString callForEntity = entry.value(QStringLiteral("dxCallsign")).toString().trimmed().toUpper();
+            if (callForEntity.isEmpty()) {
+                callForEntity = entry.value(QStringLiteral("fromCall")).toString().trimmed().toUpper();
+            }
+            DxccEntity const ent = m_dxccLookup->lookup(callForEntity);
+            if (ent.isValid()) {
+                double gridLon = 0.0;
+                double gridLat = 0.0;
+                if (grid2deg(grid, gridLon, gridLat)) {
+                    double mismatchAz = 0.0;
+                    double const entLonEast = -ent.lon;
+                    double const mismatchKm = azdist(ent.lat, entLonEast, gridLat, gridLon, mismatchAz);
+                    bool distOk = false;
+                    double const localDistKm = entry.value(QStringLiteral("dxDistance")).toDouble(&distOk);
+                    if (mismatchKm > 5000.0 && (!distOk || localDistKm > 8000.0)) {
+                        bridgeLog(QStringLiteral("[GhostFilter] call/grid mismatch reject: call=%1 dxcc=%2 grid=%3 mismatch=%4km db=%5")
+                                      .arg(callForEntity,
+                                           ent.name,
+                                           grid,
+                                           QString::number(qRound(mismatchKm)),
+                                           QString::number(db)));
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -4712,6 +4750,7 @@ QString DecodiumBridge::webServerUrl() const
 bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
 {
     if (entry.isEmpty()) return false;
+    if (entry.value(QStringLiteral("forceRxPane")).toBool()) return true;
     QString const activeBase = decodeListModel_normalizedBaseCall(m_dxCall);
     bool const isTx = entry.value(QStringLiteral("isTx")).toBool();
     if (isTx) return true;  // sempre includere TX nei RX panel
@@ -7686,7 +7725,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         // Legacy widget routing can occasionally miss FT8/FT4/FT2 messages directed to us
         // or belonging to the current QSO. Mirror them from Band Activity as a fallback.
         for (const QVariant& value : std::as_const(bandFallbackDecodes)) {
-            QVariantMap const entry = value.toMap();
+            QVariantMap entry = value.toMap();
             if (!shouldMirrorToRxPane(entry)) {
                 continue;
             }
@@ -7698,6 +7737,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                 continue;
             }
             seen.insert(key);
+            entry[QStringLiteral("forceRxPane")] = true;
             mergedRxDecodes.append(entry);
         }
 
@@ -7713,7 +7753,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         // Keep Signal RX as a running history, otherwise switching to the next
         // AutoCQ partner drops the previous CQ/report/signoff lines from QML.
         for (const QVariant& value : std::as_const(m_rxDecodeList)) {
-            QVariantMap const entry = value.toMap();
+            QVariantMap entry = value.toMap();
             QString const key = decodeMirrorEntryKey(entry);
             if (key.isEmpty()
                 || seen.contains(key)
@@ -7721,6 +7761,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                 continue;
             }
             seen.insert(key);
+            entry[QStringLiteral("forceRxPane")] = true;
             mergedRxDecodes.append(entry);
         }
 
@@ -8026,11 +8067,14 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
         return;
     }
 
-    QString const clearKey = decodeRxClearEntryKey(entry);
+    QVariantMap rxEntry = entry;
+    rxEntry[QStringLiteral("forceRxPane")] = true;
+
+    QString const clearKey = decodeRxClearEntryKey(rxEntry);
     if (!clearKey.isEmpty() && m_clearedRxDecodeKeys.contains(clearKey)) {
         return;
     }
-    QString const key = decodeMirrorEntryKey(entry);
+    QString const key = decodeMirrorEntryKey(rxEntry);
 
     for (const QVariant& existingValue : std::as_const(m_rxDecodeList)) {
         QVariantMap const existing = existingValue.toMap();
@@ -8040,7 +8084,7 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
         }
     }
 
-    m_rxDecodeList.append(entry);
+    m_rxDecodeList.append(rxEntry);
     trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
     coalesceRxPaneTxRows(m_rxDecodeList, m_mode);
     normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
@@ -8057,11 +8101,12 @@ void DecodiumBridge::rebuildRxDecodeList()
     rebuilt.reserve(m_decodeList.size() + m_rxDecodeList.size());
 
     QSet<QString> seen;
-    auto appendRelevantEntry = [this, &rebuilt, &seen](QVariant const& value) {
-        QVariantMap const entry = value.toMap();
-        if (!shouldMirrorToRxPane(entry)) {
+    auto appendRelevantEntry = [this, &rebuilt, &seen](QVariant const& value, bool alreadyAcceptedForRx) {
+        QVariantMap entry = value.toMap();
+        if (!alreadyAcceptedForRx && !shouldMirrorToRxPane(entry)) {
             return;
         }
+        entry[QStringLiteral("forceRxPane")] = true;
 
         QString const clearKey = decodeRxClearEntryKey(entry);
         if (!clearKey.isEmpty() && m_clearedRxDecodeKeys.contains(clearKey)) {
@@ -8076,10 +8121,10 @@ void DecodiumBridge::rebuildRxDecodeList()
     };
 
     for (const QVariant& value : std::as_const(m_rxDecodeList)) {
-        appendRelevantEntry(value);
+        appendRelevantEntry(value, true);
     }
     for (const QVariant& value : std::as_const(m_decodeList)) {
-        appendRelevantEntry(value);
+        appendRelevantEntry(value, false);
     }
 
     coalesceRxPaneTxRows(rebuilt, m_mode);
@@ -9825,7 +9870,7 @@ void DecodiumBridge::setDxCall(const QString& v) {
             m_legacyBackend->setDxCall(next);
         }
         regenerateTxMessages();
-        if (m_multiAnswerMode && !activeQueueCall.isEmpty()) {
+        if ((m_multiAnswerMode || m_autoCqRepeat) && !activeQueueCall.isEmpty()) {
             removeCallerFromQueue(activeQueueCall);
         }
         emitCurrentWorldMapQsoPath();
@@ -18602,7 +18647,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             (m_autoCqRepeat || manualPartnerQso)
             && !isCqAutoCq
             && !(m_currentTx == 5 && m_ft2DeferredLogPending);
-        if (applyRetryLimit && m_currentTx == m_lastNtx && m_txRetryCount >= m_maxCallerRetries) {
+        if (applyRetryLimit && m_currentTx == m_lastNtx && m_txRetryCount > m_maxCallerRetries) {
             QString const retryReason =
                 "checkAndStartPeriodicTx: retry limit " +
                 QString::number(m_maxCallerRetries) + " su TX" +
@@ -18962,6 +19007,33 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         restoreAutoCqPartnerLock();
     }
 
+    bool const autoCqExchangeInProgress =
+        m_autoCqRepeat
+        && !duplicateActiveBase.isEmpty()
+        && (m_qsoProgress > 1
+            || (m_txEnabled && m_currentTx >= 1 && m_currentTx <= 5)
+            || (!m_autoCqLockedCall.trimmed().isEmpty() && m_currentTx != 6));
+    bool const differentAutoCqCallerDuringActiveExchange =
+        autoCqExchangeInProgress
+        && !messagePartnerBase.isEmpty()
+        && messagePartnerBase != duplicateActiveBase;
+    if (differentAutoCqCallerDuringActiveExchange) {
+        if (directedToMe && !is_73) {
+            bool freqOk = false;
+            int const freq = f.size() >= 8 ? f.value(7).toInt(&freqOk) : m_rxFrequency;
+            int const snr = f.size() >= 2 ? decodeSnrOrDefault(f.value(1), -99) : -99;
+            enqueueCallerInternal(messagePartner,
+                                  freqOk ? freq : m_rxFrequency,
+                                  snr,
+                                  true);
+        }
+        bridgeLog(QStringLiteral("autoSeq: keep active AutoCQ partner %1; queue/ignore %2 msg=%3")
+                      .arg(duplicateActiveBase,
+                           messagePartnerBase,
+                           msg));
+        return;
+    }
+
     // Shannon (riga 9699-9720): filtro messaggi — solo quelli rilevanti per noi
     // CQ mode (m_bCallingCQ && m_bAutoReply): accetta solo chi ci chiama (parts[0]==m_callsign)
     // Non CQ mode: accetta solo dalla stazione DX corrente; se dxCall vuoto → non rispondere
@@ -19147,6 +19219,25 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         (last.compare(QStringLiteral("RRR"), Qt::CaseInsensitive) == 0
          && m_qsoProgress >= 4);
     bool const partnerAnySignoff = partnerSignoff73 || partnerSignoffRR73 || partnerSignoffRRR;
+    QString activeSignoffPartner = m_dxCall.trimmed();
+    if (activeSignoffPartner.isEmpty()) {
+        activeSignoffPartner = m_autoCqLockedCall.trimmed();
+    }
+    if (activeSignoffPartner.isEmpty()) {
+        activeSignoffPartner = inferredPartnerForAutolog().trimmed();
+    }
+    QString const activeSignoffBase = normalizedBaseCall(activeSignoffPartner);
+    bool const signoffFromActivePartner =
+        !messagePartnerBase.isEmpty()
+        && !activeSignoffBase.isEmpty()
+        && messagePartnerBase == activeSignoffBase;
+    if (partnerAnySignoff && !directedToMe && !signoffFromActivePartner) {
+        bridgeLog(QStringLiteral("autoSeq: ignore unrelated signoff from %1 while active=%2 msg=%3")
+                      .arg(messagePartnerBase.isEmpty() ? from : messagePartnerBase,
+                           activeSignoffBase.isEmpty() ? QStringLiteral("<none>") : activeSignoffBase,
+                           msg));
+        return;
+    }
     bool const profileNeedsOwn73BeforeLog =
         ((m_mode == QStringLiteral("FT2") && !m_quickQsoEnabled)
          || m_mode == QStringLiteral("FT8")
@@ -22557,6 +22648,9 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClea
     if (entry.value(QStringLiteral("isTx")).toBool()) {
         return;
     }
+    if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+        return;
+    }
     if (!worldMapEntryFreshEnough(entry)) {
         return;
     }
@@ -22742,6 +22836,11 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClea
         return;
     }
 
+    bool const mapAllMessages = getSetting(QStringLiteral("MapAllMessages"), false).toBool();
+    if (!isCqLike && !mapAllMessages) {
+        return;
+    }
+
     if (isCqLike && !calls.isEmpty()) {
         remoteCall = calls.first();
         remoteGrid = gridForMapCall(remoteCall);
@@ -22769,7 +22868,7 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClea
         emit worldMapContactAdded(remoteCall, remoteGrid, remoteGrid, roleBandOnly);
         return;
     }
-    if (getSetting(QStringLiteral("MapAllMessages"), false).toBool()) {
+    if (mapAllMessages) {
         emitApproximateContact(remoteCall, roleBandOnly);
     }
 }

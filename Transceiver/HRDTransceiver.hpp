@@ -77,6 +77,7 @@ private:
   MODE lookup_mode (int, ModeMap const&) const;
   void set_data_mode (MODE);
   MODE get_data_mode (MODE);
+  void prefer_data_mode_dropdown_selection (int);
 
   // An alternate TransceiverBase instance that can be used to drive
   // PTT if required.

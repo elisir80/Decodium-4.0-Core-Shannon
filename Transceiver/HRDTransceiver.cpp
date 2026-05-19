@@ -719,15 +719,44 @@ int HRDTransceiver::do_start ()
   // appears to be an HRD defect and we cannot work around it
   if ((data_mode_dropdown_ = find_dropdown (QRegularExpression ("^(Data)$"))) >= 0)
     {
-      // When HRD exposes both "On" and a data profile such as "D1",
-      // select "On". Some Icom HRD profiles keep the rig in plain USB
-      // when D1 is selected before the DATA state is enabled.
-      data_mode_dropdown_selection_on_ = find_dropdown_selection (data_mode_dropdown_, QRegularExpression ("^(On)$"));
-      if (!data_mode_dropdown_selection_on_.size ())
-        {
-          data_mode_dropdown_selection_on_ = find_dropdown_selection (data_mode_dropdown_, QRegularExpression ("^(Data1|D1|D1-FIL1)$"));
-        }
+      auto const data_mode_generic_on =
+        find_dropdown_selection (data_mode_dropdown_, QRegularExpression ("^(On)$"));
+      auto const data_mode_profile_on =
+        find_dropdown_selection (data_mode_dropdown_, QRegularExpression ("^(Data1|D1|D1-FIL1)$"));
       data_mode_dropdown_selection_off_ = find_dropdown_selection (data_mode_dropdown_, QRegularExpression ("^(Off)$"));
+
+      for (auto const selection : data_mode_generic_on)
+        {
+          prefer_data_mode_dropdown_selection (selection);
+        }
+      for (auto const selection : data_mode_profile_on)
+        {
+          prefer_data_mode_dropdown_selection (selection);
+        }
+
+      // Prefer the user's active Icom data profile when it is a concrete
+      // profile. On IC-7100 HRD accepts "Data On" but reports "Data Off"
+      // again as soon as PTT starts; the stable setting in the tap is "D1".
+      if (data_mode_dropdown_selection_off_.size ())
+        {
+          try
+            {
+              auto const current_data_selection = get_dropdown (data_mode_dropdown_);
+              if (current_data_selection >= 0
+                  && current_data_selection != data_mode_dropdown_selection_off_.front ()
+                  && data_mode_generic_on.cend () == std::find (data_mode_generic_on.cbegin (),
+                                                                data_mode_generic_on.cend (),
+                                                                current_data_selection))
+                {
+                  prefer_data_mode_dropdown_selection (current_data_selection);
+                }
+            }
+          catch (error const& e)
+            {
+              hrd_diag (QStringLiteral ("unable to read initial Data dropdown selection: %1")
+                        .arg (QString::fromUtf8 (e.what ())));
+            }
+        }
     }
 
   ptt_button_ = find_button (QRegularExpression ("^(TX)$"));
@@ -851,13 +880,13 @@ void HRDTransceiver::map_modes (int dropdown, ModeMap *map)
   map->push_back (std::forward_as_tuple (CW_R, find_dropdown_selection (dropdown, QRegularExpression ("^(CW-R|CW-R\\(N\\)|CW|CW-USB|CWU)$"))));
   map->push_back (std::forward_as_tuple (LSB, lsb_selection));
   map->push_back (std::forward_as_tuple (USB, usb_selection));
-  map->push_back (std::forward_as_tuple (DIG_U, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|DIGU|DATA-U|PKT-U|DATA|AFSK|USER-U)$")), usb_selection)));
-  map->push_back (std::forward_as_tuple (DIG_L, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|DIGL|DATA-L|PKT-L|DATA-R|USER-L)$")), lsb_selection)));
+  map->push_back (std::forward_as_tuple (DIG_U, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|DIGU|USB-D|USB-D[123]|DATA-U|DATA-USB|PKT-U|DATA|AFSK|USER-U)$")), usb_selection)));
+  map->push_back (std::forward_as_tuple (DIG_L, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|DIGL|LSB-D|LSB-D[123]|DATA-L|DATA-LSB|PKT-L|DATA-R|USER-L)$")), lsb_selection)));
   map->push_back (std::forward_as_tuple (FSK, find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|FSK|RTTY|RTTY-LSB)$"))));
   map->push_back (std::forward_as_tuple (FSK_R, find_dropdown_selection (dropdown, QRegularExpression ("^(DIG|FSK-R|RTTY-R|RTTY|RTTY-USB)$"))));
   map->push_back (std::forward_as_tuple (AM, find_dropdown_selection (dropdown, QRegularExpression ("^(AM|DSB|SAM|DRM)$"))));
   map->push_back (std::forward_as_tuple (FM, fm_selection));
-  map->push_back (std::forward_as_tuple (DIG_FM, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(PKT-FM|PKT|DATA\\(FM\\))$")), fm_selection)));
+  map->push_back (std::forward_as_tuple (DIG_FM, with_fallback (find_dropdown_selection (dropdown, QRegularExpression ("^(FM-D|FM-D[123]|DATA-FM|PKT-FM|PKT|DATA\\(FM\\))$")), fm_selection)));
 
   CAT_TRACE ("for dropdown" << dropdown_names_[dropdown]);
   std::for_each (map->begin (), map->end (), [this, dropdown] (ModeMap::value_type const& item)
@@ -990,6 +1019,27 @@ void HRDTransceiver::set_button (int button_index, bool checked)
     }
 }
 
+void HRDTransceiver::prefer_data_mode_dropdown_selection (int selection)
+{
+  if (selection < 0)
+    {
+      return;
+    }
+
+  auto const existing = std::find (data_mode_dropdown_selection_on_.begin (),
+                                   data_mode_dropdown_selection_on_.end (),
+                                   selection);
+  if (data_mode_dropdown_selection_on_.end () == existing)
+    {
+      data_mode_dropdown_selection_on_.insert (data_mode_dropdown_selection_on_.begin (), selection);
+    }
+  else if (data_mode_dropdown_selection_on_.begin () != existing)
+    {
+      data_mode_dropdown_selection_on_.erase (existing);
+      data_mode_dropdown_selection_on_.insert (data_mode_dropdown_selection_on_.begin (), selection);
+    }
+}
+
 void HRDTransceiver::set_data_mode (MODE m)
 {
   bool sent_data_command {false};
@@ -1067,6 +1117,7 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
       // we must rely on the initial parse finding valid on values
       if (selection >= 0 && selection != data_mode_dropdown_selection_off_.front ())
         {
+          prefer_data_mode_dropdown_selection (selection);
           switch (m)
             {
             case USB: m = DIG_U; break;
