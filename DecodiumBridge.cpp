@@ -4714,12 +4714,13 @@ void DecodiumBridge::rebuildRxDecodeModel()
 void DecodiumBridge::recordFrameTimestamp()
 {
     m_totalFrameSamples.fetch_add(1, std::memory_order_relaxed);
-    // 1.0.251 debug: log al primo entry post-init.
+    // 1.0.252: Qt 6.11 RHI on-demand stoppa frameSwapped+afterRendering
+    // dopo ~4s startup quando UI dominata da custom QQuickPaintedItem
+    // (Waterfall Decodium). Frame ms timing inaffidabile - DevOverlay
+    // mostra "n/a" via QML quando ringFilled==0.
     if (!m_perfFrameElapsedStarted) {
         m_perfFrameElapsed.start();
         m_perfFrameElapsedStarted = true;
-        bridgeLog(QStringLiteral("[FT] perfFrame elapsed STARTED total=%1")
-                  .arg(m_totalFrameSamples.load()));
         return;
     }
     qint64 const ns = m_perfFrameElapsed.nsecsElapsed();
@@ -4729,14 +4730,6 @@ void DecodiumBridge::recordFrameTimestamp()
     m_frameTimeRing[m_frameTimeRingPos] = ms;
     m_frameTimeRingPos = (m_frameTimeRingPos + 1) % kPerfFrameRingSize;
     if (m_frameTimeRingFilled < kPerfFrameRingSize) ++m_frameTimeRingFilled;
-    // 1.0.251 debug: log ogni 100 body invocations.
-    static int s_bodyCnt = 0;
-    if (++s_bodyCnt % 100 == 0) {
-        bridgeLog(QStringLiteral("[FT] body #%1 ms=%2 ringFilled=%3 lastMs=%4 meanMs=%5")
-                  .arg(s_bodyCnt).arg(ms, 0, 'f', 2)
-                  .arg(m_frameTimeRingFilled).arg(m_lastFrameTimeMs, 0, 'f', 2)
-                  .arg(m_meanFrameTimeMs, 0, 'f', 2));
-    }
 }
 
 void DecodiumBridge::noteDecodeReceived() const
@@ -4823,18 +4816,6 @@ void DecodiumBridge::setDevOverlayActive(bool v)
                 int const comm = m_decodeRateCommittedCounter.exchange(0, std::memory_order_relaxed);
                 m_decodeRateReceivedHz  = double(recv) * 4.0;
                 m_decodeRateCommittedHz = double(comm) * 4.0;
-                // 1.0.246 debug: log ogni 8 tick (2s) per vedere se il timer
-                // scatta davvero ed esegue il sample-and-clear.
-                static int s_tickCount = 0;
-                if (++s_tickCount % 8 == 0) {
-                    bridgeLog(QStringLiteral(
-                        "[DevOverlay tick #%1] recv=%2 comm=%3 ringFilled=%4 "
-                        "lastMs=%5 meanMs=%6 active=%7")
-                        .arg(s_tickCount).arg(recv).arg(comm).arg(n)
-                        .arg(m_lastFrameTimeMs, 0, 'f', 2)
-                        .arg(m_meanFrameTimeMs, 0, 'f', 2)
-                        .arg(m_devOverlayActive ? "true" : "false"));
-                }
                 emit perfMetricsChanged();
             });
         }

@@ -68,9 +68,15 @@ Item {
         lines.push("  RHI backend       : " + (t ? t.activeRhiBackend : "n/a"))
         lines.push("")
         lines.push("[Frame time (ms)]")
-        lines.push("  last              : " + fmt(t ? t.lastFrameTimeMs : 0, 2))
-        lines.push("  mean (32 samples) : " + fmt(t ? t.meanFrameTimeMs : 0, 2))
-        lines.push("  p99               : " + fmt(t ? t.p99FrameTimeMs : 0, 2))
+        var ftAvail = (t && t.lastFrameTimeMs > 0)
+        if (ftAvail) {
+            lines.push("  last              : " + fmt(t.lastFrameTimeMs, 2))
+            lines.push("  mean (32 samples) : " + fmt(t.meanFrameTimeMs, 2))
+            lines.push("  p99               : " + fmt(t.p99FrameTimeMs, 2))
+        } else {
+            lines.push("  (n/a - Qt 6.11 RHI on-demand pipeline doesn't")
+            lines.push("   emit frameSwapped/afterRendering after startup)")
+        }
         lines.push("")
         lines.push("[Decode rate (Hz)]")
         lines.push("  received          : " + fmt(t ? t.decodeRateReceivedHz : 0, 1))
@@ -190,12 +196,18 @@ Item {
 
                 Text { text: "Frame (ms):"; color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
+                    // 1.0.252: Qt 6.11 RHI on-demand stoppa frame signals dopo
+                    // ~4s startup. Frame timing inaffidabile su Decodium pipeline.
                     text: warmingUp
                           ? "warming up... " + fmt(uptimeSec, 0) + "/5s"
-                          : (fmt(target ? target.lastFrameTimeMs : 0, 2)
-                             + "  mean " + fmt(target ? target.meanFrameTimeMs : 0, 2)
-                             + "  p99 " + fmt(target ? target.p99FrameTimeMs : 0, 2))
-                    color: warmingUp ? "#7088A0" : "#E0E0E0"
+                          : (target && target.lastFrameTimeMs > 0
+                             ? (fmt(target.lastFrameTimeMs, 2)
+                                + "  mean " + fmt(target.meanFrameTimeMs, 2)
+                                + "  p99 " + fmt(target.p99FrameTimeMs, 2))
+                             : "n/a (Qt RHI on-demand)")
+                    color: warmingUp ? "#7088A0"
+                                     : (target && target.lastFrameTimeMs > 0
+                                        ? "#E0E0E0" : "#7088A0")
                     font.pixelSize: 10
                     Layout.fillWidth: true
                 }
