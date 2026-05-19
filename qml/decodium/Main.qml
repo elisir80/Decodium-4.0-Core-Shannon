@@ -633,6 +633,15 @@ ApplicationWindow {
         if (bridge)
             bridge.setSetting("CompactFullSpectrum", compactFullSpectrum)
     }
+    // 1.0.253 — Compact mode Signal RX: stesso pattern di Full Spectrum
+    // ma indipendente. Opt-in default OFF.
+    property bool compactSignalRx: bridge ? !!bridge.getSetting("CompactSignalRx", false) : false
+    property int signalRxRowHeight: compactSignalRx ? 14 : 26
+    function toggleCompactSignalRx() {
+        compactSignalRx = !compactSignalRx
+        if (bridge)
+            bridge.setSetting("CompactSignalRx", compactSignalRx)
+    }
     property bool period2Detached: false
     property bool period2Minimized: false
     property bool period2DockHighlighted: false
@@ -5917,6 +5926,42 @@ NumberAnimation {
                                             ToolTip.text: qsTr("Clear Signal RX")
                                         }
 
+	                                        // 1.0.253 — Compact mode toggle Signal RX
+	                                        Rectangle {
+	                                            Layout.preferredWidth: 34
+	                                            Layout.preferredHeight: 18
+	                                            radius: 4
+	                                            color: rxCompactMA.containsMouse
+	                                                ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3)
+	                                                : (mainWindow.compactSignalRx
+	                                                    ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2)
+	                                                    : "transparent")
+	                                            border.color: (rxCompactMA.containsMouse || mainWindow.compactSignalRx)
+	                                                ? secondaryCyan
+	                                                : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+	                                            border.width: 1
+	                                            Text {
+	                                                anchors.centerIn: parent
+	                                                text: mainWindow.compactSignalRx ? "Full" : "Compact"
+	                                                font.pixelSize: mainWindow.compactSignalRx ? 10 : 9
+	                                                font.bold: true
+	                                                color: (rxCompactMA.containsMouse || mainWindow.compactSignalRx)
+	                                                    ? secondaryCyan : textSecondary
+	                                            }
+	                                            MouseArea {
+	                                                id: rxCompactMA
+	                                                anchors.fill: parent
+	                                                hoverEnabled: true
+	                                                cursorShape: Qt.PointingHandCursor
+	                                                onClicked: mainWindow.toggleCompactSignalRx()
+	                                            }
+	                                            ToolTip.visible: rxCompactMA.containsMouse
+	                                            ToolTip.text: mainWindow.compactSignalRx
+	                                                ? qsTr("Switch to normal row height")
+	                                                : qsTr("Compact rows (2x more visible decodes)")
+	                                            ToolTip.delay: 500
+	                                        }
+
 	                                        // Pop button
 	                                        Rectangle {
 	                                            Layout.preferredWidth: 34
@@ -6119,7 +6164,8 @@ NumberAnimation {
 	                                            readonly property var entry: modelData || ({})
                                             readonly property bool isPeriodSeparator: hasEntry && entry.isSeparator === true
                                             width: rxFrequencyList.width - 8
-                                            height: !hasEntry ? 0 : isPeriodSeparator ? Math.round(4 * fs) : Math.round(26 * fs)
+                                            // 1.0.253 — height adattiva compact mode Signal RX
+                                            height: !hasEntry ? 0 : isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
                                             color: isPeriodSeparator ? "transparent" :
                                                    entry.isTx ? Qt.rgba(241/255, 196/255, 15/255, 0.3) :
                                                    entry.isMyCall ? Qt.rgba(244/255, 67/255, 54/255, 0.3) :
@@ -10029,6 +10075,42 @@ NumberAnimation {
 	                                }
 	                            }
 
+	                            // 1.0.253 — Compact mode toggle Signal RX (floating window)
+	                            Rectangle {
+	                                Layout.preferredWidth: 50
+	                                Layout.preferredHeight: 22
+	                                radius: 4
+	                                color: rxFloatCompactMA.containsMouse
+	                                    ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3)
+	                                    : (mainWindow.compactSignalRx
+	                                        ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2)
+	                                        : "transparent")
+	                                border.color: (rxFloatCompactMA.containsMouse || mainWindow.compactSignalRx)
+	                                    ? secondaryCyan
+	                                    : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+	                                border.width: 1
+	                                Text {
+	                                    anchors.centerIn: parent
+	                                    text: mainWindow.compactSignalRx ? "Full" : "Compact"
+	                                    font.pixelSize: mainWindow.compactSignalRx ? 11 : 10
+	                                    font.bold: true
+	                                    color: (rxFloatCompactMA.containsMouse || mainWindow.compactSignalRx)
+	                                        ? secondaryCyan : textSecondary
+	                                }
+	                                MouseArea {
+	                                    id: rxFloatCompactMA
+	                                    anchors.fill: parent
+	                                    hoverEnabled: true
+	                                    cursorShape: Qt.PointingHandCursor
+	                                    onClicked: mainWindow.toggleCompactSignalRx()
+	                                }
+	                                ToolTip.visible: rxFloatCompactMA.containsMouse
+	                                ToolTip.text: mainWindow.compactSignalRx
+	                                    ? qsTr("Switch to normal row height")
+	                                    : qsTr("Compact rows (2x more visible decodes)")
+	                                ToolTip.delay: 500
+	                            }
+
 		                        Rectangle {
 	                            Layout.preferredWidth: 42
 	                            Layout.preferredHeight: 22
@@ -10236,7 +10318,8 @@ NumberAnimation {
 	                        delegate: Rectangle {
 	                            width: parent ? parent.width - 8 : 100
 	                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
-	                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(24 * fs)
+	                            // 1.0.253 — height adattiva compact mode Signal RX
+	                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
 	                            radius: 3
 	                            color: isPeriodSeparator ? "transparent" :
 	                                   modelData.bgColorHex ? modelData.bgColorHex :
