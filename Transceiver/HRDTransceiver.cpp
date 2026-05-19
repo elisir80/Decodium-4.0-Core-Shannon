@@ -1040,8 +1040,31 @@ void HRDTransceiver::prefer_data_mode_dropdown_selection (int selection)
     }
 }
 
+auto HRDTransceiver::protect_pending_data_mode (MODE mode) const -> MODE
+{
+  if (hrd_is_data_mode (mode)
+      || pending_data_mode_ == UNK
+      || QDateTime::currentMSecsSinceEpoch () > pending_data_mode_until_ms_)
+    {
+      return mode;
+    }
+
+  return hrd_data_carrier_matches (pending_data_mode_, mode)
+       ? pending_data_mode_
+       : mode;
+}
+
 void HRDTransceiver::set_data_mode (MODE m)
 {
+  auto const requested_mode = m;
+  m = protect_pending_data_mode (m);
+  if (m != requested_mode)
+    {
+      hrd_diag (QStringLiteral ("preserving pending Data mode %1 while HRD reports carrier mode %2")
+                .arg (m)
+                .arg (requested_mode));
+    }
+
   bool sent_data_command {false};
   if (data_mode_toggle_button_ >= 0)
     {
@@ -1125,11 +1148,10 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
             case FM: m = DIG_FM; break;
             default: break;
             }
-          if (hrd_is_data_mode (m))
-            {
-              pending_data_mode_ = UNK;
-              pending_data_mode_until_ms_ = 0;
-            }
+          // HRD can briefly report the Data dropdown as active and then
+          // drop back to Off while PTT is still settling. Keep the guard
+          // alive until its timeout instead of clearing it on the first
+          // successful readback.
         }
       else if (selection >= 0
                && pending_data_mode_ != UNK
@@ -1158,6 +1180,7 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
 
 void HRDTransceiver::do_frequency (Frequency f, MODE m, bool /*no_ignore*/)
 {
+  m = protect_pending_data_mode (m);
   CAT_TRACE (f << "reversed" << reversed_);
   hrd_diag (QStringLiteral ("QSY RX context=%1 hz=%2 mode=%3 reversed=%4")
             .arg (current_radio_)
@@ -1187,6 +1210,7 @@ void HRDTransceiver::do_frequency (Frequency f, MODE m, bool /*no_ignore*/)
 
 void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*/)
 {
+  mode = protect_pending_data_mode (mode);
   CAT_TRACE (tx << "reversed" << reversed_);
   hrd_diag (QStringLiteral ("QSY TX context=%1 hz=%2 mode=%3 reversed=%4")
             .arg (current_radio_)
@@ -1363,6 +1387,7 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
 
 void HRDTransceiver::do_mode (MODE mode)
 {
+  mode = protect_pending_data_mode (mode);
   CAT_TRACE (mode);
   if (reversed_ && mode_B_dropdown_ >= 0)
     {

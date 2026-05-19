@@ -1190,6 +1190,8 @@ ApplicationWindow {
     }
 
     function fullSpectrumTextColor(modelData) {
+        if (!modelData)
+            return textPrimary
         var rowHex = decodeRowHighlightHex(modelData)
         if (rowHex.length > 0)
             return readableTextOnHighlight(rowHex)
@@ -1300,6 +1302,7 @@ ApplicationWindow {
 
     // IU8LMC: Function to build tooltip text
     function getDxccTooltipText(modelData) {
+        if (!modelData) return ""
         if (!modelData.dxCountry) return ""
         var lines = []
         var header = modelData.dxCallsign + " - " + modelData.dxCountry
@@ -5633,10 +5636,11 @@ NumberAnimation {
                                             width: 8
                                         }
 
-                                        delegate: Rectangle {
-                                            // 1.0.155: separator meno invasivo — riga sottile, no label.
-                                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
-                                            width: evenPeriodList.width
+	                                        delegate: Rectangle {
+	                                            // 1.0.155: separator meno invasivo — riga sottile, no label.
+	                                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
+	                                            readonly property var entry: modelData || ({})
+	                                            width: evenPeriodList.width
                                             // 1.0.229 — height adattiva via mainWindow.fullSpectrumRowHeight
                                             // (compact 14px / normal 26px). Toggle via toolbar o Ctrl+Shift+C.
                                             height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.fullSpectrumRowHeight * fs)
@@ -5646,10 +5650,10 @@ NumberAnimation {
 	                                            // model swap transients che saturava il main thread via logger sincrono.
 	                                            color: !modelData ? "transparent" :
 	                                                   isPeriodSeparator ? "transparent" :
-	                                                   highlightFill ? highlightFill :
-	                                                   modelData.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12) :
-	                                                   decodePanel.isAtRxFrequency(modelData.freq || "0", modelData) ? Qt.rgba(76/255, 175/255, 80/255, 0.2) :
-	                                                   index % 2 === 0 ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+		                                                   highlightFill ? highlightFill :
+		                                                   entry.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12) :
+		                                                   decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? Qt.rgba(76/255, 175/255, 80/255, 0.2) :
+		                                                   index % 2 === 0 ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
                                             border.color: highlightBorder ? highlightBorder : "transparent"
                                             border.width: highlightFill ? 1 : 0
                                             radius: 2
@@ -5673,26 +5677,26 @@ NumberAnimation {
                                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                                                 onClicked: function(mouse) {
                                                     if (parent.isPeriodSeparator) return
-                                                    if (modelData.isTx) return
+	                                                    if (entry.isTx) return
                                                     if (mouse.button === Qt.LeftButton) {
                                                         // Sinistro = imposta TX freq
                                                         if (!bridge.holdTxFreq)
-                                                            bridge.txFrequency = parseInt(modelData.freq || "0")
+	                                                            bridge.txFrequency = parseInt(entry.freq || "0")
                                                     } else if (mouse.button === Qt.RightButton) {
                                                         // Destro = imposta RX freq
-                                                        bridge.rxFrequency = parseInt(modelData.freq || "0")
+	                                                        bridge.rxFrequency = parseInt(entry.freq || "0")
                                                     }
                                                 }
                                                 onDoubleClicked: function(mouse) {
                                                     if (parent.isPeriodSeparator) return
-                                                    if (!modelData.isTx && mouse.button === Qt.LeftButton)
-                                                        decodePanel.handleDecodeDoubleClick(modelData)
+	                                                    if (!entry.isTx && mouse.button === Qt.LeftButton)
+	                                                        decodePanel.handleDecodeDoubleClick(entry)
                                                 }
                                                 // IU8LMC: Show tooltip on hover
                                                 onContainsMouseChanged: {
                                                     if (parent.isPeriodSeparator) { dxccTooltipVisible = false; return }
                                                     if (containsMouse) {
-                                                        dxccTooltipText = getDxccTooltipText(modelData)
+	                                                        dxccTooltipText = getDxccTooltipText(entry)
                                                         var pos = mapToGlobal(mouseX, mouseY)
                                                         dxccTooltipX = pos.x - mainWindow.x
                                                         dxccTooltipY = pos.y - mainWindow.y
@@ -5717,15 +5721,15 @@ NumberAnimation {
 	                                                anchors.rightMargin: 6
 	                                                spacing: 0
 
-                                                Text { text: modelData.formattedTime || decodePanel.formatUtcForDisplay(modelData.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1Panel.utcColumnWidth }
-                                                Text { text: modelData.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.snrColor || (modelData.isTx ? "#f1c40f" : textSecondary); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
+	                                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1Panel.utcColumnWidth }
+	                                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.dbDtGapWidth }
-                                                Text { text: modelData.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
+	                                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.dtFreqGapWidth }
-                                                Text { text: modelData.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(modelData.freq || "0", modelData) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (modelData.isTx === true) || decodePanel.isAtRxFrequency(modelData.freq || "0", modelData); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
+	                                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.gapColumnWidth }
-                                                Text { text: modelData.displayMessage || modelData.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(modelData); font.strikeout: decodePanel.decodeEntryStrikeout(modelData); color: mainWindow.fullSpectrumTextColor(modelData); Layout.fillWidth: true; Layout.minimumWidth: period1Panel.messageMinWidth; elide: messageElideMode(modelData.displayMessage || modelData.message) }
-                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
+	                                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; Layout.minimumWidth: period1Panel.messageMinWidth; elide: messageElideMode(entry.displayMessage || entry.message) }
+	                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
                                                 Item {
                                                     visible: mainWindow.showDxccInfo
                                                     Layout.preferredWidth: period1Panel.dxccColumnWidth
@@ -5733,10 +5737,10 @@ NumberAnimation {
                                                     clip: true
                                                     Text {
                                                         anchors.fill: parent
-                                                        text: modelData.dxCountry || ""
+	                                                        text: entry.dxCountry || ""
                                                         font.family: mainWindow.decodedTextFontFamily
                                                         font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-                                                        color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
+	                                                        color: entry.dxCountry ? bridge.colorDXEntity : textSecondary
                                                         horizontalAlignment: Text.AlignRight
                                                         verticalAlignment: Text.AlignVCenter
                                                         elide: Text.ElideRight
@@ -5751,7 +5755,7 @@ NumberAnimation {
                                                     Layout.fillHeight: true
                                                     Text {
                                                         anchors.fill: parent
-                                                        text: formatBearingDegrees(modelData.dxBearing)
+	                                                        text: formatBearingDegrees(entry.dxBearing)
                                                         font.family: mainWindow.decodedTextFontFamily
                                                         font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
                                                         color: secondaryCyan
@@ -6595,7 +6599,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     text: dxccTooltipText
                     color: textPrimary
                     font.pixelSize: 11
-                    font.family: "Segoe UI"
                 }
             }
         }
@@ -9865,10 +9868,11 @@ NumberAnimation {
                             width: 8
                         }
 
-	                        delegate: Rectangle {
-		                            width: parent ? parent.width : 100
-	                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
-	                            // 1.0.229 — height adattiva compact mode (vedi mainWindow.fullSpectrumRowHeight)
+		                        delegate: Rectangle {
+			                            width: parent ? parent.width : 100
+		                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
+		                            readonly property var entry: modelData || ({})
+		                            // 1.0.229 — height adattiva compact mode (vedi mainWindow.fullSpectrumRowHeight)
 	                            height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.fullSpectrumRowHeight * fs)
 		                            radius: 3
 		                            property var highlightFill: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeHighlightFill(modelData)
@@ -9877,10 +9881,10 @@ NumberAnimation {
 		                            // model swap transients che saturava il main thread via logger sincrono.
 		                            color: !modelData ? "transparent" :
 		                                   isPeriodSeparator ? "transparent" :
-		                                   highlightFill ? highlightFill :
-		                                   modelData.bgColorHex ? modelData.bgColorHex :
-		                                   modelData.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) :
-		                                   Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+			                                   highlightFill ? highlightFill :
+			                                   entry.bgColorHex ? entry.bgColorHex :
+			                                   entry.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) :
+			                                   Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
 	                            border.color: !isPeriodSeparator && highlightBorder ? highlightBorder : "transparent"
 	                            border.width: !isPeriodSeparator && highlightFill ? 1 : 0
 
@@ -9900,15 +9904,15 @@ NumberAnimation {
 	                                anchors.fill: parent
 	                                anchors.margins: 4
 		                                spacing: 0
-	                                Text { text: modelData.formattedTime || decodePanel.formatUtcForDisplay(modelData.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
-	                                Text { text: modelData.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.snrColor || (modelData.isTx ? "#f1c40f" : textSecondary); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
+		                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
+		                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.dbDtGapWidth }
-	                                Text { text: modelData.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
+		                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.dtFreqGapWidth }
-	                                Text { text: modelData.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(modelData.freq || "0", modelData) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (modelData.isTx === true) || decodePanel.isAtRxFrequency(modelData.freq || "0", modelData); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
+		                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.gapColumnWidth }
-	                                Text { text: modelData.displayMessage || modelData.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(modelData); font.strikeout: decodePanel.decodeEntryStrikeout(modelData); color: mainWindow.fullSpectrumTextColor(modelData); Layout.fillWidth: true; elide: messageElideMode(modelData.displayMessage || modelData.message) }
-	                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
+		                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
+		                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
 	                                Item {
 	                                    visible: mainWindow.showDxccInfo
 	                                    Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth
@@ -9916,25 +9920,25 @@ NumberAnimation {
 	                                    clip: true
 	                                    Text {
 	                                        anchors.fill: parent
-	                                        text: modelData.dxCountry || ""
+		                                        text: entry.dxCountry || ""
 	                                        font.family: mainWindow.decodedTextFontFamily
 	                                        font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
 	                                        fontSizeMode: Text.HorizontalFit
 	                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
 	                                        maximumLineCount: 1
-	                                        color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
+		                                        color: entry.dxCountry ? bridge.colorDXEntity : textSecondary
 	                                        horizontalAlignment: Text.AlignRight
 	                                        verticalAlignment: Text.AlignVCenter
 	                                        elide: Text.ElideRight
 	                                    }
 	                                }
-	                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(modelData.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: secondaryCyan; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
+		                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: secondaryCyan; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
                             }
 
 	                            MouseArea {
 	                                enabled: !parent.isPeriodSeparator
 	                                anchors.fill: parent
-	                                onDoubleClicked: { if (!parent.isPeriodSeparator && !modelData.isTx) decodePanel.handleDecodeDoubleClick(modelData) }
+		                                onDoubleClicked: { if (!parent.isPeriodSeparator && !entry.isTx) decodePanel.handleDecodeDoubleClick(entry) }
 	                            }
 	                        }
                     }

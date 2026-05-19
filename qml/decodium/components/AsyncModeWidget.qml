@@ -51,7 +51,6 @@ Item {
             color: root.running
                    ? (root.transmitting ? "#ff4444" : "#00e676")
                    : "#444444"
-            font.family:    "Segoe UI"
             font.pixelSize: 8
             font.bold:      true
         }
@@ -141,7 +140,6 @@ Item {
                 horizontalAlignment:      Text.AlignHCenter
                 text:  root.snr <= -99 ? "--- dB" : (root.snr + " dB")
                 color: "white"
-                font.family:    "Segoe UI"
                 font.pixelSize: 6
             }
 

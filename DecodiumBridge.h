@@ -1454,6 +1454,8 @@ private:
     void clearPromptLogSnapshot();
     void capturePendingAutoLogSnapshot();
     void clearPendingAutoLogSnapshot();
+    void clearPendingAutoSeqTx(const QString& reason);
+    void forgetPartnerMemoryForCall(const QString& call, const QString& reason);
     void armLateAutoLogSnapshot();
     void clearLateAutoLogSnapshot();
     void engageManualTxHold(const QString& reason, bool clearQueue = false);
@@ -1527,9 +1529,9 @@ private:
     bool m_startupServicesStarted {false};
     bool m_lastSuccessfulCatConnected {false};
     QString m_lastSuccessfulCatBackend;
-    // Limita i retry di startup quando la porta è occupata (es. OmniRig.exe
-    // sta tenendo la COM): dopo il primo fallimento, un secondo tentativo
-    // schedulato con delay maggiore. Nessun retry infinito.
+    // Limita i retry di startup quando la porta CAT non e' ancora pronta
+    // (COM Windows enumerata in ritardo, radio appena accesa, porta occupata).
+    // Retry finiti e distanziati: nessun loop infinito.
     int m_startupCatRetryCount {0};
     bool m_monitoring {false};
     bool m_monitorRequested {false};
@@ -1909,6 +1911,7 @@ private:
     qint64             m_audioOverdriveStartMs {0};
     qint64             m_lastAudioOverdriveWarningMs {0};
     qint64             m_lastZeroDecodeAudioWarningMs {0};
+    quint64            m_postTxRxResumeSerial {0};
     qint64             m_lastAudioHealthMs {0};
     double             m_lastAudioHealthRms {0.0};
     double             m_lastAudioHealthPeak {0.0};
@@ -2463,6 +2466,7 @@ private:
     void completeTxPlayback(const QString& reason, bool error = false);
     void finishModulatorIdlePlayback(const QString& reason);
     bool shouldAlignTxAudioToCurrentSyncSlot() const;
+    bool isSyncTxStartTooLate(int* elapsedMsOut = nullptr, int* latestStartMsOut = nullptr) const;
     qint64 syncTxPcmStartOffsetBytes(const QAudioFormat& format, qint64 pcmSizeBytes,
                                      int* elapsedMsOut = nullptr) const;
     void scheduleSyncTxBoundaryStop(const QString& reason, quint64 txSerial);

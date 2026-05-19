@@ -660,7 +660,6 @@ Window {
             text: tooltipText
             color: textPrimary
             font.pixelSize: 11
-            font.family: "Segoe UI"
         }
     }
 

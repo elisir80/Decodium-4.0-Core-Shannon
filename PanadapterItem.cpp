@@ -15,6 +15,7 @@
 #include <QSGTexture>
 #include <QQuickWindow>
 #include <QFile>
+#include <QFontDatabase>
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QMutexLocker>
@@ -1596,7 +1597,9 @@ void PanadapterItem::renderSpectrum()
     int txX = fToX(m_txFreq);
     bool const txVisible = txX >= 0 && txX < w && m_txFreq != m_rxFreq;
     auto drawMarkerLabel = [&](int markerX, int preferredCenterY, const QString& text, const QColor& accent) {
-        QFont labelFont("Segoe UI", 9, QFont::Bold);
+        QFont labelFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+        labelFont.setPointSize(9);
+        labelFont.setBold(true);
         p.setFont(labelFont);
         QFontMetrics fm(labelFont);
 

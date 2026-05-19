@@ -97,6 +97,24 @@ QString sanitizeHamlibFailure(QString const& reason)
         }
     }
 
+    static QStringList const missingPortMarkers = {
+        QStringLiteral("does not exist"),
+        QStringLiteral("No such file"),
+        QStringLiteral("The system cannot find"),
+        QStringLiteral("cannot find the file"),
+        QStringLiteral("ENODEV"),
+        QStringLiteral("ENOENT"),
+    };
+    for (auto const& marker : missingPortMarkers) {
+        if (reason.contains(marker, Qt::CaseInsensitive)) {
+            QString port = extractPortNameFromReason(reason);
+            if (port.isEmpty()) {
+                return QObject::tr("Porta seriale CAT non disponibile. Attendi che Windows enumeri la radio e riprova.");
+            }
+            return QObject::tr("Porta %1 non disponibile. Attendi che Windows enumeri la radio e riprova.").arg(port);
+        }
+    }
+
     static QStringList const debugMarkers = {
         QStringLiteral("read_string_generic"),
         QStringLiteral("write_block"),
@@ -583,6 +601,53 @@ QStringList enumerateSerialPorts(QString const& savedSerialPort, QString const& 
     appendUniqueSerialPort(ports, savedPttPort);
     sortSerialPorts(ports);
     return ports;
+}
+
+bool serialPortCurrentlyAvailable(QString const& port)
+{
+    QString const wanted = comparablePortName(port);
+    if (wanted.isEmpty()
+        || wanted == QStringLiteral("cat")
+        || wanted == QStringLiteral("none")) {
+        return true;
+    }
+
+    for (QSerialPortInfo const& info : QSerialPortInfo::availablePorts()) {
+        if (comparablePortName(info.portName()) == wanted
+            || comparablePortName(info.systemLocation()) == wanted) {
+            return true;
+        }
+    }
+
+#if defined(Q_OS_WIN)
+    QSettings serialMap(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DEVICEMAP\\SERIALCOMM"),
+                        QSettings::NativeFormat);
+    for (QString const& key : serialMap.allKeys()) {
+        if (comparablePortName(serialMap.value(key).toString()) == wanted) {
+            return true;
+        }
+    }
+#endif
+
+    return false;
+}
+
+bool isSerialPortMissingFailure(QString const& reason)
+{
+    static QStringList const markers = {
+        QStringLiteral("does not exist"),
+        QStringLiteral("No such file"),
+        QStringLiteral("The system cannot find"),
+        QStringLiteral("cannot find the file"),
+        QStringLiteral("ENODEV"),
+        QStringLiteral("ENOENT"),
+    };
+    for (auto const& marker : markers) {
+        if (reason.contains(marker, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool isDefaultSerialChoice(QString const& value)
@@ -1435,6 +1500,26 @@ void DecodiumTransceiverManager::connectRig()
         return;
     }
 
+    QString const lowerPortType = m_portType.trimmed().toLower();
+    bool const serialTransport =
+        lowerPortType == QStringLiteral("serial")
+        || lowerPortType == QStringLiteral("usb");
+    if (serialTransport
+        && !isHamRadioDeluxeRig(m_rigName)
+        && !serialPortCurrentlyAvailable(m_serialPort)) {
+        refreshPorts();
+        qInfo().noquote()
+            << "[CATDBG] Connect deferred: serial port unavailable"
+            << "rig=" << m_rigName
+            << "portType=" << m_portType
+            << "serial=" << m_serialPort;
+        emit statusUpdate(QStringLiteral("Porta %1 non ancora disponibile, ritento CAT a breve...")
+                          .arg(m_serialPort.trimmed().isEmpty()
+                               ? QStringLiteral("<non impostata>")
+                               : m_serialPort.trimmed()));
+        return;
+    }
+
     emit statusUpdate("Connessione a " + m_rigName + "…");
 
     // Thread senza parent: sarà gestito via QThread::finished + deleteLater
@@ -1640,7 +1725,9 @@ void DecodiumTransceiverManager::connectRig()
                     << "pttPort=" << attemptPttPort
                     << "raw=" << reason
                     << "shown=" << shownReason;
-                if ((wasConnected || recovering) && isTransientCatIoFailure(reason)) {
+                if (startupAttempt && isSerialPortMissingFailure(reason)) {
+                    emit statusUpdate(shownReason + QStringLiteral(" Ritento CAT a breve..."));
+                } else if ((wasConnected || recovering) && isTransientCatIoFailure(reason)) {
                     scheduleTransientReconnect(reason);
                 } else {
                     emit errorOccurred("CAT failure: " + shownReason);
