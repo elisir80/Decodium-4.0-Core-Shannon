@@ -227,7 +227,7 @@ Item {
                 text: glyph
                 color: foreground
                 font.pixelSize: glyphSize
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -235,7 +235,7 @@ Item {
                 text: label
                 color: foreground
                 font.pixelSize: labelSize
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.bold: boldLabel
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -376,7 +376,7 @@ Item {
                                     return idx >= 0 ? idx : 0
                                 }
                                 onCurrentTextChanged: if (engine && currentText) engine.mode = currentText
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(12, Math.round(12 * txPanel.toolbarScale))
                                 itemHeight: 34
                                 popupMinWidth: 176
@@ -852,7 +852,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: "HOUND"
                                 color: warningOrange
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 font.bold: true
                             }
@@ -883,7 +883,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: "W&P"
                                 color: secondaryCyan
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 font.bold: true
                             }
@@ -945,7 +945,7 @@ Item {
                     text: engine ? engine.dxCall : ""
                     placeholderText: "Call"
                     font.pixelSize: 12
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: textPrimary
 
                     background: Rectangle {
@@ -975,7 +975,7 @@ Item {
                     text: engine ? engine.dxGrid : ""
                     placeholderText: "Grid"
                     font.pixelSize: 12
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: textPrimary
 
                     background: Rectangle {
@@ -1004,7 +1004,7 @@ Item {
                     Layout.preferredHeight: 32
                     text: engine ? engine.reportSent : "-10"
                     font.pixelSize: 12
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: textPrimary
 
                     background: Rectangle {
@@ -1034,7 +1034,7 @@ Item {
                     text: engine ? engine.reportReceived : ""
                     placeholderText: "--"
                     font.pixelSize: 11
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: accentGreen
 
                     background: Rectangle {
@@ -1077,7 +1077,7 @@ Item {
                             Layout.fillWidth: true
                             text: engine ? engine.currentTxMessage : ""
                             color: engine && engine.transmitting ? errorRed : textPrimary
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             font.pixelSize: 11
                             font.bold: engine && engine.transmitting
                             elide: Text.ElideRight
@@ -1287,7 +1287,7 @@ Item {
                 selectedTextColor: bgDeep
                 selectionColor: secondaryCyan
                 font.pixelSize: 16
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 selectByMouse: true
                 inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText
                 onTextChanged: txPanel.editingTxError = ""
@@ -1590,7 +1590,7 @@ Item {
                     width: parent.width
                     text: message
                     color: isTransmitting ? errorRed : textPrimary
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 9
                     font.strikeout: txButton.isDisabled
                     elide: Text.ElideMiddle

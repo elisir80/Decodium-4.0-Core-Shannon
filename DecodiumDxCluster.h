@@ -97,6 +97,7 @@ private:
     // Derive amateur band string from frequency in kHz.
     QString     bandFromFreq(double freqKhz) const;
     void        setLastStatus(const QString& msg);
+    void        scheduleSpotsChanged(int delayMs = 200);
 
     static constexpr int k_maxSpots = 200;
 
@@ -119,4 +120,6 @@ private:
     QTimer*      m_connectTimeoutTimer {nullptr};
     QTimer*      m_refreshTimer {nullptr};
     QTimer*      m_reconnectTimer {nullptr};
+    QTimer*      m_spotsChangedTimer {nullptr};
+    int          m_pendingSpotsChangedCount {0};
 };

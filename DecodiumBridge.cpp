@@ -134,6 +134,10 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #endif
+#ifdef Q_OS_MAC
+#include <mach/mach.h>
+#include <mach/task_info.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -734,7 +738,29 @@ quint64 decodiumCurrentProcessCpuUsec()
 
 bool decodiumCurrentProcessGpuTimeNs(quint64* gpuTimeNs)
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_MAC
+#if defined(__x86_64__)
+    task_power_info_v2_data_t info {};
+    mach_msg_type_number_t count = TASK_POWER_INFO_V2_COUNT;
+    kern_return_t const result = task_info(mach_task_self(),
+                                           TASK_POWER_INFO_V2,
+                                           reinterpret_cast<task_info_t>(&info),
+                                           &count);
+    if (result != KERN_SUCCESS) {
+        return false;
+    }
+    if (gpuTimeNs) {
+        *gpuTimeNs = info.gpu_energy.task_gpu_utilisation;
+    }
+    return true;
+#else
+    // Apple Silicon currently reports zero through TASK_POWER_INFO_V2 for
+    // task_gpu_utilisation. Activity Monitor uses private sysmon counters, so
+    // presenting this as a real process-GPU value would be misleading.
+    Q_UNUSED(gpuTimeNs);
+    return false;
+#endif
+#elif defined(Q_OS_LINUX)
     QDir fdInfoDir(QStringLiteral("/proc/self/fdinfo"));
     QStringList const entries = fdInfoDir.entryList(QDir::Files | QDir::NoDotAndDotDot);
     if (entries.isEmpty())
@@ -3681,6 +3707,21 @@ static inline bool isHamlibFamilyBackend(QString const& backend)
     return normalized == QStringLiteral("hamlib") || normalized == QStringLiteral("tci");
 }
 
+static inline bool isHamRadioDeluxeRigName(QString const& rigName)
+{
+    QString const normalized = rigName.trimmed();
+    return normalized.compare(QStringLiteral("Ham Radio Deluxe"), Qt::CaseInsensitive) == 0
+        || normalized.compare(QStringLiteral("HRD"), Qt::CaseInsensitive) == 0
+        || normalized.contains(QStringLiteral("Ham Radio Deluxe"), Qt::CaseInsensitive);
+}
+
+static inline bool activeHamlibCatIsHrd(QString const& backend, DecodiumTransceiverManager* h)
+{
+    return backend.trimmed().compare(QStringLiteral("hamlib"), Qt::CaseInsensitive) == 0
+        && h
+        && isHamRadioDeluxeRigName(h->rigName());
+}
+
 static inline bool catSignalMatchesBackend(QString const& activeBackend, QString const& signalBackend)
 {
     QString const active = activeBackend.trimmed().toLower();
@@ -4259,7 +4300,7 @@ void DecodiumBridge::setSmoothDecodeFlow(bool v)
         }
         m_pendingDecodeReleaseQueue.clear();
         if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
-        trimDecodeListsIfNeeded();  // 1.0.206 cap
+        trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
         emitDecodeListChangedThrottled();
     }
 }
@@ -4467,17 +4508,68 @@ void DecodiumBridge::stopPersistenceWorker()
     m_persistenceWorker = nullptr;
 }
 
-// 1.0.206 — Cap m_decodeList/m_rxDecodeList per evitare crescita illimitata.
-// Memory leak storico (cap 200 di 1.0.155 perso da merge upstream): dopo 1h
-// di RX in banda affollata m_decodeList superava 500 entries, ogni rebuild
-// model O(N) saturava CPU. Chiamato dopo ogni append.
+void DecodiumBridge::moveLegacyAllTxtCursorToEnd()
+{
+    QString const path = legacyAllTxtPath().trimmed();
+    QFileInfo const info(path);
+    m_legacyAllTxtConsumedPath = info.exists() ? info.absoluteFilePath() : path;
+    m_legacyAllTxtConsumedSize = info.exists() ? info.size() : -1;
+}
+
+// 1.0.257 — Auto-clear a soglia per evitare che le finestre decode crescano
+// all'infinito. Non e' piu' un rolling FIFO: quando una finestra arriva al
+// limite viene svuotata per intero. Le due liste restano indipendenti.
 void DecodiumBridge::trimDecodeListsIfNeeded()
 {
-    while (m_decodeList.size() > kDecodeListCap) {
-        m_decodeList.removeFirst();
+    if (m_decodeList.size() >= kDecodeListCap) {
+        int const cleared = m_decodeList.size();
+        m_decodeList.clear();
+        if (usingLegacyBackendForTx() && legacyBackendAvailable()) {
+            m_legacyBackend->clearBandActivity();
+            m_legacyBandActivityRevision = -1;
+            moveLegacyAllTxtCursorToEnd();
+        }
+        clearRemoteActivityCache(true);
+        if (m_activeStations) {
+            m_activeStations->clear();
+        }
+        bridgeLog(QStringLiteral("decode auto-clear: Full Spectrum reached %1 rows, list reset")
+                      .arg(cleared));
+        emit decodeListChanged();
     }
-    while (m_rxDecodeList.size() > kRxDecodeListCap) {
-        m_rxDecodeList.removeFirst();
+
+    if (m_rxDecodeList.size() >= kRxDecodeListCap) {
+        auto rememberClearedRxKeys = [this](QVariantList const& entries) {
+            for (QVariant const& value : entries) {
+                QString const key = decodeRxClearEntryKey(value.toMap());
+                if (!key.isEmpty()) {
+                    m_clearedRxDecodeKeys.insert(key);
+                }
+            }
+        };
+        rememberClearedRxKeys(m_rxDecodeList);
+        rememberClearedRxKeys(m_decodeList);
+
+        int const cleared = m_rxDecodeList.size();
+        if (usingLegacyBackendForTx() && legacyBackendAvailable()) {
+            m_legacyBackend->clearRxFrequency();
+            m_legacyRxFrequencyRevision = -1;
+            m_legacyClearedRxMirrorKeys.clear();
+            for (QVariant const& value : std::as_const(m_rxDecodeList)) {
+                QString const key = decodeMirrorEntryKey(value.toMap());
+                if (!key.isEmpty()) {
+                    m_legacyClearedRxMirrorKeys.insert(key);
+                }
+            }
+            moveLegacyAllTxtCursorToEnd();
+        }
+        m_rxDecodeList.clear();
+        if (m_rxDecodeModel) {
+            m_rxDecodeModel->setEntries(QVariantList {});
+        }
+        bridgeLog(QStringLiteral("decode auto-clear: Signal RX reached %1 rows, list reset")
+                      .arg(cleared));
+        emit rxDecodeListChanged();
     }
 }
 
@@ -4501,7 +4593,7 @@ void DecodiumBridge::drainDecodeReleaseQueue()
         noteDecodeCommitted();
         enqueuePersistDecode(entry);
     }
-    trimDecodeListsIfNeeded();  // 1.0.206 cap
+    trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
     emitDecodeListChangedThrottled();
     if (m_pendingDecodeReleaseQueue.isEmpty() && m_decodeReleaseTimer) {
         m_decodeReleaseTimer->stop();
@@ -4968,7 +5060,17 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_hamlibCat       = new DecodiumTransceiverManager(this);
     m_dxCluster       = new DecodiumDxCluster(this);
     QGuiApplication::setFont(fontSettingFont(QStringLiteral("Font"), QString(), 0));
-    connect(m_dxCluster, &DecodiumDxCluster::statusUpdate, this, [](const QString& msg) {
+    m_dxClusterSpotsNotifyTimer = new QTimer(this);
+    m_dxClusterSpotsNotifyTimer->setSingleShot(true);
+    connect(m_dxClusterSpotsNotifyTimer, &QTimer::timeout, this, [this]() {
+        flushDxClusterSpotsChanged();
+    });
+    connect(m_dxCluster, &DecodiumDxCluster::statusUpdate, this, [this](const QString& msg) {
+        if (visualFeedsDeferredForTx()
+            && (msg.startsWith(QStringLiteral("DX de "), Qt::CaseInsensitive)
+                || msg.contains(QStringLiteral("SHOW/DX"), Qt::CaseInsensitive))) {
+            return;
+        }
         qDebug() << "[DxCluster]" << msg;
     });
     connect(m_dxCluster, &DecodiumDxCluster::errorOccurred, this, [this](const QString& msg) {
@@ -5030,7 +5132,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         emit dxClusterConnectedChanged();
     });
     connect(m_dxCluster, &DecodiumDxCluster::spotsChanged, this, [this]() {
-        emit dxClusterSpotsChanged();
+        scheduleDxClusterSpotsChanged();
     });
     m_activeStations  = new ActiveStationsModel(this);
     m_alertManager    = new DecodiumAlertManager(this);
@@ -5373,7 +5475,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         double const previousFrequency = m_frequency;
         setFrequency(freq);
         requestRigFrequencyFromBridge(freq, QStringLiteral("band/mode"));
-        applyConfiguredCatRigMode(QStringLiteral("band-change"));
+        if (!activeHamlibCatIsHrd(m_catBackend, m_hamlibCat)) {
+            applyConfiguredCatRigMode(QStringLiteral("band-change"));
+        }
         if (m_monitoring) {
             {
                 QMutexLocker locker(&m_audioBufferMutex);
@@ -6065,8 +6169,7 @@ void DecodiumBridge::runPostQmlStartupServices()
     bool const lastSuccess = catLastSettings.value(QStringLiteral("lastSuccessfulCatConnected"), false).toBool();
     QString const lastBackend = catLastSettings.value(QStringLiteral("lastSuccessfulCatBackend")).toString();
     bool const sameBackend = (lastBackend == m_catBackend);
-    bool const isHrdBackend = (m_catBackend == QStringLiteral("hamlib") && m_hamlibCat
-                               && m_hamlibCat->rigName().contains(QStringLiteral("HRD"), Qt::CaseInsensitive));
+    bool const isHrdBackend = activeHamlibCatIsHrd(m_catBackend, m_hamlibCat);
     bool const retryLastSuccessfulCat = lastSuccess && sameBackend && !isHrdBackend;
     bridgeLog(QStringLiteral("CAT[%1] autoConnect=%2 retryLastSuccessful=%3")
                   .arg(m_catBackend)
@@ -7388,6 +7491,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                           .arg(m_decodeList.size()));
         } else if (m_decodeList != mirroredDecodes) {
             m_decodeList = mirroredDecodes;
+            trimDecodeListsIfNeeded();
             emitDecodeListChangedThrottled();  // 1.0.142: throttle mirror replace-all
         }
     }
@@ -7468,6 +7572,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                           .arg(m_rxDecodeList.size()));
         } else if (m_rxDecodeList != mergedRxDecodes) {
             m_rxDecodeList = mergedRxDecodes;
+            trimDecodeListsIfNeeded();
             emit rxDecodeListChanged();
         }
     }
@@ -7775,7 +7880,7 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
     }
 
     m_rxDecodeList.append(entry);
-    trimDecodeListsIfNeeded();  // 1.0.206 cap
+    trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
     coalesceRxPaneTxRows(m_rxDecodeList, m_mode);
     normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
     emit rxDecodeListChanged();
@@ -7821,6 +7926,7 @@ void DecodiumBridge::rebuildRxDecodeList()
 
     if (m_rxDecodeList != rebuilt) {
         m_rxDecodeList = rebuilt;
+        trimDecodeListsIfNeeded();
         emit rxDecodeListChanged();
     }
 }
@@ -8474,6 +8580,15 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
     // 1.0.192 — applica Frequency Calibration prima di scrivere al rig.
     // Compensa drift conoscuto: hz_corrected = hz + slope_ppm*hz*1e-6 + intercept_Hz.
     double const dialHz = applyFrequencyCalibration(hz);
+    QString const rigMode = configuredCatRigMode();
+    bool const hrdBackend = activeHamlibCatIsHrd(m_catBackend, m_hamlibCat);
+    if (!rigMode.isEmpty()
+        && !hrdBackend
+        && isHamlibFamilyBackend(m_catBackend)
+        && m_hamlibCat
+        && m_hamlibCat->connected()) {
+        m_hamlibCat->setRigMode(rigMode);
+    }
     activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend, dialHz, m_omniRigCat, m_legacyBackend);
     syncActiveCatTxSplitFrequency(reason + QStringLiteral("/dial"));
     bridgeLog(QStringLiteral("CAT local QSY requested by %1: %2 Hz via %3")
@@ -9879,14 +9994,26 @@ void DecodiumBridge::updateProcessGpuUsage()
     usage = decodiumCurrentProcessGpuUsage(&available);
     if (!available || !std::isfinite(usage))
         usage = -1.0;
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     quint64 currentGpuTimeNs = 0;
     bool const available = decodiumCurrentProcessGpuTimeNs(&currentGpuTimeNs);
     qint64 const wallNs = m_processGpuSampleClock.isValid()
         ? m_processGpuSampleClock.nsecsElapsed()
         : 0;
 
-    if (!available) {
+    bool gpuCounterUnavailable = !available;
+#ifdef Q_OS_MAC
+    if (available && currentGpuTimeNs == 0) {
+        m_processGpuZeroSampleCount = qMin(m_processGpuZeroSampleCount + 1, 1000);
+        if (m_processGpuZeroSampleCount >= 4) {
+            gpuCounterUnavailable = true;
+        }
+    } else if (available) {
+        m_processGpuZeroSampleCount = 0;
+    }
+#endif
+
+    if (gpuCounterUnavailable) {
         m_processGpuSampleInitialized = false;
         m_processGpuSampleClock.restart();
         usage = -1.0;
@@ -13072,6 +13199,8 @@ void DecodiumBridge::refreshAudioDevices()
 
 void DecodiumBridge::clearDecodeList()
 {
+    resetWorldMapDisplayFromCurrentDecodes();
+
     if (usingLegacyBackendForTx()) {
         bridgeLog("clearDecodeList: delegating band activity clear to legacy backend");
         m_legacyBackend->clearBandActivity();
@@ -13095,6 +13224,8 @@ void DecodiumBridge::clearDecodeList()
 
 void DecodiumBridge::clearRxDecodes()
 {
+    resetWorldMapDisplayFromCurrentDecodes();
+
     auto rememberClearedRxEntry = [this](QVariantMap const& entry) {
         if (!entryBelongsToCurrentQso(entry)) {
             return;
@@ -17205,6 +17336,90 @@ void DecodiumBridge::clearLateAutoLogSnapshot()
     m_lateAutoLogExpires = QDateTime {};
 }
 
+bool DecodiumBridge::shouldPreserveDeferredAutoSeqTxForRearm(QString* staleReason) const
+{
+    if (staleReason) {
+        staleReason->clear();
+    }
+
+    int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
+    if (deferredTx != 3 && deferredTx != 4) {
+        if (staleReason && deferredTx > 0) {
+            *staleReason = QStringLiteral("deferred TX%1 is not a report/RR73 step").arg(deferredTx);
+        }
+        return false;
+    }
+
+    QString const activeMode = m_mode.trimmed().toUpper();
+    if (!m_pendingAutoSeqMode.isEmpty() && m_pendingAutoSeqMode != activeMode) {
+        if (staleReason) {
+            *staleReason = QStringLiteral("mode changed %1->%2").arg(m_pendingAutoSeqMode, activeMode);
+        }
+        return false;
+    }
+
+    QString const activePartnerBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
+    if (activePartnerBase.isEmpty()) {
+        if (staleReason) {
+            *staleReason = QStringLiteral("active partner missing");
+        }
+        return false;
+    }
+
+    if (!m_pendingAutoSeqPartnerBase.isEmpty()
+        && m_pendingAutoSeqPartnerBase != activePartnerBase) {
+        if (staleReason) {
+            *staleReason = QStringLiteral("partner changed %1->%2")
+                .arg(m_pendingAutoSeqPartnerBase, activePartnerBase);
+        }
+        return false;
+    }
+
+    QString pendingMessage = m_pendingAutoSeqMessage.trimmed();
+    if (pendingMessage.isEmpty()) {
+        pendingMessage = txMessage(deferredTx).trimmed();
+    }
+    if (!pendingMessage.isEmpty()
+        && !messageContainsCallToken(pendingMessage, m_dxCall, activePartnerBase)) {
+        if (staleReason) {
+            *staleReason = QStringLiteral("pending message does not mention active partner");
+        }
+        return false;
+    }
+
+    return true;
+}
+
+bool DecodiumBridge::applyDeferredAutoSeqTxForRearm(const QString& reason)
+{
+    QString staleReason;
+    if (!shouldPreserveDeferredAutoSeqTxForRearm(&staleReason)) {
+        if (m_pendingAutoSeqTxAfterActiveTx > 0 && !staleReason.isEmpty()) {
+            bridgeLog(QStringLiteral("txRearm: discard stale deferred TX%1 (%2): %3 pendingMsg=[%4]")
+                          .arg(m_pendingAutoSeqTxAfterActiveTx)
+                          .arg(reason, staleReason, m_pendingAutoSeqMessage.trimmed()));
+        }
+        return false;
+    }
+
+    int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
+    QString const pendingMessage = m_pendingAutoSeqMessage.trimmed();
+    bridgeLog(QStringLiteral("txRearm: preserving deferred TX%1 (%2) pendingMsg=[%3]")
+                  .arg(deferredTx)
+                  .arg(reason, pendingMessage.isEmpty() ? txMessage(deferredTx).trimmed() : pendingMessage));
+
+    m_pendingAutoSeqTxAfterActiveTx = 0;
+    m_pendingAutoSeqPartnerBase.clear();
+    m_pendingAutoSeqMessage.clear();
+    m_pendingAutoSeqMode.clear();
+
+    if (deferredTx != m_currentTx) {
+        advanceQsoState(deferredTx);
+    }
+    updateAutoCqPartnerLock();
+    return true;
+}
+
 void DecodiumBridge::engageManualTxHold(const QString& reason, bool clearQueue)
 {
     if (!m_manualTxHold) {
@@ -17220,8 +17435,27 @@ void DecodiumBridge::engageManualTxHold(const QString& reason, bool clearQueue)
     m_autoCQPeriodsMissed = 0;
     m_logAfterOwn73 = false;
     m_ft2DeferredLogPending = false;
-    m_pendingAutoSeqTxAfterActiveTx = 0;
-    m_quickPeerSignaled = false;
+    QString staleDeferredReason;
+    bool const keepDeferredAutoSeq = shouldPreserveDeferredAutoSeqTxForRearm(&staleDeferredReason);
+    if (keepDeferredAutoSeq) {
+        bridgeLog(QStringLiteral("manualTxHold: keeping deferred TX%1 for rearm (%2)")
+                      .arg(m_pendingAutoSeqTxAfterActiveTx)
+                      .arg(reason));
+    } else {
+        if (m_pendingAutoSeqTxAfterActiveTx > 0 && !staleDeferredReason.isEmpty()) {
+            bridgeLog(QStringLiteral("manualTxHold: clearing stale deferred TX%1 (%2): %3")
+                          .arg(m_pendingAutoSeqTxAfterActiveTx)
+                          .arg(reason, staleDeferredReason));
+        }
+        m_pendingAutoSeqTxAfterActiveTx = 0;
+        m_pendingAutoSeqPartnerBase.clear();
+        m_pendingAutoSeqMessage.clear();
+        m_pendingAutoSeqMode.clear();
+        m_autoSeqRogerReportBase.clear();
+    }
+    if (!keepDeferredAutoSeq || m_pendingAutoSeqTxAfterActiveTx != 4) {
+        m_quickPeerSignaled = false;
+    }
     if (clearQueue) {
         clearCallerQueue();
     }
@@ -17256,6 +17490,8 @@ void DecodiumBridge::resetManualTxRearmState(const QString& reason)
         return;
     }
 
+    bool const appliedDeferredAutoSeq = applyDeferredAutoSeqTxForRearm(reason);
+
     bridgeLog(QStringLiteral("txRearm reset stale state (%1): tx=%2 last=%3 retry=%4 nTx73=%5 logAfter=%6 deferred=%7 lastMsg=[%8]")
                   .arg(reason)
                   .arg(m_currentTx)
@@ -17270,13 +17506,22 @@ void DecodiumBridge::resetManualTxRearmState(const QString& reason)
     m_txWatchdogTicks = 0;
     m_autoCQPeriodsMissed = 0;
     m_nTx73 = 0;
-    m_autoSeqRogerReportBase.clear();
+    if (!appliedDeferredAutoSeq) {
+        m_autoSeqRogerReportBase.clear();
+    }
     m_lastNtx = -1;
     m_lastCqPidx = -1;
     m_logAfterOwn73 = false;
     m_ft2DeferredLogPending = false;
-    m_pendingAutoSeqTxAfterActiveTx = 0;
-    m_quickPeerSignaled = false;
+    if (!appliedDeferredAutoSeq) {
+        m_pendingAutoSeqTxAfterActiveTx = 0;
+        m_pendingAutoSeqPartnerBase.clear();
+        m_pendingAutoSeqMessage.clear();
+        m_pendingAutoSeqMode.clear();
+    }
+    if (!appliedDeferredAutoSeq || m_currentTx != 4) {
+        m_quickPeerSignaled = false;
+    }
     m_qsoLogged = false;
     m_asyncLastTxEndMs = 0;
     m_lastTransmittedMessage.clear();
@@ -21571,10 +21816,188 @@ bool DecodiumBridge::worldMapFeedEnabled() const
     return m_worldMapDisplayed;
 }
 
-void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry)
+QString DecodiumBridge::worldMapFeedEntryKey(const QVariantMap& entry) const
+{
+    QString key = decodeMirrorEntryKey(entry);
+    if (key.isEmpty()) {
+        key = entry.value(QStringLiteral("message")).toString().trimmed();
+    }
+    return key;
+}
+
+bool DecodiumBridge::visualFeedsDeferredForTx() const
+{
+    return m_transmitting || m_tuning;
+}
+
+void DecodiumBridge::deferWorldMapEntryForTx(const QVariantMap& entry, bool skipClearedFeedEntry)
+{
+    QString const key = worldMapFeedEntryKey(entry);
+    if (!key.isEmpty() && m_deferredWorldMapFeedKeys.contains(key)) {
+        return;
+    }
+
+    QVariantMap queued = entry;
+    queued.insert(QStringLiteral("__decodiumSkipClearedFeedEntry"), skipClearedFeedEntry);
+    queued.insert(QStringLiteral("__decodiumDeferredKey"), key);
+
+    static constexpr int kMaxDeferredWorldMapEntries = 300;
+    while (m_deferredWorldMapFeedQueue.size() >= kMaxDeferredWorldMapEntries) {
+        QVariantMap dropped = m_deferredWorldMapFeedQueue.takeFirst();
+        QString const droppedKey = dropped.value(QStringLiteral("__decodiumDeferredKey")).toString();
+        if (!droppedKey.isEmpty()) {
+            m_deferredWorldMapFeedKeys.remove(droppedKey);
+        }
+    }
+
+    m_deferredWorldMapFeedQueue.append(queued);
+    if (!key.isEmpty()) {
+        m_deferredWorldMapFeedKeys.insert(key);
+    }
+    if (!m_worldMapDeferredLogActive) {
+        m_worldMapDeferredLogActive = true;
+        bridgeLog(QStringLiteral("LiveMap: deferring decode feed while TX/tune is active"));
+    }
+    scheduleDeferredWorldMapFeedFlush();
+}
+
+void DecodiumBridge::scheduleDeferredWorldMapFeedFlush(int delayMs)
+{
+    if (m_worldMapFeedFlushScheduled
+        || (!m_worldMapFullReplayDeferred && m_deferredWorldMapFeedQueue.isEmpty())) {
+        return;
+    }
+    m_worldMapFeedFlushScheduled = true;
+    QTimer::singleShot(qMax(0, delayMs), this, [this]() {
+        m_worldMapFeedFlushScheduled = false;
+        flushDeferredWorldMapFeed();
+    });
+}
+
+void DecodiumBridge::flushDeferredWorldMapFeed()
+{
+    if (!m_worldMapFullReplayDeferred && m_deferredWorldMapFeedQueue.isEmpty()) {
+        return;
+    }
+    if (visualFeedsDeferredForTx()) {
+        scheduleDeferredWorldMapFeedFlush();
+        return;
+    }
+
+    if (m_worldMapFullReplayDeferred) {
+        m_worldMapFullReplayDeferred = false;
+        m_deferredWorldMapFeedQueue.clear();
+        m_deferredWorldMapFeedKeys.clear();
+        if (m_worldMapDeferredLogActive) {
+            bridgeLog(QStringLiteral("LiveMap: running deferred full replay after TX/tune"));
+            m_worldMapDeferredLogActive = false;
+        }
+        replayWorldMapFeed();
+        return;
+    }
+
+    static constexpr int kWorldMapFlushChunk = 24;
+    int processed = 0;
+    while (!m_deferredWorldMapFeedQueue.isEmpty() && processed < kWorldMapFlushChunk) {
+        QVariantMap queued = m_deferredWorldMapFeedQueue.takeFirst();
+        bool const skipCleared = queued.take(QStringLiteral("__decodiumSkipClearedFeedEntry")).toBool();
+        QString const key = queued.take(QStringLiteral("__decodiumDeferredKey")).toString();
+        if (!key.isEmpty()) {
+            m_deferredWorldMapFeedKeys.remove(key);
+        }
+        replayWorldMapEntry(queued, skipCleared);
+        ++processed;
+    }
+
+    if (!m_deferredWorldMapFeedQueue.isEmpty()) {
+        scheduleDeferredWorldMapFeedFlush(16);
+    } else if (m_worldMapDeferredLogActive) {
+        bridgeLog(QStringLiteral("LiveMap: flushed deferred decode feed after TX/tune"));
+        m_worldMapDeferredLogActive = false;
+    }
+}
+
+void DecodiumBridge::scheduleDxClusterSpotsChanged(int delayMs)
+{
+    m_dxClusterSpotsChangedPending = true;
+    if (visualFeedsDeferredForTx()) {
+        m_dxClusterSpotsDeferredDuringTx = true;
+        delayMs = qMax(delayMs, 1000);
+    }
+
+    if (!m_dxClusterSpotsNotifyTimer) {
+        flushDxClusterSpotsChanged();
+        return;
+    }
+    if (!m_dxClusterSpotsNotifyTimer->isActive()) {
+        m_dxClusterSpotsNotifyTimer->start(qMax(0, delayMs));
+    }
+}
+
+void DecodiumBridge::flushDxClusterSpotsChanged()
+{
+    if (!m_dxClusterSpotsChangedPending) {
+        return;
+    }
+    if (visualFeedsDeferredForTx()) {
+        m_dxClusterSpotsDeferredDuringTx = true;
+        if (m_dxClusterSpotsNotifyTimer && !m_dxClusterSpotsNotifyTimer->isActive()) {
+            m_dxClusterSpotsNotifyTimer->start(1000);
+        }
+        return;
+    }
+
+    bool const wasDeferred = m_dxClusterSpotsDeferredDuringTx;
+    m_dxClusterSpotsChangedPending = false;
+    m_dxClusterSpotsDeferredDuringTx = false;
+    if (wasDeferred) {
+        bridgeLog(QStringLiteral("DX Cluster: flushed deferred spot update after TX/tune"));
+    }
+    emit dxClusterSpotsChanged();
+}
+
+void DecodiumBridge::resetWorldMapDisplayFromCurrentDecodes()
+{
+    m_deferredWorldMapFeedQueue.clear();
+    m_deferredWorldMapFeedKeys.clear();
+    m_worldMapFullReplayDeferred = false;
+    m_worldMapDeferredLogActive = false;
+    m_worldMapClearedDecodeKeys.clear();
+
+    auto rememberEntry = [this](QVariantMap const& entry) {
+        if (entry.value(QStringLiteral("isTx")).toBool()) {
+            return;
+        }
+        QString const key = worldMapFeedEntryKey(entry);
+        if (!key.isEmpty()) {
+            m_worldMapClearedDecodeKeys.insert(key);
+        }
+    };
+    auto rememberList = [&rememberEntry](QVariantList const& entries) {
+        for (QVariant const& value : entries) {
+            rememberEntry(value.toMap());
+        }
+    };
+
+    rememberList(m_decodeList);
+    rememberList(m_rxDecodeList);
+    for (QVariantMap const& entry : std::as_const(m_pendingDecodeReleaseQueue)) {
+        rememberEntry(entry);
+    }
+
+    emit worldMapResetRequested();
+}
+
+void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClearedFeedEntry)
 {
     if (!worldMapFeedEnabled()) {
         return;
+    }
+    if (skipClearedFeedEntry) {
+        QString const key = worldMapFeedEntryKey(entry);
+        if (!key.isEmpty() && m_worldMapClearedDecodeKeys.contains(key)) {
+            return;
+        }
     }
     if (entry.value(QStringLiteral("isTx")).toBool()) {
         return;
@@ -21582,6 +22005,10 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry)
 
     QString const message = entry.value(QStringLiteral("message")).toString().trimmed();
     if (message.isEmpty()) {
+        return;
+    }
+    if (visualFeedsDeferredForTx()) {
+        deferWorldMapEntryForTx(entry, skipClearedFeedEntry);
         return;
     }
 
@@ -21835,22 +22262,28 @@ void DecodiumBridge::replayWorldMapFeed()
     if (!worldMapFeedEnabled()) {
         return;
     }
+    if (visualFeedsDeferredForTx()) {
+        m_worldMapFullReplayDeferred = true;
+        if (!m_worldMapDeferredLogActive) {
+            m_worldMapDeferredLogActive = true;
+            bridgeLog(QStringLiteral("LiveMap: deferring full replay while TX/tune is active"));
+        }
+        scheduleDeferredWorldMapFeedFlush();
+        return;
+    }
 
     QSet<QString> seen;
     auto replayList = [this, &seen](QVariantList const& entries) {
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
-            QString key = decodeMirrorEntryKey(entry);
-            if (key.isEmpty()) {
-                key = entry.value(QStringLiteral("message")).toString().trimmed();
-            }
+            QString const key = worldMapFeedEntryKey(entry);
             if (!key.isEmpty() && seen.contains(key)) {
                 continue;
             }
             if (!key.isEmpty()) {
                 seen.insert(key);
             }
-            replayWorldMapEntry(entry);
+            replayWorldMapEntry(entry, true);
         }
     };
 
@@ -22337,7 +22770,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 enqueuePersistDecode(e);
             }
             m_pendingDecodeReleaseQueue.clear();
-            trimDecodeListsIfNeeded();  // 1.0.206 cap
+            trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
             emitDecodeListChangedThrottled();
         }
         m_lastReleaseSerial = static_cast<qint64>(serial);
@@ -22855,7 +23288,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         tryStartWaitPounceFromEntry(entry, m_decodeList, QStringLiteral("ft2-async"));
 
         m_decodeList.append(QVariant(entry));
-        trimDecodeListsIfNeeded();  // 1.0.206 cap
+        trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
         // 1.0.240 (Phase 5.2 fix iter2): hook persistence + counter sul
         // path FT2-async (decoder principale). Vedi appendDecodeMapToList.
         noteDecodeCommitted();
@@ -23079,7 +23512,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
           } if (isDupe) continue; }
         tryStartWaitPounceFromEntry(entry, m_decodeList, QStringLiteral("legacy-jt"));
         m_decodeList.append(QVariant(entry));
-        trimDecodeListsIfNeeded();  // 1.0.206 cap
+        trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
         // 1.0.240 (Phase 5.2 fix iter2): hook persistence + counter sul
         // path legacy-jt (JT9/JT65/Q65/WSPR via legacy backend).
         noteDecodeCommitted();

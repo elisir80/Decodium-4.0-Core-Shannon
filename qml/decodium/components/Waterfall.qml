@@ -22,6 +22,7 @@ Item {
     property bool restoringSettings: false
     property bool showDecodeCallsigns: true
     property var spectrumDecodeLabels: []
+    property bool dxClusterRefreshPending: false
 
     // Altezza minima/massima del grafico spettro (regolabile tramite drag)
     readonly property int spectrumMinHeight: 60
@@ -159,6 +160,37 @@ Item {
         waterfallDisplay.setDecodeLabels(labels)
     }
 
+    Timer {
+        id: dxClusterRefreshTimer
+        interval: 250
+        repeat: false
+        onTriggered: {
+            if ((bridge.transmitting || bridge.tuning) && waterfallPanel.dxClusterRefreshPending) {
+                interval = 1000
+                restart()
+                return
+            }
+            waterfallPanel.dxClusterRefreshPending = false
+            waterfallPanel.refreshDxClusterSpots()
+        }
+    }
+
+    function scheduleDxClusterRefresh(delayMs) {
+        if (!dxClusterCheck.checked) {
+            waterfallPanel.dxClusterRefreshPending = false
+            dxClusterRefreshTimer.stop()
+            waterfallDisplay.setDxClusterSpots([])
+            return
+        }
+        waterfallPanel.dxClusterRefreshPending = true
+        var ms = (delayMs === undefined) ? 250 : delayMs
+        dxClusterRefreshTimer.interval = (bridge.transmitting || bridge.tuning) ? 1000 : Math.max(0, ms)
+        if (!dxClusterRefreshTimer.running)
+            dxClusterRefreshTimer.start()
+        else if (!(bridge.transmitting || bridge.tuning))
+            dxClusterRefreshTimer.restart()
+    }
+
     // Filtra gli spot del DX cluster per la dial corrente e li passa al
     // PanadapterItem. Ogni voce: { call, freq } con freq in audio Hz.
     // bridge.frequency è la dial in Hz. Spot.frequency è in kHz.
@@ -171,7 +203,11 @@ Item {
             waterfallDisplay.setDxClusterSpots([])
             return
         }
-        var spots = (bridge.dxCluster && bridge.dxCluster.spots) ? bridge.dxCluster.spots : []
+        if (bridge.transmitting || bridge.tuning) {
+            scheduleDxClusterRefresh(1000)
+            return
+        }
+        var spots = bridge.dxClusterSpots || []
         var dialHz = Number(bridge.frequency) || 0
         var fmin = waterfallPanel.minFreq
         var fmax = waterfallPanel.maxFreq
@@ -232,13 +268,21 @@ Item {
     // Aggiorna gli spot cluster sul waterfall quando arrivano nuovi spot
     // o quando cambia la dial (cambia anche il filtro audio offset).
     Connections {
-        target: bridge.dxCluster
-        function onSpotsChanged() { Qt.callLater(refreshDxClusterSpots) }
+        target: bridge
+        function onDxClusterSpotsChanged() { waterfallPanel.scheduleDxClusterRefresh(250) }
     }
     Connections {
         target: bridge
         function onFrequencyChanged() {
-            if (dxClusterCheck.checked) Qt.callLater(refreshDxClusterSpots)
+            if (dxClusterCheck.checked) waterfallPanel.scheduleDxClusterRefresh(120)
+        }
+        function onTransmittingChanged() {
+            if (!bridge.transmitting && waterfallPanel.dxClusterRefreshPending)
+                waterfallPanel.scheduleDxClusterRefresh(0)
+        }
+        function onTuningChanged() {
+            if (!bridge.tuning && waterfallPanel.dxClusterRefreshPending)
+                waterfallPanel.scheduleDxClusterRefresh(0)
         }
     }
 
@@ -432,7 +476,7 @@ Item {
                             bridge.setSetting("uiWaterfallShowDxCluster", checked)
                         }
                         if (checked) {
-                            waterfallPanel.refreshDxClusterSpots()
+                            waterfallPanel.scheduleDxClusterRefresh(0)
                         }
                     }
                     ToolTip.text: "Show DX Cluster spots on the waterfall (click to call)"

@@ -144,7 +144,7 @@ Rectangle {
                         return (freq / 1000000).toFixed(6)
                     }
                     font.pixelSize: 20
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.bold: true
                     color: transmitting ? colorRed : accentGreen
                     Layout.fillWidth: true
@@ -486,7 +486,7 @@ Rectangle {
 
                         Text {
                             font.pixelSize: 14
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             font.bold: true
                             color: textPrimary
                             text: ("0" + worldClock.hours).slice(-2) + ":" +

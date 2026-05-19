@@ -171,7 +171,7 @@ Item {
                 // Tempo UTC
                 Text {
                     text: modelData.time || ""
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 11
                     color: modelData.isTx ? errorRed : textSecondary
                     Layout.preferredWidth: 52
@@ -180,7 +180,7 @@ Item {
                 // SNR / TX indicator
                 Text {
                     text: modelData.isTx ? ">>>TX" : (modelData.db + "dB")
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 11
                     font.bold: modelData.isTx
                     color: {
@@ -197,7 +197,7 @@ Item {
                 // Frequenza audio
                 Text {
                     text: modelData.freq + "Hz"
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 11
                     color: modelData.isTx ? errorRed : secondaryCyan
                     Layout.preferredWidth: 54
@@ -209,7 +209,7 @@ Item {
                     text: modelData.dxDistance !== undefined && modelData.dxDistance > 0
                           ? Math.round(modelData.dxDistance) + "km"
                           : ""
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     color: (bridge && bridge.themeManager) ? bridge.themeManager.secondaryColor : "#80CBC4"
                     Layout.preferredWidth: 52
@@ -219,7 +219,7 @@ Item {
                 // Testo messaggio
                 Text {
                     text: modelData.displayMessage || modelData.message || ""
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 12
                     font.bold: modelData.isCQ || modelData.isTx
                     // B7 — C13: applica colori dinamici

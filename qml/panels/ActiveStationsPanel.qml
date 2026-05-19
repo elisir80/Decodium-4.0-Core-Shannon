@@ -25,7 +25,7 @@ Rectangle {
 
             Text {
                 text: "ACTIVE STATIONS"
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 font.bold: true
                 color: "#00BCD4"
@@ -35,7 +35,7 @@ Rectangle {
 
             Text {
                 text: (bridge.activeStations ? bridge.activeStations.count : 0) + " stn"
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#B0BEC5"
             }
@@ -50,7 +50,7 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: "X"
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     color: "#00BCD4"
                 }
@@ -82,7 +82,7 @@ Rectangle {
                     border.width: 1; radius: 3
                 }
                 contentItem: Text {
-                    text: "CQ Only"; font.family: "Monospace"; font.pixelSize: 9
+                    text: "CQ Only"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: parent.active ? "#00BCD4" : "#78909C"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -99,7 +99,7 @@ Rectangle {
                     border.width: 1; radius: 3
                 }
                 contentItem: Text {
-                    text: "Wanted"; font.family: "Monospace"; font.pixelSize: 9
+                    text: "Wanted"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: parent.active ? "#00BCD4" : "#78909C"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -112,7 +112,7 @@ Rectangle {
                 implicitWidth: 36; implicitHeight: 18
                 onClicked: { if (bridge.activeStations) bridge.activeStations.clear() }
                 contentItem: Text {
-                    text: "Clear"; font.family: "Monospace"; font.pixelSize: 9
+                    text: "Clear"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: "#f44336"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -125,11 +125,11 @@ Rectangle {
         RowLayout {
             width: parent.width
             spacing: 4
-            Text { text: "Call";  font.family: "Monospace"; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 78 }
-            Text { text: "Freq";  font.family: "Monospace"; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
-            Text { text: "SNR";   font.family: "Monospace"; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 33 }
-            Text { text: "Grid";  font.family: "Monospace"; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
-            Text { text: "UTC";   font.family: "Monospace"; font.pixelSize: 9; color: "#546E7A"; Layout.fillWidth: true }
+            Text { text: "Call";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 78 }
+            Text { text: "Freq";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
+            Text { text: "SNR";   font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 33 }
+            Text { text: "Grid";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
+            Text { text: "UTC";   font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.fillWidth: true }
         }
 
         Rectangle { width: parent.width; height: 1; color: Qt.rgba(84/255, 110/255, 122/255, 0.5) }
@@ -156,7 +156,7 @@ Rectangle {
 
                     Text {
                         text: model.callsign
-                        font.family: "Monospace"; font.pixelSize: 10; font.bold: true
+                        font.family: decodiumMonoFontFamily; font.pixelSize: 10; font.bold: true
                         color: {
                             if (model.isNewDxcc) return "#FF4081"
                             if (model.isNewGrid) return "#7C4DFF"
@@ -168,24 +168,24 @@ Rectangle {
                     }
                     Text {
                         text: model.frequency
-                        font.family: "Monospace"; font.pixelSize: 10
+                        font.family: decodiumMonoFontFamily; font.pixelSize: 10
                         color: "#B0BEC5"; Layout.preferredWidth: 48
                     }
                     Text {
                         text: model.snr
-                        font.family: "Monospace"; font.pixelSize: 10
+                        font.family: decodiumMonoFontFamily; font.pixelSize: 10
                         color: model.snr >= 0 ? "#4CAF50" : (model.snr >= -15 ? "#FF9800" : "#f44336")
                         Layout.preferredWidth: 33
                     }
                     Text {
                         text: model.grid || ""
-                        font.family: "Monospace"; font.pixelSize: 10
+                        font.family: decodiumMonoFontFamily; font.pixelSize: 10
                         color: model.isLotwUser ? "#64DD17" : "#B0BEC5"
                         Layout.preferredWidth: 48
                     }
                     Text {
                         text: model.lastUtc
-                        font.family: "Monospace"; font.pixelSize: 10
+                        font.family: decodiumMonoFontFamily; font.pixelSize: 10
                         color: "#546E7A"; Layout.fillWidth: true
                     }
                 }
@@ -210,7 +210,7 @@ Rectangle {
                 anchors.centerIn: parent
                 visible: !bridge.activeStations || bridge.activeStations.count === 0
                 text: "No active stations"
-                font.family: "Monospace"; font.pixelSize: 10
+                font.family: decodiumMonoFontFamily; font.pixelSize: 10
                 color: "#546E7A"
             }
         }

@@ -195,6 +195,8 @@ private:
                                 // PTT - used to select rear audio.
 
   bool reversed_;               // True if VFOs are reversed.
+  MODE pending_data_mode_ {UNK};
+  qint64 pending_data_mode_until_ms_ {0};
   bool startup_diagnostics_active_ {false};
   quint64 hrd_command_sequence_ {0};
 };

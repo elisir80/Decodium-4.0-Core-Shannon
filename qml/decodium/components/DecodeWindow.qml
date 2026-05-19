@@ -759,7 +759,7 @@ Window {
 
                             Text {
                                 text: "UTC"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: secondaryCyan
@@ -767,7 +767,7 @@ Window {
                             }
                             Text {
                                 text: "dB"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: secondaryCyan
@@ -777,7 +777,7 @@ Window {
                             Item { Layout.preferredWidth: decodeWindow.bandDbDtGapWidth }
                             Text {
                                 text: "DT"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: secondaryCyan
@@ -787,7 +787,7 @@ Window {
                             Item { Layout.preferredWidth: decodeWindow.bandDtFreqGapWidth }
                             Text {
                                 text: "Freq"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: secondaryCyan
@@ -797,7 +797,7 @@ Window {
                             Item { Layout.preferredWidth: decodeWindow.bandGapWidth }
                             Text {
                                 text: "Message"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: secondaryCyan
@@ -810,7 +810,7 @@ Window {
                                 Text {
                                     anchors.fill: parent
                                     text: "DXCC"
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     font.pixelSize: 10
                                     font.bold: true
                                     color: secondaryCyan
@@ -825,7 +825,7 @@ Window {
                                 Text {
                                     anchors.fill: parent
                                     text: "Az"
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     font.pixelSize: 10
                                     font.bold: true
                                     color: secondaryCyan
@@ -1117,7 +1117,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: textSecondary
                                         Layout.preferredWidth: decodeWindow.bandUtcWidth
@@ -1125,7 +1125,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.db
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: parseInt(modelData.db) > -5 ? accentGreen :
                                                parseInt(modelData.db) > -15 ? secondaryCyan :
@@ -1138,7 +1138,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.dt
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: textSecondary
                                         horizontalAlignment: Text.AlignRight
@@ -1149,7 +1149,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.freq
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: isAtRxFrequency(modelData.freq, modelData) ? primaryBlue : secondaryCyan
                                         font.bold: isAtRxFrequency(modelData.freq, modelData)
@@ -1163,7 +1163,7 @@ Component.onCompleted: {
                                     Text {
                                         id: bandMsgText
                                         text: modelData.displayMessage || modelData.message
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         // 1.0.144: precomputed in C++ (enrichDecodeEntry)
                                         font.bold: modelData.isHighlighted === true
@@ -1182,7 +1182,7 @@ Component.onCompleted: {
                                         Text {
                                             anchors.fill: parent
                                             text: modelData.dxCountry || ""
-                                            font.family: "Monospace"
+                                            font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
                                             color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
                                             horizontalAlignment: Text.AlignRight
@@ -1201,7 +1201,7 @@ Component.onCompleted: {
                                         Text {
                                             anchors.fill: parent
                                             text: formatBearingDegrees(modelData.dxBearing)
-                                            font.family: "Monospace"
+                                            font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
                                             color: secondaryCyan
                                             horizontalAlignment: Text.AlignRight
@@ -1265,7 +1265,7 @@ Component.onCompleted: {
                                 Text {
                                     anchors.centerIn: parent
                                     text: appEngine.rxFrequency + " Hz"
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     font.pixelSize: 11
                                     font.bold: true
                                     color: primaryBlue
@@ -1322,7 +1322,7 @@ Component.onCompleted: {
 
                             Text {
                                 text: "UTC"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: primaryBlue
@@ -1330,7 +1330,7 @@ Component.onCompleted: {
                             }
                             Text {
                                 text: "dB"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: primaryBlue
@@ -1340,7 +1340,7 @@ Component.onCompleted: {
                             Item { Layout.preferredWidth: decodeWindow.rxDbDtGapWidth }
                             Text {
                                 text: "DT"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: primaryBlue
@@ -1350,7 +1350,7 @@ Component.onCompleted: {
                             Item { Layout.preferredWidth: decodeWindow.rxGapWidth }
                             Text {
                                 text: "Message"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: primaryBlue
@@ -1627,7 +1627,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: textSecondary
                                         Layout.preferredWidth: decodeWindow.rxUtcWidth
@@ -1635,7 +1635,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.db
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: parseInt(modelData.db) > -5 ? accentGreen :
                                                parseInt(modelData.db) > -15 ? secondaryCyan :
@@ -1648,7 +1648,7 @@ Component.onCompleted: {
 
                                     Text {
                                         text: modelData.dt
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         color: textSecondary
                                         horizontalAlignment: Text.AlignRight
@@ -1661,7 +1661,7 @@ Component.onCompleted: {
                                     Text {
                                         id: rxMsgText
                                         text: modelData.displayMessage || modelData.message
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         // 1.0.144: precomputed in C++ (enrichDecodeEntry)
                                         font.bold: modelData.isHighlighted === true

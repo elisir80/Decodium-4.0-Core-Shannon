@@ -216,28 +216,28 @@ Rectangle {
                                     text: model.call
                                     font.pixelSize: 10
                                     font.bold: true
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: accentGreen
                                     Layout.preferredWidth: 70
                                 }
                                 Text {
                                     text: model.snr
                                     font.pixelSize: 10
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: parseInt(model.snr) >= 0 ? accentGreen : colorRed
                                     Layout.preferredWidth: 35
                                 }
                                 Text {
                                     text: model.grid || "-"
                                     font.pixelSize: 10
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: textSecondary
                                     Layout.preferredWidth: 45
                                 }
                                 Text {
                                     text: model.freq
                                     font.pixelSize: 10
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: secondaryCyan
                                     Layout.preferredWidth: 45
                                 }
@@ -356,7 +356,7 @@ Rectangle {
                                     text: model.call
                                     font.pixelSize: 11
                                     font.bold: true
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: colorOrange
                                     Layout.preferredWidth: 70
                                 }
@@ -380,7 +380,7 @@ Rectangle {
                                 Text {
                                     text: model.snr
                                     font.pixelSize: 10
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: parseInt(model.snr) >= 0 ? accentGreen : colorRed
                                     Layout.preferredWidth: 35
                                 }

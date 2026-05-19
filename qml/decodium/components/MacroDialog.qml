@@ -249,7 +249,7 @@ Dialog {
 
                         contentItem: TextInput {
                             text: serialSpinBox.value.toString().padStart(4, '0')
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             font.pixelSize: 14
                             color: accentGreen
                             horizontalAlignment: Text.AlignHCenter
@@ -392,7 +392,7 @@ Dialog {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 32
                                     text: appEngine.macroManager ? appEngine.macroManager.getMacroTemplate(index) : ""
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     font.pixelSize: 12
                                     color: textPrimary
 
@@ -459,7 +459,7 @@ Dialog {
                         id: previewText
                         anchors.centerIn: parent
                         text: "Click 'Preview' to see expanded macro"
-                        font.family: "Monospace"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 12
                         color: accentGreen
                     }

@@ -21,12 +21,14 @@ Rectangle {
     property double gpuActivity: 0.0
     readonly property double displayedGpuActivity: realGpuUsageAvailable
         ? Math.max(0.0, Math.min(1.0, processGpuUsage))
-        : gpuActivity
+        : 0.0
     readonly property double gpuLoadPercentValue: displayedGpuActivity * 100.0
     readonly property int gpuLoadPercent: Math.round(gpuLoadPercentValue)
     readonly property string gpuLoadText: realGpuUsageAvailable
         ? (gpuLoadPercentValue < 10.0 ? gpuLoadPercentValue.toFixed(1) + "%" : gpuLoadPercent.toFixed(0) + "%")
-        : gpuLoadPercent + "%"
+        : "n/a"
+    readonly property string gpuLabelText: "GPU:"
+    readonly property bool gpuMonitorVisible: Qt.platform.os !== "osx"
     property double rigPowerWatts: bridge ? bridge.rigPowerWatts : 0.0
     property double rigSwr: bridge ? bridge.rigSwr : 0.0
     property bool pwrAndSwrEnabled: bridge ? bridge.getSetting("PWRandSWR", false) : false
@@ -47,8 +49,6 @@ Rectangle {
     property bool tuning: false
     property bool decoding: false
     readonly property bool txVisualActive: transmitting || tuning
-
-    onDecodingChanged: console.log("StatusBar: decoding =", decoding)
 
     readonly property var themeManager: bridge && bridge.themeManager ? bridge.themeManager : null
     property color accentGreen: themeManager ? themeManager.accentColor : "#00FF88"
@@ -72,7 +72,7 @@ Rectangle {
     }
 
     Connections {
-        target: statusBarComponent.Window.window
+        target: statusBarComponent.gpuMonitorVisible ? statusBarComponent.Window.window : null
         function onFrameSwapped() {
             statusBarComponent.gpuFrameCount += 1
         }
@@ -80,7 +80,7 @@ Rectangle {
 
     Timer {
         interval: 1000
-        running: true
+        running: statusBarComponent.gpuMonitorVisible
         repeat: true
         onTriggered: {
             var frames = statusBarComponent.gpuFrameCount
@@ -169,7 +169,7 @@ Rectangle {
                         return signalLevel.toFixed(0) + "dB"
                     return "-∞"
                 }
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: scaledLevel > 0.9 ? colorRed : textSecondary
                 Layout.preferredWidth: 35
@@ -226,8 +226,6 @@ Rectangle {
 
                 property bool ledOn: statusBarComponent.decoding || testDecoding
                 property bool testDecoding: false
-
-                onLedOnChanged: console.log("DEC LED ledOn changed to:", ledOn)
 
                 color: ledOn ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.5) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
                 border.color: ledOn ? secondaryCyan : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
@@ -307,7 +305,7 @@ Rectangle {
                         text: ftThreadsLed.threadCount.toString()
                         font.pixelSize: 9
                         font.bold: true
-                        font.family: "Monospace"
+                        font.family: decodiumMonoFontFamily
                         color: ftThreadsLed.isActive ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : textSecondary
                     }
                 }
@@ -378,7 +376,7 @@ Rectangle {
 
             Text {
                 text: rigPowerWatts > 0.05 ? Math.round(rigPowerWatts).toString() + "W" : "--"
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: rigPowerWatts > 0.05 ? accentGreen : textSecondary
                 Layout.preferredWidth: 34
@@ -396,7 +394,7 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: "SWR: " + (rigSwr > 0 ? rigSwr.toFixed(rigSwr < 10 ? 2 : 1) : "--")
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     font.bold: rigSwr >= 1.5
                     color: rigSwr >= 2.0 ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : swrStatusColor
@@ -491,7 +489,7 @@ Rectangle {
 
             Text {
                 text: (cpuUsage * 100).toFixed(0) + "%"
-                font.family: "Monospace"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: cpuUsage > 0.8 ? colorRed : textSecondary
                 Layout.preferredWidth: 30
@@ -501,8 +499,9 @@ Rectangle {
         // GPU/render activity monitor
         Item {
             id: gpuMonitor
-            implicitWidth: gpuMonitorLayout.implicitWidth
-            implicitHeight: gpuMonitorLayout.implicitHeight
+            visible: statusBarComponent.gpuMonitorVisible
+            implicitWidth: visible ? gpuMonitorLayout.implicitWidth : 0
+            implicitHeight: visible ? gpuMonitorLayout.implicitHeight : 0
 
             RowLayout {
                 id: gpuMonitorLayout
@@ -510,7 +509,7 @@ Rectangle {
                 spacing: 6
 
                 Text {
-                    text: "GPU:"
+                    text: gpuLabelText
                     font.pixelSize: 10
                     color: textSecondary
                 }
@@ -529,17 +528,18 @@ Rectangle {
                         anchors.margins: 2
                         width: Math.max(0, Math.min(parent.width - 4, (parent.width - 4) * displayedGpuActivity))
                         radius: 1
-                        color: displayedGpuActivity < 0.5 ? secondaryCyan :
+                        color: !realGpuUsageAvailable ? Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.35) :
+                               displayedGpuActivity < 0.5 ? secondaryCyan :
                                displayedGpuActivity < 0.8 ? colorOrange : colorRed
                     }
                 }
 
                 Text {
                     text: gpuLoadText
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
-                    color: displayedGpuActivity > 0.8 ? colorRed : textSecondary
-                    Layout.preferredWidth: realGpuUsageAvailable ? 38 : 30
+                    color: realGpuUsageAvailable && displayedGpuActivity > 0.8 ? colorRed : textSecondary
+                    Layout.preferredWidth: 38
                 }
             }
 
@@ -556,8 +556,8 @@ Rectangle {
                           ? "Real Decodium GPU process usage\n"
                             + gpuLoadText + " from OS GPU counters\n"
                             + gpuFps + " rendered frames/s"
-                          : "Estimated Decodium GPU/render load\n"
-                            + gpuLoadText + " normalized render activity\n"
+                          : "Process GPU counter unavailable\n"
+                            + "No reliable OS counter exposed to Decodium on this platform\n"
                             + gpuFps + " rendered frames/s"
                 }
             }

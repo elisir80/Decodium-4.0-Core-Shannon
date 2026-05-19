@@ -401,6 +401,13 @@ DecodiumDxCluster::DecodiumDxCluster(QObject* parent)
         connectCluster();
     });
 
+    m_spotsChangedTimer = new QTimer(this);
+    m_spotsChangedTimer->setSingleShot(true);
+    connect(m_spotsChangedTimer, &QTimer::timeout, this, [this]() {
+        m_pendingSpotsChangedCount = 0;
+        emit spotsChanged();
+    });
+
     loadSettings();
 }
 
@@ -414,6 +421,9 @@ DecodiumDxCluster::~DecodiumDxCluster()
     }
     if (m_reconnectTimer) {
         m_reconnectTimer->stop();
+    }
+    if (m_spotsChangedTimer) {
+        m_spotsChangedTimer->stop();
     }
 
     // Disconnect cleanly without emitting Qt signals during destruction.
@@ -1023,7 +1033,7 @@ bool DecodiumDxCluster::submitSpotVerified(const QString& dxCall, double freqKhz
 void DecodiumDxCluster::clearSpots()
 {
     m_spots.clear();
-    emit spotsChanged();
+    scheduleSpotsChanged(0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1157,6 +1167,23 @@ void DecodiumDxCluster::onError(QAbstractSocket::SocketError socketError)
 // Private helpers
 // ---------------------------------------------------------------------------
 
+void DecodiumDxCluster::scheduleSpotsChanged(int delayMs)
+{
+    ++m_pendingSpotsChangedCount;
+    if (!m_spotsChangedTimer || delayMs <= 0) {
+        if (m_spotsChangedTimer) {
+            m_spotsChangedTimer->stop();
+        }
+        m_pendingSpotsChangedCount = 0;
+        emit spotsChanged();
+        return;
+    }
+
+    if (!m_spotsChangedTimer->isActive()) {
+        m_spotsChangedTimer->start(delayMs);
+    }
+}
+
 void DecodiumDxCluster::processLine(const QString& line)
 {
     // ---- Login prompt detection ----
@@ -1182,7 +1209,7 @@ void DecodiumDxCluster::processLine(const QString& line)
 
             m_spots.append(spot);
             emit newSpot(spot);
-            emit spotsChanged();
+            scheduleSpotsChanged();
         }
         return;
     }
@@ -1199,9 +1226,6 @@ void DecodiumDxCluster::processLine(const QString& line)
     QRegularExpressionMatch dumpM = dumpRe.match(line);
     if (dumpM.hasMatch()) {
         double const freqKhz = dumpM.captured(1).toDouble();
-        qDebug() << "[DxCluster][DUMP-MATCH]" << "freq=" << freqKhz
-                 << "call=" << dumpM.captured(2)
-                 << "spotter=" << dumpM.captured(5);
         if (freqKhz > 0.0) {
             QString const dxCall = dumpM.captured(2).toUpper();
             QString const time   = dumpM.captured(3);
@@ -1235,10 +1259,8 @@ void DecodiumDxCluster::processLine(const QString& line)
             while (m_spots.size() >= k_maxSpots)
                 m_spots.removeFirst();
             m_spots.append(spot);
-            qDebug() << "[DxCluster][SPOT-ADDED]" << dxCall << "@" << freqKhz
-                     << "kHz total=" << m_spots.size();
             emit newSpot(spot);
-            emit spotsChanged();
+            scheduleSpotsChanged();
             return;
         }
     }

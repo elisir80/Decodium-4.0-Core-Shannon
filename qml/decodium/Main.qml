@@ -1709,7 +1709,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
                     font.pixelSize: 18
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: textPrimary
                     placeholderText: ""
                     selectByMouse: true
@@ -1915,7 +1915,7 @@ ApplicationWindow {
                                 // bridge.frequency is synced with both CAT and BandManager
                                 text: (bridge.frequency / 1000000).toFixed(6)
                                 font.pixelSize: Math.round(26 * fs)
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.bold: true
                                 color: mainWindow.txVisualActive ? "#ff6b6b" : accentGreen
                                 Layout.fillWidth: true
@@ -1966,7 +1966,7 @@ ApplicationWindow {
                                 Text {
                                     id: txFreqText; anchors.centerIn: parent
                                     text: bridge.txFrequency + " Hz"
-                                    font.pixelSize: 10; font.family: "Monospace"
+                                    font.pixelSize: 10; font.family: decodiumMonoFontFamily
                                     color: bridge.txFrequency === bridge.rxFrequency ? accentGreen : bridge.themeManager.ledRed
                                 }
                                 MouseArea {
@@ -1991,7 +1991,7 @@ ApplicationWindow {
                                 Text {
                                     id: rxFreqText; anchors.centerIn: parent
                                     text: bridge.rxFrequency + " Hz"
-                                    font.pixelSize: 10; font.family: "Monospace"
+                                    font.pixelSize: 10; font.family: decodiumMonoFontFamily
                                     color: accentGreen
                                 }
                                 MouseArea {
@@ -2172,7 +2172,7 @@ ApplicationWindow {
                             id: utcTimeLabel
                             text: bridge.utcTime
                             font.pixelSize: 8
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             font.bold: true
                             color: clockMouseArea.containsMouse
                                        ? bridge.themeManager.warningColor
@@ -2264,7 +2264,7 @@ ApplicationWindow {
                                             width: 8; height: 8; radius: 4; color: secondaryCyan
                                         }
                                     }
-                                    Text { text: Math.round(bridge.rxInputLevel); color: secondaryCyan; font.pixelSize: 8; font.family: "Monospace"; Layout.preferredWidth: 18 }
+                                    Text { text: Math.round(bridge.rxInputLevel); color: secondaryCyan; font.pixelSize: 8; font.family: decodiumMonoFontFamily; Layout.preferredWidth: 18 }
                                 }
 
                                 RowLayout {
@@ -2292,7 +2292,7 @@ ApplicationWindow {
                                         text: bridge.txOutputLevel > 0 ? ("-" + (bridge.txOutputLevel / 10).toFixed(1)) : "0.0"
                                         color: accentGreen
                                         font.pixelSize: 8
-                                        font.family: "Monospace"
+                                        font.family: decodiumMonoFontFamily
                                         Layout.preferredWidth: 28
                                     }
                                 }
@@ -2927,7 +2927,7 @@ ApplicationWindow {
 	                                font.pixelSize: 22
 	                                minimumPixelSize: 17
 	                                fontSizeMode: Text.Fit
-	                                font.family: "Monospace"
+	                                font.family: decodiumMonoFontFamily
 	                                font.bold: true
 	                                color: textPrimary
 	                                elide: Text.ElideRight
@@ -2946,7 +2946,7 @@ ApplicationWindow {
 	                                height: 13
 	                                text: worldClock.dateStr
 	                                font.pixelSize: 11
-	                                font.family: "Monospace"
+	                                font.family: decodiumMonoFontFamily
 	                                color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.7)
 	                                elide: Text.ElideRight
 	                            }
@@ -3963,7 +3963,7 @@ ApplicationWindow {
                                     placeholderText: (activeFocus || text.length > 0) ? "" : "Callsign..."
                                     font.pixelSize: 11
                                     font.capitalization: Font.AllUppercase
-                                    font.family: "Monospace"
+                                    font.family: decodiumMonoFontFamily
                                     color: textPrimary
                                     placeholderTextColor: textSecondary
                                     verticalAlignment: TextInput.AlignVCenter
@@ -4998,7 +4998,7 @@ ApplicationWindow {
                             text: timingBar.periodLabel
                             font.pixelSize: 11
                             font.bold: true
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             color: timingBar.isTxPhase ? bridge.themeManager.ledRed : bridge.themeManager.successColor
                         }
 
@@ -5011,7 +5011,7 @@ ApplicationWindow {
                             text: ""
                             font.pixelSize: 10
                             font.bold: true
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             color: timingBar.isTxPhase ? bridge.themeManager.ledRed : accentGreen
                         }
 
@@ -5022,7 +5022,7 @@ ApplicationWindow {
                             anchors.verticalCenter: parent.verticalCenter
                             text: timingBar.secInPeriod.toFixed(1) + " / " + timingBar.periodLen.toFixed(1) + "s"
                             font.pixelSize: 10
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             color: textSecondary
                         }
                     }
@@ -5440,34 +5440,41 @@ ApplicationWindow {
 	                                        // 1.0.231 — counter pending decodes mentre user scrolla up.
 	                                        // Permette al floating button "↓ N new" di sapere quanti
 	                                        // decode sono arrivati dopo la perdita di tail-follow.
-	                                        property int pendingNewDecodes: 0
-	                                        function isNearTail() {
-	                                            return contentHeight <= height + 2
-	                                                || contentY >= Math.max(0, contentHeight - height - 48)
+		                                        property int pendingNewDecodes: 0
+		                                        function isNearTail() {
+		                                            return contentHeight <= height + 2
+		                                                || contentY >= tailContentY() - 48
+		                                        }
+	                                        function updateFollowTail() {
+	                                            if (tailFollowPending)
+	                                                return
+	                                            followTail = isNearTail()
+	                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
+	                                            if (followTail) evenPeriodList.pendingNewDecodes = 0
 	                                        }
-                                        function updateFollowTail() {
-                                            if (tailFollowPending)
-                                                return
-                                            followTail = isNearTail()
-                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
-                                            if (followTail) pendingNewDecodes = 0
-                                        }
-                                        function tailContentY() {
-                                            return Math.max(0, contentHeight - height)
-                                        }
-                                        function finishTailFollow() {
-                                            tailFollowPending = false
-                                            followTail = isNearTail()
-                                            if (followTail) pendingNewDecodes = 0
+	                                        function tailContentY() {
+	                                            var bottom = originY + contentHeight - height
+	                                            return Math.max(originY, bottom)
+	                                        }
+	                                        function finishTailFollow() {
+	                                            var shouldSnap = tailFollowPending || followTail
+	                                            tailFollowPending = false
+	                                            if (shouldSnap) {
+	                                                var targetY = tailContentY()
+	                                                if (Math.abs(contentY - targetY) > 0.5)
+	                                                    contentY = targetY
+	                                            }
+	                                            followTail = isNearTail()
+	                                            if (followTail) evenPeriodList.pendingNewDecodes = 0
                                         }
                                         function forceTailFollow() {
-    followTail = true
-    tailFollowPending = true
-    if (tailFollowQueued)
+    evenPeriodList.followTail = true
+    evenPeriodList.tailFollowPending = true
+    if (evenPeriodList.tailFollowQueued)
         return
-    tailFollowQueued = true
+    evenPeriodList.tailFollowQueued = true
     Qt.callLater(function() {
-        tailFollowQueued = false
+        evenPeriodList.tailFollowQueued = false
         if (!evenPeriodList)
             return
         var targetY = evenPeriodList.tailContentY()
@@ -5539,10 +5546,10 @@ NumberAnimation {
                                             if (period1Detached) return
                                             // 1.0.231 — se user e' in scroll-back, no forced tail
                                             // ma incrementa counter per il floating "↓ N new" button.
-                                            if (!followTail) {
-                                                pendingNewDecodes++
-                                                return
-                                            }
+	                                            if (!followTail) {
+	                                                evenPeriodList.pendingNewDecodes++
+	                                                return
+	                                            }
                                             forceTailFollow()
                                         }
                                         property int _ver: decodePanel.decodeListVersion
@@ -5677,6 +5684,7 @@ NumberAnimation {
                                                     visible: mainWindow.showDxccInfo
                                                     Layout.preferredWidth: period1Panel.dxccColumnWidth
                                                     Layout.fillHeight: true
+                                                    clip: true
                                                     Text {
                                                         anchors.fill: parent
                                                         text: modelData.dxCountry || ""
@@ -5685,7 +5693,7 @@ NumberAnimation {
                                                         color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
                                                         horizontalAlignment: Text.AlignRight
                                                         verticalAlignment: Text.AlignVCenter
-                                                        elide: Text.ElideNone
+                                                        elide: Text.ElideRight
                                                         fontSizeMode: Text.HorizontalFit
                                                         minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
                                                         maximumLineCount: 1
@@ -5910,7 +5918,7 @@ NumberAnimation {
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: bridge.rxFrequency + " Hz"
-                                                font.family: "Monospace"
+                                                font.family: decodiumMonoFontFamily
                                                 font.pixelSize: 10
                                                 font.bold: true
                                                 color: primaryBlue
@@ -6053,36 +6061,44 @@ NumberAnimation {
 	                                        cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
 	                                        reuseItems: true
 	                                        interactive: true
-                                        property bool followTail: true
-                                        property bool tailFollowPending: false
-	                                        property bool tailFollowQueued: false
-	                                        function isNearTail() {
-	                                            return contentHeight <= height + 2
-	                                                || contentY >= Math.max(0, contentHeight - height - 48)
+	                                        property bool followTail: true
+	                                        property bool tailFollowPending: false
+		                                        property bool tailFollowQueued: false
+		                                        property int pendingNewDecodes: 0
+		                                        function isNearTail() {
+		                                            return contentHeight <= height + 2
+		                                                || contentY >= tailContentY() - 48
+		                                        }
+	                                        function updateFollowTail() {
+	                                            if (tailFollowPending)
+	                                                return
+	                                            followTail = isNearTail()
+	                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
+	                                            if (followTail) rxFrequencyList.pendingNewDecodes = 0
 	                                        }
-                                        function updateFollowTail() {
-                                            if (tailFollowPending)
-                                                return
-                                            followTail = isNearTail()
-                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
-                                            if (followTail) pendingNewDecodes = 0
-                                        }
-                                        function tailContentY() {
-                                            return Math.max(0, contentHeight - height)
-                                        }
-                                        function finishTailFollow() {
-                                            tailFollowPending = false
-                                            followTail = isNearTail()
-                                            if (followTail) pendingNewDecodes = 0
-                                        }
-                                        function forceTailFollow() {
-    followTail = true
-    tailFollowPending = true
-    if (tailFollowQueued)
+	                                        function tailContentY() {
+	                                            var bottom = originY + contentHeight - height
+	                                            return Math.max(originY, bottom)
+	                                        }
+	                                        function finishTailFollow() {
+	                                            var shouldSnap = tailFollowPending || followTail
+	                                            tailFollowPending = false
+	                                            if (shouldSnap) {
+	                                                var targetY = tailContentY()
+	                                                if (Math.abs(contentY - targetY) > 0.5)
+	                                                    contentY = targetY
+	                                            }
+	                                            followTail = isNearTail()
+	                                            if (followTail) rxFrequencyList.pendingNewDecodes = 0
+	                                        }
+	                                        function forceTailFollow() {
+    rxFrequencyList.followTail = true
+    rxFrequencyList.tailFollowPending = true
+    if (rxFrequencyList.tailFollowQueued)
         return
-    tailFollowQueued = true
+    rxFrequencyList.tailFollowQueued = true
     Qt.callLater(function() {
-        tailFollowQueued = false
+        rxFrequencyList.tailFollowQueued = false
         if (!rxFrequencyList)
             return
         var targetY = rxFrequencyList.tailContentY()
@@ -6751,7 +6767,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
                 Text {
                     text: badgeText
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 36
                     font.bold: true
                     font.letterSpacing: 3
@@ -6760,7 +6776,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
                 Text {
                     text: badgeSubText
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 18
                     color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.8)
                 }
@@ -8007,7 +8023,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 text: (Qt.platform.os === "windows"
                        ? "C:/Users/IU8LMC/Documents/" : "~/")
                       + bridge.callsign + "_" + Qt.formatDate(new Date(), "yyyyMMdd") + ".cbr"
-                font.family: "Monospace"; font.pixelSize: 11
+                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                 color: textPrimary
                 background: Rectangle {
                     color: Qt.rgba(textPrimary.r,textPrimary.g,textPrimary.b,0.07); border.color: glassBorder; radius: 4
@@ -8619,7 +8635,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         Text {
                             text: "RX: " + bridge.rxFrequency + " Hz | TX: " + bridge.txFrequency + " Hz"
                             font.pixelSize: 12
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             color: textSecondary
                         }
 
@@ -8696,7 +8712,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                       ? waterfallDetachedLoader.item.minFreq + "-" + waterfallDetachedLoader.item.maxFreq + " Hz"
                                       : "0-3200 Hz"
                                 font.pixelSize: 10
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 color: textSecondary
                             }
                         }
@@ -8814,7 +8830,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         Text {
                             text: "Freq: " + (bridge.frequency / 1000000).toFixed(6) + " MHz"
                             font.pixelSize: 11
-                            font.family: "Monospace"
+                            font.family: decodiumMonoFontFamily
                             color: accentGreen
                         }
 
@@ -9667,33 +9683,40 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         property bool tailFollowPending: false
 	                        property bool tailFollowQueued: false
 	                        // 1.0.231 — counter pending decodes (floating mode)
-	                        property int pendingNewDecodes: 0
-	                        function isNearTail() {
-	                            return contentHeight <= height + 2
-	                                || contentY >= Math.max(0, contentHeight - height - 48)
-	                        }
+		                        property int pendingNewDecodes: 0
+		                        function isNearTail() {
+		                            return contentHeight <= height + 2
+		                                || contentY >= tailContentY() - 48
+		                        }
                         function updateFollowTail() {
                             if (tailFollowPending)
                                 return
                             followTail = isNearTail()
-                            if (followTail) pendingNewDecodes = 0
+                            if (followTail) period1FloatingList.pendingNewDecodes = 0
                         }
-                        function tailContentY() {
-                            return Math.max(0, contentHeight - height)
-                        }
-                        function finishTailFollow() {
-                            tailFollowPending = false
-                            followTail = isNearTail()
-                            if (followTail) pendingNewDecodes = 0
+	                        function tailContentY() {
+	                            var bottom = originY + contentHeight - height
+	                            return Math.max(originY, bottom)
+	                        }
+	                        function finishTailFollow() {
+	                            var shouldSnap = tailFollowPending || followTail
+	                            tailFollowPending = false
+	                            if (shouldSnap) {
+	                                var targetY = tailContentY()
+	                                if (Math.abs(contentY - targetY) > 0.5)
+	                                    contentY = targetY
+	                            }
+	                            followTail = isNearTail()
+	                            if (followTail) period1FloatingList.pendingNewDecodes = 0
                         }
                         function forceTailFollow() {
-    followTail = true
-    tailFollowPending = true
-    if (tailFollowQueued)
+    period1FloatingList.followTail = true
+    period1FloatingList.tailFollowPending = true
+    if (period1FloatingList.tailFollowQueued)
         return
-    tailFollowQueued = true
+    period1FloatingList.tailFollowQueued = true
     Qt.callLater(function() {
-        tailFollowQueued = false
+        period1FloatingList.tailFollowQueued = false
         if (!period1FloatingList)
             return
         var targetY = period1FloatingList.tailContentY()
@@ -9758,7 +9781,7 @@ NumberAnimation {
                             if (!period1Detached) return
                             // 1.0.231 — se user in scroll-back, counter ↓N
                             if (!followTail) {
-                                pendingNewDecodes++
+                                period1FloatingList.pendingNewDecodes++
                                 return
                             }
                             forceTailFollow()
@@ -9838,7 +9861,25 @@ NumberAnimation {
 	                                Item { Layout.preferredWidth: period1FloatingWindow.gapColumnWidth }
 	                                Text { text: modelData.displayMessage || modelData.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(modelData); font.strikeout: decodePanel.decodeEntryStrikeout(modelData); color: mainWindow.fullSpectrumTextColor(modelData); Layout.fillWidth: true; elide: messageElideMode(modelData.displayMessage || modelData.message) }
 	                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
-	                                Text { visible: mainWindow.showDxccInfo; text: modelData.dxCountry || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); fontSizeMode: Text.HorizontalFit; minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65)); maximumLineCount: 1; color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary; horizontalAlignment: Text.AlignRight; elide: Text.ElideNone; Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth }
+	                                Item {
+	                                    visible: mainWindow.showDxccInfo
+	                                    Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth
+	                                    Layout.fillHeight: true
+	                                    clip: true
+	                                    Text {
+	                                        anchors.fill: parent
+	                                        text: modelData.dxCountry || ""
+	                                        font.family: mainWindow.decodedTextFontFamily
+	                                        font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
+	                                        fontSizeMode: Text.HorizontalFit
+	                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
+	                                        maximumLineCount: 1
+	                                        color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
+	                                        horizontalAlignment: Text.AlignRight
+	                                        verticalAlignment: Text.AlignVCenter
+	                                        elide: Text.ElideRight
+	                                    }
+	                                }
 	                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(modelData.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: secondaryCyan; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
                             }
 
@@ -10056,7 +10097,7 @@ NumberAnimation {
                             Text {
                                 anchors.centerIn: parent
                                 text: bridge.rxFrequency + " Hz"
-                                font.family: "Monospace"
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
                                 color: primaryBlue
@@ -10221,33 +10262,43 @@ NumberAnimation {
 	                        cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
 	                        reuseItems: true
 	                        interactive: true
-                        property bool followTail: true
-                        property bool tailFollowPending: false
-	                        property bool tailFollowQueued: false
-	                        function isNearTail() {
-	                            return contentHeight <= height + 2
-	                                || contentY >= Math.max(0, contentHeight - height - 48)
-	                        }
+	                        property bool followTail: true
+	                        property bool tailFollowPending: false
+		                        property bool tailFollowQueued: false
+		                        property int pendingNewDecodes: 0
+		                        function isNearTail() {
+		                            return contentHeight <= height + 2
+		                                || contentY >= tailContentY() - 48
+		                        }
                         function updateFollowTail() {
                             if (tailFollowPending)
                                 return
                             followTail = isNearTail()
+                            if (followTail) rxFrequencyFloatingList.pendingNewDecodes = 0
                         }
-                        function tailContentY() {
-                            return Math.max(0, contentHeight - height)
-                        }
-                        function finishTailFollow() {
-                            tailFollowPending = false
-                            followTail = isNearTail()
-                        }
+	                        function tailContentY() {
+	                            var bottom = originY + contentHeight - height
+	                            return Math.max(originY, bottom)
+	                        }
+	                        function finishTailFollow() {
+	                            var shouldSnap = tailFollowPending || followTail
+	                            tailFollowPending = false
+	                            if (shouldSnap) {
+	                                var targetY = tailContentY()
+	                                if (Math.abs(contentY - targetY) > 0.5)
+	                                    contentY = targetY
+	                            }
+	                            followTail = isNearTail()
+	                            if (followTail) rxFrequencyFloatingList.pendingNewDecodes = 0
+	                        }
                         function forceTailFollow() {
-    followTail = true
-    tailFollowPending = true
-    if (tailFollowQueued)
+    rxFrequencyFloatingList.followTail = true
+    rxFrequencyFloatingList.tailFollowPending = true
+    if (rxFrequencyFloatingList.tailFollowQueued)
         return
-    tailFollowQueued = true
+    rxFrequencyFloatingList.tailFollowQueued = true
     Qt.callLater(function() {
-        tailFollowQueued = false
+        rxFrequencyFloatingList.tailFollowQueued = false
         if (!rxFrequencyFloatingList)
             return
         var targetY = rxFrequencyFloatingList.tailContentY()

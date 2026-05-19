@@ -1155,6 +1155,9 @@ int main(int argc, char* argv[])
 
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("appEngine", &bridge);
+    engine.rootContext()->setContextProperty(
+        "decodiumMonoFontFamily",
+        fixedFontFamily.isEmpty() ? QStringLiteral("monospace") : fixedFontFamily);
     L("QSG Live Map enabled by default; CPU WorldMapItem fallback remains available via LiveMapUseGpu=false");
 
     // Load BootLoader first so the process shows a real window before the

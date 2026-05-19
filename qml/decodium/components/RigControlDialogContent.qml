@@ -57,7 +57,7 @@ Rectangle {
                 Text {
                     visible: cat && cat.connected && cat.frequency > 0
                     text: cat ? (cat.frequency / 1e6).toFixed(6) + " MHz  " + cat.mode : ""
-                    font.pixelSize: 12; font.family: "Monospace"
+                    font.pixelSize: 12; font.family: decodiumMonoFontFamily
                     color: secondaryCyan
                 }
             }

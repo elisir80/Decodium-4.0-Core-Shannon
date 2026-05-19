@@ -1541,19 +1541,13 @@ private:
     int m_audioOutputChannel {0};
     QVariantList m_decodeList;
     QVariantList m_rxDecodeList;
-    // 1.0.206 — Cap re-introduced (era 200 in 1.0.155, perso da merge upstream).
-    // Senza cap, ogni rebuildBandActivityModel/rebuildRxDecodeModel itera O(N)
-    // su lista che cresce indefinitamente → CPU saturo + RAM crescente quando
-    // Decodium gira per ore. Cap conservativo 500 (contesti FT8 affollati).
-    // m_rxDecodeList condivide stesso cap (QSO scope, raramente >50 entries).
-    // 1.0.229 — Cap ridotto da 500 a 250 (richiesta utente IU8LMC per
-    // contenere la Full Spectrum quando ci sono molti decode). Quando
-    // m_decodeList raggiunge 250, trimDecodeListsIfNeeded rimuove le
-    // entry piu' vecchie (FIFO rolling). RxDecodeList resta 200 (gia'
-    // scope QSO ristretto).
+    // 1.0.257 — Auto-clear separato per le due finestre decode. Quando una
+    // lista arriva a 250 righe viene azzerata completamente; Full Spectrum e
+    // Signal RX hanno contatori indipendenti e non si cancellano a vicenda.
     static constexpr int kDecodeListCap = 250;
-    static constexpr int kRxDecodeListCap = 200;
+    static constexpr int kRxDecodeListCap = 250;
     void trimDecodeListsIfNeeded();
+    void moveLegacyAllTxtCursorToEnd();
     // 1.0.142: throttle per decodeListChanged signal nei path high-frequency
     // (FT2 async 5-20Hz, FT8 ready bursts, legacy mirror replace). Riduce
     // rebuild ListView QML da ~20/sec a ~4/sec → fluidità percepita.
@@ -1661,6 +1655,12 @@ private:
     QStringList m_remoteActivityKeyOrder;
     QHash<QString, QString> m_worldMapGridByCall;
     QSet<QString> m_worldMapClosedQsoCallKeys;
+    QSet<QString> m_worldMapClearedDecodeKeys;
+    QVector<QVariantMap> m_deferredWorldMapFeedQueue;
+    QSet<QString> m_deferredWorldMapFeedKeys;
+    bool m_worldMapFeedFlushScheduled {false};
+    bool m_worldMapFullReplayDeferred {false};
+    bool m_worldMapDeferredLogActive {false};
     bool m_worldMapCall3Loaded {false};
     bool m_worldMapDisplayed {true};
     QString m_mapLastClickCall;
@@ -1708,6 +1708,7 @@ private:
     qint64 m_lastCpuPressureLogMs {0};
     quint64 m_lastProcessCpuUsec {0};
     quint64 m_lastProcessGpuTimeNs {0};
+    int m_processGpuZeroSampleCount {0};
     int m_processCpuLogicalCores {1};
     bool m_processCpuSampleInitialized {false};
     bool m_processGpuSampleInitialized {false};
@@ -1771,6 +1772,9 @@ private:
     bool                          m_suppressCatErrors {false};
     RemoteCommandServer*          m_remoteServer {nullptr};
     DecodiumDxCluster*    m_dxCluster     {nullptr};
+    QTimer*               m_dxClusterSpotsNotifyTimer {nullptr};
+    bool                  m_dxClusterSpotsChangedPending {false};
+    bool                  m_dxClusterSpotsDeferredDuringTx {false};
     // FT2 async smart TX scheduler (anti-collision)
     qint64                m_ft2AsyncLastDecodeMs   {0};
     qint64                m_ft2AsyncFirstDecodeMs  {0};   // start of current decode burst
@@ -2493,7 +2497,13 @@ private:
     void appendRxDecodeEntry(const QVariantMap& entry);
     void rebuildRxDecodeList();
     bool worldMapFeedEnabled() const;
-    void replayWorldMapEntry(const QVariantMap& entry);
+    QString worldMapFeedEntryKey(const QVariantMap& entry) const;
+    bool visualFeedsDeferredForTx() const;
+    void deferWorldMapEntryForTx(const QVariantMap& entry, bool skipClearedFeedEntry);
+    void scheduleDeferredWorldMapFeedFlush(int delayMs = 600);
+    void flushDeferredWorldMapFeed();
+    void resetWorldMapDisplayFromCurrentDecodes();
+    void replayWorldMapEntry(const QVariantMap& entry, bool skipClearedFeedEntry = false);
     void emitCurrentWorldMapQsoPath();
     void markWorldMapQsoClosed(const QString& call, const QString& reason = QString());
     void clearWorldMapClosedQso(const QString& call);
@@ -2502,6 +2512,10 @@ private:
     QString lookupWorldMapGrid(const QString& call);
     QString approximateWorldMapGridForCall(const QString& call);
     void loadWorldMapCall3Cache();
+    void scheduleDxClusterSpotsChanged(int delayMs = 200);
+    void flushDxClusterSpotsChanged();
+    bool shouldPreserveDeferredAutoSeqTxForRearm(QString* staleReason = nullptr) const;
+    bool applyDeferredAutoSeqTxForRearm(const QString& reason);
     void genStdMsgs(const QString& hisCall, const QString& hisGrid);
     void checkAndStartPeriodicTx();
     bool shouldDeferAutoTxUntilTimeSyncDecode(const QString& modeSnapshot) const;

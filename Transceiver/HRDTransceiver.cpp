@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <QDateTime>
 #include <QHostAddress>
 #include <QByteArray>
 #include <QElapsedTimer>
@@ -32,10 +33,35 @@ namespace
   unsigned constexpr hrd_startup_command_reply_retries {8};
   int constexpr hrd_command_reply_timeout_ms {1000};
   unsigned constexpr hrd_command_reply_retries {5};
+  int constexpr hrd_data_mode_settle_ms {12000};
   qsizetype constexpr hrd_max_reply_bytes {16 * 1024 * 1024};
   qsizetype constexpr hrd_v5_header_size {16};
   quint32 constexpr hrd_v5_magic_1 {0x1234ABCDu};
   quint32 constexpr hrd_v5_magic_2 {0xABCD1234u};
+
+  bool hrd_is_data_mode (Transceiver::MODE mode)
+  {
+    switch (mode)
+      {
+      case Transceiver::DIG_U:
+      case Transceiver::DIG_L:
+      case Transceiver::DIG_FM:
+        return true;
+      default:
+        return false;
+      }
+  }
+
+  bool hrd_data_carrier_matches (Transceiver::MODE data_mode, Transceiver::MODE carrier_mode)
+  {
+    switch (data_mode)
+      {
+      case Transceiver::DIG_U:  return carrier_mode == Transceiver::USB;
+      case Transceiver::DIG_L:  return carrier_mode == Transceiver::LSB;
+      case Transceiver::DIG_FM: return carrier_mode == Transceiver::FM;
+      default:                  return false;
+      }
+  }
 
   void hrd_append_le16 (QByteArray& data, quint16 value)
   {
@@ -180,6 +206,26 @@ namespace
     return text.trimmed ().simplified ().toCaseFolded ();
   }
 
+  unsigned hrd_context_id_from_reply (QString const& text)
+  {
+    bool ok {false};
+    auto const direct = text.trimmed ().toUInt (&ok);
+    if (ok)
+      {
+        return direct;
+      }
+
+    QRegularExpression const first_number {QStringLiteral ("(\\d+)")};
+    auto const match = first_number.match (text);
+    if (!match.hasMatch ())
+      {
+        return 0;
+      }
+
+    auto const parsed = match.captured (1).toUInt (&ok);
+    return ok ? parsed : 0;
+  }
+
   void hrd_diag (QString const& message)
   {
     DIAG_CAT (QStringLiteral ("[HRD] ") + message);
@@ -250,6 +296,8 @@ HRDTransceiver::HRDTransceiver (logger_type * logger
   , ptt_button_ {-1}
   , alt_ptt_button_ {-1}
   , reversed_ {false}
+  , pending_data_mode_ {UNK}
+  , pending_data_mode_until_ms_ {0}
   , startup_diagnostics_active_ {false}
   , hrd_command_sequence_ {0}
 {
@@ -262,6 +310,45 @@ int HRDTransceiver::do_start ()
   startup_timer.start ();
   ScopedStartupDiagnostics diagnostics_guard {startup_diagnostics_active_};
   hrd_command_sequence_ = 0;
+  pending_data_mode_ = UNK;
+  pending_data_mode_until_ms_ = 0;
+  radios_.clear ();
+  buttons_.clear ();
+  dropdown_names_.clear ();
+  dropdowns_.clear ();
+  slider_names_.clear ();
+  sliders_.clear ();
+  mode_A_map_.clear ();
+  mode_B_map_.clear ();
+  data_mode_dropdown_selection_on_.clear ();
+  data_mode_dropdown_selection_off_.clear ();
+  split_mode_dropdown_selection_on_.clear ();
+  split_mode_dropdown_selection_off_.clear ();
+  rx_A_selection_.clear ();
+  rx_B_selection_.clear ();
+  current_radio_ = 0;
+  vfo_count_ = 0;
+  vfo_A_button_ = -1;
+  vfo_B_button_ = -1;
+  vfo_toggle_button_ = -1;
+  mode_A_dropdown_ = -1;
+  mode_B_dropdown_ = -1;
+  data_mode_toggle_button_ = -1;
+  data_mode_on_button_ = -1;
+  data_mode_off_button_ = -1;
+  data_mode_dropdown_ = -1;
+  split_mode_button_ = -1;
+  split_mode_dropdown_ = -1;
+  split_mode_dropdown_write_only_ = false;
+  split_off_button_ = -1;
+  tx_A_button_ = -1;
+  tx_B_button_ = -1;
+  rx_A_button_ = -1;
+  rx_B_button_ = -1;
+  receiver_dropdown_ = -1;
+  ptt_button_ = -1;
+  alt_ptt_button_ = -1;
+  reversed_ = false;
   hrd_diag (QStringLiteral ("startup begin server='%1' usePtt=%2 audioSource=%3")
             .arg (server_)
             .arg (use_for_ptt_ ? 1 : 0)
@@ -443,17 +530,76 @@ int HRDTransceiver::do_start ()
       CAT_ERROR ("no rig found");
       throw error {tr ("Ham Radio Deluxe: no rig found")};
     }
-  auto current_radio_iter = std::find_if (radios_.begin (), radios_.end (), [&current_radio_name] (RadioMap::value_type const& radio)
-                                          {
-                                            return std::get<1> (radio) == current_radio_name;
-                                          });
-  if (current_radio_iter == radios_.end ())
+  auto const normalized_current = hrd_normalized_radio_name (current_radio_name);
+  auto radio_name_matches = [&current_radio_name, &normalized_current] (RadioMap::value_type const& radio)
     {
-      auto const normalized_current = hrd_normalized_radio_name (current_radio_name);
-      current_radio_iter = std::find_if (radios_.begin (), radios_.end (), [&normalized_current] (RadioMap::value_type const& radio)
-                                         {
-                                           return hrd_normalized_radio_name (std::get<1> (radio)) == normalized_current;
-                                         });
+      return std::get<1> (radio) == current_radio_name
+          || hrd_normalized_radio_name (std::get<1> (radio)) == normalized_current;
+    };
+
+  std::vector<RadioMap::iterator> matching_radios;
+  for (auto it = radios_.begin (); it != radios_.end (); ++it)
+    {
+      if (radio_name_matches (*it))
+        {
+          matching_radios.push_back (it);
+        }
+    }
+
+  auto current_radio_iter = matching_radios.empty () ? radios_.end () : matching_radios.front ();
+  QString current_context_reply;
+  unsigned current_context_id {0};
+  if (matching_radios.size () > 1)
+    {
+      try
+        {
+          current_context_reply = send_command (QStringLiteral ("get context"), false, false);
+          current_context_id = hrd_context_id_from_reply (current_context_reply);
+          HRD_info << "Current context: " << current_context_reply << "\n";
+          hrd_diag (QStringLiteral ("current context reply='%1' parsed=%2")
+                    .arg (hrd_preview (current_context_reply))
+                    .arg (current_context_id));
+        }
+      catch (error const& e)
+        {
+          hrd_diag (QStringLiteral ("get context unavailable while selecting radio: %1")
+                    .arg (QString::fromUtf8 (e.what ())));
+        }
+    }
+
+  if (current_context_id)
+    {
+      auto context_iter = std::find_if (radios_.begin (), radios_.end (), [current_context_id] (RadioMap::value_type const& radio)
+                                        {
+                                          return std::get<0> (radio) == current_context_id;
+                                        });
+      if (context_iter != radios_.end ())
+        {
+          if (radio_name_matches (*context_iter))
+            {
+              current_radio_iter = context_iter;
+            }
+          else
+            {
+              hrd_diag (QStringLiteral ("current context id=%1 name='%2' does not match current radio name='%3'; keeping name match")
+                        .arg (current_context_id)
+                        .arg (hrd_preview (std::get<1> (*context_iter)))
+                        .arg (hrd_preview (current_radio_name)));
+            }
+        }
+      else
+        {
+          hrd_diag (QStringLiteral ("current context id=%1 not found in radio inventory")
+                    .arg (current_context_id));
+        }
+    }
+
+  if (matching_radios.size () > 1 && current_radio_iter != radios_.end ())
+    {
+      hrd_diag (QStringLiteral ("duplicate HRD radio name '%1' matches=%2 selected context id=%3")
+                .arg (hrd_preview (current_radio_name))
+                .arg (static_cast<int> (matching_radios.size ()))
+                .arg (std::get<0> (*current_radio_iter)));
     }
   if (current_radio_iter == radios_.end ())
     {
@@ -830,6 +976,7 @@ void HRDTransceiver::set_button (int button_index, bool checked)
 
 void HRDTransceiver::set_data_mode (MODE m)
 {
+  bool sent_data_command {false};
   if (data_mode_toggle_button_ >= 0)
     {
       switch (m)
@@ -843,6 +990,7 @@ void HRDTransceiver::set_data_mode (MODE m)
           set_button (data_mode_toggle_button_, false);
           break;
         }
+      sent_data_command = true;
     }
   else if (data_mode_on_button_ >= 0 && data_mode_off_button_ >= 0)
     {
@@ -857,6 +1005,7 @@ void HRDTransceiver::set_data_mode (MODE m)
           set_button (data_mode_off_button_, true);
           break;
         }
+      sent_data_command = true;
     }
   else if (data_mode_dropdown_ >= 0
       && data_mode_dropdown_selection_off_.size ()
@@ -873,11 +1022,27 @@ void HRDTransceiver::set_data_mode (MODE m)
           set_dropdown (data_mode_dropdown_, data_mode_dropdown_selection_off_.front ());
           break;
         }
+      sent_data_command = true;
+    }
+
+  if (sent_data_command)
+    {
+      if (hrd_is_data_mode (m))
+        {
+          pending_data_mode_ = m;
+          pending_data_mode_until_ms_ = QDateTime::currentMSecsSinceEpoch () + hrd_data_mode_settle_ms;
+        }
+      else
+        {
+          pending_data_mode_ = UNK;
+          pending_data_mode_until_ms_ = 0;
+        }
     }
 }
 
 auto HRDTransceiver::get_data_mode (MODE m) -> MODE
 {
+  auto const now_ms = QDateTime::currentMSecsSinceEpoch ();
   if (data_mode_dropdown_ >= 0
       && data_mode_dropdown_selection_off_.size ())
     {
@@ -893,7 +1058,24 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
             case FM: m = DIG_FM; break;
             default: break;
             }
+          if (hrd_is_data_mode (m))
+            {
+              pending_data_mode_ = UNK;
+              pending_data_mode_until_ms_ = 0;
+            }
         }
+      else if (selection >= 0
+               && pending_data_mode_ != UNK
+               && now_ms <= pending_data_mode_until_ms_
+               && hrd_data_carrier_matches (pending_data_mode_, m))
+        {
+          return pending_data_mode_;
+        }
+    }
+  if (pending_data_mode_ != UNK && now_ms > pending_data_mode_until_ms_)
+    {
+      pending_data_mode_ = UNK;
+      pending_data_mode_until_ms_ = 0;
     }
   return m;
 }
@@ -901,6 +1083,11 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
 void HRDTransceiver::do_frequency (Frequency f, MODE m, bool /*no_ignore*/)
 {
   CAT_TRACE (f << "reversed" << reversed_);
+  hrd_diag (QStringLiteral ("QSY RX context=%1 hz=%2 mode=%3 reversed=%4")
+            .arg (current_radio_)
+            .arg (QString::number (f))
+            .arg (m)
+            .arg (reversed_ ? 1 : 0));
   if (UNK != m)
     {
       do_mode (m);
@@ -916,11 +1103,20 @@ void HRDTransceiver::do_frequency (Frequency f, MODE m, bool /*no_ignore*/)
       send_simple_command ("set frequency-hz " + QString::number (f));
     }
   update_rx_frequency (f);
+  if (hrd_is_data_mode (m))
+    {
+      set_data_mode (m);
+    }
 }
 
 void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*/)
 {
   CAT_TRACE (tx << "reversed" << reversed_);
+  hrd_diag (QStringLiteral ("QSY TX context=%1 hz=%2 mode=%3 reversed=%4")
+            .arg (current_radio_)
+            .arg (QString::number (tx))
+            .arg (mode)
+            .arg (reversed_ ? 1 : 0));
 
   // re-check if reversed VFOs
   bool rx_A {true};

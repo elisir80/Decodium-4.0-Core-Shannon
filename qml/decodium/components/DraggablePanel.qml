@@ -521,7 +521,7 @@ Rectangle {
                 Text {
                     text: Math.round(panel.width) + "x" + Math.round(panel.height)
                     font.pixelSize: 9
-                    font.family: "Monospace"
+                    font.family: decodiumMonoFontFamily
                     color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.4)
                     visible: isResizing
                 }
