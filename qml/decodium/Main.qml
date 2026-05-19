@@ -5302,7 +5302,7 @@ ApplicationWindow {
 	                                            border.width: 1
 	                                            Text {
 	                                                anchors.centerIn: parent
-	                                                text: mainWindow.compactFullSpectrum ? "Full" : "Compact"
+		                                                text: mainWindow.compactFullSpectrum ? "Full" : "Cmp"
 	                                                font.pixelSize: mainWindow.compactFullSpectrum ? 10 : 9
 	                                                font.bold: true
 	                                                color: (p1CompactMA.containsMouse || mainWindow.compactFullSpectrum)
@@ -5967,7 +5967,7 @@ NumberAnimation {
 	                                            border.width: 1
 	                                            Text {
 	                                                anchors.centerIn: parent
-	                                                text: mainWindow.compactSignalRx ? "Full" : "Compact"
+		                                                text: mainWindow.compactSignalRx ? "Full" : "Cmp"
 	                                                font.pixelSize: mainWindow.compactSignalRx ? 10 : 9
 	                                                font.bold: true
 	                                                color: (rxCompactMA.containsMouse || mainWindow.compactSignalRx)
@@ -9566,7 +9566,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		                            border.width: 1
 		                            Text {
 		                                anchors.centerIn: parent
-		                                text: mainWindow.compactFullSpectrum ? "Full" : "Compact"
+			                                text: mainWindow.compactFullSpectrum ? "Full" : "Cmp"
 		                                font.pixelSize: mainWindow.compactFullSpectrum ? 11 : 10
 		                                font.bold: true
 		                                color: (p1FloatCompactMA.containsMouse || mainWindow.compactFullSpectrum)
@@ -10154,7 +10154,7 @@ NumberAnimation {
 	                                border.width: 1
 	                                Text {
 	                                    anchors.centerIn: parent
-	                                    text: mainWindow.compactSignalRx ? "Full" : "Compact"
+		                                    text: mainWindow.compactSignalRx ? "Full" : "Cmp"
 	                                    font.pixelSize: mainWindow.compactSignalRx ? 11 : 10
 	                                    font.bold: true
 	                                    color: (rxFloatCompactMA.containsMouse || mainWindow.compactSignalRx)

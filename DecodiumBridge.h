@@ -476,7 +476,7 @@ public:
     bool sendRR73() const { return m_sendRR73; }
     void setSendRR73(bool v);
     bool multiAnswerMode() const { return m_multiAnswerMode; }
-    void setMultiAnswerMode(bool v) { if (m_multiAnswerMode != v) { m_multiAnswerMode = v; emit multiAnswerModeChanged(); } }
+    void setMultiAnswerMode(bool v);
 
     bool autoSeq()           const { return m_autoSeq; }
     void setAutoSeq(bool v);
@@ -917,6 +917,7 @@ public:
     // A4 — Fox/Hound queue management
     Q_INVOKABLE void enqueueStation(const QString& call);
     Q_INVOKABLE void dequeueStation(const QString& call);
+    Q_INVOKABLE void moveCallerQueueItem(int fromIndex, int toIndex);
     Q_INVOKABLE void clearCallerQueue();
 
     // C13 — Grid distance/bearing
@@ -1407,6 +1408,9 @@ private:
     bool shouldAcceptDecodedMessage(const QString& message,
                                     QString* reason = nullptr,
                                     bool allowUnresolvedPlaceholder = false) const;
+    bool shouldSuppressConflictingDirectedReportDecode(const QStringList& fields,
+                                                       const QString& source,
+                                                       QString* reason = nullptr);
     bool tryStartWaitPounceFromEntry(const QVariantMap& entry,
                                      const QVariantList& previousEntries,
                                      const QString& source);
@@ -1440,6 +1444,7 @@ private:
     void replayPskReporterRecentEntries(const QVariantList& entries, const QString& source);
     bool promptToLogEnabled() const;
     void logQsoNow();
+    void clearCompletedQsoTxFields(const QString& completedCall, const QString& reason);
     void clearTxArmedAfterCompletedQso(const QString& completedCall, const QString& reason);
     void showLogQsoPromptDialog();
     void capturePromptLogSnapshot(const QVariantMap& preview);
@@ -1451,6 +1456,9 @@ private:
     void engageManualTxHold(const QString& reason, bool clearQueue = false);
     void clearManualTxHold(const QString& reason);
     void resetManualTxRearmState(const QString& reason);
+    void armCqAutoReplyWindow(const QString& reason);
+    void clearCqAutoReplyWindow(const QString& reason);
+    bool decodeIsFreshForCqAutoReply(const QString& utcToken, QString* reason = nullptr) const;
     bool usesDeferredManualSyncTx() const;
     bool shouldDeferManualSyncTxStart() const;
     bool tryStartDeferredManualSyncTx();
@@ -1541,9 +1549,9 @@ private:
     int m_audioOutputChannel {0};
     QVariantList m_decodeList;
     QVariantList m_rxDecodeList;
-    // 1.0.257 — Auto-clear separato per le due finestre decode. Quando una
-    // lista arriva a 250 righe viene azzerata completamente; Full Spectrum e
-    // Signal RX hanno contatori indipendenti e non si cancellano a vicenda.
+    // 1.0.257 — Auto-clear separato per le due finestre decode. Full Spectrum
+    // conta tutte le righe, Signal RX conta solo i decode RX reali: le righe
+    // TX locali sono timeline e non devono cancellare ricezioni precedenti.
     static constexpr int kDecodeListCap = 250;
     static constexpr int kRxDecodeListCap = 250;
     void trimDecodeListsIfNeeded();
@@ -1953,6 +1961,8 @@ private:
     int  m_lastCqPidx       {-1};  // period index dell'ultimo CQ inviato (evita CQ consecutivi)
     QString m_lastAutoSeqKey;      // deduplicazione autoSequenceStep
     qint64  m_lastAutoSeqMs {0};   // timestamp ultima deduplicazione
+    QHash<QString, qint64> m_recentDirectedReportDecodeMs;
+    QHash<QString, QString> m_recentDirectedReportDecodeMessage;
     QString m_lastTransmittedMessage;
     QString m_autoSeqRogerReportBase;
     int     m_activeTxNumber {0};
@@ -1961,6 +1971,8 @@ private:
     QDateTime m_qsoStartedOn;
     bool    m_logAfterOwn73 {false};
     bool    m_ft2DeferredLogPending {false};
+    int     m_cqAutoReplyArmSecond {-1};
+    qint64  m_cqAutoReplyArmWallMs {0};
     int     m_pendingAutoSeqTxAfterActiveTx {0};
     QString m_pendingAutoSeqPartnerBase;
     QString m_pendingAutoSeqMessage;
@@ -2484,6 +2496,7 @@ private:
     void scheduleLegacyPcmSpectrumRearm(const QString& reason);
     void teardownAudioCapture();
     void primeLegacyAllTxtCursor();
+    void clearDecodeWindowsForBandChange(double previousFrequency, double nextFrequency, const QString& reason);
     void clearDecodeWindowsForModeChange(const QString& previousMode, const QString& nextMode);
     void reloadBridgeSettingsFromPersistentStore();
     void syncLegacyBackendDecodeList();
@@ -2498,6 +2511,7 @@ private:
     void rebuildRxDecodeList();
     bool worldMapFeedEnabled() const;
     QString worldMapFeedEntryKey(const QVariantMap& entry) const;
+    bool worldMapEntryFreshEnough(const QVariantMap& entry, QString* reason = nullptr) const;
     bool visualFeedsDeferredForTx() const;
     void deferWorldMapEntryForTx(const QVariantMap& entry, bool skipClearedFeedEntry);
     void scheduleDeferredWorldMapFeedFlush(int delayMs = 600);

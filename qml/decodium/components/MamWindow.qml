@@ -41,8 +41,9 @@ Dialog {
     property color textPrimary: engine ? engine.themeManager.textPrimary : "#e5eefc"
     property color textSecondary: engine ? engine.themeManager.textSecondary : "#9db1c9"
     property color glassBorder: engine ? engine.themeManager.glassBorder : "#2a3950"
-    readonly property var mamQueueEntries: engine ? engine.callerQueue : []
-    readonly property int mamQueueCount: engine ? engine.callerQueueSize : 0
+    readonly property bool mamQueueActive: engine && (engine.multiAnswerMode || engine.autoCqRepeat)
+    readonly property var mamQueueEntries: mamWindow.mamQueueActive ? engine.callerQueue : []
+    readonly property int mamQueueCount: mamWindow.mamQueueActive ? engine.callerQueueSize : 0
     readonly property string mamActiveCall: inferMamActiveCall()
     readonly property bool mamHasActiveCaller: engine
                                                && mamWindow.mamActiveCall.length > 0
@@ -132,6 +133,46 @@ Dialog {
         return ""
     }
 
+    component QueueMoveButton: Rectangle {
+        id: queueMoveButton
+        property string symbol: ""
+        property string tip: ""
+        property bool active: true
+        signal triggered()
+
+        implicitWidth: 20
+        implicitHeight: 22
+        radius: 4
+        opacity: active ? 1.0 : 0.28
+        color: active && moveMouse.containsMouse
+               ? Qt.rgba(mamWindow.secondaryCyan.r, mamWindow.secondaryCyan.g, mamWindow.secondaryCyan.b, 0.24)
+               : Qt.rgba(mamWindow.secondaryCyan.r, mamWindow.secondaryCyan.g, mamWindow.secondaryCyan.b, 0.08)
+        border.width: 1
+        border.color: active
+                      ? Qt.rgba(mamWindow.secondaryCyan.r, mamWindow.secondaryCyan.g, mamWindow.secondaryCyan.b, 0.55)
+                      : Qt.rgba(mamWindow.textSecondary.r, mamWindow.textSecondary.g, mamWindow.textSecondary.b, 0.25)
+
+        Text {
+            anchors.centerIn: parent
+            text: queueMoveButton.symbol
+            font.pixelSize: 11
+            font.bold: true
+            color: queueMoveButton.active ? mamWindow.textPrimary : mamWindow.textSecondary
+        }
+
+        MouseArea {
+            id: moveMouse
+            anchors.fill: parent
+            enabled: queueMoveButton.active
+            hoverEnabled: true
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: queueMoveButton.triggered()
+        }
+
+        ToolTip.visible: moveMouse.containsMouse && queueMoveButton.active
+        ToolTip.text: queueMoveButton.tip
+    }
+
     background: Rectangle {
         color: bgPanel
         border.color: glassBorder
@@ -162,7 +203,7 @@ Dialog {
 
         Text {
             anchors.centerIn: parent
-            text: "Multi-Answer Mode - Queue: " + mamWindow.mamQueueCount + " | Now: " + mamWindow.mamNowCount
+            text: "Multi-Answer Mode - " + (mamWindow.mamQueueActive ? ("Queue: " + mamWindow.mamQueueCount) : "Manual TX") + " | Now: " + mamWindow.mamNowCount
             font.pixelSize: 16
             font.bold: true
             color: warningOrange
@@ -198,7 +239,7 @@ Dialog {
                     }
 
                     Text {
-                        text: "Count: " + mamWindow.mamQueueCount
+                        text: mamWindow.mamQueueActive ? ("Count: " + mamWindow.mamQueueCount) : "Manual TX"
                         font.pixelSize: 12
                         color: textSecondary
                     }
@@ -215,14 +256,14 @@ Dialog {
 
                         delegate: Rectangle {
                             width: queueList.width - (queueScroll.visible ? queueScroll.width + 6 : 0)
-                            height: 38
+                            height: 42
                             radius: 4
                             color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.08)
 
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 8
+                                anchors.margins: 7
+                                spacing: 6
 
                                 Text {
                                     text: (index + 1) + "."
@@ -245,6 +286,8 @@ Dialog {
                                     text: mamWindow.queueFreq(modelData) + " Hz"
                                     font.pixelSize: 11
                                     color: textSecondary
+                                    Layout.preferredWidth: 58
+                                    horizontalAlignment: Text.AlignRight
                                 }
 
                                 Text {
@@ -252,6 +295,29 @@ Dialog {
                                     text: mamWindow.queueSnr(modelData) + " dB"
                                     font.pixelSize: 11
                                     color: textSecondary
+                                    Layout.preferredWidth: 42
+                                    horizontalAlignment: Text.AlignRight
+                                }
+
+                                QueueMoveButton {
+                                    symbol: "⇧"
+                                    tip: "Porta al primo posto"
+                                    active: index > 0
+                                    onTriggered: if (mamWindow.engine) mamWindow.engine.moveCallerQueueItem(index, 0)
+                                }
+
+                                QueueMoveButton {
+                                    symbol: "↑"
+                                    tip: "Sposta su"
+                                    active: index > 0
+                                    onTriggered: if (mamWindow.engine) mamWindow.engine.moveCallerQueueItem(index, index - 1)
+                                }
+
+                                QueueMoveButton {
+                                    symbol: "↓"
+                                    tip: "Sposta giù"
+                                    active: index < queueList.count - 1
+                                    onTriggered: if (mamWindow.engine) mamWindow.engine.moveCallerQueueItem(index, index + 1)
                                 }
                             }
                         }
@@ -264,7 +330,7 @@ Dialog {
                         Text {
                             anchors.centerIn: parent
                             visible: mamWindow.mamQueueCount === 0
-                            text: "No queued callers"
+                            text: mamWindow.mamQueueActive ? "No queued callers" : "Queue inactive"
                             font.pixelSize: 12
                             color: textSecondary
                         }

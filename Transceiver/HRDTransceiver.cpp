@@ -933,6 +933,22 @@ void HRDTransceiver::set_dropdown (int dd, int value)
 void HRDTransceiver::do_ptt (bool on)
 {
   CAT_TRACE (on);
+  if (on)
+    {
+      auto ptt_mode = state ().mode ();
+      auto const now_ms = QDateTime::currentMSecsSinceEpoch ();
+      if (!hrd_is_data_mode (ptt_mode)
+          && pending_data_mode_ != UNK
+          && now_ms <= pending_data_mode_until_ms_)
+        {
+          ptt_mode = pending_data_mode_;
+        }
+      if (hrd_is_data_mode (ptt_mode))
+        {
+          hrd_diag (QStringLiteral ("PTT data-mode guard mode=%1").arg (ptt_mode));
+          set_data_mode (ptt_mode);
+        }
+    }
   if (use_for_ptt_)
     {
       if (alt_ptt_button_ >= 0 && TransceiverFactory::TX_audio_source_rear == audio_source_)
@@ -1069,6 +1085,15 @@ auto HRDTransceiver::get_data_mode (MODE m) -> MODE
                && now_ms <= pending_data_mode_until_ms_
                && hrd_data_carrier_matches (pending_data_mode_, m))
         {
+          if (data_mode_dropdown_selection_on_.size ())
+            {
+              hrd_diag (QStringLiteral ("HRD reported Data Off while mode %1 is pending on carrier %2; reasserting Data selection %3")
+                        .arg (pending_data_mode_)
+                        .arg (m)
+                        .arg (data_mode_dropdown_selection_on_.front ()));
+              set_dropdown (data_mode_dropdown_, data_mode_dropdown_selection_on_.front ());
+              pending_data_mode_until_ms_ = now_ms + hrd_data_mode_settle_ms;
+            }
           return pending_data_mode_;
         }
     }
@@ -1217,6 +1242,10 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
         }
     }
   update_other_frequency (tx);
+  if (hrd_is_data_mode (mode))
+    {
+      set_data_mode (mode);
+    }
 
   if (split_mode_button_ >= 0)
     {
