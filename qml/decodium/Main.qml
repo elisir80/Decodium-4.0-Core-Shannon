@@ -418,6 +418,45 @@ ApplicationWindow {
         bridge.saveWindowState("decoSyncMonitorWindow", Math.round(decoSyncMonitorWindow.x), Math.round(decoSyncMonitorWindow.y), Math.round(decoSyncMonitorWindow.width), Math.round(decoSyncMonitorWindow.height), false, decoSyncMonitorWindow.visibility === Window.Minimized)
     }
 
+    // 1.0.263 (fork-only) — Reset Layout: ricevi signal dal backend e ripristina
+    // tutte le floating windows a docked + centra mainWindow sul primary screen.
+    Connections {
+        target: bridge
+        function onWindowLayoutResetRequested() {
+            console.log("[ResetLayout] applying default layout")
+            // 1) Re-dock di tutte le finestre floating (toglie detached + minimized)
+            waterfallDetached = false;   waterfallMinimized = false
+            logWindowDetached = false;   logWindowMinimized = false
+            astroWindowDetached = false; astroWindowMinimized = false
+            macroDialogDetached = false; macroDialogMinimized = false
+            rigControlDetached = false;  rigControlMinimized = false
+            period1Detached = false;     period1Minimized = false
+            period2Detached = false;     period2Minimized = false
+            rxFreqDetached = false;      rxFreqMinimized = false
+            txPanelDetached = false;     txPanelMinimized = false
+            liveMapDetached = false;     liveMapMinimized = false
+
+            // 2) Centra mainWindow su primary screen con dimensioni default
+            var geo = bridge.primaryScreenAvailableGeometry()
+            if (geo && geo.width && geo.height) {
+                var dw = Math.min(1600, Math.max(1024, geo.width  - 100))
+                var dh = Math.min(1000, Math.max(720,  geo.height - 100))
+                visibility = Window.Windowed
+                width  = dw
+                height = dh
+                x = geo.x + Math.round((geo.width  - dw) / 2)
+                y = geo.y + Math.round((geo.height - dh) / 2)
+            } else {
+                visibility = Window.Windowed
+                width = 1280; height = 800; x = 100; y = 100
+            }
+            raise(); requestActivate()
+
+            // 3) Forza salvataggio nuovo state pulito (sovrascrive QSettings)
+            Qt.callLater(persistWindowLayouts)
+        }
+    }
+
     // Salva impostazioni bridge al close
     onClosing: function(close) {
         saveTimer.stop()

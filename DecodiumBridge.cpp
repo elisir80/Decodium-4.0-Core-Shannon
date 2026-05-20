@@ -20651,6 +20651,20 @@ void DecodiumBridge::saveWindowState(const QString& key,
     s.sync();
 }
 
+// 1.0.263 (fork-only) — Reset Layout
+// Cancella tutto il gruppo "WindowState" da QSettings (rimuove coords/dimensioni
+// di tutte le finestre floating salvate) e segnala al QML di ripristinare i
+// default e ri-dockare le finestre. Usato quando una o piu' finestre finiscono
+// su un monitor disconnesso o fuori dall'area visibile.
+void DecodiumBridge::resetWindowLayout()
+{
+    QSettings s;
+    s.remove(QStringLiteral("WindowState"));
+    s.sync();
+    bridgeLog(QStringLiteral("resetWindowLayout: tutte le WindowState/* cancellate, signal emesso"));
+    emit windowLayoutResetRequested();
+}
+
 QVariantMap DecodiumBridge::primaryScreenAvailableGeometry() const
 {
     QVariantMap geometry;

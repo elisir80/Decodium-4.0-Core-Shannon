@@ -311,6 +311,39 @@ Rectangle {
                     radius: 8
                 }
             }
+
+            // 1.0.263 (fork-only) — Reset Layout: ricolloca tutte le finestre floating
+            // a docked + ricentra mainWindow sul primary screen. Utile se le finestre
+            // finiscono su un monitor disconnesso o fuori area visibile.
+            Button {
+                id: resetLayoutButton
+                text: "Layout"
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Reset Layout\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale")
+                ToolTip.delay: 500
+                onClicked: resetLayoutConfirm.open()
+                background: Rectangle {
+                    color: glassOverlay
+                    border.color: glassBorder
+                    radius: 8
+                }
+            }
+
+            Dialog {
+                id: resetLayoutConfirm
+                title: qsTr("Reset Layout")
+                modal: true
+                standardButtons: Dialog.Yes | Dialog.No
+                anchors.centerIn: Overlay.overlay
+                onAccepted: { if (bridge) bridge.resetWindowLayout() }
+                contentItem: Text {
+                    text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
+                    color: textPrimary
+                    wrapMode: Text.WordWrap
+                    width: 360
+                }
+            }
+
             // Raptor: Async Decode indicator
             Rectangle {
                 width: 24; height: 24; radius: 12

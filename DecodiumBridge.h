@@ -1059,6 +1059,11 @@ public:
                                      int height,
                                      bool detached,
                                      bool minimized);
+    // 1.0.263 (fork-only) — cancella tutte le WindowState/* salvate e emette signal
+    // windowLayoutResetRequested(): il QML poi ripristina default position+size e re-docka
+    // tutte le finestre floating. Utile quando le finestre finiscono su monitor disconnessi
+    // o fuori area visibile.
+    Q_INVOKABLE void resetWindowLayout();
     Q_INVOKABLE QVariantMap primaryScreenAvailableGeometry() const;
     Q_INVOKABLE QString version() const;
 
@@ -1189,6 +1194,8 @@ signals:
     void targetCallPeriodChanged();
     void targetCallPauseSChanged();
     void targetCallRetryCountChanged();
+    // 1.0.263 (fork-only) — signal QML per re-dock + reset position di tutte le floating windows
+    void windowLayoutResetRequested();
     void asyncTxEnabledChanged();
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
