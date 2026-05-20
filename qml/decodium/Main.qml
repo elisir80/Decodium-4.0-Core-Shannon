@@ -1961,6 +1961,48 @@ ApplicationWindow {
                     }
                 }
 
+                // 1.0.264 fork reset layout button: this is the inline header that Main.qml actually uses.
+                Item {
+                    width: 116
+                    height: 74
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 108
+                        height: 28
+                        radius: 6
+                        color: resetLayoutButtonMA.containsMouse
+                               ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.28)
+                               : Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.14)
+                        border.color: accentOrange
+                        border.width: 2
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "LAYOUT RESET"
+                            color: accentOrange
+                            font.bold: true
+                            font.pixelSize: 10
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        MouseArea {
+                            id: resetLayoutButtonMA
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: resetLayoutConfirmDialog.open()
+                        }
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                        ToolTip.visible: resetLayoutButtonMA.containsMouse
+                        ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.\nUsa questo se hai finestre perse fuori monitor.")
+                        ToolTip.delay: 300
+                    }
+                }
+
                 // Radio Frequency Display with CAT status
                 Rectangle {
                     width: bridge.catConnected ? 340 : 290
@@ -6654,6 +6696,42 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             tuning: bridge ? bridge.tuning : false
             decoding: bridge ? bridge.decoding : false
             catStatus: bridge && bridge.catConnected ? "Connected" : "Disconnected"
+        }
+    }
+
+    Dialog {
+        id: resetLayoutConfirmDialog
+        modal: true
+        width: Math.max(360, Math.min(parent ? parent.width - 48 : 520, 520))
+        implicitWidth: 480
+        implicitHeight: 190
+        anchors.centerIn: parent
+        title: qsTr("Reset Layout")
+        standardButtons: Dialog.Yes | Dialog.No
+
+        background: Rectangle {
+            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            border.color: accentOrange
+            border.width: 1
+            radius: 8
+        }
+
+        contentItem: Item {
+            implicitWidth: 440
+            implicitHeight: 92
+
+            Text {
+                anchors.fill: parent
+                text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
+                color: textPrimary
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        onAccepted: {
+            if (bridge)
+                bridge.resetWindowLayout()
         }
     }
 

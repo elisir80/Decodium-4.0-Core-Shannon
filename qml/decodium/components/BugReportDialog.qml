@@ -129,7 +129,7 @@ Dialog {
                 readOnly: true
                 color: "#999"
                 font.pixelSize: 11
-                font.family: "Consolas"
+                font.family: decodiumMonoFontFamily
                 wrapMode: TextArea.Wrap
                 background: Rectangle { color: "#1e1e2e"; radius: 4 }
             }

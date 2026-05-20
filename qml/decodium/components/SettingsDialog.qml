@@ -3378,7 +3378,7 @@ Dialog {
                             text: bridge.webServerUrl() || "(non attivo)"
                             color: bridge.webServerRunning() ? accentGreen : textSecondary
                             font.pixelSize: 12
-                            font.family: Qt.platform.os === "osx" ? "Menlo" : (Qt.platform.os === "windows" ? "Consolas" : "DejaVu Sans Mono")
+                            font.family: decodiumMonoFontFamily
                             Layout.columnSpan: 3
                             Layout.fillWidth: true
                         }

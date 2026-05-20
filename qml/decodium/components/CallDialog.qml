@@ -91,7 +91,7 @@ Window {
                     color: callDialog.cText
                     font.pixelSize: 18
                     font.bold: true
-                    font.family: "Consolas"
+                    font.family: decodiumMonoFontFamily
                     selectByMouse: true
                     background: Rectangle {
                         color: callDialog.cFieldBg

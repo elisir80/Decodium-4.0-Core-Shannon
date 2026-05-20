@@ -3610,6 +3610,20 @@ static int minimumUsefulSyncPayloadMs(const QString& mode)
     return 0;
 }
 
+static int ft2AsyncTxStartSafetyMs()
+{
+    return 300;
+}
+
+static int latestFt2AsyncTxStartMs(int periodMs)
+{
+    int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
+    if (periodMs <= 0 || payloadMs <= 0) {
+        return 0;
+    }
+    return qMax(0, periodMs - payloadMs - ft2AsyncTxStartSafetyMs());
+}
+
 static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
 {
     if (periodMs <= 0) {
@@ -11860,6 +11874,141 @@ bool DecodiumBridge::isSyncTxStartTooLate(int* elapsedMsOut, int* latestStartMsO
     return elapsedMs >= latestStartMs;
 }
 
+bool DecodiumBridge::isFt2AsyncTxStartTooLate(int* elapsedMsOut,
+                                              int* latestStartMsOut,
+                                              int* delayToNextSlotMsOut) const
+{
+    if (elapsedMsOut) {
+        *elapsedMsOut = -1;
+    }
+    if (latestStartMsOut) {
+        *latestStartMsOut = 0;
+    }
+    if (delayToNextSlotMsOut) {
+        *delayToNextSlotMsOut = 0;
+    }
+
+    if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled) {
+        return false;
+    }
+
+    int const periodMs = periodMsForMode(m_mode);
+    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs);
+    if (latestStartMsOut) {
+        *latestStartMsOut = latestStartMs;
+    }
+    if (periodMs <= 0 || latestStartMs <= 0) {
+        return false;
+    }
+
+    qint64 const nowMs = correctedUtcEpochMs();
+    int const elapsedMs = static_cast<int>(nowMs % static_cast<qint64>(periodMs));
+    int delayMs = periodMs - elapsedMs + 40;
+    if (delayMs <= 40 || delayMs > periodMs + 40) {
+        delayMs = periodMs + 40;
+    }
+
+    if (elapsedMsOut) {
+        *elapsedMsOut = elapsedMs;
+    }
+    if (delayToNextSlotMsOut) {
+        *delayToNextSlotMsOut = delayMs;
+    }
+    return elapsedMs >= latestStartMs;
+}
+
+qint64 DecodiumBridge::safeFt2AsyncTxDelay(qint64 requestedDelayMs, QString* adjustmentOut) const
+{
+    if (adjustmentOut) {
+        adjustmentOut->clear();
+    }
+    if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled) {
+        return requestedDelayMs;
+    }
+
+    int const periodMs = periodMsForMode(m_mode);
+    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs);
+    if (periodMs <= 0 || latestStartMs <= 0) {
+        return requestedDelayMs;
+    }
+
+    qint64 const safeRequestedDelay = qMax<qint64>(0, requestedDelayMs);
+    qint64 const nowMs = correctedUtcEpochMs();
+    int const elapsedMs = static_cast<int>(nowMs % static_cast<qint64>(periodMs));
+    int const targetElapsedMs =
+        static_cast<int>((nowMs + safeRequestedDelay) % static_cast<qint64>(periodMs));
+    if (targetElapsedMs < latestStartMs) {
+        return requestedDelayMs;
+    }
+
+    int delayMs = periodMs - elapsedMs + 40;
+    if (delayMs <= 40 || delayMs > periodMs + 40) {
+        delayMs = periodMs + 40;
+    }
+    if (adjustmentOut) {
+        *adjustmentOut = QStringLiteral("FT2-safe-slot target=%1ms latest=%2ms")
+                             .arg(targetElapsedMs)
+                             .arg(latestStartMs);
+    }
+    return delayMs;
+}
+
+void DecodiumBridge::scheduleFt2AsyncTxAtNextSafeSlot(const QString& reason,
+                                                      int elapsedMs,
+                                                      int latestStartMs,
+                                                      int delayMs)
+{
+    if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled || !m_txEnabled || m_manualTxHold) {
+        return;
+    }
+
+    if (elapsedMs < 0 || latestStartMs <= 0 || delayMs <= 0) {
+        int computedElapsedMs = -1;
+        int computedLatestStartMs = 0;
+        int computedDelayMs = 0;
+        isFt2AsyncTxStartTooLate(&computedElapsedMs, &computedLatestStartMs, &computedDelayMs);
+        if (elapsedMs < 0) {
+            elapsedMs = computedElapsedMs;
+        }
+        if (latestStartMs <= 0) {
+            latestStartMs = computedLatestStartMs;
+        }
+        if (delayMs <= 0) {
+            delayMs = computedDelayMs;
+        }
+    }
+
+    if (delayMs <= 0) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("FT2 async late TX guard: defer TX%1 (%2) elapsed=%3ms latest=%4ms delay=%5ms")
+                  .arg(m_currentTx)
+                  .arg(reason)
+                  .arg(elapsedMs)
+                  .arg(latestStartMs)
+                  .arg(delayMs));
+    scheduleTxAudioPrecompute(qMin(delayMs, 250));
+
+    if (m_periodicTxCheckScheduled) {
+        return;
+    }
+    m_periodicTxCheckScheduled = true;
+    QTimer::singleShot(delayMs, this, [this, reason]() {
+        m_periodicTxCheckScheduled = false;
+        if (m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && m_txEnabled
+            && !m_manualTxHold
+            && !m_transmitting
+            && !m_tuning) {
+            bridgeLog(QStringLiteral("FT2 async late TX guard: retry at safe slot (%1)")
+                          .arg(reason));
+            checkAndStartPeriodicTx();
+        }
+    });
+}
+
 void DecodiumBridge::resetTxAudioTelemetry(quint64 txSerial, qint64 audioStartWallMs, qint64 expectedUs,
                                            int slotElapsedMs, int leadInMs, int payloadDelayMs,
                                            qint64 pcmBytes, qsizetype sinkBufferSize,
@@ -12424,6 +12573,21 @@ void DecodiumBridge::startTx()
     if (m_monitoring) {
         int elapsedMs = -1;
         int latestStartMs = 0;
+        int ft2AsyncDelayMs = 0;
+        if (isFt2AsyncTxStartTooLate(&elapsedMs, &latestStartMs, &ft2AsyncDelayMs)) {
+            bridgeLog(QStringLiteral("startTx: skipped late FT2 async TX%1 elapsed=%2ms latest=%3ms msg=[%4]")
+                          .arg(m_currentTx)
+                          .arg(elapsedMs)
+                          .arg(latestStartMs)
+                          .arg(msg.trimmed()));
+            scheduleFt2AsyncTxAtNextSafeSlot(QStringLiteral("startTx"),
+                                             elapsedMs,
+                                             latestStartMs,
+                                             ft2AsyncDelayMs);
+            emit statusMessage(QStringLiteral("TX%1 FT2 rimandato: slot troppo avanzato")
+                               .arg(m_currentTx));
+            return;
+        }
         if (isSyncTxStartTooLate(&elapsedMs, &latestStartMs)) {
             bridgeLog(QStringLiteral("startTx: skipped late %1 TX%2 elapsed=%3ms latest=%4ms msg=[%5]")
                           .arg(m_mode)
@@ -18059,6 +18223,9 @@ void DecodiumBridge::engageManualTxHold(const QString& reason, bool clearQueue)
     m_autoCQPeriodsMissed = 0;
     m_logAfterOwn73 = false;
     m_ft2DeferredLogPending = false;
+    if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
+        clearFt2AsyncAbortQsoState(QStringLiteral("manualTxHold: %1").arg(reason));
+    }
     QString staleDeferredReason;
     bool const keepDeferredAutoSeq = shouldPreserveDeferredAutoSeqTxForRearm(&staleDeferredReason);
     if (keepDeferredAutoSeq) {
@@ -18092,6 +18259,70 @@ void DecodiumBridge::clearManualTxHold(const QString& reason)
     }
     m_manualTxHold = false;
     bridgeLog(QStringLiteral("manualTxHold: cleared (%1)").arg(reason));
+}
+
+void DecodiumBridge::clearFt2AsyncAbortQsoState(const QString& reason)
+{
+    if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled) {
+        return;
+    }
+
+    bool const hadQsoState =
+        m_qsoProgress > 1
+        || !m_dxCall.trimmed().isEmpty()
+        || m_pendingAutoSeqTxAfterActiveTx != 0
+        || !m_pendingAutoSeqMessage.trimmed().isEmpty()
+        || !m_lastTransmittedMessage.trimmed().isEmpty()
+        || m_lastNtx != -1
+        || m_txRetryCount != 0
+        || m_nTx73 != 0
+        || m_logAfterOwn73
+        || m_ft2DeferredLogPending;
+    if (!hadQsoState) {
+        return;
+    }
+
+    QString const activeCall = m_dxCall.trimmed();
+    bridgeLog(QStringLiteral("FT2 async abort cleanup (%1): active=%2 progress=%3 tx=%4 retry=%5")
+                  .arg(reason,
+                       activeCall.isEmpty() ? QStringLiteral("<none>") : activeCall)
+                  .arg(m_qsoProgress)
+                  .arg(m_currentTx)
+                  .arg(m_txRetryCount));
+
+    clearDeferredManualSyncTx(reason);
+    clearPendingAutoSeqTx(reason);
+    clearPendingAutoLogSnapshot();
+    clearLateAutoLogSnapshot();
+    clearAutoCqPartnerLock();
+
+    m_txRetryCount = 0;
+    m_lastNtx = -1;
+    m_lastCqPidx = -1;
+    m_nTx73 = 0;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    m_autoSeqRogerReportBase.clear();
+    m_logAfterOwn73 = false;
+    m_ft2DeferredLogPending = false;
+    m_quickPeerSignaled = false;
+    m_qsoLogged = false;
+    m_lastTransmittedMessage.clear();
+    m_activeTxNumber = 0;
+    m_activeTxMessage.clear();
+    m_qsoStartedOn = QDateTime {};
+    m_asyncLastTxEndMs = 0;
+    m_ft2AsyncLastDecodeMs = 0;
+    m_ft2AsyncFirstDecodeMs = 0;
+    m_ft2AsyncAudioQuietRuns = 0;
+
+    setDxCall(QString());
+    setDxGrid(QString());
+    if (m_qsoProgress != 0) {
+        m_qsoProgress = 0;
+        emit qsoProgressChanged();
+    }
+    setCurrentTx(m_tx6.trimmed().isEmpty() ? 1 : 6);
 }
 
 void DecodiumBridge::resetManualTxRearmState(const QString& reason)
@@ -18754,6 +18985,12 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         strategy = QStringLiteral("S4-jitter");
     }
     if (finalDelay > 2500) finalDelay = 2500;  // S5 cap
+    QString safeSlotAdjustment;
+    qint64 const safeFinalDelay = safeFt2AsyncTxDelay(finalDelay, &safeSlotAdjustment);
+    if (safeFinalDelay != finalDelay) {
+        strategy += QStringLiteral("+") + safeSlotAdjustment;
+        finalDelay = safeFinalDelay;
+    }
 
     bridgeLog(QStringLiteral("smartFt2Tx [%1]: slotDelay=%2 rmsQuiet=%3 decodeQuiet=%4ms strategy=%5 final=%6ms")
               .arg(reason)
@@ -18779,6 +19016,13 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         if (allClear) {
             bridgeLog(QStringLiteral("smartFt2Tx: gates clear after wait, TX now (decodeQuiet=%1ms quietRuns=%2)")
                       .arg(decodeQuietMs2).arg(m_ft2AsyncAudioQuietRuns));
+            int elapsedMs = -1;
+            int latestStartMs = 0;
+            int delayMs = 0;
+            if (isFt2AsyncTxStartTooLate(&elapsedMs, &latestStartMs, &delayMs)) {
+                scheduleFt2AsyncTxAtNextSafeSlot(QStringLiteral("smartFt2Tx"), elapsedMs, latestStartMs, delayMs);
+                return;
+            }
             checkAndStartPeriodicTx();
         } else {
             // Gates ancora non puliti — re-schedule (max 1 retry)
@@ -18962,8 +19206,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     }
 
     // FT2 async mode:
-    // - Per risposte QSO (m_txEnabled, stazione DX nota): salta il controllo di periodo
-    //   → risposta immediata alla stazione partner senza aspettare il boundary
+    // - Per risposte QSO (m_txEnabled, stazione DX nota): salta solo la
+    //   parita' periodo, ma mantiene il guard "late start" separato sotto.
+    //   Risposta rapida sì, avvio a fine slot no.
     // - Per AutoCQ (nessuna stazione DX): usa il controllo di periodo normale
     //   → evita loop CQ continuo (CQ ogni 3.75s senza pausa RX)
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
@@ -19024,6 +19269,16 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             }
             qint64 const waitMs = static_cast<qint64>(periodMs * waitFactor);
             if (m_currentTx == m_lastNtx && elapsed < waitMs) return;
+        }
+        int elapsedMs = -1;
+        int latestStartMs = 0;
+        int delayMs = 0;
+        if (isFt2AsyncTxStartTooLate(&elapsedMs, &latestStartMs, &delayMs)) {
+            scheduleFt2AsyncTxAtNextSafeSlot(QStringLiteral("checkAndStartPeriodicTx"),
+                                             elapsedMs,
+                                             latestStartMs,
+                                             delayMs);
+            return;
         }
     }
 
@@ -19095,6 +19350,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             clearPendingAutoSeqTx(retryReason);
             forgetPartnerMemoryForCall(abandonedPartner, retryReason);
             clearAutoCqPartnerLock();
+            if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
+                clearFt2AsyncAbortQsoState(retryReason);
+            }
             // clearDX: azzera dxCall (stazione non raggiungibile)
             setDxCall(QString());
             setDxGrid(QString());

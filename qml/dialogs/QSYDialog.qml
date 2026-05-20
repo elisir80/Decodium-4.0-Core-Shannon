@@ -68,7 +68,7 @@ Dialog {
             Layout.leftMargin: 12
             Layout.topMargin: 8
             text: "Current band: " + currentBand + "  •  Mode: " + currentMode
-            font.family: "Consolas"
+            font.family: decodiumMonoFontFamily
             font.pixelSize: 11
             color: "#90A4AE"
         }
@@ -76,7 +76,7 @@ Dialog {
         Text {
             Layout.leftMargin: 12
             text: "SUGGESTED FREQUENCIES"
-            font.family: "Consolas"
+            font.family: decodiumMonoFontFamily
             font.pixelSize: 10
             font.letterSpacing: 2
             color: "#546E7A"
@@ -133,7 +133,7 @@ Dialog {
 
                     Text {
                         text: modelData.band
-                        font.family: "Consolas"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 11
                         font.bold: true
                         color: modelData.isCurrent ? "#00BCD4" : "#ECEFF1"
@@ -142,7 +142,7 @@ Dialog {
 
                     Text {
                         text: modelData.dial.toFixed(1) + " kHz"
-                        font.family: "Consolas"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 12
                         color: "#00BCD4"
                         Layout.fillWidth: true
@@ -150,7 +150,7 @@ Dialog {
 
                     Text {
                         text: modelData.mode
-                        font.family: "Consolas"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 10
                         font.bold: true
                         color: modelData.mode === currentMode ? "#69F0AE" : "#78909C"
@@ -173,7 +173,7 @@ Dialog {
             }
             contentItem: Text {
                 text: parent.text; color: "#90A4AE"
-                font.family: "Consolas"; font.pixelSize: 11
+                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                 horizontalAlignment: Text.AlignHCenter
             }
         }

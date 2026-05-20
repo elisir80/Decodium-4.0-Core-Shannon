@@ -198,6 +198,46 @@ static QString graphicsStartupPendingFlagPath()
         .absoluteFilePath(QStringLiteral("decodium-gpu-startup-pending.flag"));
 }
 
+static QString persistentD3d11FallbackKey()
+{
+    return QStringLiteral("Graphics/PersistentD3D11FallbackAfterD3D12Failure");
+}
+
+static QString persistentD3d11FallbackReasonKey()
+{
+    return QStringLiteral("Graphics/PersistentD3D11FallbackReason");
+}
+
+static QString persistentD3d11FallbackUtcKey()
+{
+    return QStringLiteral("Graphics/PersistentD3D11FallbackUtc");
+}
+
+static bool persistentD3d11FallbackEnabled()
+{
+    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    return settings.value(persistentD3d11FallbackKey(), false).toBool();
+}
+
+static void writePersistentD3d11Fallback(const QString& reason)
+{
+    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    settings.setValue(persistentD3d11FallbackKey(), true);
+    settings.setValue(persistentD3d11FallbackReasonKey(), reason);
+    settings.setValue(persistentD3d11FallbackUtcKey(),
+                      QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs));
+    settings.sync();
+}
+
+static void clearPersistentD3d11Fallback()
+{
+    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    settings.remove(persistentD3d11FallbackKey());
+    settings.remove(persistentD3d11FallbackReasonKey());
+    settings.remove(persistentD3d11FallbackUtcKey());
+    settings.sync();
+}
+
 static QString startupLogPath()
 {
     return QDir {QStandardPaths::writableLocation(QStandardPaths::TempLocation)}
@@ -539,11 +579,16 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
     if (msg.contains(QStringLiteral("Failed to create D3D12 device"), Qt::CaseInsensitive)
         || (msg.contains(QStringLiteral("D3D12"), Qt::CaseInsensitive)
             && msg.contains(QStringLiteral("0x887a0004"), Qt::CaseInsensitive))) {
-        g_windowsD3d12DeviceFailed.store(true, std::memory_order_relaxed);
-        writeWindowsGraphicsStartupFlag(
-            graphicsStartupPendingFlagPath(),
-            QByteArrayLiteral("d3d12"),
-            QByteArrayLiteral("D3D12 device creation failed; retry with D3D11 hardware on next launch"));
+        bool const firstFailure = !g_windowsD3d12DeviceFailed.exchange(true, std::memory_order_relaxed);
+        if (firstFailure) {
+            QString const reason =
+                QStringLiteral("D3D12 device creation failed; use persistent D3D11 hardware fallback");
+            writeWindowsGraphicsStartupFlag(graphicsStartupPendingFlagPath(),
+                                            QByteArrayLiteral("d3d12"),
+                                            reason.toLocal8Bit());
+            writePersistentD3d11Fallback(reason);
+            L("Windows D3D12 device failure persisted; automatic launches will use D3D11 hardware renderer");
+        }
     }
 #endif
     if (g_shuttingDown.load(std::memory_order_relaxed) && isIgnorableShutdownQmlMessage(msg))
@@ -739,6 +784,7 @@ int main(int argc, char* argv[])
     if (commandLineResetSafeGraphics) {
         removeFileIfExists(slowQmlStartupFlag);
         removeFileIfExists(graphicsStartupPendingFlag);
+        clearPersistentD3d11Fallback();
     }
     auto normalizedBackend = [] (const char* name) -> QByteArray {
         return qEnvironmentVariableIsSet(name) ? qgetenv(name).trimmed().toLower() : QByteArray {};
@@ -799,18 +845,24 @@ int main(int argc, char* argv[])
         pendingGraphicsStartupMarker ? graphicsStartupFlagBackend(graphicsStartupPendingFlag) : QByteArray {};
     bool const pendingGraphicsWasD3d11 =
         pendingGraphicsBackend == QByteArrayLiteral("d3d11");
+    bool const persistentD3d11Fallback =
+        !commandLineResetSafeGraphics && persistentD3d11FallbackEnabled();
     bool const explicitGraphicsBackend =
         !decodiumGraphicsBackend.isEmpty()
         || !requestedRhiBackend.isEmpty()
         || !requestedQuickBackend.isEmpty();
     bool const slowQmlStartupMarker = QFile::exists(slowQmlStartupFlag);
     bool const previousSlowQmlStartup = previousStartupLogShowsSlowQml();
+    bool const persistentD3d11FallbackUsable =
+        persistentD3d11Fallback
+        && !(pendingGraphicsStartupMarker && pendingGraphicsWasD3d11);
     bool const automaticD3d11Fallback =
         !commandLineResetSafeGraphics
-        && !pendingGraphicsWasD3d11
-        && (pendingGraphicsStartupMarker
-            || slowQmlStartupMarker
-            || previousSlowQmlStartup)
+        && (persistentD3d11FallbackUsable
+            || (!pendingGraphicsWasD3d11
+                && (pendingGraphicsStartupMarker
+                    || slowQmlStartupMarker
+                    || previousSlowQmlStartup)))
         && !envSafeGraphics
         && !commandLineSafeGraphics
         && !backendRequestsSoftware
@@ -852,9 +904,13 @@ int main(int argc, char* argv[])
         if (requestedQuickBackend.isEmpty() && qgetenv("QT_OPENGL").trimmed().toLower() == "software") {
             qunsetenv("QT_OPENGL");
         }
-        L(("Qt Quick graphics auto-fallback after previous D3D12 startup/device problem: "
-           "using D3D11 hardware renderer; marker="
-           + graphicsStartupPendingFlag.toLocal8Bit()).constData());
+        if (persistentD3d11FallbackUsable) {
+            L("Qt Quick graphics persistent D3D12-failure fallback: using D3D11 hardware renderer");
+        } else {
+            L(("Qt Quick graphics auto-fallback after previous D3D12 startup/device problem: "
+               "using D3D11 hardware renderer; marker="
+               + graphicsStartupPendingFlag.toLocal8Bit()).constData());
+        }
     } else if (qEnvironmentVariableIsSet("QSG_RHI_BACKEND")) {
         QByteArray backendMessage("Qt Quick graphics backend from environment: ");
         backendMessage += qgetenv("QSG_RHI_BACKEND");
@@ -1000,7 +1056,7 @@ int main(int argc, char* argv[])
         QStringLiteral("Use the Windows software graphics renderer for Qt Quick startup troubleshooting."));
     QCommandLineOption const resetSafeGraphicsOption(
         QStringList {} << "reset-safe-graphics",
-        QStringLiteral("Clear the automatic Windows safe graphics startup marker."));
+        QStringLiteral("Clear automatic Windows safe graphics and persistent D3D11 fallback markers."));
     parser.addOption(rigOption);
     parser.addOption(configOption);
     parser.addOption(languageOption);
@@ -1397,15 +1453,19 @@ int main(int argc, char* argv[])
     if (!safeGraphicsRequested || automaticSafeGraphics || automaticD3d11Fallback) {
         QTimer::singleShot(8000, &app, [graphicsStartupPendingFlag,
                                         slowQmlStartupFlag,
+                                        persistentD3d11FallbackUsable,
                                         automaticSafeGraphics,
                                         automaticD3d11Fallback] {
             if (QFile::exists(graphicsStartupPendingFlag)) {
                 if (g_windowsD3d12DeviceFailed.load(std::memory_order_relaxed)) {
-                    L("Windows D3D12 device failure observed; keeping graphics startup marker for D3D11 fallback on next launch");
+                    L("Windows D3D12 device failure observed; persistent D3D11 fallback kept for future launches");
                 } else {
                     QFile::remove(graphicsStartupPendingFlag);
                     L("Windows graphics startup completed; startup marker cleared");
                 }
+            }
+            if (persistentD3d11FallbackUsable) {
+                L("Windows persistent D3D11 fallback remains active; use --reset-safe-graphics to retry D3D12");
             }
             if (automaticSafeGraphics && QFile::exists(slowQmlStartupFlag)) {
                 QFile::remove(slowQmlStartupFlag);

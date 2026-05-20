@@ -83,7 +83,7 @@ Rectangle {
             text: root.buildStatusText()
             color: textPrimary
             font.pixelSize: 11
-            font.family: Qt.platform.os === "osx" ? "Menlo" : (Qt.platform.os === "windows" ? "Consolas" : "DejaVu Sans Mono")
+            font.family: decodiumMonoFontFamily
             Layout.fillWidth: true
         }
 
@@ -107,7 +107,7 @@ Rectangle {
                     var n = offsetHistory.length
                     if (n < 2) {
                         ctx.fillStyle = "rgba(150, 165, 180, 0.4)"
-                        ctx.font = "10px Consolas"
+                        ctx.font = "10px \"" + decodiumMonoFontFamily + "\""
                         ctx.fillText("Acquisizione dati…", width / 2 - 50, height / 2)
                         return
                     }
@@ -143,7 +143,7 @@ Rectangle {
                     ctx.stroke()
                     // Min/max labels
                     ctx.fillStyle = "rgba(154, 164, 175, 0.85)"
-                    ctx.font = "9px Consolas"
+                    ctx.font = "9px \"" + decodiumMonoFontFamily + "\""
                     ctx.fillText(maxV.toFixed(1) + " ms", 4, 10)
                     ctx.fillText(minV.toFixed(1) + " ms", 4, height - 4)
                 }

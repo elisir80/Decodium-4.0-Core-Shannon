@@ -169,7 +169,7 @@ Window {
                             Text {
                                 text: modelData.frequencyMHz + " MHz"
                                 color: "#ffffff"
-                                font.family: Qt.platform.os === "osx" ? "Menlo" : (Qt.platform.os === "windows" ? "Consolas" : "DejaVu Sans Mono")
+                                font.family: decodiumMonoFontFamily
                                 font.pixelSize: 13
                                 Layout.preferredWidth: 130
                             }

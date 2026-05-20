@@ -64,7 +64,7 @@ Dialog {
 
                     Text {
                         text: modelData.label
-                        font.family: "Consolas"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 12
                         color: "#ECEFF1"
                         Layout.preferredWidth: 180
@@ -93,7 +93,7 @@ Dialog {
                     // Etichetta colore corrente
                     Text {
                         text: bridge[modelData.prop] || modelData.defaultColor
-                        font.family: "Consolas"
+                        font.family: decodiumMonoFontFamily
                         font.pixelSize: 11
                         color: "#90A4AE"
                     }
@@ -109,7 +109,7 @@ Dialog {
 
                 Text {
                     text: "B4 Strikethrough:"
-                    font.family: "Consolas"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 12
                     color: "#ECEFF1"
                     Layout.preferredWidth: 180
@@ -128,7 +128,7 @@ Dialog {
 
                 Text {
                     text: "Alert Sounds:"
-                    font.family: "Consolas"
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 12
                     color: "#ECEFF1"
                     Layout.preferredWidth: 180
@@ -167,7 +167,7 @@ Dialog {
 
             Text {
                 text: "Hex color (#RRGGBB):"
-                font.family: "Consolas"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 11
                 color: "#B0BEC5"
             }
@@ -177,7 +177,7 @@ Dialog {
                 width: 240
                 text: colorPickerDialog.currentHex
                 placeholderText: "#RRGGBB"
-                font.family: "Consolas"
+                font.family: decodiumMonoFontFamily
                 font.pixelSize: 13
                 background: Rectangle {
                     color: Qt.rgba(1,1,1,0.08)

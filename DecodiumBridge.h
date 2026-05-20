@@ -2527,6 +2527,15 @@ private:
     void finishModulatorIdlePlayback(const QString& reason);
     bool shouldAlignTxAudioToCurrentSyncSlot() const;
     bool isSyncTxStartTooLate(int* elapsedMsOut = nullptr, int* latestStartMsOut = nullptr) const;
+    bool isFt2AsyncTxStartTooLate(int* elapsedMsOut = nullptr,
+                                  int* latestStartMsOut = nullptr,
+                                  int* delayToNextSlotMsOut = nullptr) const;
+    qint64 safeFt2AsyncTxDelay(qint64 requestedDelayMs, QString* adjustmentOut = nullptr) const;
+    void scheduleFt2AsyncTxAtNextSafeSlot(const QString& reason,
+                                          int elapsedMs = -1,
+                                          int latestStartMs = -1,
+                                          int delayMs = -1);
+    void clearFt2AsyncAbortQsoState(const QString& reason);
     qint64 syncTxPcmStartOffsetBytes(const QAudioFormat& format, qint64 pcmSizeBytes,
                                      int* elapsedMsOut = nullptr) const;
     void scheduleSyncTxBoundaryStop(const QString& reason, quint64 txSerial);

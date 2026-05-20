@@ -130,9 +130,12 @@ Item {
         var labels = []
         var seen = {}
         var list = bridge.decodeList
-        // Prendi solo gli ultimi decode (ultimo periodo) — max 30
+        // Prendi solo gli ultimi decode (ultimo periodo) — max 30.
+        // Scorri al contrario: se la stessa stazione compare piu' volte,
+        // il waterfall deve mostrare il valore SNR del decode piu' recente,
+        // cioe' quello che l'operatore vede in cima al Full Spectrum.
         var start = Math.max(0, list.length - 30)
-        for (var i = start; i < list.length; ++i) {
+        for (var i = list.length - 1; i >= start; --i) {
             var d = list[i]
             if (d.isTx)
                 continue
@@ -803,8 +806,7 @@ Item {
                 clip: true
                 visible: waterfallDisplay.spectrumGpuOverlayAvailable && height > 0
 
-                readonly property string fixedFontFamily: Qt.platform.os === "osx" ? "Menlo"
-                                                       : (Qt.platform.os === "windows" ? "Consolas" : "DejaVu Sans Mono")
+                readonly property string fixedFontFamily: decodiumMonoFontFamily
                 readonly property real viewStartHz: waterfallDisplay.viewStartHz
                 readonly property real viewRangeHz: waterfallDisplay.viewRangeHz
                 readonly property real dbRange: Math.max(1, waterfallDisplay.maxDb - waterfallDisplay.minDb)
