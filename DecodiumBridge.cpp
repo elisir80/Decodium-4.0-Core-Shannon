@@ -10214,6 +10214,174 @@ void DecodiumBridge::setAlt12Enabled(bool v)
     }
 }
 
+// =====================================================================
+// === TARGET CALL feature (fork-only 1.0.262, iu8lmc)               ===
+// Chiamata diretta verso uno specifico callsign con retry/timeout,
+// coesiste con autoCqRepeat (CALL ha priorita' se attivo).
+// =====================================================================
+void DecodiumBridge::setTargetCallSign(const QString& v)
+{
+    QString cleaned = v.trimmed().toUpper();
+    if (m_targetCallSign != cleaned) {
+        m_targetCallSign = cleaned;
+        emit targetCallSignChanged();
+        QSettings().setValue(QStringLiteral("CallFeature/TargetCallSign"), m_targetCallSign);
+    }
+}
+
+void DecodiumBridge::setTargetCallMaxRetries(int v)
+{
+    v = qBound(0, v, 999);
+    if (m_targetCallMaxRetries != v) {
+        m_targetCallMaxRetries = v;
+        emit targetCallMaxRetriesChanged();
+        QSettings().setValue(QStringLiteral("CallFeature/MaxRetries"), v);
+    }
+}
+
+void DecodiumBridge::setTargetCallTimeoutS(int v)
+{
+    v = qBound(10, v, 600);
+    if (m_targetCallTimeoutS != v) {
+        m_targetCallTimeoutS = v;
+        emit targetCallTimeoutSChanged();
+        QSettings().setValue(QStringLiteral("CallFeature/TimeoutS"), v);
+    }
+}
+
+void DecodiumBridge::setTargetCallPeriod(int v)
+{
+    v = qBound(0, v, 2);
+    if (m_targetCallPeriod != v) {
+        m_targetCallPeriod = v;
+        emit targetCallPeriodChanged();
+        QSettings().setValue(QStringLiteral("CallFeature/Period"), v);
+    }
+}
+
+void DecodiumBridge::setTargetCallPauseS(int v)
+{
+    v = qBound(0, v, 300);
+    if (m_targetCallPauseS != v) {
+        m_targetCallPauseS = v;
+        emit targetCallPauseSChanged();
+        QSettings().setValue(QStringLiteral("CallFeature/PauseS"), v);
+    }
+}
+
+void DecodiumBridge::startTargetCall()
+{
+    if (m_targetCallSign.isEmpty()) {
+        bridgeLog(QStringLiteral("startTargetCall: empty callsign, ignored"));
+        return;
+    }
+    if (m_targetCallActive) {
+        bridgeLog(QStringLiteral("startTargetCall: already active for %1").arg(m_targetCallSign));
+        return;
+    }
+    // Salva stato pre-attivazione per ripristino on stop
+    m_targetCallSavedDxCall    = m_dxCall;
+    m_targetCallSavedTxPeriod  = m_txPeriod;
+    m_targetCallSavedAlt12     = m_alt12Enabled;
+
+    m_targetCallRetryCount      = 0;
+    m_targetCallLastTxUtc       = QDateTime::currentDateTimeUtc();
+    m_targetCallWasTransmitting = m_transmitting;
+    m_targetCallActive          = true;
+    emit targetCallActiveChanged();
+    emit targetCallRetryCountChanged();
+
+    // Imposta modo periodo FT8/FT4 (0=1st, 1=2nd, 2=alterna)
+    if (m_targetCallPeriod == 0) {
+        setAlt12Enabled(false);
+        setTxPeriod(0);
+    } else if (m_targetCallPeriod == 1) {
+        setAlt12Enabled(false);
+        setTxPeriod(1);
+    } else {
+        setAlt12Enabled(true);
+    }
+
+    // Imposta dxCall + autoSeq + txEnabled per innescare TX1 nello slot successivo
+    setDxCall(m_targetCallSign);
+    if (!m_autoSeq) setAutoSeq(true);
+    if (!m_txEnabled) setTxEnabled(true);
+
+    // Connect edge detector per contare retry alla fine di ogni TX
+    connect(this, &DecodiumBridge::transmittingChanged,
+            this, &DecodiumBridge::onTargetCallTransmittingChanged,
+            Qt::UniqueConnection);
+
+    bridgeLog(QStringLiteral("startTargetCall: target=%1 maxRetries=%2 timeoutS=%3 period=%4 pauseS=%5")
+                  .arg(m_targetCallSign)
+                  .arg(m_targetCallMaxRetries == 0 ? QStringLiteral("inf") : QString::number(m_targetCallMaxRetries))
+                  .arg(m_targetCallTimeoutS)
+                  .arg(m_targetCallPeriod)
+                  .arg(m_targetCallPauseS));
+}
+
+void DecodiumBridge::stopTargetCall()
+{
+    if (!m_targetCallActive) return;
+
+    disconnect(this, &DecodiumBridge::transmittingChanged,
+               this, &DecodiumBridge::onTargetCallTransmittingChanged);
+
+    m_targetCallActive = false;
+    emit targetCallActiveChanged();
+
+    // Ripristina stato pre-attivazione SOLO se non siamo entrati in un QSO completato
+    // (se qsoLogged=true il QSO si e' concluso bene, lasciamo Decodium come e' adesso)
+    if (!m_qsoLogged) {
+        setTxEnabled(false);
+        setDxCall(m_targetCallSavedDxCall);
+    }
+    setAlt12Enabled(m_targetCallSavedAlt12);
+    if (!m_alt12Enabled) {
+        setTxPeriod(m_targetCallSavedTxPeriod);
+    }
+
+    bridgeLog(QStringLiteral("stopTargetCall: retryCount=%1 qsoLogged=%2")
+                  .arg(m_targetCallRetryCount)
+                  .arg(m_qsoLogged ? "true" : "false"));
+}
+
+void DecodiumBridge::onTargetCallTransmittingChanged()
+{
+    if (!m_targetCallActive) return;
+    bool const nowTx = m_transmitting;
+    if (m_targetCallWasTransmitting && !nowTx) {
+        // Edge: TX appena terminato -> tick
+        tickTargetCallOnTx();
+    }
+    m_targetCallWasTransmitting = nowTx;
+}
+
+void DecodiumBridge::tickTargetCallOnTx()
+{
+    if (!m_targetCallActive) return;
+    // Conta solo retry verso il target. Se siamo entrati in un QSO con risposta
+    // del partner, m_qsoLogged si attivera' a fine RR73 / 73 e stopTargetCall()
+    // verra' chiamata. Qui contiamo i tentativi TX1 ripetuti senza risposta.
+    if (m_dxCall.compare(m_targetCallSign, Qt::CaseInsensitive) != 0) {
+        // dxCall e' cambiato (es. partner ha risposto e siamo in mid-QSO) -> non contare retry
+        return;
+    }
+    ++m_targetCallRetryCount;
+    m_targetCallLastTxUtc = QDateTime::currentDateTimeUtc();
+    emit targetCallRetryCountChanged();
+
+    bridgeLog(QStringLiteral("targetCall tx-end: retry=%1/%2 dxCall=%3")
+                  .arg(m_targetCallRetryCount)
+                  .arg(m_targetCallMaxRetries == 0 ? QStringLiteral("inf") : QString::number(m_targetCallMaxRetries))
+                  .arg(m_dxCall));
+
+    if (m_targetCallMaxRetries > 0 && m_targetCallRetryCount >= m_targetCallMaxRetries) {
+        bridgeLog(QStringLiteral("targetCall: max retries reached (%1), stopping").arg(m_targetCallMaxRetries));
+        stopTargetCall();
+    }
+}
+
 // === CAT ===
 bool DecodiumBridge::catConnected() const { return m_catConnected; }
 QString DecodiumBridge::catRigName() const { return m_catRigName; }
@@ -19994,6 +20162,12 @@ void DecodiumBridge::loadSettings()
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
+    // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
+    m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
+    m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
+    m_targetCallTimeoutS      = qBound(10, s.value(QStringLiteral("CallFeature/TimeoutS"),   90).toInt(),  600);
+    m_targetCallPeriod        = qBound(0,  s.value(QStringLiteral("CallFeature/Period"),     2).toInt(),    2);
+    m_targetCallPauseS        = qBound(0,  s.value(QStringLiteral("CallFeature/PauseS"),     0).toInt(),  300);
     bridgeLog(QStringLiteral("[FT2WS] Pack init Conservative=%1 PartnerMemory=%2 Tx2Resend=%3")
                   .arg(m_ft2Conservative ? "ON" : "OFF")
                   .arg(m_ft2PartnerMemoryEnabled ? "ON" : "OFF")

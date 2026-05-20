@@ -178,6 +178,17 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft8ApEnabled READ ft8ApEnabled WRITE setFt8ApEnabled NOTIFY ft8ApEnabledChanged)
     Q_PROPERTY(int  txPeriod         READ txPeriod         WRITE setTxPeriod         NOTIFY txPeriodChanged)
     Q_PROPERTY(bool alt12Enabled     READ alt12Enabled     WRITE setAlt12Enabled     NOTIFY alt12EnabledChanged)
+
+    // === TARGET CALL (CALL feature, fork-only 1.0.262) ===
+    // Chiamata diretta verso uno specifico callsign con retry/timeout, coesiste con autoCqRepeat (CALL ha priorità).
+    Q_PROPERTY(bool    targetCallActive     READ targetCallActive     NOTIFY targetCallActiveChanged)
+    Q_PROPERTY(QString targetCallSign       READ targetCallSign       WRITE setTargetCallSign       NOTIFY targetCallSignChanged)
+    Q_PROPERTY(int     targetCallMaxRetries READ targetCallMaxRetries WRITE setTargetCallMaxRetries NOTIFY targetCallMaxRetriesChanged)
+    Q_PROPERTY(int     targetCallTimeoutS   READ targetCallTimeoutS   WRITE setTargetCallTimeoutS   NOTIFY targetCallTimeoutSChanged)
+    Q_PROPERTY(int     targetCallPeriod     READ targetCallPeriod     WRITE setTargetCallPeriod     NOTIFY targetCallPeriodChanged)
+    Q_PROPERTY(int     targetCallPauseS     READ targetCallPauseS     WRITE setTargetCallPauseS     NOTIFY targetCallPauseSChanged)
+    Q_PROPERTY(int     targetCallRetryCount READ targetCallRetryCount NOTIFY targetCallRetryCountChanged)
+
     // FT2-specific: async TX (no period sync) e dual carrier
     Q_PROPERTY(bool asyncTxEnabled     READ asyncTxEnabled     WRITE setAsyncTxEnabled     NOTIFY asyncTxEnabledChanged)
     Q_PROPERTY(bool asyncDecodeEnabled READ asyncDecodeEnabled WRITE setAsyncDecodeEnabled NOTIFY asyncDecodeEnabledChanged)
@@ -505,6 +516,23 @@ public:
     void setTxPeriod(int v);
     bool alt12Enabled()      const { return m_alt12Enabled; }
     void setAlt12Enabled(bool v);
+
+    // === TARGET CALL feature (fork-only 1.0.262) ===
+    bool    targetCallActive()     const { return m_targetCallActive; }
+    QString targetCallSign()       const { return m_targetCallSign; }
+    void    setTargetCallSign(const QString &v);
+    int     targetCallMaxRetries() const { return m_targetCallMaxRetries; }
+    void    setTargetCallMaxRetries(int v);
+    int     targetCallTimeoutS()   const { return m_targetCallTimeoutS; }
+    void    setTargetCallTimeoutS(int v);
+    int     targetCallPeriod()     const { return m_targetCallPeriod; }
+    void    setTargetCallPeriod(int v);
+    int     targetCallPauseS()     const { return m_targetCallPauseS; }
+    void    setTargetCallPauseS(int v);
+    int     targetCallRetryCount() const { return m_targetCallRetryCount; }
+    Q_INVOKABLE void startTargetCall();
+    Q_INVOKABLE void stopTargetCall();
+
     bool asyncTxEnabled()      const { return m_asyncTxEnabled; }
     void setAsyncTxEnabled(bool v)    { if (m_mode == "FT2") v = true;  /* FT2: sempre attivo */
                                         if (m_asyncTxEnabled != v)      { m_asyncTxEnabled = v;      emit asyncTxEnabledChanged(); } }
@@ -1153,6 +1181,14 @@ signals:
     void ft8ApEnabledChanged();
     void txPeriodChanged();
     void alt12EnabledChanged();
+    // === TARGET CALL signals (fork-only 1.0.262) ===
+    void targetCallActiveChanged();
+    void targetCallSignChanged();
+    void targetCallMaxRetriesChanged();
+    void targetCallTimeoutSChanged();
+    void targetCallPeriodChanged();
+    void targetCallPauseSChanged();
+    void targetCallRetryCountChanged();
     void asyncTxEnabledChanged();
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
@@ -1348,8 +1384,10 @@ private slots:
     void onAsyncDecodeTimer();   // FT2 turbo async ogni 100ms
     void regenerateTxMessages();  // auto-genera TX6 (CQ) e TX1-5 da callsign/grid/dxCall
     void processNextInQueue();   // mainwindow processNextInQueue: auto-handoff al prossimo caller
+    void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
 private:
+    void tickTargetCallOnTx();   // 1.0.262 incrementa retry counter on TX end, ferma se max raggiunto
     bool shouldIgnoreDecodeCallbacks() const;
     void beginDecodeCallbackShutdown();
     bool isTimeSyncDecodeMode(const QString& mode) const;
@@ -1990,6 +2028,21 @@ private:
     int  m_autoCqMaxCycles  {0};   // 0 = infinito, >0 = max cicli CQ
     int  m_autoCqPauseSec   {0};   // pausa (s) tra cicli CQ (0 = nessuna pausa)
     int  m_autoCqCycleCount {0};   // contatore cicli CQ corrente
+
+    // === TARGET CALL feature (fork-only 1.0.262) ===
+    bool    m_targetCallActive       {false};
+    QString m_targetCallSign;
+    int     m_targetCallMaxRetries   {10};   // 0 = infinito
+    int     m_targetCallTimeoutS     {90};
+    int     m_targetCallPeriod       {2};    // 0=1st, 1=2nd, 2=alterna
+    int     m_targetCallPauseS       {0};
+    int     m_targetCallRetryCount   {0};
+    QDateTime m_targetCallLastTxUtc;         // ultima TX inviata al target
+    QString m_targetCallSavedDxCall;         // dxCall pre-attivazione (per ripristino on stop)
+    int     m_targetCallSavedTxPeriod {0};
+    bool    m_targetCallSavedAlt12   {false};
+    bool    m_targetCallWasTransmitting {false}; // edge detector per transmittingChanged
+
     int  m_txWatchdogTicks  {0};   // tick watchdog a 250ms (240 tick = 60s)
     static constexpr int TX_WATCHDOG_MAX = 240; // 60s @ 250ms
 

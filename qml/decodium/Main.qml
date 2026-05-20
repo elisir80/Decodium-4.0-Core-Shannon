@@ -6493,6 +6493,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     showAsyncIcon: mainWindow.asyncIconVisible
                     visible: !txPanelDetached
                     onMamWindowRequested: mamWindow.open()
+                    onCallRequested: callDialogInstance.show()
 
                     // Detach button overlay at top-right
                     Rectangle {
@@ -7265,6 +7266,11 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
     MamWindow {
         id: mamWindow
         engine: bridge
+    }
+
+    // 1.0.262 — CALL Dialog (chiamata diretta a target callsign con retry/timeout)
+    CallDialog {
+        id: callDialogInstance
     }
 
     // Auto-open MAM window when MAM mode is enabled
@@ -10810,6 +10816,7 @@ NumberAnimation {
                     showAsyncIcon: mainWindow.asyncIconVisible
                     handleLogPrompt: false
                     onMamWindowRequested: mamWindow.open()
+                    onCallRequested: callDialogInstance.show()
                 }
             }
         }

@@ -8,6 +8,9 @@ import QtQuick.Layouts
 Item {
     id: txPanel
 
+    // 1.0.262 — CALL feature: signal emesso quando l'utente clicca il pulsante CALL
+    signal callRequested()
+
     // Required property - reference to the app engine
     required property var engine
     property bool handleLogPrompt: true
@@ -677,6 +680,37 @@ Item {
                                     engine.autoCqRepeat = !engine.autoCqRepeat
                                 }
                             }
+                        }
+
+                        // 1.0.262 \u2014 CALL feature: pulsante chiamata diretta con retry/timeout
+                        Button {
+                            id: callButton
+                            width: txPanel.toolbarWideButtonWidth
+                            height: txPanel.toolbarButtonHeight
+                            padding: 0
+                            background: Rectangle {
+                                radius: 5
+                                color: engine && engine.targetCallActive ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
+                                border.color: engine && engine.targetCallActive ? successGreen : Qt.alpha(textPrimary, 0.2)
+                                border.width: engine && engine.targetCallActive ? 2 : 1
+                            }
+                            contentItem: ToolbarButtonContent {
+                                label: "CALL"
+                                glyph: "\ud83d\udcde"
+                                foreground: engine && engine.targetCallActive ? successGreen : textPrimary
+                                glyphSize: txPanel.toolbarGlyphSize
+                                labelSize: txPanel.toolbarLabelSize
+                                boldLabel: engine && engine.targetCallActive
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: engine && engine.targetCallActive
+                                          ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire pannello").arg(engine.targetCallSign)
+                                                .arg(engine.targetCallRetryCount)
+                                                .arg(engine.targetCallMaxRetries === 0 ? "\u221e" : engine.targetCallMaxRetries)
+                                          : qsTr("Chiamate (CALL)\nApri pannello per chiamata diretta verso un callsign\ncon tentativi/timeout/periodo")
+                            ToolTip.delay: 500
+
+                            onClicked: txPanel.callRequested()
                         }
 
                         // 1.0.182 \u2014 Button QQC2-native restyle
