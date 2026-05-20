@@ -266,6 +266,32 @@ Rectangle {
         RowLayout {
             spacing: 10
 
+            // 1.0.264 (fork-only) — Reset Layout button POSIZIONATO PRIMA di Monitor
+            // per essere sempre visibile, anche con finestra Decodium stretta.
+            // Stile distintivo (border arancione) per essere trovato a colpo d'occhio.
+            Button {
+                id: resetLayoutButton
+                text: "🗗 Layout"
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.\nUsa questo se hai finestre perse fuori monitor.")
+                ToolTip.delay: 300
+                onClicked: resetLayoutConfirm.open()
+                background: Rectangle {
+                    color: Qt.rgba(255/255, 155/255, 58/255, 0.18)
+                    border.color: Qt.rgba(255/255, 155/255, 58/255, 1.0)
+                    border.width: 2
+                    radius: 8
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                    font.bold: true
+                    font.pixelSize: 12
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
             Button {
                 text: monitoring ? "Stop" : "Monitor"
                 highlighted: monitoring
@@ -308,23 +334,6 @@ Rectangle {
                 background: Rectangle {
                     color: Qt.rgba(244/255, 67/255, 54/255, 0.2)
                     border.color: colorRed
-                    radius: 8
-                }
-            }
-
-            // 1.0.263 (fork-only) — Reset Layout: ricolloca tutte le finestre floating
-            // a docked + ricentra mainWindow sul primary screen. Utile se le finestre
-            // finiscono su un monitor disconnesso o fuori area visibile.
-            Button {
-                id: resetLayoutButton
-                text: "Layout"
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Reset Layout\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale")
-                ToolTip.delay: 500
-                onClicked: resetLayoutConfirm.open()
-                background: Rectangle {
-                    color: glassOverlay
-                    border.color: glassBorder
                     radius: 8
                 }
             }

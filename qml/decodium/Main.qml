@@ -7017,6 +7017,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             if (bridge) bridge.devOverlayActive = !bridge.devOverlayActive
         }
     }
+    // 1.0.264 (fork-only) — Reset Layout (recupera finestre fuori monitor)
+    Shortcut {
+        sequence: "Ctrl+Shift+L"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (bridge) bridge.resetWindowLayout() }
+    }
 
     // 1.0.233 — DevOverlay floating panel (async Loader, zero overhead
     // quando bridge.devOverlayActive == false).
