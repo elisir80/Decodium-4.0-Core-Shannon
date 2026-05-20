@@ -100,7 +100,7 @@ Item {
         var preset = labelColorPresets[labelColorCombo.currentIndex]
         waterfallDisplay.labelUseCustomColor = preset.custom
         waterfallDisplay.labelColor = preset.color
-        applyManualContrast()
+        waterfallPanel.applyManualContrast()
         if (!waterfallPanel.showDecodeCallsigns)
             clearDecodeLabels()
         restoringSettings = false
