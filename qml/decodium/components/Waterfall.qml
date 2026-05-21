@@ -1104,6 +1104,52 @@ Item {
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#ffc8ff" }
                 }
 
+                // 1.0.269 (fork-only) — TX CARRIER ACTIVE: barra rossa larga ~50Hz
+                // (banda della portante FT8) che si accende SOLO quando bridge.transmitting=true
+                // o bridge.tuning=true. Indica visivamente che la portante e' on-air.
+                Item {
+                    id: txCarrierActiveBar
+                    readonly property real markerX: spectrumGpuOverlay.xForFreq(waterfallDisplay.txFreq)
+                    readonly property real carrierBwHz: bridge && bridge.mode === "FT4" ? 80 : 50
+                    readonly property real barWidthPx: Math.max(8, carrierBwHz * spectrumGpuOverlay.width / Math.max(1, spectrumGpuOverlay.viewRangeHz))
+                    x: Math.round(markerX - barWidthPx / 2)
+                    y: 0
+                    width: barWidthPx
+                    height: parent.height
+                    visible: bridge && (bridge.transmitting || bridge.tuning)
+                             && markerX >= 0 && markerX < spectrumGpuOverlay.width
+                    Rectangle {
+                        anchors.fill: parent
+                        color: Qt.rgba(1.0, 0.12, 0.12, 0.32)
+                        border.color: Qt.rgba(1.0, 0.20, 0.20, 0.95)
+                        border.width: 2
+                    }
+                    Rectangle {
+                        x: parent.width / 2 - 1
+                        width: 2
+                        height: parent.height
+                        color: Qt.rgba(1.0, 0.85, 0.85, 0.95)
+                    }
+                    // Etichetta "TX ON-AIR" sopra
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: 2
+                        width: txOnAirText.implicitWidth + 10
+                        height: txOnAirText.implicitHeight + 4
+                        radius: 3
+                        color: Qt.rgba(0.85, 0.05, 0.05, 0.95)
+                        Text {
+                            id: txOnAirText
+                            anchors.centerIn: parent
+                            text: bridge && bridge.tuning ? "TUNE" : "TX ON-AIR"
+                            color: "#ffffff"
+                            font.pixelSize: 9
+                            font.bold: true
+                        }
+                    }
+                }
+
                 Item {
                     id: rxMarkerLabel
                     readonly property real markerX: spectrumGpuOverlay.xForFreq(waterfallDisplay.rxFreq)

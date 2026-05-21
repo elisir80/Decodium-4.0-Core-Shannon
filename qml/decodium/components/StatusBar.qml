@@ -416,6 +416,81 @@ Rectangle {
             }
         }
 
+        // 1.0.269 (fork-only) — Reset Layout + Decode History buttons spostati qui dal
+        // HeaderBar per essere sempre visibili nel footer accanto a PWR/SWR/PSK.
+        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+
+        Button {
+            id: footerResetLayoutButton
+            implicitHeight: 22
+            padding: 0
+            text: "🗗 Layout"
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.")
+            ToolTip.delay: 300
+            onClicked: footerResetLayoutConfirm.open()
+            background: Rectangle {
+                color: Qt.rgba(255/255, 155/255, 58/255, 0.18)
+                border.color: Qt.rgba(255/255, 155/255, 58/255, 1.0)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Text {
+                text: parent.text
+                color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                font.bold: true
+                font.pixelSize: 10
+                leftPadding: 6
+                rightPadding: 6
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        Button {
+            id: footerHistoryButton
+            implicitHeight: 22
+            padding: 0
+            text: "📚 History"
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite. Filtri + Export ADIF.")
+            ToolTip.delay: 300
+            onClicked: {
+                if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
+            }
+            background: Rectangle {
+                color: Qt.rgba(58/255, 157/255, 255/255, 0.18)
+                border.color: Qt.rgba(58/255, 157/255, 255/255, 1.0)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Text {
+                text: parent.text
+                color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                font.bold: true
+                font.pixelSize: 10
+                leftPadding: 6
+                rightPadding: 6
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        Dialog {
+            id: footerResetLayoutConfirm
+            title: qsTr("Reset Layout")
+            modal: true
+            standardButtons: Dialog.Yes | Dialog.No
+            anchors.centerIn: Overlay.overlay
+            onAccepted: { if (bridge) bridge.resetWindowLayout() }
+            contentItem: Text {
+                text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
+                color: textPrimary
+                wrapMode: Text.WordWrap
+                width: 360
+            }
+        }
+
         // Separator
         Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
 

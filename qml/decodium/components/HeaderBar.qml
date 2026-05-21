@@ -266,57 +266,9 @@ Rectangle {
         RowLayout {
             spacing: 10
 
-            // 1.0.264 (fork-only) — Reset Layout button POSIZIONATO PRIMA di Monitor
-            // per essere sempre visibile, anche con finestra Decodium stretta.
-            // Stile distintivo (border arancione) per essere trovato a colpo d'occhio.
-            Button {
-                id: resetLayoutButton
-                text: "🗗 Layout"
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.\nUsa questo se hai finestre perse fuori monitor.")
-                ToolTip.delay: 300
-                onClicked: resetLayoutConfirm.open()
-                background: Rectangle {
-                    color: Qt.rgba(255/255, 155/255, 58/255, 0.18)
-                    border.color: Qt.rgba(255/255, 155/255, 58/255, 1.0)
-                    border.width: 2
-                    radius: 8
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
-                    font.bold: true
-                    font.pixelSize: 12
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-
-            // 1.0.268 (Phase 5.3 fork-only) — apre Decode History Dialog (DB SQLite)
-            Button {
-                id: historyButton
-                text: "📚 History"
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite.\nFiltri: callsign, banda, modo, date range. Export ADIF.")
-                ToolTip.delay: 300
-                onClicked: {
-                    if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
-                }
-                background: Rectangle {
-                    color: Qt.rgba(58/255, 157/255, 255/255, 0.18)
-                    border.color: Qt.rgba(58/255, 157/255, 255/255, 1.0)
-                    border.width: 2
-                    radius: 8
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
-                    font.bold: true
-                    font.pixelSize: 12
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
+            // 1.0.269 (fork-only) — Reset Layout + History buttons SPOSTATI in StatusBar
+            // (footer accanto a PWR/SWR/PSK) per essere sempre visibili.
+            // Vedi qml/decodium/components/StatusBar.qml — footerResetLayoutButton + footerHistoryButton.
 
             Button {
                 text: monitoring ? "Stop" : "Monitor"
@@ -364,20 +316,7 @@ Rectangle {
                 }
             }
 
-            Dialog {
-                id: resetLayoutConfirm
-                title: qsTr("Reset Layout")
-                modal: true
-                standardButtons: Dialog.Yes | Dialog.No
-                anchors.centerIn: Overlay.overlay
-                onAccepted: { if (bridge) bridge.resetWindowLayout() }
-                contentItem: Text {
-                    text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
-                    color: textPrimary
-                    wrapMode: Text.WordWrap
-                    width: 360
-                }
-            }
+            // 1.0.269 — resetLayoutConfirm Dialog spostato in StatusBar.qml col pulsante.
 
             // Raptor: Async Decode indicator
             Rectangle {
