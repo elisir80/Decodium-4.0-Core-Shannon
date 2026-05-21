@@ -7101,6 +7101,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         context: Qt.ApplicationShortcut
         onActivated: { if (bridge) bridge.resetWindowLayout() }
     }
+    // 1.0.268 (Phase 5.3) — apre Decode History Dialog
+    Shortcut {
+        sequence: "Ctrl+Shift+H"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (historyDialogInstance) historyDialogInstance.show() }
+    }
 
     // 1.0.233 — DevOverlay floating panel (async Loader, zero overhead
     // quando bridge.devOverlayActive == false).
@@ -7394,6 +7400,11 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
     // 1.0.262 — CALL Dialog (chiamata diretta a target callsign con retry/timeout)
     CallDialog {
         id: callDialogInstance
+    }
+
+    // 1.0.268 (Phase 5.3) — Decode History Dialog (esplora DB SQLite)
+    DecodeHistoryDialog {
+        id: historyDialogInstance
     }
 
     // Auto-open MAM window when MAM mode is enabled

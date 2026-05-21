@@ -292,6 +292,32 @@ Rectangle {
                 }
             }
 
+            // 1.0.268 (Phase 5.3 fork-only) — apre Decode History Dialog (DB SQLite)
+            Button {
+                id: historyButton
+                text: "📚 History"
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite.\nFiltri: callsign, banda, modo, date range. Export ADIF.")
+                ToolTip.delay: 300
+                onClicked: {
+                    if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
+                }
+                background: Rectangle {
+                    color: Qt.rgba(58/255, 157/255, 255/255, 0.18)
+                    border.color: Qt.rgba(58/255, 157/255, 255/255, 1.0)
+                    border.width: 2
+                    radius: 8
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                    font.bold: true
+                    font.pixelSize: 12
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
             Button {
                 text: monitoring ? "Stop" : "Monitor"
                 highlighted: monitoring

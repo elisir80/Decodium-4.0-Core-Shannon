@@ -70,6 +70,7 @@ namespace decodium {
 class RemoteCommandServer;
 class DecodeListModel;  // 1.0.143 fase 2: model nativo per ListView decode
 class DecodeHistoryWorker;  // 1.0.238 Phase 5.2 perf roadmap: write-behind SQLite
+class QSqlDatabase;          // 1.0.268 Phase 5.3 query API (forward decl)
 
 class DecodiumBridge : public QObject
 {
@@ -1064,6 +1065,28 @@ public:
     // tutte le finestre floating. Utile quando le finestre finiscono su monitor disconnessi
     // o fuori area visibile.
     Q_INVOKABLE void resetWindowLayout();
+
+    // 1.0.268 (Phase 5.3 fork-only) — Decode History Query API
+    // Apre una connessione SQLite separata named "decode_history_reader" sul
+    // main thread (worker scrive su "decode_history_worker"). Le query sono
+    // veloci grazie agli indici creati in Phase 5.1.
+    //
+    // Filtri supportati (tutti opzionali, omettere = no filtro):
+    //   callsign  -> LIKE su callsign_dx OR callsign_de OR message contains
+    //   band      -> exact match (es. "20M")
+    //   mode      -> exact match (es. "FT8")
+    //   fromUtc   -> ts_utc >= (millis)
+    //   toUtc     -> ts_utc <= (millis)
+    //   sessionId -> exact match
+    //   limit     -> default 500, max 5000
+    //   newestFirst -> bool, default true
+    Q_INVOKABLE QVariantList queryDecodeHistory(QVariantMap const& filters) const;
+    Q_INVOKABLE QVariantList queryDecodeSessions() const;
+    Q_INVOKABLE QStringList  queryDecodeBands() const;
+    Q_INVOKABLE QStringList  queryDecodeModes() const;
+    Q_INVOKABLE QVariantMap  queryDecodeStats() const;
+    Q_INVOKABLE bool         exportAdifFromHistory(QVariantMap const& filters, QString const& path);
+
     Q_INVOKABLE QVariantMap primaryScreenAvailableGeometry() const;
     Q_INVOKABLE QString version() const;
 
@@ -1395,6 +1418,11 @@ private slots:
 
 private:
     void tickTargetCallOnTx();   // 1.0.262 incrementa retry counter on TX end, ferma se max raggiunto
+
+    // 1.0.268 (Phase 5.3) — apre connessione SQLite read-only named "decode_history_reader"
+    // sul main thread (worker scrive su connessione separata). Idempotente: se gia' aperta
+    // ritorna riferimento esistente. Restituisce QSqlDatabase non valida se DB non disponibile.
+    QSqlDatabase openHistoryReadDb() const;
     bool shouldIgnoreDecodeCallbacks() const;
     void beginDecodeCallbackShutdown();
     bool isTimeSyncDecodeMode(const QString& mode) const;
