@@ -4787,28 +4787,23 @@ QString DecodiumBridge::webServerUrl() const
 
 bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
 {
+    // 1.0.266 (fork-only iu8lmc) — Rimodulazione filtro Signal RX:
+    // mostra SOLO entries collegate alla nostra call. Tre casi accettati:
+    //   1. forceRxPane=true (override esplicito, es. period separator)
+    //   2. isTx=true: nostre trasmissioni (CQ IU8LMC, chiamate dirette, repliche QSO)
+    //   3. myMatch: messaggio contiene la nostra call OPPURE isMyCall=true
+    //      (chiamate ricevute verso di noi, self-echo, risposte partner in QSO)
+    // RIMOSSO il fallback "isAtRxFrequency +/-200Hz" che faceva spuntare nel
+    // pannello tutto il traffico della porzione di banda selezionata nel waterfall.
     if (entry.isEmpty()) return false;
     if (entry.value(QStringLiteral("forceRxPane")).toBool()) return true;
-    QString const activeBase = decodeListModel_normalizedBaseCall(m_dxCall);
     bool const isTx = entry.value(QStringLiteral("isTx")).toBool();
-    if (isTx) return true;  // sempre includere TX nei RX panel
+    if (isTx) return true;
     QString const myBase = decodeListModel_normalizedBaseCall(m_callsign);
     QString const message = entry.value(QStringLiteral("message")).toString();
     bool const myMatch = entry.value(QStringLiteral("isMyCall")).toBool()
         || decodeListModel_messageContainsBase(message, myBase);
-    if (myMatch) return true;
-    if (activeBase.isEmpty()) {
-        // fallback isAtRxFrequency ±200Hz
-        int const f = entry.value(QStringLiteral("freq")).toString().toInt();
-        if (m_rxFrequency > 0 && std::abs(f - m_rxFrequency) <= 200) return true;
-        return false;
-    }
-    bool const activeMatch = decodeListModel_messageContainsBase(message, activeBase)
-        || decodeListModel_normalizedBaseCall(
-                entry.value(QStringLiteral("fromCall")).toString()) == activeBase
-        || decodeListModel_normalizedBaseCall(
-                entry.value(QStringLiteral("dxCallsign")).toString()) == activeBase;
-    return activeMatch && myMatch;
+    return myMatch;
 }
 
 void DecodiumBridge::injectPeriodSeparators(QVariantList& filtered) const
@@ -5106,10 +5101,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         m_clearedRxDecodeKeys.clear();
         rebuildRxDecodeModel();
     });
-    connect(this, &DecodiumBridge::rxFrequencyChanged, this, [this]() {
-        m_clearedRxDecodeKeys.clear();
-        rebuildRxDecodeModel();
-    });
+    // 1.0.266 (fork-only iu8lmc) — RIMOSSA connect rxFrequencyChanged -> rebuildRxDecodeModel.
+    // Il filtro Signal RX non dipende piu' dalla frequenza RX (rimosso il match +/-200Hz),
+    // quindi un cambio di rxFrequency non richiede piu' alcun rebuild. Evita rebuild
+    // inutili ogni volta che l'utente trascina il marker nel waterfall.
     connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
         m_clearedRxDecodeKeys.clear();
         rebuildRxDecodeModel();
