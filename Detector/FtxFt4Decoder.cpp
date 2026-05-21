@@ -35,7 +35,7 @@ constexpr int kFt4DecodedChars {37};
 constexpr float kFt4FsDown {12000.0f / kFt4Ndown};
 constexpr float kFt4SyncThresholdDefault {0.90f};
 constexpr float kFt4SyncThresholdDeep {0.75f};
-constexpr float kFt4SnrFloor {-21.0f};
+constexpr float kFt4SnrFloor {-26.0f};
 constexpr float kFt4DecodeScale {2.83f};
 constexpr float kFt4SamplesPerSecond {666.67f};
 

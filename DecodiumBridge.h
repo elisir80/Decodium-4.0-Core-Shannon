@@ -97,6 +97,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double sMeter READ sMeter NOTIFY sMeterChanged)
     Q_PROPERTY(bool legacyBackendActive READ legacyBackendActive CONSTANT)
     Q_PROPERTY(double rxInputLevel READ rxInputLevel WRITE setRxInputLevel NOTIFY rxInputLevelChanged)
+    Q_PROPERTY(bool autoRxInputLevel READ autoRxInputLevel WRITE setAutoRxInputLevel NOTIFY autoRxInputLevelChanged)
     Q_PROPERTY(double txOutputLevel READ txOutputLevel WRITE setTxOutputLevel NOTIFY txOutputLevelChanged)
     Q_PROPERTY(QStringList audioInputDevices READ audioInputDevices NOTIFY audioInputDevicesChanged)
     Q_PROPERTY(QStringList audioOutputDevices READ audioOutputDevices NOTIFY audioOutputDevicesChanged)
@@ -446,6 +447,8 @@ public:
     bool legacyBackendActive() const { return usingLegacyBackendForTx(); }
     double rxInputLevel() const { return m_rxInputLevel; }
     void setRxInputLevel(double v);
+    bool autoRxInputLevel() const { return m_autoRxInputLevel; }
+    void setAutoRxInputLevel(bool enabled);
     double txOutputLevel() const { return m_txOutputLevel; }
     void setTxOutputLevel(double v);
     QStringList audioInputDevices() const;
@@ -1168,6 +1171,7 @@ signals:
     void sMeterChanged();
     void waitPounceActiveChanged();
     void rxInputLevelChanged();
+    void autoRxInputLevelChanged();
     void txOutputLevelChanged();
     void audioInputDevicesChanged();
     void audioOutputDevicesChanged();
@@ -1450,6 +1454,7 @@ private:
     void publishRemoteActivityEntry(QVariantMap const& entry);
     void clearRemoteActivityCache(bool notifyRemote);
     QString configuredCatRigMode() const;
+    bool configuredCatRigModeRequestsDataPacket() const;
     void applyConfiguredCatRigMode(const QString& reason);
     void updateRigTelemetry(double powerWatts, double swr);
     void applyNtpSettings();
@@ -1622,6 +1627,10 @@ private:
     double m_audioLevel {0.0};
     double m_sMeter {0.0};
     double m_rxInputLevel {50.0};
+    bool m_autoRxInputLevel {true};
+    qint64 m_autoRxLevelLastAdjustMs {0};
+    qint64 m_autoRxLevelLowStartMs {0};
+    qint64 m_autoRxLevelManualHoldUntilMs {0};
     double m_txOutputLevel {0.0};
     QStringList m_audioInputDevices;
     QStringList m_audioOutputDevices;
@@ -2248,6 +2257,7 @@ private:
     QThread* m_persistenceThread {nullptr};
     DecodeHistoryWorker* m_persistenceWorker {nullptr};
     qint64   m_currentSessionId {-1};
+    QSet<QString> m_decodeHistoryPersistedKeys;
     NtpClient* m_ntpClient      {nullptr};
     bool   m_ntpEnabled         {false};
     QString m_ntpCustomServer;
@@ -2475,6 +2485,7 @@ private:
     //   QMetaObject::invokeMethod sul worker (~µs sul thread GUI).
     // stopPersistenceWorker(): cleanup nel distruttore.
     void startPersistenceWorker();
+    bool persistDecodeHistoryEntry(QVariantMap const& entry);
     void enqueuePersistDecode(QVariantMap const& entry);
     void stopPersistenceWorker();
 
@@ -2494,6 +2505,8 @@ private:
     void stopTciAudioCapture();
     void onTciPcmSamplesReady(const QVector<short>& samples);
     void handleAudioHealth(double rms, double peak, int dynamicRange, int clippedSamples, int samples);
+    void updateAutoRxInputLevel(double rms, double peak, int clippedSamples, int samples, qint64 now);
+    void applyRxInputLevel(double level, bool automatic);
     void restartAudioCaptureForModeChange(const QString& previousMode);
     void scheduleMonitorRecovery(const QString& reason,
                                  quint64 sessionId,

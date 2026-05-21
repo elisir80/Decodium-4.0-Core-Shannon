@@ -23,10 +23,10 @@ import QtQuick.Window
 Window {
     id: callDialog
     title: qsTr("Chiamate (CALL)")
-    width: 460
-    height: 580
+    width: 480
+    height: 640
     minimumWidth: 400
-    minimumHeight: 520
+    minimumHeight: 580
     flags: Qt.Dialog | Qt.WindowCloseButtonHint
     color: "#1a1a2e"
 
@@ -34,9 +34,73 @@ Window {
     readonly property color cGreen:      "#3acb6c"  // successGreen
     readonly property color cOrange:     "#ff9b3a"  // warningOrange
     readonly property color cText:       "#e8edf2"  // textPrimary
-    readonly property color cMuted:      "#8a93a3"
-    readonly property color cBorder:     "#3a3e58"
-    readonly property color cFieldBg:    "#22243a"
+    readonly property color cMuted:      "#a5afc4"
+    readonly property color cBorder:     "#4a5372"
+    readonly property color cFieldBg:    "#30354f"
+    readonly property color cFieldBgFocus: "#384463"
+
+    component StyledSpinBox : SpinBox {
+        id: control
+        editable: true
+        Layout.preferredWidth: 110
+        Layout.preferredHeight: 36
+        contentItem: TextInput {
+            z: 2
+            text: control.textFromValue(control.value, control.locale)
+            color: callDialog.cText
+            selectionColor: callDialog.cAccent
+            selectedTextColor: callDialog.cText
+            horizontalAlignment: Qt.AlignHCenter
+            verticalAlignment: Qt.AlignVCenter
+            readOnly: !control.editable
+            validator: control.validator
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            font.family: decodiumMonoFontFamily
+            font.pixelSize: 14
+        }
+        up.indicator: Rectangle {
+            x: control.width - width
+            width: 34
+            height: control.height
+            color: control.enabled
+                   ? (control.up.pressed ? Qt.alpha(callDialog.cAccent, 0.36) : Qt.alpha(callDialog.cAccent, 0.18))
+                   : Qt.alpha(callDialog.cText, 0.05)
+            border.color: callDialog.cBorder
+            radius: 6
+            Text {
+                anchors.centerIn: parent
+                text: "+"
+                color: control.enabled ? callDialog.cText : callDialog.cMuted
+                font.pixelSize: 18
+                font.bold: true
+            }
+        }
+        down.indicator: Rectangle {
+            x: 0
+            width: 34
+            height: control.height
+            color: control.enabled
+                   ? (control.down.pressed ? Qt.alpha(callDialog.cAccent, 0.36) : Qt.alpha(callDialog.cAccent, 0.18))
+                   : Qt.alpha(callDialog.cText, 0.05)
+            border.color: callDialog.cBorder
+            radius: 6
+            Text {
+                anchors.centerIn: parent
+                text: "-"
+                color: control.enabled ? callDialog.cText : callDialog.cMuted
+                font.pixelSize: 18
+                font.bold: true
+            }
+        }
+        background: Rectangle {
+            color: control.enabled
+                   ? (control.activeFocus ? callDialog.cFieldBgFocus : callDialog.cFieldBg)
+                   : Qt.alpha(callDialog.cText, 0.06)
+            border.color: control.activeFocus ? callDialog.cAccent : callDialog.cBorder
+            border.width: control.activeFocus ? 2 : 1
+            radius: 6
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -88,16 +152,17 @@ Window {
                     Layout.fillWidth: true
                     text: bridge ? bridge.targetCallSign : ""
                     placeholderText: "es. F4CQS"
+                    placeholderTextColor: "#7d89a5"
                     color: callDialog.cText
                     font.pixelSize: 18
                     font.bold: true
                     font.family: decodiumMonoFontFamily
                     selectByMouse: true
                     background: Rectangle {
-                        color: callDialog.cFieldBg
+                        color: targetField.activeFocus ? callDialog.cFieldBgFocus : callDialog.cFieldBg
                         border.color: targetField.activeFocus ? callDialog.cAccent : callDialog.cBorder
-                        border.width: 1
-                        radius: 4
+                        border.width: targetField.activeFocus ? 2 : 1
+                        radius: 6
                     }
                     onEditingFinished: if (bridge) bridge.targetCallSign = text
                     enabled: !bridge || !bridge.targetCallActive
@@ -117,11 +182,10 @@ Window {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
-                    SpinBox {
+                    StyledSpinBox {
                         id: retriesSpin
                         from: 0; to: 999
                         value: bridge ? bridge.targetCallMaxRetries : 10
-                        editable: true
                         enabled: !infiniteCheck.checked && (!bridge || !bridge.targetCallActive)
                         onValueModified: if (bridge) bridge.targetCallMaxRetries = value
                         Layout.preferredWidth: 100
@@ -136,6 +200,23 @@ Window {
                             if (checked) bridge.targetCallMaxRetries = 0
                             else bridge.targetCallMaxRetries = retriesSpin.value > 0 ? retriesSpin.value : 10
                         }
+                        indicator: Rectangle {
+                            implicitWidth: 18
+                            implicitHeight: 18
+                            x: 0
+                            y: (infiniteCheck.height - height) / 2
+                            radius: 4
+                            color: infiniteCheck.checked ? Qt.alpha(callDialog.cAccent, 0.28) : callDialog.cFieldBg
+                            border.color: infiniteCheck.checked ? callDialog.cAccent : callDialog.cBorder
+                            border.width: 2
+                            Text {
+                                anchors.centerIn: parent
+                                text: infiniteCheck.checked ? "✓" : ""
+                                color: callDialog.cText
+                                font.pixelSize: 12
+                                font.bold: true
+                            }
+                        }
                         contentItem: Text {
                             text: infiniteCheck.text
                             color: callDialog.cText
@@ -145,11 +226,10 @@ Window {
                         }
                     }
                 }
-                SpinBox {
+                StyledSpinBox {
                     id: timeoutSpin
                     from: 10; to: 600
                     value: bridge ? bridge.targetCallTimeoutS : 90
-                    editable: true
                     enabled: !bridge || !bridge.targetCallActive
                     Layout.preferredWidth: 120
                     onValueModified: if (bridge) bridge.targetCallTimeoutS = value
@@ -170,6 +250,23 @@ Window {
                         checked: bridge && bridge.targetCallPeriod === 0
                         enabled: !bridge || !bridge.targetCallActive
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 0
+                        indicator: Rectangle {
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            x: 0
+                            y: (periodFirst.height - height) / 2
+                            radius: 10
+                            color: callDialog.cFieldBg
+                            border.color: periodFirst.checked ? callDialog.cAccent : callDialog.cBorder
+                            border.width: 2
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 5
+                                color: periodFirst.checked ? callDialog.cAccent : "transparent"
+                            }
+                        }
                         contentItem: Text {
                             text: periodFirst.text
                             color: callDialog.cText
@@ -183,6 +280,23 @@ Window {
                         checked: bridge && bridge.targetCallPeriod === 1
                         enabled: !bridge || !bridge.targetCallActive
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 1
+                        indicator: Rectangle {
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            x: 0
+                            y: (periodSecond.height - height) / 2
+                            radius: 10
+                            color: callDialog.cFieldBg
+                            border.color: periodSecond.checked ? callDialog.cAccent : callDialog.cBorder
+                            border.width: 2
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 5
+                                color: periodSecond.checked ? callDialog.cAccent : "transparent"
+                            }
+                        }
                         contentItem: Text {
                             text: periodSecond.text
                             color: callDialog.cText
@@ -196,6 +310,23 @@ Window {
                         checked: bridge && bridge.targetCallPeriod === 2
                         enabled: !bridge || !bridge.targetCallActive
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 2
+                        indicator: Rectangle {
+                            implicitWidth: 20
+                            implicitHeight: 20
+                            x: 0
+                            y: (periodAlt.height - height) / 2
+                            radius: 10
+                            color: callDialog.cFieldBg
+                            border.color: periodAlt.checked ? "#ff2f7b" : callDialog.cBorder
+                            border.width: 2
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 5
+                                color: periodAlt.checked ? "#ff2f7b" : "transparent"
+                            }
+                        }
                         contentItem: Text {
                             text: periodAlt.text
                             color: callDialog.cText
@@ -216,11 +347,10 @@ Window {
                     font.pixelSize: 12
                     Layout.preferredWidth: 180
                 }
-                SpinBox {
+                StyledSpinBox {
                     id: pauseSpin
                     from: 0; to: 300
                     value: bridge ? bridge.targetCallPauseS : 0
-                    editable: true
                     enabled: !bridge || !bridge.targetCallActive
                     Layout.preferredWidth: 100
                     onValueModified: if (bridge) bridge.targetCallPauseS = value
@@ -280,10 +410,9 @@ Window {
                         font.pixelSize: 12
                         Layout.preferredWidth: 180
                     }
-                    SpinBox {
+                    StyledSpinBox {
                         from: 0; to: 999
                         value: bridge ? bridge.autoCqMaxCycles : 0
-                        editable: true
                         Layout.preferredWidth: 100
                         onValueModified: if (bridge) bridge.autoCqMaxCycles = value
                     }
@@ -297,10 +426,9 @@ Window {
                         font.pixelSize: 12
                         Layout.preferredWidth: 180
                     }
-                    SpinBox {
+                    StyledSpinBox {
                         from: 0; to: 300
                         value: bridge ? bridge.autoCqPauseSec : 0
-                        editable: true
                         Layout.preferredWidth: 100
                         onValueModified: if (bridge) bridge.autoCqPauseSec = value
                     }
@@ -318,8 +446,10 @@ Window {
                     Layout.preferredWidth: 90
                     onClicked: callDialog.close()
                     background: Rectangle {
-                        radius: 4
-                        color: Qt.alpha(callDialog.cText, 0.08)
+                        radius: 6
+                        color: parent.down ? Qt.alpha(callDialog.cText, 0.20)
+                                           : (parent.hovered ? Qt.alpha(callDialog.cText, 0.15)
+                                                             : Qt.alpha(callDialog.cText, 0.10))
                         border.color: callDialog.cBorder
                         border.width: 1
                     }
@@ -340,8 +470,12 @@ Window {
                     enabled: bridge && bridge.targetCallActive
                     onClicked: if (bridge) bridge.stopTargetCall()
                     background: Rectangle {
-                        radius: 4
-                        color: parent.enabled ? Qt.alpha(callDialog.cOrange, 0.2) : Qt.alpha(callDialog.cText, 0.05)
+                        radius: 6
+                        color: parent.enabled
+                               ? (parent.down ? Qt.alpha(callDialog.cOrange, 0.36)
+                                              : (parent.hovered ? Qt.alpha(callDialog.cOrange, 0.30)
+                                                                : Qt.alpha(callDialog.cOrange, 0.22)))
+                               : Qt.alpha(callDialog.cText, 0.06)
                         border.color: parent.enabled ? callDialog.cOrange : callDialog.cBorder
                         border.width: parent.enabled ? 2 : 1
                     }
@@ -365,8 +499,12 @@ Window {
                         bridge.startTargetCall()
                     }
                     background: Rectangle {
-                        radius: 4
-                        color: parent.enabled ? Qt.alpha(callDialog.cGreen, 0.25) : Qt.alpha(callDialog.cText, 0.05)
+                        radius: 6
+                        color: parent.enabled
+                               ? (parent.down ? Qt.alpha(callDialog.cGreen, 0.38)
+                                              : (parent.hovered ? Qt.alpha(callDialog.cGreen, 0.32)
+                                                                : Qt.alpha(callDialog.cGreen, 0.24)))
+                               : Qt.alpha(callDialog.cText, 0.06)
                         border.color: parent.enabled ? callDialog.cGreen : callDialog.cBorder
                         border.width: parent.enabled ? 2 : 1
                     }

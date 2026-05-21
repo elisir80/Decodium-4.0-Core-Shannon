@@ -46,6 +46,7 @@ constexpr int kFt2NdMax = kFt2NMax / kFt2NDown;
 constexpr int kFt2MaxCand = 300;
 constexpr int kFt2Nh1 = 1152 / 2;
 constexpr float kFt2FsDown = 12000.0f / static_cast<float> (kFt2NDown);
+constexpr float kFt2SnrFloor = -26.0f;
 // Legacy FT2 uses a rounded 1333.33 samples/s when converting ibest -> dt.
 constexpr float kFt2FreqDtScale = 1.0f / 1333.33f;
 constexpr int kFt2FoxMax = 1000;
@@ -2215,12 +2216,12 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 
               seen_decodes.push_back (decoded_best.message_fixed);
               ++nwork_decodes;
-              float xsnr = -21.0f;
+              float xsnr = kFt2SnrFloor;
               if (snr > 0.0f)
                 {
                   xsnr = 10.0f * std::log10 (snr) - 13.0f;
                 }
-              int const nsnr = static_cast<int> (std::lround (std::max (-21.0f, xsnr)));
+              int const nsnr = static_cast<int> (std::lround (std::max (kFt2SnrFloor, xsnr)));
               float const xdt = static_cast<float> (ibest) * kFt2FreqDtScale - 0.5f;
               float const qual = 1.0f - (static_cast<float> (decoded_best.nharderror) + decoded_best.dmin) / 60.0f;
 
@@ -2312,8 +2313,9 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               state.last_avg_decoded.fill (' ');
               fill_fixed_chars (state.last_avg_decoded.data (), kFt2DecodedChars,
                                 decoded.message_fixed);
-              copy_decode_row (ndecodes, best_sync_avg, -21, state.dt_avg - 0.5f, state.f_avg,
-                               decoded.iaptype, qual, decoded.bits, decoded.message_fixed,
+              copy_decode_row (ndecodes, best_sync_avg, static_cast<int> (kFt2SnrFloor),
+                               state.dt_avg - 0.5f, state.f_avg, decoded.iaptype, qual,
+                               decoded.bits, decoded.message_fixed,
                                syncs, snrs, dts, freqs, naps, quals, bits77, decodeds);
               ++ndecodes;
               reset_average_state (state);

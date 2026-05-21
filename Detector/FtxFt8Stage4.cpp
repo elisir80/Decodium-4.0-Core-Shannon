@@ -235,11 +235,17 @@ extern "C"
                              float xbase, int nagain, int nsync, float* xsnr_out);
   void legacy_pack77_reset_context_c ();
   void legacy_pack77_set_context_c (char const mycall[13], char const hiscall[13]);
+  void legacy_pack77_pack_c (char const msg0[37], int* i3, int* n3,
+                             signed char c77[77], char msgsent[37],
+                             bool* success, int received);
   void legacy_pack77_unpack28_c (int n28, char c13[13], bool* success);
   void legacy_pack77_unpacktext77_c (char const c71[71], char c13[13], bool* success);
   int legacy_pack77_unpack77bits_c (signed char const* message77, int received,
                                     char msgsent[37], int* quirky_out);
   int ftx_ft8_message77_to_itone_c (signed char const* message77, int* itone_out);
+  int ftx_ft8sdvar_c (float const* s8, float srr, int const* itone_in,
+                      char const msgd[37], char const mycall[12], int lcq,
+                      char msg37_out[37], int itone_out[79]);
   void ftx_sfox_remove_ft8_c (float* dd, int npts);
   void sfox_remove_tone_ (std::complex<float>* c0, float* fsync);
   void qpc_decode2_ (std::complex<float>* c0, float* fsync, float* ftol,
@@ -2609,6 +2615,97 @@ FixedChars<13> widen_call_for_pack77 (FixedChars<12> const& value)
   return out;
 }
 
+bool ft8sd_hint_is_cq (FixedChars<kFt8DecodedChars> const& message)
+{
+  return starts_with (message, "CQ ")
+      || starts_with (message, "DE ")
+      || starts_with (message, "QRZ ");
+}
+
+bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
+                              float const* s8, int nsync, float f1, float xdt,
+                              float xbase, FixedChars<kFt8DecodedChars>& msg37,
+                              float& xsnr, std::array<int, kFt8Nn>& itone,
+                              std::array<signed char, kFt8Bits>& message77)
+{
+  if (!hints || !s8 || request.ndepth < 4
+      || !stage4_supplemental_requested ().load (std::memory_order_relaxed))
+    {
+      return false;
+    }
+
+  float const callback_dt = xdt - 0.5f;
+  int const previous_limit = std::min (hints->previous_count, kFt8MaxEarly);
+  for (int index = 0; index < previous_limit; ++index)
+    {
+      Ft8A7Entry const& hint = hints->previous[static_cast<size_t> (index)];
+      if (hint.freq <= -98.0f || hint.age > 3)
+        {
+          continue;
+        }
+      if (std::fabs (hint.freq - f1) > 3.0f
+          || std::fabs (hint.dt - callback_dt) > 0.25f)
+        {
+          continue;
+        }
+      if (!is_strict_standard_ft8_message (hint.message))
+        {
+          continue;
+        }
+
+      std::array<int, kFt8Nn> expected_tones {};
+      std::array<signed char, 174> expected_codeword {};
+      FixedChars<kFt8DecodedChars> msgsent = blank_fixed<kFt8DecodedChars> ();
+      if (ftx_encode_ft8_candidate_c (hint.message.data (), msgsent.data (),
+                                      expected_tones.data (),
+                                      expected_codeword.data ()) == 0)
+        {
+          continue;
+        }
+
+      FixedChars<kFt8DecodedChars> sd_message = blank_fixed<kFt8DecodedChars> ();
+      std::array<int, kFt8Nn> sd_tones {};
+      int const lcq = ft8sd_hint_is_cq (hint.message) ? 1 : 0;
+      if (ftx_ft8sdvar_c (s8, 0.0f, expected_tones.data (), hint.message.data (),
+                          request.mycall.data (), lcq, sd_message.data (),
+                          sd_tones.data ()) == 0)
+        {
+          continue;
+        }
+      if (!is_strict_standard_ft8_message (sd_message))
+        {
+          continue;
+        }
+
+      int i3 = -1;
+      int n3 = -1;
+      bool pack_ok = false;
+      FixedChars<kFt8DecodedChars> packed_msgsent = blank_fixed<kFt8DecodedChars> ();
+      std::array<signed char, kFt8Bits> packed_bits {};
+      legacy_pack77_pack_c (sd_message.data (), &i3, &n3, packed_bits.data (),
+                            packed_msgsent.data (), &pack_ok, 0);
+      if (!pack_ok)
+        {
+          continue;
+        }
+
+      float hinted_snr = 0.0f;
+      if (ftx_ft8_compute_snr_c (s8, 8, kFt8Nn, sd_tones.data (), xbase,
+                                 request.nagain, nsync, &hinted_snr) == 0)
+        {
+          hinted_snr = -24.0f;
+        }
+
+      msg37 = sd_message;
+      xsnr = hinted_snr;
+      itone = sd_tones;
+      message77 = packed_bits;
+      return true;
+    }
+
+  return false;
+}
+
 int ft8_candidate_sync_threshold (int imetric, int ndepth)
 {
   int syncmin = 6;
@@ -2749,7 +2846,8 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                 int& ipass, int& iaptype,
                                 FixedChars<kFt8DecodedChars>& msg37, float& xsnr,
                                 std::array<int, kFt8Nn>& itone,
-                                std::array<signed char, kFt8Bits>& message77)
+                                std::array<signed char, kFt8Bits>& message77,
+                                Ft8A7Slot const* sd_hints)
 {
   sync = 0.0f;
   f1 = 0.0f;
@@ -2816,7 +2914,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   xdt += 0.5f;
 
   int nsync = 0;
-  ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 3.2f,
+  ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
                                s8.data (), &nsync, llra.data (), llrb.data (),
                                llrc.data (), llrd.data (), llre.data ());
   *newdat = local_newdat;
@@ -2984,6 +3082,17 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       return true;
     }
 
+  if (try_ft8sd_repeated_hint (sd_hints, request, s8.data (), nsync, f1, xdt,
+                               xbase, msg37, xsnr, itone, message77))
+    {
+      nharderrors = kFt8StrictHardErrors;
+      dmin = 0.0f;
+      nbadcrc = 0;
+      ipass = 0;
+      iaptype = 0;
+      return true;
+    }
+
   return false;
 }
 
@@ -3112,7 +3221,7 @@ extern "C" void ftx_ft8_decode_candidate_stage4_c (
                              *sbase_size, sync_out, f1_out, xdt_out, xbase_out,
                              nharderrors_out, dmin_out, nbadcrc_out, ipass_out,
                              iaptype_out, msg37_array, xsnr_out, itone_array,
-                             message77_array);
+                             message77_array, nullptr);
 
   *sync = sync_out;
   *f1 = f1_out;
@@ -3137,7 +3246,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
   std::array<float, 4 * kFt8MaxCand> candidate {};
   std::array<int, kFt8Nn> itone {};
   std::array<signed char, kFt8Bits> message77 {};
-  int npass = 4;
+  int npass = 5;
   if (request.ndepth <= 2)
     {
       npass = 3;
@@ -3218,7 +3327,8 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                      sbase.data (),
                                      kFt8Nh1, sync, f1, xdt, xbase, nharderrors,
                                      dmin, nbadcrc, candidate_pass, iaptype,
-                                     msg37, xsnr, itone, message77);
+                                     msg37, xsnr, itone, message77,
+                                     &state.a7[static_cast<size_t> (jseq)]);
           if (stage4_should_cancel ())
             {
               if (shifted_pass)

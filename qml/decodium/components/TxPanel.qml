@@ -773,33 +773,29 @@ Item {
 
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
-                            id: tuneButton
-                            property bool isTuning: engine && engine.tuning
+                            id: haltButton
                             width: txPanel.toolbarWideButtonWidth
                             height: txPanel.toolbarButtonHeight
                             padding: 0
                             background: Rectangle {
                                 radius: 5
-                                color: tuneButton.isTuning ? Qt.alpha(warningOrange, 0.5) : Qt.alpha(warningOrange, 0.2)
-                                border.color: warningOrange
-                                border.width: tuneButton.isTuning ? 2 : 1
+                                color: haltButton.hovered || (engine && engine.transmitting)
+                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.92)
+                                       : Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.78)
+                                border.color: Qt.lighter(errorRed, 1.2)
+                                border.width: engine && engine.transmitting ? 2 : 1
                             }
                             contentItem: ToolbarButtonContent {
-                                label: tuneButton.isTuning ? "STOP" : "TUNE"
-                                glyph: "\u266B"
-                                foreground: warningOrange
+                                label: "HALT"
+                                glyph: "\u25A0"
+                                foreground: "#FFF8F6"
                                 glyphSize: txPanel.toolbarGlyphSize
                                 labelSize: txPanel.toolbarLabelSize
                                 boldLabel: true
                             }
-                            onClicked: {
-                                if (engine) {
-                                    if (engine.tuning) engine.stopTune()
-                                    else engine.startTune()
-                                }
-                            }
+                            onClicked: if (engine) engine.haltWithReason("qml-halt-button")
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Tune")
+                            ToolTip.text: qsTr("Halt TX")
                             ToolTip.delay: 500
                         }
 
@@ -833,29 +829,33 @@ Item {
 
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
-                            id: haltButton
+                            id: tuneButton
+                            property bool isTuning: engine && engine.tuning
                             width: txPanel.toolbarWideButtonWidth
                             height: txPanel.toolbarButtonHeight
                             padding: 0
                             background: Rectangle {
                                 radius: 5
-                                color: haltButton.hovered || (engine && engine.transmitting)
-                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.92)
-                                       : Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.78)
-                                border.color: Qt.lighter(errorRed, 1.2)
-                                border.width: engine && engine.transmitting ? 2 : 1
+                                color: tuneButton.isTuning ? Qt.alpha(warningOrange, 0.5) : Qt.alpha(warningOrange, 0.2)
+                                border.color: warningOrange
+                                border.width: tuneButton.isTuning ? 2 : 1
                             }
                             contentItem: ToolbarButtonContent {
-                                label: "HALT"
-                                glyph: "\u25A0"
-                                foreground: "#FFF8F6"
+                                label: tuneButton.isTuning ? "STOP" : "TUNE"
+                                glyph: "\u266B"
+                                foreground: warningOrange
                                 glyphSize: txPanel.toolbarGlyphSize
                                 labelSize: txPanel.toolbarLabelSize
                                 boldLabel: true
                             }
-                            onClicked: if (engine) engine.haltWithReason("qml-halt-button")
+                            onClicked: {
+                                if (engine) {
+                                    if (engine.tuning) engine.stopTune()
+                                    else engine.startTune()
+                                }
+                            }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Halt TX")
+                            ToolTip.text: qsTr("Tune")
                             ToolTip.delay: 500
                         }
 

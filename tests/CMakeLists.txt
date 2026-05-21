@@ -52,6 +52,14 @@ add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
 
+add_executable (test_ftx_weak_decode test_ftx_weak_decode.cpp)
+target_link_libraries (test_ftx_weak_decode wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_test (NAME test_ftx_weak_decode COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
+set_tests_properties (test_ftx_weak_decode PROPERTIES ENVIRONMENT "DECODIUM_WEAK_TEST_SNR=-15")
+add_test (NAME test_ft8_weak_decode_deep COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
+set_tests_properties (test_ft8_weak_decode_deep PROPERTIES
+  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-24;DECODIUM_WEAK_TEST_TRIALS=1")
+
 add_executable (test_ft2_qso_sim test_ft2_qso_sim.cpp)
 target_link_libraries (test_ft2_qso_sim wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ft2_qso_sim COMMAND $<TARGET_FILE:test_ft2_qso_sim>)

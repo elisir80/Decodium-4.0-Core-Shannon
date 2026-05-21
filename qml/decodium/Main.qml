@@ -1961,48 +1961,6 @@ ApplicationWindow {
                     }
                 }
 
-                // 1.0.264 fork reset layout button: this is the inline header that Main.qml actually uses.
-                Item {
-                    width: 116
-                    height: 74
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 108
-                        height: 28
-                        radius: 6
-                        color: resetLayoutButtonMA.containsMouse
-                               ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.28)
-                               : Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.14)
-                        border.color: accentOrange
-                        border.width: 2
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "LAYOUT RESET"
-                            color: accentOrange
-                            font.bold: true
-                            font.pixelSize: 10
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-
-                        MouseArea {
-                            id: resetLayoutButtonMA
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: resetLayoutConfirmDialog.open()
-                        }
-
-                        Behavior on color { ColorAnimation { duration: 150 } }
-
-                        ToolTip.visible: resetLayoutButtonMA.containsMouse
-                        ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.\nUsa questo se hai finestre perse fuori monitor.")
-                        ToolTip.delay: 300
-                    }
-                }
-
                 // Radio Frequency Display with CAT status
                 Rectangle {
                     width: bridge.catConnected ? 340 : 290
@@ -2363,12 +2321,41 @@ ApplicationWindow {
                                 anchors.margins: 2
                                 spacing: 0
 
-                                RowLayout {
-                                    spacing: 2
-                                    Text { text: "RX"; color: secondaryCyan; font.pixelSize: 8; font.bold: true; Layout.preferredWidth: 16 }
-                                    Slider {
-                                        id: rxSliderHeader
-                                        Layout.fillWidth: true
+	                                RowLayout {
+	                                    spacing: 2
+	                                    Text { text: "RX"; color: secondaryCyan; font.pixelSize: 8; font.bold: true; Layout.preferredWidth: 16 }
+	                                    Rectangle {
+	                                        id: rxAutoLevelToggle
+	                                        Layout.preferredWidth: 30
+	                                        Layout.preferredHeight: 12
+	                                        radius: 3
+	                                        color: bridge && bridge.autoRxInputLevel
+	                                               ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
+	                                               : Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.85)
+	                                        border.color: bridge && bridge.autoRxInputLevel ? secondaryCyan : glassBorder
+	                                        border.width: 1
+	                                        Text {
+	                                            anchors.centerIn: parent
+	                                            text: "AUTO"
+	                                            color: bridge && bridge.autoRxInputLevel ? secondaryCyan : textDim
+	                                            font.pixelSize: 7
+	                                            font.bold: true
+	                                        }
+	                                        MouseArea {
+	                                            id: rxAutoLevelMouse
+	                                            anchors.fill: parent
+	                                            hoverEnabled: true
+	                                            cursorShape: Qt.PointingHandCursor
+	                                            onClicked: if (bridge) bridge.autoRxInputLevel = !bridge.autoRxInputLevel
+	                                        }
+	                                        ToolTip.visible: rxAutoLevelMouse.containsMouse
+	                                        ToolTip.text: bridge && bridge.autoRxInputLevel
+	                                                      ? qsTr("Auto RX level active")
+	                                                      : qsTr("Auto RX level disabled")
+	                                    }
+	                                    Slider {
+	                                        id: rxSliderHeader
+	                                        Layout.fillWidth: true
                                         Layout.preferredHeight: 14
                                         from: 0; to: 100; live: true; stepSize: 1
                                         Component.onCompleted: if (bridge) value = bridge.rxInputLevel
@@ -5920,7 +5907,6 @@ NumberAnimation {
                             readonly property int dtColumnWidth: compactColumns ? 42 : 48
                             readonly property int gapColumnWidth: compactColumns ? 8 : 12
                             readonly property int distanceColumnWidth: compactColumns ? 0 : 56
-                            readonly property int headerBadgeWidth: compactHeader ? 62 : 70
                             color: "transparent"
                             onWidthChanged: {
                                 if (width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
@@ -6037,23 +6023,6 @@ NumberAnimation {
                                             font.pixelSize: rxFreqPanel.compactHeader ? 12 : 14
                                             font.bold: true
                                             color: primaryBlue
-                                        }
-
-                                        Rectangle {
-                                            width: rxFreqPanel.headerBadgeWidth
-                                            height: 18
-                                            color: Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.3)
-                                            radius: 4
-                                            border.color: primaryBlue
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: bridge.rxFrequency + " Hz"
-                                                font.family: decodiumMonoFontFamily
-                                                font.pixelSize: 10
-                                                font.bold: true
-                                                color: primaryBlue
-                                            }
                                         }
 
                                         Item { Layout.fillWidth: true }
@@ -6414,14 +6383,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                            }
 	                                        }
 
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "No messages at\n" + bridge.rxFrequency + " Hz"
-                                            font.pixelSize: 12
-                                            color: textSecondary
-                                            horizontalAlignment: Text.AlignHCenter
-                                            visible: rxFrequencyList.count === 0
-                                        }
                                     }
                                 }
                             }
@@ -10278,23 +10239,6 @@ NumberAnimation {
                         Text { text: "⋮⋮"; font.pixelSize: 12; color: primaryBlue }
 	                        Rectangle { Layout.preferredWidth: 10; Layout.preferredHeight: 10; radius: 5; color: primaryBlue }
 	                        Text { text: "Signal RX"; font.pixelSize: 14; font.bold: true; color: primaryBlue }
-
-	                        Rectangle {
-	                            Layout.preferredWidth: 70
-	                            Layout.preferredHeight: 20
-                            color: Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.3)
-                            radius: 4
-                            border.color: primaryBlue
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: bridge.rxFrequency + " Hz"
-                                font.family: decodiumMonoFontFamily
-                                font.pixelSize: 10
-                                font.bold: true
-                                color: primaryBlue
-                            }
-	                        }
 
 		                        Item { Layout.fillWidth: true }
 

@@ -2463,17 +2463,56 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("RX Input Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        Slider {
-                            id: setupRxInputLevelSlider
-                            from: 0; to: 100; live: true; stepSize: 1
-                            Layout.fillWidth: true; Layout.columnSpan: 3
-                            Binding on value { value: bridge.rxInputLevel; when: !setupRxInputLevelSlider.pressed }
-                            onMoved: bridge.rxInputLevel = value
-                            onPressedChanged: {
-                                if (!pressed && Math.abs(bridge.rxInputLevel - value) >= 0.5)
-                                    bridge.rxInputLevel = value
-                            }
-                        }
+	                        RowLayout {
+	                            Layout.fillWidth: true
+	                            Layout.columnSpan: 3
+	                            spacing: 8
+	                            Slider {
+	                                id: setupRxInputLevelSlider
+	                                from: 0; to: 100; live: true; stepSize: 1
+	                                Layout.fillWidth: true
+	                                Binding on value { value: bridge.rxInputLevel; when: !setupRxInputLevelSlider.pressed }
+	                                onMoved: bridge.rxInputLevel = value
+	                                onPressedChanged: {
+	                                    if (!pressed && Math.abs(bridge.rxInputLevel - value) >= 0.5)
+	                                        bridge.rxInputLevel = value
+	                                }
+	                            }
+	                            Text {
+	                                text: Math.round(bridge.rxInputLevel)
+	                                color: secondaryCyan
+	                                font.pixelSize: 11
+	                                font.family: decodiumMonoFontFamily
+	                                Layout.preferredWidth: 28
+	                                horizontalAlignment: Text.AlignRight
+	                            }
+	                            Rectangle {
+	                                Layout.preferredWidth: 48
+	                                Layout.preferredHeight: 22
+	                                radius: 4
+	                                color: bridge.autoRxInputLevel
+	                                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.18)
+	                                       : bgMedium
+	                                border.color: bridge.autoRxInputLevel ? secondaryCyan : glassBorder
+	                                Text {
+	                                    anchors.centerIn: parent
+	                                    text: "AUTO"
+	                                    color: bridge.autoRxInputLevel ? secondaryCyan : textSecondary
+	                                    font.pixelSize: 10
+	                                    font.bold: true
+	                                }
+	                                MouseArea {
+	                                    id: setupRxAutoMouse
+	                                    anchors.fill: parent
+	                                    hoverEnabled: true
+	                                    cursorShape: Qt.PointingHandCursor
+	                                    onClicked: bridge.autoRxInputLevel = !bridge.autoRxInputLevel
+	                                }
+	                                ToolTip.visible: setupRxAutoMouse.containsMouse
+	                                ToolTip.text: bridge.autoRxInputLevel ? qsTr("Auto RX level active")
+	                                                                       : qsTr("Auto RX level disabled")
+	                            }
+	                        }
 
                         Text { text: qsTr("TX Output Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         Slider {

@@ -66,7 +66,6 @@ Window {
     readonly property int rxDtWidth: compactRxColumns ? 42 : 50
     readonly property int rxGapWidth: compactRxColumns ? 8 : 12
     readonly property int rxDistanceWidth: compactRxColumns ? 0 : 50
-    readonly property int rxHeaderBadgeWidth: compactRxHeader ? 62 : 70
     property int decodeListVersion: 0
     property int rxDecodeListVersion: 0
     property var bandActivityModel: filteredDecodeEntries(appEngine.decodeList)
@@ -1254,23 +1253,6 @@ Component.onCompleted: {
                                 color: primaryBlue
                             }
 
-                            Rectangle {
-                                Layout.preferredWidth: decodeWindow.rxHeaderBadgeWidth
-                                Layout.preferredHeight: 22
-                                color: Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.3)
-                                radius: 4
-                                border.color: primaryBlue
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: appEngine.rxFrequency + " Hz"
-                                    font.family: decodiumMonoFontFamily
-                                    font.pixelSize: 11
-                                    font.bold: true
-                                    color: primaryBlue
-                                }
-                            }
-
                             Item { Layout.fillWidth: true }
 
                             // RX Frequency count
@@ -1683,15 +1665,6 @@ Component.onCompleted: {
                             }
                         }
 
-                        // Empty state for RX Frequency
-                        Text {
-                            anchors.centerIn: parent
-                            text: "No messages at " + appEngine.rxFrequency + " Hz\nClick on Full Spectrum to select frequency"
-                            font.pixelSize: 12
-                            color: textSecondary
-                            horizontalAlignment: Text.AlignHCenter
-                            visible: rxFrequencyList.count === 0
-                        }
                     }
                 }
             }

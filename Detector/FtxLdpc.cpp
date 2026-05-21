@@ -1122,6 +1122,43 @@ extern "C" void ftx_decode174_91_c (float const* llr_in, int Keff, int maxosd, i
             {
               *dmin_out = dmin;
             }
+            return;
+        }
+    }
+
+  if (maxosd > 0)
+    {
+      std::array<signed char, kLdpc17491K> message91 {};
+      std::array<signed char, kLdpc17491N> cw_osd {};
+      std::array<signed char, kLdpc17491N> apmask {};
+      std::copy_n (apmask_in, kLdpc17491N, apmask.begin ());
+      int nhard = -1;
+      float dmin = 0.0f;
+      osd174_91_cpp (llr.data (), Keff, apmask.data (), norder, message91.data (),
+                     cw_osd.data (), &nhard, &dmin);
+      if (nhard >= 0)
+        {
+          ftx_ldpc174_91_metrics_c (cw_osd.data (), llr.data (), &nhard, &dmin);
+          if (message91_out)
+            {
+              std::copy (message91.begin (), message91.end (), message91_out);
+            }
+          if (cw_out)
+            {
+              std::copy (cw_osd.begin (), cw_osd.end (), cw_out);
+            }
+          if (ntype_out)
+            {
+              *ntype_out = 2;
+            }
+          if (nharderror_out)
+            {
+              *nharderror_out = nhard;
+            }
+          if (dmin_out)
+            {
+              *dmin_out = dmin;
+            }
           return;
         }
     }

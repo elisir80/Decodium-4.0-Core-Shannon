@@ -34,9 +34,10 @@ Window {
     readonly property color cOrange:  "#ff9b3a"
     readonly property color cRed:     "#e84545"
     readonly property color cText:    "#e8edf2"
-    readonly property color cMuted:   "#8a93a3"
-    readonly property color cBorder:  "#3a3e58"
-    readonly property color cFieldBg: "#22243a"
+    readonly property color cMuted:   "#a5afc4"
+    readonly property color cBorder:  "#4a5372"
+    readonly property color cFieldBg: "#30354f"
+    readonly property color cFieldBgFocus: "#384463"
     readonly property color cRowAlt:  "#1f2236"
 
     property var results: []
@@ -129,52 +130,161 @@ Window {
                 TextField {
                     id: callsignField
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 34
                     placeholderText: qsTr("es. F4CQS")
+                    placeholderTextColor: "#7d89a5"
                     color: historyDialog.cText
-                    font.family: "Consolas"; font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily; font.pixelSize: 13
                     selectByMouse: true
                     background: Rectangle {
-                        color: historyDialog.cFieldBg
+                        color: callsignField.activeFocus ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
                         border.color: callsignField.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
-                        radius: 4
+                        border.width: callsignField.activeFocus ? 2 : 1
+                        radius: 5
                     }
                     onAccepted: historyDialog.runQuery()
                 }
                 ComboBox {
                     id: bandCombo
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 34
                     model: ["Tutte"]
                     onActivated: historyDialog.runQuery()
+                    contentItem: Text {
+                        text: bandCombo.displayText
+                        color: historyDialog.cText
+                        font.pixelSize: 13
+                        verticalAlignment: Text.AlignVCenter
+                        leftPadding: 10
+                        rightPadding: 28
+                        elide: Text.ElideRight
+                    }
+                    indicator: Text {
+                        x: bandCombo.width - width - 10
+                        y: (bandCombo.height - height) / 2
+                        text: "▾"
+                        color: historyDialog.cMuted
+                        font.pixelSize: 14
+                    }
+                    background: Rectangle {
+                        color: bandCombo.activeFocus || bandCombo.hovered ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
+                        border.color: bandCombo.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
+                        border.width: bandCombo.activeFocus ? 2 : 1
+                        radius: 5
+                    }
+                    delegate: ItemDelegate {
+                        width: bandCombo.width
+                        contentItem: Text {
+                            text: modelData
+                            color: historyDialog.cText
+                            font.pixelSize: 13
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        background: Rectangle {
+                            color: highlighted ? Qt.alpha(historyDialog.cAccent, 0.28) : historyDialog.cFieldBg
+                        }
+                    }
+                    popup: Popup {
+                        y: bandCombo.height + 2
+                        width: bandCombo.width
+                        implicitHeight: contentItem.implicitHeight
+                        padding: 2
+                        background: Rectangle { color: historyDialog.cFieldBg; border.color: historyDialog.cBorder; radius: 5 }
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: Math.min(contentHeight, 260)
+                            model: bandCombo.popup.visible ? bandCombo.delegateModel : null
+                            currentIndex: bandCombo.highlightedIndex
+                            ScrollIndicator.vertical: ScrollIndicator {}
+                        }
+                    }
                 }
                 ComboBox {
                     id: modeCombo
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 34
                     model: ["Tutti"]
                     onActivated: historyDialog.runQuery()
+                    contentItem: Text {
+                        text: modeCombo.displayText
+                        color: historyDialog.cText
+                        font.pixelSize: 13
+                        verticalAlignment: Text.AlignVCenter
+                        leftPadding: 10
+                        rightPadding: 28
+                        elide: Text.ElideRight
+                    }
+                    indicator: Text {
+                        x: modeCombo.width - width - 10
+                        y: (modeCombo.height - height) / 2
+                        text: "▾"
+                        color: historyDialog.cMuted
+                        font.pixelSize: 14
+                    }
+                    background: Rectangle {
+                        color: modeCombo.activeFocus || modeCombo.hovered ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
+                        border.color: modeCombo.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
+                        border.width: modeCombo.activeFocus ? 2 : 1
+                        radius: 5
+                    }
+                    delegate: ItemDelegate {
+                        width: modeCombo.width
+                        contentItem: Text {
+                            text: modelData
+                            color: historyDialog.cText
+                            font.pixelSize: 13
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        background: Rectangle {
+                            color: highlighted ? Qt.alpha(historyDialog.cAccent, 0.28) : historyDialog.cFieldBg
+                        }
+                    }
+                    popup: Popup {
+                        y: modeCombo.height + 2
+                        width: modeCombo.width
+                        implicitHeight: contentItem.implicitHeight
+                        padding: 2
+                        background: Rectangle { color: historyDialog.cFieldBg; border.color: historyDialog.cBorder; radius: 5 }
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: Math.min(contentHeight, 260)
+                            model: modeCombo.popup.visible ? modeCombo.delegateModel : null
+                            currentIndex: modeCombo.highlightedIndex
+                            ScrollIndicator.vertical: ScrollIndicator {}
+                        }
+                    }
                 }
                 TextField {
                     id: fromDateField
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 34
                     placeholderText: "yyyy-mm-dd"
+                    placeholderTextColor: "#7d89a5"
                     color: historyDialog.cText
-                    font.family: "Consolas"; font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily; font.pixelSize: 13
                     background: Rectangle {
-                        color: historyDialog.cFieldBg
+                        color: fromDateField.activeFocus ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
                         border.color: fromDateField.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
-                        radius: 4
+                        border.width: fromDateField.activeFocus ? 2 : 1
+                        radius: 5
                     }
                     onAccepted: historyDialog.runQuery()
                 }
                 TextField {
                     id: toDateField
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 34
                     placeholderText: "yyyy-mm-dd"
+                    placeholderTextColor: "#7d89a5"
                     color: historyDialog.cText
-                    font.family: "Consolas"; font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily; font.pixelSize: 13
                     background: Rectangle {
-                        color: historyDialog.cFieldBg
+                        color: toDateField.activeFocus ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
                         border.color: toDateField.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
-                        radius: 4
+                        border.width: toDateField.activeFocus ? 2 : 1
+                        radius: 5
                     }
                     onAccepted: historyDialog.runQuery()
                 }
@@ -184,6 +294,45 @@ Window {
                     value: 500
                     editable: true
                     Layout.preferredWidth: 100
+                    Layout.preferredHeight: 34
+                    contentItem: TextInput {
+                        z: 2
+                        text: limitSpin.textFromValue(limitSpin.value, limitSpin.locale)
+                        color: historyDialog.cText
+                        selectionColor: historyDialog.cAccent
+                        selectedTextColor: historyDialog.cText
+                        horizontalAlignment: Qt.AlignHCenter
+                        verticalAlignment: Qt.AlignVCenter
+                        readOnly: !limitSpin.editable
+                        validator: limitSpin.validator
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        font.family: decodiumMonoFontFamily
+                        font.pixelSize: 13
+                    }
+                    up.indicator: Rectangle {
+                        x: limitSpin.width - width
+                        width: 30
+                        height: limitSpin.height
+                        color: limitSpin.up.pressed ? Qt.alpha(historyDialog.cAccent, 0.35) : Qt.alpha(historyDialog.cAccent, 0.18)
+                        border.color: historyDialog.cBorder
+                        radius: 5
+                        Text { anchors.centerIn: parent; text: "+"; color: historyDialog.cText; font.pixelSize: 18; font.bold: true }
+                    }
+                    down.indicator: Rectangle {
+                        x: 0
+                        width: 30
+                        height: limitSpin.height
+                        color: limitSpin.down.pressed ? Qt.alpha(historyDialog.cAccent, 0.35) : Qt.alpha(historyDialog.cAccent, 0.18)
+                        border.color: historyDialog.cBorder
+                        radius: 5
+                        Text { anchors.centerIn: parent; text: "-"; color: historyDialog.cText; font.pixelSize: 18; font.bold: true }
+                    }
+                    background: Rectangle {
+                        color: limitSpin.activeFocus ? historyDialog.cFieldBgFocus : historyDialog.cFieldBg
+                        border.color: limitSpin.activeFocus ? historyDialog.cAccent : historyDialog.cBorder
+                        border.width: limitSpin.activeFocus ? 2 : 1
+                        radius: 5
+                    }
                 }
             }
 
@@ -193,14 +342,18 @@ Window {
                 spacing: 8
                 Button {
                     text: "🔍  " + qsTr("Cerca")
+                    Layout.preferredWidth: 112
+                    Layout.preferredHeight: 34
                     onClicked: historyDialog.runQuery()
                     background: Rectangle {
-                        color: Qt.alpha(historyDialog.cAccent, 0.25)
+                        color: parent.down ? Qt.alpha(historyDialog.cAccent, 0.38)
+                                           : (parent.hovered ? Qt.alpha(historyDialog.cAccent, 0.32)
+                                                             : Qt.alpha(historyDialog.cAccent, 0.24))
                         border.color: historyDialog.cAccent; border.width: 2
-                        radius: 4
+                        radius: 6
                     }
                     contentItem: Text {
-                        text: parent.text; color: historyDialog.cAccent
+                        text: parent.text; color: "#78bdff"
                         font.bold: true; font.pixelSize: 13
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -208,6 +361,8 @@ Window {
                 }
                 Button {
                     text: qsTr("Pulisci filtri")
+                    Layout.preferredWidth: 118
+                    Layout.preferredHeight: 34
                     onClicked: {
                         callsignField.text = ""
                         bandCombo.currentIndex = 0
@@ -217,9 +372,11 @@ Window {
                         historyDialog.runQuery()
                     }
                     background: Rectangle {
-                        color: Qt.alpha(historyDialog.cText, 0.08)
+                        color: parent.down ? Qt.alpha(historyDialog.cText, 0.20)
+                                           : (parent.hovered ? Qt.alpha(historyDialog.cText, 0.15)
+                                                             : Qt.alpha(historyDialog.cText, 0.10))
                         border.color: historyDialog.cBorder
-                        radius: 4
+                        radius: 6
                     }
                     contentItem: Text {
                         text: parent.text; color: historyDialog.cText
@@ -239,16 +396,22 @@ Window {
                 Button {
                     text: "💾  " + qsTr("Export ADIF…")
                     enabled: historyDialog.results.length > 0
+                    Layout.preferredWidth: 150
+                    Layout.preferredHeight: 34
                     onClicked: exportFileDialog.open()
                     background: Rectangle {
-                        color: parent.enabled ? Qt.alpha(historyDialog.cGreen, 0.2) : Qt.alpha(historyDialog.cText, 0.05)
+                        color: parent.enabled
+                               ? (parent.down ? Qt.alpha(historyDialog.cGreen, 0.36)
+                                              : (parent.hovered ? Qt.alpha(historyDialog.cGreen, 0.30)
+                                                                : Qt.alpha(historyDialog.cGreen, 0.22)))
+                               : Qt.alpha(historyDialog.cText, 0.06)
                         border.color: parent.enabled ? historyDialog.cGreen : historyDialog.cBorder
                         border.width: parent.enabled ? 2 : 1
-                        radius: 4
+                        radius: 6
                     }
                     contentItem: Text {
                         text: parent.text
-                        color: parent.enabled ? historyDialog.cGreen : historyDialog.cMuted
+                        color: parent.enabled ? "#58e089" : historyDialog.cMuted
                         font.bold: parent.enabled; font.pixelSize: 13
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -316,46 +479,46 @@ Window {
                             Text {
                                 text: parent.parent.modelData ? historyDialog.formatUtc(parent.parent.modelData.ts_utc) : ""
                                 color: historyDialog.cMuted
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.preferredWidth: 150
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.band || "" : ""
                                 color: historyDialog.cText
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.preferredWidth: 50
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.mode || "" : ""
                                 color: historyDialog.cText
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.preferredWidth: 50
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.callsign_dx || "" : ""
                                 color: historyDialog.cAccent
-                                font.family: "Consolas"; font.pixelSize: 11; font.bold: true
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11; font.bold: true
                                 Layout.preferredWidth: 90
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.callsign_de || "" : ""
                                 color: historyDialog.cText
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.preferredWidth: 90
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.grid || "" : ""
                                 color: historyDialog.cMuted
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.preferredWidth: 55
                             }
                             Text {
                                 text: parent.parent.modelData && parent.parent.modelData.snr_db !== undefined
                                       ? String(parent.parent.modelData.snr_db) : ""
                                 color: historyDialog.cText
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 horizontalAlignment: Text.AlignRight
                                 Layout.preferredWidth: 36
                             }
@@ -363,14 +526,14 @@ Window {
                                 text: parent.parent.modelData && parent.parent.modelData.freq_hz
                                       ? (parent.parent.modelData.freq_hz / 1000).toFixed(2) : ""
                                 color: historyDialog.cMuted
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 horizontalAlignment: Text.AlignRight
                                 Layout.preferredWidth: 70
                             }
                             Text {
                                 text: parent.parent.modelData ? parent.parent.modelData.message || "" : ""
                                 color: historyDialog.cText
-                                font.family: "Consolas"; font.pixelSize: 11
+                                font.family: decodiumMonoFontFamily; font.pixelSize: 11
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }

@@ -194,11 +194,12 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       return;
     }
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
-  ftx_ft8_stage4_set_supplemental_c (request.supplemental ? 1 : 0);
+  bool const supplementalRequested = request.supplemental || request.ndepth >= 4;
+  ftx_ft8_stage4_set_supplemental_c (supplementalRequested ? 1 : 0);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
   ftx_ft8_stage4_set_ldpc_max_iter_c (request.turboFeedbackEnabled ? 50 : 30);
-  bool const wantOsd = (request.supplemental && request.ndepth >= 3) || request.neuralSyncEnabled;
-  if (request.supplemental && request.ndepth >= 4)
+  bool const wantOsd = (supplementalRequested && request.ndepth >= 3) || request.neuralSyncEnabled;
+  if (supplementalRequested && request.ndepth >= 4)
     {
       ftx_ft8_stage4_set_ldpc_osd_c (3, 4);
     }
