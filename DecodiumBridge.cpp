@@ -8040,13 +8040,12 @@ bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
         }
     }
 
-    bool ok = false;
-    int const audioFreqHz = entry.value("freq").toString().trimmed().toInt(&ok);
-    if (!ok) {
-        return false;
-    }
-
-    return std::abs(audioFreqHz - m_rxFrequency) <= 200;
+    // 1.0.267 (fork-only iu8lmc) — RIMOSSO il fallback "audioFreqHz +/- 200Hz".
+    // Allineato a entryBelongsToCurrentQso (1.0.266): il pannello Signal RX mostra
+    // solo entries collegate a mycall (TX nostre, chiamate verso di noi, repliche
+    // QSO con partner attivo). Il traffico della porzione di banda selezionata nel
+    // waterfall NON viene piu' mirrorato qui.
+    return false;
 }
 
 void DecodiumBridge::appendTxDecodeEntry(const QString& message)
