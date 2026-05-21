@@ -1107,8 +1107,11 @@ Item {
                 // 1.0.269 (fork-only) — TX CARRIER ACTIVE: barra rossa larga ~50Hz
                 // (banda della portante FT8) che si accende SOLO quando bridge.transmitting=true
                 // o bridge.tuning=true. Indica visivamente che la portante e' on-air.
+                // 1.0.270: z=50 per disegnare SOPRA rxMarkerLabel/txMarkerLabel (z=0)
+                // che venivano dichiarati dopo e coprivano la banda rossa.
                 Item {
                     id: txCarrierActiveBar
+                    z: 50
                     readonly property real markerX: spectrumGpuOverlay.xForFreq(waterfallDisplay.txFreq)
                     readonly property real carrierBwHz: bridge && bridge.mode === "FT4" ? 80 : 50
                     readonly property real barWidthPx: Math.max(8, carrierBwHz * spectrumGpuOverlay.width / Math.max(1, spectrumGpuOverlay.viewRangeHz))

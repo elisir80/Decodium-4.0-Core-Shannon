@@ -266,10 +266,6 @@ Rectangle {
         RowLayout {
             spacing: 10
 
-            // 1.0.269 (fork-only) — Reset Layout + History buttons SPOSTATI in StatusBar
-            // (footer accanto a PWR/SWR/PSK) per essere sempre visibili.
-            // Vedi qml/decodium/components/StatusBar.qml — footerResetLayoutButton + footerHistoryButton.
-
             Button {
                 text: monitoring ? "Stop" : "Monitor"
                 highlighted: monitoring
@@ -315,8 +311,6 @@ Rectangle {
                     radius: 8
                 }
             }
-
-            // 1.0.269 — resetLayoutConfirm Dialog spostato in StatusBar.qml col pulsante.
 
             // Raptor: Async Decode indicator
             Rectangle {

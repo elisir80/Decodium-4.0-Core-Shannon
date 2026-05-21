@@ -1419,6 +1419,10 @@ private slots:
 private:
     void tickTargetCallOnTx();   // 1.0.262 incrementa retry counter on TX end, ferma se max raggiunto
 
+    // 1.0.270 (Phase 5.3+) — cleanup retention DB: elimina decode + sessioni orfane
+    // piu' vecchie di N giorni + VACUUM. Eseguito UNA VOLTA al boot del worker.
+    void pruneDecodeHistoryOlderThan(int days);
+
     // 1.0.268 (Phase 5.3) — apre connessione SQLite read-only named "decode_history_reader"
     // sul main thread (worker scrive su connessione separata). Idempotente: se gia' aperta
     // ritorna riferimento esistente. Restituisce QSqlDatabase non valida se DB non disponibile.

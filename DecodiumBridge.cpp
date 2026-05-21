@@ -4508,6 +4508,11 @@ void DecodiumBridge::startPersistenceWorker()
                                      "unavailable, persistence disabled"));
             return;
         }
+        // 1.0.270 (Phase 5.3+) — Retention: cancella decode > 30 giorni PRIMA di
+        // creare la nuova sessione. Cosi' la nuova sessione parte sempre su un DB
+        // potato. Eseguito sulla connessione default (sincrono), prima del worker.
+        pruneDecodeHistoryOlderThan(30);
+
         QSqlQuery q(db);
         // 1.0.268 (Phase 5.3) — popola anche operator + station, prima erano NULL.
         if (!q.prepare(QStringLiteral(
@@ -20945,6 +20950,70 @@ void DecodiumBridge::resetWindowLayout()
 // =====================================================================
 // === Phase 5.3 (fork-only 1.0.268) — Decode History Query API     ===
 // =====================================================================
+
+// 1.0.270 — Cleanup retention DB: elimina decode + sessioni orfane piu' vecchie
+// di N giorni + VACUUM per rilasciare spazio su disco. Eseguito UNA volta al
+// boot della sessione (in startPersistenceWorker, prima del worker thread).
+void DecodiumBridge::pruneDecodeHistoryOlderThan(int days)
+{
+    if (days <= 0) return;
+    QSqlDatabase db = QSqlDatabase::database(QSqlDatabase::defaultConnection);
+    if (!db.isValid() || !db.isOpen()) {
+        bridgeLog(QStringLiteral("[Phase5.3] pruneDecodeHistory: default DB unavailable"));
+        return;
+    }
+    qint64 const cutoffMs = QDateTime::currentMSecsSinceEpoch()
+                            - static_cast<qint64>(days) * 24LL * 3600LL * 1000LL;
+
+    qint64 const sizeBefore = QFileInfo(db.databaseName()).size();
+    int deletedDecodes = 0;
+    int deletedSessions = 0;
+
+    // 1. DELETE decode > N giorni
+    {
+        QSqlQuery q(db);
+        q.prepare(QStringLiteral("DELETE FROM decodes WHERE ts_utc < :cutoff"));
+        q.bindValue(QStringLiteral(":cutoff"), cutoffMs);
+        if (!q.exec()) {
+            bridgeLog(QStringLiteral("[Phase5.3] pruneDecodeHistory DELETE decodes failed: %1")
+                          .arg(q.lastError().text()));
+            return;
+        }
+        deletedDecodes = q.numRowsAffected();
+    }
+    // 2. DELETE sessioni orfane (nessun decode collegato)
+    {
+        QSqlQuery q(db);
+        if (q.exec(QStringLiteral(
+                "DELETE FROM sessions WHERE id NOT IN "
+                "(SELECT DISTINCT session_id FROM decodes)"))) {
+            deletedSessions = q.numRowsAffected();
+        } else {
+            bridgeLog(QStringLiteral("[Phase5.3] pruneDecodeHistory DELETE sessions failed: %1")
+                          .arg(q.lastError().text()));
+        }
+    }
+    // 3. VACUUM se abbiamo cancellato qualcosa
+    if (deletedDecodes > 0 || deletedSessions > 0) {
+        QSqlQuery q(db);
+        if (!q.exec(QStringLiteral("VACUUM"))) {
+            bridgeLog(QStringLiteral("[Phase5.3] pruneDecodeHistory VACUUM failed: %1")
+                          .arg(q.lastError().text()));
+        }
+    }
+    qint64 const sizeAfter = QFileInfo(db.databaseName()).size();
+    double const freedMb = (sizeBefore - sizeAfter) / (1024.0 * 1024.0);
+
+    bridgeLog(QStringLiteral("[Phase5.3] pruneDecodeHistory(%1d): deleted %2 decodes + "
+                             "%3 orphan sessions, freed %4 MB (DB %5 -> %6 MB)")
+                  .arg(days)
+                  .arg(deletedDecodes)
+                  .arg(deletedSessions)
+                  .arg(freedMb, 0, 'f', 2)
+                  .arg(sizeBefore / (1024.0 * 1024.0), 0, 'f', 2)
+                  .arg(sizeAfter  / (1024.0 * 1024.0), 0, 'f', 2));
+}
+
 // Apertura connessione SQLite read-only separata dal worker
 QSqlDatabase DecodiumBridge::openHistoryReadDb() const
 {

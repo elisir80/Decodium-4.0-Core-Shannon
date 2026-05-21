@@ -21,7 +21,12 @@ Window {
     height: 700
     minimumWidth: 800
     minimumHeight: 500
-    flags: Qt.Dialog | Qt.WindowCloseButtonHint
+    // 1.0.270 (fork-only) — Qt.Window invece di Qt.Dialog:
+    // su Windows il flag Qt.Dialog limitava drag/resize/maximize.
+    // Adesso e' una finestra normale con title bar nativa + tutti i pulsanti.
+    flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
+         | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
+         | Qt.WindowCloseButtonHint
     color: "#1a1a2e"
 
     readonly property color cAccent:  "#3a9dff"
