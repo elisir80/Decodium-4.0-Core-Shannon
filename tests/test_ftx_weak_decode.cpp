@@ -53,6 +53,10 @@ extern "C"
                                     int imetric, float scale, float* s8_out, int* nsync_out,
                                     float* llra, float* llrb, float* llrc, float* llrd,
                                     float* llre);
+  void ftx_ft8_bitmetrics_deep_c (std::complex<float> const* cd0, int np2, int ibest,
+                                  int imetric, float scale, float* s8_out, int* nsync_out,
+                                  float* llra, float* llrb, float* llrc, float* llrd,
+                                  float* llre);
   void ftx_prepare_ft8_ap_c (char const mycall[12], char const hiscall[12], int ncontest,
                              int* apsym, int* aph10);
   int ftx_ft8_prepare_decode_pass_c (int ipass, int nQSOProgress, int lapcqonly,
@@ -74,6 +78,8 @@ extern "C"
       int* ipass, int* iaptype, char* msg37, float* xsnr, int* itone,
       signed char* message77_out);
   int ftx_encode174_91_message77_c (signed char const* message77, signed char* codeword_out);
+  int ftx_encode_ft8_candidate_c (char const* message37, char* msgsent_out,
+                                  int* itone_out, signed char* codeword_out);
   void ftx_decode174_91_c (float const* llr_in, int Keff, int maxosd, int norder,
                            signed char const* apmask_in, signed char* message91_out,
                            signed char* cw_out, int* ntype_out, int* nharderror_out,
@@ -85,6 +91,12 @@ extern "C"
                                     char* msg37, int* quirky);
   int ftx_ft8sdvar_c (float const* s8, float srr, int const* itone_in, char const msgd[37],
                       char const mycall[12], int lcq, char msg37_out[37], int itone_out[79]);
+  void ftx_ft8a7_measure_candidate_c (float const* s8, int rows, int cols,
+                                      int const* itone, signed char const* cw,
+                                      float const* llra, float const* llrb,
+                                      float const* llrc, float const* llrd,
+                                      float* pow_out, float* dmin_out,
+                                      int* nharderrors_out);
 
   void ftx_ft4_decode_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nfa, int* nfb,
                          int* ndepth, int* lapcqonly, int* ncontest,
@@ -489,10 +501,10 @@ namespace
                         std::array<float, 174> llrd {};
                         std::array<float, 174> llre {};
                         int direct_nsync = 0;
-                        ftx_ft8_bitmetrics_scaled_c (cd0.data (), 2812, ibest, imetric, 2.83f,
-                                                     s8.data (), &direct_nsync, llra.data (),
-                                                     llrb.data (), llrc.data (), llrd.data (),
-                                                     llre.data ());
+                        ftx_ft8_bitmetrics_deep_c (cd0.data (), 2812, ibest, imetric, 2.83f,
+                                                   s8.data (), &direct_nsync, llra.data (),
+                                                   llrb.data (), llrc.data (), llrd.data (),
+                                                   llre.data ());
                         std::array<int, 79> expected_tones {};
                         if (encoded.ok && encoded.tones.size () >= 79)
                           {
@@ -504,12 +516,28 @@ namespace
                             QByteArray msgd = to_fortran_field ("CQ K1ABC FN42", kDecodedChars);
                             std::array<char, kDecodedChars> sd_msg {};
                             std::array<int, 79> sd_tones {};
+                            std::array<char, kDecodedChars> expected_msgsent {};
+                            std::array<signed char, 174> expected_codeword {};
+                            ftx_encode_ft8_candidate_c (msgd.constData (), expected_msgsent.data (),
+                                                        expected_tones.data (),
+                                                        expected_codeword.data ());
                             int const sd_ok = ftx_ft8sdvar_c (s8.data (), 0.0f, expected_tones.data (),
                                                               msgd.constData (), mycall.constData (),
                                                               1, sd_msg.data (), sd_tones.data ());
                             std::cerr << "    ft8sdvar-known ok=" << sd_ok
                                       << " text=\"" << trim_fortran_field (sd_msg.data (), kDecodedChars).constData ()
                                       << "\"\n";
+                            float expected_pow = 0.0f;
+                            float expected_dmin = 0.0f;
+                            int expected_nhard = -1;
+                            ftx_ft8a7_measure_candidate_c (s8.data (), 8, 79, expected_tones.data (),
+                                                           expected_codeword.data (), llra.data (),
+                                                           llrb.data (), llrc.data (), llrd.data (),
+                                                           &expected_pow, &expected_dmin,
+                                                           &expected_nhard);
+                            std::cerr << "    expected metric pow=" << expected_pow
+                                      << " dmin=" << expected_dmin
+                                      << " nhard=" << expected_nhard << '\n';
                           }
                         std::array<signed char, 174> zero_mask {};
                         dump_decode_pass ("llra", llra.data (), zero_mask.data ());

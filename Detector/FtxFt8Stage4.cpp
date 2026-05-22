@@ -194,6 +194,9 @@ extern "C"
   void ftx_ft8_bitmetrics_scaled_c (std::complex<float> const* cd0, int np2, int ibest, int imetric,
                                     float scale, float* s8_out, int* nsync_out,
                                     float* llra, float* llrb, float* llrc, float* llrd, float* llre);
+  void ftx_ft8_bitmetrics_deep_c (std::complex<float> const* cd0, int np2, int ibest, int imetric,
+                                  float scale, float* s8_out, int* nsync_out,
+                                  float* llra, float* llrb, float* llrc, float* llrd, float* llre);
   int ftx_ft8_a8_search_candidate_c (std::complex<float> const* cd,
                                      std::complex<float> const* cwave,
                                      int nzz, int nwave, float f1,
@@ -2626,7 +2629,9 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
                               float const* s8, int nsync, float f1, float xdt,
                               float xbase, FixedChars<kFt8DecodedChars>& msg37,
                               float& xsnr, std::array<int, kFt8Nn>& itone,
-                              std::array<signed char, kFt8Bits>& message77)
+                              std::array<signed char, kFt8Bits>& message77,
+                              float const* llra, float const* llrb,
+                              float const* llrc, float const* llrd)
 {
   if (!hints || !s8 || request.ndepth < 4
       || !stage4_supplemental_requested ().load (std::memory_order_relaxed))
@@ -2670,7 +2675,23 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
                           request.mycall.data (), lcq, sd_message.data (),
                           sd_tones.data ()) == 0)
         {
-          continue;
+          float hint_pow = 0.0f;
+          float hint_dmin = 1.0e30f;
+          int hint_nhard = 174;
+          if (nsync < 5 || !llra || !llrb || !llrc || !llrd)
+            {
+              continue;
+            }
+          ftx_ft8a7_measure_candidate_c (s8, 8, kFt8Nn, expected_tones.data (),
+                                         expected_codeword.data (), llra, llrb,
+                                         llrc, llrd, &hint_pow, &hint_dmin,
+                                         &hint_nhard);
+          if (hint_nhard > 80 || hint_dmin > 170.0f || hint_pow <= 0.0f)
+            {
+              continue;
+            }
+          sd_message = hint.message;
+          sd_tones = expected_tones;
         }
       if (!is_strict_standard_ft8_message (sd_message))
         {
@@ -2914,9 +2935,21 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   xdt += 0.5f;
 
   int nsync = 0;
-  ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
-                               s8.data (), &nsync, llra.data (), llrb.data (),
-                               llrc.data (), llrd.data (), llre.data ());
+  bool const deep_bitmetrics =
+      request.ndepth >= 4
+      && stage4_supplemental_requested ().load (std::memory_order_relaxed);
+  if (deep_bitmetrics)
+    {
+      ftx_ft8_bitmetrics_deep_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
+                                 s8.data (), &nsync, llra.data (), llrb.data (),
+                                 llrc.data (), llrd.data (), llre.data ());
+    }
+  else
+    {
+      ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
+                                   s8.data (), &nsync, llra.data (), llrb.data (),
+                                   llrc.data (), llrd.data (), llre.data ());
+    }
   *newdat = local_newdat;
 
   float const cq_signature_score = ft8_cq_signature_score (s8.data (), 8);
@@ -3083,7 +3116,9 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
     }
 
   if (try_ft8sd_repeated_hint (sd_hints, request, s8.data (), nsync, f1, xdt,
-                               xbase, msg37, xsnr, itone, message77))
+                               xbase, msg37, xsnr, itone, message77,
+                               llra.data (), llrb.data (), llrc.data (),
+                               llrd.data ()))
     {
       nharderrors = kFt8StrictHardErrors;
       dmin = 0.0f;

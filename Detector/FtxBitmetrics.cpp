@@ -220,6 +220,27 @@ void normalizebmet_cpp (float* data, int n)
     }
 }
 
+void normalizebmet_rms_cpp (float* data, int n)
+{
+  float sum2 = 0.0f;
+  for (int i = 0; i < n; ++i)
+    {
+      sum2 += data[i] * data[i];
+    }
+
+  float const mean2 = sum2 / static_cast<float> (n);
+  float const sigma = std::sqrt (std::max (mean2, 0.0f));
+  if (sigma <= 0.0f)
+    {
+      return;
+    }
+
+  for (int i = 0; i < n; ++i)
+    {
+      data[i] /= sigma;
+    }
+}
+
 void finalize_ft2_bitmetric_columns (float* bitmetrics, int rows)
 {
   bm_at (bitmetrics, rows, 204, 1) = bm_at (bitmetrics, rows, 204, 0);
@@ -903,7 +924,7 @@ void run_ft2_bitmetrics (Complex const* cd, float* bitmetrics, int* badsync)
 }
 
 void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
-                         float scale,
+                         float scale, bool weak_deep,
                          float* s8_out, int* nsync_out,
                          float* llra, float* llrb, float* llrc,
                          float* llrd, float* llre)
@@ -970,6 +991,29 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
     }
   *nsync_out = is1 + is2 + is3;
 
+  float srr = 99.0f;
+  if (weak_deep)
+    {
+      float synclev = 0.0f;
+      float sumlev = 0.0f;
+      for (int k = 0; k < 7; ++k)
+        {
+          int const symbol = k + 36;
+          synclev += s8_out[icos7[static_cast<size_t> (k)] + 8 * symbol];
+          for (int tone = 0; tone < 8; ++tone)
+            {
+              sumlev += s8_out[tone + 8 * symbol];
+            }
+        }
+      float snoiselev = (sumlev - synclev) / 7.0f;
+      if (snoiselev < 0.1f)
+        {
+          snoiselev = 1.0f;
+        }
+      srr = synclev / snoiselev;
+    }
+  bool const use_weak_transform = weak_deep && srr < 2.5f;
+
   for (int nsym = 1; nsym <= 3; ++nsym)
     {
       int const nt = 1 << (3 * nsym);
@@ -1000,7 +1044,30 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
                                     cs[static_cast<size_t> (ks)][static_cast<size_t> (graymap[static_cast<size_t> (i2)])] +
                                     cs[static_cast<size_t> (ks + 1)][static_cast<size_t> (graymap[static_cast<size_t> (i3)])]);
                     }
-                  if (imetric == 2)
+                  if (use_weak_transform)
+                    {
+                      if (imetric == 1)
+                        {
+                          if (srr > 2.3f)
+                            {
+                              value *= value;
+                            }
+                          else if (value < 5.77f)
+                            {
+                              float const value2 = value * value;
+                              value = 1.0f + 8.0f * value2 - 0.12f * value2 * value2;
+                            }
+                          else
+                            {
+                              value = (value + 5.82f) * (value + 5.82f);
+                            }
+                        }
+                      else
+                        {
+                          value = std::pow (0.5f * value, 3.0f);
+                        }
+                    }
+                  else if (imetric == 2)
                     {
                       value *= value;
                     }
@@ -1070,11 +1137,22 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
       bmete[static_cast<size_t> (i)] = temp[static_cast<size_t> (best)];
     }
 
-  normalizebmet_cpp (bmeta.data (), 174);
-  normalizebmet_cpp (bmetb.data (), 174);
-  normalizebmet_cpp (bmetc.data (), 174);
-  normalizebmet_cpp (bmetd.data (), 174);
-  normalizebmet_cpp (bmete.data (), 174);
+  if (use_weak_transform)
+    {
+      normalizebmet_rms_cpp (bmeta.data (), 174);
+      normalizebmet_rms_cpp (bmetb.data (), 174);
+      normalizebmet_rms_cpp (bmetc.data (), 174);
+      normalizebmet_rms_cpp (bmetd.data (), 174);
+      normalizebmet_rms_cpp (bmete.data (), 174);
+    }
+  else
+    {
+      normalizebmet_cpp (bmeta.data (), 174);
+      normalizebmet_cpp (bmetb.data (), 174);
+      normalizebmet_cpp (bmetc.data (), 174);
+      normalizebmet_cpp (bmetd.data (), 174);
+      normalizebmet_cpp (bmete.data (), 174);
+    }
 
   for (int i = 0; i < 174; ++i)
     {
@@ -1140,7 +1218,7 @@ extern "C" void ftx_ft8_bitmetrics_c (Complex const* cd0, int np2, int ibest, in
                                       float* llra, float* llrb, float* llrc,
                                       float* llrd, float* llre)
 {
-  run_ft8_bitmetrics (cd0, np2, ibest, imetric, 3.2f,
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, 3.2f, false,
                       s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
 }
 
@@ -1150,7 +1228,17 @@ extern "C" void ftx_ft8_bitmetrics_scaled_c (Complex const* cd0, int np2, int ib
                                              float* llra, float* llrb, float* llrc,
                                              float* llrd, float* llre)
 {
-  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale,
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, false,
+                      s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
+}
+
+extern "C" void ftx_ft8_bitmetrics_deep_c (Complex const* cd0, int np2, int ibest, int imetric,
+                                            float scale,
+                                            float* s8_out, int* nsync_out,
+                                            float* llra, float* llrb, float* llrc,
+                                            float* llrd, float* llre)
+{
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, true,
                       s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
 }
 

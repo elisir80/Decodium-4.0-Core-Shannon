@@ -24,6 +24,29 @@ constexpr int kLdpc17491ColWeight = 3;
 constexpr int kLdpc17491MaxNdeep = 6;
 constexpr float kAlphaMs = 0.75f;
 
+float platanh_ldpc174 (float x)
+{
+  int const sign = x < 0.0f ? -1 : 1;
+  float const z = std::fabs (x);
+  if (z <= 0.664f)
+    {
+      return x / 0.83f;
+    }
+  if (z <= 0.9217f)
+    {
+      return sign * (z - 0.4064f) / 0.322f;
+    }
+  if (z <= 0.9951f)
+    {
+      return sign * (z - 0.8378f) / 0.0524f;
+    }
+  if (z <= 0.9998f)
+    {
+      return sign * (z - 0.9914f) / 0.0012f;
+    }
+  return sign * 7.0f;
+}
+
 using Codeword174 = std::array<signed char, kLdpc17491N>;
 using Message91 = std::array<signed char, kLdpc17491K>;
 using GeneratorRows = std::vector<Codeword174>;
@@ -933,10 +956,12 @@ extern "C" void ftx_decode174_91_c (float const* llr_in, int Keff, int maxosd, i
   std::array<float, kLdpc17491N> zsum {};
   std::array<std::array<float, kLdpc17491ColWeight>, kLdpc17491N> tov {};
   std::array<std::array<float, kLdpc17491MaxRowWeight>, kLdpc17491M> toc {};
+  std::array<std::array<float, kLdpc17491MaxRowWeight>, kLdpc17491M> tanhtoc {};
   std::array<signed char, kLdpc17491N> cw {};
   std::array<int, kLdpc17491M> synd {};
 
   std::copy_n (llr_in, kLdpc17491N, llr.begin ());
+  bool const use_exact_bp = maxosd >= 3 && norder >= 4;
   if (maxosd == 0)
     {
       nosd = 1;
@@ -1067,23 +1092,56 @@ extern "C" void ftx_decode174_91_c (float const* llr_in, int Keff, int maxosd, i
             }
         }
 
-      for (int bit = 0; bit < kLdpc17491N; ++bit)
+      if (use_exact_bp)
         {
-          for (int edge = 0; edge < tables.ncw; ++edge)
+          for (int check = 0; check < kLdpc17491M; ++check)
             {
-              int const check = mn_at (tables, edge, bit) - 1;
-              float sign_prod = 1.0f;
-              float min_abs = 1.0e30f;
               for (int row = 0; row < tables.nrw[static_cast<size_t> (check)]; ++row)
                 {
-                  if (nm_at (tables, row, check) != bit + 1)
-                    {
-                      float const value = toc[static_cast<size_t> (check)][static_cast<size_t> (row)];
-                      sign_prod *= sign_one (-value);
-                      min_abs = std::min (min_abs, std::fabs (value));
-                    }
+                  float const value = toc[static_cast<size_t> (check)][static_cast<size_t> (row)];
+                  tanhtoc[static_cast<size_t> (check)][static_cast<size_t> (row)] =
+                      std::tanh (-0.5f * value);
                 }
-              tov[static_cast<size_t> (bit)][static_cast<size_t> (edge)] = kAlphaMs * sign_prod * min_abs;
+            }
+
+          for (int bit = 0; bit < kLdpc17491N; ++bit)
+            {
+              for (int edge = 0; edge < tables.ncw; ++edge)
+                {
+                  int const check = mn_at (tables, edge, bit) - 1;
+                  float tmn = 1.0f;
+                  for (int row = 0; row < tables.nrw[static_cast<size_t> (check)]; ++row)
+                    {
+                      if (nm_at (tables, row, check) != bit + 1)
+                        {
+                          tmn *= tanhtoc[static_cast<size_t> (check)][static_cast<size_t> (row)];
+                        }
+                    }
+                  tov[static_cast<size_t> (bit)][static_cast<size_t> (edge)] =
+                      2.0f * platanh_ldpc174 (-tmn);
+                }
+            }
+        }
+      else
+        {
+          for (int bit = 0; bit < kLdpc17491N; ++bit)
+            {
+              for (int edge = 0; edge < tables.ncw; ++edge)
+                {
+                  int const check = mn_at (tables, edge, bit) - 1;
+                  float sign_prod = 1.0f;
+                  float min_abs = 1.0e30f;
+                  for (int row = 0; row < tables.nrw[static_cast<size_t> (check)]; ++row)
+                    {
+                      if (nm_at (tables, row, check) != bit + 1)
+                        {
+                          float const value = toc[static_cast<size_t> (check)][static_cast<size_t> (row)];
+                          sign_prod *= sign_one (-value);
+                          min_abs = std::min (min_abs, std::fabs (value));
+                        }
+                    }
+                  tov[static_cast<size_t> (bit)][static_cast<size_t> (edge)] = kAlphaMs * sign_prod * min_abs;
+                }
             }
         }
     }
