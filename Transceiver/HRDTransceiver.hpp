@@ -75,6 +75,7 @@ private:
   void map_modes (int dropdown, ModeMap *);
   int lookup_mode (MODE, ModeMap const&) const;
   MODE lookup_mode (int, ModeMap const&) const;
+  bool set_mode_dropdown (int dropdown, ModeMap const&, MODE);
   MODE protect_pending_data_mode (MODE) const;
   void set_data_mode (MODE);
   MODE get_data_mode (MODE);

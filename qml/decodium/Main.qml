@@ -346,6 +346,38 @@ ApplicationWindow {
         }
     }
 
+    function frequencyDisplayCells(freqHz) {
+        var numericHz = Math.round(Number(freqHz) || 0)
+        var text = (numericHz / 1000000).toFixed(6)
+        var dot = text.indexOf(".")
+        var cells = []
+        for (var i = 0; i < text.length; ++i) {
+            var ch = text.charAt(i)
+            var isDigit = ch >= "0" && ch <= "9"
+            var stepHz = 0
+            if (isDigit && dot >= 0) {
+                if (i < dot) {
+                    stepHz = Math.pow(10, dot - i - 1) * 1000000
+                } else if (i > dot) {
+                    stepHz = Math.pow(10, 6 - (i - dot))
+                }
+                stepHz = Math.max(1, Math.round(stepHz))
+            }
+            cells.push({ text: ch, digit: isDigit, stepHz: stepHz })
+        }
+        return cells
+    }
+
+    function tuneDialByStep(stepHz, direction) {
+        if (!bridge || !(stepHz > 0))
+            return
+        var currentHz = Math.round(Number(bridge.frequency) || 0)
+        var nextHz = Math.max(0, currentHz + Math.round(stepHz) * direction)
+        if (nextHz === currentHz)
+            return
+        bridge.qsyTo(nextHz, bridge.mode || "")
+    }
+
     function persistSettingsDialogIfOpen() {
         if (settingsDialog && settingsDialog.visible && settingsDialog.persistSettingsNow)
             settingsDialog.persistSettingsNow()
@@ -1999,17 +2031,89 @@ ApplicationWindow {
                             }
 
                             // Frequency display - syncs with radio or band selection
-                            Text {
+                            Row {
                                 id: frequencyDisplay
-                                // bridge.frequency is synced with both CAT and BandManager
-                                text: (bridge.frequency / 1000000).toFixed(6)
-                                font.pixelSize: Math.round(26 * fs)
-                                font.family: decodiumMonoFontFamily
-                                font.bold: true
-                                color: mainWindow.txVisualActive ? "#ff6b6b" : accentGreen
+                                property int digitHeight: Math.round(34 * fs)
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: digitHeight
+                                spacing: 0
 
-                                Behavior on color { ColorAnimation { duration: 200 } }
+                                Repeater {
+                                    model: mainWindow.frequencyDisplayCells(bridge.frequency)
+
+                                    delegate: Rectangle {
+                                        id: frequencyDigitCell
+                                        required property var modelData
+                                        readonly property bool digitCell: !!modelData.digit
+                                        readonly property int stepHz: Number(modelData.stepHz || 0)
+                                        readonly property color baseDigitColor: mainWindow.txVisualActive ? "#ff6b6b" : accentGreen
+                                        width: digitCell ? Math.round(16 * fs) : Math.round(8 * fs)
+                                        height: frequencyDisplay.digitHeight
+                                        radius: 2
+                                        color: digitCell && digitUpArea.containsMouse
+                                               ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.20)
+                                               : digitCell && digitDownArea.containsMouse
+                                                 ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.18)
+                                                 : "transparent"
+
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            height: 1
+                                            visible: frequencyDigitCell.digitCell && digitUpArea.containsMouse
+                                            color: accentGreen
+                                        }
+
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.bottom: parent.bottom
+                                            height: 1
+                                            visible: frequencyDigitCell.digitCell && digitDownArea.containsMouse
+                                            color: secondaryCyan
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: frequencyDigitCell.modelData.text
+                                            font.pixelSize: Math.round(26 * fs)
+                                            font.family: decodiumMonoFontFamily
+                                            font.bold: true
+                                            color: digitCell && digitUpArea.containsMouse
+                                                   ? "#8cffb8"
+                                                   : digitCell && digitDownArea.containsMouse
+                                                     ? "#8fd7ff"
+                                                     : frequencyDigitCell.baseDigitColor
+
+                                            Behavior on color { ColorAnimation { duration: 90 } }
+                                        }
+
+                                        MouseArea {
+                                            id: digitUpArea
+                                            enabled: frequencyDigitCell.digitCell
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            height: parent.height / 2
+                                            hoverEnabled: true
+                                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                            onClicked: mainWindow.tuneDialByStep(frequencyDigitCell.stepHz, 1)
+                                        }
+
+                                        MouseArea {
+                                            id: digitDownArea
+                                            enabled: frequencyDigitCell.digitCell
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.bottom: parent.bottom
+                                            height: parent.height / 2
+                                            hoverEnabled: true
+                                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                            onClicked: mainWindow.tuneDialByStep(frequencyDigitCell.stepHz, -1)
+                                        }
+                                    }
+                                }
                             }
 
                             Text {

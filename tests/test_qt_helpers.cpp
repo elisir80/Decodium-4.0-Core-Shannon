@@ -2607,6 +2607,60 @@ private:
     QCOMPARE (context.lookupHash22 (context.hashDx22 ()), QStringLiteral ("<PJ4/W9XYZ>"));
   }
 
+  Q_SLOT void ftx_special_event_call_messages_avoid_standard_truncation ()
+  {
+    auto const sent = [] (decodium::txmsg::EncodedMessage const& encoded) {
+      return QString::fromLatin1 (encoded.msgsent.constData (), encoded.msgsent.size ()).trimmed ();
+    };
+    auto const decodedText = [] (decodium::txmsg::DecodedMessage const& decoded) {
+      return QString::fromLatin1 (decoded.msgsent.constData (), decoded.msgsent.size ()).trimmed ();
+    };
+    QRegularExpression const truncatedToken {
+      QStringLiteral ("(^|[\\s<])II9MES($|[\\s>])")
+    };
+
+    QVERIFY (!decodium::txmsg::isStandardFtxCall (QStringLiteral ("II9MESC")));
+    QVERIFY (decodium::txmsg::isStandardFtxCall (QStringLiteral ("OE9GWV")));
+    QCOMPARE (decodium::txmsg::bracketHashCall (QStringLiteral ("II9MESC")),
+              QStringLiteral ("<II9MESC>"));
+
+    decodium::txmsg::EncodedMessage const unsafe =
+        decodium::txmsg::encodeFt8 (QStringLiteral ("OE9GWV II9MESC -02"));
+    QVERIFY (unsafe.ok);
+    QVERIFY2 (truncatedToken.match (sent (unsafe)).hasMatch (),
+              qPrintable (sent (unsafe)));
+
+    struct MessageCase
+    {
+      char const* message;
+    };
+    MessageCase const safeMessages[] = {
+      {"CQ II9MESC"},
+      {"<II9MESC> OE9GWV JM77"},
+      {"<II9MESC> OE9GWV -02"},
+      {"OE9GWV <II9MESC> R-02"},
+      {"II9MESC <OE9GWV> RR73"},
+      {"II9MESC <OE9GWV> 73"},
+    };
+
+    for (MessageCase const& candidate : safeMessages)
+      {
+        QString const message = QString::fromLatin1 (candidate.message);
+        decodium::txmsg::EncodedMessage const encoded = decodium::txmsg::encodeFt8 (message);
+        QVERIFY2 (encoded.ok, qPrintable (message));
+        QVERIFY2 (!truncatedToken.match (sent (encoded)).hasMatch (),
+                  qPrintable (sent (encoded)));
+
+        decodium::txmsg::Decode77Context context;
+        context.saveHashCall (QStringLiteral ("II9MESC"));
+        context.saveHashCall (QStringLiteral ("OE9GWV"));
+        decodium::txmsg::DecodedMessage const decoded =
+            decodium::txmsg::decode77 (encoded.msgbits, encoded.i3, encoded.n3, &context, true);
+        QVERIFY2 (decoded.ok, qPrintable (message));
+        QCOMPARE (decodedText (decoded), message);
+      }
+  }
+
   Q_SLOT void ftx_decode77_updates_recent_calls ()
   {
     decodium::txmsg::Decode77Context context;

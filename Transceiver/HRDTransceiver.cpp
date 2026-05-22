@@ -63,6 +63,17 @@ namespace
       }
   }
 
+  auto hrd_data_carrier_mode (Transceiver::MODE data_mode) -> Transceiver::MODE
+  {
+    switch (data_mode)
+      {
+      case Transceiver::DIG_U:  return Transceiver::USB;
+      case Transceiver::DIG_L:  return Transceiver::LSB;
+      case Transceiver::DIG_FM: return Transceiver::FM;
+      default:                  return data_mode;
+      }
+  }
+
   void hrd_append_le16 (QByteArray& data, quint16 value)
   {
     data.append (static_cast<char> (value & 0xffu));
@@ -925,6 +936,81 @@ auto HRDTransceiver::lookup_mode (int mode, ModeMap const& map) const -> MODE
   return std::get<0> (*it);
 }
 
+bool HRDTransceiver::set_mode_dropdown (int dropdown, ModeMap const& map, MODE mode)
+{
+  if (dropdown < 0 || UNK == mode)
+    {
+      return false;
+    }
+
+  auto const desired_selection = lookup_mode (mode, map);
+  if (hrd_is_data_mode (mode))
+    {
+      auto const carrier_mode = hrd_data_carrier_mode (mode);
+      int carrier_selection {-1};
+      try
+        {
+          carrier_selection = lookup_mode (carrier_mode, map);
+        }
+      catch (error const&)
+        {
+          carrier_selection = -1;
+        }
+
+      // Some HRD radio profiles do not expose USB-D/DATA-U in the Mode
+      // dropdown. They expose plain USB plus a separate Data control. In that
+      // case selecting the fallback USB item creates a visible USB -> USB-D
+      // bounce on Icom rigs. If the carrier is already correct, leave the Mode
+      // dropdown alone and only assert the Data control.
+      if (carrier_selection >= 0 && desired_selection == carrier_selection)
+        {
+          int current_selection {-1};
+          try
+            {
+              current_selection = get_dropdown (dropdown);
+            }
+          catch (error const&)
+            {
+              current_selection = -1;
+            }
+          if (current_selection == carrier_selection)
+            {
+              hrd_diag (QStringLiteral ("skipping carrier fallback mode write for Data mode %1 on dropdown %2 selection=%3")
+                        .arg (mode)
+                        .arg (dropdown_names_.value (dropdown))
+                        .arg (carrier_selection));
+              return false;
+            }
+
+          try
+            {
+              auto const current_mode = lookup_mode (current_selection, map);
+              if (hrd_data_carrier_matches (mode, current_mode))
+                {
+                  hrd_diag (QStringLiteral ("skipping carrier-equivalent mode write for Data mode %1 currentMode=%2 dropdown=%3")
+                            .arg (mode)
+                            .arg (current_mode)
+                            .arg (dropdown_names_.value (dropdown)));
+                  return false;
+                }
+            }
+          catch (error const&)
+            {
+              // Fall through and set the dropdown explicitly. This matches the
+              // previous behaviour for unrecognised HRD mode values.
+            }
+
+          // If the carrier really must change, keep DATA latched before the
+          // carrier write as well as after it. This avoids clearing the data
+          // profile on HRD/Icom combinations where Data is a separate control.
+          set_data_mode (mode);
+        }
+    }
+
+  set_dropdown (dropdown, desired_selection);
+  return true;
+}
+
 int HRDTransceiver::get_dropdown (int dd)
 {
   if (dd < 0)
@@ -1247,11 +1333,11 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
         {
           if (!reversed_ && mode_B_dropdown_ >= 0)
             {
-              set_dropdown (mode_B_dropdown_, lookup_mode (mode, mode_B_map_));
+              set_mode_dropdown (mode_B_dropdown_, mode_B_map_, mode);
             }
           else if (reversed_ && mode_B_dropdown_ >= 0)
             {
-              set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+              set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
             }
           else
             {
@@ -1260,7 +1346,7 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
               if (rx_B_button_ >= 0)
                 {
                   set_button (reversed_ ? rx_A_button_ : rx_B_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_data_mode (mode);
                   set_button (reversed_ ? rx_B_button_ : rx_A_button_);
                 }
@@ -1268,14 +1354,14 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
                        && rx_A_selection_.size () && rx_B_selection_.size ())
                 {
                   set_dropdown (receiver_dropdown_, (reversed_ ? rx_A_selection_ : rx_B_selection_).front ());
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_data_mode (mode);
                   set_dropdown (receiver_dropdown_, (reversed_ ? rx_B_selection_ : rx_A_selection_).front ());
                 }
               else if (vfo_count_ > 1 && ((vfo_A_button_ >=0 && vfo_B_button_ >=0) || vfo_toggle_button_ >= 0))
                 {
                   set_button (vfo_A_button_ >= 0 ? (reversed_ ? vfo_A_button_ : vfo_B_button_) : vfo_toggle_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_data_mode (mode);
                   set_button (vfo_A_button_ >= 0 ? (reversed_ ? vfo_B_button_ : vfo_A_button_) : vfo_toggle_button_);
                 }
@@ -1309,7 +1395,7 @@ void HRDTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool /*no_ignore*
                 {
                   // do this here rather than later so we only
                   // toggle/switch VFOs once
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_data_mode (mode);
                 }
               set_button (vfo_A_button_ >= 0 ? vfo_A_button_ : vfo_toggle_button_);
@@ -1391,11 +1477,11 @@ void HRDTransceiver::do_mode (MODE mode)
   CAT_TRACE (mode);
   if (reversed_ && mode_B_dropdown_ >= 0)
     {
-      set_dropdown (mode_B_dropdown_, lookup_mode (mode, mode_B_map_));
+      set_mode_dropdown (mode_B_dropdown_, mode_B_map_, mode);
     }
   else
     {
-      set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+      set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
     }
   if (mode != UNK && state ().split ()) // rationalise mode if split
     {
@@ -1403,7 +1489,7 @@ void HRDTransceiver::do_mode (MODE mode)
         {
           if (mode_B_dropdown_ >= 0)
             {
-              set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+              set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
             }
           else
             {
@@ -1412,20 +1498,20 @@ void HRDTransceiver::do_mode (MODE mode)
               if (rx_B_button_ >= 0)
                 {
                   set_button (rx_A_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_button (rx_B_button_);
                 }
               else if (receiver_dropdown_ >= 0
                        && rx_A_selection_.size () && rx_B_selection_.size ())
                 {
                   set_dropdown (receiver_dropdown_, rx_A_selection_.front ());
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_dropdown (receiver_dropdown_, rx_B_selection_.front ());
                 }
               else if (vfo_count_ > 1 && ((vfo_A_button_ >=0 && vfo_B_button_ >=0) || vfo_toggle_button_ >= 0))
                 {
                   set_button (vfo_A_button_ >= 0 ? vfo_A_button_ : vfo_toggle_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_button (vfo_B_button_ >= 0 ? vfo_B_button_ : vfo_toggle_button_);
                 }
               // else Tx VFO mode gets set when Tx VFO frequency is
@@ -1441,7 +1527,7 @@ void HRDTransceiver::do_mode (MODE mode)
         {
           if (mode_B_dropdown_ >= 0)
             {
-              set_dropdown (mode_B_dropdown_, lookup_mode (mode, mode_B_map_));
+              set_mode_dropdown (mode_B_dropdown_, mode_B_map_, mode);
             }
           else
             {
@@ -1450,20 +1536,20 @@ void HRDTransceiver::do_mode (MODE mode)
               if (rx_B_button_ >= 0)
                 {
                   set_button (rx_B_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_button (rx_A_button_);
                 }
               else if (receiver_dropdown_ >= 0
                        && rx_A_selection_.size () && rx_B_selection_.size ())
                 {
                   set_dropdown (receiver_dropdown_, rx_B_selection_.front ());
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_dropdown (receiver_dropdown_, rx_A_selection_.front ());
                 }
               else if (vfo_count_ > 1 && ((vfo_A_button_ >=0 && vfo_B_button_ >=0) || vfo_toggle_button_ >= 0))
                 {
                   set_button (vfo_B_button_ >= 0 ? vfo_B_button_ : vfo_toggle_button_);
-                  set_dropdown (mode_A_dropdown_, lookup_mode (mode, mode_A_map_));
+                  set_mode_dropdown (mode_A_dropdown_, mode_A_map_, mode);
                   set_button (vfo_A_button_ >= 0 ? vfo_A_button_ : vfo_toggle_button_);
                 }
               // else Tx VFO mode gets set when Tx VFO frequency is

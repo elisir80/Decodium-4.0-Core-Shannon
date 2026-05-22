@@ -44,7 +44,19 @@ Item {
     property var vhfBands: [
         { index: 16, lambda: "4M",   name: "70 MHz" },
         { index: 17, lambda: "2M",   name: "144 MHz" },
-        { index: 19, lambda: "70CM", name: "432 MHz" }
+        { index: 18, lambda: "1.25M", name: "222 MHz" },
+        { index: 19, lambda: "70CM", name: "432 MHz" },
+        { index: 20, lambda: "33CM", name: "902 MHz" }
+    ]
+
+    // SHF bands exposed by the default working-frequency table.
+    property var shfBands: [
+        { index: 21, lambda: "23CM",   name: "1296 MHz" },
+        { index: 22, lambda: "13CM",   name: "2304 MHz" },
+        { index: 23, lambda: "9CM",    name: "3400 MHz" },
+        { index: 24, lambda: "6CM",    name: "5760 MHz" },
+        { index: 25, lambda: "3CM",    name: "10 GHz" },
+        { index: 26, lambda: "1.25CM", name: "24 GHz" }
     ]
 
     implicitHeight: contentColumn.height
@@ -164,6 +176,37 @@ Item {
 
             Item { Layout.fillWidth: true }
         }
+
+        // SHF bands row
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 4
+            visible: shfBands.length > 0
+
+            Text {
+                text: "SHF:"
+                color: textSecondary
+                font.pixelSize: 10
+                Layout.preferredWidth: 28
+            }
+
+            Repeater {
+                model: shfBands
+
+                BandButton {
+                    bandIndex: modelData.index
+                    bandLambda: modelData.lambda
+                    bandName: modelData.name
+                    onClicked: {
+                        if (bandMgr) {
+                            bandMgr.changeBand(bandIndex)
+                        }
+                    }
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+        }
     }
 
     // Band Button component
@@ -176,7 +219,7 @@ Item {
         // Use internal bandIndex for selection - more reliable binding
         readonly property bool isSelected: bandMgr && bandMgr.currentBandIndex === bandBtn.bandIndex
 
-        Layout.preferredWidth: 42
+        Layout.preferredWidth: Math.max(42, Math.min(72, bandLambda.length * 8 + 14))
         Layout.preferredHeight: 28
 
         background: Rectangle {

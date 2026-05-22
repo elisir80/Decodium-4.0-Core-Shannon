@@ -422,9 +422,11 @@ Rectangle {
 
         Button {
             id: footerResetLayoutButton
-            implicitHeight: 22
+            Layout.preferredWidth: 150
+            Layout.preferredHeight: 30
+            implicitWidth: 150
+            implicitHeight: 30
             padding: 0
-            text: "🗗 Layout"
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.")
             ToolTip.delay: 300
@@ -435,23 +437,35 @@ Rectangle {
                 border.width: 1
                 radius: 4
             }
-            contentItem: Text {
-                text: parent.text
-                color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
-                font.bold: true
-                font.pixelSize: 10
-                leftPadding: 6
-                rightPadding: 6
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+            contentItem: Item {
+                Row {
+                    spacing: 6
+                    anchors.centerIn: parent
+
+                    Text {
+                        text: "☰"
+                        color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                        font.bold: true
+                        font.pixelSize: 15
+                    }
+
+                    Text {
+                        text: qsTr("Layout")
+                        color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
             }
         }
 
         Button {
             id: footerHistoryButton
-            implicitHeight: 22
+            Layout.preferredWidth: 150
+            Layout.preferredHeight: 30
+            implicitWidth: 150
+            implicitHeight: 30
             padding: 0
-            text: "📚 History"
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite. Filtri + Export ADIF.")
             ToolTip.delay: 300
@@ -464,15 +478,25 @@ Rectangle {
                 border.width: 1
                 radius: 4
             }
-            contentItem: Text {
-                text: parent.text
-                color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
-                font.bold: true
-                font.pixelSize: 10
-                leftPadding: 6
-                rightPadding: 6
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+            contentItem: Item {
+                Row {
+                    spacing: 6
+                    anchors.centerIn: parent
+
+                    Text {
+                        text: "▤"
+                        color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                        font.bold: true
+                        font.pixelSize: 15
+                    }
+
+                    Text {
+                        text: qsTr("History")
+                        color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
             }
         }
 
@@ -482,12 +506,14 @@ Rectangle {
             modal: true
             standardButtons: Dialog.Yes | Dialog.No
             anchors.centerIn: Overlay.overlay
+            width: Math.min(440, Overlay.overlay ? Overlay.overlay.width - 48 : 440)
+            implicitWidth: width
             onAccepted: { if (bridge) bridge.resetWindowLayout() }
             contentItem: Text {
                 text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
                 color: textPrimary
                 wrapMode: Text.WordWrap
-                width: 360
+                width: footerResetLayoutConfirm.width - footerResetLayoutConfirm.leftPadding - footerResetLayoutConfirm.rightPadding
             }
         }
 

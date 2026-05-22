@@ -202,10 +202,10 @@ QString DecodiumOmniRigManager::modeFromParam(int param) const
 {
     if (param & OMNI_PM_CW_U)  return "CW-R";
     if (param & OMNI_PM_CW_L)  return "CW";
-    if (param & OMNI_PM_SSB_U) return "USB";
-    if (param & OMNI_PM_SSB_L) return "LSB";
     if (param & OMNI_PM_DIG_U) return "DATA-U";
     if (param & OMNI_PM_DIG_L) return "DATA-L";
+    if (param & OMNI_PM_SSB_U) return "USB";
+    if (param & OMNI_PM_SSB_L) return "LSB";
     if (param & OMNI_PM_AM)    return "AM";
     if (param & OMNI_PM_FM)    return "FM";
     return "USB";

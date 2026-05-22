@@ -1357,10 +1357,14 @@ static QString decodeDedupKey(QString const& time,
         + canonicalDecodeMessage(message);
 }
 
+static constexpr int kFt2AsyncUiDedupeFallbackWindowMs = 3750;
+static constexpr int kFt2AsyncAutoSeqDedupeSeconds = 9;
+static constexpr int kFt2AsyncAutoSeqDedupeMs = kFt2AsyncAutoSeqDedupeSeconds * 1000;
+
 // FT2 async turbo (100ms windows): lo stage7 DSP può riportare lo stesso messaggio
 // in scansioni consecutive con freq leggermente diversa (±1-10 Hz di jitter). Quantizza
 // la frequenza in bucket da 20 Hz così gli stessi decode non producono righe duplicate
-// nella decodeList, mantenendo comunque la distinzione tra QSO vicini su bande diverse.
+// nello stesso slot, ma senza attraversare slot FT2 successivi.
 static QString decodeDedupKeyFt2Async(QString const& time,
                                       QString const& freq,
                                       QString const& message,
@@ -1371,77 +1375,14 @@ static QString decodeDedupKeyFt2Async(QString const& time,
     QString const fBucket = ok ? QString::number((f / 20) * 20) : freq.trimmed();
     QString timeToken = normalizeUtcDisplayToken(time).trimmed();
     if (timeToken.isEmpty() && timestampMs > 0) {
-        timeToken = QStringLiteral("@") + QString::number(timestampMs / 60000);
+        timeToken = QStringLiteral("@ft2slot")
+            + QString::number(timestampMs / kFt2AsyncUiDedupeFallbackWindowMs);
     }
     return timeToken
         + QLatin1Char('|')
         + fBucket
         + QLatin1Char('|')
         + canonicalDecodeMessage(message);
-}
-
-static constexpr int kFt2AsyncBurstDedupeSeconds = 9;
-static constexpr int kFt2AsyncAutoSeqDedupeMs = kFt2AsyncBurstDedupeSeconds * 1000;
-
-static QString decodeDedupKeyFt2AsyncBurst(QString const& freq,
-                                           QString const& message)
-{
-    bool ok = false;
-    int const f = freq.trimmed().toInt(&ok);
-    QString const fBucket = ok ? QString::number((f / 20) * 20) : freq.trimmed();
-    return fBucket
-        + QLatin1Char('|')
-        + canonicalDecodeMessage(message).toUpper();
-}
-
-static int circularUtcSecondDistance(int lhs, int rhs)
-{
-    if (lhs < 0 || rhs < 0) {
-        return std::numeric_limits<int>::max();
-    }
-
-    int diff = qAbs(lhs - rhs);
-    return qMin(diff, 86400 - diff);
-}
-
-static bool isFt2AsyncRecentBurstDuplicate(QVariantMap const& previous,
-                                           QVariantMap const& entry,
-                                           int maxDistanceSeconds = kFt2AsyncBurstDedupeSeconds)
-{
-    if (previous.value(QStringLiteral("isTx")).toBool()
-        || entry.value(QStringLiteral("isTx")).toBool()) {
-        return false;
-    }
-
-    QString const previousKey = decodeDedupKeyFt2AsyncBurst(
-        previous.value(QStringLiteral("freq")).toString(),
-        previous.value(QStringLiteral("message")).toString());
-    QString const entryKey = decodeDedupKeyFt2AsyncBurst(
-        entry.value(QStringLiteral("freq")).toString(),
-        entry.value(QStringLiteral("message")).toString());
-    if (previousKey.isEmpty() || previousKey != entryKey) {
-        return false;
-    }
-
-    // 1.0.136: preferisce entry["timestamp"] (ms epoch, sempre popolato in FT2
-    // async — vedi commento alla riga ~18734) rispetto a entry["time"] che
-    // resta vuoto per i decode async (parseFt8Row non lo popola). Prima
-    // questo path falliva sempre: secondsFromUtcDisplayToken("") = -1 →
-    // circularUtcSecondDistance(-1,-1) = INT_MAX → check sempre false →
-    // dedup cross-period mai applicato → loop di CQ identici ogni 3.75s.
-    qulonglong const previousMs = previous.value(QStringLiteral("timestamp")).toULongLong();
-    qulonglong const entryMs = entry.value(QStringLiteral("timestamp")).toULongLong();
-    if (previousMs > 0 && entryMs > 0) {
-        qulonglong const distanceMs = (previousMs > entryMs)
-            ? (previousMs - entryMs)
-            : (entryMs - previousMs);
-        return distanceMs <= static_cast<qulonglong>(maxDistanceSeconds) * 1000ULL;
-    }
-
-    // Fallback per entries vecchie senza timestamp (compat. con sync mode).
-    int const previousSeconds = secondsFromUtcDisplayToken(previous.value(QStringLiteral("time")).toString());
-    int const entrySeconds = secondsFromUtcDisplayToken(entry.value(QStringLiteral("time")).toString());
-    return circularUtcSecondDistance(previousSeconds, entrySeconds) <= maxDistanceSeconds;
 }
 
 static int legacyDepthBitsToModernDepth(int legacyBits)
@@ -2316,6 +2257,122 @@ static QString normalizeCallToken(QString token)
         token.chop(1);
     }
     return token.trimmed();
+}
+
+static bool isFtx77MessageMode(QString const& mode)
+{
+    QString const upper = mode.trimmed().toUpper();
+    return upper == QStringLiteral("FT8")
+        || upper == QStringLiteral("FT4")
+        || upper == QStringLiteral("FT2");
+}
+
+static QString normalizedTxCallToken(QString const& call)
+{
+    return normalizeCallToken(call).trimmed().toUpper();
+}
+
+static QString ftxHashedCallToken(QString const& call)
+{
+    return decodium::txmsg::bracketHashCall(normalizedTxCallToken(call));
+}
+
+static QString standardFtxQsoMessage(int txNumber,
+                                     QString const& dxCall,
+                                     QString const& myCall,
+                                     QString const& grid4,
+                                     QString const& reportSent,
+                                     bool sendRR73,
+                                     bool quickQso,
+                                     QString const& mode)
+{
+    QString const dx = normalizedTxCallToken(dxCall);
+    QString const my = normalizedTxCallToken(myCall);
+    QString const grid = grid4.left(4).trimmed().toUpper();
+    QString const report = normalizeSignalReportText(reportSent.isEmpty()
+        ? QStringLiteral("-10")
+        : reportSent);
+    QString const endMessage = sendRR73 ? QStringLiteral("RR73") : QStringLiteral("RRR");
+
+    if (dx.isEmpty() || my.isEmpty()) {
+        return {};
+    }
+
+    auto const normalMessage = [&]() -> QString {
+        switch (txNumber) {
+        case 1: return dx + QLatin1Char(' ') + my
+                    + (grid.isEmpty() ? QString() : QStringLiteral(" ") + grid);
+        case 2: return dx + QLatin1Char(' ') + my + QLatin1Char(' ') + report;
+        case 3: return dx + QLatin1Char(' ') + my + QStringLiteral(" R") + report
+                    + (quickQso ? QStringLiteral(" TU") : QString());
+        case 4: return dx + QLatin1Char(' ') + my + QLatin1Char(' ') + endMessage;
+        case 5: return dx + QLatin1Char(' ') + my + QStringLiteral(" 73");
+        default: return {};
+        }
+    };
+
+    if (!isFtx77MessageMode(mode)) {
+        return normalMessage();
+    }
+
+    bool const myStandard = decodium::txmsg::isStandardFtxCall(my);
+    bool const dxStandard = decodium::txmsg::isStandardFtxCall(dx);
+    if (myStandard && dxStandard) {
+        return normalMessage();
+    }
+
+    QString const myHash = ftxHashedCallToken(my);
+    QString const dxHash = ftxHashedCallToken(dx);
+    auto const withGrid = [&](QString const& base) {
+        return grid.isEmpty() ? base : base + QLatin1Char(' ') + grid;
+    };
+    auto const withQuick = [&](QString const& base) {
+        return quickQso ? base + QStringLiteral(" TU") : base;
+    };
+
+    if (!myStandard && dxStandard) {
+        switch (txNumber) {
+        case 1: return withGrid(myHash + QLatin1Char(' ') + dx);
+        case 2: return myHash + QLatin1Char(' ') + dx + QLatin1Char(' ') + report;
+        case 3: return withQuick(dx + QLatin1Char(' ') + myHash + QStringLiteral(" R") + report);
+        case 4: return my + QLatin1Char(' ') + dxHash + QLatin1Char(' ') + endMessage;
+        case 5: return my + QLatin1Char(' ') + dxHash + QStringLiteral(" 73");
+        default: return {};
+        }
+    }
+
+    if (myStandard && !dxStandard) {
+        switch (txNumber) {
+        case 1: return withGrid(dxHash + QLatin1Char(' ') + my);
+        case 2: return dxHash + QLatin1Char(' ') + my + QLatin1Char(' ') + report;
+        case 3: return withQuick(my + QLatin1Char(' ') + dxHash + QStringLiteral(" R") + report);
+        case 4: return dxHash + QLatin1Char(' ') + my + QLatin1Char(' ') + endMessage;
+        case 5: return dxHash + QLatin1Char(' ') + my + QStringLiteral(" 73");
+        default: return {};
+        }
+    }
+
+    switch (txNumber) {
+    case 1: return withGrid(myHash + QLatin1Char(' ') + dxHash);
+    case 2: return myHash + QLatin1Char(' ') + dxHash + QLatin1Char(' ') + report;
+    case 3: return withQuick(dxHash + QLatin1Char(' ') + myHash + QStringLiteral(" R") + report);
+    case 4: return my + QLatin1Char(' ') + dxHash + QLatin1Char(' ') + endMessage;
+    case 5: return my + QLatin1Char(' ') + dxHash + QStringLiteral(" 73");
+    default: return {};
+    }
+}
+
+static QString standardFtxCqMessage(QString const& myCall, QString const& grid4, QString const& mode)
+{
+    QString const my = normalizedTxCallToken(myCall);
+    QString const grid = grid4.left(4).trimmed().toUpper();
+    if (my.isEmpty()) {
+        return {};
+    }
+    if (isFtx77MessageMode(mode) && !decodium::txmsg::isStandardFtxCall(my)) {
+        return QStringLiteral("CQ ") + my;
+    }
+    return QStringLiteral("CQ ") + my + (grid.isEmpty() ? QString() : QStringLiteral(" ") + grid);
 }
 
 static bool isPlaceholderCallToken(QString const& token)
@@ -3799,6 +3856,20 @@ static inline bool useLegacyRigControlFallback(DecodiumLegacyBackend* legacy, co
     Q_UNUSED(legacy);
     Q_UNUSED(backend);
     return false;
+}
+
+static inline bool embeddedLegacyRigControlEnabledForBackend(const QString& backend,
+                                                             bool legacyTxBackendRequested)
+{
+    if (legacyTxBackendRequested) {
+        return false;
+    }
+
+    // OmniRig data mode is defined by each rig INI.  Let the modern OmniRig
+    // manager own the COM object so the embedded legacy backend cannot issue a
+    // second PM_DIG_U/SetMode request that some Kenwood INI files map to FSK
+    // or plain USB instead of USB-D.
+    return backend.trimmed().compare(QStringLiteral("omnirig"), Qt::CaseInsensitive) != 0;
 }
 
 static inline bool legacyOwnsRigControl(DecodiumLegacyBackend* legacy)
@@ -6553,7 +6624,9 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
     bool const createdNow = (m_legacyBackend == nullptr);
     if (!m_legacyBackend) {
         if (auto * app = QCoreApplication::instance()) {
-            app->setProperty("decodiumEmbeddedLegacyRigControlEnabled", !legacyTxBackendRequested());
+            app->setProperty("decodiumEmbeddedLegacyRigControlEnabled",
+                             embeddedLegacyRigControlEnabledForBackend(m_catBackend,
+                                                                       legacyTxBackendRequested()));
         }
         m_legacyBackend = new DecodiumLegacyBackend(this);
     }
@@ -6688,7 +6761,8 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                       ? QStringLiteral("Legacy backend enabled for TX/Tune and special operation control")
                       : QStringLiteral("Legacy backend enabled for shared Setup/Time Sync UI"));
 
-        m_legacyBackend->setRigControlEnabled(!legacyTxBackendRequested());
+        m_legacyBackend->setRigControlEnabled(
+            embeddedLegacyRigControlEnabledForBackend(m_catBackend, legacyTxBackendRequested()));
         if (QObject* cat = catManagerObj()) {
             syncCatSplitModeToLegacy(cat->property("splitMode").toString(),
                                      QStringLiteral("legacy-backend-init"));
@@ -6728,7 +6802,8 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
         }
     }
 
-    m_legacyBackend->setRigControlEnabled(!legacyTxBackendRequested());
+    m_legacyBackend->setRigControlEnabled(
+        embeddedLegacyRigControlEnabledForBackend(m_catBackend, legacyTxBackendRequested()));
     scheduleLegacyStateRefreshBurst();
 
     return true;
@@ -8803,21 +8878,26 @@ void DecodiumBridge::regenerateTxMessages()
         return;
     }
 
-    // TX6 — CQ: sempre rigenerato da callsign+grid
-    QString newTx6 = "CQ " + m_callsign.toUpper() + (grid4.isEmpty() ? "" : " " + grid4);
+    // TX6 — CQ: sempre rigenerato da callsign+grid quando il modo lo consente.
+    // I nominativi speciali non standard (es. II9MESC) in FT8/FT4/FT2 devono
+    // usare type-4 senza locator, altrimenti il packing standard li tronca.
+    QString newTx6 = standardFtxCqMessage(m_callsign, grid4, mode);
     setTx6(newTx6);
 
     // TX1-5: rigenerati solo se dxCall è noto
     if (!m_dxCall.isEmpty()) {
-        QString dx      = m_dxCall.toUpper();
-        QString my      = m_callsign.toUpper();
         QString rptSent = m_reportSent.isEmpty() ? "-10" : m_reportSent;
 
-        setTx1(dx + " " + my + (grid4.isEmpty() ? "" : " " + grid4));              // DX MY GRID
-        setTx2(dx + " " + my + " " + rptSent);                                     // DX MY REPORT
-        setTx3(dx + " " + my + " R" + rptSent);                                    // DX MY R+SENT_RPT
-        setTx4(dx + " " + my + " " + (m_sendRR73 ? "RR73" : "RRR"));              // DX MY RR73/RRR
-        setTx5(dx + " " + my + " 73");                                              // DX MY 73
+        setTx1(standardFtxQsoMessage(1, m_dxCall, m_callsign, grid4, rptSent,
+                                     m_sendRR73, false, mode));                    // DX MY GRID
+        setTx2(standardFtxQsoMessage(2, m_dxCall, m_callsign, grid4, rptSent,
+                                     m_sendRR73, false, mode));                    // DX MY REPORT
+        setTx3(standardFtxQsoMessage(3, m_dxCall, m_callsign, grid4, rptSent,
+                                     m_sendRR73, false, mode));                    // DX MY R+SENT_RPT
+        setTx4(standardFtxQsoMessage(4, m_dxCall, m_callsign, grid4, rptSent,
+                                     m_sendRR73, false, mode));                    // DX MY RR73/RRR
+        setTx5(standardFtxQsoMessage(5, m_dxCall, m_callsign, grid4, rptSent,
+                                     m_sendRR73, false, mode));                    // DX MY 73
     } else {
         setTx1(QString());
         setTx2(QString());
@@ -14455,6 +14535,10 @@ void DecodiumBridge::setCatBackend(const QString& v)
     m_catBackend = normalized;
     emit catBackendChanged();
     emit catManagerChanged();
+    if (legacyBackendAvailable()) {
+        m_legacyBackend->setRigControlEnabled(
+            embeddedLegacyRigControlEnabledForBackend(m_catBackend, legacyTxBackendRequested()));
+    }
     refreshPskReporterLocalStation();
     QSettings s2("Decodium","Decodium3");
     s2.setValue("catBackend", m_catBackend);
@@ -17884,25 +17968,26 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
 void DecodiumBridge::genStdMsgs(const QString& hisCall, const QString& hisGrid)
 {
     if (m_callsign.isEmpty() || hisCall.isEmpty()) return;
-    QString my   = m_callsign;
     QString mygr = m_grid.left(4); // gridsquare 4 chars
+    QString const mode = m_mode.trimmed().toUpper();
     QString rptSent = m_reportSent.isEmpty() ? "-10" : m_reportSent;
 
-    setTx1(hisCall + " " + my + " " + mygr);                          // risposta CQ
-    setTx2(hisCall + " " + my + " " + rptSent);                       // il nostro report
+    setTx1(standardFtxQsoMessage(1, hisCall, m_callsign, mygr, rptSent,
+                                 m_sendRR73, false, mode));           // risposta CQ
+    setTx2(standardFtxQsoMessage(2, hisCall, m_callsign, mygr, rptSent,
+                                 m_sendRR73, false, mode));           // il nostro report
 
     // TX3 conferma il report ricevuto e ripete il report che inviamo al DX.
     // Quick QSO (Ultra2): aggiunge "TU" per segnalare QSO completo in 2 messaggi.
     // Formato: "HIS_CALL MY_CALL R+NN TU" — il DX peer risponde con RR73 direttamente.
-    if (m_quickQsoEnabled) {
-        setTx3(hisCall + " " + my + " R" + rptSent + " TU");
-    } else {
-        setTx3(hisCall + " " + my + " R" + rptSent);
-    }
+    setTx3(standardFtxQsoMessage(3, hisCall, m_callsign, mygr, rptSent,
+                                 m_sendRR73, m_quickQsoEnabled, mode));
 
-    setTx4(hisCall + " " + my + " " + (m_sendRR73 ? "RR73" : "RRR")); // RR73 o RRR
-    setTx5(hisCall + " " + my + " 73");                                // 73
-    setTx6("CQ "   + my + " " + mygr);                                // CQ
+    setTx4(standardFtxQsoMessage(4, hisCall, m_callsign, mygr, rptSent,
+                                 m_sendRR73, false, mode));           // RR73 o RRR
+    setTx5(standardFtxQsoMessage(5, hisCall, m_callsign, mygr, rptSent,
+                                 m_sendRR73, false, mode));           // 73
+    setTx6(standardFtxCqMessage(m_callsign, mygr, mode));              // CQ
     Q_UNUSED(hisGrid)
 }
 
@@ -24646,8 +24731,12 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         }
     }
 
-    bridgeLog("onFt8DecodeReady: serial=" + QString::number(serial) +
-              " rows=" + QString::number(rows.size()));
+    if (rows.isEmpty() && serialMode == QStringLiteral("FT2")) {
+        bridgeLog("onFt2DecodeReady: slot senza decode serial=" + QString::number(serial));
+    } else {
+        bridgeLog("onFt8DecodeReady: serial=" + QString::number(serial) +
+                  " rows=" + QString::number(rows.size()));
+    }
     for (int dbgI = 0; dbgI < qMin(rows.size(), 3); ++dbgI)
         bridgeLog("  raw[" + QString::number(dbgI) + "]='" + rows[dbgI] + "'");
 
@@ -25072,8 +25161,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         return;
     }
 
+    if (rows.isEmpty()) {
+        bridgeLog("FT2 async decode attempt vuoto");
+        return;
+    }
+
     bridgeLog("onFt2AsyncDecodeReady: rows=" + QString::number(rows.size()));
-    if (!rows.isEmpty()) bridgeLog("  async_raw[0]='" + rows[0] + "'");
+    bridgeLog("  async_raw[0]='" + rows[0] + "'");
 
     // FT2 async is latency sensitive: drive the QSO sequencer before the
     // heavier UI/list/DXCC work below, so a directed reply can arm the next
@@ -25232,19 +25326,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                                                         entry.value("freq").toString(),
                                                         msg,
                                                         entry.value("timestamp").toLongLong());
-        bool duplicate = existing.contains(dedupKey);
-        if (!duplicate) {
-            for (const QVariant& existingValue : std::as_const(m_decodeList)) {
-                QVariantMap const prev = existingValue.toMap();
-                if (prev.value("decodeSessionId").toULongLong() != m_decodeSessionId) {
-                    continue;
-                }
-                if (isFt2AsyncRecentBurstDuplicate(prev, entry)) {
-                    duplicate = true;
-                    break;
-                }
-            }
-        }
+        bool const duplicate = existing.contains(dedupKey);
         if (duplicate) {
             ++duplicatesSkipped;
             continue;

@@ -27,14 +27,6 @@ auto OmniRigTransceiver::map_mode (OmniRig::RigParamX param) -> MODE
     {
       return CW;
     }
-  else if (param & OmniRig::PM_SSB_U)
-    {
-      return USB;
-    }
-  else if (param & OmniRig::PM_SSB_L)
-    {
-      return LSB;
-    }
   else if (param & OmniRig::PM_DIG_U)
     {
       return DIG_U;
@@ -42,6 +34,14 @@ auto OmniRigTransceiver::map_mode (OmniRig::RigParamX param) -> MODE
   else if (param & OmniRig::PM_DIG_L)
     {
       return DIG_L;
+    }
+  else if (param & OmniRig::PM_SSB_U)
+    {
+      return USB;
+    }
+  else if (param & OmniRig::PM_SSB_L)
+    {
+      return LSB;
     }
   else if (param & OmniRig::PM_AM)
     {

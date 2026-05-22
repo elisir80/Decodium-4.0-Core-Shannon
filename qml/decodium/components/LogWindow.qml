@@ -403,7 +403,7 @@ Popup {
 
                 StyledComboBox {
                     id: bandFilter
-                    model: ["All", "160m", "80m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", "2m", "70cm"]
+                    model: ["All", "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", "4m", "2m", "1.25m", "70cm", "33cm", "23cm", "13cm", "9cm", "6cm", "3cm", "1.25cm"]
                     currentIndex: 0
                     Layout.preferredWidth: 85; height: 28
                     font.pixelSize: 10

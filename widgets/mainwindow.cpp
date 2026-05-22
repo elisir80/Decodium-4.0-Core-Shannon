@@ -23438,21 +23438,24 @@ void MainWindow::switch_mode (Mode mode)
     if (!(m_mode=="Echo" or ((m_mode=="Q65" or m_mode=="JT65") && m_config.decode_at_52s()))
         && ui->actionAstronomical_data->isChecked () && m_config.auto_astro()) ui->actionAstronomical_data->setChecked (false);
   });
-  switch (mode)
+  if (!(m_embeddedShellMode && !m_embeddedRigControlEnabled))
     {
-    case Modes::FT2:
-    case Modes::FT4:
-    case Modes::FT8:
-      m_config.set_transceiver_mode_override (Transceiver::DIG_U);
-      break;
+      switch (mode)
+        {
+        case Modes::FT2:
+        case Modes::FT4:
+        case Modes::FT8:
+          m_config.set_transceiver_mode_override (Transceiver::DIG_U);
+          break;
 
-    case Modes::RTTY:
-      m_config.set_transceiver_mode_override (Transceiver::FSK);
-      break;
+        case Modes::RTTY:
+          m_config.set_transceiver_mode_override (Transceiver::FSK);
+          break;
 
-    default:
-      m_config.set_transceiver_mode_override (Transceiver::UNK);
-      break;
+        default:
+          m_config.set_transceiver_mode_override (Transceiver::UNK);
+          break;
+        }
     }
   applySingleDecodeColumnFlowLayout();
   check_button_color();

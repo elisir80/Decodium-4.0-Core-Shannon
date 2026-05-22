@@ -305,7 +305,15 @@ Item {
                                     { label: "6", lambda: "6M" },
                                     { label: "4", lambda: "4M" },
                                     { label: "2", lambda: "2M" },
-                                    { label: "70cm", lambda: "70CM" }
+                                    { label: "1.25m", lambda: "1.25M" },
+                                    { label: "70cm", lambda: "70CM" },
+                                    { label: "33cm", lambda: "33CM" },
+                                    { label: "23cm", lambda: "23CM" },
+                                    { label: "13cm", lambda: "13CM" },
+                                    { label: "9cm", lambda: "9CM" },
+                                    { label: "6cm", lambda: "6CM" },
+                                    { label: "3cm", lambda: "3CM" },
+                                    { label: "1.25cm", lambda: "1.25CM" }
                                 ]
 
                                 Rectangle {
@@ -313,7 +321,7 @@ Item {
                                     readonly property string bandLabel: modelData.label
                                     readonly property string bandLambda: modelData.lambda
 
-                                    width: bandLabel.length > 2 ? 46 : 38
+                                    width: Math.max(38, Math.min(68, bandLabel.length * 8 + 14))
                                     height: 26
                                     radius: 3
 
@@ -1523,13 +1531,40 @@ Item {
                 spacing: 10
 
                 Button {
+                    id: logPromptRejectButton
+
                     text: qsTr("Close")
+                    Layout.preferredWidth: 112
+                    Layout.preferredHeight: 36
+                    padding: 0
                     onClicked: logConfirmPopup.close()
+                    background: Rectangle {
+                        radius: 6
+                        color: logPromptRejectButton.down
+                               ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.20)
+                               : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.10)
+                        border.color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, logPromptRejectButton.hovered ? 0.75 : 0.35)
+                        border.width: 1
+                    }
+                    contentItem: Text {
+                        text: logPromptRejectButton.text
+                        color: textPrimary
+                        font.pixelSize: 13
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
 
                 Button {
+                    id: logPromptAcceptButton
+
                     text: qsTr("Add")
+                    Layout.preferredWidth: 112
+                    Layout.preferredHeight: 36
+                    padding: 0
                     enabled: logPreviewCall.length > 0
+                    opacity: enabled ? 1.0 : 0.45
                     onClicked: {
                         if (engine) {
                             var satCode = txPanel.satelliteCodeFromDisplay(satelliteCombo.currentText)
@@ -1552,6 +1587,24 @@ Item {
                                 engine.logQso()
                         }
                         logConfirmPopup.close()
+                    }
+                    background: Rectangle {
+                        radius: 6
+                        color: logPromptAcceptButton.enabled
+                               ? (logPromptAcceptButton.down
+                                  ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.42)
+                                  : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, logPromptAcceptButton.hovered ? 0.32 : 0.22))
+                               : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.07)
+                        border.color: logPromptAcceptButton.enabled ? accentGreen : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.30)
+                        border.width: 1
+                    }
+                    contentItem: Text {
+                        text: logPromptAcceptButton.text
+                        color: logPromptAcceptButton.enabled ? accentGreen : textSecondary
+                        font.pixelSize: 13
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                 }
             }

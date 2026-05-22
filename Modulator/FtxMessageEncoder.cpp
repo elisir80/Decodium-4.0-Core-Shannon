@@ -3204,6 +3204,11 @@ Decode77Context& sharedDecode77Context ()
   return context;
 }
 
+QString bracketHashCall (QString const& call)
+{
+  return bracket_hash_call (call);
+}
+
 EncodedMessage encodeFt2 (QString const& message, bool check_only)
 {
   return encode_ftx_common (message, true, 103, false, check_only);
@@ -3680,6 +3685,19 @@ QString build_ft8_a8_candidate_message (int imsg, QString const& mycall,
       return {};
     }
   return normalize_message77 (msg);
+}
+}
+
+namespace decodium
+{
+namespace txmsg
+{
+
+bool isStandardFtxCall (QString const& call)
+{
+  return is_standard_callsign_ftx (call);
+}
+
 }
 }
 
