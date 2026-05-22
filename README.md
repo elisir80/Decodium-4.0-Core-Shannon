@@ -1,5 +1,8 @@
 # Decodium 4.0 Core Shannon
 
+<img width="3438" height="1378" alt="decodium4" src="https://github.com/user-attachments/assets/fabdbb3e-3652-42a3-b3e9-49fc10d8e03d" />
+
+
 [![Release](https://img.shields.io/github/v/release/elisir80/Decodium-4.0-Core-Shannon?include_prereleases&label=release)](https://github.com/elisir80/Decodium-4.0-Core-Shannon/releases)
 [![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-blue.svg)](COPYING)
 [![Qt](https://img.shields.io/badge/UI-Qt%206.11-41cd52.svg)](https://www.qt.io/)
