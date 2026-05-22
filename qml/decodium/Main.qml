@@ -448,6 +448,15 @@ ApplicationWindow {
         bridge.saveWindowState("txPanelFloatingWindow", Math.round(txPanelFloatingWindow.x), Math.round(txPanelFloatingWindow.y), Math.round(txPanelFloatingWindow.width), Math.round(txPanelFloatingWindow.height), txPanelDetached, txPanelMinimized)
         bridge.saveWindowState("liveMapFloatingWindow", Math.round(liveMapFloatingWindow.x), Math.round(liveMapFloatingWindow.y), Math.round(liveMapFloatingWindow.width), Math.round(liveMapFloatingWindow.height), liveMapDetached, false)
         bridge.saveWindowState("decoSyncMonitorWindow", Math.round(decoSyncMonitorWindow.x), Math.round(decoSyncMonitorWindow.y), Math.round(decoSyncMonitorWindow.width), Math.round(decoSyncMonitorWindow.height), false, decoSyncMonitorWindow.visibility === Window.Minimized)
+        // 1.0.275 — DX Cluster floating window
+        if (dxClusterFloatingWindow) {
+            bridge.saveWindowState("dxClusterFloatingWindow",
+                Math.round(dxClusterFloatingWindow.x),
+                Math.round(dxClusterFloatingWindow.y),
+                Math.round(dxClusterFloatingWindow.width),
+                Math.round(dxClusterFloatingWindow.height),
+                dxClusterDetached, dxClusterMinimized)
+        }
     }
 
     // 1.0.263 (fork-only) — Reset Layout: ricevi signal dal backend e ripristina
@@ -467,6 +476,16 @@ ApplicationWindow {
             rxFreqDetached = false;      rxFreqMinimized = false
             txPanelDetached = false;     txPanelMinimized = false
             liveMapDetached = false;     liveMapMinimized = false
+            // 1.0.275 — DX Cluster: riporta alla posizione default vicino bordo destro mainWindow
+            dxClusterMinimized = false
+            if (dxClusterFloatingWindow) {
+                dxClusterFloatingWindow.width = 560
+                dxClusterFloatingWindow.height = 360
+                dxClusterFloatingWindow.x = mainWindow.x + Math.max(0, mainWindow.width - 560 - 60)
+                dxClusterFloatingWindow.y = mainWindow.y + 80
+                dxClusterFloatingWindow.visibility = Window.Windowed
+                if (dxClusterFloatingWindow.visible) dxClusterFloatingWindow.raise()
+            }
 
             // 2) Centra mainWindow su primary screen con dimensioni default
             var geo = bridge.primaryScreenAvailableGeometry()
@@ -769,6 +788,9 @@ ApplicationWindow {
     property bool txPanelMinimized: false
     property bool liveMapDetached: false
     property bool liveMapMinimized: false
+    // 1.0.275 (fork-only) — DX Cluster floating window state
+    property bool dxClusterDetached: true   // default detached (era sempre floating)
+    property bool dxClusterMinimized: false
     property bool applicationClosing: false
     onWaterfallDetachedChanged: scheduleWindowStateSave()
     onWaterfallMinimizedChanged: scheduleWindowStateSave()
@@ -11359,48 +11381,50 @@ NumberAnimation {
         }
     }
 
-    // DxClusterPanel — spot DX Cluster in tempo reale, draggabile
-    DxClusterPanel {
-        id: dxClusterOverlay
-        visible: dxClusterPanelVisible
-        z: 9000
-        property bool userPositioned: mainWindow.settingBool("uiDxClusterPanelUserPositioned", false)
-        property real savedX: Number(mainWindow.safeBridgeSetting("uiDxClusterPanelX", -1))
-        property real savedY: Number(mainWindow.safeBridgeSetting("uiDxClusterPanelY", -1))
-        function boundedX(value) {
-            return Math.round(Math.min(Math.max(0, Number(value) || 0),
-                                       Math.max(0, mainWindow.width - width)))
+    // 1.0.275 (fork-only) — DxClusterPanel ora in una Window floating separata,
+    // spostabile ovunque sul monitor (anche fuori dalla mainWindow). Integrata
+    // con il Reset Layout via property dxClusterDetached/Minimized e persistence
+    // standard WindowState/dxClusterFloatingWindow.
+    Window {
+        id: dxClusterFloatingWindow
+        title: "DX Cluster - Decodium"
+        width: Math.max(500, Number(bridge.getSetting("uiDxClusterPanelWidth", 560)))
+        height: Math.max(300, Number(bridge.getSetting("uiDxClusterPanelHeight", 360)))
+        minimumWidth: 500
+        minimumHeight: 300
+        visible: mainWindow.dxClusterPanelVisible
+        flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
+             | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
+             | Qt.WindowCloseButtonHint
+        color: "#1a1a2e"
+
+        x: mainWindow.x + Math.max(0, mainWindow.width - width - 60)
+        y: mainWindow.y + 80
+
+        Component.onCompleted: mainWindow.restoreFloatingWindowState(
+            dxClusterFloatingWindow, "dxClusterFloatingWindow", "dxClusterDetached", "dxClusterMinimized")
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onVisibilityChanged: function(visibility) {
+            if (visibility === Window.Minimized) {
+                mainWindow.dxClusterMinimized = true
+            } else if (dxClusterFloatingWindow.visible) {
+                mainWindow.dxClusterMinimized = false
+            }
+            mainWindow.scheduleWindowStateSave()
         }
-        function boundedY(value) {
-            return Math.round(Math.min(Math.max(0, Number(value) || 0),
-                                       Math.max(0, mainWindow.height - height)))
+        onClosing: function(close) {
+            mainWindow.dxClusterPanelVisible = false
+            close.accepted = true
         }
-        function savePosition() {
-            userPositioned = true
-            savedX = boundedX(x)
-            savedY = boundedY(y)
-            x = savedX
-            y = savedY
-            mainWindow.persistUiSetting("uiDxClusterPanelUserPositioned", true)
-            mainWindow.persistUiSetting("uiDxClusterPanelX", savedX)
-            mainWindow.persistUiSetting("uiDxClusterPanelY", savedY)
+
+        DxClusterPanel {
+            anchors.fill: parent
+            onCloseRequested: mainWindow.dxClusterPanelVisible = false
+            // positionCommitted non piu' usato: la Window OS gestisce drag/resize nativi
         }
-        function clampSavedPosition() {
-            if (!userPositioned)
-                return
-            savedX = boundedX(savedX)
-            savedY = boundedY(savedY)
-            x = savedX
-            y = savedY
-            mainWindow.persistUiSetting("uiDxClusterPanelX", savedX)
-            mainWindow.persistUiSetting("uiDxClusterPanelY", savedY)
-        }
-        x: userPositioned ? boundedX(savedX) : Math.max(0, mainWindow.width - width - 12)
-        y: userPositioned ? boundedY(savedY) : 60
-        onWidthChanged: Qt.callLater(clampSavedPosition)
-        onHeightChanged: Qt.callLater(clampSavedPosition)
-        onCloseRequested: dxClusterPanelVisible = false
-        onPositionCommitted: savePosition()
     }
 
     // ── DecoSyncTime Monitor floating window ─────────────────────────────
