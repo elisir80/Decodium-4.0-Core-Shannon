@@ -901,7 +901,22 @@ ApplicationWindow {
     onActiveStationsPanelVisibleChanged: persistUiSetting("uiActiveStationsPanelVisible", activeStationsPanelVisible)
     onCallerQueuePanelVisibleChanged: persistUiSetting("uiCallerQueuePanelVisible", callerQueuePanelVisible)
     onAstroPanelVisibleChanged: persistUiSetting("uiAstroPanelVisible", astroPanelVisible)
-    onDxClusterPanelVisibleChanged: persistUiSetting("uiDxClusterPanelVisible", dxClusterPanelVisible)
+    onDxClusterPanelVisibleChanged: {
+        persistUiSetting("uiDxClusterPanelVisible", dxClusterPanelVisible)
+        // 1.0.277 — dopo che la X della Window chiude DxClusterFloatingWindow,
+        // Qt rompe il binding `visible: dxClusterPanelVisible` (la Window resta
+        // hidden anche se il binding torna true). Forzo show()/hide() esplicito
+        // sulla Window per garantire riapertura affidabile dal footer toggle.
+        if (typeof dxClusterFloatingWindow !== 'undefined') {
+            if (dxClusterPanelVisible) {
+                dxClusterFloatingWindow.show()
+                dxClusterFloatingWindow.raise()
+                dxClusterFloatingWindow.requestActivate()
+            } else {
+                dxClusterFloatingWindow.hide()
+            }
+        }
+    }
     onDecoSyncMonitorVisibleChanged: persistUiSetting("uiDecoSyncMonitorVisible", decoSyncMonitorVisible)
     function syncLiveMapFloatingVisibility(activate) {
         if (typeof liveMapFloatingWindow === "undefined" || !liveMapFloatingWindow)
