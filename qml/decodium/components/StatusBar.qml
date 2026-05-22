@@ -500,6 +500,64 @@ Rectangle {
             }
         }
 
+        // 1.0.276 (fork-only) — DX Cluster toggle button
+        // Necessario perche' chiudendo la X della DxClusterFloatingWindow non c'era
+        // un modo "footer" per riaprirla. Verde acceso quando il pannello e' visibile.
+        Button {
+            id: footerDxClusterButton
+            Layout.preferredWidth: 110
+            Layout.preferredHeight: 30
+            implicitWidth: 110
+            implicitHeight: 30
+            padding: 0
+            readonly property bool clusterOn: typeof mainWindow !== 'undefined'
+                                              && mainWindow.dxClusterPanelVisible
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("DX Cluster (toggle)\nApre/chiude la finestra DX Cluster floating.\nLa finestra e' spostabile su qualsiasi monitor.")
+            ToolTip.delay: 300
+            onClicked: {
+                if (typeof mainWindow !== 'undefined') {
+                    mainWindow.dxClusterPanelVisible = !mainWindow.dxClusterPanelVisible
+                    if (mainWindow.dxClusterPanelVisible && bridge && bridge.dxCluster
+                        && !bridge.dxCluster.connected) {
+                        bridge.connectDxCluster(bridge.dxCluster.host, bridge.dxCluster.port)
+                    }
+                }
+            }
+            background: Rectangle {
+                color: footerDxClusterButton.clusterOn
+                       ? Qt.rgba(58/255, 203/255, 108/255, 0.22)
+                       : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                border.color: footerDxClusterButton.clusterOn
+                              ? Qt.rgba(58/255, 203/255, 108/255, 1.0)
+                              : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Item {
+                Row {
+                    spacing: 6
+                    anchors.centerIn: parent
+                    Text {
+                        text: footerDxClusterButton.clusterOn ? "●" : "○"
+                        color: footerDxClusterButton.clusterOn
+                               ? Qt.rgba(78/255, 220/255, 128/255, 1.0)
+                               : textSecondary
+                        font.bold: true
+                        font.pixelSize: 13
+                    }
+                    Text {
+                        text: qsTr("DX Cluster")
+                        color: footerDxClusterButton.clusterOn
+                               ? Qt.rgba(78/255, 220/255, 128/255, 1.0)
+                               : textSecondary
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
+            }
+        }
+
         Dialog {
             id: footerResetLayoutConfirm
             title: qsTr("Reset Layout")
