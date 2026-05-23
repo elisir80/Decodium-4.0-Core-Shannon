@@ -3394,25 +3394,38 @@ void Configuration::impl::read_settings ()
         }
     }
 
-  // Legacy WSJT-X profiles may not include FT2 rows; ensure the FT2 band plan exists.
-  bool has_ft2_frequency = false;
-  for (auto const& item : frequencies_.frequency_list ()) {
-    if (item.mode_ == Modes::FT2) {
-      has_ft2_frequency = true;
-      break;
-    }
-  }
-  if (!has_ft2_frequency) {
+  // Existing WSJT-X/Decodium profiles may miss newer default rows. Merge new
+  // defaults by band/mode/region without replacing an operator's custom QRGs.
+  {
     FrequencyList_v2_101 defaults {&bands_, this};
     defaults.reset_to_defaults ();
-    FrequencyList_v2_101::FrequencyItems ft2_defaults;
+    FrequencyList_v2_101::FrequencyItems missing_defaults;
+    auto has_equivalent_row = [this] (FrequencyList_v2_101::Item const& candidate) {
+      auto const candidate_band = bands_.find (candidate.frequency_);
+      for (auto const& item : frequencies_.frequency_list ()) {
+        if (item.mode_ != candidate.mode_ || item.region_ != candidate.region_) {
+          continue;
+        }
+        auto const item_band = bands_.find (item.frequency_);
+        if (!candidate_band.isEmpty () && !item_band.isEmpty ()) {
+          if (item_band == candidate_band) {
+            return true;
+          }
+          continue;
+        }
+        if (item.frequency_ == candidate.frequency_) {
+          return true;
+        }
+      }
+      return false;
+    };
     for (auto const& item : defaults.frequency_list ()) {
-      if (item.mode_ == Modes::FT2) {
-        ft2_defaults << item;
+      if (!has_equivalent_row (item)) {
+        missing_defaults << item;
       }
     }
-    if (!ft2_defaults.isEmpty ()) {
-      frequencies_.frequency_list_merge (ft2_defaults);
+    if (!missing_defaults.isEmpty ()) {
+      frequencies_.frequency_list_merge (missing_defaults);
     }
   }
 

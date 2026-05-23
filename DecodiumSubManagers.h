@@ -12,6 +12,7 @@
 #include <QMutexLocker>
 #include <QVector>
 #include <cmath>
+#include <functional>
 #include <limits>
 
 // --- WavManager — registrazione audio WAV 16-bit mono a 12 kHz ---
@@ -329,7 +330,7 @@ public:
             {  3, "160M",   "1.8 MHz",      1800000.0,     2000000.0,     1840000.0,     1843000.0,        0.0,     1836600.0,     1838000.0,     1839000.0,        0.0,           0.0,           0.0,         0.0 },
             {  4, "80M",    "3.5 MHz",      3500000.0,     4000000.0,     3573000.0,     3568000.0,  3575000.0,     3568600.0,     3570000.0,     3572000.0,        0.0,           0.0,           0.0,         0.0 },
             {  5, "60M",    "5 MHz",        5060000.0,     5450000.0,     5357000.0,     5360000.0,        0.0,           0.0,     5357000.0,     5357000.0,        0.0,           0.0,           0.0,         0.0 },
-            {  6, "40M",    "7 MHz",        7000000.0,     7300000.0,     7074000.0,     7052000.0,  7047500.0,     7038600.0,     7076000.0,     7078000.0,        0.0,           0.0,           0.0,         0.0 },
+            {  6, "40M",    "7 MHz",        7000000.0,     7300000.0,     7074000.0,     7062000.0,  7047500.0,     7038600.0,     7076000.0,     7078000.0,        0.0,           0.0,           0.0,         0.0 },
             {  7, "30M",    "10 MHz",      10100000.0,    10150000.0,    10136000.0,    10144000.0, 10140000.0,    10138700.0,          0.0,    10140000.0,        0.0,           0.0,           0.0,         0.0 },
             {  8, "20M",    "14 MHz",      14000000.0,    14350000.0,    14074000.0,    14084000.0, 14080000.0,    14095600.0,          0.0,    14078000.0,        0.0,           0.0,           0.0,         0.0 },
             {  9, "17M",    "18 MHz",      18068000.0,    18168000.0,    18100000.0,    18108000.0, 18104000.0,    18104600.0,          0.0,    18104000.0,        0.0,           0.0,           0.0,         0.0 },
@@ -340,9 +341,9 @@ public:
             { 16, "4M",     "70 MHz",      70000000.0,    71000000.0,    70154000.0,    70157000.0,       0.0,    70091000.0,    70102000.0,    70104000.0,        0.0,           0.0,           0.0,  70230000.0 },
             { 17, "2M",     "144 MHz",    144000000.0,   148000000.0,   144174000.0,   144177000.0,144170000.0,   144489000.0,   144120000.0,          0.0,        0.0,   144180000.0,   144120000.0, 144360000.0 },
             { 18, "1.25M",  "222 MHz",    222000000.0,   225000000.0,   222174000.0,   222177000.0,       0.0,           0.0,   222065000.0,          0.0,        0.0,   222065000.0,   222065000.0,         0.0 },
-            { 19, "70CM",   "432 MHz",    420000000.0,   450000000.0,   432174000.0,   432177000.0,       0.0,   432300000.0,   432065000.0,          0.0,        0.0,   432065000.0,   432065000.0, 432360000.0 },
+            { 19, "70CM",   "432 MHz",    420000000.0,   450000000.0,   432174000.0,   432177000.0,432170000.0,   432300000.0,   432065000.0,          0.0,        0.0,   432065000.0,   432065000.0, 432360000.0 },
             { 20, "33CM",   "902 MHz",    902000000.0,   928000000.0,          0.0,          0.0,       0.0,           0.0,   902065000.0,          0.0,        0.0,   902065000.0,           0.0,         0.0 },
-            { 21, "23CM",   "1296 MHz",  1240000000.0,  1300000000.0,  1296174000.0,  1296177000.0,       0.0,  1296500000.0,  1296065000.0,          0.0,        0.0,  1296065000.0,  1296065000.0,         0.0 },
+            { 21, "23CM",   "1296 MHz",  1240000000.0,  1300000000.0,  1296174000.0,  1296177000.0,1296170000.0,  1296500000.0,  1296065000.0,          0.0,        0.0,  1296065000.0,  1296065000.0,         0.0 },
             { 22, "13CM",   "2304 MHz",  2300000000.0,  2450000000.0,          0.0,          0.0,       0.0,           0.0,  2304065000.0,          0.0, 2304065000.0,  2304065000.0,  2304065000.0,         0.0 },
             { 23, "9CM",    "3400 MHz",  3300000000.0,  3500000000.0,          0.0,          0.0,       0.0,           0.0,  3400065000.0,          0.0, 3400065000.0,  3400065000.0,  3400065000.0,         0.0 },
             { 24, "6CM",    "5760 MHz",  5650000000.0,  5925000000.0,          0.0,          0.0,       0.0,           0.0,  5760065000.0,          0.0, 5760065000.0,  5760200000.0,  5760065000.0,         0.0 },
@@ -364,10 +365,15 @@ public:
     }
     double dialFrequency() const { return m_dialFreq; }
 
+    using FrequencyResolver = std::function<double(const QString& bandLambda, const QString& mode)>;
+    void setFrequencyResolver(FrequencyResolver resolver) { m_frequencyResolver = resolver; }
+
     // Ritorna la frequenza per una banda e un modo
     double freqForMode(const Band& b, const QString& mode) const
     {
         QString const normalized = mode.trimmed().toUpper();
+        double const configured = configuredFreqForMode(b, normalized);
+        if (configured > 0.0) return configured;
         if (normalized == "FT8" && b.ft8Freq > 0.0) return b.ft8Freq;
         if (normalized == "FT2" && b.ft2Freq > 0.0) return b.ft2Freq;
         if (normalized == "FT4" && b.ft4Freq > 0.0) return b.ft4Freq;
@@ -419,6 +425,17 @@ public:
         };
 
         for (const Band& b : m_bands) {
+            consider(configuredFreqForMode(b, QStringLiteral("FT8")), QStringLiteral("FT8"));
+            consider(configuredFreqForMode(b, QStringLiteral("FT4")), QStringLiteral("FT4"));
+            consider(configuredFreqForMode(b, QStringLiteral("FT2")), QStringLiteral("FT2"));
+            consider(configuredFreqForMode(b, QStringLiteral("Q65")), QStringLiteral("Q65"));
+            consider(configuredFreqForMode(b, QStringLiteral("JT65")), QStringLiteral("JT65"));
+            consider(configuredFreqForMode(b, QStringLiteral("JT9")), QStringLiteral("JT9"));
+            consider(configuredFreqForMode(b, QStringLiteral("JT4")), QStringLiteral("JT4"));
+            consider(configuredFreqForMode(b, QStringLiteral("MSK144")), QStringLiteral("MSK144"));
+            consider(configuredFreqForMode(b, QStringLiteral("WSPR")), QStringLiteral("WSPR"));
+            consider(configuredFreqForMode(b, QStringLiteral("FST4W")), QStringLiteral("WSPR"));
+            consider(configuredFreqForMode(b, QStringLiteral("ECHO")), QStringLiteral("Echo"));
             consider(b.ft8Freq, QStringLiteral("FT8"));
             consider(b.ft4Freq, QStringLiteral("FT4"));
             consider(b.ft2Freq, QStringLiteral("FT2"));
@@ -519,10 +536,19 @@ signals:
     void bandFrequencyRequested(double freqHz);  // bridge → setFrequency + CAT
 
 private:
+    double configuredFreqForMode(const Band& b, const QString& normalizedMode) const
+    {
+        if (!m_frequencyResolver) return 0.0;
+        double const freq = m_frequencyResolver(b.lambda, normalizedMode);
+        if (freq < b.lowerBoundHz || freq > b.upperBoundHz) return 0.0;
+        return freq;
+    }
+
     QList<Band> m_bands;
     int    m_currentIndex {8};
     double m_dialFreq     {14074000.0};
     QString m_currentMode {"FT8"};
+    FrequencyResolver m_frequencyResolver;
 };
 
 // --- DxClusterManager stub ---

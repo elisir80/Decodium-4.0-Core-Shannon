@@ -27,7 +27,9 @@ Window {
     height: 640
     minimumWidth: 400
     minimumHeight: 580
-    flags: Qt.Dialog | Qt.WindowCloseButtonHint
+    // Use a normal native window on Windows too. Qt.Dialog with only a close
+    // hint can produce a non-movable tool/dialog frame on some Windows themes.
+    flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint
     color: "#1a1a2e"
 
     readonly property color cAccent:     "#3a9dff"  // primaryBlue
@@ -467,8 +469,13 @@ Window {
                 Button {
                     text: qsTr("Stop")
                     Layout.preferredWidth: 90
-                    enabled: bridge && bridge.targetCallActive
-                    onClicked: if (bridge) bridge.stopTargetCall()
+                    enabled: bridge !== null
+                    onClicked: {
+                        if (!bridge) return
+                        if (bridge.targetCallActive)
+                            bridge.stopTargetCall()
+                        bridge.haltWithReason("call-dialog-stop")
+                    }
                     background: Rectangle {
                         radius: 6
                         color: parent.enabled

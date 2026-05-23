@@ -53,102 +53,6 @@ bool is_loopback_origin_host(QString const& host)
       || normalized == QStringLiteral("[::1]");
 }
 
-struct RemoteBandDial
-{
-  char const* key;
-  qint64 lowerHz;
-  qint64 upperHz;
-  qint64 ft8Hz;
-  qint64 ft2Hz;
-  qint64 ft4Hz;
-};
-
-RemoteBandDial const kRemoteBandDials[] = {
-  {"160M",  1800000,    2000000,    1840000,    1843000,        0},
-  {"80M",   3500000,    4000000,    3573000,    3568000,  3575000},
-  {"60M",   5060000,    5450000,    5357000,    5360000,        0},
-  {"40M",   7000000,    7300000,    7074000,    7052000,  7047500},
-  {"30M",  10100000,   10150000,   10136000,   10144000, 10140000},
-  {"20M",  14000000,   14350000,   14074000,   14084000, 14080000},
-  {"17M",  18068000,   18168000,   18100000,   18108000, 18104000},
-  {"15M",  21000000,   21450000,   21074000,   21144000, 21140000},
-  {"12M",  24890000,   24990000,   24915000,   24923000, 24919000},
-  {"10M",  28000000,   29700000,   28074000,   28184000, 28180000},
-  {"6M",   50000000,   54000000,   50313000,   50313000, 50318000},
-  {"4M",   70000000,   71000000,   70154000,   70154000,        0},
-  {"2M",  144000000,  148000000,  144174000,  144174000,        0},
-  {"70CM",420000000,  450000000,  432174000,  432174000,        0},
-};
-
-QString remoteBandKeyFromFrequency(qint64 dialFrequencyHz)
-{
-  if (dialFrequencyHz <= 0) {
-    return {};
-  }
-  for (auto const& band : kRemoteBandDials) {
-    if (dialFrequencyHz >= band.lowerHz && dialFrequencyHz <= band.upperHz) {
-      return QString::fromLatin1(band.key);
-    }
-  }
-  return {};
-}
-
-QString normalizeRemoteBandKey(QString band, qint64 fallbackDialFrequencyHz)
-{
-  auto text = band.trimmed().toUpper();
-  text.remove(QRegularExpression(QStringLiteral("\\s+")));
-  if (text.isEmpty()) {
-    return remoteBandKeyFromFrequency(fallbackDialFrequencyHz);
-  }
-  if (text == QStringLiteral("70CM")) {
-    return text;
-  }
-  if (text.endsWith(QStringLiteral("MHZ"))) {
-    bool ok = false;
-    auto const mhz = text.left(text.size() - 3).toDouble(&ok);
-    if (ok) {
-      auto inferred = remoteBandKeyFromFrequency(qRound64(mhz * 1000000.0));
-      if (!inferred.isEmpty()) {
-        return inferred;
-      }
-    }
-  }
-  if (text.endsWith(QLatin1Char('M'))) {
-    return text;
-  }
-  bool ok = false;
-  auto const meters = text.toInt(&ok);
-  if (ok && meters > 0) {
-    return QString::number(meters) + QStringLiteral("M");
-  }
-  return remoteBandKeyFromFrequency(fallbackDialFrequencyHz);
-}
-
-qint64 remoteNominalDialFrequency(QString const& band,
-                                  QString const& mode,
-                                  qint64 fallbackDialFrequencyHz)
-{
-  auto const key = normalizeRemoteBandKey(band, fallbackDialFrequencyHz);
-  if (key.isEmpty()) {
-    return 0;
-  }
-
-  auto const normalizedMode = mode.trimmed().toUpper();
-  for (auto const& bandDial : kRemoteBandDials) {
-    if (key != QString::fromLatin1(bandDial.key)) {
-      continue;
-    }
-    if (normalizedMode == QStringLiteral("FT2") && bandDial.ft2Hz > 0) {
-      return bandDial.ft2Hz;
-    }
-    if (normalizedMode == QStringLiteral("FT4") && bandDial.ft4Hz > 0) {
-      return bandDial.ft4Hz;
-    }
-    return bandDial.ft8Hz;
-  }
-  return 0;
-}
-
 QByteArray dashboard_html()
 {
   return QByteArrayLiteral(
@@ -1719,7 +1623,7 @@ R"FT2JS((() => {
     '160M': {FT8:1840000, FT2:1843000},
     '80M': {FT8:3573000, FT2:3568000, FT4:3575000},
     '60M': {FT8:5357000, FT2:5360000},
-    '40M': {FT8:7074000, FT2:7052000, FT4:7047500},
+    '40M': {FT8:7074000, FT2:7062000, FT4:7047500},
     '30M': {FT8:10136000, FT2:10144000, FT4:10140000},
     '20M': {FT8:14074000, FT2:14084000, FT4:14080000},
     '17M': {FT8:18100000, FT2:18108000, FT4:18104000},
@@ -3241,38 +3145,20 @@ R"FT2JS((() => {
       renderActivity();
     };
   }
-  document.querySelectorAll('.mode-btn').forEach((b) => {
-    b.addEventListener('click', () => {
-      const mode = b.dataset.mode;
-      const payload = {type:'set_mode', mode};
-      const dialHz = dialForBandMode(activeBand, mode);
-      if (dialHz) payload.dial_frequency_hz = dialHz;
-      sendCommand(payload)
-        .then((ack) => {
-          const ackDial = (ack && typeof ack.dial_frequency_hz === 'number') ? Number(ack.dial_frequency_hz) : 0;
-          const targetDial = ackDial || dialHz || 0;
-          if (targetDial) return sendCommand({type:'set_dial_frequency', dial_frequency_hz:targetDial});
-          return null;
-        })
-        .catch(handleCommandError);
-    });
-  });
-  document.querySelectorAll('.band-btn').forEach((b) => {
-    b.addEventListener('click', () => {
-      const band = b.dataset.band;
-      const payload = {type:'set_band', band};
-      const dialHz = dialForBandMode(band, activeMode || currentMode);
-      if (dialHz) payload.dial_frequency_hz = dialHz;
-      sendCommand(payload)
-        .then((ack) => {
-          const ackDial = (ack && typeof ack.dial_frequency_hz === 'number') ? Number(ack.dial_frequency_hz) : 0;
-          const targetDial = ackDial || dialHz || 0;
-          if (targetDial) return sendCommand({type:'set_dial_frequency', dial_frequency_hz:targetDial});
-          return null;
-        })
-        .catch(handleCommandError);
-    });
-  });
+	  document.querySelectorAll('.mode-btn').forEach((b) => {
+	    b.addEventListener('click', () => {
+	      const mode = b.dataset.mode;
+	      sendCommand({type:'set_mode', mode})
+	        .catch(handleCommandError);
+	    });
+	  });
+	  document.querySelectorAll('.band-btn').forEach((b) => {
+	    b.addEventListener('click', () => {
+	      const band = b.dataset.band;
+	      sendCommand({type:'set_band', band})
+	        .catch(handleCommandError);
+	    });
+	  });
 
   if (btnActivityPause) {
     btnActivityPause.addEventListener('click', () => {
@@ -4260,10 +4146,6 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
         {
           return result;
         }
-      if (dialFrequency <= 0)
-        {
-          dialFrequency = remoteNominalDialFrequency(state.band, mode, state.dialFrequencyHz);
-        }
       seenCommandIds_.insert(commandId, nowUtcMs);
       Q_EMIT setModeRequested(commandId, mode);
       if (dialFrequency > 0)
@@ -4300,10 +4182,6 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
       if (!parseOptionalDialFrequency(dialFrequency, result.payload))
         {
           return result;
-        }
-      if (dialFrequency <= 0)
-        {
-          dialFrequency = remoteNominalDialFrequency(band, state.mode, state.dialFrequencyHz);
         }
       seenCommandIds_.insert(commandId, nowUtcMs);
       Q_EMIT setBandRequested(commandId, band);

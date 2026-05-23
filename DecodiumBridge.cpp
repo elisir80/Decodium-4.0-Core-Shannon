@@ -1050,6 +1050,20 @@ static QString resolveBridgeFontFamily(QString const& requestedFamily,
             candidates << clean;
         }
     };
+    auto addPlatformSansCandidates = [&addCandidate] {
+#if defined(Q_OS_MAC)
+        addCandidate(QStringLiteral("Helvetica Neue"));
+        addCandidate(QStringLiteral("Arial"));
+#elif defined(Q_OS_WIN)
+        addCandidate(QStringLiteral("Segoe UI"));
+        addCandidate(QStringLiteral("Arial"));
+#else
+        addCandidate(QStringLiteral("Noto Sans"));
+        addCandidate(QStringLiteral("DejaVu Sans"));
+        addCandidate(QStringLiteral("Liberation Sans"));
+        addCandidate(QStringLiteral("Sans Serif"));
+#endif
+    };
 
     for (QString const& token : requestedFamily.split(',', Qt::SkipEmptyParts)) {
         QString const clean = token.trimmed();
@@ -1066,6 +1080,13 @@ static QString resolveBridgeFontFamily(QString const& requestedFamily,
             addCandidate(QStringLiteral("Liberation Mono"));
 #endif
             addCandidate(QStringLiteral("Monospace"));
+        } else if (clean.compare(QStringLiteral("MS Shell Dlg 2"), Qt::CaseInsensitive) == 0
+                   || clean.compare(QStringLiteral("MS Shell Dlg"), Qt::CaseInsensitive) == 0
+#if !defined(Q_OS_WIN)
+                   || clean.compare(QStringLiteral("Segoe UI"), Qt::CaseInsensitive) == 0
+#endif
+                   ) {
+            addPlatformSansCandidates();
         } else {
             addCandidate(clean);
         }
@@ -1073,6 +1094,7 @@ static QString resolveBridgeFontFamily(QString const& requestedFamily,
 
     addCandidate(fallbackFamily);
     addCandidate(QGuiApplication::font().family());
+    addPlatformSansCandidates();
 
     for (QString const& candidate : candidates) {
         QString const installed = findInstalledFamily(candidate);
@@ -1081,9 +1103,7 @@ static QString resolveBridgeFontFamily(QString const& requestedFamily,
         }
     }
 
-    return fallbackFamily.trimmed().isEmpty()
-        ? QGuiApplication::font().family()
-        : fallbackFamily.trimmed();
+    return availableFamilies.isEmpty() ? fallbackFamily.trimmed() : availableFamilies.first();
 }
 
 static QFont fallbackBridgeFont(QString const& fallbackFamily, int fallbackPointSize)
@@ -2540,6 +2560,23 @@ static bool isDirectedDecodeTerminalToken(QString const& token)
         || isRogerSignalReportToken(upper);
 }
 
+static bool hasPortableOperatingDesignator(QString const& token)
+{
+    QString const upper = normalizeCallToken(token).trimmed().toUpper();
+    int const slashIdx = upper.lastIndexOf(QLatin1Char('/'));
+    if (slashIdx <= 0 || slashIdx >= upper.size() - 1) {
+        return false;
+    }
+
+    QString const suffix = upper.mid(slashIdx + 1);
+    static const QSet<QString> portableSuffixes {
+        QStringLiteral("P"), QStringLiteral("M"), QStringLiteral("MM"),
+        QStringLiteral("AM"), QStringLiteral("A"), QStringLiteral("R"),
+        QStringLiteral("QRP"), QStringLiteral("PM"), QStringLiteral("MA")
+    };
+    return portableSuffixes.contains(suffix);
+}
+
 // Sanity gate per callsign — rifiuta i ghost del decoder LDPC.
 // Pattern ITU-R 19.68: prefisso (1-2 lettere | lettera+cifra | cifra 2-9 + lettera)
 // + cifra (0-9) + suffisso (1-4 lettere). Esempi rifiutati: 0Z4SYH, 0L0MYK,
@@ -3270,7 +3307,7 @@ static double rxInputLevelFromGain(double gain)
     return 50.0 + ((bounded - 1.0) / 3.0) * 50.0;
 }
 
-static constexpr double kAutoRxInputMaxLevel = 50.0;
+static constexpr double kAutoRxInputMaxLevel = 100.0;
 
 static qreal txGainFromSlider(double outputLevel)
 {
@@ -5398,6 +5435,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
     m_macroManager    = new MacroManager(this);
     m_bandManager     = new BandManager(this);
+    m_bandManager->setFrequencyResolver([this](const QString& bandLambda, const QString& mode) {
+        return workingFrequencyForBandMode(bandLambda, mode);
+    });
     m_nativeCat       = new DecodiumCatManager(this);
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
@@ -9815,9 +9855,6 @@ void DecodiumBridge::setAutoRxInputLevel(bool enabled)
     m_autoRxLevelManualHoldUntilMs = 0;
     bridgeLog(QStringLiteral("Auto RX Input Level %1").arg(enabled ? QStringLiteral("enabled")
                                                                   : QStringLiteral("disabled")));
-    if (enabled && m_rxInputLevel > kAutoRxInputMaxLevel) {
-        applyRxInputLevel(kAutoRxInputMaxLevel, true);
-    }
     emit autoRxInputLevelChanged();
 }
 
@@ -9829,7 +9866,7 @@ void DecodiumBridge::applyRxInputLevel(double level, bool automatic)
     }
 
     if (!automatic && m_autoRxInputLevel) {
-        m_autoRxLevelManualHoldUntilMs = QDateTime::currentMSecsSinceEpoch() + 15000;
+        m_autoRxLevelManualHoldUntilMs = QDateTime::currentMSecsSinceEpoch() + 30000;
     }
 
     bridgeLog(QStringLiteral("%1RxInputLevel: requested=%2 previous=%3 legacy=%4")
@@ -15145,18 +15182,28 @@ void ensureDefaultWorkingFrequencies(WorkingFrequencyItems& items)
     if (items.isEmpty()) {
         items = defaults.frequency_list();
     } else {
-        bool hasFt2 = false;
-        for (WorkingFrequencyItem const& item : std::as_const(items)) {
-            if (item.mode_ == Modes::FT2) {
-                hasFt2 = true;
-                break;
-            }
-        }
-        if (!hasFt2) {
-            for (WorkingFrequencyItem const& item : defaults.frequency_list()) {
-                if (item.mode_ == Modes::FT2) {
-                    items << item;
+        auto hasEquivalentRow = [&bands, &items](WorkingFrequencyItem const& candidate) {
+            QString const candidateBand = bands.find(candidate.frequency_);
+            for (WorkingFrequencyItem const& item : std::as_const(items)) {
+                if (item.mode_ != candidate.mode_ || item.region_ != candidate.region_) {
+                    continue;
                 }
+                QString const itemBand = bands.find(item.frequency_);
+                if (!candidateBand.isEmpty() && !itemBand.isEmpty()) {
+                    if (itemBand == candidateBand) {
+                        return true;
+                    }
+                    continue;
+                }
+                if (item.frequency_ == candidate.frequency_) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        for (WorkingFrequencyItem const& item : defaults.frequency_list()) {
+            if (!hasEquivalentRow(item)) {
+                items << item;
             }
         }
     }
@@ -15454,6 +15501,58 @@ QStringList DecodiumBridge::frequencyBandOptions() const
         names << band;
     }
     return names;
+}
+
+double DecodiumBridge::workingFrequencyForBandMode(const QString& bandLambda, const QString& mode) const
+{
+    QString const targetBand = bandLambda.trimmed();
+    if (targetBand.isEmpty()) {
+        return 0.0;
+    }
+
+    QString targetMode = canonicalApplicationDecodeMode(mode).trimmed().toUpper();
+    if (targetMode.isEmpty()) {
+        targetMode = mode.trimmed().toUpper();
+    }
+    if (targetMode.isEmpty()) {
+        return 0.0;
+    }
+
+    WorkingFrequencyItems items =
+        workingFrequencyItemsFromSetting(readSettingFromLegacyIni(QStringLiteral("FrequenciesForRegionModes_v2")));
+    if (items.isEmpty()) {
+        items = workingFrequencyItemsFromSetting(readSettingFromLegacyIni(QStringLiteral("FrequenciesForRegionModes")));
+    }
+    ensureDefaultWorkingFrequencies(items);
+
+    Bands bands;
+    auto matches = [&](WorkingFrequencyItem const& item) {
+        QString const itemBand = bands.find(item.frequency_);
+        QString const itemMode = QString::fromLatin1(Modes::name(item.mode_)).trimmed().toUpper();
+        return item.frequency_ > 0
+            && itemBand.compare(targetBand, Qt::CaseInsensitive) == 0
+            && itemMode == targetMode;
+    };
+
+    Radio::Frequency firstAllRegion = 0;
+    Radio::Frequency firstAnyRegion = 0;
+    for (WorkingFrequencyItem const& item : std::as_const(items)) {
+        if (!matches(item)) {
+            continue;
+        }
+        if (item.preferred_) {
+            return static_cast<double>(item.frequency_);
+        }
+        if (item.region_ == IARURegions::ALL && firstAllRegion <= 0) {
+            firstAllRegion = item.frequency_;
+        }
+        if (firstAnyRegion <= 0) {
+            firstAnyRegion = item.frequency_;
+        }
+    }
+
+    Radio::Frequency const fallback = firstAllRegion > 0 ? firstAllRegion : firstAnyRegion;
+    return fallback > 0 ? static_cast<double>(fallback) : 0.0;
 }
 
 bool DecodiumBridge::addWorkingFrequencyRow(const QString& region,
@@ -20702,6 +20801,7 @@ void DecodiumBridge::loadSettings()
     m_callsign = !legacyCallsign.isEmpty() ? legacyCallsign : bridgeCallsign;
     m_grid     = !legacyGrid.isEmpty() ? legacyGrid
                                        : (bridgeGrid.isEmpty() ? QStringLiteral("AA00") : bridgeGrid);
+    loadLogbookSettings();
     m_frequency = s.value("frequency", 14074000.0).toDouble();
     {
         QString const savedMode = s.value("mode", "FT8").toString().trimmed();
@@ -20728,9 +20828,6 @@ void DecodiumBridge::loadSettings()
     m_audioOutputChannel = qBound(0, m_audioOutputChannel, 3);
     m_rxInputLevel = qBound(0.0, s.value("rxInputLevel", 50.0).toDouble(), 100.0);
     m_autoRxInputLevel = s.value("autoRxInputLevel", true).toBool();
-    if (m_autoRxInputLevel && m_rxInputLevel > kAutoRxInputMaxLevel) {
-        m_rxInputLevel = kAutoRxInputMaxLevel;
-    }
     m_txOutputLevel = qBound(0.0, s.value("txOutputLevel", 0.0).toDouble(), 450.0);
     m_txDisabledMask = s.value("txDisabledMask", 0).toInt() & 0x3F;  // 6 bit (TX1-TX6)
     m_hideGhostDecodes = s.value("hideGhostDecodes", true).toBool();  // 1.0.145 default ON
@@ -21633,15 +21730,14 @@ void DecodiumBridge::setRecordRxEnabled(bool value)
 
 QString DecodiumBridge::effectiveAdifLogPath() const
 {
-    if (usingLegacyBackendForTx()) {
-        QString const legacyPath = m_legacyBackend->adifLogPath().trimmed();
-        if (!legacyPath.isEmpty()) {
-            return legacyPath;
-        }
-    }
     if (!m_adifLogPath.trimmed().isEmpty()) {
         return m_adifLogPath;
     }
+    return defaultAdifLogPath();
+}
+
+QString DecodiumBridge::defaultAdifLogPath() const
+{
     // Usa la directory legacy (AppData\Local\Decodium) se il log esiste gia' li',
     // altrimenti la directory standard Qt (AppData\Local\IU8LMC\Decodium)
     QString const legacyDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
@@ -21660,6 +21756,152 @@ QString DecodiumBridge::ensureAdifLogPath()
         m_adifLogPath = resolved;
     }
     return m_adifLogPath;
+}
+
+QString DecodiumBridge::logbookDirectoryPath() const
+{
+    QString const base = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    return QDir(base.isEmpty() ? QDir::homePath() : base).absoluteFilePath(QStringLiteral("logbooks"));
+}
+
+QString DecodiumBridge::sanitizedLogbookFileStem(const QString& name) const
+{
+    QString stem = name.trimmed();
+    if (stem.isEmpty()) {
+        stem = m_callsign.trimmed().isEmpty() ? QStringLiteral("Default") : m_callsign.trimmed();
+    }
+    stem.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_.-]+")), QStringLiteral("_"));
+    stem.replace(QRegularExpression(QStringLiteral("_+")), QStringLiteral("_"));
+    stem = stem.trimmed();
+    while (stem.startsWith(QLatin1Char('.')) || stem.startsWith(QLatin1Char('_'))) {
+        stem.remove(0, 1);
+    }
+    while (stem.endsWith(QLatin1Char('.')) || stem.endsWith(QLatin1Char('_'))) {
+        stem.chop(1);
+    }
+    return stem.isEmpty() ? QStringLiteral("Default") : stem.left(48);
+}
+
+void DecodiumBridge::ensureLogbookProfile(const QString& name, const QString& path)
+{
+    if (path.trimmed().isEmpty()) {
+        return;
+    }
+    QString const cleanPath = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+    if (cleanPath.isEmpty()) {
+        return;
+    }
+    QString cleanName = name.trimmed();
+    if (cleanName.isEmpty()) {
+        cleanName = QFileInfo(cleanPath).completeBaseName();
+    }
+    if (cleanName.isEmpty()) {
+        cleanName = QStringLiteral("Default");
+    }
+
+    int const existingPathIndex = m_logbookProfilePaths.indexOf(cleanPath);
+    if (existingPathIndex >= 0) {
+        m_logbookProfileNames[existingPathIndex] = cleanName;
+        return;
+    }
+
+    QString uniqueName = cleanName;
+    int suffix = 2;
+    while (m_logbookProfileNames.contains(uniqueName)) {
+        uniqueName = QStringLiteral("%1 %2").arg(cleanName).arg(suffix++);
+    }
+    m_logbookProfileNames << uniqueName;
+    m_logbookProfilePaths << cleanPath;
+}
+
+void DecodiumBridge::loadLogbookSettings()
+{
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    m_logbookProfileNames.clear();
+    m_logbookProfilePaths.clear();
+
+    s.beginGroup(QStringLiteral("Logbooks"));
+    int const count = s.beginReadArray(QStringLiteral("Profiles"));
+    for (int i = 0; i < count; ++i) {
+        s.setArrayIndex(i);
+        QString const name = s.value(QStringLiteral("Name")).toString().trimmed();
+        QString const path = s.value(QStringLiteral("Path")).toString().trimmed();
+        if (!path.isEmpty()) {
+            ensureLogbookProfile(name, path);
+        }
+    }
+    s.endArray();
+    QString activePath = s.value(QStringLiteral("ActivePath")).toString().trimmed();
+    QString activeName = s.value(QStringLiteral("ActiveName")).toString().trimmed();
+    s.endGroup();
+
+    QString const fallbackPath = defaultAdifLogPath();
+    if (m_logbookProfilePaths.isEmpty()) {
+        QString defaultName = m_callsign.trimmed().toUpper();
+        if (defaultName.isEmpty()) {
+            defaultName = QStringLiteral("Default");
+        }
+        ensureLogbookProfile(defaultName, fallbackPath);
+    }
+
+    if (activePath.isEmpty()) {
+        activePath = fallbackPath;
+    }
+    activePath = QDir::cleanPath(QFileInfo(activePath).absoluteFilePath());
+    int activeIndex = m_logbookProfilePaths.indexOf(activePath);
+    if (activeIndex < 0) {
+        ensureLogbookProfile(activeName.isEmpty() ? QFileInfo(activePath).completeBaseName() : activeName,
+                             activePath);
+        activeIndex = m_logbookProfilePaths.indexOf(activePath);
+    }
+
+    if (activeIndex >= 0) {
+        m_activeLogbookName = m_logbookProfileNames.at(activeIndex);
+        m_adifLogPath = m_logbookProfilePaths.at(activeIndex);
+    } else {
+        m_activeLogbookName = QStringLiteral("Default");
+        m_adifLogPath = fallbackPath;
+        ensureLogbookProfile(m_activeLogbookName, m_adifLogPath);
+    }
+
+    saveLogbookSettings();
+    bridgeLog(QStringLiteral("Logbook active: name=%1 path=%2")
+                  .arg(m_activeLogbookName, m_adifLogPath));
+}
+
+void DecodiumBridge::saveLogbookSettings() const
+{
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    s.beginGroup(QStringLiteral("Logbooks"));
+    s.setValue(QStringLiteral("ActiveName"), m_activeLogbookName);
+    s.setValue(QStringLiteral("ActivePath"), m_adifLogPath);
+    s.beginWriteArray(QStringLiteral("Profiles"));
+    for (int i = 0; i < m_logbookProfilePaths.size(); ++i) {
+        s.setArrayIndex(i);
+        s.setValue(QStringLiteral("Name"), m_logbookProfileNames.value(i));
+        s.setValue(QStringLiteral("Path"), m_logbookProfilePaths.value(i));
+    }
+    s.endArray();
+    s.endGroup();
+    s.sync();
+}
+
+void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
+{
+    QString const path = ensureAdifLogPath();
+    ParsedAdifDocument doc = loadAdifDocument(path);
+    rebuildWorkedCallsFromDocument(m_workedCalls, doc.records);
+    rebuildWorkedSetsFromAdifRecords(doc.records);
+    m_qsoCountCache = doc.records.size();
+    invalidateQsoSearchCache();
+    warmLogCacheAsync();
+    emit qsoCountChanged();
+    emit workedCountChanged();
+    emit qsoLogCacheChanged();
+    emit activeLogbookChanged();
+    bridgeLog(QStringLiteral("Logbook reloaded: %1 QSO reason=%2 path=%3")
+                  .arg(m_qsoCountCache)
+                  .arg(reason, path));
 }
 
 bool DecodiumBridge::cpuPressureActive() const
@@ -22642,7 +22884,11 @@ void DecodiumBridge::logQsoNow()
         return;
     }
 
-    if (usingLegacyBackendForTx()) {
+    // Multi-logbook support: D4 must write the active ADIF logbook itself,
+    // otherwise the embedded legacy backend always logs to its own fixed file
+    // and operators get mixed. Keep the legacy writer as hidden fallback only.
+    if (usingLegacyBackendForTx()
+        && getSetting(QStringLiteral("UseLegacyBackendLogWriter"), false).toBool()) {
         bridgeLog("logQso: delegating to legacy backend");
         syncLegacyBackendState();
         syncLegacyBackendTxState();
@@ -23433,12 +23679,22 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         return false;
     }
 
+    bool const ft2StrictSemanticGate =
+        m_mode.trimmed().compare(QStringLiteral("FT2"), Qt::CaseInsensitive) == 0;
+
     // FT2 non deve promuovere payload raw/telemetry a decode utente. In
     // pratica il caso visto e' una singola stringa hex lunga a -26 dB che
     // finiva nello storico come se fosse una chiamata.
-    if (m_mode.trimmed().compare(QStringLiteral("FT2"), Qt::CaseInsensitive) == 0
-        && decodeListModel_isTelemetryOnlyMessage(message)) {
+    if (ft2StrictSemanticGate && decodeListModel_isTelemetryOnlyMessage(message)) {
         if (reason) *reason = QStringLiteral("FT2 standalone telemetry/hex payload (ghost)");
+        return false;
+    }
+
+    if (ft2StrictSemanticGate
+        && tokens.size() == 1
+        && tokens.constFirst() != QStringLiteral("CQ")
+        && tokens.constFirst() != QStringLiteral("QRZ")) {
+        if (reason) *reason = QStringLiteral("FT2 standalone non-QSO token (ghost)");
         return false;
     }
 
@@ -23512,6 +23768,46 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
                 || hasHighConfidenceGhostPrefix(tokens.at(1));
             if (t0Bad || t1Bad) {
                 if (reason) *reason = QStringLiteral("source or dest callsign invalid/ghost");
+                return false;
+            }
+        }
+        if (ft2StrictSemanticGate) {
+            if (tokens.size() < 3) {
+                if (reason) *reason = QStringLiteral("FT2 third-party directed message without payload");
+                return false;
+            }
+
+            QStringList thirdPartyPayload = tokens.mid(2);
+            while (!thirdPartyPayload.isEmpty()
+                   && thirdPartyPayload.constLast() == QStringLiteral("?")) {
+                thirdPartyPayload.removeLast();
+            }
+
+            if (thirdPartyPayload.size() > 2) {
+                if (reason) *reason = QStringLiteral("FT2 third-party free-text payload (ghost)");
+                return false;
+            }
+
+            // Firma ricorrente dei falsi positivi FT2: due nominativi
+            // portable/rover non diretti a noi seguiti solo da locator
+            // (es. "UF7QJY/P BF0OWX/P HJ26"). Il formato e' astrattamente
+            // valido, ma in FT2 terza-stazione ha prodotto ghost visibili in
+            // UI/LiveMap. Non tocca CQ, messaggi diretti a noi, report o 73.
+            if (thirdPartyPayload.size() == 1
+                && isGridTokenStrict(thirdPartyPayload.constFirst())
+                && hasPortableOperatingDesignator(tokens.at(0))
+                && hasPortableOperatingDesignator(tokens.at(1))) {
+                if (reason) *reason = QStringLiteral("FT2 third-party portable locator ghost");
+                return false;
+            }
+
+            QString thirdPartyPayloadReason;
+            if (!isDirectedDecodePayloadValid(thirdPartyPayload,
+                                              contestDecodeExchangesEnabled(),
+                                              &thirdPartyPayloadReason)) {
+                if (reason) {
+                    *reason = QStringLiteral("FT2 third-party %1").arg(thirdPartyPayloadReason);
+                }
                 return false;
             }
         }
@@ -24782,13 +25078,20 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     int duplicatesSkipped = 0;
     int accepted = 0;
     DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    QString const flowMode = decodeMode.isEmpty() ? m_mode : decodeMode;
+    bool const timeSyncFlowMode =
+        flowMode == QStringLiteral("FT8")
+        || flowMode == QStringLiteral("FT4");
 
     // 1.0.179 — Smooth Decode Flow scheduler. Se attivo + auto-fallback OK +
     // batch grande (>5) + non FT2 (gia' streaming via async), spalma il
-    // rilascio. Altrimenti path legacy (batch flush + emit).
+    // rilascio. FT8/FT4 restano fuori: sono mode a slot stretti e l'utente si
+    // aspetta la lista decode al boundary, non una coda che scivola nello slot
+    // successivo.
     const bool useSmoothFlow = m_smoothDecodeFlow
         && rows.size() > 5
         && m_mode != QStringLiteral("FT2")
+        && !timeSyncFlowMode
         && !isUiStallActive(500, 5000);
     if (useSmoothFlow) {
         // Flush residuo dello slot precedente (no merge tra serial diversi).
@@ -25744,10 +26047,9 @@ void DecodiumBridge::onPeriodTimer()
         emit periodProgressChanged();
         if (timeSyncMode) {
             qint64 const kTimeSyncDecodeSettleMs =
-                (modeSnapshot == QStringLiteral("FT8")
-                 || modeSnapshot == QStringLiteral("FT4"))
-                    ? qint64 {3500}
-                    : qint64 {1750};
+                modeSnapshot == QStringLiteral("FT8") ? qint64 {650}
+                : modeSnapshot == QStringLiteral("FT4") ? qint64 {350}
+                : qint64 {1000};
             dispatchTimeSyncDecodeWhenReady(completedUtcSlot, modeSnapshot, m_periodTimerSessionId,
                                             nowMs + kTimeSyncDecodeSettleMs);
         } else {
@@ -26582,17 +26884,19 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
         return;
     }
 
-    constexpr double kTargetPeak = 0.62;     // circa -4 dBFS: alto, ma con margine dal clipping.
-    constexpr double kHotPeak = 0.90;        // riduci solo quando il picco e' davvero vicino al limite.
-    constexpr double kClipPeak = 0.97;
-    constexpr double kLowPeak = 0.22;        // circa -13 dBFS: alza solo se il segnale non e' silenzio.
-    constexpr double kUsefulPeak = 0.018;    // circa -35 dBFS.
-    constexpr double kUsefulRms = 0.0012;
-    constexpr qint64 kFastCooldownMs = 700;
-    constexpr qint64 kSlowCooldownMs = 3500;
-    constexpr qint64 kLowHoldMs = 8000;
+    constexpr double kTargetPeak = 0.70;     // circa -3 dBFS: alto, ma con margine dal clipping.
+    constexpr double kTargetRms = 0.045;     // circa -27 dBFS RMS, evita input inutilmente fiacchi.
+    constexpr double kHotPeak = 0.93;        // riduci solo quando il picco e' davvero vicino al limite.
+    constexpr double kClipPeak = 0.985;
+    constexpr double kLowPeak = 0.42;        // sotto ~-7.5 dBFS si puo' salire se il segnale e' utile.
+    constexpr double kLowRms = 0.030;
+    constexpr double kUsefulPeak = 0.012;    // circa -38 dBFS.
+    constexpr double kUsefulRms = 0.0008;
+    constexpr qint64 kFastCooldownMs = 600;
+    constexpr qint64 kSlowCooldownMs = 2000;
+    constexpr qint64 kLowHoldMs = 3000;
     constexpr double kMinGain = 0.05;
-    constexpr double kMaxGain = 1.0;
+    const double kMaxGain = rxInputGainFromLevel(kAutoRxInputMaxLevel);
 
     const double clippedRatio = samples > 0
         ? static_cast<double>(clippedSamples) / static_cast<double>(samples)
@@ -26632,7 +26936,10 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
         return;
     }
 
-    const bool usefulLowSignal = peak >= kUsefulPeak && rms >= kUsefulRms && peak < kLowPeak;
+    const bool usefulLowSignal =
+        peak >= kUsefulPeak
+        && rms >= kUsefulRms
+        && (peak < kLowPeak || rms < kLowRms);
     if (!usefulLowSignal || m_rxInputLevel >= kAutoRxInputMaxLevel - 0.5) {
         m_autoRxLevelLowStartMs = 0;
         return;
@@ -26647,8 +26954,12 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
         return;
     }
 
+    double idealGain = currentGain * (kTargetPeak / qMax(peak, 1e-6));
+    if (rms > 1e-9) {
+        idealGain = qMin(idealGain, currentGain * (kTargetRms / rms));
+    }
     const double targetGain = qBound(kMinGain,
-                                     qMin(currentGain * 1.12, currentGain * (kTargetPeak / peak)),
+                                     qMin(currentGain * 1.12, idealGain),
                                      kMaxGain);
     const double newLevel = qMin(kAutoRxInputMaxLevel, rxInputLevelFromGain(targetGain));
     if (newLevel > m_rxInputLevel + 0.5) {
@@ -27060,11 +27371,17 @@ void DecodiumBridge::dispatchTimeSyncDecodeWhenReady(qint64 completedUtcSlot,
         finalAudio.resize(targetSamples);
     }
 
+    int const minimumSamples = minimumDecodeSamplesForMode(modeSnapshot);
+    bool const enoughForMode =
+        minimumSamples <= 0 || finalAudio.size() >= minimumSamples;
     if (targetSamples > 0 && finalAudio.size() < targetSamples) {
-        bridgeLog(QStringLiteral("time-sync decode settling timeout: mode=%1 samples=%2 target=%3 borrowed=%4 slot=%5")
+        bridgeLog(QStringLiteral("time-sync decode %1: mode=%2 samples=%3 target=%4 min=%5 borrowed=%6 slot=%7")
+                      .arg(enoughForMode ? QStringLiteral("partial dispatch")
+                                         : QStringLiteral("settling timeout"))
                       .arg(modeSnapshot)
                       .arg(finalAudio.size())
                       .arg(targetSamples)
+                      .arg(minimumSamples)
                       .arg(borrowedSamples)
                       .arg(completedUtcSlot));
     } else if (targetSamples > 0) {
@@ -29254,6 +29571,170 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     warmLogCacheAsync();
     emit qsoCountChanged();
     emit workedCountChanged();
+}
+
+QVariantList DecodiumBridge::logbookProfiles() const
+{
+    QVariantList profiles;
+    QString const activePath = QDir::cleanPath(QFileInfo(effectiveAdifLogPath()).absoluteFilePath());
+    for (int i = 0; i < m_logbookProfilePaths.size(); ++i) {
+        QString const path = QDir::cleanPath(QFileInfo(m_logbookProfilePaths.at(i)).absoluteFilePath());
+        QFileInfo const info(path);
+        QVariantMap profile;
+        profile.insert(QStringLiteral("name"), m_logbookProfileNames.value(i));
+        profile.insert(QStringLiteral("path"), path);
+        profile.insert(QStringLiteral("active"), path == activePath);
+        profile.insert(QStringLiteral("exists"), info.exists());
+        profile.insert(QStringLiteral("qsoCount"), countAdifRecordsLightweight(path));
+        profiles.append(profile);
+    }
+    return profiles;
+}
+
+bool DecodiumBridge::backupActiveLogbook()
+{
+    QString const path = ensureAdifLogPath();
+    QFileInfo const info(path);
+    if (!info.exists() || !info.isFile()) {
+        emit statusMessage(QStringLiteral("Logbook backup non necessario: file non ancora creato"));
+        return true;
+    }
+
+    QString const stamp = QDateTime::currentDateTimeUtc().toString(QStringLiteral("yyyyMMdd_HHmmss"));
+    QString const backupPath = info.absoluteDir().absoluteFilePath(
+        QStringLiteral("%1_%2.backup.adi").arg(info.completeBaseName(), stamp));
+    if (!QFile::copy(path, backupPath)) {
+        emit errorMessage(QStringLiteral("Impossibile creare backup logbook: %1").arg(backupPath));
+        return false;
+    }
+    emit statusMessage(QStringLiteral("Backup logbook creato: %1").arg(QDir::toNativeSeparators(backupPath)));
+    return true;
+}
+
+bool DecodiumBridge::createLogbook(const QString& name, bool backupCurrent)
+{
+    QString cleanName = name.trimmed();
+    if (cleanName.isEmpty()) {
+        cleanName = m_callsign.trimmed().isEmpty() ? QStringLiteral("Default") : m_callsign.trimmed().toUpper();
+    }
+    if (backupCurrent && !backupActiveLogbook()) {
+        return false;
+    }
+
+    QDir dir(logbookDirectoryPath());
+    if (!dir.exists() && !dir.mkpath(QStringLiteral("."))) {
+        emit errorMessage(QStringLiteral("Impossibile creare cartella logbook: %1").arg(dir.absolutePath()));
+        return false;
+    }
+
+    QString stem = sanitizedLogbookFileStem(cleanName);
+    QString path = dir.absoluteFilePath(stem + QStringLiteral(".adi"));
+    int suffix = 2;
+    while (QFileInfo::exists(path)) {
+        path = dir.absoluteFilePath(QStringLiteral("%1_%2.adi").arg(stem).arg(suffix++));
+    }
+
+    ParsedAdifDocument emptyDoc;
+    emptyDoc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+    emptyDoc.loaded = true;
+    if (!writeAdifDocument(path, emptyDoc)) {
+        emit errorMessage(QStringLiteral("Impossibile creare logbook: %1").arg(path));
+        return false;
+    }
+
+    m_adifLogPath = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+    ensureLogbookProfile(cleanName, m_adifLogPath);
+    m_activeLogbookName = m_logbookProfileNames.value(m_logbookProfilePaths.indexOf(m_adifLogPath), cleanName);
+    saveLogbookSettings();
+    reloadActiveLogbookState(QStringLiteral("create"));
+    emit statusMessage(QStringLiteral("Logbook attivo: %1").arg(m_activeLogbookName));
+    return true;
+}
+
+bool DecodiumBridge::addLogbook(const QString& filename, const QString& name)
+{
+    QString path = filename.trimmed();
+    if (path.startsWith(QStringLiteral("file://"))) {
+        path = QUrl(path).toLocalFile();
+    }
+    if (path.isEmpty()) {
+        return false;
+    }
+
+    QFileInfo const info(path);
+    QString cleanName = name.trimmed();
+    if (cleanName.isEmpty()) {
+        cleanName = info.completeBaseName();
+    }
+    if (cleanName.isEmpty()) {
+        cleanName = QStringLiteral("Imported");
+    }
+
+    if (!info.exists()) {
+        ParsedAdifDocument emptyDoc;
+        emptyDoc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+        emptyDoc.loaded = true;
+        if (!writeAdifDocument(info.absoluteFilePath(), emptyDoc)) {
+            emit errorMessage(QStringLiteral("Impossibile creare logbook: %1").arg(path));
+            return false;
+        }
+    }
+
+    m_adifLogPath = QDir::cleanPath(info.absoluteFilePath());
+    ensureLogbookProfile(cleanName, m_adifLogPath);
+    m_activeLogbookName = m_logbookProfileNames.value(m_logbookProfilePaths.indexOf(m_adifLogPath), cleanName);
+    saveLogbookSettings();
+    reloadActiveLogbookState(QStringLiteral("add"));
+    emit statusMessage(QStringLiteral("Logbook caricato: %1").arg(m_activeLogbookName));
+    return true;
+}
+
+bool DecodiumBridge::switchLogbook(const QString& path)
+{
+    QString cleanPath = path.trimmed();
+    if (cleanPath.startsWith(QStringLiteral("file://"))) {
+        cleanPath = QUrl(cleanPath).toLocalFile();
+    }
+    cleanPath = QDir::cleanPath(QFileInfo(cleanPath).absoluteFilePath());
+    if (cleanPath.isEmpty()) {
+        return false;
+    }
+
+    int index = m_logbookProfilePaths.indexOf(cleanPath);
+    if (index < 0) {
+        ensureLogbookProfile(QFileInfo(cleanPath).completeBaseName(), cleanPath);
+        index = m_logbookProfilePaths.indexOf(cleanPath);
+    }
+    if (index < 0) {
+        return false;
+    }
+
+    if (!QFileInfo::exists(cleanPath)) {
+        ParsedAdifDocument emptyDoc;
+        emptyDoc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+        emptyDoc.loaded = true;
+        if (!writeAdifDocument(cleanPath, emptyDoc)) {
+            emit errorMessage(QStringLiteral("Impossibile aprire logbook: %1").arg(cleanPath));
+            return false;
+        }
+    }
+
+    m_activeLogbookName = m_logbookProfileNames.value(index, QFileInfo(cleanPath).completeBaseName());
+    m_adifLogPath = cleanPath;
+    saveLogbookSettings();
+    reloadActiveLogbookState(QStringLiteral("switch"));
+    emit statusMessage(QStringLiteral("Logbook attivo: %1").arg(m_activeLogbookName));
+    return true;
+}
+
+bool DecodiumBridge::openActiveLogbookFolder() const
+{
+    QFileInfo const info(effectiveAdifLogPath());
+    QDir dir = info.exists() ? info.absoluteDir() : QDir(info.absolutePath());
+    if (!dir.exists()) {
+        dir.mkpath(QStringLiteral("."));
+    }
+    return QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
 }
 
 bool DecodiumBridge::exportAdif(const QString& filename)

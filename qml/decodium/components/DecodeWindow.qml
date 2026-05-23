@@ -43,6 +43,7 @@ Window {
     property color textPrimary: bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
+    property int decodeColorBoost: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     readonly property real leftPanelWidth: width * 0.5
@@ -83,15 +84,17 @@ Window {
         bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
         rxDecodeModel = currentRxDecodes()
     }
-    Connections {
-        target: bridge
-        function onSettingValueChanged(key, value) {
-            if (key === "decodeShowPeriodSeparator")
-                decodeShowPeriodSeparator = value
-            else if (key === "decodeNewestFirst")
-                decodeNewestFirst = value
-        }
-    }
+	    Connections {
+	        target: bridge
+	        function onSettingValueChanged(key, value) {
+	            if (key === "decodeShowPeriodSeparator")
+	                decodeShowPeriodSeparator = value
+	            else if (key === "decodeNewestFirst")
+	                decodeNewestFirst = value
+	            else if (key === "uiDecodeColorBoost")
+	                decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
+	        }
+	    }
     property bool hideTelemetryOnlyDecodes: Qt.platform.os === "windows"
     property string highlightOrangeCallsigns: bridge.getSetting("HighlightOrangeCallsigns", "")
     property string highlightBlueCallsigns: bridge.getSetting("HighlightBlueCallsigns", "")
@@ -240,6 +243,68 @@ Window {
         return hex
     }
 
+    function decodeClamp01(value) {
+        return Math.max(0, Math.min(1, Number(value)))
+    }
+
+    function decodeColorObject(value) {
+        if (value === undefined || value === null)
+            return null
+        if (typeof value === "object" && value.r !== undefined)
+            return value
+        var text = String(value)
+        if (text.length === 0)
+            return null
+        try {
+            return Qt.color(text)
+        } catch (e) {
+            return null
+        }
+    }
+
+    function boostedDecodeTextColor(value) {
+        var boost = Math.max(0, Math.min(100, Number(decodeWindow.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        if (lum < 0.08 || lum > 0.92)
+            return c
+
+        var sat = 0.30 * boost
+        var r = decodeClamp01(c.r + (c.r - lum) * sat)
+        var g = decodeClamp01(c.g + (c.g - lum) * sat)
+        var b = decodeClamp01(c.b + (c.b - lum) * sat)
+        var boostedLum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        var targetLum = 0.52 + 0.28 * boost
+        if (boostedLum < targetLum) {
+            var mix = Math.min(0.65, (targetLum - boostedLum) / Math.max(0.001, 1.0 - boostedLum))
+            r = r + (1.0 - r) * mix
+            g = g + (1.0 - g) * mix
+            b = b + (1.0 - b) * mix
+        }
+        return Qt.rgba(decodeClamp01(r), decodeClamp01(g), decodeClamp01(b), c.a)
+    }
+
+    function boostedDecodeBackgroundColor(value) {
+        var boost = Math.max(0, Math.min(100, Number(decodeWindow.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        var sat = 0.18 * boost
+        var r = decodeClamp01(c.r + (c.r - lum) * sat)
+        var g = decodeClamp01(c.g + (c.g - lum) * sat)
+        var b = decodeClamp01(c.b + (c.b - lum) * sat)
+        var alphaLift = c.a < 0.12 ? 0.05 * boost : 0.12 * boost
+        var alphaCap = c.a < 0.12 ? 0.16 : 0.58
+        return Qt.rgba(r, g, b, Math.min(alphaCap, c.a + alphaLift))
+    }
+
     function readableTextOnHighlight(hex) {
         var c = Qt.color(hex)
         var luminance = (0.299 * c.r) + (0.587 * c.g) + (0.114 * c.b)
@@ -252,13 +317,13 @@ Window {
         var hex = wsjtxRowHighlightHex(modelData)
         if (hex.length === 0) return null
         var c = Qt.color(hex)
-        return Qt.rgba(c.r, c.g, c.b, 0.35)
+        return boostedDecodeBackgroundColor(Qt.rgba(c.r, c.g, c.b, 0.35))
     }
     function wsjtxBorderColor(modelData) {
         var hex = wsjtxRowHighlightHex(modelData)
         if (hex.length === 0) return null
         var c = Qt.color(hex)
-        return Qt.rgba(c.r, c.g, c.b, 0.85)
+        return boostedDecodeTextColor(Qt.rgba(c.r, c.g, c.b, 0.85))
     }
 
     // Shannon-compatible coloring (priorità DecodeHighlightingModel)
@@ -283,22 +348,22 @@ Window {
             return readableTextOnHighlight(rowHex)
 
         var customColor = customHighlightColor(modelData)
-        if (customColor !== "") return customColor
-        if (highlight73 && isSignoffMessage(modelData.message)) return bridge.color73
-        if (modelData.isB4 || modelData.dxIsWorked) return bridge.colorB4
+        if (customColor !== "") return boostedDecodeTextColor(customColor)
+        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(bridge.color73)
+        if (modelData.isB4 || modelData.dxIsWorked) return boostedDecodeTextColor(bridge.colorB4)
 
         var textHighlight = wsjtxTextHighlightColor(modelData)
         if (textHighlight.length > 0)
-            return textHighlight
+            return boostedDecodeTextColor(textHighlight)
 
-        if (modelData.isTx)     return colorTx
-        if (rowReallyIsMyCall(modelData)) return bridge.colorMyCall
-        if (modelData.isLotw)   return colorLotw
+        if (modelData.isTx)     return boostedDecodeTextColor(colorTx)
+        if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(bridge.colorMyCall)
+        if (modelData.isLotw)   return boostedDecodeTextColor(colorLotw)
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
-            return bridge.colorDXEntity
-        if (modelData.isCQ)     return bridge.colorCQ
-        return textPrimary
+            return boostedDecodeTextColor(bridge.colorDXEntity)
+        if (modelData.isCQ)     return boostedDecodeTextColor(bridge.colorCQ)
+        return boostedDecodeTextColor(textPrimary)
     }
 
     // IU8LMC: Function to build tooltip text
@@ -1009,17 +1074,17 @@ Component.onCompleted: {
                                     if (wsx) return wsx
                                     // 1.0.134: match DxCall — oro (Band Activity). Solo flag
                                     // pre-calcolato C++, niente funzione QML (no regressione).
-                                    if (modelData.matchesDxCall === true)
-                                        return Qt.rgba(1, 0.84, 0, 0.30)
+	                                    if (modelData.matchesDxCall === true)
+	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(1, 0.84, 0, 0.30))
                                     // 1.0.141: difesa contro stazioni "fantasma" rosse
-                                    if (decodeWindow.rowReallyIsMyCall(modelData))
-                                        return Qt.rgba(244/255, 67/255, 54/255, 0.25)
-                                    if (modelData.isCQ)     return Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)
-                                    if (isAtRxFrequency(modelData.freq, modelData))
-                                        return Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2)
-                                    return index % 2 === 0
-                                           ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02)
-                                           : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+	                                    if (decodeWindow.rowReallyIsMyCall(modelData))
+	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.25))
+	                                    if (modelData.isCQ)     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12))
+	                                    if (isAtRxFrequency(modelData.freq, modelData))
+	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2))
+	                                    return index % 2 === 0
+	                                           ? decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02))
+	                                           : decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
                                 }
                                 border.color: {
                                     if (isPeriodSeparator) return "transparent"
@@ -1117,7 +1182,7 @@ Component.onCompleted: {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: textSecondary
+	                                        color: decodeWindow.boostedDecodeTextColor(textSecondary)
                                         Layout.preferredWidth: decodeWindow.bandUtcWidth
                                     }
 
@@ -1125,9 +1190,9 @@ Component.onCompleted: {
                                         text: modelData.db
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: parseInt(modelData.db) > -5 ? accentGreen :
-                                               parseInt(modelData.db) > -15 ? secondaryCyan :
-                                               parseInt(modelData.db) > -20 ? textSecondary : "#888"
+	                                        color: decodeWindow.boostedDecodeTextColor(parseInt(modelData.db) > -5 ? accentGreen :
+	                                               parseInt(modelData.db) > -15 ? secondaryCyan :
+	                                               parseInt(modelData.db) > -20 ? textSecondary : "#888")
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.bandDbWidth
                                     }
@@ -1138,7 +1203,7 @@ Component.onCompleted: {
                                         text: modelData.dt
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: textSecondary
+	                                        color: decodeWindow.boostedDecodeTextColor(textSecondary)
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.bandDtWidth
                                     }
@@ -1149,7 +1214,7 @@ Component.onCompleted: {
                                         text: modelData.freq
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: isAtRxFrequency(modelData.freq, modelData) ? primaryBlue : secondaryCyan
+	                                        color: decodeWindow.boostedDecodeTextColor(isAtRxFrequency(modelData.freq, modelData) ? primaryBlue : secondaryCyan)
                                         font.bold: isAtRxFrequency(modelData.freq, modelData)
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.bandFreqWidth
@@ -1182,7 +1247,7 @@ Component.onCompleted: {
                                             text: modelData.dxCountry || ""
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-                                            color: modelData.dxCountry ? bridge.colorDXEntity : textSecondary
+	                                            color: decodeWindow.boostedDecodeTextColor(modelData.dxCountry ? bridge.colorDXEntity : textSecondary)
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                             elide: Text.ElideNone
@@ -1201,7 +1266,7 @@ Component.onCompleted: {
                                             text: formatBearingDegrees(modelData.dxBearing)
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-                                            color: secondaryCyan
+	                                            color: decodeWindow.boostedDecodeTextColor(secondaryCyan)
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                         }
@@ -1512,15 +1577,15 @@ Component.onCompleted: {
                                     if (wsx) return wsx
                                     // 1.0.134: match DxCall — oro (Signal RX). Solo flag
                                     // pre-calcolato C++, niente funzione QML.
-                                    if (modelData.matchesDxCall === true)
-                                        return Qt.rgba(1, 0.84, 0, 0.30)
+	                                    if (modelData.matchesDxCall === true)
+	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(1, 0.84, 0, 0.30))
                                     // 1.0.141: difesa contro stazioni "fantasma" rosse (Signal RX)
-                                    if (decodeWindow.rowReallyIsMyCall(modelData))
-                                        return Qt.rgba(244/255, 67/255, 54/255, 0.3)
-                                    if (modelData.isCQ)     return Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)
-                                    return index % 2 === 0
-                                           ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.05)
-                                           : Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.1)
+	                                    if (decodeWindow.rowReallyIsMyCall(modelData))
+	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3))
+	                                    if (modelData.isCQ)     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15))
+	                                    return index % 2 === 0
+	                                           ? decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.05))
+	                                           : decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.1))
                                 }
                                 border.color: {
                                     if (isPeriodSeparator) return "transparent"
@@ -1610,7 +1675,7 @@ Component.onCompleted: {
                                         text: modelData.formattedTime || formatUtcForDisplay(modelData.time)
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: textSecondary
+	                                        color: decodeWindow.boostedDecodeTextColor(textSecondary)
                                         Layout.preferredWidth: decodeWindow.rxUtcWidth
                                     }
 
@@ -1618,9 +1683,9 @@ Component.onCompleted: {
                                         text: modelData.db
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: parseInt(modelData.db) > -5 ? accentGreen :
-                                               parseInt(modelData.db) > -15 ? secondaryCyan :
-                                               parseInt(modelData.db) > -20 ? textSecondary : "#888"
+	                                        color: decodeWindow.boostedDecodeTextColor(parseInt(modelData.db) > -5 ? accentGreen :
+	                                               parseInt(modelData.db) > -15 ? secondaryCyan :
+	                                               parseInt(modelData.db) > -20 ? textSecondary : "#888")
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.rxDbWidth
                                     }
@@ -1631,7 +1696,7 @@ Component.onCompleted: {
                                         text: modelData.dt
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-                                        color: textSecondary
+	                                        color: decodeWindow.boostedDecodeTextColor(textSecondary)
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.rxDtWidth
                                     }
@@ -1657,7 +1722,7 @@ Component.onCompleted: {
                                         text: modelData.dxDistance > 0 ?
                                               Math.round(modelData.dxDistance) + "km" : ""
                                         font.pixelSize: 9
-                                        color: (bridge && bridge.themeManager) ? bridge.themeManager.textSecondary : "#666688"
+	                                        color: decodeWindow.boostedDecodeTextColor((bridge && bridge.themeManager) ? bridge.themeManager.textSecondary : "#666688")
                                         Layout.preferredWidth: decodeWindow.rxDistanceWidth
                                         horizontalAlignment: Text.AlignRight
                                     }

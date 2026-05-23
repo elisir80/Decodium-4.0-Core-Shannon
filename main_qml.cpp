@@ -86,6 +86,31 @@ static void L(const char* msg) {
     DIAG_INFO(QString::fromLocal8Bit(msg));
 }
 
+static QString firstInstalledFontFamily(QStringList const& candidates)
+{
+    QStringList families = QFontDatabase::families();
+    families.removeDuplicates();
+    for (QString const& candidate : candidates) {
+        QString const clean = candidate.trimmed();
+        if (clean.isEmpty()) {
+            continue;
+        }
+        for (QString const& family : families) {
+            if (family.compare(clean, Qt::CaseInsensitive) == 0) {
+                return family;
+            }
+        }
+    }
+
+    QString const systemFamily = QFontDatabase::systemFont(QFontDatabase::GeneralFont).family().trimmed();
+    if (!systemFamily.isEmpty()
+        && systemFamily.compare(QStringLiteral("MS Shell Dlg 2"), Qt::CaseInsensitive) != 0
+        && systemFamily.compare(QStringLiteral("MS Shell Dlg"), Qt::CaseInsensitive) != 0) {
+        return systemFamily;
+    }
+    return families.isEmpty() ? QString{} : families.first();
+}
+
 static std::atomic_bool g_shuttingDown {false};
 
 #ifdef Q_OS_WIN
@@ -977,6 +1002,27 @@ int main(int argc, char* argv[])
         QFont::insertSubstitution(QStringLiteral("Consolas"), fixedFontFamily);
         QFont::insertSubstitution(QStringLiteral("Monospace"), fixedFontFamily);
         QFont::insertSubstitution(QStringLiteral("monospace"), fixedFontFamily);
+    }
+    QString const uiFontFamily = firstInstalledFontFamily({
+#if defined(Q_OS_MAC)
+        QStringLiteral("Helvetica Neue"),
+        QStringLiteral("Arial"),
+#elif defined(Q_OS_WIN)
+        QStringLiteral("Segoe UI"),
+        QStringLiteral("Arial"),
+#else
+        QStringLiteral("Noto Sans"),
+        QStringLiteral("DejaVu Sans"),
+        QStringLiteral("Liberation Sans"),
+        QStringLiteral("Sans Serif"),
+#endif
+    });
+    if (!uiFontFamily.isEmpty()) {
+        QFont::insertSubstitution(QStringLiteral("MS Shell Dlg 2"), uiFontFamily);
+        QFont::insertSubstitution(QStringLiteral("MS Shell Dlg"), uiFontFamily);
+#if !defined(Q_OS_WIN)
+        QFont::insertSubstitution(QStringLiteral("Segoe UI"), uiFontFamily);
+#endif
     }
 
     // Forza locale C per numeri (punto decimale) — evita problemi con locale FR/DE/IT

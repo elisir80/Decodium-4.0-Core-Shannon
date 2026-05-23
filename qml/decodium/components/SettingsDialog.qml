@@ -190,10 +190,50 @@ Dialog {
         frequencyEndField.text = ""
     }
 
+    function workingFrequencyEditorFrequencyText() {
+        var text = String(frequencyMHzField.text || "").trim()
+        var lower = text.toLowerCase()
+        var explicitMHz = lower.indexOf("mhz") >= 0
+        var explicitHz = lower.indexOf("hz") >= 0 && !explicitMHz
+        text = text.replace(/,/g, ".")
+        text = text.replace(/mhz/ig, "")
+        text = text.replace(/hz/ig, "")
+        text = text.replace(/\s+/g, "")
+        if (text.length === 0)
+            return ""
+        return text + (explicitMHz ? " MHz" : (explicitHz ? " Hz" : ""))
+    }
+
+    function workingFrequencyEditorHasValidFrequency() {
+        var text = workingFrequencyEditorFrequencyText()
+        if (text.length === 0)
+            return false
+        var numeric = Number(text.replace(/mhz|hz/ig, "").trim())
+        return isFinite(numeric) && numeric > 0
+    }
+
+    function newWorkingFrequencyEditor() {
+        selectedWorkingFrequencyIndex = -1
+        setComboText(frequencyRegionCombo, "All")
+        setComboText(frequencyModeCombo, bridge.mode || "FT8")
+        var currentHz = Number(bridge.frequency) || 0
+        frequencyMHzField.text = currentHz > 0 ? (currentHz / 1000000.0).toFixed(6) : ""
+        frequencyPreferredCheck.checked = true
+        frequencyDescriptionField.text = ""
+        frequencyStartField.text = ""
+        frequencyEndField.text = ""
+        Qt.callLater(function() {
+            frequencyMHzField.forceActiveFocus()
+            frequencyMHzField.selectAll()
+        })
+    }
+
     function addWorkingFrequencyFromEditor() {
+        if (!workingFrequencyEditorHasValidFrequency())
+            return
         if (bridge.addWorkingFrequencyRow(frequencyRegionCombo.currentText,
                                           frequencyModeCombo.currentText,
-                                          frequencyMHzField.text,
+                                          workingFrequencyEditorFrequencyText(),
                                           frequencyDescriptionField.text,
                                           frequencyStartField.text,
                                           frequencyEndField.text,
@@ -205,10 +245,12 @@ Dialog {
     function updateWorkingFrequencyFromEditor() {
         if (selectedWorkingFrequencyIndex < 0)
             return
+        if (!workingFrequencyEditorHasValidFrequency())
+            return
         if (bridge.updateWorkingFrequencyRow(selectedWorkingFrequencyIndex,
                                              frequencyRegionCombo.currentText,
                                              frequencyModeCombo.currentText,
-                                             frequencyMHzField.text,
+                                             workingFrequencyEditorFrequencyText(),
                                              frequencyDescriptionField.text,
                                              frequencyStartField.text,
                                              frequencyEndField.text,
@@ -4678,7 +4720,12 @@ Dialog {
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 120
                                         implicitHeight: controlHeight
-                                        background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                                        background: Rectangle {
+                                            color: bgMedium
+                                            border.color: parent.activeFocus ? secondaryCyan
+                                                                               : (parent.text.length > 0 && !settingsDialog.workingFrequencyEditorHasValidFrequency() ? "#ff7777" : glassBorder)
+                                            radius: 4
+                                        }
                                     }
                                     CheckBox {
                                         id: frequencyPreferredCheck
@@ -4736,16 +4783,18 @@ Dialog {
                                     Button {
                                         id: addWorkingFrequencyButton
                                         text: qsTr("Add")
+                                        enabled: settingsDialog.workingFrequencyEditorHasValidFrequency()
                                         implicitHeight: controlHeight
                                         Layout.preferredWidth: 86
                                         onClicked: settingsDialog.addWorkingFrequencyFromEditor()
-                                        background: Rectangle { color: addWorkingFrequencyButton.hovered ? Qt.rgba(accentGreen.r,accentGreen.g,accentGreen.b,0.18) : bgMedium; border.color: accentGreen; radius: 4 }
-                                        contentItem: Text { text: addWorkingFrequencyButton.text; color: accentGreen; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                        background: Rectangle { color: addWorkingFrequencyButton.enabled && addWorkingFrequencyButton.hovered ? Qt.rgba(accentGreen.r,accentGreen.g,accentGreen.b,0.18) : bgMedium; border.color: addWorkingFrequencyButton.enabled ? accentGreen : glassBorder; radius: 4 }
+                                        contentItem: Text { text: addWorkingFrequencyButton.text; color: addWorkingFrequencyButton.enabled ? accentGreen : textSecondary; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                     }
                                     Button {
                                         id: updateWorkingFrequencyButton
                                         text: qsTr("Update")
                                         enabled: settingsDialog.selectedWorkingFrequencyIndex >= 0
+                                                 && settingsDialog.workingFrequencyEditorHasValidFrequency()
                                         implicitHeight: controlHeight
                                         Layout.preferredWidth: 96
                                         onClicked: settingsDialog.updateWorkingFrequencyFromEditor()
@@ -4767,7 +4816,7 @@ Dialog {
                                         text: qsTr("New")
                                         implicitHeight: controlHeight
                                         Layout.preferredWidth: 86
-                                        onClicked: settingsDialog.clearWorkingFrequencyEditor()
+                                        onClicked: settingsDialog.newWorkingFrequencyEditor()
                                         background: Rectangle { color: clearWorkingFrequencyButton.hovered ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.16) : bgMedium; border.color: glassBorder; radius: 4 }
                                         contentItem: Text { text: clearWorkingFrequencyButton.text; color: textSecondary; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                     }
@@ -5154,19 +5203,41 @@ Dialog {
                                 Item { Layout.fillWidth: true }
                             }
                         }
-                        Text { text: qsTr("B4 Strikethrough:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        CheckBox {
-                            checked: bridge.b4Strikethrough
-                            onCheckedChanged: {
-                                bridge.b4Strikethrough = checked
+	                        Text { text: qsTr("B4 Strikethrough:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+	                        CheckBox {
+	                            checked: bridge.b4Strikethrough
+	                            onCheckedChanged: {
+	                                bridge.b4Strikethrough = checked
                                 bridge.setSetting("b4Strikethrough", checked)
                             }
-                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                            contentItem: Text { text: ""; leftPadding: 24 }
-                        }
+	                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+	                            contentItem: Text { text: ""; leftPadding: 24 }
+	                        }
+	                        Text { text: qsTr("Decode Boost:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+	                        RowLayout {
+	                            Layout.fillWidth: true
+	                            Layout.columnSpan: 3
+	                            spacing: 10
+	                            Slider {
+	                                id: decodeColorBoostSlider
+	                                from: 0
+	                                to: 100
+	                                stepSize: 1
+	                                value: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
+	                                Layout.fillWidth: true
+	                                onValueChanged: bridge.setSetting("uiDecodeColorBoost", Math.round(value))
+	                            }
+	                            Text {
+	                                text: Math.round(decodeColorBoostSlider.value) + "%"
+	                                color: textPrimary
+	                                font.pixelSize: 12
+	                                horizontalAlignment: Text.AlignRight
+	                                Layout.preferredWidth: 44
+	                            }
+	                        }
 
-                        // ── Highlighting ──
-                        Text { text: qsTr("HIGHLIGHTING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+	                        // ── Highlighting ──
+	                        Text { text: qsTr("HIGHLIGHTING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Highlight 73:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }

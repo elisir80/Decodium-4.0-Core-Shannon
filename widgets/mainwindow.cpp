@@ -11683,10 +11683,9 @@ void MainWindow::decode()                                       //decode()
 
     // In the embedded D4 UI the FT8 worker shares CPU with QML, waterfall and
     // map rendering. Dense slots can occasionally finish after the next
-    // boundary; cancelling here drops complete slots compared with Decodium3.
-    // Keep one full-slot request queued so the next decode runs with the
-    // correct UTC instead of being discarded.
-    queueEmbeddedFt8FullSlot = ft8MayPreempt;
+    // boundary; keep one full-slot request queued for a normal live pass. A
+    // deep follow-up is optional, so the next real slot is allowed to preempt it.
+    queueEmbeddedFt8FullSlot = ft8MayPreempt && !m_ft8DecodeDeepFollowupPending;
 
     if (!ft2MayPreempt && !ft8MayPreempt && !queueEmbeddedFt8FullSlot) {
       return;                          //Don't start decoder if it's already busy.
@@ -11719,7 +11718,14 @@ void MainWindow::decode()                                       //decode()
           return;
         }
 
-      if (!queueEmbeddedFt8FullSlot)
+      if (m_ft8DecodeDeepFollowupPending)
+        {
+          debugToFile (QString {"ft8Decode   cancel deep follow-up for next slot pendingUtc:%1 nextUtc:%2"}
+                         .arg (m_ft8DecodePendingUtc)
+                         .arg (pendingUtc));
+          cancelPendingInProcessDecode ();
+        }
+      else if (!queueEmbeddedFt8FullSlot)
         {
           cancelPendingInProcessDecode ();
         }
@@ -12834,12 +12840,20 @@ bool MainWindow::cancelPendingInProcessDecode ()
     }
     ++m_ft8DecodeSerial;
     m_ft8DecodePending = false;
+    m_ft8DecodeDeepFollowupPending = false;
     m_ft8DecodePendingUtc = 0;
     cancelled = true;
   }
   if (m_ft8QueuedDecodePending) {
     m_ft8QueuedDecodePending = false;
     m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
+    cancelled = true;
+  }
+  if (m_ft8QueuedDeepFollowupPending || m_ft8DeepFollowupQueued) {
+    m_ft8QueuedDeepFollowupPending = false;
+    m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
+    m_ft8DeepFollowupQueued = false;
+    m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
     cancelled = true;
   }
 
@@ -13021,7 +13035,9 @@ void MainWindow::requestInProcessFt8Decode ()
     return;
   }
 
-  dispatchFt8DecodeRequest (buildFt8DecodeRequest ());
+  auto const baseRequest = buildFt8DecodeRequest ();
+  prepareEmbeddedFt8DeepFollowup (baseRequest);
+  dispatchFt8DecodeRequest (buildEmbeddedFt8FastLiveRequest (baseRequest), false);
 }
 
 void MainWindow::queueInProcessFt8Decode ()
@@ -13040,11 +13056,18 @@ void MainWindow::queueInProcessFt8Decode ()
   // Preserve the just-finished 15 s slot instead of dropping it when the
   // previous embedded FT8 decode is still running. The queued request is
   // launched as soon as the current worker result is consumed.
-  m_ft8QueuedDecodeRequest = buildFt8DecodeRequest ();
+  auto const baseRequest = buildFt8DecodeRequest ();
+  m_ft8QueuedDecodeRequest = buildEmbeddedFt8FastLiveRequest (baseRequest);
+  m_ft8QueuedDeepFollowupPending = false;
+  m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
   if (!m_ft8QueuedDecodeRequest.hasFreshAudio) {
     m_ft8QueuedDecodePending = false;
     m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
     return;
+  }
+  if (shouldPrepareEmbeddedFt8DeepFollowup (baseRequest)) {
+    m_ft8QueuedDeepFollowupRequest = buildEmbeddedFt8DeepFollowupRequest (baseRequest);
+    m_ft8QueuedDeepFollowupPending = m_ft8QueuedDeepFollowupRequest.hasFreshAudio;
   }
   debugToFile (QString {"ft8Decode   queue utc:%1 nzhsym:%2 samples:%3"}
                  .arg (m_ft8QueuedDecodeRequest.nutc)
@@ -13120,17 +13143,6 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
         request.lft8apon = 1;
       }
     }
-    if (request.nzhsym >= 50) {
-      if (request.ndepth >= 4) {
-        request.maxDecodeMs = 12000;
-      } else if (request.ndepth >= 3) {
-        request.maxDecodeMs = 9500;
-      } else {
-        request.maxDecodeMs = 6500;
-      }
-    } else {
-      request.maxDecodeMs = request.ndepth >= 4 ? 3500 : 2200;
-    }
   }
   request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
@@ -13150,38 +13162,168 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   return request;
 }
 
-void MainWindow::dispatchFt8DecodeRequest (decodium::ft8::DecodeRequest request)
+decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodium::ft8::DecodeRequest request) const
+{
+  if (!(m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+    return request;
+  }
+
+  int const baseDepth = request.ndepth;
+  if (request.nzhsym >= 50) {
+    request.ndepth = qMin (request.ndepth, 3);
+    if (baseDepth >= 4) {
+      request.maxDecodeMs = 3800;
+    } else if (baseDepth >= 3) {
+      request.maxDecodeMs = 3200;
+    } else {
+      request.maxDecodeMs = 2600;
+    }
+  } else {
+    request.ndepth = qMin (request.ndepth, 2);
+    request.maxDecodeMs = baseDepth >= 4 ? 2400 : 1800;
+  }
+
+  // Fast live pass: no supplemental/OSD helpers. A cancellable deep follow-up
+  // is queued separately when there is enough slack before the next slot.
+  request.supplemental = false;
+  request.neuralSyncEnabled = false;
+  request.turboFeedbackEnabled = false;
+  request.coherentAvgEnabled = false;
+  return request;
+}
+
+decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8DeepFollowupRequest (decodium::ft8::DecodeRequest request) const
+{
+  if (!(m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+    return request;
+  }
+
+  request.supplemental = request.ndepth >= 4;
+  if (request.ndepth >= 4) {
+    request.maxDecodeMs = 6500;
+  } else if (request.ndepth >= 3) {
+    request.maxDecodeMs = 5200;
+  } else {
+    request.maxDecodeMs = 0;
+  }
+  return request;
+}
+
+bool MainWindow::shouldPrepareEmbeddedFt8DeepFollowup (decodium::ft8::DecodeRequest const& request) const
+{
+  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+    return false;
+  }
+  if (!request.hasFreshAudio || request.nzhsym < 50 || request.maxDecodeMs < 0) {
+    return false;
+  }
+  return request.ndepth >= 3
+      || request.supplemental
+      || request.neuralSyncEnabled
+      || request.turboFeedbackEnabled
+      || request.coherentAvgEnabled;
+}
+
+void MainWindow::prepareEmbeddedFt8DeepFollowup (decodium::ft8::DecodeRequest const& request)
+{
+  m_ft8DeepFollowupQueued = false;
+  m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
+
+  if (!shouldPrepareEmbeddedFt8DeepFollowup (request)) {
+    return;
+  }
+
+  auto deepRequest = buildEmbeddedFt8DeepFollowupRequest (request);
+  if (!deepRequest.hasFreshAudio || deepRequest.maxDecodeMs <= 0) {
+    return;
+  }
+
+  m_ft8DeepFollowupRequest = std::move (deepRequest);
+  m_ft8DeepFollowupQueued = true;
+}
+
+int MainWindow::msUntilNextEmbeddedFt8FullDecodeTrigger () const
+{
+  int const periodMs = qMax (1000, qRound (m_TRperiod * 1000.0));
+  int const triggerMs = qBound (0, qRound (double (m_hsymStop) * 288.0), periodMs - 1);
+  int const msOfDay = QDateTime::currentDateTimeUtc ().time ().msecsSinceStartOfDay ();
+  int const msInPeriod = msOfDay % periodMs;
+  if (msInPeriod <= triggerMs) {
+    return triggerMs - msInPeriod;
+  }
+  return periodMs - msInPeriod + triggerMs;
+}
+
+bool MainWindow::dispatchQueuedEmbeddedFt8DeepFollowup ()
+{
+  if (!m_ft8DeepFollowupQueued) {
+    return false;
+  }
+
+  auto request = m_ft8DeepFollowupRequest;
+  m_ft8DeepFollowupQueued = false;
+  m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
+
+  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8)
+      || !request.hasFreshAudio || request.maxDecodeMs <= 0) {
+    return false;
+  }
+
+  int const slackMs = msUntilNextEmbeddedFt8FullDecodeTrigger ();
+  int const safetyMs = m_transmitting ? 2200 : 900;
+  if (m_transmitting || slackMs < request.maxDecodeMs + safetyMs) {
+    debugToFile (QString {"ft8Decode   skip deep follow-up utc:%1 maxMs:%2 slackMs:%3 tx:%4"}
+                   .arg (request.nutc)
+                   .arg (request.maxDecodeMs)
+                   .arg (slackMs)
+                   .arg (m_transmitting ? 1 : 0));
+    return false;
+  }
+
+  debugToFile (QString {"ft8Decode   start deep follow-up utc:%1 maxMs:%2 slackMs:%3"}
+                 .arg (request.nutc)
+                 .arg (request.maxDecodeMs)
+                 .arg (slackMs));
+  dispatchFt8DecodeRequest (std::move (request), true);
+  return true;
+}
+
+void MainWindow::dispatchFt8DecodeRequest (decodium::ft8::DecodeRequest request, bool deepFollowup)
 {
   if (!m_ft8DecodeWorker || !m_ft8DecodeThread.isRunning ()) {
-    debugToFile (QString {"ft8Decode   worker unavailable source:dispatch running:%1 worker:%2 utc:%3 nzhsym:%4 samples:%5"}
+    debugToFile (QString {"ft8Decode   worker unavailable source:dispatch running:%1 worker:%2 utc:%3 nzhsym:%4 samples:%5 deep:%6"}
                    .arg (m_ft8DecodeThread.isRunning () ? 1 : 0)
                    .arg (m_ft8DecodeWorker ? 1 : 0)
                    .arg (request.nutc)
                    .arg (request.nzhsym)
-                   .arg (request.availableSamples));
+                   .arg (request.availableSamples)
+                   .arg (deepFollowup ? 1 : 0));
     return;
   }
 
   if (!request.hasFreshAudio) {
-    debugToFile (QString {"ft8Decode   skip stale/partial audio utc:%1 nzhsym:%2 samples:%3 kin:%4"}
+    debugToFile (QString {"ft8Decode   skip stale/partial audio utc:%1 nzhsym:%2 samples:%3 kin:%4 deep:%5"}
                    .arg (request.nutc)
                    .arg (request.nzhsym)
                    .arg (request.availableSamples)
-                   .arg (dec_data.params.kin));
+                   .arg (dec_data.params.kin)
+                   .arg (deepFollowup ? 1 : 0));
     return;
   }
 
   request.serial = ++m_ft8DecodeSerial;
   m_ft8DecodePending = true;
+  m_ft8DecodeDeepFollowupPending = deepFollowup;
   m_ft8DecodePendingUtc = request.nutc;
   m_decodedTransportQueue.clear ();
   m_decodeStartMs = QDateTime::currentMSecsSinceEpoch ();
-  debugToFile (QString {"ft8Decode   start utc:%1 nzhsym:%2 depth:%3 maxMs:%4 samples:%5"}
+  debugToFile (QString {"ft8Decode   start utc:%1 nzhsym:%2 depth:%3 maxMs:%4 samples:%5 deep:%6"}
                  .arg (request.nutc)
                  .arg (request.nzhsym)
                  .arg (request.ndepth)
                  .arg (request.maxDecodeMs)
-                 .arg (request.availableSamples));
+                 .arg (request.availableSamples)
+                 .arg (deepFollowup ? 1 : 0));
   decodeBusy (true);
 
   auto * worker = m_ft8DecodeWorker;
@@ -28675,38 +28817,56 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
   }
 
   int const completedUtc = m_ft8DecodePendingUtc;
+  bool const completedDeepFollowup = m_ft8DecodeDeepFollowupPending;
   qint64 const elapsedMs = m_decodeStartMs > 0
       ? QDateTime::currentMSecsSinceEpoch () - m_decodeStartMs
       : -1;
   m_ft8DecodePending = false;
+  m_ft8DecodeDeepFollowupPending = false;
   m_ft8DecodePendingUtc = 0;
 
   if (m_mode != "FT8") {
     m_ft8QueuedDecodePending = false;
+    m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
+    m_ft8QueuedDeepFollowupPending = false;
+    m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
+    m_ft8DeepFollowupQueued = false;
+    m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
     if (m_decoderBusy) {
       decodeBusy (false);
     }
     return;
   }
 
-  debugToFile (QString {"ft8Decode   done utc:%1 rows:%2 elapsedMs:%3 queued:%4"}
+  debugToFile (QString {"ft8Decode   done utc:%1 rows:%2 elapsedMs:%3 queued:%4 deep:%5"}
                  .arg (completedUtc)
                  .arg (rows.size ())
                  .arg (elapsedMs)
-                 .arg (m_ft8QueuedDecodePending ? 1 : 0));
+                 .arg (m_ft8QueuedDecodePending ? 1 : 0)
+                 .arg (completedDeepFollowup ? 1 : 0));
 
   auto dispatchQueuedFt8Decode = [this] () -> bool {
     if (!m_ft8QueuedDecodePending) {
       return false;
     }
     auto request = m_ft8QueuedDecodeRequest;
+    auto deepRequest = m_ft8QueuedDeepFollowupRequest;
+    bool const hasDeepRequest = m_ft8QueuedDeepFollowupPending;
     m_ft8QueuedDecodePending = false;
     m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
+    m_ft8QueuedDeepFollowupPending = false;
+    m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
+    m_ft8DeepFollowupQueued = false;
+    m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
+    if (hasDeepRequest) {
+      m_ft8DeepFollowupRequest = std::move (deepRequest);
+      m_ft8DeepFollowupQueued = true;
+    }
     dispatchFt8DecodeRequest (std::move (request));
     return true;
   };
 
-  if (!m_diskData && completedUtc > 0 && elapsedMs > 6500) {
+  if (!m_diskData && completedUtc > 0 && elapsedMs > 6500 && !completedDeepFollowup) {
     debugToFile (QString {"ft8Decode   slow utc:%1 rows:%2 elapsedMs:%3 queued:%4 processing"}
                    .arg (completedUtc)
                    .arg (rows.size ())
@@ -28723,6 +28883,10 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
   readFromStdout ();
 
   if (dispatchQueuedFt8Decode ()) {
+    return;
+  }
+
+  if (!completedDeepFollowup && dispatchQueuedEmbeddedFt8DeepFollowup ()) {
     return;
   }
 

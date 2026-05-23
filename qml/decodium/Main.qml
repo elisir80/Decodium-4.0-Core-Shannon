@@ -1101,6 +1101,7 @@ ApplicationWindow {
     property bool highlightBlue: bridge.getSetting("HighlightBlue", false)
     property string highlightOrangeCallsigns: bridge.getSetting("HighlightOrangeCallsigns", "")
     property string highlightBlueCallsigns: bridge.getSetting("HighlightBlueCallsigns", "")
+    property int decodeColorBoost: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
     property string decodedTextFontFamily: bridge.fontSettingFamily("DecodedTextFont", "Courier", 10)
     property int decodedTextFontPixelSize: bridge.fontSettingPixelSize("DecodedTextFont", "Courier", 10)
     property int decodedTextHeaderPixelSize: Math.max(8, decodedTextFontPixelSize - 1)
@@ -1134,6 +1135,10 @@ ApplicationWindow {
                 mainWindow.highlightBlueCallsigns = String(value || "")
             else if (key === "DecodedTextFont")
                 mainWindow.refreshDecodedTextFont()
+            else if (key === "uiDecodeColorBoost") {
+                mainWindow.decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
+                mainWindow.refreshDecodeColors()
+            }
             else if (key === "WorldMapDisplayed")
                 mainWindow.liveMapPanelVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiTimeSyncPanelVisible")
@@ -1184,6 +1189,76 @@ ApplicationWindow {
         function onColorLotwUserChanged() { mainWindow.refreshDecodeColors() }
     }
 
+    function decodeClamp01(value) {
+        return Math.max(0, Math.min(1, Number(value)))
+    }
+
+    function decodeColorObject(value) {
+        if (value === undefined || value === null)
+            return null
+        if (typeof value === "object" && value.r !== undefined)
+            return value
+        var text = String(value)
+        if (text.length === 0)
+            return null
+        try {
+            return Qt.color(text)
+        } catch (e) {
+            return null
+        }
+    }
+
+    function boostedDecodeTextColor(value) {
+        mainWindow.decodeColorRevision
+        var boost = Math.max(0, Math.min(100, Number(mainWindow.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        if (lum < 0.08 || lum > 0.92)
+            return c
+
+        var sat = 0.30 * boost
+        var r = c.r + (c.r - lum) * sat
+        var g = c.g + (c.g - lum) * sat
+        var b = c.b + (c.b - lum) * sat
+        r = decodeClamp01(r)
+        g = decodeClamp01(g)
+        b = decodeClamp01(b)
+
+        var boostedLum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        var targetLum = 0.52 + 0.28 * boost
+        if (boostedLum < targetLum) {
+            var mix = Math.min(0.65, (targetLum - boostedLum) / Math.max(0.001, 1.0 - boostedLum))
+            r = r + (1.0 - r) * mix
+            g = g + (1.0 - g) * mix
+            b = b + (1.0 - b) * mix
+        }
+        return Qt.rgba(decodeClamp01(r), decodeClamp01(g), decodeClamp01(b), c.a)
+    }
+
+    function boostedDecodeBackgroundColor(value) {
+        mainWindow.decodeColorRevision
+        var boost = Math.max(0, Math.min(100, Number(mainWindow.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        var sat = 0.18 * boost
+        var r = decodeClamp01(c.r + (c.r - lum) * sat)
+        var g = decodeClamp01(c.g + (c.g - lum) * sat)
+        var b = decodeClamp01(c.b + (c.b - lum) * sat)
+        var alphaLift = c.a < 0.12 ? 0.05 * boost : 0.12 * boost
+        var alphaCap = c.a < 0.12 ? 0.16 : 0.58
+        return Qt.rgba(r, g, b, Math.min(alphaCap, c.a + alphaLift))
+    }
+
     // IU8LMC: DXCC color scheme (JTDX-style)
     readonly property color colorWorked: "#808080"       // Gray - already worked
     readonly property color colorNewBand: bridge.themeManager.ledYellow      // Gold - new on this band
@@ -1228,21 +1303,21 @@ ApplicationWindow {
     }
 
 	    // Shannon-compatible color function (allineato a DecodeWindow.qml)
-	    function getDxccColor(modelData) {
-	        if (!modelData)
-	            return textPrimary
-	        var customColor = customHighlightColor(modelData)
-	        if (modelData.isTx)     return bridge.themeManager.warningColor
-        if (modelData.isMyCall) return bridge.colorMyCall
-        if (customColor !== "") return customColor
-        if (highlight73 && isSignoffMessage(modelData.message)) return bridge.color73
-        if (modelData.isB4 === true || modelData.dxIsWorked === true) return bridge.colorB4
-        if (modelData.isLotw === true) return "#44BBFF"
+    function getDxccColor(modelData) {
+        if (!modelData)
+            return boostedDecodeTextColor(textPrimary)
+        var customColor = customHighlightColor(modelData)
+        if (modelData.isTx)     return boostedDecodeTextColor(bridge.themeManager.warningColor)
+        if (modelData.isMyCall) return boostedDecodeTextColor(bridge.colorMyCall)
+        if (customColor !== "") return boostedDecodeTextColor(customColor)
+        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(bridge.color73)
+        if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(bridge.colorB4)
+        if (modelData.isLotw === true) return boostedDecodeTextColor("#44BBFF")
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
-            return bridge.colorDXEntity
-        if (modelData.isCQ) return bridge.colorCQ
-        return textPrimary
+            return boostedDecodeTextColor(bridge.colorDXEntity)
+        if (modelData.isCQ) return boostedDecodeTextColor(bridge.colorCQ)
+        return boostedDecodeTextColor(textPrimary)
     }
 
     function decodeHighlightHex(modelData) {
@@ -1286,7 +1361,7 @@ ApplicationWindow {
         if (hex.length === 0)
             return null
         var c = Qt.color(hex)
-        return Qt.rgba(c.r, c.g, c.b, 0.35)
+        return boostedDecodeBackgroundColor(Qt.rgba(c.r, c.g, c.b, 0.35))
     }
 
     function decodeHighlightBorder(modelData) {
@@ -1294,7 +1369,7 @@ ApplicationWindow {
         if (hex.length === 0)
             return null
         var c = Qt.color(hex)
-        return Qt.rgba(c.r, c.g, c.b, 0.85)
+        return boostedDecodeTextColor(Qt.rgba(c.r, c.g, c.b, 0.85))
     }
 
     function fullSpectrumTextColor(modelData) {
@@ -1306,15 +1381,15 @@ ApplicationWindow {
 
         var customColor = customHighlightColor(modelData)
         if (customColor !== "")
-            return customColor
+            return boostedDecodeTextColor(customColor)
         if (highlight73 && isSignoffMessage(modelData.message))
-            return bridge.color73
+            return boostedDecodeTextColor(bridge.color73)
         if (modelData.isB4 === true || modelData.dxIsWorked === true)
-            return bridge.colorB4
+            return boostedDecodeTextColor(bridge.colorB4)
 
         var textHex = decodePassiveHighlightTextColor(modelData)
         if (textHex.length > 0)
-            return textHex
+            return boostedDecodeTextColor(textHex)
 
         return getDxccColor(modelData)
     }
@@ -5860,9 +5935,9 @@ NumberAnimation {
 	                                            color: !modelData ? "transparent" :
 	                                                   isPeriodSeparator ? "transparent" :
 		                                                   highlightFill ? highlightFill :
-		                                                   entry.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12) :
-		                                                   decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? Qt.rgba(76/255, 175/255, 80/255, 0.2) :
-		                                                   index % 2 === 0 ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+			                                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)) :
+			                                                   decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(76/255, 175/255, 80/255, 0.2)) :
+			                                                   index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
                                             border.color: highlightBorder ? highlightBorder : "transparent"
                                             border.width: highlightFill ? 1 : 0
                                             radius: 2
@@ -5930,15 +6005,15 @@ NumberAnimation {
 	                                                anchors.rightMargin: 6
 	                                                spacing: 0
 
-	                                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1Panel.utcColumnWidth }
-	                                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
+		                                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: period1Panel.utcColumnWidth }
+		                                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary)); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.dbDtGapWidth }
-	                                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
+		                                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.dtFreqGapWidth }
-	                                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
+		                                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan); font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
                                                 Item { Layout.preferredWidth: period1Panel.gapColumnWidth }
 	                                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; Layout.minimumWidth: period1Panel.messageMinWidth; elide: messageElideMode(entry.displayMessage || entry.message) }
-	                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
+		                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
                                                 Item {
                                                     visible: mainWindow.showDxccInfo
                                                     Layout.preferredWidth: period1Panel.dxccColumnWidth
@@ -5949,7 +6024,7 @@ NumberAnimation {
 	                                                        text: entry.dxCountry || ""
                                                         font.family: mainWindow.decodedTextFontFamily
                                                         font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-	                                                        color: entry.dxCountry ? bridge.colorDXEntity : textSecondary
+		                                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? bridge.colorDXEntity : textSecondary)
                                                         horizontalAlignment: Text.AlignRight
                                                         verticalAlignment: Text.AlignVCenter
                                                         elide: Text.ElideRight
@@ -5967,7 +6042,7 @@ NumberAnimation {
 	                                                        text: formatBearingDegrees(entry.dxBearing)
                                                         font.family: mainWindow.decodedTextFontFamily
                                                         font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-                                                        color: secondaryCyan
+	                                                        color: mainWindow.boostedDecodeTextColor(secondaryCyan)
                                                         horizontalAlignment: Text.AlignRight
                                                         verticalAlignment: Text.AlignVCenter
                                                     }
@@ -6446,10 +6521,10 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                             // stabile e affidarsi al guard color in 6171.
                                             height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
                                             color: isPeriodSeparator ? "transparent" :
-                                                   entry.isTx ? Qt.rgba(241/255, 196/255, 15/255, 0.3) :
-                                                   entry.isMyCall ? Qt.rgba(244/255, 67/255, 54/255, 0.3) :
-                                                   entry.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) :
-                                                   index % 2 === 0 ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.08) : Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.15)
+                                                   entry.isTx ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(241/255, 196/255, 15/255, 0.3)) :
+                                                   entry.isMyCall ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3)) :
+                                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
+                                                   index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.08)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.15))
                                             radius: 2
 
 	                                            Rectangle {
@@ -6514,13 +6589,13 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		                                                anchors.rightMargin: 4
 	                                                spacing: 0
 
-	                                                Text { text: rxFrequencyDelegate.entry.formattedTime || decodePanel.formatUtcForDisplay(rxFrequencyDelegate.entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: rxFreqPanel.utcColumnWidth }
-	                                                Text { text: rxFrequencyDelegate.entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: rxFrequencyDelegate.entry.snrColor || (rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dbColumnWidth }
+		                                                Text { text: rxFrequencyDelegate.entry.formattedTime || decodePanel.formatUtcForDisplay(rxFrequencyDelegate.entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: rxFreqPanel.utcColumnWidth }
+		                                                Text { text: rxFrequencyDelegate.entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.snrColor || (rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary)); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dbColumnWidth }
 	                                                Item { Layout.preferredWidth: rxFreqPanel.dbDtGapWidth }
-	                                                Text { text: rxFrequencyDelegate.entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
+		                                                Text { text: rxFrequencyDelegate.entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
 	                                                Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
 	                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
-	                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
+		                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
 	                                            }
 	                                        }
 
@@ -10124,9 +10199,9 @@ NumberAnimation {
 		                            color: !modelData ? "transparent" :
 		                                   isPeriodSeparator ? "transparent" :
 			                                   highlightFill ? highlightFill :
-			                                   entry.bgColorHex ? entry.bgColorHex :
-			                                   entry.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) :
-			                                   Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+				                                   entry.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(entry.bgColorHex) :
+				                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
+				                                   mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
 	                            border.color: !isPeriodSeparator && highlightBorder ? highlightBorder : "transparent"
 	                            border.width: !isPeriodSeparator && highlightFill ? 1 : 0
 
@@ -10146,15 +10221,15 @@ NumberAnimation {
 	                                anchors.fill: parent
 	                                anchors.margins: 4
 		                                spacing: 0
-		                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
-		                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
+			                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
+			                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary)); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.dbDtGapWidth }
-		                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
+			                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.dtFreqGapWidth }
-		                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan; font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
+			                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan); font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
 	                                Item { Layout.preferredWidth: period1FloatingWindow.gapColumnWidth }
 		                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
-		                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
+			                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
 	                                Item {
 	                                    visible: mainWindow.showDxccInfo
 	                                    Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth
@@ -10168,13 +10243,13 @@ NumberAnimation {
 	                                        fontSizeMode: Text.HorizontalFit
 	                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
 	                                        maximumLineCount: 1
-		                                        color: entry.dxCountry ? bridge.colorDXEntity : textSecondary
+			                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? bridge.colorDXEntity : textSecondary)
 	                                        horizontalAlignment: Text.AlignRight
 	                                        verticalAlignment: Text.AlignVCenter
 	                                        elide: Text.ElideRight
 	                                    }
 	                                }
-		                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: secondaryCyan; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
+			                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
                             }
 
 	                            MouseArea {
@@ -10677,8 +10752,8 @@ NumberAnimation {
 	                            // undefined per 1-2 frame -> color="" -> Rectangle nero.
 	                            color: !modelData ? "transparent" :
 	                                   isPeriodSeparator ? "transparent" :
-	                                   modelData.bgColorHex ? modelData.bgColorHex :
-	                                   modelData.isCQ ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05)
+		                                   modelData.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(modelData.bgColorHex) :
+		                                   modelData.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05))
 
 	                            Rectangle {
 	                                visible: parent.isPeriodSeparator
@@ -10696,13 +10771,13 @@ NumberAnimation {
 	                                anchors.fill: parent
 	                                anchors.margins: 4
 		                                spacing: 0
-	                                Text { text: modelData.formattedTime || decodePanel.formatUtcForDisplay(modelData.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; Layout.preferredWidth: rxFreqFloatingWindow.utcColumnWidth }
-	                                Text { text: modelData.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.snrColor || (modelData.isTx ? "#f1c40f" : textSecondary); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dbColumnWidth }
+		                                Text { text: modelData.formattedTime || decodePanel.formatUtcForDisplay(modelData.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: rxFreqFloatingWindow.utcColumnWidth }
+		                                Text { text: modelData.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.snrColor || (modelData.isTx ? "#f1c40f" : textSecondary)); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dbColumnWidth }
 	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.dbDtGapWidth }
-	                                Text { text: modelData.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: modelData.isTx ? "#f1c40f" : textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
+		                                Text { text: modelData.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
 	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
 	                                Text { text: modelData.displayMessage || modelData.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(modelData); font.strikeout: decodePanel.decodeEntryStrikeout(modelData); color: getDxccColor(modelData); Layout.fillWidth: true; elide: messageElideMode(modelData.displayMessage || modelData.message) }
-	                                Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
+		                                Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
                             }
 
 	                            MouseArea {
@@ -11416,8 +11491,20 @@ NumberAnimation {
         x: mainWindow.x + Math.max(0, mainWindow.width - width - 60)
         y: mainWindow.y + 80
 
-        Component.onCompleted: mainWindow.restoreFloatingWindowState(
-            dxClusterFloatingWindow, "dxClusterFloatingWindow", "dxClusterDetached", "dxClusterMinimized")
+        Component.onCompleted: {
+            mainWindow.restoreFloatingWindowState(
+                dxClusterFloatingWindow, "dxClusterFloatingWindow", "dxClusterDetached", "dxClusterMinimized")
+            // La geometria del DX Cluster va ripristinata, ma la finestra non
+            // deve aprirsi da sola solo perche' e' floating/detached. La scelta
+            // dell'utente e' `uiDxClusterPanelVisible`: se e' false o assente
+            // resta chiusa anche quando esiste una vecchia WindowState salvata.
+            if (!mainWindow.dxClusterPanelVisible) {
+                dxClusterFloatingWindow.hide()
+            } else if (!mainWindow.dxClusterMinimized) {
+                dxClusterFloatingWindow.show()
+                dxClusterFloatingWindow.raise()
+            }
+        }
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()

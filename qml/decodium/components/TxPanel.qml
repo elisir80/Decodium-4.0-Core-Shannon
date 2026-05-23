@@ -164,20 +164,46 @@ Item {
     readonly property real toolbarScale: Math.max(0.9, Math.min(1.12, bridge ? bridge.fontScale : 1.0))
     readonly property int toolbarSpacing: 3
     readonly property int toolbarButtonHeight: 32
-    readonly property int toolbarButtonWidth: 62
-    readonly property int toolbarHoldButtonWidth: 72
-    readonly property int toolbarWideButtonWidth: 70
-    readonly property int toolbarLongButtonWidth: 76
-    readonly property int toolbarModeWidth: 116
+    readonly property int toolbarButtonHPad: Math.max(11, Math.round(12 * toolbarScale))
+    readonly property int toolbarMinButtonWidth: Math.max(54, Math.round(56 * toolbarScale))
+    readonly property int toolbarMaxButtonWidth: Math.max(98, Math.round(104 * toolbarScale))
+    readonly property int toolbarButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
+    readonly property int toolbarHoldButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
+    readonly property int toolbarWideButtonWidth: toolbarActionWidth("CLEAR", "")
+    readonly property int toolbarLongButtonWidth: toolbarActionWidth("ALT 1/2", "\u21C4")
+    readonly property int toolbarModeWidth: toolbarActionWidth("MSK144", "\u25BE")
     readonly property int toolbarLabelSize: Math.max(9, Math.round(9 * toolbarScale))
     readonly property int toolbarGlyphSize: Math.max(12, Math.round(13 * toolbarScale))
+    readonly property int qsoInfoControlHeight: 30
+    readonly property int qsoInfoLabelSize: Math.max(10, Math.round(10 * toolbarScale))
+    readonly property int qsoInfoFieldSize: Math.max(11, Math.round(11 * toolbarScale))
+    readonly property int qsoInfoPad: Math.max(8, Math.round(9 * toolbarScale))
     readonly property int toolbarControlsWidth: toolbarModeWidth
                                                 + (toolbarButtonWidth * 7)
-                                                + toolbarHoldButtonWidth
-                                                + (toolbarWideButtonWidth * 5)
-                                                + toolbarLongButtonWidth
+                                                + toolbarButtonWidth
+                                                + (toolbarButtonWidth * 6)
                                                 + (toolbarSpacing * 15)
     readonly property int toolbarBandWidth: Math.max(220, Math.min(520, topControlsFlow.width))
+
+    function toolbarActionWidth(label, glyph) {
+        var text = String(label || "")
+        var icon = String(glyph || "")
+        var charPx = Math.max(6.2, 6.8 * toolbarScale)
+        var iconPx = icon.length > 0 ? toolbarGlyphSize + 4 : 0
+        return Math.max(toolbarMinButtonWidth,
+                        Math.min(toolbarMaxButtonWidth,
+                                 Math.round(text.length * charPx + iconPx + toolbarButtonHPad * 2)))
+    }
+
+    function qsoInfoWidth(text, placeholder, minWidth, maxWidth) {
+        var value = String(text || "")
+        var hint = String(placeholder || "")
+        var chars = Math.max(value.length, hint.length)
+        var charPx = Math.max(6.5, 7.1 * toolbarScale)
+        return Math.max(minWidth,
+                        Math.min(maxWidth,
+                                 Math.round(chars * charPx + qsoInfoPad * 2)))
+    }
 
     // State colors based on QSO progress (bridge::QSOProgress enum)
     // 0=IDLE, 1=CALLING_CQ, 2=REPLYING, 3=REPORT, 4=ROGER_REPORT, 5=SIGNOFF, 6=IDLE_QSO
@@ -216,7 +242,6 @@ Item {
         property int glyphSize: 14
         property int labelSize: 10
         property bool boldLabel: false
-
         implicitWidth: contentRow.implicitWidth
         implicitHeight: contentRow.implicitHeight
 
@@ -388,12 +413,12 @@ Item {
                                 }
                                 onCurrentTextChanged: if (engine && currentText) engine.mode = currentText
                                 font.family: decodiumMonoFontFamily
-                                font.pixelSize: Math.max(12, Math.round(12 * txPanel.toolbarScale))
+                                font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 itemHeight: 34
                                 popupMinWidth: 176
                                 textHorizontalAlignment: Text.AlignHCenter
-                                leftPadding: 6
-                                rightPadding: 20
+                                leftPadding: 4
+                                rightPadding: 18
                                 topPadding: 4
                                 bottomPadding: 4
                                 bgColor: "transparent"
@@ -402,7 +427,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("MAM", "\u21C6")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: mamBtn.checked ? Qt.rgba(255/255, 152/255, 0, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -415,6 +440,7 @@ Item {
                                 checkable: true
                                 checked: engine ? engine.multiAnswerMode : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onCheckedChanged: if (engine) engine.multiAnswerMode = checked
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
@@ -438,7 +464,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("DEEP", "\u25CE")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: deepBtn.checked ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -451,6 +477,7 @@ Item {
                                 checkable: true
                                 checked: engine ? engine.deepSearchEnabled : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onCheckedChanged: if (engine) engine.deepSearchEnabled = checked
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
@@ -468,7 +495,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("AP", "\u25C6")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: apBtn.checked ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -481,6 +508,7 @@ Item {
                                 checkable: true
                                 checked: engine ? engine.ft8ApEnabled : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onCheckedChanged: if (engine) engine.ft8ApEnabled = checked
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
@@ -498,7 +526,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("SWL", "\u2609")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: swlBtn.checked ? Qt.rgba(156/255, 39/255, 176/255, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -511,6 +539,7 @@ Item {
                                 checkable: true
                                 checked: engine ? engine.swlMode : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onCheckedChanged: if (engine) engine.swlMode = checked
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
@@ -530,11 +559,12 @@ Item {
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
                             id: autoSeqBtn2
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("SEQ", "\u21BB")
                             height: txPanel.toolbarButtonHeight
                             checkable: true
                             checked: engine ? engine.autoSeq : false
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             onCheckedChanged: if (engine) engine.autoSeq = checked
                             background: Rectangle {
                                 radius: 5
@@ -556,7 +586,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("QQ", "\u21E8")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: qqBtn.checked ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -569,6 +599,7 @@ Item {
                                 checkable: true
                                 checked: engine ? engine.quickQsoEnabled : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onCheckedChanged: if (engine) engine.quickQsoEnabled = checked
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
@@ -589,9 +620,10 @@ Item {
                         Button {
                             id: txEnableBtn
                             property bool txActive: engine ? engine.txEnabled : false
-                            width: txPanel.toolbarButtonWidth
+                            width: txPanel.toolbarActionWidth("TX", "\u25B2")
                             height: txPanel.toolbarButtonHeight
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             onClicked: {
                                 if (!engine) {
                                     return
@@ -624,7 +656,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarHoldButtonWidth
+                            width: txPanel.toolbarActionWidth("HOLD", "\uD83D\uDD13")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: holdTxFreqBtn.checked ? Qt.rgba(255/255, 193/255, 7/255, 0.25) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -637,6 +669,7 @@ Item {
                                 checkable: true
                                 checked: bridge ? bridge.holdTxFreq : false
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 onClicked: {
                                     if (bridge) {
                                         bridge.holdTxFreq = checked
@@ -660,9 +693,10 @@ Item {
                         // 1.0.182 — Button QQC2-native restyle
                         Button {
                             id: autoCqButton
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth("ACQ", "⟳")
                             height: txPanel.toolbarButtonHeight
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
                                 color: engine && engine.autoCqRepeat ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
@@ -693,9 +727,10 @@ Item {
                         // 1.0.262 \u2014 CALL feature: pulsante chiamata diretta con retry/timeout
                         Button {
                             id: callButton
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth("CALL", "\ud83d\udcde")
                             height: txPanel.toolbarButtonHeight
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
                                 color: engine && engine.targetCallActive ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
@@ -724,10 +759,12 @@ Item {
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
                             id: txPhaseButton
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth(engine && engine.txPeriod === 1 ? "1ST" : "2ND",
+                                                              engine && engine.txPeriod === 1 ? "\u2460" : "\u2461")
                             height: txPanel.toolbarButtonHeight
                             visible: engine && engine.mode !== "FT2"
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
                                 color: engine && engine.txPeriod === 1 ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.28)
@@ -750,7 +787,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarLongButtonWidth
+                            width: txPanel.toolbarActionWidth("ALT 1/2", "\u21C4")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             visible: engine && engine.mode !== "FT2"
@@ -763,6 +800,7 @@ Item {
                                 id: alt12Button
                                 anchors.fill: parent
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 background: Rectangle { color: "transparent" }
                                 contentItem: ToolbarButtonContent {
                                     label: "ALT 1/2"
@@ -782,9 +820,10 @@ Item {
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
                             id: haltButton
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth("HALT", "\u25A0")
                             height: txPanel.toolbarButtonHeight
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
                                 color: haltButton.hovered || (engine && engine.transmitting)
@@ -808,7 +847,7 @@ Item {
                         }
 
                         Rectangle {
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth("CLEAR", "")
                             height: txPanel.toolbarButtonHeight
                             radius: 5
                             color: clearTxButton.hovered ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
@@ -820,6 +859,7 @@ Item {
                                 id: clearTxButton
                                 anchors.fill: parent
                                 padding: 0
+                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                                 enabled: engine !== null
                                 onClicked: if (engine) engine.clearTxMessages()
                                 background: Rectangle { color: "transparent" }
@@ -839,9 +879,10 @@ Item {
                         Button {
                             id: tuneButton
                             property bool isTuning: engine && engine.tuning
-                            width: txPanel.toolbarWideButtonWidth
+                            width: txPanel.toolbarActionWidth(tuneButton.isTuning ? "STOP" : "TUNE", "\u266B")
                             height: txPanel.toolbarButtonHeight
                             padding: 0
+                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
                                 color: tuneButton.isTuning ? Qt.alpha(warningOrange, 0.5) : Qt.alpha(warningOrange, 0.2)
@@ -949,23 +990,23 @@ Item {
             // DX Station info row
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: 5
 
                 // QSO State indicator
                 Rectangle {
-                    Layout.preferredWidth: 110
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth(stateText, "Idle", 58, 118)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     color: Qt.alpha(stateColor, 0.2)
                     border.color: stateColor
                     radius: 4
 
                     Text {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
-                        anchors.rightMargin: 6
+                        anchors.leftMargin: qsoInfoPad
+                        anchors.rightMargin: qsoInfoPad
                         text: stateText
                         color: stateColor
-                        font.pixelSize: 11
+                        font.pixelSize: qsoInfoLabelSize
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -976,19 +1017,28 @@ Item {
                 Text {
                     text: "DX:"
                     color: secondaryCyan
-                    font.pixelSize: 11
+                    font.pixelSize: qsoInfoLabelSize
                     font.bold: true
                 }
 
                 TextField {
                     id: dxCallField
-                    Layout.preferredWidth: 100
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth(text, "Call", 74, 126)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     text: engine ? engine.dxCall : ""
                     placeholderText: "Call"
-                    font.pixelSize: 12
+                    font.pixelSize: qsoInfoFieldSize
                     font.family: decodiumMonoFontFamily
                     color: textPrimary
+                    leftPadding: qsoInfoPad
+                    rightPadding: qsoInfoPad
+                    topPadding: 0
+                    bottomPadding: 0
+                    topInset: 0
+                    bottomInset: 0
+                    leftInset: 0
+                    rightInset: 0
+                    verticalAlignment: TextInput.AlignVCenter
 
                     background: Rectangle {
                         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
@@ -1006,19 +1056,28 @@ Item {
                 Text {
                     text: "Grid:"
                     color: secondaryCyan
-                    font.pixelSize: 11
+                    font.pixelSize: qsoInfoLabelSize
                     font.bold: true
                 }
 
                 TextField {
                     id: dxGridField
-                    Layout.preferredWidth: 65
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth(text, "Grid", 58, 84)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     text: engine ? engine.dxGrid : ""
                     placeholderText: "Grid"
-                    font.pixelSize: 12
+                    font.pixelSize: qsoInfoFieldSize
                     font.family: decodiumMonoFontFamily
                     color: textPrimary
+                    leftPadding: qsoInfoPad
+                    rightPadding: qsoInfoPad
+                    topPadding: 0
+                    bottomPadding: 0
+                    topInset: 0
+                    bottomInset: 0
+                    leftInset: 0
+                    rightInset: 0
+                    verticalAlignment: TextInput.AlignVCenter
 
                     background: Rectangle {
                         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
@@ -1036,18 +1095,28 @@ Item {
                 Text {
                     text: "S:"
                     color: secondaryCyan
-                    font.pixelSize: 11
+                    font.pixelSize: qsoInfoLabelSize
                     font.bold: true
                 }
 
                 TextField {
                     id: rptSentField
-                    Layout.preferredWidth: 50
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth(text, "-10", 44, 58)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     text: engine ? engine.reportSent : "-10"
-                    font.pixelSize: 12
+                    font.pixelSize: qsoInfoFieldSize
                     font.family: decodiumMonoFontFamily
                     color: textPrimary
+                    leftPadding: 4
+                    rightPadding: 4
+                    topPadding: 0
+                    bottomPadding: 0
+                    topInset: 0
+                    bottomInset: 0
+                    leftInset: 0
+                    rightInset: 0
+                    horizontalAlignment: TextInput.AlignHCenter
+                    verticalAlignment: TextInput.AlignVCenter
 
                     background: Rectangle {
                         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
@@ -1065,19 +1134,29 @@ Item {
                 Text {
                     text: "R:"
                     color: secondaryCyan
-                    font.pixelSize: 11
+                    font.pixelSize: qsoInfoLabelSize
                     font.bold: true
                 }
 
                 TextField {
                     id: rptRcvdField
-                    Layout.preferredWidth: 50
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth(text, "--", 44, 58)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     text: engine ? engine.reportReceived : ""
                     placeholderText: "--"
-                    font.pixelSize: 11
+                    font.pixelSize: qsoInfoFieldSize
                     font.family: decodiumMonoFontFamily
                     color: accentGreen
+                    leftPadding: 4
+                    rightPadding: 4
+                    topPadding: 0
+                    bottomPadding: 0
+                    topInset: 0
+                    bottomInset: 0
+                    leftInset: 0
+                    rightInset: 0
+                    horizontalAlignment: TextInput.AlignHCenter
+                    verticalAlignment: TextInput.AlignVCenter
 
                     background: Rectangle {
                         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
@@ -1095,7 +1174,7 @@ Item {
                 // Next/TX Message display
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: qsoInfoControlHeight
                     color: engine && engine.transmitting ?
                            Qt.alpha(errorRed, 0.2) :
                            Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
@@ -1131,9 +1210,14 @@ Item {
                 // Log QSO button
                 Button {
                     id: logQsoBtn
-                    Layout.preferredWidth: 80
-                    Layout.preferredHeight: 32
+                    Layout.preferredWidth: qsoInfoWidth("LOG", "\u270E", 58, 70)
+                    Layout.preferredHeight: qsoInfoControlHeight
                     enabled: engine && engine.dxCall.length > 0
+                    padding: 0
+                    topInset: 0
+                    bottomInset: 0
+                    leftInset: 0
+                    rightInset: 0
 
                     background: Rectangle {
                         color: logQsoBtn.enabled ?

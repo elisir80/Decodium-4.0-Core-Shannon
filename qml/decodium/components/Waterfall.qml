@@ -119,6 +119,15 @@ Item {
         waterfallDisplay.setDecodeLabels([])
     }
 
+    function txSignalBandwidthHz(modeName) {
+        var mode = String(modeName || bridge.mode || "").trim().toUpperCase()
+        if (mode === "FT4")
+            return 90
+        if (mode === "FT8" || mode === "FT2")
+            return 50
+        return 0
+    }
+
     function refreshDecodeLabels() {
         if (!waterfallPanel.visible)
             return
@@ -755,10 +764,17 @@ Item {
             zoomFactor:     bridge.uiZoomFactor > 0 ? bridge.uiZoomFactor : 1.0
 
             readonly property real rxFilterHz: 300
+            readonly property real txSignalBandwidthHz: waterfallPanel.txSignalBandwidthHz(bridge.mode)
             readonly property real viewRangeHz: Math.max(1, bandwidth) / Math.max(0.001, zoomFactor)
             readonly property real viewStartHz: startFreq + Math.max(1, bandwidth) * 0.5 + panHz - viewRangeHz * 0.5
             readonly property real rxFilterLeftX: Math.max(0, Math.min(width, freqToPixel(rxFreq - rxFilterHz * 0.5)))
             readonly property real rxFilterRightX: Math.max(0, Math.min(width, freqToPixel(rxFreq + rxFilterHz * 0.5)))
+            readonly property real txSignalLeftX: freqToPixel(txFreq - txSignalBandwidthHz * 0.5)
+            readonly property real txSignalRightX: freqToPixel(txFreq + txSignalBandwidthHz * 0.5)
+            readonly property bool txSignalGuideVisible: showTxBrackets
+                                                           && txSignalBandwidthHz > 0
+                                                           && txSignalRightX >= 0
+                                                           && txSignalLeftX <= width
 
             function freqToPixel(freq) {
                 return (Number(freq) - viewStartHz) * width / viewRangeHz
@@ -1104,6 +1120,42 @@ Item {
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#ffc8ff" }
                 }
 
+                Item {
+                    id: txSignalWidthGuide
+                    z: -1
+                    anchors.fill: parent
+                    visible: waterfallDisplay.txSignalGuideVisible
+
+                    readonly property real leftX: waterfallDisplay.txSignalLeftX
+                    readonly property real rightX: waterfallDisplay.txSignalRightX
+                    readonly property real clampedLeftX: spectrumGpuOverlay.clamp(leftX, 0, spectrumGpuOverlay.width)
+                    readonly property real clampedRightX: spectrumGpuOverlay.clamp(rightX, 0, spectrumGpuOverlay.width)
+
+                    Rectangle {
+                        x: txSignalWidthGuide.clampedLeftX
+                        y: 0
+                        width: Math.max(1, txSignalWidthGuide.clampedRightX - txSignalWidthGuide.clampedLeftX)
+                        height: parent.height
+                        color: Qt.rgba(1.0, 0.0, 1.0, 0.055)
+                    }
+                    Rectangle {
+                        x: Math.round(txSignalWidthGuide.leftX) - 1
+                        y: 0
+                        width: 2
+                        height: parent.height
+                        visible: txSignalWidthGuide.leftX >= 0 && txSignalWidthGuide.leftX <= spectrumGpuOverlay.width
+                        color: Qt.rgba(1.0, 0.40, 1.0, 0.82)
+                    }
+                    Rectangle {
+                        x: Math.round(txSignalWidthGuide.rightX) - 1
+                        y: 0
+                        width: 2
+                        height: parent.height
+                        visible: txSignalWidthGuide.rightX >= 0 && txSignalWidthGuide.rightX <= spectrumGpuOverlay.width
+                        color: Qt.rgba(1.0, 0.40, 1.0, 0.82)
+                    }
+                }
+
                 // 1.0.269 (fork-only) — TX CARRIER ACTIVE: barra rossa larga ~50Hz
                 // (banda della portante FT8) che si accende SOLO quando bridge.transmitting=true
                 // o bridge.tuning=true. Indica visivamente che la portante e' on-air.
@@ -1113,7 +1165,7 @@ Item {
                     id: txCarrierActiveBar
                     z: 50
                     readonly property real markerX: spectrumGpuOverlay.xForFreq(waterfallDisplay.txFreq)
-                    readonly property real carrierBwHz: bridge && bridge.mode === "FT4" ? 80 : 50
+                    readonly property real carrierBwHz: Math.max(50, waterfallDisplay.txSignalBandwidthHz)
                     readonly property real barWidthPx: Math.max(8, carrierBwHz * spectrumGpuOverlay.width / Math.max(1, spectrumGpuOverlay.viewRangeHz))
                     x: Math.round(markerX - barWidthPx / 2)
                     y: 0
@@ -1229,6 +1281,47 @@ Item {
                 color: Qt.rgba(0.74, 0.74, 0.74, 0.16)
                 border.color: Qt.rgba(1, 1, 1, 0.20)
                 border.width: 1
+            }
+
+            Item {
+                id: txSignalWaterfallGuide
+                x: 0
+                y: waterfallDisplay.spectrumHeight
+                z: 3
+                width: waterfallDisplay.width
+                height: Math.max(0, waterfallDisplay.height - waterfallDisplay.spectrumHeight)
+                visible: (bridge.monitoring || bridge.transmitting || bridge.tuning)
+                         && waterfallDisplay.txSignalGuideVisible
+                         && height > 0
+
+                readonly property real leftX: waterfallDisplay.txSignalLeftX
+                readonly property real rightX: waterfallDisplay.txSignalRightX
+                readonly property real clampedLeftX: Math.max(0, Math.min(width, leftX))
+                readonly property real clampedRightX: Math.max(0, Math.min(width, rightX))
+
+                Rectangle {
+                    x: txSignalWaterfallGuide.clampedLeftX
+                    y: 0
+                    width: Math.max(1, txSignalWaterfallGuide.clampedRightX - txSignalWaterfallGuide.clampedLeftX)
+                    height: parent.height
+                    color: Qt.rgba(1.0, 0.0, 1.0, 0.060)
+                }
+                Rectangle {
+                    x: Math.round(txSignalWaterfallGuide.leftX) - 1
+                    y: 0
+                    width: 2
+                    height: parent.height
+                    visible: txSignalWaterfallGuide.leftX >= 0 && txSignalWaterfallGuide.leftX <= parent.width
+                    color: Qt.rgba(1.0, 0.42, 1.0, 0.78)
+                }
+                Rectangle {
+                    x: Math.round(txSignalWaterfallGuide.rightX) - 1
+                    y: 0
+                    width: 2
+                    height: parent.height
+                    visible: txSignalWaterfallGuide.rightX >= 0 && txSignalWaterfallGuide.rightX <= parent.width
+                    color: Qt.rgba(1.0, 0.42, 1.0, 0.78)
+                }
             }
 
             // Overlay "Start monitoring"

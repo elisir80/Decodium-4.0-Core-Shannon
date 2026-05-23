@@ -256,6 +256,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int     contestNumber     READ contestNumber     WRITE setContestNumber     NOTIFY contestNumberChanged)
     Q_PROPERTY(QStringList contestTypeNames READ contestTypeNames CONSTANT)
     Q_PROPERTY(QString logAllTxtPath     READ logAllTxtPath     CONSTANT)
+    Q_PROPERTY(QString activeLogbookName READ activeLogbookName NOTIFY activeLogbookChanged)
+    Q_PROPERTY(QString activeLogbookPath READ activeLogbookPath NOTIFY activeLogbookChanged)
     Q_PROPERTY(QObject* logManager READ logManager CONSTANT)
     Q_PROPERTY(QObject* propagationManager READ propagationManager CONSTANT)
     Q_PROPERTY(QObject* diagnostics READ diagnostics CONSTANT)
@@ -1094,6 +1096,14 @@ public:
     Q_INVOKABLE QString version() const;
 
     // ADIF import/export
+    Q_INVOKABLE QVariantList logbookProfiles() const;
+    Q_INVOKABLE bool createLogbook(const QString& name, bool backupCurrent = true);
+    Q_INVOKABLE bool addLogbook(const QString& filename, const QString& name = QString());
+    Q_INVOKABLE bool switchLogbook(const QString& path);
+    Q_INVOKABLE bool backupActiveLogbook();
+    Q_INVOKABLE bool openActiveLogbookFolder() const;
+    QString activeLogbookName() const { return m_activeLogbookName; }
+    QString activeLogbookPath() const { return effectiveAdifLogPath(); }
     Q_INVOKABLE bool exportAdif(const QString& filename);
     Q_INVOKABLE bool importAdif(const QString& filename);
     Q_INVOKABLE QVariantList searchQsos(const QString& search,
@@ -1365,6 +1375,7 @@ signals:
     void contestNumberChanged();
     void contestTypeNamesChanged();
     void logAllTxtPathChanged();
+    void activeLogbookChanged();
     void pskReporterEnabledChanged();
     void pskReporterConnectedChanged();
     // ADIF / LotW / Cloudlog
@@ -1468,6 +1479,7 @@ private:
                              const QString& decodeMode) const;
     QString autoCqBandKeyForFrequency(double freqHz) const;
     QString startupModeForFrequency(double dialFrequency) const;
+    double workingFrequencyForBandMode(const QString& bandLambda, const QString& mode) const;
     void maybeApplyStartupModeFromRigFrequency(double dialFrequency, bool authoritativeRigFrequency = false);
     void runPostQmlStartupServices();
     qint64 correctedUtcEpochMs() const;
@@ -1529,6 +1541,13 @@ private:
     void replayPskReporterRecentEntries(const QVariantList& entries, const QString& source);
     bool promptToLogEnabled() const;
     void logQsoNow();
+    QString defaultAdifLogPath() const;
+    QString logbookDirectoryPath() const;
+    QString sanitizedLogbookFileStem(const QString& name) const;
+    void loadLogbookSettings();
+    void saveLogbookSettings() const;
+    void ensureLogbookProfile(const QString& name, const QString& path);
+    void reloadActiveLogbookState(const QString& reason);
     void clearCompletedQsoTxFields(const QString& completedCall, const QString& reason);
     void clearTxArmedAfterCompletedQso(const QString& completedCall, const QString& reason);
     void showLogQsoPromptDialog();
@@ -2287,6 +2306,9 @@ private:
     // ADIF — log lavorato + import
     QSet<QString>    m_workedCalls;   // callsign già lavorati (B4 check)
     QString          m_adifLogPath;   // path file .adi
+    QString          m_activeLogbookName;
+    QStringList      m_logbookProfileNames;
+    QStringList      m_logbookProfilePaths;
     mutable int      m_qsoCountCache {-1};
     mutable QMutex   m_qsoSearchCacheMutex;
     mutable QString  m_qsoSearchCachePath;

@@ -134,6 +134,15 @@ int waterfallHistoryRowsForVisibleHeight(int visibleRows)
     return ((rows + kHistoryRowsStep - 1) / kHistoryRowsStep) * kHistoryRowsStep;
 }
 
+QFont panadapterMonoFont(int pointSize, QFont::Weight weight = QFont::Normal)
+{
+    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    font.setStyleHint(QFont::Monospace);
+    font.setPointSize(pointSize);
+    font.setWeight(weight);
+    return font;
+}
+
 QSGNode* sceneGraphChildAt(QSGNode* parent, int index)
 {
     if (!parent || index < 0)
@@ -1492,7 +1501,7 @@ void PanadapterItem::renderSpectrum()
 
     // ── Griglia dB orizzontale (SmartSDR: 5 livelli, labels dBm) ──────────
     const int DB_STEPS = 5;
-    p.setFont(QFont("Consolas", 8));
+    p.setFont(panadapterMonoFont(8));
     for (int step = 0; step <= DB_STEPS; ++step) {
         float norm = (float)step / DB_STEPS;
         int gy = h - 1 - (int)(norm * (h - 16));
@@ -1505,7 +1514,7 @@ void PanadapterItem::renderSpectrum()
 
     // ── Griglia frequenza verticale (label grandi e leggibili) ────────────
     int freqStep = (int)viewRange > 3000 ? 500 : ((int)viewRange > 1000 ? 200 : 100);
-    p.setFont(QFont("Consolas", 9, QFont::Bold));
+    p.setFont(panadapterMonoFont(9, QFont::Bold));
     int fGridStart = (int)viewStart;
     for (int f = ((fGridStart/freqStep)+1)*freqStep; f < (int)(viewStart + viewRange); f += freqStep) {
         int x = fToX(f);
@@ -1646,7 +1655,7 @@ void PanadapterItem::renderSpectrum()
     }
 
     // ── Frequency ticks ogni 500Hz ────────────────────────────────────────
-    p.setFont(QFont("Consolas", 9, QFont::Bold));
+    p.setFont(panadapterMonoFont(9, QFont::Bold));
     for (int calFreq = (int)(viewStart/500)*500 + 500; calFreq < (int)(viewStart+viewRange); calFreq += 500) {
         int cx = fToX(calFreq);
         if (cx < 0 || cx >= w) continue;
@@ -1672,7 +1681,7 @@ void PanadapterItem::renderSpectrum()
     // ── Decode labels: mostra callsign delle stazioni decodificate ─────
     // Algoritmo anti-overlap: assegnazione automatica su più righe.
     if (!m_decodeLabels.isEmpty()) {
-        QFont labelFont("Consolas", m_labelFontSize, m_labelBold ? QFont::Bold : QFont::Normal);
+        QFont labelFont = panadapterMonoFont(m_labelFontSize, m_labelBold ? QFont::Bold : QFont::Normal);
         p.setFont(labelFont);
         QFontMetrics fm(labelFont);
         const int rowH = fm.height();
@@ -1770,7 +1779,7 @@ void PanadapterItem::renderSpectrum()
     // {call, freq} con freq in audio Hz relativi alla dial.
     m_clusterHitRects.clear();
     if (m_showDxClusterSpots && !m_dxClusterSpots.isEmpty()) {
-        QFont clusterFont("Consolas", m_labelFontSize, QFont::Bold);
+        QFont clusterFont = panadapterMonoFont(m_labelFontSize, QFont::Bold);
         p.setFont(clusterFont);
         QFontMetrics fm(clusterFont);
         const int rowH = fm.height();
@@ -1834,7 +1843,7 @@ void PanadapterItem::renderSpectrum()
 
     // ── Info in basso a destra ────────────────────────────────────────────
     if (m_autoRange) {
-        p.setFont(QFont("Consolas", 8));
+        p.setFont(panadapterMonoFont(8));
         p.setPen(QColor(100, 100, 100));
         p.drawText(w - 100, h - 3,
                    QString("NF:%1dB").arg((int)m_measuredFloor));

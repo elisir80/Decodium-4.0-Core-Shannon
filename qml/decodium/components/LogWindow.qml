@@ -52,11 +52,15 @@ Popup {
     property var stats: ({})
     property int selectedIndex: -1
     property var selectedQso: null
+    property var logbookProfiles: []
+    property var logbookNames: []
+    property bool updatingLogbookCombo: false
 
     onAboutToShow: {
         ensureInitialPosition()
         if (appEngine && appEngine.logManager && appEngine.logManager.warmLogCacheAsync)
             appEngine.logManager.warmLogCacheAsync()
+        refreshLogbookProfiles()
         delayedInitialRefresh.restart()
     }
 
@@ -70,9 +74,37 @@ Popup {
     Connections {
         target: appEngine && appEngine.logManager ? appEngine.logManager : null
         function onQsoLogCacheChanged() {
+            if (logWindow.visible) {
+                refreshLogbookProfiles()
+                refreshLog()
+            }
+        }
+        function onActiveLogbookChanged() {
+            refreshLogbookProfiles()
+            clearSelection()
             if (logWindow.visible)
                 refreshLog()
         }
+    }
+
+    function refreshLogbookProfiles() {
+        if (!(appEngine && appEngine.logManager && appEngine.logManager.logbookProfiles))
+            return
+        var profiles = appEngine.logManager.logbookProfiles()
+        var names = []
+        var active = -1
+        for (var i = 0; i < profiles.length; ++i) {
+            var p = profiles[i] || ({})
+            names.push(String(p.name || "Logbook") + "  " + String(p.qsoCount || 0))
+            if (p.active)
+                active = i
+        }
+        updatingLogbookCombo = true
+        logbookProfiles = profiles
+        logbookNames = names
+        if (active >= 0 && logbookCombo)
+            logbookCombo.currentIndex = active
+        updatingLogbookCombo = false
     }
 
     function refreshLog() {
@@ -194,6 +226,63 @@ Popup {
                 var path = fileUrlToLocalPath(selectedFile)
                 var count = appEngine.logManager.importFromAdif(path)
                 clearSelection()
+                refreshLog()
+            }
+        }
+    }
+
+    FileDialog {
+        id: addLogbookFileDialog
+        title: "Carica logbook ADIF"
+        nameFilters: ["ADIF files (*.adi *.adif)", "All files (*)"]
+        onAccepted: {
+            if (appEngine && appEngine.logManager) {
+                appEngine.logManager.addLogbook(fileUrlToLocalPath(selectedFile), "")
+                clearSelection()
+                refreshLogbookProfiles()
+                refreshLog()
+            }
+        }
+    }
+
+    Dialog {
+        id: createLogbookDialog
+        title: "Nuovo logbook"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        ColumnLayout {
+            width: 300
+            spacing: 8
+            Label {
+                text: "Nome operatore / callsign"
+                color: textPrimary
+            }
+            TextField {
+                id: newLogbookNameField
+                Layout.fillWidth: true
+                placeholderText: "es. 9H1SR oppure AMICO"
+                selectByMouse: true
+                color: textPrimary
+            }
+            CheckBox {
+                id: newLogbookBackupCheck
+                checked: true
+                text: "Backup log attuale"
+            }
+        }
+
+        onOpened: {
+            newLogbookNameField.text = appEngine ? String(appEngine.callsign || "") : ""
+            newLogbookNameField.forceActiveFocus()
+            newLogbookNameField.selectAll()
+        }
+        onAccepted: {
+            if (appEngine && appEngine.logManager) {
+                appEngine.logManager.createLogbook(newLogbookNameField.text, newLogbookBackupCheck.checked)
+                clearSelection()
+                refreshLogbookProfiles()
                 refreshLog()
             }
         }
@@ -377,9 +466,56 @@ Popup {
                 anchors.leftMargin: 8; anchors.rightMargin: 8
                 spacing: 6
 
+                StyledComboBox {
+                    id: logbookCombo
+                    model: logbookNames
+                    Layout.preferredWidth: 150
+                    height: 28
+                    font.pixelSize: 10
+                    onActivated: function(index) {
+                        if (updatingLogbookCombo || !(appEngine && appEngine.logManager))
+                            return
+                        var profile = logbookProfiles[index] || ({})
+                        if (profile.path)
+                            appEngine.logManager.switchLogbook(profile.path)
+                    }
+                    ToolTip.visible: hovered
+                    ToolTip.text: appEngine && appEngine.logManager
+                                  ? "Logbook attivo: " + appEngine.logManager.activeLogbookPath
+                                  : "Logbook"
+                    ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    width: 46; height: 28; radius: 4
+                    color: newLogbookMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.28) : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.10)
+                    border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.55)
+                    Text { anchors.centerIn: parent; text: "New"; font.pixelSize: 10; font.bold: true; color: accentGreen }
+                    MouseArea { id: newLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: createLogbookDialog.open() }
+                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Crea un logbook separato"; ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    width: 48; height: 28; radius: 4
+                    color: loadLogbookMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.28) : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.10)
+                    border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.55)
+                    Text { anchors.centerIn: parent; text: "Load"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
+                    MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: addLogbookFileDialog.open() }
+                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Carica/usa un ADIF esistente come logbook"; ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    width: 44; height: 28; radius: 4
+                    color: backupLogbookMA.containsMouse ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.25) : Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.08)
+                    border.color: Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.5)
+                    Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 10; font.bold: true; color: accentOrange }
+                    MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
+                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Crea backup del logbook attivo"; ToolTip.delay: 500
+                }
+
                 // Search field
                 Rectangle {
-                    Layout.preferredWidth: 200; height: 28; radius: 4
+                    Layout.preferredWidth: 150; height: 28; radius: 4
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                     border.color: searchField.focus ? secondaryCyan : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
                     border.width: searchField.focus ? 2 : 1
