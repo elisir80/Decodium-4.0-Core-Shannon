@@ -27516,6 +27516,15 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
         return;
     }
 
+    if (mark47) {
+        // The second partial FT8 pass was tested on Windows with both nzhsym=47
+        // and a short full-symbol pre-final path.  It either returned no rows
+        // or stole budget from the final pass, so keep the live path focused:
+        // one shallow preview, then the prioritized final decode.
+        m_ft8EarlyDecode47Sent = true;
+        return;
+    }
+
     // 1.0.178 — Skip solo su severe pressure OR esplicito lowCpuMode.
     // Prima skipparvamo anche su mild pressure (UI stall 600-1099ms) → utenti
     // perdevano le passate FT8 early predecode (nzhsym=41/47, ~50% yield) su
@@ -27534,7 +27543,8 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
         return;
     }
 
-    int const decodeDepth = effectiveDecodeDepth();
+    int const effectiveDepth = effectiveDecodeDepth();
+    int const decodeDepth = qMin(effectiveDepth, 2);
     if (decodeDepth <= 1) {
         if (mark41) m_ft8EarlyDecode41Sent = true;
         if (mark47) m_ft8EarlyDecode47Sent = true;
@@ -27575,11 +27585,19 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
               " nzhsym=" + QString::number(nzhsym) +
               " samples=" + QString::number(audioSnapshot.size()) +
               " slot=" + QString::number(utcSlot) +
-              " depth=" + QString::number(decodeDepth));
+              " depth=" + QString::number(decodeDepth) +
+              (effectiveDepth != decodeDepth
+                   ? QStringLiteral(" liveDepthCap=%1").arg(effectiveDepth)
+                   : QString()));
 
+    if (m_ft8Worker && mark41) {
+        m_ft8Worker->cancelCurrentDecode();
+        bridgeLog(QStringLiteral("FT8 early visible decode: preempting stale FT8 decode for live slot serial=%1")
+                      .arg(serial));
+    }
     queueFt8DecodeRequest(audioSnapshot, serial, nutc, utcSlot, decodeDepth,
-                          legacyDecodeQsoProgress(), legacyDecodeCqHint(),
-                          nzhsym, m_ft8ApEnabled, false);
+                           legacyDecodeQsoProgress(), legacyDecodeCqHint(),
+                           nzhsym, false, false);
     if (mark41) m_ft8EarlyDecode41Sent = true;
     if (mark47) m_ft8EarlyDecode47Sent = true;
 }
@@ -27835,6 +27853,11 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
               " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0));
 
     if (modeSnapshot == "FT8") {
+        if (m_ft8Worker) {
+            m_ft8Worker->cancelCurrentDecode();
+            bridgeLog(QStringLiteral("FT8 final decode: preempting in-flight early/deep decode before live final serial=%1")
+                          .arg(serial));
+        }
         int const fastDepth = qMin(decodeDepth, 2);
         bool const runDeepFollowup =
             !txAudioActive

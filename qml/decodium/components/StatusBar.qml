@@ -61,6 +61,18 @@ Rectangle {
     property color colorYellow: themeManager ? themeManager.ledYellow    : "#FFEB3B"
     property color colorGreen:  themeManager ? themeManager.successColor : "#4CAF50"
     property color colorOrange: themeManager ? themeManager.warningColor : "#ff9800"
+    readonly property bool compactFooter: width > 0 && width < 1800
+    readonly property bool narrowFooter: width > 0 && width < 1450
+    readonly property int footerMargin: narrowFooter ? 6 : (compactFooter ? 8 : 12)
+    readonly property int footerSpacing: narrowFooter ? 6 : (compactFooter ? 10 : 20)
+    readonly property int footerSeparatorHeight: compactFooter ? 16 : 20
+    readonly property int footerMetricBarWidth: narrowFooter ? 34 : (compactFooter ? 42 : 50)
+    readonly property int footerMetricValueWidth: narrowFooter ? 28 : 34
+    readonly property int footerButtonHeight: compactFooter ? 26 : 30
+    readonly property bool showFooterVersion: width >= 1920
+    readonly property bool showFooterFtThreads: width >= 1500
+    readonly property bool showFooterSignalDb: width >= 1320
+    readonly property bool showFooterDxText: width >= 1550
 
     Connections {
         target: bridge
@@ -109,9 +121,9 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 20
+        anchors.leftMargin: footerMargin
+        anchors.rightMargin: footerMargin
+        spacing: footerSpacing
 
         // S-Meter Display
         RowLayout {
@@ -126,7 +138,7 @@ Rectangle {
 
             // S-Meter bar
             Rectangle {
-                width: 80
+                width: narrowFooter ? 58 : (compactFooter ? 68 : 80)
                 height: 16
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                 radius: 3
@@ -161,6 +173,7 @@ Rectangle {
 
             // dB value
             Text {
+                visible: showFooterSignalDb
                 text: {
                     if (audioLevel > 0) {
                         var db = 20.0 * Math.log(audioLevel) / Math.LN10
@@ -178,7 +191,7 @@ Rectangle {
         }
 
         // Separator
-        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
 
         // Status indicators
         RowLayout {
@@ -270,6 +283,7 @@ Rectangle {
             // FT Threads indicator - shows active decoder threads
             Rectangle {
                 id: ftThreadsLed
+                visible: showFooterFtThreads
                 width: 40
                 height: 18
                 radius: 9
@@ -337,7 +351,7 @@ Rectangle {
         }
 
         // Separator
-        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
 
         // CAT Status
         RowLayout {
@@ -358,11 +372,11 @@ Rectangle {
             }
         }
 
-        Rectangle {
-            width: 1
-            height: 20
-            visible: rigTelemetryVisible
-            color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+            Rectangle {
+                width: 1
+                height: footerSeparatorHeight
+                visible: rigTelemetryVisible
+                color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
         }
 
         RowLayout {
@@ -418,14 +432,14 @@ Rectangle {
 
         // 1.0.269 (fork-only) — Reset Layout + Decode History buttons spostati qui dal
         // HeaderBar per essere sempre visibili nel footer accanto a PWR/SWR/PSK.
-        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
 
         Button {
             id: footerResetLayoutButton
-            Layout.preferredWidth: 150
-            Layout.preferredHeight: 30
-            implicitWidth: 150
-            implicitHeight: 30
+            Layout.preferredWidth: narrowFooter ? 88 : (compactFooter ? 108 : 150)
+            Layout.preferredHeight: footerButtonHeight
+            implicitWidth: Layout.preferredWidth
+            implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.")
@@ -461,10 +475,10 @@ Rectangle {
 
         Button {
             id: footerHistoryButton
-            Layout.preferredWidth: 150
-            Layout.preferredHeight: 30
-            implicitWidth: 150
-            implicitHeight: 30
+            Layout.preferredWidth: narrowFooter ? 92 : (compactFooter ? 112 : 150)
+            Layout.preferredHeight: footerButtonHeight
+            implicitWidth: Layout.preferredWidth
+            implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite. Filtri + Export ADIF.")
@@ -505,10 +519,10 @@ Rectangle {
         // un modo "footer" per riaprirla. Verde acceso quando il pannello e' visibile.
         Button {
             id: footerDxClusterButton
-            Layout.preferredWidth: 110
-            Layout.preferredHeight: 30
-            implicitWidth: 110
-            implicitHeight: 30
+            Layout.preferredWidth: showFooterDxText ? (compactFooter ? 96 : 110) : 38
+            Layout.preferredHeight: footerButtonHeight
+            implicitWidth: Layout.preferredWidth
+            implicitHeight: footerButtonHeight
             padding: 0
             readonly property bool clusterOn: typeof mainWindow !== 'undefined'
                                               && mainWindow.dxClusterPanelVisible
@@ -547,6 +561,7 @@ Rectangle {
                         font.pixelSize: 13
                     }
                     Text {
+                        visible: showFooterDxText
                         text: qsTr("DX Cluster")
                         color: footerDxClusterButton.clusterOn
                                ? Qt.rgba(78/255, 220/255, 128/255, 1.0)
@@ -576,7 +591,7 @@ Rectangle {
         }
 
         // Separator
-        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
 
         // PSK Reporter Status
         RowLayout {
@@ -615,7 +630,12 @@ Rectangle {
             }
         }
 
-        Item { Layout.fillWidth: true }
+        Item {
+            Layout.fillWidth: true
+            Layout.minimumWidth: 0
+            Layout.preferredWidth: compactFooter ? 0 : 1
+            Layout.maximumWidth: compactFooter ? 8 : 16777215
+        }
 
         // CPU Monitor
         RowLayout {
@@ -629,7 +649,7 @@ Rectangle {
 
             // CPU bar
             Rectangle {
-                width: 50
+                width: footerMetricBarWidth
                 height: 12
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                 radius: 2
@@ -652,7 +672,7 @@ Rectangle {
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: cpuUsage > 0.8 ? colorRed : textSecondary
-                Layout.preferredWidth: 30
+                Layout.preferredWidth: footerMetricValueWidth
             }
         }
 
@@ -675,7 +695,7 @@ Rectangle {
                 }
 
                 Rectangle {
-                    width: 50
+                    width: footerMetricBarWidth
                     height: 12
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                     radius: 2
@@ -698,7 +718,7 @@ Rectangle {
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     color: realGpuUsageAvailable && displayedGpuActivity > 0.8 ? colorRed : textSecondary
-                    Layout.preferredWidth: 38
+                    Layout.preferredWidth: narrowFooter ? 34 : 38
                 }
             }
 
@@ -723,10 +743,16 @@ Rectangle {
         }
 
         // Separator
-        Rectangle { width: 1; height: 20; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+        Rectangle {
+            width: 1
+            height: footerSeparatorHeight
+            visible: showFooterVersion
+            color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+        }
 
         // Version info
         Text {
+            visible: showFooterVersion
             text: "Decodium 4.0"
             font.pixelSize: 10
             color: textSecondary
