@@ -6779,13 +6779,16 @@ void MainWindow::dataSink(qint64 frames)
   }
   // end of ft8md
   
+  bool const embeddedFt8SingleThreadDecode =
+      m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8;
+
   bool bCallDecoder=false;
 
   if(m_multithreadFT8 && m_ft8DecoderStart==1) m_earlyDecode2 = 46; // ft8md
 
   if(m_ihsym==m_hsymStop) bCallDecoder=true;
 
-  if(m_mode=="FT8" && !m_diskData
+  if(m_mode=="FT8" && !m_diskData && !embeddedFt8SingleThreadDecode
      && !(m_multithreadFT8 && m_ft8DecoderStart>1)) {  //ft8md Try to call MTD two times when "Very early" has been selected
     if(m_ihsym==m_earlyDecode) bCallDecoder=true;
     if(m_ihsym==m_earlyDecode2 && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) bCallDecoder=true;
@@ -6892,8 +6895,8 @@ void MainWindow::dataSink(qint64 frames)
     dec_data.params.nagain=0;
     dec_data.params.nagainfil=0;	
     dec_data.params.nzhsym=m_hsymStop;
-    if(m_mode=="FT8" and m_ihsym==m_earlyDecode and !m_diskData && !(m_multithreadFT8 && m_ft8DecoderStart>1)) dec_data.params.nzhsym=m_earlyDecode;
-    if(m_mode=="FT8" and m_ihsym==m_earlyDecode2 and !m_diskData && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) dec_data.params.nzhsym=m_earlyDecode2;
+    if(m_mode=="FT8" and m_ihsym==m_earlyDecode and !m_diskData && !embeddedFt8SingleThreadDecode && !(m_multithreadFT8 && m_ft8DecoderStart>1)) dec_data.params.nzhsym=m_earlyDecode;
+    if(m_mode=="FT8" and m_ihsym==m_earlyDecode2 and !m_diskData && !embeddedFt8SingleThreadDecode && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) dec_data.params.nzhsym=m_earlyDecode2;
     QDateTime now {QDateTime::currentDateTimeUtc ()};
     m_dateTime = now.toString ("yyyy-MMM-dd hh:mm");
     if(m_mode!="WSPR") {
@@ -6904,7 +6907,8 @@ void MainWindow::dataSink(qint64 frames)
       decode(); //Start decoder
     }
 
-    if(m_mode=="FT8" and !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2))
+    if(m_mode=="FT8" and !embeddedFt8SingleThreadDecode
+       and !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2))
        && (m_ihsym==m_earlyDecode or m_ihsym==m_earlyDecode2)) return;
     if (!m_diskData)
       {
@@ -11677,10 +11681,12 @@ void MainWindow::decode()                                       //decode()
          && m_ihsym == m_hsymStop
          && m_dateTimeSeqStart.isValid ());
 
-    // Live FT8 must not publish one slot late. The worker has its own live
-    // time budget, so if it still overruns a boundary this decode is stale and
-    // the current slot takes priority.
-    queueEmbeddedFt8FullSlot = false;
+    // In the embedded D4 UI the FT8 worker shares CPU with QML, waterfall and
+    // map rendering. Dense slots can occasionally finish after the next
+    // boundary; cancelling here drops complete slots compared with Decodium3.
+    // Keep one full-slot request queued so the next decode runs with the
+    // correct UTC instead of being discarded.
+    queueEmbeddedFt8FullSlot = ft8MayPreempt;
 
     if (!ft2MayPreempt && !ft8MayPreempt && !queueEmbeddedFt8FullSlot) {
       return;                          //Don't start decoder if it's already busy.
@@ -13040,7 +13046,25 @@ void MainWindow::queueInProcessFt8Decode ()
     m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
     return;
   }
+  debugToFile (QString {"ft8Decode   queue utc:%1 nzhsym:%2 samples:%3"}
+                 .arg (m_ft8QueuedDecodeRequest.nutc)
+                 .arg (m_ft8QueuedDecodeRequest.nzhsym)
+                 .arg (m_ft8QueuedDecodeRequest.availableSamples));
   m_ft8QueuedDecodePending = true;
+}
+
+static int ft8BaseDepthFromLegacyMask (int rawDepth)
+{
+  // NDepth is a legacy bit mask: bits 0..2 hold the base decode depth, while
+  // upper bits enable averaging, correlation, AP DX call, etc. The C++ FT8
+  // worker accepts only the base depth; clamping values like 51 to 4
+  // accidentally forces the slowest live decode path on every slot.
+  int depth = rawDepth & 7;
+  if (depth <= 0)
+    {
+      depth = rawDepth;
+    }
+  return qBound (1, depth, 4);
 }
 
 decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
@@ -13056,7 +13080,7 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   request.nfa = qBound (0, int (dec_data.params.nfa), 5000);
   request.nfb = qMax (request.nfa + 50, qBound (0, int (dec_data.params.nfb), 5000));
   request.nzhsym = qBound (41, int (dec_data.params.nzhsym), 50);
-  request.ndepth = qBound (1, int (dec_data.params.ndepth), 4);
+  request.ndepth = ft8BaseDepthFromLegacyMask (int (dec_data.params.ndepth));
   request.emedelay = dec_data.params.emedelay;
   request.ncontest = qBound (0, int (dec_data.params.nexp_decode & 7), 16);
   request.nagain = dec_data.params.nagain ? 1 : 0;
@@ -13098,11 +13122,11 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
     }
     if (request.nzhsym >= 50) {
       if (request.ndepth >= 4) {
-        request.maxDecodeMs = 6500;
+        request.maxDecodeMs = 12000;
       } else if (request.ndepth >= 3) {
-        request.maxDecodeMs = 5500;
+        request.maxDecodeMs = 9500;
       } else {
-        request.maxDecodeMs = 3500;
+        request.maxDecodeMs = 6500;
       }
     } else {
       request.maxDecodeMs = request.ndepth >= 4 ? 3500 : 2200;

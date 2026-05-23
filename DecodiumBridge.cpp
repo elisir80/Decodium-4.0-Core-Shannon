@@ -3270,6 +3270,8 @@ static double rxInputLevelFromGain(double gain)
     return 50.0 + ((bounded - 1.0) / 3.0) * 50.0;
 }
 
+static constexpr double kAutoRxInputMaxLevel = 50.0;
+
 static qreal txGainFromSlider(double outputLevel)
 {
     return static_cast<qreal>(kTxAudioHeadroomGain
@@ -9813,6 +9815,9 @@ void DecodiumBridge::setAutoRxInputLevel(bool enabled)
     m_autoRxLevelManualHoldUntilMs = 0;
     bridgeLog(QStringLiteral("Auto RX Input Level %1").arg(enabled ? QStringLiteral("enabled")
                                                                   : QStringLiteral("disabled")));
+    if (enabled && m_rxInputLevel > kAutoRxInputMaxLevel) {
+        applyRxInputLevel(kAutoRxInputMaxLevel, true);
+    }
     emit autoRxInputLevelChanged();
 }
 
@@ -20723,6 +20728,9 @@ void DecodiumBridge::loadSettings()
     m_audioOutputChannel = qBound(0, m_audioOutputChannel, 3);
     m_rxInputLevel = qBound(0.0, s.value("rxInputLevel", 50.0).toDouble(), 100.0);
     m_autoRxInputLevel = s.value("autoRxInputLevel", true).toBool();
+    if (m_autoRxInputLevel && m_rxInputLevel > kAutoRxInputMaxLevel) {
+        m_rxInputLevel = kAutoRxInputMaxLevel;
+    }
     m_txOutputLevel = qBound(0.0, s.value("txOutputLevel", 0.0).toDouble(), 450.0);
     m_txDisabledMask = s.value("txDisabledMask", 0).toInt() & 0x3F;  // 6 bit (TX1-TX6)
     m_hideGhostDecodes = s.value("hideGhostDecodes", true).toBool();  // 1.0.145 default ON
@@ -25809,10 +25817,13 @@ void DecodiumBridge::onSpectrumTimer()
             m_lastWaterfallAudioBufferSize = avail;
             if (usingLegacyBackendForTx()
                 && useModernSpectrumFeedWithLegacy()
-                && avail > (int)WF_RING_SIZE * 2) {
-                m_audioBuffer = m_audioBuffer.mid(avail - (int)WF_RING_SIZE);
+                && avail > qMax((int)WF_RING_SIZE * 2,
+                                 targetDecodeSamplesForMode(m_mode) + (int)WF_RING_SIZE)) {
+                int const keepSamples = qMax((int)WF_RING_SIZE,
+                                             targetDecodeSamplesForMode(m_mode));
+                m_audioBuffer = m_audioBuffer.mid(avail - keepSamples);
                 m_lastWaterfallAudioBufferSize = m_audioBuffer.size();
-                m_audioBuffer.reserve((int)WF_RING_SIZE * 2);
+                m_audioBuffer.reserve(keepSamples + (int)WF_RING_SIZE);
             }
         }
     }
@@ -26571,17 +26582,17 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
         return;
     }
 
-    constexpr double kTargetPeak = 0.22;     // circa -13 dBFS: headroom prima del clipping.
-    constexpr double kHotPeak = 0.70;        // circa -3 dBFS: troppo vicino al limite.
+    constexpr double kTargetPeak = 0.62;     // circa -4 dBFS: alto, ma con margine dal clipping.
+    constexpr double kHotPeak = 0.90;        // riduci solo quando il picco e' davvero vicino al limite.
     constexpr double kClipPeak = 0.97;
-    constexpr double kLowPeak = 0.10;        // circa -20 dBFS: alza solo se il segnale non e' silenzio.
+    constexpr double kLowPeak = 0.22;        // circa -13 dBFS: alza solo se il segnale non e' silenzio.
     constexpr double kUsefulPeak = 0.018;    // circa -35 dBFS.
     constexpr double kUsefulRms = 0.0012;
     constexpr qint64 kFastCooldownMs = 700;
     constexpr qint64 kSlowCooldownMs = 3500;
     constexpr qint64 kLowHoldMs = 8000;
     constexpr double kMinGain = 0.05;
-    constexpr double kMaxGain = 4.0;
+    constexpr double kMaxGain = 1.0;
 
     const double clippedRatio = samples > 0
         ? static_cast<double>(clippedSamples) / static_cast<double>(samples)
@@ -26589,6 +26600,16 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
     const bool clipped = clippedSamples >= 2 || clippedRatio >= 0.001 || peak >= kClipPeak;
     const bool hot = peak >= kHotPeak;
     const double currentGain = rxInputGainFromLevel(m_rxInputLevel);
+    if (m_rxInputLevel > kAutoRxInputMaxLevel) {
+        applyRxInputLevel(kAutoRxInputMaxLevel, true);
+        m_autoRxLevelLastAdjustMs = now;
+        m_autoRxLevelLowStartMs = 0;
+        bridgeLog(QStringLiteral("Auto RX level capped: level=%1 peak=%2 rms=%3")
+                      .arg(m_rxInputLevel, 0, 'f', 1)
+                      .arg(peak, 0, 'g', 4)
+                      .arg(rms, 0, 'g', 4));
+        return;
+    }
 
     if ((clipped || hot) && peak > 1e-6) {
         if (now - m_autoRxLevelLastAdjustMs < kFastCooldownMs) {
@@ -26612,7 +26633,7 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
     }
 
     const bool usefulLowSignal = peak >= kUsefulPeak && rms >= kUsefulRms && peak < kLowPeak;
-    if (!usefulLowSignal || m_rxInputLevel >= 99.5) {
+    if (!usefulLowSignal || m_rxInputLevel >= kAutoRxInputMaxLevel - 0.5) {
         m_autoRxLevelLowStartMs = 0;
         return;
     }
@@ -26629,7 +26650,7 @@ void DecodiumBridge::updateAutoRxInputLevel(double rms,
     const double targetGain = qBound(kMinGain,
                                      qMin(currentGain * 1.12, currentGain * (kTargetPeak / peak)),
                                      kMaxGain);
-    const double newLevel = qMin(100.0, rxInputLevelFromGain(targetGain));
+    const double newLevel = qMin(kAutoRxInputMaxLevel, rxInputLevelFromGain(targetGain));
     if (newLevel > m_rxInputLevel + 0.5) {
         applyRxInputLevel(newLevel, true);
         m_autoRxLevelLastAdjustMs = now;

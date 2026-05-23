@@ -2,6 +2,8 @@
 #ifndef DECODIUM_AUDIO_SINK_H
 #define DECODIUM_AUDIO_SINK_H
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <QObject>
@@ -13,9 +15,8 @@
 // DecodiumAudioSink: AudioDevice subclass that appends 16-bit PCM mono
 // samples into DecodiumBridge's m_audioBuffer and emits audio health metrics.
 //
-// downSampleFactor: campioni da scartare per ogni campione tenuto.
-// Es. dsf=4: QAudioSource cattura a 48000 Hz, sink scrive a 12000 Hz.
-// Decimazione semplice (1:dsf) — sufficiente per FT8/FT2.
+// downSampleFactor: 4x path uses the same fil4 FIR low-pass shape as the
+// legacy WSJT-X/Decodium3 detector before producing 12 kHz samples.
 //
 // sampleCallback: se impostata, viene chiamata per ogni campione decimato
 // (utile per il ring buffer async FT2).
@@ -43,8 +44,12 @@ public:
         if (m_bufferMutex) {
             QMutexLocker locker(m_bufferMutex);
             m_dsfCounter = 0;
+            m_filterDelay.fill(0.0f);
+            m_pendingFullRate.clear();
         } else {
             m_dsfCounter = 0;
+            m_filterDelay.fill(0.0f);
+            m_pendingFullRate.clear();
         }
     }
 
@@ -75,13 +80,17 @@ public:
         {
             QMutexLocker locker(m_bufferMutex);
             prevSize = m_buffer.size();
-            for (qint64 i = 0; i < numFrames; ++i) {
-                if (m_dsfCounter == 0) {
-                    short s = tmp[static_cast<int>(i)];
-                    m_buffer.append(s);
-                    if (m_sampleCallback) m_sampleCallback(s);
+            if (m_dsf == kFil4Downsample) {
+                appendFilteredFil4(tmp.constData(), static_cast<int>(numFrames));
+            } else {
+                for (qint64 i = 0; i < numFrames; ++i) {
+                    if (m_dsfCounter == 0) {
+                        short s = tmp[static_cast<int>(i)];
+                        m_buffer.append(s);
+                        if (m_sampleCallback) m_sampleCallback(s);
+                    }
+                    m_dsfCounter = (m_dsfCounter + 1) % m_dsf;
                 }
-                m_dsfCounter = (m_dsfCounter + 1) % m_dsf;
             }
             newSamples = m_buffer.size() - prevSize;
             // Metriche calcolate dentro al lock perche leggono constData() del
@@ -122,10 +131,78 @@ signals:
     void audioHealthChanged(double rms, double peak, int dynamicRange, int clippedSamples, int samples);
 
 private:
+    static constexpr int kFil4Taps {49};
+    static constexpr int kFil4Downsample {4};
+
+    short filterFil4Group(short const* input)
+    {
+        static constexpr std::array<float, kFil4Taps> weights {{
+            0.000861074040f, 0.010051920210f, 0.010161983649f, 0.011363155076f,
+            0.008706594219f, 0.002613872664f,-0.005202883094f,-0.011720748164f,
+           -0.013752163325f,-0.009431602741f, 0.000539063909f, 0.012636767098f,
+            0.021494659597f, 0.021951235065f, 0.011564169382f,-0.007656470131f,
+           -0.028965787341f,-0.042637874109f,-0.039203309748f,-0.013153301537f,
+            0.034320769178f, 0.094717832646f, 0.154224604789f, 0.197758325022f,
+            0.213715139513f, 0.197758325022f, 0.154224604789f, 0.094717832646f,
+            0.034320769178f,-0.013153301537f,-0.039203309748f,-0.042637874109f,
+           -0.028965787341f,-0.007656470131f, 0.011564169382f, 0.021951235065f,
+            0.021494659597f, 0.012636767098f, 0.000539063909f,-0.009431602741f,
+           -0.013752163325f,-0.011720748164f,-0.005202883094f, 0.002613872664f,
+            0.008706594219f, 0.011363155076f, 0.010161983649f, 0.010051920210f,
+            0.000861074040f
+        }};
+
+        for (int i = 0; i < kFil4Taps - kFil4Downsample; ++i) {
+            m_filterDelay[static_cast<size_t>(i)] =
+                m_filterDelay[static_cast<size_t>(i + kFil4Downsample)];
+        }
+        for (int i = 0; i < kFil4Downsample; ++i) {
+            m_filterDelay[static_cast<size_t>(kFil4Taps - kFil4Downsample + i)] =
+                static_cast<float>(input[i]);
+        }
+
+        float sum = 0.0f;
+        for (int i = 0; i < kFil4Taps; ++i) {
+            sum += weights[static_cast<size_t>(i)] * m_filterDelay[static_cast<size_t>(i)];
+        }
+        return static_cast<short>(qBound(-32768, static_cast<int>(std::lround(sum)), 32767));
+    }
+
+    void appendOutputSample(short sample)
+    {
+        m_buffer.append(sample);
+        if (m_sampleCallback) m_sampleCallback(sample);
+    }
+
+    void appendFilteredFil4(short const* input, int frames)
+    {
+        int index = 0;
+        if (!m_pendingFullRate.isEmpty()) {
+            while (m_pendingFullRate.size() < kFil4Downsample && index < frames) {
+                m_pendingFullRate.append(input[index++]);
+            }
+            if (m_pendingFullRate.size() == kFil4Downsample) {
+                appendOutputSample(filterFil4Group(m_pendingFullRate.constData()));
+                m_pendingFullRate.clear();
+            }
+        }
+
+        while (index + kFil4Downsample <= frames) {
+            appendOutputSample(filterFil4Group(input + index));
+            index += kFil4Downsample;
+        }
+
+        while (index < frames) {
+            m_pendingFullRate.append(input[index++]);
+        }
+    }
+
     QVector<short>& m_buffer;
     QMutex*         m_bufferMutex;  // owned dal chiamante; nullptr = no locking
     unsigned        m_dsf;
     unsigned        m_dsfCounter;
+    std::array<float, kFil4Taps> m_filterDelay {};
+    QVector<short>  m_pendingFullRate;
     double          m_lastRms {0.0};
     std::function<void(short)> m_sampleCallback;
 };
