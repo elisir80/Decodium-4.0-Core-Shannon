@@ -59,6 +59,9 @@ set_tests_properties (test_ftx_weak_decode PROPERTIES ENVIRONMENT "DECODIUM_WEAK
 add_test (NAME test_ft8_weak_decode_deep COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
 set_tests_properties (test_ft8_weak_decode_deep PROPERTIES
   ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-26;DECODIUM_WEAK_TEST_TRIALS=1")
+add_test (NAME test_ft8_hinted_decode_very_deep COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
+set_tests_properties (test_ft8_hinted_decode_very_deep PROPERTIES
+  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-27;DECODIUM_WEAK_TEST_TRIALS=1")
 
 add_executable (test_ft2_qso_sim test_ft2_qso_sim.cpp)
 target_link_libraries (test_ft2_qso_sim wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)

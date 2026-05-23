@@ -81,8 +81,10 @@ QAudioFormat makeInputFormat(QAudioDevice const& device,
       stereoFormat.setChannelCount (2);
       if (device.isFormatSupported (stereoFormat))
         {
-          // Capture stereo and let AudioDevice select the requested hardware
-          // channel. This avoids Qt/OS mono downmixing.
+          // Keep the hardware stream stereo and let AudioDevice build the
+          // mono signal. This avoids Qt6/CoreAudio/driver-specific mono
+          // channel mapping, which otherwise changes the reported SNR across
+          // the audio passband compared with Decodium3.
           format = stereoFormat;
           if (usingStereoForMono)
             {
@@ -243,7 +245,7 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
   if (usingStereoForMono)
     {
-      qDebug() << "SoundInput: using stereo capture for mono input selection";
+      qDebug() << "SoundInput: using stereo capture with internal mono downmix";
     }
   qDebug() << "SoundInput::start ch=" << format.channelCount() << "rate=" << format.sampleRate() << "dev=" << device.description();
   if (!device.isFormatSupported (format))
