@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
       // Keep a dedicated FT2 profile namespace (settings/data/temp) to avoid
       // collisions with WSJT-X profiles and preserve ft2.ini behavior.
       a.setApplicationName ("ft2");
+      a.setApplicationDisplayName ("Decodium4");
       a.setApplicationVersion (version ());
 
       QCommandLineParser parser;

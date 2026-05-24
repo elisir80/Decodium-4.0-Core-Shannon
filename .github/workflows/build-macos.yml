@@ -132,8 +132,9 @@ jobs:
 
       - name: Normalize app bundle
         run: |
-          rm -rf /tmp/ft2_install/Decodium4.app
-          mv /tmp/ft2_install/ft2.app /tmp/ft2_install/Decodium4.app
+          if [ -d /tmp/ft2_install/ft2.app ] && [ ! -d /tmp/ft2_install/Decodium4.app ]; then
+            mv /tmp/ft2_install/ft2.app /tmp/ft2_install/Decodium4.app
+          fi
           scripts/normalize-macos-app.sh /tmp/ft2_install/Decodium4.app
 
       - name: Package app bundle
@@ -160,7 +161,15 @@ jobs:
 
       - name: Verify executables
         run: |
-          file /tmp/ft2_install/Decodium4.app/Contents/MacOS/ft2
+          MAIN_EXEC=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' /tmp/ft2_install/Decodium4.app/Contents/Info.plist)
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' /tmp/ft2_install/Decodium4.app/Contents/Info.plist)
+          BUNDLE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' /tmp/ft2_install/Decodium4.app/Contents/Info.plist)
+          DISPLAY_NAME=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' /tmp/ft2_install/Decodium4.app/Contents/Info.plist)
+          test "${MAIN_EXEC}" = "Decodium4"
+          test "${BUNDLE_ID}" = "org.decodium.decodium4"
+          test "${BUNDLE_NAME}" = "Decodium4"
+          test "${DISPLAY_NAME}" = "Decodium4"
+          file "/tmp/ft2_install/Decodium4.app/Contents/MacOS/${MAIN_EXEC}"
           file /tmp/ft2_install/Decodium4.app/Contents/MacOS/jt9
           ls -lh /tmp/ft2_install/Decodium4.app/Contents/MacOS
 

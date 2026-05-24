@@ -65,8 +65,17 @@ project (wsjtx
 set (PROJECT_DESCRIPTION "Decodium 4.0 Core Shannon: Digital Modes for Weak Signal Communications in Amateur Radio")
 set (CMAKE_PROJECT_DESCRIPTION ${PROJECT_DESCRIPTION})
 set (CMAKE_AUTOUIC ON)
-set (WSJT_APP_BUNDLE_NAME "ft2")
-set (WSJT_APP_EXECUTABLE_NAME "ft2")
+if (APPLE)
+  set (WSJT_APP_BUNDLE_NAME "Decodium4")
+  set (WSJT_APP_EXECUTABLE_NAME "Decodium4")
+  set (WSJT_APP_DISPLAY_NAME "Decodium4")
+  set (WSJT_APP_GUI_IDENTIFIER "org.decodium.decodium4")
+else ()
+  set (WSJT_APP_BUNDLE_NAME "ft2")
+  set (WSJT_APP_EXECUTABLE_NAME "ft2")
+  set (WSJT_APP_DISPLAY_NAME "ft2")
+  set (WSJT_APP_GUI_IDENTIFIER "org.decodium.ft2")
+endif ()
 include (CTest)
 
 #
@@ -189,9 +198,13 @@ if (APPLE)
   set (CMAKE_INSTALL_DATAROOTDIR ${WSJT_APP_BUNDLE_NAME}.app/Contents/Resources)
   # Clean up stale bundle artifacts from older macOS target layouts.
   file (REMOVE_RECURSE
+    "${CMAKE_BINARY_DIR}/CMakeFiles/Decodium4.dir"
+    "${CMAKE_BINARY_DIR}/CMakeFiles/Decodium4_autogen.dir"
+    "${CMAKE_BINARY_DIR}/CMakeFiles/Decodium4_autogen_timestamp_deps.dir"
     "${CMAKE_BINARY_DIR}/CMakeFiles/ft2.dir"
     "${CMAKE_BINARY_DIR}/CMakeFiles/ft2_autogen.dir"
     "${CMAKE_BINARY_DIR}/CMakeFiles/ft2_autogen_timestamp_deps.dir"
+    "${CMAKE_BINARY_DIR}/ft2.app"
     "${CMAKE_BINARY_DIR}/${WSJT_APP_BUNDLE_NAME}.app/Contents/MacOS/sounds")
 endif ()
 
@@ -206,8 +219,13 @@ elseif (APPLE)
   set (QT_CONF_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})
 endif ()
 
-set (WSJT_PLUGIN_DESTINATION ${PLUGIN_DESTINATION} CACHE PATH "Path for plugins")
-set (WSJT_QT_CONF_DESTINATION ${QT_CONF_DESTINATION} CACHE PATH "Path for the qt.conf file")
+if (APPLE)
+  set (WSJT_PLUGIN_DESTINATION ${PLUGIN_DESTINATION} CACHE PATH "Path for plugins" FORCE)
+  set (WSJT_QT_CONF_DESTINATION ${QT_CONF_DESTINATION} CACHE PATH "Path for the qt.conf file" FORCE)
+else ()
+  set (WSJT_PLUGIN_DESTINATION ${PLUGIN_DESTINATION} CACHE PATH "Path for plugins")
+  set (WSJT_QT_CONF_DESTINATION ${QT_CONF_DESTINATION} CACHE PATH "Path for the qt.conf file")
+endif ()
 
 if (WSJT_FOX_OTP)
   set (wsjt_fox_CXXSRCS
@@ -1422,10 +1440,10 @@ set_target_properties (wsjtx PROPERTIES
   MACOSX_BUNDLE_BUNDLE_VERSION "${FORK_RELEASE_VERSION}"
   MACOSX_BUNDLE_SHORT_VERSION_STRING "v${FORK_RELEASE_VERSION}"
   MACOSX_BUNDLE_LONG_VERSION_STRING "Version ${FORK_RELEASE_VERSION}${SCS_VERSION_STR}"
-  MACOSX_BUNDLE_BUNDLE_NAME "${PROJECT_BUNDLE_NAME}"
+  MACOSX_BUNDLE_BUNDLE_NAME "${WSJT_APP_DISPLAY_NAME}"
   MACOSX_BUNDLE_BUNDLE_EXECUTABLE_NAME "${WSJT_APP_EXECUTABLE_NAME}"
   MACOSX_BUNDLE_COPYRIGHT "${PROJECT_COPYRIGHT}"
-  MACOSX_BUNDLE_GUI_IDENTIFIER "org.decodium.ft2"
+  MACOSX_BUNDLE_GUI_IDENTIFIER "${WSJT_APP_GUI_IDENTIFIER}"
   )
 
 target_include_directories (wsjtx PRIVATE ${FFTW3_INCLUDE_DIRS})

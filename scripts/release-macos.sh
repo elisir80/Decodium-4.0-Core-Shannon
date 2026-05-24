@@ -139,6 +139,48 @@ check_bundle_compatibility() {
   return 0
 }
 
+verify_app_identity() {
+  local app_bundle="$1"
+  local main_exec=""
+  local bundle_id=""
+  local bundle_name=""
+  local display_name=""
+
+  main_exec="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
+  bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
+  bundle_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
+  display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
+
+  if [[ "$(basename "${app_bundle}")" != "Decodium4.app" ]]; then
+    echo "error: macOS app bundle must be Decodium4.app, got $(basename "${app_bundle}")"
+    return 1
+  fi
+  if [[ "${main_exec}" != "Decodium4" ]]; then
+    echo "error: CFBundleExecutable must be Decodium4, got ${main_exec:-<empty>}"
+    return 1
+  fi
+  if [[ "${bundle_id}" != "org.decodium.decodium4" ]]; then
+    echo "error: CFBundleIdentifier must be org.decodium.decodium4, got ${bundle_id:-<empty>}"
+    return 1
+  fi
+  if [[ "${bundle_name}" != "Decodium4" ]]; then
+    echo "error: CFBundleName must be Decodium4, got ${bundle_name:-<empty>}"
+    return 1
+  fi
+  if [[ "${display_name}" != "Decodium4" ]]; then
+    echo "error: CFBundleDisplayName must be Decodium4, got ${display_name:-<empty>}"
+    return 1
+  fi
+  if [[ ! -x "${app_bundle}/Contents/MacOS/Decodium4" ]]; then
+    echo "error: missing executable ${app_bundle}/Contents/MacOS/Decodium4"
+    return 1
+  fi
+  if [[ -e "${app_bundle}/Contents/MacOS/ft2" ]]; then
+    echo "error: stale ft2 executable still present in ${app_bundle}/Contents/MacOS"
+    return 1
+  fi
+}
+
 main_executable_for_app() {
   local app_bundle="$1"
   local executable_name=""
@@ -407,6 +449,7 @@ STAGED_ROOT_ABS="$(dirname "${STAGED_APP_ABS}")"
 
 echo "[4/7] Normalizing macOS bundle layout and runtime paths..."
 "${ROOT_DIR}/scripts/normalize-macos-app.sh" "${STAGED_APP_ABS}"
+verify_app_identity "${STAGED_APP_ABS}"
 
 if [[ "$SKIP_COMPAT_CHECK" -eq 0 ]]; then
   echo "[5/7] Checking bundle compatibility target macOS ${COMPAT_MACOS}..."
