@@ -7,6 +7,8 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Fixed a macOS FT8 crash reported as `Thread stack size exceeded` in the decoder `QThread`, with the crash stack ending in `run_main_passes` / `ftx_ft8_async_decode_stage4_c`.
 - Increased the FT8 decoder worker thread stack size before starting the worker, avoiding the macOS default small QThread stack that can hit the stack guard during the stage4 C++ decode path.
 - Kept the larger stack scoped to the FT8 worker thread only, without changing the UI thread or general application thread model.
+- Fixed macOS release packaging for Homebrew Qt 6.11 builds where `QtGui.framework` can require `QtDBus.framework` at launch.
+- The macOS bundle normalizer now copies missing `@rpath` framework dependencies into `Contents/Frameworks` and fails the release build if any bundled `@rpath` dependency cannot be resolved inside the app.
 - Fixed directed CQ parsing so messages such as `CQ POTA IT9ARO JM68` and `CQ SOTA IT9ARO JM68` are accepted as valid directed CQ calls instead of treating `POTA` or `SOTA` as callsigns.
 - Extended directed CQ modifier handling consistently across FT8 decode filtering, double-click handling, Signal RX extraction, Live Map enrichment, and replay paths.
 - Added decoder-side support for additional directed CQ modifiers: `POTA`, `SOTA`, `QRP`, `IOTA`, `FD`, and `WW`, alongside the existing region and contest modifiers.
@@ -23,6 +25,8 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Corretto un crash macOS FT8 segnalato come `Thread stack size exceeded` nel `QThread` del decoder, con stack crash in `run_main_passes` / `ftx_ft8_async_decode_stage4_c`.
 - Aumentata la dimensione dello stack del thread worker FT8 prima dell'avvio, evitando il limite troppo basso del QThread macOS durante il percorso C++ stage4 del decoder.
 - La modifica dello stack resta limitata al solo worker FT8 e non cambia il thread UI o il modello generale dei thread dell'applicazione.
+- Corretto il packaging release macOS per le build Homebrew Qt 6.11 in cui `QtGui.framework` puo richiedere `QtDBus.framework` all'avvio.
+- Il normalizzatore del bundle macOS ora copia dentro `Contents/Frameworks` le dipendenze framework `@rpath` mancanti e blocca la release se una dipendenza `@rpath` non e risolvibile dentro l'app.
 - Corretto il parsing dei CQ diretti: messaggi come `CQ POTA IT9ARO JM68` e `CQ SOTA IT9ARO JM68` ora entrano correttamente invece di interpretare `POTA` o `SOTA` come nominativi.
 - Estesa la gestione dei modificatori CQ diretti in modo coerente su filtro decode FT8, doppio click, estrazione Signal RX, arricchimento Live Map e replay.
 - Aggiunto supporto lato decoder per ulteriori modificatori CQ diretti: `POTA`, `SOTA`, `QRP`, `IOTA`, `FD` e `WW`, oltre ai modificatori regionali e contest gia esistenti.

@@ -130,6 +130,63 @@ framework_rpath_for_file() {
   return 1
 }
 
+expanded_rpaths_for_file() {
+  local file_path="$1"
+  local file_dir=""
+  local rpath=""
+  local expanded=""
+
+  file_dir="$(dirname "${file_path}")"
+  while IFS= read -r rpath; do
+    [[ -n "${rpath}" ]] || continue
+    case "${rpath}" in
+      @loader_path*)
+        expanded="${file_dir}${rpath#@loader_path}"
+        ;;
+      @executable_path*)
+        expanded="${MACOS_DIR}${rpath#@executable_path}"
+        ;;
+      /*)
+        expanded="${rpath}"
+        ;;
+      *)
+        continue
+        ;;
+    esac
+
+    if [[ -d "${expanded}" ]]; then
+      printf '%s\n' "$(cd "${expanded}" && pwd -P)"
+    fi
+  done < <(otool -l "${file_path}" | awk '/LC_RPATH/{flag=1; next} flag && $1=="path"{print $2; flag=0}')
+}
+
+resolve_bundled_rpath_dependency() {
+  local file_path="$1"
+  local dep_path="$2"
+  local dep_suffix=""
+  local rpath_root=""
+  local candidate=""
+  local resolved=""
+
+  [[ "${dep_path}" == @rpath/* ]] || return 1
+  dep_suffix="${dep_path#@rpath/}"
+
+  while IFS= read -r rpath_root; do
+    [[ -n "${rpath_root}" ]] || continue
+    candidate="${rpath_root}/${dep_suffix}"
+    [[ -e "${candidate}" ]] || continue
+    resolved="$(resolve_realpath "${candidate}")"
+    case "${resolved}" in
+      "${APP_BUNDLE}"/*)
+        printf '%s\n' "${resolved}"
+        return 0
+        ;;
+    esac
+  done < <(expanded_rpaths_for_file "${file_path}")
+
+  return 1
+}
+
 normalized_framework_dependency() {
   local dep_path="$1"
 
@@ -139,6 +196,44 @@ normalized_framework_dependency() {
       return 0
       ;;
   esac
+
+  return 1
+}
+
+resolve_external_rpath_dependency() {
+  local file_path="$1"
+  local dep_path="$2"
+  local dep_suffix=""
+  local rpath_root=""
+  local search_root=""
+  local candidate=""
+
+  [[ "${dep_path}" == @rpath/* ]] || return 1
+  dep_suffix="${dep_path#@rpath/}"
+
+  while IFS= read -r rpath_root; do
+    [[ -n "${rpath_root}" ]] || continue
+    candidate="${rpath_root}/${dep_suffix}"
+    if [[ -e "${candidate}" ]]; then
+      printf '%s\n' "$(resolve_realpath "${candidate}")"
+      return 0
+    fi
+  done < <(expanded_rpaths_for_file "${file_path}")
+
+  for search_root in \
+    "${QT_PREFIX:+${QT_PREFIX}/lib}" \
+    "${QTDIR:+${QTDIR}/lib}" \
+    "/opt/homebrew/opt/qt/lib" \
+    "/usr/local/opt/qt/lib" \
+    "/opt/homebrew/lib" \
+    "/usr/local/lib"; do
+    [[ -n "${search_root}" && -d "${search_root}" ]] || continue
+    candidate="${search_root}/${dep_suffix}"
+    if [[ -e "${candidate}" ]]; then
+      printf '%s\n' "$(resolve_realpath "${candidate}")"
+      return 0
+    fi
+  done
 
   return 1
 }
@@ -190,6 +285,21 @@ copy_absolute_dependency_into_bundle() {
 
   printf '@rpath/%s\n' "${dep_name}"
   return 0
+}
+
+copy_missing_rpath_dependency_into_bundle() {
+  local file_path="$1"
+  local dep_path="$2"
+  local resolved=""
+
+  [[ "${dep_path}" == @rpath/* ]] || return 1
+
+  if resolve_bundled_rpath_dependency "${file_path}" "${dep_path}" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  resolved="$(resolve_external_rpath_dependency "${file_path}" "${dep_path}")" || return 1
+  copy_absolute_dependency_into_bundle "${resolved}"
 }
 
 install_id_of() {
@@ -268,6 +378,13 @@ normalize_bundle_macho_paths() {
             install_name_tool -change "${dep_path}" "${new_dep}" "${file_path}"
             changed=1
           fi
+          continue
+        fi
+        if new_dep="$(copy_missing_rpath_dependency_into_bundle "${file_path}" "${dep_path}" 2>/dev/null)"; then
+          if [[ "${new_dep}" != "${dep_path}" ]]; then
+            install_name_tool -change "${dep_path}" "${new_dep}" "${file_path}"
+          fi
+          changed=1
           continue
         fi
         if new_dep="$(normalized_framework_dependency "${dep_path}" 2>/dev/null)"; then
@@ -350,6 +467,13 @@ validate_bundle() {
         @*Frameworks/*)
           echo "error: stale Frameworks reference remains: ${file_path} -> ${dep_path}"
           exit 1
+          ;;
+        @rpath/*)
+          if ! resolve_bundled_rpath_dependency "${file_path}" "${dep_path}" >/dev/null 2>&1; then
+            echo "error: unresolved bundled @rpath dependency:"
+            echo "  ${file_path} -> ${dep_path}"
+            exit 1
+          fi
           ;;
       esac
     done < <(otool -L "${file_path}" | awk 'NR>1 {print $1}')
