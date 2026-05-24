@@ -37,6 +37,272 @@ is_macho() {
   file "$1" | grep -q "Mach-O"
 }
 
+bundled_qt_core_version() {
+  local qt_core="${FRAMEWORKS_DIR}/QtCore.framework/Versions/A/QtCore"
+
+  [[ -f "${qt_core}" ]] || return 1
+  strings "${qt_core}" \
+    | awk '
+        /^Qt [0-9]+\.[0-9]+\.[0-9]+ / {print $2; exit}
+        /^[0-9]+\.[0-9]+\.[0-9]+$/ {print; exit}
+      '
+}
+
+qt_qmake_for_bundle() {
+  local qmake_bin=""
+  local qt_version=""
+  local required_qt_version=""
+  local checked_versions=""
+
+  required_qt_version="$(bundled_qt_core_version || true)"
+
+  for qmake_bin in \
+    "${QT_PREFIX:+${QT_PREFIX}/bin/qmake6}" \
+    "${QT_PREFIX:+${QT_PREFIX}/bin/qmake}" \
+    "${QTDIR:+${QTDIR}/bin/qmake6}" \
+    "${QTDIR:+${QTDIR}/bin/qmake}" \
+    "$(command -v qmake6 2>/dev/null || true)" \
+    "$(command -v qmake 2>/dev/null || true)"; do
+    [[ -n "${qmake_bin}" && -x "${qmake_bin}" ]] || continue
+    qt_version="$("${qmake_bin}" -query QT_VERSION 2>/dev/null || true)"
+    [[ -n "${qt_version}" ]] || continue
+
+    if [[ -z "${required_qt_version}" || "${qt_version}" == "${required_qt_version}" ]]; then
+      printf '%s\n' "${qmake_bin}"
+      return 0
+    fi
+
+    checked_versions+=$'\n'"  ${qmake_bin}: ${qt_version}"
+  done
+
+  if [[ -n "${required_qt_version}" ]]; then
+    echo "error: unable to locate qmake matching bundled QtCore ${required_qt_version}" >&2
+    if [[ -n "${checked_versions}" ]]; then
+      echo "error: checked Qt installations:${checked_versions}" >&2
+    fi
+  fi
+
+  return 1
+}
+
+qt_qml_import_root() {
+  local candidate=""
+  local qmake_bin=""
+
+  if [[ -n "${QT_QML_DIR:-}" && -d "${QT_QML_DIR}" ]]; then
+    printf '%s\n' "${QT_QML_DIR}"
+    return 0
+  fi
+
+  if qmake_bin="$(qt_qmake_for_bundle)"; then
+    candidate="$("${qmake_bin}" -query QT_INSTALL_QML 2>/dev/null || true)"
+    if [[ -n "${candidate}" && -d "${candidate}" ]]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  fi
+
+  if [[ -n "$(bundled_qt_core_version || true)" ]]; then
+    return 1
+  fi
+
+  for candidate in \
+    "${QT_PREFIX:+${QT_PREFIX}/share/qt/qml}" \
+    "${QTDIR:+${QTDIR}/qml}" \
+    "${QTDIR:+${QTDIR}/share/qt/qml}" \
+    "/opt/homebrew/share/qt/qml" \
+    "/usr/local/share/qt/qml"; do
+    [[ -n "${candidate}" && -d "${candidate}" ]] || continue
+    printf '%s\n' "${candidate}"
+    return 0
+  done
+
+  return 1
+}
+
+qt_plugin_root() {
+  local candidate=""
+  local qmake_bin=""
+
+  if [[ -n "${QT_PLUGIN_DIR:-}" && -d "${QT_PLUGIN_DIR}" ]]; then
+    printf '%s\n' "${QT_PLUGIN_DIR}"
+    return 0
+  fi
+
+  if qmake_bin="$(qt_qmake_for_bundle)"; then
+    candidate="$("${qmake_bin}" -query QT_INSTALL_PLUGINS 2>/dev/null || true)"
+    if [[ -n "${candidate}" && -d "${candidate}" ]]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  fi
+
+  if [[ -n "$(bundled_qt_core_version || true)" ]]; then
+    return 1
+  fi
+
+  for candidate in \
+    "${QT_PREFIX:+${QT_PREFIX}/plugins}" \
+    "${QT_PREFIX:+${QT_PREFIX}/share/qt/plugins}" \
+    "${QTDIR:+${QTDIR}/plugins}" \
+    "${QTDIR:+${QTDIR}/share/qt/plugins}" \
+    "/opt/homebrew/share/qt/plugins" \
+    "/usr/local/share/qt/plugins"; do
+    [[ -n "${candidate}" && -d "${candidate}" ]] || continue
+    printf '%s\n' "${candidate}"
+    return 0
+  done
+
+  return 1
+}
+
+copy_qt_qml_imports_into_bundle() {
+  local qt_qml_dir=""
+  local entry=""
+  local module=""
+  local src=""
+  local dest=""
+
+  qt_qml_dir="$(qt_qml_import_root)" || {
+    echo "error: unable to locate Qt QML import directory"
+    echo "error: set QT_QML_DIR or ensure qmake6 is available in PATH"
+    exit 1
+  }
+
+  mkdir -p "${MACOS_DIR}/qml"
+
+  for module in QML QtQml QtCore QtQuick Qt; do
+    rm -rf "${MACOS_DIR}/qml/${module}"
+  done
+
+  for entry in \
+    QML \
+    QtQml/qmldir \
+    QtQml/plugins.qmltypes \
+    QtQml/libqmlplugin.dylib \
+    QtQml/Models \
+    QtQml/WorkerScript \
+    QtCore/qmldir \
+    QtCore/plugins.qmltypes \
+    QtCore/libqtqmlcoreplugin.dylib \
+    Qt/labs/folderlistmodel \
+    QtQuick/qmldir \
+    QtQuick/plugins.qmltypes \
+    QtQuick/libqtquick2plugin.dylib \
+    QtQuick/Controls/qmldir \
+    QtQuick/Controls/plugins.qmltypes \
+    QtQuick/Controls/libqtquickcontrols2plugin.dylib \
+    QtQuick/Controls/Basic \
+    QtQuick/Controls/Material \
+    QtQuick/Controls/impl \
+    QtQuick/Dialogs \
+    QtQuick/Effects \
+    QtQuick/Layouts \
+    QtQuick/Templates \
+    QtQuick/Window; do
+    src="${qt_qml_dir}/${entry}"
+    [[ -e "${src}" ]] || continue
+
+    dest="${MACOS_DIR}/qml/${entry}"
+    rm -rf "${dest}"
+    mkdir -p "$(dirname "${dest}")"
+    cp -R -L -p "${src}" "${dest}"
+  done
+}
+
+copy_qt_plugins_into_bundle() {
+  local qt_plugins_dir=""
+  local category=""
+  local src=""
+  local dest=""
+
+  qt_plugins_dir="$(qt_plugin_root)" || {
+    echo "warning: unable to locate matching Qt plugin directory; TLS and multimedia plugins will not be bundled"
+    return 0
+  }
+
+  mkdir -p "${PLUGINS_DIR}"
+
+  for category in tls multimedia networkaccess; do
+    src="${qt_plugins_dir}/${category}"
+    [[ -d "${src}" ]] || continue
+    if ! find "${src}" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
+      continue
+    fi
+
+    dest="${PLUGINS_DIR}/${category}"
+    rm -rf "${dest}"
+    mkdir -p "$(dirname "${dest}")"
+    cp -R -L -p "${src}" "${dest}"
+  done
+}
+
+validate_qt_qml_imports() {
+  local missing=0
+  local required_path=""
+  local symlink_path=""
+
+  for required_path in \
+    "${MACOS_DIR}/qml/QtQuick/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Controls/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Controls/Material/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Dialogs/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Effects/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Layouts/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Templates/qmldir" \
+    "${MACOS_DIR}/qml/QtQuick/Window/qmldir" \
+    "${MACOS_DIR}/qml/QtQml/qmldir" \
+    "${MACOS_DIR}/qml/Qt/labs/folderlistmodel/qmldir" \
+    "${MACOS_DIR}/qml/QML/qmldir"; do
+    if [[ ! -f "${required_path}" ]]; then
+      echo "error: missing bundled Qt QML import: ${required_path}"
+      missing=1
+    fi
+  done
+
+  if ! find "${MACOS_DIR}/qml/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing bundled Qt Quick Controls plugin under ${MACOS_DIR}/qml/QtQuick/Controls"
+    missing=1
+  fi
+
+  while IFS= read -r symlink_path; do
+    [[ -n "${symlink_path}" ]] || continue
+    echo "error: symlink remains in bundled QML imports: ${symlink_path}"
+    missing=1
+  done < <(find "${MACOS_DIR}/qml" -type l -print 2>/dev/null)
+
+  if [[ "${missing}" -ne 0 ]]; then
+    exit 1
+  fi
+}
+
+validate_qt_runtime_plugins() {
+  local missing=0
+  local plugin_symlink=""
+
+  if [[ -d "${FRAMEWORKS_DIR}/QtNetwork.framework" ]] \
+    && ! find "${PLUGINS_DIR}/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing bundled Qt TLS plugins under ${PLUGINS_DIR}/tls"
+    missing=1
+  fi
+
+  if [[ -d "${FRAMEWORKS_DIR}/QtMultimedia.framework" ]] \
+    && ! find "${PLUGINS_DIR}/multimedia" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing bundled Qt multimedia plugins under ${PLUGINS_DIR}/multimedia"
+    missing=1
+  fi
+
+  while IFS= read -r plugin_symlink; do
+    [[ -n "${plugin_symlink}" ]] || continue
+    echo "error: symlink remains in bundled Qt plugin imports: ${plugin_symlink}"
+    missing=1
+  done < <(find "${PLUGINS_DIR}/tls" "${PLUGINS_DIR}/multimedia" "${PLUGINS_DIR}/networkaccess" -type l -print 2>/dev/null)
+
+  if [[ "${missing}" -ne 0 ]]; then
+    exit 1
+  fi
+}
+
 resolve_realpath() {
   local target="$1"
   local link_target=""
@@ -627,7 +893,11 @@ validate_bundle() {
 
 normalize_bundle_layout
 promote_decodium_qml_main_executable
+copy_qt_qml_imports_into_bundle
+copy_qt_plugins_into_bundle
 normalize_bundle_macho_paths
+validate_qt_qml_imports
+validate_qt_runtime_plugins
 validate_bundle
 
 echo "Normalized macOS bundle: ${APP_BUNDLE}"

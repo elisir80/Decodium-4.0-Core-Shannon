@@ -145,6 +145,7 @@ verify_app_identity() {
   local bundle_id=""
   local bundle_name=""
   local display_name=""
+  local required_qml_path=""
 
   main_exec="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
   bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
@@ -184,6 +185,35 @@ verify_app_identity() {
     echo "error: stale ft2 executable still present in ${app_bundle}/Contents/MacOS"
     return 1
   fi
+  for required_qml_path in \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls/Material/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Dialogs/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Effects/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Layouts/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Templates/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQuick/Window/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QtQml/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/Qt/labs/folderlistmodel/qmldir" \
+    "${app_bundle}/Contents/MacOS/qml/QML/qmldir"; do
+    if [[ ! -f "${required_qml_path}" ]]; then
+      echo "error: missing Qt QML runtime import in app bundle: ${required_qml_path}"
+      return 1
+    fi
+  done
+  if ! find "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing Qt Quick Controls QML plugin in app bundle"
+    return 1
+  fi
+  if ! find "${app_bundle}/Contents/PlugIns/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing Qt TLS plugins in app bundle"
+    return 1
+  fi
+  if [[ -d "${app_bundle}/Contents/Frameworks/QtMultimedia.framework" ]] \
+    && ! find "${app_bundle}/Contents/PlugIns/multimedia" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing Qt multimedia plugins in app bundle"
+    return 1
+  fi
 }
 
 main_executable_for_app() {
@@ -220,18 +250,12 @@ sign_app_bundle() {
   # behavior and keeps runtime Mach-O signatures valid after install_name_tool.
   while IFS= read -r code_file; do
     [[ -n "${code_file}" ]] || continue
-    if [[ "${code_file}" == "${main_exec}" ]]; then
-      continue
-    fi
     if ! file "${code_file}" | grep -q "Mach-O"; then
       continue
     fi
     codesign --force --sign "${sign_identity}" --timestamp=none "${code_file}" >/dev/null
   done < <(find "${app_bundle}/Contents" -type f \
     \( -name "*.dylib" -o -name "*.so" -o -perm -111 \) 2>/dev/null | sort)
-
-  # Leave the main executable signature untouched: on Xcode 16.x, attempting
-  # to re-sign it can fail when non-code files live in Contents/MacOS.
 
   while IFS= read -r bundle_dir; do
     [[ -n "${bundle_dir}" ]] || continue
@@ -240,16 +264,17 @@ sign_app_bundle() {
     \( -name "*.framework" -o -name "*.bundle" -o -name "*.app" -o -name "*.xpc" -o -name "*.appex" \) 2>/dev/null \
     | awk '{print length($0) " " $0}' | sort -rn | cut -d' ' -f2-)
 
+  codesign --force --sign "${sign_identity}" --timestamp=none "${app_bundle}" >/dev/null
+
   while IFS= read -r verify_file; do
     [[ -n "${verify_file}" ]] || continue
-    if [[ "${verify_file}" == "${main_exec}" ]]; then
-      continue
-    fi
     if ! file "${verify_file}" | grep -q "Mach-O"; then
       continue
     fi
     codesign --verify --verbose=2 "${verify_file}" >/dev/null
   done < <(find "${app_bundle}/Contents" -type f 2>/dev/null | sort)
+
+  codesign --verify --deep --strict --verbose=2 "${app_bundle}" >/dev/null
 }
 
 create_dmg_from_staged_root() {
