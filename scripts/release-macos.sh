@@ -248,6 +248,9 @@ sign_app_bundle() {
   # behavior and keeps runtime Mach-O signatures valid after install_name_tool.
   while IFS= read -r code_file; do
     [[ -n "${code_file}" ]] || continue
+    if [[ "${code_file}" == "${main_exec}" ]]; then
+      continue
+    fi
     if ! file "${code_file}" | grep -q "Mach-O"; then
       continue
     fi
@@ -266,13 +269,16 @@ sign_app_bundle() {
 
   while IFS= read -r verify_file; do
     [[ -n "${verify_file}" ]] || continue
+    if [[ "${verify_file}" == "${main_exec}" ]]; then
+      continue
+    fi
     if ! file "${verify_file}" | grep -q "Mach-O"; then
       continue
     fi
     codesign --verify --verbose=2 "${verify_file}" >/dev/null
   done < <(find "${app_bundle}/Contents" -type f 2>/dev/null | sort)
 
-  codesign --verify --deep --strict --verbose=2 "${app_bundle}" >/dev/null
+  codesign --verify --strict --verbose=2 "${app_bundle}" >/dev/null
 }
 
 create_dmg_from_staged_root() {

@@ -210,6 +210,19 @@ copy_qt_qml_imports_into_bundle() {
   done
 }
 
+normalize_qml_resource_permissions() {
+  local qml_file=""
+
+  [[ -d "${MACOS_DIR}/qml" ]] || return 0
+
+  while IFS= read -r qml_file; do
+    [[ -n "${qml_file}" ]] || continue
+    if ! file "${qml_file}" | grep -q "Mach-O"; then
+      chmod a-x "${qml_file}"
+    fi
+  done < <(find "${MACOS_DIR}/qml" -type f -perm -111 -print 2>/dev/null)
+}
+
 copy_qt_plugins_into_bundle() {
   local qt_plugins_dir=""
   local category=""
@@ -892,6 +905,7 @@ validate_bundle() {
 normalize_bundle_layout
 promote_decodium_qml_main_executable
 copy_qt_qml_imports_into_bundle
+normalize_qml_resource_permissions
 copy_qt_plugins_into_bundle
 normalize_bundle_macho_paths
 validate_qt_qml_imports
