@@ -1314,6 +1314,7 @@ int main(int argc, char* argv[])
         }
     });
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     // 1.0.180 — Apply pipeline cache to each QQuickWindow before scene graph init.
     // setGraphicsConfiguration is an instance method; objectCreated fires before
     // the scene graph starts, so this is the correct hook per Qt docs.
@@ -1331,6 +1332,10 @@ int main(int argc, char* argv[])
                     << "load=" << canLoadPipelineCache;
         }
     });
+#else
+    qInfo() << "[UI] Pipeline cache skipped: Qt" << QT_VERSION_STR
+            << "does not expose QQuickGraphicsConfiguration pipeline cache files";
+#endif
 
     L("loading QML...");
     // Watchdog: log if QML loading takes too long (helps diagnose hangs)
