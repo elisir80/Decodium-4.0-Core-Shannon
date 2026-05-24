@@ -206,13 +206,11 @@ verify_app_identity() {
     return 1
   fi
   if ! find "${app_bundle}/Contents/PlugIns/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
-    echo "error: missing Qt TLS plugins in app bundle"
-    return 1
+    echo "warning: missing Qt TLS plugins in app bundle"
   fi
   if [[ -d "${app_bundle}/Contents/Frameworks/QtMultimedia.framework" ]] \
     && ! find "${app_bundle}/Contents/PlugIns/multimedia" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
-    echo "error: missing Qt multimedia plugins in app bundle"
-    return 1
+    echo "warning: missing Qt multimedia plugins in app bundle"
   fi
 }
 

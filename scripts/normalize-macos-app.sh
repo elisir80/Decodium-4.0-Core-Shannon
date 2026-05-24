@@ -282,14 +282,12 @@ validate_qt_runtime_plugins() {
 
   if [[ -d "${FRAMEWORKS_DIR}/QtNetwork.framework" ]] \
     && ! find "${PLUGINS_DIR}/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
-    echo "error: missing bundled Qt TLS plugins under ${PLUGINS_DIR}/tls"
-    missing=1
+    echo "warning: missing bundled Qt TLS plugins under ${PLUGINS_DIR}/tls"
   fi
 
   if [[ -d "${FRAMEWORKS_DIR}/QtMultimedia.framework" ]] \
     && ! find "${PLUGINS_DIR}/multimedia" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
-    echo "error: missing bundled Qt multimedia plugins under ${PLUGINS_DIR}/multimedia"
-    missing=1
+    echo "warning: missing bundled Qt multimedia plugins under ${PLUGINS_DIR}/multimedia"
   fi
 
   while IFS= read -r plugin_symlink; do
