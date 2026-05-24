@@ -12,6 +12,7 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Fixed a macOS 1.0.281 launch crash in `Configuration::impl::initialize_models()` where stale or invalid saved radio-button IDs could make `QButtonGroup::button(id)` return null before `setChecked(true)`.
 - Startup now falls back to safe defaults for invalid saved radio IDs covering PTT method, special operating activity, TX mode, split mode, CAT data bits, CAT stop bits, CAT handshake, and TX audio source.
 - Fixed Linux AppImage build compatibility with Qt 6.4.x by avoiding newer `QTimeZone::UTC` / `QTimeZone::utc()` APIs in shared code paths and by disabling Qt Quick pipeline-cache APIs that are unavailable in Qt 6.4.
+- Fixed Linux AppImage startup on Qt 6.4.2 by removing the optional `QtQuick.Effects` / `MultiEffect` dependency from QML dialogs; those shadow effects require Qt 6.5+ and prevented `Main.qml` from loading on openSUSE.
 - Fixed Linux AppImage packaging so the release script no longer tries to move Qt plugins inside a system-owned `/usr/lib/.../qt6/plugins` directory when that tree is not writable.
 - Fixed directed CQ parsing so messages such as `CQ POTA IT9ARO JM68` and `CQ SOTA IT9ARO JM68` are accepted as valid directed CQ calls instead of treating `POTA` or `SOTA` as callsigns.
 - Extended directed CQ modifier handling consistently across FT8 decode filtering, double-click handling, Signal RX extraction, Live Map enrichment, and replay paths.
@@ -34,6 +35,7 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Corretto un crash di avvio macOS 1.0.281 in `Configuration::impl::initialize_models()`, dove ID radio-button salvati non piu validi potevano far tornare nullo `QButtonGroup::button(id)` prima di `setChecked(true)`.
 - L'avvio ora usa default sicuri per ID radio salvati non validi su metodo PTT, attivita speciale, modo TX, split mode, CAT data bits, CAT stop bits, CAT handshake e sorgente audio TX.
 - Corretta la compatibilita della build Linux AppImage con Qt 6.4.x evitando le API piu nuove `QTimeZone::UTC` / `QTimeZone::utc()` nei percorsi condivisi e disabilitando le API Qt Quick pipeline-cache non disponibili in Qt 6.4.
+- Corretto l'avvio della AppImage Linux su Qt 6.4.2 rimuovendo dai dialoghi QML la dipendenza opzionale `QtQuick.Effects` / `MultiEffect`; quegli effetti ombra richiedono Qt 6.5+ e impedivano il caricamento di `Main.qml` su openSUSE.
 - Corretto il packaging Linux AppImage: lo script release non prova piu a spostare plugin Qt dentro una directory di sistema `/usr/lib/.../qt6/plugins` quando non e scrivibile.
 - Corretto il parsing dei CQ diretti: messaggi come `CQ POTA IT9ARO JM68` e `CQ SOTA IT9ARO JM68` ora entrano correttamente invece di interpretare `POTA` o `SOTA` come nominativi.
 - Estesa la gestione dei modificatori CQ diretti in modo coerente su filtro decode FT8, doppio click, estrazione Signal RX, arricchimento Live Map e replay.

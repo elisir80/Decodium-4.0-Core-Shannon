@@ -7,7 +7,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
-import QtQuick.Effects  // 1.0.180 — MultiEffect Qt 6.5+
 import QtQuick.Layouts
 
 Dialog {
@@ -1252,20 +1251,9 @@ Dialog {
         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
         border.color: secondaryCyan; border.width: 2; radius: 12
 
-        // 1.0.180 — MultiEffect shadow gated su uiQuality. Su Low/Medium niente
-        // shadow per non appesantire PC modesti. Su High abilitato con
-        // blurMax basso per efficacia su integrated GPU.
-        layer.enabled: bridge && bridge.uiQuality === "High"
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowBlur: 0.5
-            shadowColor: Qt.rgba(0, 0, 0, 0.45)
-            shadowVerticalOffset: 4
-            shadowHorizontalOffset: 0
-            // downsampleFactor non disponibile in MultiEffect base; usiamo
-            // blurMax basso per limitare il costo.
-            blurMax: 16
-        }
+        // Keep this dialog compatible with the Linux Qt 6.4 AppImage runtime.
+        // QtQuick.Effects/MultiEffect is only available from Qt 6.5.
+        layer.enabled: false
     }
 
     // 1.0.180 — Apertura/chiusura su render thread con OpacityAnimator.
@@ -3102,7 +3090,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Low = nessun effetto (PC modesti). Medium = ombre leggere + Animator. High = MultiEffect shadow + tutte le animazioni. Default Medium.")
+                            ToolTip.text: qsTr("Low = nessun effetto (PC modesti). Medium = animazioni leggere. High = tutte le animazioni disponibili. Default Medium.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 

@@ -7,7 +7,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
-import QtQuick.Effects  // 1.0.182 — MultiEffect Qt 6.5+
 
 Dialog {
     id: macroDialog
@@ -49,18 +48,9 @@ Dialog {
         border.width: 2
         radius: 12
 
-        // 1.0.182 — UI Visual Boost: MultiEffect shadow gated su uiQuality High.
-        // Su Low/Medium nessuna ombra (PC modesti). Pattern identico a
-        // SettingsDialog.qml ~1001-1014.
-        layer.enabled: bridge && bridge.uiQuality === "High"
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowBlur: 0.5
-            shadowColor: Qt.rgba(0, 0, 0, 0.45)
-            shadowVerticalOffset: 4
-            shadowHorizontalOffset: 0
-            blurMax: 16
-        }
+        // Keep this dialog compatible with the Linux Qt 6.4 AppImage runtime.
+        // QtQuick.Effects/MultiEffect is only available from Qt 6.5.
+        layer.enabled: false
     }
 
     header: Rectangle {
