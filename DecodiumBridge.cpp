@@ -16338,11 +16338,24 @@ QString DecodiumBridge::legacyIniPath() const
 {
     QString const configDir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     QDir const configRoot(configDir.isEmpty() ? QDir::homePath() : configDir);
-    QString const decodium4IniPath = configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"));
-    if (QFileInfo::exists(decodium4IniPath)) {
-        return decodium4IniPath;
+    QStringList candidates;
+    QString const appName = QCoreApplication::applicationName();
+    if (!appName.isEmpty()) {
+        candidates << configRoot.absoluteFilePath(appName + QStringLiteral(".ini"));
     }
-    return configRoot.absoluteFilePath(QStringLiteral("ft2.ini"));
+    candidates
+        << configRoot.absoluteFilePath(QStringLiteral("Decodium4.ini"))
+        << configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"))
+        << configRoot.absoluteFilePath(QStringLiteral("ft2.ini"));
+
+    candidates.removeDuplicates();
+    for (QString const& path : candidates) {
+        if (QFileInfo::exists(path)) {
+            return path;
+        }
+    }
+
+    return configRoot.absoluteFilePath(QStringLiteral("Decodium4.ini"));
 }
 
 QString DecodiumBridge::legacyConfigGroupName() const
@@ -17389,13 +17402,7 @@ void DecodiumBridge::saveSettings()
     QString const audioInputChannelSetting = audioChannelSettingValue(m_audioInputChannel);
     QString const audioOutputChannelSetting = audioChannelSettingValue(m_audioOutputChannel);
 
-    QString const configDir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    QDir const configRoot(configDir.isEmpty() ? QDir::homePath() : configDir);
-    QString const decodium4IniPath = configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"));
-    QString const legacyConfigPath = QFileInfo::exists(decodium4IniPath)
-        ? decodium4IniPath
-        : configRoot.absoluteFilePath(QStringLiteral("ft2.ini"));
-    QSettings legacyIni(legacyConfigPath, QSettings::IniFormat);
+    QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
     legacyIni.setValue(QStringLiteral("MyCall"), m_callsign.trimmed().toUpper());
     legacyIni.setValue(QStringLiteral("MyGrid"), m_grid.trimmed().toUpper());
     legacyIni.setValue(QStringLiteral("SelectedActivity"), m_specialOperationActivity);
@@ -20885,13 +20892,7 @@ void DecodiumBridge::setFontScale(double s)
 void DecodiumBridge::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
-    QString const configDir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    QDir const configRoot(configDir.isEmpty() ? QDir::homePath() : configDir);
-    QString const decodium4IniPath = configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"));
-    QString const legacyIniPath = QFileInfo::exists(decodium4IniPath)
-        ? decodium4IniPath
-        : configRoot.absoluteFilePath(QStringLiteral("ft2.ini"));
-    QSettings legacyIni(legacyIniPath, QSettings::IniFormat);
+    QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
     QString const legacyCallsign = legacyIni.value(QStringLiteral("MyCall")).toString().trimmed().toUpper();
     QString const legacyGrid = legacyIni.value(QStringLiteral("MyGrid")).toString().trimmed().toUpper();
     QString const bridgeCallsign = s.value("callsign", QString()).toString().trimmed().toUpper();

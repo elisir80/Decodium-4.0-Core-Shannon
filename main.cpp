@@ -13,6 +13,8 @@
 #include <QStyleFactory>
 #include <QProcessEnvironment>
 #include <QTemporaryFile>
+#include <QFile>
+#include <QFileInfo>
 #include <QDateTime>
 #include <QLocale>
 #include <QTranslator>
@@ -114,6 +116,134 @@ namespace
     return key.contains (sensitive_pattern);
   }
 
+#if defined (Q_OS_MACOS)
+  QString legacy_macos_application_name (QString const& application_name)
+  {
+    static QString const decodium4_prefix {QStringLiteral ("Decodium4")};
+    if (application_name.startsWith (decodium4_prefix))
+      {
+        return QStringLiteral ("ft2") + application_name.mid (decodium4_prefix.size ());
+      }
+    return QStringLiteral ("ft2");
+  }
+
+  QString app_scoped_writable_location (QStandardPaths::StandardLocation location,
+                                        QString const& application_name)
+  {
+    auto * app = QCoreApplication::instance ();
+    auto const original_name = app ? app->applicationName () : QString {};
+    if (app)
+      {
+        app->setApplicationName (application_name);
+      }
+    auto const path = QStandardPaths::writableLocation (location);
+    if (app)
+      {
+        app->setApplicationName (original_name);
+      }
+    return path;
+  }
+
+  void copy_file_if_missing (QString const& target_path, QStringList const& source_paths)
+  {
+    if (target_path.isEmpty () || QFileInfo::exists (target_path))
+      {
+        return;
+      }
+
+    for (auto const& source_path : source_paths)
+      {
+        QFileInfo const source_info {source_path};
+        if (!source_info.exists () || !source_info.isFile ())
+          {
+            continue;
+          }
+
+        QDir target_dir {QFileInfo {target_path}.absolutePath ()};
+        if (target_dir.mkpath (QStringLiteral (".")))
+          {
+            QFile::copy (source_info.absoluteFilePath (), target_path);
+          }
+        return;
+      }
+  }
+
+  bool directory_has_entries (QString const& path)
+  {
+    QDir const dir {path};
+    return dir.exists () && !dir.entryList (QDir::AllEntries | QDir::NoDotAndDotDot).isEmpty ();
+  }
+
+  void copy_directory_if_missing (QString const& target_path, QString const& source_path)
+  {
+    if (target_path.isEmpty () || source_path.isEmpty () || target_path == source_path
+        || directory_has_entries (target_path))
+      {
+        return;
+      }
+
+    QDir const source_dir {source_path};
+    if (!source_dir.exists ())
+      {
+        return;
+      }
+
+    QDir target_dir {target_path};
+    if (!target_dir.mkpath (QStringLiteral (".")))
+      {
+        return;
+      }
+
+    QDirIterator it {source_dir.absolutePath (),
+                     QDir::AllEntries | QDir::NoDotAndDotDot,
+                     QDirIterator::Subdirectories};
+    while (it.hasNext ())
+      {
+        it.next ();
+        auto const source_info = it.fileInfo ();
+        auto const relative_path = source_dir.relativeFilePath (source_info.absoluteFilePath ());
+        auto const target_item_path = target_dir.absoluteFilePath (relative_path);
+
+        if (source_info.isDir ())
+          {
+            QDir {}.mkpath (target_item_path);
+          }
+        else if (!QFileInfo::exists (target_item_path))
+          {
+            QDir {}.mkpath (QFileInfo {target_item_path}.absolutePath ());
+            QFile::copy (source_info.absoluteFilePath (), target_item_path);
+          }
+      }
+  }
+
+  void migrate_macos_legacy_runtime_identity ()
+  {
+    auto const application_name = QCoreApplication::applicationName ();
+    if (!application_name.startsWith (QStringLiteral ("Decodium4")))
+      {
+        return;
+      }
+
+    auto const legacy_name = legacy_macos_application_name (application_name);
+    auto const config_directory = QStandardPaths::writableLocation (QStandardPaths::ConfigLocation);
+    QDir config_path {config_directory.isEmpty () ? QDir::homePath () : config_directory};
+    config_path.mkpath (QStringLiteral ("."));
+
+    auto const suffix = application_name.mid (QStringLiteral ("Decodium4").size ());
+    copy_file_if_missing (config_path.absoluteFilePath (application_name + QStringLiteral (".ini")),
+                          QStringList {}
+                            << config_path.absoluteFilePath (QStringLiteral ("decodium4") + suffix + QStringLiteral (".ini"))
+                            << config_path.absoluteFilePath (legacy_name + QStringLiteral (".ini")));
+
+    copy_directory_if_missing (
+      app_scoped_writable_location (QStandardPaths::AppLocalDataLocation, application_name),
+      app_scoped_writable_location (QStandardPaths::AppLocalDataLocation, legacy_name));
+    copy_directory_if_missing (
+      app_scoped_writable_location (QStandardPaths::AppDataLocation, application_name),
+      app_scoped_writable_location (QStandardPaths::AppDataLocation, legacy_name));
+  }
+#endif
+
 }
 
 int main(int argc, char *argv[])
@@ -165,10 +295,12 @@ int main(int argc, char *argv[])
       // reset the C+ & C global locales to the classic C locale
       std::locale::global (std::locale::classic ());
 
-      // Override programs executable basename as application name.
-      // Keep a dedicated FT2 profile namespace (settings/data/temp) to avoid
-      // collisions with WSJT-X profiles and preserve ft2.ini behavior.
+      // Override the executable basename as application name.
+#if defined (Q_OS_MACOS)
+      a.setApplicationName ("Decodium4");
+#else
       a.setApplicationName ("ft2");
+#endif
       a.setApplicationDisplayName ("Decodium4");
       a.setApplicationVersion (version ());
 
@@ -243,6 +375,10 @@ int main(int argc, char *argv[])
 
           multiple = true;
         }
+
+#if defined (Q_OS_MACOS)
+      migrate_macos_legacy_runtime_identity ();
+#endif
 
       // now we have the application name we can open the logging and settings
       DecodiumLogging lg;
