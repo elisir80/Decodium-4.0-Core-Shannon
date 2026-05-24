@@ -1249,8 +1249,14 @@ int main(int argc, char* argv[])
                 diag->addQmlWarning(warning);
         }
     });
-    engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
+    QString const appQmlPath = QCoreApplication::applicationDirPath() + QStringLiteral("/qml");
+    QString const bundledQtQmlPath = QDir(QCoreApplication::applicationDirPath())
+        .absoluteFilePath(QStringLiteral("../Resources/qml"));
     engine.addImportPath(QLibraryInfo::path(QLibraryInfo::QmlImportsPath));
+    engine.addImportPath(appQmlPath);
+    if (QDir(bundledQtQmlPath).exists()) {
+        engine.addImportPath(QDir(bundledQtQmlPath).canonicalPath());
+    }
     for (const QString& importPath : engine.importPathList()) {
         L(("QML import path: " + importPath.toLocal8Bit()).constData());
     }
@@ -1265,8 +1271,11 @@ int main(int argc, char* argv[])
     // Load BootLoader first so the process shows a real window before the
     // heavy QML tree is compiled. This also lets Windows users recover from
     // driver-specific Qt Quick stalls instead of waiting on a silent startup.
-    QDir const qmlDir {QDir(QCoreApplication::applicationDirPath())
-                           .absoluteFilePath(QStringLiteral("qml/decodium"))};
+    QString bundledAppQmlPath = QDir(bundledQtQmlPath).absoluteFilePath(QStringLiteral("decodium"));
+    if (!QFile::exists(QDir(bundledAppQmlPath).absoluteFilePath(QStringLiteral("BootLoader.qml")))) {
+        bundledAppQmlPath = QDir(appQmlPath).absoluteFilePath(QStringLiteral("decodium"));
+    }
+    QDir const qmlDir {bundledAppQmlPath};
 
     QString qmlPath = qmlDir.absoluteFilePath(QStringLiteral("BootLoader.qml"));
 

@@ -185,23 +185,28 @@ verify_app_identity() {
     echo "error: stale ft2 executable still present in ${app_bundle}/Contents/MacOS"
     return 1
   fi
+  if [[ -d "${app_bundle}/Contents/MacOS/qml" ]]; then
+    echo "error: QML runtime files must not remain under Contents/MacOS"
+    return 1
+  fi
   for required_qml_path in \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls/Material/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Dialogs/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Effects/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Layouts/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Templates/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQuick/Window/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QtQml/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/Qt/labs/folderlistmodel/qmldir" \
-    "${app_bundle}/Contents/MacOS/qml/QML/qmldir"; do
+    "${app_bundle}/Contents/Resources/qml/decodium/BootLoader.qml" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Controls/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Controls/Material/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Dialogs/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Effects/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Layouts/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Templates/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQuick/Window/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QtQml/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/Qt/labs/folderlistmodel/qmldir" \
+    "${app_bundle}/Contents/Resources/qml/QML/qmldir"; do
     if [[ ! -f "${required_qml_path}" ]]; then
       echo "error: missing Qt QML runtime import in app bundle: ${required_qml_path}"
       return 1
     fi
   done
-  if ! find "${app_bundle}/Contents/MacOS/qml/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
+  if ! find "${app_bundle}/Contents/Resources/qml/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
     echo "error: missing Qt Quick Controls QML plugin in app bundle"
     return 1
   fi

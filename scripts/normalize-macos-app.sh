@@ -32,6 +32,7 @@ MACOS_DIR="${CONTENTS_DIR}/MacOS"
 FRAMEWORKS_DIR="${CONTENTS_DIR}/Frameworks"
 PLUGINS_DIR="${CONTENTS_DIR}/PlugIns"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
+QT_QML_BUNDLE_DIR="${RESOURCES_DIR}/qml"
 
 is_macho() {
   file "$1" | grep -q "Mach-O"
@@ -169,9 +170,10 @@ copy_qt_qml_imports_into_bundle() {
     exit 1
   }
 
-  mkdir -p "${MACOS_DIR}/qml"
+  mkdir -p "${QT_QML_BUNDLE_DIR}"
 
   for module in QML QtQml QtCore QtQuick Qt; do
+    rm -rf "${QT_QML_BUNDLE_DIR}/${module}"
     rm -rf "${MACOS_DIR}/qml/${module}"
   done
 
@@ -199,24 +201,36 @@ copy_qt_qml_imports_into_bundle() {
     src="${qt_qml_dir}/${entry}"
     [[ -e "${src}" ]] || continue
 
-    dest="${MACOS_DIR}/qml/${entry}"
+    dest="${QT_QML_BUNDLE_DIR}/${entry}"
     rm -rf "${dest}"
     mkdir -p "$(dirname "${dest}")"
     cp -R -L -p "${src}" "${dest}"
   done
 }
 
+move_app_qml_into_resources() {
+  local app_qml_src="${MACOS_DIR}/qml/decodium"
+  local app_qml_dest="${QT_QML_BUNDLE_DIR}/decodium"
+
+  [[ -d "${app_qml_src}" ]] || return 0
+
+  mkdir -p "${QT_QML_BUNDLE_DIR}"
+  rm -rf "${app_qml_dest}"
+  mv "${app_qml_src}" "${app_qml_dest}"
+  rmdir "${MACOS_DIR}/qml" 2>/dev/null || true
+}
+
 prune_qml_type_metadata() {
   local qmltypes_file=""
   local removed=0
 
-  [[ -d "${MACOS_DIR}/qml" ]] || return 0
+  [[ -d "${QT_QML_BUNDLE_DIR}" ]] || return 0
 
   while IFS= read -r qmltypes_file; do
     [[ -n "${qmltypes_file}" ]] || continue
     rm -f "${qmltypes_file}"
     removed=1
-  done < <(find "${MACOS_DIR}/qml" -type f -name 'plugins.qmltypes' -print 2>/dev/null)
+  done < <(find "${QT_QML_BUNDLE_DIR}" -type f -name 'plugins.qmltypes' -print 2>/dev/null)
 
   if [[ "${removed}" -ne 0 ]]; then
     echo "Pruned Qt QML type metadata from runtime bundle"
@@ -226,14 +240,14 @@ prune_qml_type_metadata() {
 normalize_qml_resource_permissions() {
   local qml_file=""
 
-  [[ -d "${MACOS_DIR}/qml" ]] || return 0
+  [[ -d "${QT_QML_BUNDLE_DIR}" ]] || return 0
 
   while IFS= read -r qml_file; do
     [[ -n "${qml_file}" ]] || continue
     if ! file "${qml_file}" | grep -q "Mach-O"; then
       chmod a-x "${qml_file}"
     fi
-  done < <(find "${MACOS_DIR}/qml" -type f -perm -111 -print 2>/dev/null)
+  done < <(find "${QT_QML_BUNDLE_DIR}" -type f -perm -111 -print 2>/dev/null)
 }
 
 copy_qt_plugins_into_bundle() {
@@ -269,25 +283,35 @@ validate_qt_qml_imports() {
   local symlink_path=""
 
   for required_path in \
-    "${MACOS_DIR}/qml/QtQuick/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Controls/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Controls/Material/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Dialogs/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Effects/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Layouts/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Templates/qmldir" \
-    "${MACOS_DIR}/qml/QtQuick/Window/qmldir" \
-    "${MACOS_DIR}/qml/QtQml/qmldir" \
-    "${MACOS_DIR}/qml/Qt/labs/folderlistmodel/qmldir" \
-    "${MACOS_DIR}/qml/QML/qmldir"; do
+    "${QT_QML_BUNDLE_DIR}/QtQuick/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Controls/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Controls/Material/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Dialogs/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Effects/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Layouts/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Templates/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQuick/Window/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QtQml/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/Qt/labs/folderlistmodel/qmldir" \
+    "${QT_QML_BUNDLE_DIR}/QML/qmldir"; do
     if [[ ! -f "${required_path}" ]]; then
       echo "error: missing bundled Qt QML import: ${required_path}"
       missing=1
     fi
   done
 
-  if ! find "${MACOS_DIR}/qml/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
-    echo "error: missing bundled Qt Quick Controls plugin under ${MACOS_DIR}/qml/QtQuick/Controls"
+  if ! find "${QT_QML_BUNDLE_DIR}/QtQuick/Controls" -type f -name '*qtquickcontrols2plugin*.dylib' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: missing bundled Qt Quick Controls plugin under ${QT_QML_BUNDLE_DIR}/QtQuick/Controls"
+    missing=1
+  fi
+
+  if [[ ! -f "${QT_QML_BUNDLE_DIR}/decodium/BootLoader.qml" ]]; then
+    echo "error: missing Decodium QML runtime under ${QT_QML_BUNDLE_DIR}/decodium"
+    missing=1
+  fi
+
+  if [[ -d "${MACOS_DIR}/qml" ]]; then
+    echo "error: QML files remain under Contents/MacOS: ${MACOS_DIR}/qml"
     missing=1
   fi
 
@@ -295,9 +319,9 @@ validate_qt_qml_imports() {
     [[ -n "${symlink_path}" ]] || continue
     echo "error: symlink remains in bundled QML imports: ${symlink_path}"
     missing=1
-  done < <(find "${MACOS_DIR}/qml" -type l -print 2>/dev/null)
+  done < <(find "${QT_QML_BUNDLE_DIR}" -type l -print 2>/dev/null)
 
-  if find "${MACOS_DIR}/qml" -type f -name 'plugins.qmltypes' -print -quit 2>/dev/null | grep -q .; then
+  if find "${QT_QML_BUNDLE_DIR}" -type f -name 'plugins.qmltypes' -print -quit 2>/dev/null | grep -q .; then
     echo "error: Qt QML type metadata remains in runtime bundle"
     missing=1
   fi
@@ -409,6 +433,11 @@ desired_install_id() {
     return 0
   fi
 
+  if [[ "${file_path}" == "${QT_QML_BUNDLE_DIR}/"* ]]; then
+    printf '@rpath/%s\n' "${file_path#${CONTENTS_DIR}/}"
+    return 0
+  fi
+
   return 1
 }
 
@@ -425,6 +454,11 @@ framework_rpath_for_file() {
 
   if [[ "${file_path}" == "${PLUGINS_DIR}/"* ]]; then
     printf '%s\n' '@loader_path/../../Frameworks'
+    return 0
+  fi
+
+  if [[ "${file_path}" == "${QT_QML_BUNDLE_DIR}/"* ]]; then
+    printf '%s\n' '@executable_path/../Frameworks'
     return 0
   fi
 
@@ -923,6 +957,7 @@ validate_bundle() {
 normalize_bundle_layout
 promote_decodium_qml_main_executable
 copy_qt_qml_imports_into_bundle
+move_app_qml_into_resources
 prune_qml_type_metadata
 normalize_qml_resource_permissions
 copy_qt_plugins_into_bundle
