@@ -62,6 +62,7 @@ check_bundle_compatibility() {
   local has_absolute_deps=0
   local has_bad_minos=0
   local has_bad_bundle_paths=0
+  local has_bad_rpaths=0
 
   while IFS= read -r file_path; do
     if ! file "$file_path" | grep -q "Mach-O"; then
@@ -95,6 +96,18 @@ check_bundle_compatibility() {
       esac
     done < <(otool -L "$file_path" | awk 'NR>1 {print $1}')
 
+    while IFS= read -r rpath; do
+      case "$rpath" in
+        @loader_path*|@executable_path*)
+          ;;
+        *)
+          echo "error: unsafe runtime search path in bundle:"
+          echo "  ${file_path} -> ${rpath}"
+          has_bad_rpaths=1
+          ;;
+      esac
+    done < <(otool -l "$file_path" | awk '/LC_RPATH/{flag=1; next} flag && $1=="path"{print $2; flag=0}')
+
     local minos
     minos="$(otool -l "$file_path" | awk '/LC_BUILD_VERSION/{s=1} s && $1=="minos"{print $2; exit}')"
     if [[ -n "$minos" ]] && version_gt "$minos" "$compat_macos"; then
@@ -120,10 +133,23 @@ check_bundle_compatibility() {
     fi
   done
 
-  if [[ "$has_absolute_deps" -ne 0 || "$has_bad_minos" -ne 0 || "$has_bad_bundle_paths" -ne 0 ]]; then
+  if [[ "$has_absolute_deps" -ne 0 || "$has_bad_minos" -ne 0 || "$has_bad_bundle_paths" -ne 0 || "$has_bad_rpaths" -ne 0 ]]; then
     return 1
   fi
   return 0
+}
+
+main_executable_for_app() {
+  local app_bundle="$1"
+  local executable_name=""
+
+  executable_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
+  if [[ -n "${executable_name}" && -x "${app_bundle}/Contents/MacOS/${executable_name}" ]]; then
+    printf '%s\n' "${app_bundle}/Contents/MacOS/${executable_name}"
+    return 0
+  fi
+
+  find "${app_bundle}/Contents/MacOS" -maxdepth 1 -type f -perm -111 | sort | head -n1
 }
 
 sign_app_bundle() {
@@ -131,7 +157,11 @@ sign_app_bundle() {
   local sign_identity="$2"
   local main_exec
 
-  main_exec="${app_bundle}/Contents/MacOS/$(basename "${app_bundle%.app}")"
+  main_exec="$(main_executable_for_app "${app_bundle}")"
+  if [[ -z "${main_exec}" ]]; then
+    echo "error: unable to locate main executable in ${app_bundle}"
+    return 1
+  fi
 
   if ! command -v codesign >/dev/null 2>&1; then
     echo "error: codesign tool not found"
@@ -286,6 +316,8 @@ done
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
 PREFIX="decodium4-ft2"
+APP_BUNDLE_NAME="Decodium4.app"
+APP_VOLUME_NAME="Decodium4"
 ARCH="$(uname -m)"
 
 if [[ "$ARCH" == "x86_64" ]]; then
@@ -350,17 +382,27 @@ cpack_status=0
   cd "$BUILD_DIR"
   cpack -G DragNDrop
 ) || cpack_status=$?
-STAGED_APP="$(cd "$BUILD_DIR" && ls -td _CPack_Packages/Darwin/DragNDrop/*/ft2.app 2>/dev/null | head -n1 || true)"
+STAGED_APP="$(cd "$BUILD_DIR" && ls -td _CPack_Packages/Darwin/DragNDrop/*/"${APP_BUNDLE_NAME}" 2>/dev/null | head -n1 || true)"
 if [[ -z "$STAGED_APP" ]]; then
-  echo "error: unable to locate staged ft2.app from CPack output"
+  STAGED_APP="$(cd "$BUILD_DIR" && ls -td _CPack_Packages/Darwin/DragNDrop/*/ft2.app 2>/dev/null | head -n1 || true)"
+fi
+if [[ -z "$STAGED_APP" ]]; then
+  echo "error: unable to locate staged ${APP_BUNDLE_NAME} from CPack output"
   echo "error: cpack exit status: ${cpack_status}"
   exit 1
 fi
 if [[ "${cpack_status}" -ne 0 ]]; then
-  echo "warning: CPack returned status ${cpack_status}, but staged ft2.app exists; continuing with manual DMG packaging."
+  echo "warning: CPack returned status ${cpack_status}, but staged app exists; continuing with manual DMG packaging."
 fi
 detach_mountpoint_if_present "${CPACK_VOLUME_MOUNT}" || true
 STAGED_APP_ABS="${BUILD_DIR}/${STAGED_APP}"
+if [[ "$(basename "${STAGED_APP_ABS}")" != "${APP_BUNDLE_NAME}" ]]; then
+  RENAMED_APP_ABS="$(dirname "${STAGED_APP_ABS}")/${APP_BUNDLE_NAME}"
+  rm -rf "${RENAMED_APP_ABS}"
+  mv "${STAGED_APP_ABS}" "${RENAMED_APP_ABS}"
+  STAGED_APP_ABS="${RENAMED_APP_ABS}"
+  STAGED_APP="${STAGED_APP_ABS#${BUILD_DIR}/}"
+fi
 STAGED_ROOT_ABS="$(dirname "${STAGED_APP_ABS}")"
 
 echo "[4/7] Normalizing macOS bundle layout and runtime paths..."
@@ -390,7 +432,7 @@ echo "[6/7] Re-signing app bundle..."
 sign_app_bundle "${STAGED_APP_ABS}" "${CODESIGN_IDENTITY}"
 
 echo "[7/7] Creating release assets..."
-create_dmg_from_staged_root "${STAGED_ROOT_ABS}" "${BUILD_DIR}/${DMG_OUT}" "ft2"
+create_dmg_from_staged_root "${STAGED_ROOT_ABS}" "${BUILD_DIR}/${DMG_OUT}" "${APP_VOLUME_NAME}"
 (
   /usr/bin/ditto -c -k --sequesterRsrc --keepParent "${STAGED_APP_ABS}" "${BUILD_DIR}/${ZIP_OUT}"
   cd "$BUILD_DIR"
@@ -416,7 +458,7 @@ if [[ "$PUBLISH" -eq 1 ]]; then
 This release includes fork updates up to \`${VERSION}\`.
 
 If the app does not start on macOS, run from Terminal:
-\`sudo xattr -r -d com.apple.quarantine /Applications/ft2.app\`
+\`sudo xattr -r -d com.apple.quarantine /Applications/Decodium4.app\`
 
 See \`CHANGELOG.md\` for full details.
 
@@ -429,7 +471,7 @@ Assets:
 Questa release include aggiornamenti fork fino a \`${VERSION}\`.
 
 Se l'app non si avvia su macOS, esegui da Terminale:
-\`sudo xattr -r -d com.apple.quarantine /Applications/ft2.app\`
+\`sudo xattr -r -d com.apple.quarantine /Applications/Decodium4.app\`
 
 Per i dettagli completi, vedi \`CHANGELOG.md\`.
 
@@ -442,7 +484,7 @@ Asset:
 Esta release incluye actualizaciones del fork hasta \`${VERSION}\`.
 
 Si la app no inicia en macOS, ejecuta en Terminal:
-\`sudo xattr -r -d com.apple.quarantine /Applications/ft2.app\`
+\`sudo xattr -r -d com.apple.quarantine /Applications/Decodium4.app\`
 
 Para todos los detalles, ver \`CHANGELOG.md\`.
 

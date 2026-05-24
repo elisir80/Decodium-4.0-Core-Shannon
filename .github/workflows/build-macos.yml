@@ -132,11 +132,13 @@ jobs:
 
       - name: Normalize app bundle
         run: |
-          scripts/normalize-macos-app.sh /tmp/ft2_install/ft2.app
+          rm -rf /tmp/ft2_install/Decodium4.app
+          mv /tmp/ft2_install/ft2.app /tmp/ft2_install/Decodium4.app
+          scripts/normalize-macos-app.sh /tmp/ft2_install/Decodium4.app
 
       - name: Package app bundle
         run: |
-          APP_DIR=/tmp/ft2_install/ft2.app
+          APP_DIR=/tmp/ft2_install/Decodium4.app
           if [ ! -d "${APP_DIR}" ]; then
             echo "Missing app bundle at ${APP_DIR}"
             exit 1
@@ -151,16 +153,16 @@ jobs:
           (cd /tmp && tar czf "${TAR_NAME}" "ft2-release-${{ matrix.platform_id }}")
 
           ZIP_NAME=ft2-v${RELEASE_VERSION}-${{ matrix.platform_id }}.zip
-          ditto -c -k --sequesterRsrc --keepParent "${PKG_ROOT}/ft2.app" "/tmp/${ZIP_NAME}"
+          ditto -c -k --sequesterRsrc --keepParent "${PKG_ROOT}/Decodium4.app" "/tmp/${ZIP_NAME}"
 
           shasum -a 256 "/tmp/${TAR_NAME}" "/tmp/${ZIP_NAME}" > "/tmp/ft2-v${RELEASE_VERSION}-${{ matrix.platform_id }}.sha256"
           ls -lh "/tmp/${TAR_NAME}" "/tmp/${ZIP_NAME}" "/tmp/ft2-v${RELEASE_VERSION}-${{ matrix.platform_id }}.sha256"
 
       - name: Verify executables
         run: |
-          file /tmp/ft2_install/ft2.app/Contents/MacOS/ft2
-          file /tmp/ft2_install/ft2.app/Contents/MacOS/jt9
-          ls -lh /tmp/ft2_install/ft2.app/Contents/MacOS
+          file /tmp/ft2_install/Decodium4.app/Contents/MacOS/ft2
+          file /tmp/ft2_install/Decodium4.app/Contents/MacOS/jt9
+          ls -lh /tmp/ft2_install/Decodium4.app/Contents/MacOS
 
       - name: Upload tar artifact
         uses: actions/upload-artifact@v4

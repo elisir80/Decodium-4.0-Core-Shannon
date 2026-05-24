@@ -9,6 +9,9 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Kept the larger stack scoped to the FT8 worker thread only, without changing the UI thread or general application thread model.
 - Fixed macOS release packaging for Homebrew Qt 6.11 builds where `QtGui.framework` can require `QtDBus.framework` at launch.
 - The macOS bundle normalizer now copies missing `@rpath` framework dependencies into `Contents/Frameworks` and fails the release build if any bundled `@rpath` dependency cannot be resolved inside the app.
+- Fixed macOS installed-app startup where bundled Qt plugins could load Qt from `Contents/Frameworks` while the main executable still resolved Qt through external Homebrew runtime paths, causing Qt to abort during Cocoa platform initialization.
+- The macOS bundle normalizer now removes unsafe absolute `LC_RPATH` entries such as `/opt/homebrew/...` and verifies that every bundled `@rpath` dependency resolves first inside `Decodium4.app`.
+- The macOS app bundle is now named `Decodium4.app`; the executable inside the bundle remains `ft2`.
 - Fixed a macOS 1.0.281 launch crash in `Configuration::impl::initialize_models()` where stale or invalid saved radio-button IDs could make `QButtonGroup::button(id)` return null before `setChecked(true)`.
 - Startup now falls back to safe defaults for invalid saved radio IDs covering PTT method, special operating activity, TX mode, split mode, CAT data bits, CAT stop bits, CAT handshake, and TX audio source.
 - Fixed Linux AppImage build compatibility with Qt 6.4.x by avoiding newer `QTimeZone::UTC` / `QTimeZone::utc()` APIs in shared code paths and by disabling Qt Quick pipeline-cache APIs that are unavailable in Qt 6.4.
@@ -32,6 +35,9 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - La modifica dello stack resta limitata al solo worker FT8 e non cambia il thread UI o il modello generale dei thread dell'applicazione.
 - Corretto il packaging release macOS per le build Homebrew Qt 6.11 in cui `QtGui.framework` puo richiedere `QtDBus.framework` all'avvio.
 - Il normalizzatore del bundle macOS ora copia dentro `Contents/Frameworks` le dipendenze framework `@rpath` mancanti e blocca la release se una dipendenza `@rpath` non e risolvibile dentro l'app.
+- Corretto l'avvio dell'app installata su macOS quando i plugin Qt del bundle caricavano Qt da `Contents/Frameworks` mentre l'eseguibile principale risolveva ancora Qt tramite percorsi runtime esterni di Homebrew, causando l'abort di Qt durante l'inizializzazione della piattaforma Cocoa.
+- Il normalizzatore del bundle macOS ora rimuove gli `LC_RPATH` assoluti non sicuri come `/opt/homebrew/...` e verifica che ogni dipendenza `@rpath` del bundle si risolva prima dentro `Decodium4.app`.
+- Il bundle macOS ora si chiama `Decodium4.app`; l'eseguibile interno resta `ft2`.
 - Corretto un crash di avvio macOS 1.0.281 in `Configuration::impl::initialize_models()`, dove ID radio-button salvati non piu validi potevano far tornare nullo `QButtonGroup::button(id)` prima di `setChecked(true)`.
 - L'avvio ora usa default sicuri per ID radio salvati non validi su metodo PTT, attivita speciale, modo TX, split mode, CAT data bits, CAT stop bits, CAT handshake e sorgente audio TX.
 - Corretta la compatibilita della build Linux AppImage con Qt 6.4.x evitando le API piu nuove `QTimeZone::UTC` / `QTimeZone::utc()` nei percorsi condivisi e disabilitando le API Qt Quick pipeline-cache non disponibili in Qt 6.4.

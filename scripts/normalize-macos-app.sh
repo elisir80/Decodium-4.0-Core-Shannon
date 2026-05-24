@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/normalize-macos-app.sh /path/to/ft2.app
+  scripts/normalize-macos-app.sh /path/to/Decodium4.app
 
 What it does:
   1) Ensures sounds live in Contents/Resources/sounds
@@ -26,7 +26,7 @@ if [[ ! -d "${APP_BUNDLE}" || "${APP_BUNDLE}" != *.app ]]; then
   exit 1
 fi
 
-APP_BUNDLE="$(cd "$(dirname "${APP_BUNDLE}")" && pwd)/$(basename "${APP_BUNDLE}")"
+APP_BUNDLE="$(cd "$(dirname "${APP_BUNDLE}")" && pwd -P)/$(basename "${APP_BUNDLE}")"
 CONTENTS_DIR="${APP_BUNDLE}/Contents"
 MACOS_DIR="${CONTENTS_DIR}/MacOS"
 FRAMEWORKS_DIR="${CONTENTS_DIR}/Frameworks"
@@ -160,6 +160,69 @@ expanded_rpaths_for_file() {
   done < <(otool -l "${file_path}" | awk '/LC_RPATH/{flag=1; next} flag && $1=="path"{print $2; flag=0}')
 }
 
+current_rpaths_for_file() {
+  local file_path="$1"
+
+  otool -l "${file_path}" | awk '/LC_RPATH/{flag=1; next} flag && $1=="path"{print $2; flag=0}'
+}
+
+expanded_rpath_value() {
+  local file_path="$1"
+  local rpath="$2"
+  local file_dir=""
+
+  file_dir="$(dirname "${file_path}")"
+  case "${rpath}" in
+    @loader_path*)
+      printf '%s\n' "${file_dir}${rpath#@loader_path}"
+      ;;
+    @executable_path*)
+      printf '%s\n' "${MACOS_DIR}${rpath#@executable_path}"
+      ;;
+    /*)
+      printf '%s\n' "${rpath}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_safe_bundle_rpath() {
+  local file_path="$1"
+  local rpath="$2"
+  local expanded=""
+  local resolved=""
+
+  case "${rpath}" in
+    @loader_path*|@executable_path*)
+      expanded="$(expanded_rpath_value "${file_path}" "${rpath}")" || return 1
+      [[ -d "${expanded}" ]] || return 0
+      resolved="$(cd "${expanded}" && pwd -P)"
+      [[ "${resolved}" == "${APP_BUNDLE}"/* ]]
+      return
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+remove_unsafe_rpaths() {
+  local file_path="$1"
+  local rpath=""
+
+  while IFS= read -r rpath; do
+    [[ -n "${rpath}" ]] || continue
+    if is_safe_bundle_rpath "${file_path}" "${rpath}"; then
+      continue
+    fi
+
+    chmod u+w "${file_path}"
+    install_name_tool -delete_rpath "${rpath}" "${file_path}" 2>/dev/null || true
+  done < <(current_rpaths_for_file "${file_path}")
+}
+
 resolve_bundled_rpath_dependency() {
   local file_path="$1"
   local dep_path="$2"
@@ -182,6 +245,27 @@ resolve_bundled_rpath_dependency() {
         return 0
         ;;
     esac
+  done < <(expanded_rpaths_for_file "${file_path}")
+
+  return 1
+}
+
+resolve_first_rpath_dependency() {
+  local file_path="$1"
+  local dep_path="$2"
+  local dep_suffix=""
+  local rpath_root=""
+  local candidate=""
+
+  [[ "${dep_path}" == @rpath/* ]] || return 1
+  dep_suffix="${dep_path#@rpath/}"
+
+  while IFS= read -r rpath_root; do
+    [[ -n "${rpath_root}" ]] || continue
+    candidate="${rpath_root}/${dep_suffix}"
+    [[ -e "${candidate}" ]] || continue
+    resolve_realpath "${candidate}"
+    return 0
   done < <(expanded_rpaths_for_file "${file_path}")
 
   return 1
@@ -395,6 +479,8 @@ normalize_bundle_macho_paths() {
         fi
       done < <(otool -L "${file_path}" | awk 'NR>1 {print $1}')
 
+      remove_unsafe_rpaths "${file_path}"
+
       if rpath="$(framework_rpath_for_file "${file_path}" 2>/dev/null)"; then
         ensure_rpath "${file_path}" "${rpath}"
       fi
@@ -425,6 +511,8 @@ validate_bundle() {
   local file_path=""
   local dep_path=""
   local current_id=""
+  local resolved_dep=""
+  local rpath=""
 
   if [[ -d "${MACOS_DIR}/sounds" ]]; then
     echo "error: sounds still present in Contents/MacOS"
@@ -452,6 +540,15 @@ validate_bundle() {
       continue
     fi
 
+    while IFS= read -r rpath; do
+      [[ -n "${rpath}" ]] || continue
+      if ! is_safe_bundle_rpath "${file_path}" "${rpath}"; then
+        echo "error: unsafe LC_RPATH remains in bundle:"
+        echo "  ${file_path} -> ${rpath}"
+        exit 1
+      fi
+    done < <(current_rpaths_for_file "${file_path}")
+
     current_id="$(install_id_of "${file_path}")"
     if [[ "${file_path}" == "${FRAMEWORKS_DIR}/"* && -n "${current_id}" && "${current_id}" != @rpath/* ]]; then
       echo "error: framework or dylib install id is not @rpath-based: ${file_path} -> ${current_id}"
@@ -469,9 +566,15 @@ validate_bundle() {
           exit 1
           ;;
         @rpath/*)
-          if ! resolve_bundled_rpath_dependency "${file_path}" "${dep_path}" >/dev/null 2>&1; then
+          resolved_dep="$(resolve_first_rpath_dependency "${file_path}" "${dep_path}")" || {
             echo "error: unresolved bundled @rpath dependency:"
             echo "  ${file_path} -> ${dep_path}"
+            exit 1
+          }
+          if [[ "${resolved_dep}" != "${APP_BUNDLE}"/* ]]; then
+            echo "error: @rpath dependency resolves outside the app bundle:"
+            echo "  ${file_path} -> ${dep_path}"
+            echo "  first match: ${resolved_dep}"
             exit 1
           fi
           ;;
