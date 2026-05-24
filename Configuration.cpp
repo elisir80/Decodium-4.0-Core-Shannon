@@ -145,7 +145,9 @@
 #include <QAudioDevice>
 #include <QMediaDevices>
 #include <QDialog>
+#include <QAbstractButton>
 #include <QAction>
+#include <QButtonGroup>
 #include <QFileDialog>
 #include <QDir>
 #include <QFileInfo>
@@ -231,6 +233,53 @@ namespace
   // disabled
   int const combo_box_item_enabled (32 | 1);
   int const combo_box_item_disabled (0);
+
+  int set_checked_button_or_fallback (QButtonGroup * group, int requested_id, int fallback_id, char const * setting_name)
+  {
+    if (!group)
+      {
+        qWarning () << "Missing radio button group for setting" << setting_name;
+        return requested_id;
+      }
+
+    int actual_id = requested_id;
+    auto * button = group->button (actual_id);
+    if (!button)
+      {
+        qWarning () << "Ignoring invalid saved radio button id" << requested_id
+                    << "for" << setting_name << "- falling back to" << fallback_id;
+        actual_id = fallback_id;
+        button = group->button (actual_id);
+      }
+
+    if (!button)
+      {
+        if (auto * checked = group->checkedButton ())
+          {
+            actual_id = group->id (checked);
+            button = checked;
+          }
+      }
+
+    if (!button)
+      {
+        auto const buttons = group->buttons ();
+        if (!buttons.isEmpty ())
+          {
+            button = buttons.constFirst ();
+            actual_id = group->id (button);
+          }
+      }
+
+    if (!button)
+      {
+        qWarning () << "Radio button group for setting" << setting_name << "has no buttons";
+        return requested_id;
+      }
+
+    button->setChecked (true);
+    return actual_id;
+  }
 
   bool should_trace_transceiver_state (Transceiver::TransceiverState const& state, bool force = false)
   {
@@ -2889,7 +2938,11 @@ void Configuration::impl::initialize_models ()
   ui_->sbDegrade->setValue (degrade_);
   ui_->sbBandwidth->setValue (RxBandwidth_);
   ui_->tci_audio_check_box->setChecked (tci_audio_);
-  ui_->PTT_method_button_group->button (rig_params_.ptt_type)->setChecked (true);
+  rig_params_.ptt_type = static_cast<TransceiverFactory::PTTMethod> (
+    set_checked_button_or_fallback (ui_->PTT_method_button_group,
+                                    static_cast<int> (rig_params_.ptt_type),
+                                    static_cast<int> (TransceiverFactory::PTT_method_VOX),
+                                    "PTTMethod"));
   ui_->PWR_and_SWR_check_box->setChecked (PWR_and_SWR_);
   ui_->check_SWR_check_box->setChecked (check_SWR_);
   if (!ui_->PWR_and_SWR_check_box->isChecked()) ui_->check_SWR_check_box->setEnabled (false);
@@ -3026,17 +3079,41 @@ void Configuration::impl::initialize_models ()
   ui_->leCloudlogApiUrl->setText(cloudLogApiUrl_);
   ui_->leCloudlogApiKey->setText(cloudLogApiKey_);
   ui_->sbCloudlogStationID->setValue (cloudLogStationID_);
-  ui_->special_op_activity_button_group->button (SelectedActivity_)->setChecked (true);
+  SelectedActivity_ =
+    set_checked_button_or_fallback (ui_->special_op_activity_button_group,
+                                    SelectedActivity_,
+                                    static_cast<int> (SpecialOperatingActivity::NA_VHF),
+                                    "SelectedActivity");
   ui_->cbx2ToneSpacing->setChecked(x2ToneSpacing_);
   ui_->cbx4ToneSpacing->setChecked(x4ToneSpacing_);
   ui_->type_2_msg_gen_combo_box->setCurrentIndex (type_2_msg_gen_);
   ui_->rig_combo_box->setCurrentText (rig_params_.rig_name);
-  ui_->TX_mode_button_group->button (data_mode_)->setChecked (true);
-  ui_->split_mode_button_group->button (rig_params_.split_mode)->setChecked (true);
+  data_mode_ = static_cast<DataMode> (
+    set_checked_button_or_fallback (ui_->TX_mode_button_group,
+                                    static_cast<int> (data_mode_),
+                                    static_cast<int> (data_mode_none),
+                                    "DataMode"));
+  rig_params_.split_mode = static_cast<TransceiverFactory::SplitMode> (
+    set_checked_button_or_fallback (ui_->split_mode_button_group,
+                                    static_cast<int> (rig_params_.split_mode),
+                                    static_cast<int> (TransceiverFactory::split_mode_none),
+                                    "SplitMode"));
   ui_->CAT_serial_baud_combo_box->setCurrentText (QString::number (rig_params_.baud));
-  ui_->CAT_data_bits_button_group->button (rig_params_.data_bits)->setChecked (true);
-  ui_->CAT_stop_bits_button_group->button (rig_params_.stop_bits)->setChecked (true);
-  ui_->CAT_handshake_button_group->button (rig_params_.handshake)->setChecked (true);
+  rig_params_.data_bits = static_cast<TransceiverFactory::DataBits> (
+    set_checked_button_or_fallback (ui_->CAT_data_bits_button_group,
+                                    static_cast<int> (rig_params_.data_bits),
+                                    static_cast<int> (TransceiverFactory::default_data_bits),
+                                    "CATDataBits"));
+  rig_params_.stop_bits = static_cast<TransceiverFactory::StopBits> (
+    set_checked_button_or_fallback (ui_->CAT_stop_bits_button_group,
+                                    static_cast<int> (rig_params_.stop_bits),
+                                    static_cast<int> (TransceiverFactory::default_stop_bits),
+                                    "CATStopBits"));
+  rig_params_.handshake = static_cast<TransceiverFactory::Handshake> (
+    set_checked_button_or_fallback (ui_->CAT_handshake_button_group,
+                                    static_cast<int> (rig_params_.handshake),
+                                    static_cast<int> (TransceiverFactory::handshake_default),
+                                    "CATHandshake"));
   ui_->cbSortAlphabetically->setChecked(sortAlphabetically_);
   ui_->cbHideCARD->setChecked(hideCARD_);
   ui_->checkBoxAzElExtraLines->setChecked(AzElExtraLines_);
@@ -3058,7 +3135,11 @@ void Configuration::impl::initialize_models ()
     {
       ui_->force_RTS_combo_box->setCurrentIndex (0);
     }
-  ui_->TX_audio_source_button_group->button (rig_params_.audio_source)->setChecked (true);
+  rig_params_.audio_source = static_cast<TransceiverFactory::TXAudioSource> (
+    set_checked_button_or_fallback (ui_->TX_audio_source_button_group,
+                                    static_cast<int> (rig_params_.audio_source),
+                                    static_cast<int> (TransceiverFactory::TX_audio_source_front),
+                                    "TXAudioSource"));
   ui_->CAT_poll_interval_spin_box->setValue (rig_params_.poll_interval & 0x7fff);
   ui_->opCallEntry->setText (opCall_);
   ui_->udp_server_line_edit->setEnabled(false);
@@ -4163,7 +4244,8 @@ bool Configuration::impl::validate ()
       // don't reject as we can work without an audio output
     }
 
-  if (!ui_->PTT_method_button_group->checkedButton ()->isEnabled ())
+  auto * checked_ptt_button = ui_->PTT_method_button_group->checkedButton ();
+  if (!checked_ptt_button || !checked_ptt_button->isEnabled ())
     {
       MessageBox::critical_message (this, tr ("Invalid PTT method"));
       return false;

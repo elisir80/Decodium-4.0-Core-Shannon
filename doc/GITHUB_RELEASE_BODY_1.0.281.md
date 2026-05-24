@@ -1,6 +1,6 @@
 # Decodium 4 FT2 1.0.281
 
-Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. It restores the 1.0.280 baseline locally, then reapplies the field fixes for the macOS FT8 crash, directed CQ modifiers, special-event callsign sequencing, and invalid directed ghost decodes.
+Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. It restores the 1.0.280 baseline locally, then reapplies the field fixes for the macOS FT8 crash, directed CQ modifiers, special-event callsign sequencing, invalid directed ghost decodes, and macOS startup hardening.
 
 ## English - Changes Since 1.0.280
 
@@ -9,6 +9,8 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - Kept the larger stack scoped to the FT8 worker thread only, without changing the UI thread or general application thread model.
 - Fixed macOS release packaging for Homebrew Qt 6.11 builds where `QtGui.framework` can require `QtDBus.framework` at launch.
 - The macOS bundle normalizer now copies missing `@rpath` framework dependencies into `Contents/Frameworks` and fails the release build if any bundled `@rpath` dependency cannot be resolved inside the app.
+- Fixed a macOS 1.0.281 launch crash in `Configuration::impl::initialize_models()` where stale or invalid saved radio-button IDs could make `QButtonGroup::button(id)` return null before `setChecked(true)`.
+- Startup now falls back to safe defaults for invalid saved radio IDs covering PTT method, special operating activity, TX mode, split mode, CAT data bits, CAT stop bits, CAT handshake, and TX audio source.
 - Fixed Linux AppImage build compatibility with Qt 6.4.x by avoiding newer `QTimeZone::UTC` / `QTimeZone::utc()` APIs in shared code paths and by disabling Qt Quick pipeline-cache APIs that are unavailable in Qt 6.4.
 - Fixed Linux AppImage packaging so the release script no longer tries to move Qt plugins inside a system-owned `/usr/lib/.../qt6/plugins` directory when that tree is not writable.
 - Fixed directed CQ parsing so messages such as `CQ POTA IT9ARO JM68` and `CQ SOTA IT9ARO JM68` are accepted as valid directed CQ calls instead of treating `POTA` or `SOTA` as callsigns.
@@ -29,6 +31,8 @@ Release 1.0.281 is a focused stability and decode-logic release after 1.0.280. I
 - La modifica dello stack resta limitata al solo worker FT8 e non cambia il thread UI o il modello generale dei thread dell'applicazione.
 - Corretto il packaging release macOS per le build Homebrew Qt 6.11 in cui `QtGui.framework` puo richiedere `QtDBus.framework` all'avvio.
 - Il normalizzatore del bundle macOS ora copia dentro `Contents/Frameworks` le dipendenze framework `@rpath` mancanti e blocca la release se una dipendenza `@rpath` non e risolvibile dentro l'app.
+- Corretto un crash di avvio macOS 1.0.281 in `Configuration::impl::initialize_models()`, dove ID radio-button salvati non piu validi potevano far tornare nullo `QButtonGroup::button(id)` prima di `setChecked(true)`.
+- L'avvio ora usa default sicuri per ID radio salvati non validi su metodo PTT, attivita speciale, modo TX, split mode, CAT data bits, CAT stop bits, CAT handshake e sorgente audio TX.
 - Corretta la compatibilita della build Linux AppImage con Qt 6.4.x evitando le API piu nuove `QTimeZone::UTC` / `QTimeZone::utc()` nei percorsi condivisi e disabilitando le API Qt Quick pipeline-cache non disponibili in Qt 6.4.
 - Corretto il packaging Linux AppImage: lo script release non prova piu a spostare plugin Qt dentro una directory di sistema `/usr/lib/.../qt6/plugins` quando non e scrivibile.
 - Corretto il parsing dei CQ diretti: messaggi come `CQ POTA IT9ARO JM68` e `CQ SOTA IT9ARO JM68` ora entrano correttamente invece di interpretare `POTA` o `SOTA` come nominativi.
