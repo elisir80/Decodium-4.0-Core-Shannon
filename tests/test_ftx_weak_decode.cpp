@@ -236,6 +236,12 @@ namespace
     return ok ? std::max (1, value) : 1;
   }
 
+  QString target_message ()
+  {
+    QString const raw = QString::fromLocal8Bit (qgetenv ("DECODIUM_WEAK_TEST_MESSAGE")).trimmed ();
+    return raw.isEmpty () ? QStringLiteral ("CQ K1ABC FN42") : raw;
+  }
+
   bool mode_enabled (Mode mode)
   {
     QByteArray const raw = qgetenv ("DECODIUM_WEAK_TEST_MODE").trimmed ().toUpper ();
@@ -748,7 +754,7 @@ int main (int argc, char* argv[])
 {
   QCoreApplication app {argc, argv};
   QTextStream out {stdout};
-  QString const message = QStringLiteral ("CQ K1ABC FN42");
+  QString const message = target_message ();
   QString const want = canonical (message);
   float const snrDb = target_snr_db ();
   int const trials = target_trials ();

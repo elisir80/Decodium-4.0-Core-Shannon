@@ -546,6 +546,12 @@ bool is_cq_modifier (std::string const& word)
       || word == "AF"
       || word == "AS"
       || word == "OC"
+      || word == "POTA"
+      || word == "SOTA"
+      || word == "QRP"
+      || word == "IOTA"
+      || word == "FD"
+      || word == "WW"
       || word == "TEST";
 }
 

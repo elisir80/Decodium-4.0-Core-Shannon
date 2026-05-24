@@ -2570,6 +2570,8 @@ private:
     QTest::addColumn<QString> ("message");
 
     QTest::newRow ("standard") << "CQ K1ABC FN42";
+    QTest::newRow ("directed-cq-pota") << "CQ POTA IT9ARO JM68";
+    QTest::newRow ("directed-cq-sota") << "CQ SOTA IT9ARO JM68";
     QTest::newRow ("field-day") << "K1ABC W9XYZ 3A EMA";
     QTest::newRow ("telemetry") << "0123456789ABCDEF01";
     QTest::newRow ("wspr1") << "K1ABC FN42 30";
@@ -2659,6 +2661,20 @@ private:
         QVERIFY2 (decoded.ok, qPrintable (message));
         QCOMPARE (decodedText (decoded), message);
       }
+
+    decodium::txmsg::EncodedMessage const unresolvedPeer =
+        decodium::txmsg::encodeFt8 (QStringLiteral ("II9MESC <OE9GWV> RR73"));
+    QVERIFY (unresolvedPeer.ok);
+    decodium::txmsg::Decode77Context unresolvedContext;
+    unresolvedContext.saveHashCall (QStringLiteral ("II9MESC"));
+    decodium::txmsg::DecodedMessage const unresolvedDecoded =
+        decodium::txmsg::decode77 (unresolvedPeer.msgbits,
+                                   unresolvedPeer.i3,
+                                   unresolvedPeer.n3,
+                                   &unresolvedContext,
+                                   true);
+    QVERIFY (unresolvedDecoded.ok);
+    QCOMPARE (decodedText (unresolvedDecoded), QStringLiteral ("II9MESC <...> RR73"));
   }
 
   Q_SLOT void ftx_decode77_updates_recent_calls ()

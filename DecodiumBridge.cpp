@@ -2402,6 +2402,37 @@ static bool isPlaceholderCallToken(QString const& token)
         || upper == QStringLiteral("<...>");
 }
 
+static bool isDirectedCqModifierToken(QString const& token)
+{
+    QString const upper = normalizeCallToken(token).trimmed().toUpper();
+    if (upper.isEmpty()) {
+        return false;
+    }
+
+    static const QSet<QString> knownModifiers {
+        QStringLiteral("DX"), QStringLiteral("NA"), QStringLiteral("SA"),
+        QStringLiteral("EU"), QStringLiteral("AF"), QStringLiteral("AS"),
+        QStringLiteral("OC"), QStringLiteral("TEST"), QStringLiteral("FD"),
+        QStringLiteral("WW"), QStringLiteral("POTA"), QStringLiteral("SOTA"),
+        QStringLiteral("IOTA"), QStringLiteral("QRP")
+    };
+    if (knownModifiers.contains(upper)) {
+        return true;
+    }
+
+    // FT software commonly allows short directed-CQ tags. Do not classify
+    // digit-bearing tokens as modifiers, otherwise unusual calls can be hidden.
+    if (upper.size() <= 3) {
+        for (QChar const& ch : upper) {
+            if (ch.isDigit()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 static QString normalizedUsableCallToken(QString const& token)
 {
     QString const upper = normalizeCallToken(token).trimmed().toUpper();
@@ -2417,10 +2448,9 @@ static QString normalizedUsableCallToken(QString const& token)
         return {};
     }
     if (upper == QStringLiteral("CQ")
-        || upper == QStringLiteral("DX")
+        || isDirectedCqModifierToken(upper)
         || upper == QStringLiteral("QRZ")
         || upper == QStringLiteral("DE")
-        || upper == QStringLiteral("TEST")
         || upper == QStringLiteral("TU")
         || upper == QStringLiteral("73")
         || upper == QStringLiteral("RR73")
@@ -2680,12 +2710,38 @@ static bool hasHighConfidenceGhostPrefix(QString const& callRaw)
     }
 
     static const QSet<QString> impossiblePrefixes {
-        "ZH", "ZQ",
+        "H1", "ZH", "ZQ",
         // 1.0.224 — VZ non e' assegnato da ITU (V* assegnati: VA-VG, VK-VO, VP-VV, VX-VY).
         // HE non aggiunto: Switzerland storica (anche se ora HB9 standard).
         "VZ"
     };
     return impossiblePrefixes.contains(prefix2);
+}
+
+static QString directedPeerTokenFromMessage(QString const& message,
+                                            QString const& myFullCall,
+                                            QString const& myBaseCall)
+{
+    QStringList const tokens = normalizedMessageTokens(message);
+    if (tokens.size() < 2) {
+        return {};
+    }
+
+    bool const firstIsMine = tokenMatchesCall(tokens.at(0), myFullCall, myBaseCall);
+    bool const secondIsMine = tokenMatchesCall(tokens.at(1), myFullCall, myBaseCall);
+    if (firstIsMine == secondIsMine) {
+        return {};
+    }
+    return firstIsMine ? tokens.at(1) : tokens.at(0);
+}
+
+static bool directedPeerLooksStructurallyGhost(QString const& peerToken)
+{
+    if (peerToken.trimmed().isEmpty() || isPlaceholderCallToken(peerToken)) {
+        return false;
+    }
+    return !isPlausibleDecodedCallsign(peerToken)
+        || hasHighConfidenceGhostPrefix(peerToken);
 }
 
 static bool isDirectedDecodePayloadValid(QStringList const& payload,
@@ -2735,6 +2791,28 @@ static bool isDirectedDecodePayloadValid(QStringList const& payload,
     }
 
     return true;
+}
+
+static bool isResolvablePlaceholderDirectedPayload(QStringList const& payload,
+                                                   bool contestExchangeEnabled)
+{
+    if (payload.size() == 1) {
+        return isDirectedDecodeTerminalToken(payload.constFirst());
+    }
+
+    if (payload.size() == 2) {
+        QString const first = normalizeCallToken(payload.at(0)).toUpper();
+        QString const second = normalizeCallToken(payload.at(1)).toUpper();
+        if (second == QStringLiteral("TU")
+            && (isPlainSignalReportToken(first) || isRogerSignalReportToken(first))) {
+            return true;
+        }
+        return first == QStringLiteral("R")
+            && isGridTokenStrict(second)
+            && contestExchangeEnabled;
+    }
+
+    return false;
 }
 
 static bool shouldCoalesceVisualTxRows(QString const& mode)
@@ -6113,8 +6191,17 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             },
             Qt::QueuedConnection);
 
-    // Worker thread for FT8 decoder
+    // Worker thread for FT8 decoder.
+    // The C++ stage4 path keeps several large FFT/sync work arrays on the
+    // decoder stack; macOS QThread defaults to about 512 KB, which can crash
+    // with SIGBUS/stack guard when the modern FT8 backend is used.
     m_workerThread = new QThread(this);
+    m_workerThread->setObjectName(QStringLiteral("FT8DecodeWorker"));
+#if defined(Q_OS_LINUX)
+    m_workerThread->setStackSize(16 * 1024 * 1024);
+#else
+    m_workerThread->setStackSize(8 * 1024 * 1024);
+#endif
     m_ft8Worker = new decodium::ft8::FT8DecodeWorker();
     m_ft8Worker->moveToThread(m_workerThread);
     connect(m_ft8Worker, &decodium::ft8::FT8DecodeWorker::decodeReady,
@@ -8305,6 +8392,12 @@ bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
         || messageContainsCallToken(message, myCallUpper, myBaseUpper);
 
     if (directedToMe) {
+        QString const peerToken = directedPeerTokenFromMessage(message, myCallUpper, myBaseUpper);
+        if (directedPeerLooksStructurallyGhost(peerToken)) {
+            bridgeLog(QStringLiteral("[GhostFilter] Signal RX reject directed invalid peer=%1 msg=%2")
+                          .arg(peerToken, message));
+            return false;
+        }
         return true;
     }
 
@@ -17872,9 +17965,8 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
         // CQ [modifier] CALL GRID
         int callIdx = 1;
         if (parts.size() > 2) {
-            QString mod = parts[1];
-            if (mod == "DX" || mod == "POTA" || mod == "SOTA" ||
-                mod == "QRP" || mod.length() <= 3)
+            QString const mod = parts[1].trimmed().toUpper();
+            if (isDirectedCqModifierToken(mod))
                 callIdx = 2;
         }
         if (callIdx < parts.size()) hisCall = callAt(callIdx);
@@ -23263,7 +23355,7 @@ static QString extractRightCallsign(const QString& msg)
     // Raccogli tutti i token che sembrano callsign
     QStringList calls;
     for (const QString& p : parts) {
-        if (p == "CQ" || p == "DX" || p == "QRZ" || p == "DE" || p == "TEST") continue;
+        if (p == "CQ" || p == "QRZ" || p == "DE" || isDirectedCqModifierToken(p)) continue;
         if (looksLikeCallsignToken(p))
             calls.append(p);
     }
@@ -23403,7 +23495,9 @@ static QString legacyDecodeFilterWord2Subject(const QString& message)
 
     int index = 1;
     QString const word2 = words.at(1);
-    if (word2.size() == 2 && words.size() > 2) {
+    if (words.constFirst() == QStringLiteral("CQ")
+        && isDirectedCqModifierToken(word2)
+        && words.size() > 2) {
         index = 2;
     } else if (message.contains(QLatin1Char(';')) && words.size() > 3) {
         index = 3;
@@ -23423,10 +23517,9 @@ static QStringList decodeFilterCallingSubjects(const QVariantMap& entry)
     QStringList const words = normalizedMessageTokens(message);
     for (QString const& word : words) {
         if (word == QStringLiteral("CQ")
-            || word == QStringLiteral("DX")
             || word == QStringLiteral("QRZ")
             || word == QStringLiteral("DE")
-            || word == QStringLiteral("TEST")) {
+            || isDirectedCqModifierToken(word)) {
             continue;
         }
         if (looksLikeCallsignToken(word)) {
@@ -23725,11 +23818,7 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         if (tokens.size() >= 2) {
             int callIdx = 1;
             QString const t1 = tokens.at(1);
-            if (tokens.size() >= 3 && (t1 == QStringLiteral("DX")
-                                       || t1 == QStringLiteral("POTA")
-                                       || t1 == QStringLiteral("SOTA")
-                                       || t1 == QStringLiteral("QRP")
-                                       || t1 == QStringLiteral("TEST"))) {
+            if (tokens.size() >= 3 && isDirectedCqModifierToken(t1)) {
                 callIdx = 2;
             }
             if (callIdx < tokens.size() && !isPlausibleDecodedCallsign(tokens.at(callIdx))) {
@@ -23819,21 +23908,6 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         return false;
     }
 
-    // Sanity gate: il PEER (l'altro callsign) deve essere un amateur plausibile.
-    // Il messaggio e' "<DX> <ME> ...": peer = tokens[0] se ME e' tokens[1],
-    // altrimenti peer = tokens[1]. Applica anche il blocco sui prefissi
-    // impossibili ad alta fiducia per fermare i ghost LDPC.
-    int const peerIdx = tokenIsMine(1) ? 0 : 1;
-    QString const peerToken = tokens.at(peerIdx);
-    if (!isPlausibleDecodedCallsign(peerToken)) {
-        if (reason) *reason = QStringLiteral("directed from/to invalid callsign (ghost)");
-        return false;
-    }
-    if (hasHighConfidenceGhostPrefix(peerToken)) {
-        if (reason) *reason = QStringLiteral("directed peer has impossible prefix (ghost)");
-        return false;
-    }
-
     QStringList payload = tokens.mid(2);
     // 1.0.147: il decoder FT8/FT4/FT2 appende "?" come marker "low-confidence"
     // (es. "IU8LMC M0NXD -12 ?"). Non e' parte del payload semantico, va
@@ -23844,8 +23918,70 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         payload.removeLast();
     }
 
-    bool const payloadValid = isDirectedDecodePayloadValid(payload, contestDecodeExchangesEnabled(), reason);
+    bool const contestExchanges = contestDecodeExchangesEnabled();
+    QString payloadRejectReason;
+    bool const payloadValid = isDirectedDecodePayloadValid(payload,
+                                                           contestExchanges,
+                                                           &payloadRejectReason);
+
+    // Sanity gate: il PEER (l'altro callsign) deve essere un amateur plausibile.
+    // Il messaggio e' "<DX> <ME> ...": peer = tokens[0] se ME e' tokens[1],
+    // altrimenti peer = tokens[1]. Applica anche il blocco sui prefissi
+    // impossibili ad alta fiducia per fermare i ghost LDPC.
+    int const peerIdx = tokenIsMine(1) ? 0 : 1;
+    QString peerToken = tokens.at(peerIdx);
+    bool const peerIsUnresolvedPlaceholder = isPlaceholderCallToken(peerToken);
+    if (peerIsUnresolvedPlaceholder) {
+        if (!payloadValid) {
+            if (reason) *reason = payloadRejectReason;
+            return false;
+        }
+        if (!isResolvablePlaceholderDirectedPayload(payload, contestExchanges)) {
+            if (reason) *reason = QStringLiteral("directed placeholder peer unsupported payload");
+            return false;
+        }
+
+        QString activePartner = m_dxCall.trimmed();
+        if (activePartner.isEmpty()) {
+            activePartner = m_autoCqLockedCall.trimmed();
+        }
+        if (activePartner.isEmpty()) {
+            activePartner = inferredPartnerForAutolog().trimmed();
+        }
+
+        QString const activeBase = normalizedBaseCall(activePartner);
+        bool const activePartnerValid =
+            !activeBase.isEmpty()
+            && isPlausibleDecodedCallsign(activePartner)
+            && !hasHighConfidenceGhostPrefix(activePartner);
+        bool const activeQsoContext =
+            activePartnerValid
+            && (m_qsoProgress > 1
+                || (m_currentTx >= 1 && m_currentTx <= 5)
+                || m_txEnabled
+                || m_transmitting
+                || messageContainsCallToken(m_lastTransmittedMessage, activePartner, activeBase)
+                || messageContainsCallToken(m_pendingAutoSeqMessage, activePartner, activeBase));
+
+        if (!activeQsoContext) {
+            if (reason) *reason = QStringLiteral("directed placeholder peer without active QSO context");
+            return false;
+        }
+
+        peerToken = activePartner;
+    } else {
+        if (!isPlausibleDecodedCallsign(peerToken)) {
+            if (reason) *reason = QStringLiteral("directed from/to invalid callsign (ghost)");
+            return false;
+        }
+        if (hasHighConfidenceGhostPrefix(peerToken)) {
+            if (reason) *reason = QStringLiteral("directed peer has impossible prefix (ghost)");
+            return false;
+        }
+    }
+
     if (!payloadValid) {
+        if (reason) *reason = payloadRejectReason;
         return false;
     }
 
@@ -24354,7 +24490,7 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClea
     calls.reserve(words.size());
     for (QString const& word : words) {
         if (word == QStringLiteral("CQ") || word == QStringLiteral("QRZ") || word == QStringLiteral("DE")
-            || word == QStringLiteral("DX") || word == QStringLiteral("TEST")) {
+            || isDirectedCqModifierToken(word)) {
             continue;
         }
         if (looksLikeCallsignToken(word)) {
@@ -24738,10 +24874,9 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     QStringList const tokens = normalizedMessageTokens(msg);
     for (QString const& token : tokens) {
         if (token == QStringLiteral("CQ")
-            || token == QStringLiteral("DX")
             || token == QStringLiteral("QRZ")
             || token == QStringLiteral("DE")
-            || token == QStringLiteral("TEST")) {
+            || isDirectedCqModifierToken(token)) {
             continue;
         }
         if (looksLikeCallsignToken(token)) {
