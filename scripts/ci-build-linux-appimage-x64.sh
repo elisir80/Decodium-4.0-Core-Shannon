@@ -50,12 +50,25 @@ fi
 QT_PLUGIN_DIR_FOR_BUILD="$("${QMAKE}" -query QT_INSTALL_PLUGINS 2>/dev/null || true)"
 QT_LIB_DIR_FOR_BUILD="$("${QMAKE}" -query QT_INSTALL_LIBS 2>/dev/null || true)"
 QT_PREFIX_FOR_BUILD="$("${QMAKE}" -query QT_INSTALL_PREFIX 2>/dev/null || true)"
+
+qt_plugin_tree_writable() {
+  [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}" && -w "${QT_PLUGIN_DIR_FOR_BUILD}" ]]
+}
+
+qt_plugin_subdir_writable() {
+  local plugin_subdir="$1"
+  qt_plugin_tree_writable && [[ -d "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}" && -w "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}" ]]
+}
+
 restore_disabled_qt_plugin() {
   local plugin_subdir="$1"
   local plugin_name="$2"
   local disabled_subdir="${plugin_subdir}-disabled"
 
   if [[ -z "${QT_PLUGIN_DIR_FOR_BUILD}" ]]; then
+    return
+  fi
+  if ! qt_plugin_tree_writable; then
     return
   fi
   if [[ -f "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}/${plugin_name}" ]]; then
@@ -70,9 +83,13 @@ restore_disabled_qt_plugin() {
 
 restore_disabled_qt_plugin imageformats libqtiff.so
 if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled" ]]; then
-  mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers"
-  cp -a "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled"/libqsql*.so \
-    "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers/" 2>/dev/null || true
+  if qt_plugin_tree_writable; then
+    mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers"
+    cp -a "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled"/libqsql*.so \
+      "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers/" 2>/dev/null || true
+  else
+    echo "Skipping Qt SQL driver restore: ${QT_PLUGIN_DIR_FOR_BUILD} is not writable"
+  fi
 fi
 
 stash_optional_qt_plugin() {
@@ -84,6 +101,10 @@ stash_optional_qt_plugin() {
     return
   fi
   if [[ -f "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}/${plugin_name}" ]]; then
+    if ! qt_plugin_subdir_writable "${plugin_subdir}"; then
+      echo "Skipping optional Qt plugin stash for ${plugin_subdir}/${plugin_name}: Qt plugin dir is not writable"
+      return
+    fi
     mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/${disabled_subdir}"
     mv -f "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}/${plugin_name}" \
       "${QT_PLUGIN_DIR_FOR_BUILD}/${disabled_subdir}/${plugin_name}"
@@ -224,9 +245,13 @@ log "Prepare linuxdeploy"
 mkdir -p "${TOOLS_DIR}"
 stash_optional_qt_plugin imageformats libqtiff.so
 if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers" ]]; then
-  mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled"
-  find "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers" -maxdepth 1 -type f -name 'libqsql*.so' ! -name 'libqsqlite.so' \
-    -exec mv -f {} "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled/" \;
+  if qt_plugin_subdir_writable sqldrivers; then
+    mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled"
+    find "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers" -maxdepth 1 -type f -name 'libqsql*.so' ! -name 'libqsqlite.so' \
+      -exec mv -f {} "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled/" \;
+  else
+    echo "Skipping temporary Qt SQL driver stash: ${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers is not writable"
+  fi
 fi
 LINUXDEPLOY="${TOOLS_DIR}/linuxdeploy-x86_64.AppImage"
 QT_PLUGIN="${TOOLS_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
