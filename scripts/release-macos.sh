@@ -175,6 +175,11 @@ verify_app_identity() {
     echo "error: missing executable ${app_bundle}/Contents/MacOS/Decodium4"
     return 1
   fi
+  if ! strings "${app_bundle}/Contents/MacOS/Decodium4" \
+    | awk 'index($0, "QML OK - entering event loop") {found=1} END {exit found ? 0 : 1}'; then
+    echo "error: Contents/MacOS/Decodium4 must be the Decodium QML runtime, not the legacy FT2 UI"
+    return 1
+  fi
   if [[ -e "${app_bundle}/Contents/MacOS/ft2" ]]; then
     echo "error: stale ft2 executable still present in ${app_bundle}/Contents/MacOS"
     return 1

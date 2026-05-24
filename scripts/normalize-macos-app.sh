@@ -68,6 +68,34 @@ ensure_real_binary() {
   mv -f "${temp_path}" "${tool_path}"
 }
 
+is_decodium_qml_executable() {
+  local executable_path="$1"
+
+  [[ -x "${executable_path}" ]] || return 1
+  strings "${executable_path}" \
+    | awk 'index($0, "QML OK - entering event loop") {found=1} END {exit found ? 0 : 1}'
+}
+
+promote_decodium_qml_main_executable() {
+  local main_exec="${MACOS_DIR}/Decodium4"
+  local qml_exec="${MACOS_DIR}/decodium"
+
+  if is_decodium_qml_executable "${main_exec}"; then
+    rm -f "${qml_exec}"
+    return 0
+  fi
+
+  if ! is_decodium_qml_executable "${qml_exec}"; then
+    echo "error: Decodium QML executable is missing or invalid: ${qml_exec}"
+    echo "error: ${main_exec} would launch the legacy FT2 UI instead of Decodium4"
+    exit 1
+  fi
+
+  rm -f "${main_exec}"
+  mv "${qml_exec}" "${main_exec}"
+  chmod 755 "${main_exec}"
+}
+
 framework_relative_path() {
   local file_path="$1"
   printf '%s\n' "${file_path#${FRAMEWORKS_DIR}/}"
@@ -513,6 +541,8 @@ validate_bundle() {
   local current_id=""
   local resolved_dep=""
   local rpath=""
+  local main_exec_name=""
+  local main_exec_path=""
 
   if [[ -d "${MACOS_DIR}/sounds" ]]; then
     echo "error: sounds still present in Contents/MacOS"
@@ -533,6 +563,18 @@ validate_bundle() {
       exit 1
     fi
   done
+
+  main_exec_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${CONTENTS_DIR}/Info.plist" 2>/dev/null || true)"
+  main_exec_path="${MACOS_DIR}/${main_exec_name}"
+  if [[ "${main_exec_name}" != "Decodium4" || ! -x "${main_exec_path}" ]]; then
+    echo "error: Decodium4.app main executable is invalid: ${main_exec_name:-<empty>}"
+    exit 1
+  fi
+  if ! is_decodium_qml_executable "${main_exec_path}"; then
+    echo "error: ${main_exec_path} is not the Decodium QML runtime"
+    echo "error: release would open the legacy FT2 UI"
+    exit 1
+  fi
 
   while IFS= read -r file_path; do
     [[ -n "${file_path}" ]] || continue
@@ -584,6 +626,7 @@ validate_bundle() {
 }
 
 normalize_bundle_layout
+promote_decodium_qml_main_executable
 normalize_bundle_macho_paths
 validate_bundle
 
