@@ -52,6 +52,7 @@
 
 #include <QClipboard>
 #include <QCoreApplication>
+#include <QByteArray>
 #include <QGuiApplication>
 #include <QScreen>
 #include <QApplication>
@@ -566,6 +567,11 @@ static bool bridgeStatusLooksLikeWarning(const QString& msg)
 static constexpr bool kDecodiumUpdateCheckerEnabled = false;
 
 namespace {
+
+QTimeZone decodiumUtcTimeZone()
+{
+    return QTimeZone(QByteArrayLiteral("UTC"));
+}
 
 void applyFtOpenMpThreadLimit(int threads)
 {
@@ -14454,11 +14460,11 @@ QVariantMap DecodiumBridge::worldClockSnapshot(const QString& timeZoneId) const
 {
     QByteArray const zoneId = timeZoneId.trimmed().toUtf8();
     QTimeZone zone = (zoneId.isEmpty() || zoneId == "UTC")
-        ? QTimeZone::utc()
+        ? decodiumUtcTimeZone()
         : QTimeZone(zoneId);
 
     if (!zone.isValid()) {
-        zone = QTimeZone::utc();
+        zone = decodiumUtcTimeZone();
     }
 
     QDateTime const zonedNow = QDateTime::currentDateTimeUtc().toTimeZone(zone);
@@ -14531,7 +14537,7 @@ QVariantList DecodiumBridge::worldClockCityOptions(const QString& query, int lim
     };
 
     auto offsetLabel = [](QTimeZone const& zone) {
-        if (zone == QTimeZone::utc()) {
+        if (zone == decodiumUtcTimeZone()) {
             return QStringLiteral("UTC+00:00");
         }
         int const offset = zone.offsetFromUtc(QDateTime::currentDateTimeUtc());
@@ -14559,7 +14565,7 @@ QVariantList DecodiumBridge::worldClockCityOptions(const QString& query, int lim
     QVector<CityOption> matches;
     auto appendOption = [&](QString const& zoneId, int defaultScore) {
         QTimeZone zone = zoneId == QStringLiteral("UTC")
-            ? QTimeZone::utc()
+            ? decodiumUtcTimeZone()
             : QTimeZone(zoneId.toUtf8());
         if (!zone.isValid()) {
             return;
@@ -29946,7 +29952,7 @@ bool DecodiumBridge::exportAdif(const QString& filename)
         QString freqStr= (f.size() > 4) ? f[4] : "";
         QString mode   = (f.size() > 5) ? f[5] : "FT8";
         QDateTime utc  = QDateTime::fromString(dtStr, "yyyyMMdd_hhmmss");
-        utc.setTimeZone(QTimeZone::utc());
+        utc.setTimeZone(decodiumUtcTimeZone());
         double freqMhz = freqStr.replace("MHz","").toDouble();
         double freqHz  = freqMhz * 1e6;
         ts << field("CALL",          dxCall)

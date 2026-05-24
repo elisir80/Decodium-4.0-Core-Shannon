@@ -1,4 +1,5 @@
 #include <QtTest>
+#include <QByteArray>
 #include <QDateTime>
 #include <QDir>
 #include <QDebug>
@@ -2506,7 +2507,8 @@ private:
     };
 
     for (auto const& vector : vectors) {
-      QDateTime const dt = QDateTime::fromSecsSinceEpoch (vector.seconds, QTimeZone::UTC);
+      QDateTime const dt = QDateTime::fromSecsSinceEpoch (
+        vector.seconds, QTimeZone (QByteArrayLiteral ("UTC")));
       QCOMPARE (generator.generateTOTP (secret, dt, 8), QString::fromLatin1 (vector.expected));
     }
   }
@@ -2532,7 +2534,8 @@ private:
     };
 
     for (auto const& vector : vectors) {
-      QDateTime const dt = QDateTime::fromSecsSinceEpoch (vector.seconds, QTimeZone::UTC);
+      QDateTime const dt = QDateTime::fromSecsSinceEpoch (
+        vector.seconds, QTimeZone (QByteArrayLiteral ("UTC")));
       QCOMPARE (QString::fromLatin1 (generator.generateTOTP (secret, dt, 8, QCryptographicHash::Sha256)),
                 QString::fromLatin1 (vector.expected));
     }
@@ -2559,7 +2562,8 @@ private:
     };
 
     for (auto const& vector : vectors) {
-      QDateTime const dt = QDateTime::fromSecsSinceEpoch (vector.seconds, QTimeZone::UTC);
+      QDateTime const dt = QDateTime::fromSecsSinceEpoch (
+        vector.seconds, QTimeZone (QByteArrayLiteral ("UTC")));
       QCOMPARE (QString::fromLatin1 (generator.generateTOTP (secret, dt, 8, QCryptographicHash::Sha512)),
                 QString::fromLatin1 (vector.expected));
     }
