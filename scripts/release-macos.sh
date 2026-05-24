@@ -255,8 +255,7 @@ sign_app_bundle() {
       continue
     fi
     codesign --force --sign "${sign_identity}" --timestamp=none "${code_file}" >/dev/null
-  done < <(find "${app_bundle}/Contents" -type f \
-    \( -name "*.dylib" -o -name "*.so" -o -perm -111 \) 2>/dev/null | sort)
+  done < <(find "${app_bundle}/Contents" -type f 2>/dev/null | sort)
 
   while IFS= read -r bundle_dir; do
     [[ -n "${bundle_dir}" ]] || continue
