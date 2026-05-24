@@ -178,19 +178,15 @@ copy_qt_qml_imports_into_bundle() {
   for entry in \
     QML \
     QtQml/qmldir \
-    QtQml/plugins.qmltypes \
     QtQml/libqmlplugin.dylib \
     QtQml/Models \
     QtQml/WorkerScript \
     QtCore/qmldir \
-    QtCore/plugins.qmltypes \
     QtCore/libqtqmlcoreplugin.dylib \
     Qt/labs/folderlistmodel \
     QtQuick/qmldir \
-    QtQuick/plugins.qmltypes \
     QtQuick/libqtquick2plugin.dylib \
     QtQuick/Controls/qmldir \
-    QtQuick/Controls/plugins.qmltypes \
     QtQuick/Controls/libqtquickcontrols2plugin.dylib \
     QtQuick/Controls/Basic \
     QtQuick/Controls/Material \
@@ -208,6 +204,23 @@ copy_qt_qml_imports_into_bundle() {
     mkdir -p "$(dirname "${dest}")"
     cp -R -L -p "${src}" "${dest}"
   done
+}
+
+prune_qml_type_metadata() {
+  local qmltypes_file=""
+  local removed=0
+
+  [[ -d "${MACOS_DIR}/qml" ]] || return 0
+
+  while IFS= read -r qmltypes_file; do
+    [[ -n "${qmltypes_file}" ]] || continue
+    rm -f "${qmltypes_file}"
+    removed=1
+  done < <(find "${MACOS_DIR}/qml" -type f -name 'plugins.qmltypes' -print 2>/dev/null)
+
+  if [[ "${removed}" -ne 0 ]]; then
+    echo "Pruned Qt QML type metadata from runtime bundle"
+  fi
 }
 
 normalize_qml_resource_permissions() {
@@ -283,6 +296,11 @@ validate_qt_qml_imports() {
     echo "error: symlink remains in bundled QML imports: ${symlink_path}"
     missing=1
   done < <(find "${MACOS_DIR}/qml" -type l -print 2>/dev/null)
+
+  if find "${MACOS_DIR}/qml" -type f -name 'plugins.qmltypes' -print -quit 2>/dev/null | grep -q .; then
+    echo "error: Qt QML type metadata remains in runtime bundle"
+    missing=1
+  fi
 
   if [[ "${missing}" -ne 0 ]]; then
     exit 1
@@ -905,6 +923,7 @@ validate_bundle() {
 normalize_bundle_layout
 promote_decodium_qml_main_executable
 copy_qt_qml_imports_into_bundle
+prune_qml_type_metadata
 normalize_qml_resource_permissions
 copy_qt_plugins_into_bundle
 normalize_bundle_macho_paths
