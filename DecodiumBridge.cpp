@@ -27544,7 +27544,13 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
     }
 
     int const effectiveDepth = effectiveDecodeDepth();
-    int const decodeDepth = qMin(effectiveDepth, 2);
+    // Early preview = la passata TIMELY (gira intra-slot, prima della fine slot).
+    // Con Deep Search la portiamo a depth 3 (syncmin 6 vs 8, budget candidati 2400
+    // vs 1000): cattura piu' segnali deboli ENTRO la finestra timely. Restiamo a
+    // depth 3 e non 4 perche' il budget depth-3 (2200ms) entra nei ~2.2s prima che
+    // il final pass faccia cancelCurrentDecode; depth 4 (3000ms) verrebbe troncato.
+    int const earlyDepthCap = m_deepSearchEnabled ? 3 : 2;
+    int const decodeDepth = qMin(effectiveDepth, earlyDepthCap);
     if (decodeDepth <= 1) {
         if (mark41) m_ft8EarlyDecode41Sent = true;
         if (mark47) m_ft8EarlyDecode47Sent = true;

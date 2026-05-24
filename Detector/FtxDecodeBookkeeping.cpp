@@ -2496,6 +2496,19 @@ extern "C" void ftx_ft8_prepare_pass_c (int ndepth, int ipass, int ndecodes,
     {
       local_syncmin *= 0.76f;
     }
+  // Deep Search (ndepth>=4, attivo solo col toggle): soglia di sync piu' bassa
+  // per agganciare i segnali deboli/sovrapposti che restano dopo la sottrazione
+  // dei forti, avvicinando il yield al "Deep" di JTDX. Le passate di sottrazione
+  // (>=4) ricevono la spinta maggiore perche' e' li' che emergono gli overlapping.
+  // I candidati extra sono protetti dal CRC-14 a valle (nessun falso decode).
+  if (ndepth >= 4)
+    {
+      local_syncmin *= 0.80f;
+      if (ipass >= 4)
+        {
+          local_syncmin *= 0.85f;
+        }
+    }
 
   if (ipass == 1)
     {
