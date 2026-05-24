@@ -209,15 +209,21 @@ copy_qt_qml_imports_into_bundle() {
 }
 
 move_app_qml_into_resources() {
-  local app_qml_src="${MACOS_DIR}/qml/decodium"
-  local app_qml_dest="${QT_QML_BUNDLE_DIR}/decodium"
+  local app_qml_src="${MACOS_DIR}/qml"
+  local entry=""
+  local dest=""
 
   [[ -d "${app_qml_src}" ]] || return 0
 
   mkdir -p "${QT_QML_BUNDLE_DIR}"
-  rm -rf "${app_qml_dest}"
-  mv "${app_qml_src}" "${app_qml_dest}"
-  rmdir "${MACOS_DIR}/qml" 2>/dev/null || true
+  while IFS= read -r entry; do
+    [[ -n "${entry}" ]] || continue
+    dest="${QT_QML_BUNDLE_DIR}/$(basename "${entry}")"
+    rm -rf "${dest}"
+    mv "${entry}" "${dest}"
+  done < <(find "${app_qml_src}" -mindepth 1 -maxdepth 1 -print 2>/dev/null)
+
+  rmdir "${app_qml_src}" 2>/dev/null || true
 }
 
 prune_qml_type_metadata() {
