@@ -125,6 +125,12 @@ check_bundle_compatibility() {
     echo "error: missing sounds directory in Contents/Resources"
     has_bad_bundle_paths=1
   fi
+  while IFS= read -r file_path; do
+    [[ -n "$file_path" ]] || continue
+    echo "error: non-executable resource file remains in Contents/MacOS:"
+    echo "  ${file_path}"
+    has_bad_bundle_paths=1
+  done < <(find "$app_bundle/Contents/MacOS" -maxdepth 1 -type f ! -perm -111 -print 2>/dev/null)
   for tool_name in rigctl-wsjtx rigctld-wsjtx rigctlcom-wsjtx; do
     if [[ -L "$app_bundle/Contents/MacOS/$tool_name" ]]; then
       echo "error: bundled Hamlib tool is still a symlink:"
@@ -189,6 +195,11 @@ verify_app_identity() {
     echo "error: QML runtime files must not remain under Contents/MacOS"
     return 1
   fi
+  while IFS= read -r stale_resource_path; do
+    [[ -n "${stale_resource_path}" ]] || continue
+    echo "error: non-executable resource file must not remain under Contents/MacOS: ${stale_resource_path}"
+    return 1
+  done < <(find "${app_bundle}/Contents/MacOS" -maxdepth 1 -type f ! -perm -111 -print 2>/dev/null)
   for required_qml_path in \
     "${app_bundle}/Contents/Resources/qml/decodium/BootLoader.qml" \
     "${app_bundle}/Contents/Resources/qml/QtQuick/Controls/qmldir" \

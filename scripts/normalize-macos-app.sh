@@ -770,6 +770,8 @@ ensure_rpath() {
 normalize_bundle_layout() {
   local macos_sounds="${MACOS_DIR}/sounds"
   local resources_sounds="${RESOURCES_DIR}/sounds"
+  local resource_file=""
+  local resource_name=""
 
   mkdir -p "${RESOURCES_DIR}"
 
@@ -780,6 +782,13 @@ normalize_bundle_layout() {
       mv "${macos_sounds}" "${resources_sounds}"
     fi
   fi
+
+  while IFS= read -r resource_file; do
+    [[ -n "${resource_file}" ]] || continue
+    resource_name="$(basename "${resource_file}")"
+    rm -f "${RESOURCES_DIR}/${resource_name}"
+    mv "${resource_file}" "${RESOURCES_DIR}/${resource_name}"
+  done < <(find "${MACOS_DIR}" -maxdepth 1 -type f ! -perm -111 -print 2>/dev/null)
 
   ensure_real_binary "${MACOS_DIR}/rigctl-wsjtx"
   ensure_real_binary "${MACOS_DIR}/rigctld-wsjtx"
@@ -888,6 +897,13 @@ validate_bundle() {
     echo "error: missing Contents/Resources/sounds"
     exit 1
   fi
+
+  while IFS= read -r file_path; do
+    [[ -n "${file_path}" ]] || continue
+    echo "error: non-executable resource file remains in Contents/MacOS: ${file_path}"
+    echo "error: move bundled data files to Contents/Resources before signing"
+    exit 1
+  done < <(find "${MACOS_DIR}" -maxdepth 1 -type f ! -perm -111 -print 2>/dev/null)
 
   for file_path in \
     "${MACOS_DIR}/rigctl-wsjtx" \

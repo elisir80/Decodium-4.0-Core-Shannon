@@ -1995,11 +1995,19 @@ install (FILES
   #COMPONENT runtime
   )
 
-install (FILES
-  ALLCALL7.TXT
-  DESTINATION ${CMAKE_INSTALL_BINDIR}
-  #COMPONENT runtime
-  )
+if (APPLE)
+  install (FILES
+    ALLCALL7.TXT
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}
+    #COMPONENT runtime
+    )
+else ()
+  install (FILES
+    ALLCALL7.TXT
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    #COMPONENT runtime
+    )
+endif ()
 
 install (DIRECTORY
   example_log_configurations

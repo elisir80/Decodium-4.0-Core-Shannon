@@ -30755,14 +30755,21 @@ void MainWindow::on_actionErase_Ignore_List_triggered()
 
 void MainWindow::read_ALLCALL7()
 {
-  static QFile AllCall7File {"ALLCALL7.TXT"};
-  QTextStream AllCall7Stream(&AllCall7File);
-  if(AllCall7File.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    while (!AllCall7Stream.atEnd()) {
-      ALLCALL7 = AllCall7Stream.readAll();
-    }
-      AllCall7Stream.flush();
-      AllCall7File.close();
+  QStringList candidates {
+    QStringLiteral ("ALLCALL7.TXT"),
+    QDir (QCoreApplication::applicationDirPath ()).absoluteFilePath (QStringLiteral ("../Resources/ALLCALL7.TXT"))
+  };
+  for (auto const& path : candidates)
+    {
+      QFile allCall7File {path};
+      QTextStream allCall7Stream (&allCall7File);
+      if (allCall7File.open (QIODevice::ReadOnly | QIODevice::Text))
+        {
+          ALLCALL7 = allCall7Stream.readAll ();
+          allCall7Stream.flush ();
+          allCall7File.close ();
+          return;
+        }
   }
 }
 
