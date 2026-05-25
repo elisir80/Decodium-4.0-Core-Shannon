@@ -38,6 +38,7 @@ class DecodiumWsprUploader;
 class DxccLookup;
 class DecodiumLegacyBackend;
 #include "DecodiumDiagnostics.h"
+#include "lib/persistence/HashedCallsignCache.h"  // 1.0.293 — AP hashed-callsign cache Fase 0
 class DecodiumPropagationManager;
 class MessageClient;
 
@@ -392,6 +393,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
+    Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
     // Diversamente dalla 1.0.186 revertita, qui e' default OFF e ha gate molto
     // piu' stretti + log immediato di ogni invocazione (anche se guardrail rifiuta).
@@ -1253,6 +1255,7 @@ signals:
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2AdaptiveDecodeChanged();      // 1.0.292
+    void ft2ApHashCacheChanged();         // 1.0.293
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
     void smoothDecodeFlowChanged();  // 1.0.179 — Smooth Decode Flow
@@ -1750,6 +1753,10 @@ private:
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
+    bool m_ft2ApHashCache {false};         // 1.0.293: AP hashed-callsign cache (Fase 0: seed + hit-rate, no decode change)
+    // 1.0.293 — cache band-wide degli hash28 dei call visti in banda (single-thread, GUI-confined).
+    HashedCallsignCache m_hashedCallsignCache;
+    qint64 m_lastApHashLogMs {0};          // throttle del log hit-rate
     // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory state
     bool m_ft2PartnerMemoryEnabled {false};   // opt-in, default OFF
     struct PartnerMemoryEntry {
@@ -2463,6 +2470,8 @@ public:
     Q_INVOKABLE void setFt2QuickGiveUpStrong(bool v);
     Q_INVOKABLE bool ft2AdaptiveDecode() const { return m_ft2AdaptiveDecode; }
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
+    Q_INVOKABLE bool ft2ApHashCache() const { return m_ft2ApHashCache; }
+    Q_INVOKABLE void setFt2ApHashCache(bool v);
 
     // 1.0.179 — Smooth Decode Flow scheduler: spalma il rilascio dei decode
     // FT8/FT4 dal batch (15-30 row insieme) in stream progressivo con

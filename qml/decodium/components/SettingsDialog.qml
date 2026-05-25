@@ -2883,6 +2883,32 @@ Dialog {
                                     ToolTip.text: qsTr("In SOLO-ASCOLTO (non stai chiamando CQ né in QSO) dirada il re-decode async da 100ms a ~350ms: non ridecodifica audio sovrapposto al 95% → risparmia CPU e riduce i picchi che possono abbassare la profondità decode. Quando aspetti una risposta (AutoCQ/QSO) resta a piena cadenza. Non perde decode. Utile soprattutto su PC modesti. Default OFF.")
                                 }
 
+                                // 1.0.293 — FT2: AP hashed-callsign cache (Fase 0: solo osservabilità)
+                                Text {
+                                    text: qsTr("FT2: AP cache (sperimentale, Fase 0):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2ApHashCacheCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2ApHashCache : false
+                                    onCheckedChanged: {
+                                        if (bridge) bridge.setFt2ApHashCache(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("FASE 0 (osservabilità): registra in una cache i callsign visti in banda (hash, TTL 30 min) e misura quanto spesso una call decodificata era già stata vista — log [FT2WS-AP] nel diagnostico. NON cambia ancora il decode. È la base per l'AP decoding band-wide (obiettivo −3 dB) che arriverà nelle fasi successive. Default OFF.")
+                                }
+
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
                                 Text {
                                     text: qsTr("FT2 partner-memory (anti-QSB):")

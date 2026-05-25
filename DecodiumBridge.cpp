@@ -26,6 +26,7 @@
 #include "Detector/FT8DecodeWorker.hpp"
 #include "Detector/FftCompat.hpp"
 #include "Detector/FT2DecodeWorker.hpp"
+#include "Detector/CallsignHash28.h"  // 1.0.293 — hash28 condiviso per AP cache
 #include "Detector/FT4DecodeWorker.hpp"
 #include "Detector/Q65DecodeWorker.hpp"
 #include "Detector/MSK144DecodeWorker.hpp"
@@ -4508,6 +4509,16 @@ void DecodiumBridge::setFt2AdaptiveDecode(bool v)
     settings.setValue(QStringLiteral("Ft2AdaptiveDecode"), v);
     emit ft2AdaptiveDecodeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Adaptive decode %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setFt2ApHashCache(bool v)
+{
+    if (m_ft2ApHashCache == v) return;
+    m_ft2ApHashCache = v;
+    QSettings settings;
+    settings.setValue(QStringLiteral("Ft2ApHashCache"), v);
+    emit ft2ApHashCacheChanged();
+    bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Fase 0: seed+hit-rate)").arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers RISCRITTI
@@ -21039,6 +21050,7 @@ void DecodiumBridge::loadSettings()
     m_ft2FullDecodeInAutoCq = s.value(QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
     m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     m_ft2AdaptiveDecode     = s.value(QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
+    m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
     m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
@@ -25909,6 +25921,35 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
 
         m_decodeList.append(QVariant(entry));
         trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
+
+        // 1.0.293 — AP hashed-callsign cache Fase 0 (opt-in, default OFF): registra in
+        // cache le call viste in banda + misura l'hit-rate. Osservabilità PURA: nessun
+        // effetto sul decode (snapshot→Stage7 e uso AP arrivano in Fase 1/2). Anti-loop:
+        // in Fase 0 ogni accepted è "pulito" (i decode cache-confirmed nap=7 sono Fase 1).
+        if (m_ft2ApHashCache) {
+            qint64 const apNowMs = entry.value(QStringLiteral("timestamp")).toLongLong();
+            static QRegularExpression const apStrictCallRe(
+                QStringLiteral("^([A-Z][0-9]?|[0-9A-Z][A-Z])[0-9][A-Z]{0,3}$"));
+            const QString apCallTokens[2] = { entry.value(QStringLiteral("fromCall")).toString(),
+                                              extractRightCallsign(msg) };
+            int apSeeded = 0, apHits = 0;
+            for (const QString& rawCall : apCallTokens) {
+                if (rawCall.contains(QLatin1Char('<'))) continue;  // no nonstandard <...> in Fase 0
+                QString const baseCall = normalizedBaseCall(rawCall);
+                if (!apStrictCallRe.match(baseCall).hasMatch()) continue;
+                quint32 const h28 = decodium::ft2CallsignHash28(baseCall);
+                if (m_hashedCallsignCache.containsHash28(h28, apNowMs)) ++apHits;
+                m_hashedCallsignCache.add(h28, apNowMs);
+                ++apSeeded;
+            }
+            if (apSeeded > 0 && apNowMs - m_lastApHashLogMs >= 15000) {
+                m_lastApHashLogMs = apNowMs;
+                bridgeLog(QStringLiteral("[FT2WS-AP] Fase0 cache=%1 (TTL30m) seeded=%2 hits=%3")
+                              .arg(m_hashedCallsignCache.validCount(apNowMs))
+                              .arg(apSeeded).arg(apHits));
+            }
+        }
+
         // 1.0.240 (Phase 5.2 fix iter2): hook persistence + counter sul
         // path FT2-async (decoder principale). Vedi appendDecodeMapToList.
         noteDecodeCommitted();
