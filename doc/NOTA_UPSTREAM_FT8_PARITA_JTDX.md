@@ -76,3 +76,75 @@ subtract-and-research è inferiore a JTDX (`nPreampass=4` + decoder ottimizzato)
 
 ~85-93% di JTDX (band-dependent) · 96% timely (≤+3s) · `<...>` ~5% · 0 stall · 0 underrun.
 Da ~80% e 15% di call illeggibili. Le modifiche #1/#2 sono opt-in dietro "Deep Search".
+
+---
+
+# Parte 2 — Bug FT8 "QSO non si chiude" (2026-05-25, fork 1.0.284)
+
+**Sintomo di campo:** molti utenti non chiudono QSO **FT8** con D4 (la stazione
+remota risponde ma il QSO non si completa: D4 ripete / il partner non riceve
+risposta in tempo), mentre **D3 e JTDX chiudono gli stessi QSO sulle stesse
+macchine**. Sintomi riportati: "TX parte ma non avanza" + "il partner non risponde".
+
+## Diagnosi (provata da cattura live, QSO con EA3IXP debole -20)
+
+Il timing TX/PTT è SANO (`[TX-TL] sink_create dt=0ms`, payload +500ms, 0 underrun) —
+**non è un problema di lead-in/PTT/trimming di per sé**. Il difetto è di
+**ordinamento decode↔TX**:
+
+1. L'auto-sequence FT8 **committa il TX successivo (CQ) al confine slot (+137ms)
+   PRIMA di decodificare lo slot appena finito**. Catena: period tick
+   `DecodiumBridge.cpp:26217` → `autoTxWaitsForDecode` era falso perché
+   `pendingAutoDecodeBeforeBoundary` (`26159`) richiede un decode **già in volo** al
+   boundary, ma il decode dello slot finito viene dispatchato solo a **+650ms**
+   (`26212`).
+2. La risposta del partner — **debole, mancata dalla passata early-visible**
+   (depth 3 su buffer parziale `nzhsym=41`) — viene presa solo dal decode FINALE a
+   **~+0.8-1.0s**, quando D4 sta già trasmettendo CQ.
+3. D4 vuole rispondere ma **rinvia di un ciclo** (`auto-seq: defer TX3 while active
+   TX2 is still playing`) → il partner ripete → D4 ridecodifica tardi → **loop, QSO
+   mai chiuso**.
+
+**Perché D3/JTDX sì:** decodificano-poi-decidono (commit TX dopo il decode) e
+agganciano i deboli in tempo. **Perché "del computer":** su PC lenti l'early-visible
+viene **saltato** (CPU pressure) → *ogni* risposta arriva tardi → *ogni* QSO fallisce
+così; su PC veloci scatta solo coi partner deboli.
+
+## Fix (commit `deaab40`, 6 modifiche accoppiate in `DecodiumBridge.cpp`)
+
+1. **Decode-then-decide** (`~26217`): l'auto-TX in CQ-repeat/auto-seq aspetta il
+   decode dello slot appena finito anche senza decode già pending —
+   `autoTxWaitsForDecode = shouldDeferAutoTxUntilTimeSyncDecode && (pending || timeSyncMode)`.
+2. **Grace** (`autoTxDecodeGraceMs`, `~3911`): FT8 900→**1200ms**, FT4 600→700ms (il
+   decode + `advanceQsoState` completa ~+1.0s; il fallback deve scattare dopo).
+3. **No clamp aggressivo sotto pressione** (`~19406`): FT2=80ms ma FT8/FT4
+   `qMax(900, min(grace,1200))` — le macchine lente devono aspettare il decode **di
+   più**, non di meno (il clamp a 150ms vanificava il fix proprio sulle affette).
+4. **Shift invece di trim** (`syncTxPcmStartOffsetBytes`, `~12677`): la partenza
+   tardiva (TX risposta a ~+1.0-1.5s) invia l'**intera forma d'onda da ora** (DT
+   decodificabile) invece di troncare il fronte fino a **+2000ms**. Il trim
+   distruggeva la prima Costas → il partner non decodificava.
+5. **Cap latest-start FT8/FT4 a 2000ms** (`latestD3CompatibleSyncTxStartMs`, `~3887`,
+   era ~10640): oltre 2000ms → **DEFER al boundary successivo** invece di trimmare
+   (i CQ-resume tardivi non escono più troncati). Allineato a `maxShiftDtMs`.
+
+> FT2 async invariato. Le modifiche cambiano il timing TX FT8 (parte ~+1.3s shiftato
+> vs +0.5s): decodificabile, ma è un cambio reale da monitorare.
+
+## Validazione on-air (macchina veloce)
+
+- QSO **FT8 (DL3EBJ)** e **FT2 (EA2AA)** completati e **loggati** (TX2 → report →
+  TX4 RR73 → 73 → QSO completo). Nel run pre-fix EA3IXP loopava all'infinito.
+- CQ/risposte sempre **interi** (`slot_elapsed ~1.3-1.4s`, `pcm_pos=65536`, nessun
+  `sync PCM offset`); TX tardivi (+10.9s) **deferiti**, **zero trim**.
+- Rilasciato come **1.0.284** (field-test) su iu8lmc per test sulle **macchine lente
+  affette** — il loopback NON riproduce il trigger (segnali forti → early-visible li
+  prende).
+
+## Proposta per upstream
+
+Il fix è contenuto in `DecodiumBridge.cpp` (sequencer + audio start), zero dipendenze
+nuove, FT2 async intatto. Suggerirei di assorbirlo come default FT8/FT4. Punto aperto
+ortogonale: rendere la **early-visible** più sensibile ai deboli (o non saltarla sotto
+pressione) ridurrebbe il numero di risposte prese tardi, abbassando la dipendenza dal
+grace — ma il decode-then-decide è comunque la rete di sicurezza corretta.
