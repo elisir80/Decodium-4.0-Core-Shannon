@@ -6,7 +6,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
-import QtQuick.Dialogs
 import QtQuick.Layouts
 
 Dialog {
@@ -428,11 +427,33 @@ Dialog {
     }
 
     function openDirectoryPicker(settingKey, currentPath) {
-        directoryPickerDialog.settingKey = settingKey
-        var folderUrl = localDirectoryToUrl(currentPath)
-        if (folderUrl.length > 0)
-            directoryPickerDialog.currentFolder = folderUrl
-        directoryPickerDialog.open()
+        var title = settingKey === "AzElDirectory" ? qsTr("Select AzEl directory") : qsTr("Select save directory")
+        var path = bridge.openDirectoryDialog(title, currentPath)
+        if (settingKey === "" || path === "")
+            return
+        bridge.setSetting(settingKey, path)
+        if (settingKey === "SaveDirectory")
+            saveDirectoryField.text = path
+        else if (settingKey === "AzElDirectory")
+            azElDirectoryField.text = path
+    }
+
+    function openWorkingFrequenciesLoadDialog(mergeMode) {
+        var path = bridge.openFileDialog(mergeMode ? qsTr("Merge Working Frequencies") : qsTr("Load Working Frequencies"),
+                                         "",
+                                         [qsTr("Frequency files (*.qrg *.qrg.json)"), qsTr("All files (*)")])
+        if (path.length > 0 && bridge.loadWorkingFrequenciesFile(path, mergeMode)) {
+            settingsDialog.clearWorkingFrequencyEditor()
+            settingsDialog.refreshFrequencySettings()
+        }
+    }
+
+    function openWorkingFrequenciesSaveDialog() {
+        var path = bridge.saveFileDialog(qsTr("Save Working Frequencies"),
+                                         "",
+                                         [qsTr("Frequency files (*.qrg *.qrg.json)"), qsTr("All files (*)")])
+        if (path.length > 0)
+            bridge.saveWorkingFrequenciesFile(path)
     }
 
     Connections {
@@ -969,48 +990,6 @@ Dialog {
         interval: 500
         repeat: false
         onTriggered: settingsDialog.persistSettingsNow()
-    }
-
-    FolderDialog {
-        id: directoryPickerDialog
-        property string settingKey: ""
-        title: settingKey === "AzElDirectory" ? "Select AzEl directory" : "Select save directory"
-        onAccepted: {
-            var path = settingsDialog.folderUrlToLocalDirectory(selectedFolder)
-            if (settingKey === "" || path === "")
-                return
-            bridge.setSetting(settingKey, path)
-            if (settingKey === "SaveDirectory")
-                saveDirectoryField.text = path
-            else if (settingKey === "AzElDirectory")
-                azElDirectoryField.text = path
-        }
-    }
-
-    FileDialog {
-        id: workingFrequenciesLoadDialog
-        property bool mergeMode: false
-        title: mergeMode ? qsTr("Merge Working Frequencies") : qsTr("Load Working Frequencies")
-        nameFilters: [qsTr("Frequency files (*.qrg *.qrg.json)"), qsTr("All files (*)")]
-        onAccepted: {
-            var path = settingsDialog.fileUrlToLocalPath(selectedFile)
-            if (path.length > 0 && bridge.loadWorkingFrequenciesFile(path, mergeMode)) {
-                settingsDialog.clearWorkingFrequencyEditor()
-                settingsDialog.refreshFrequencySettings()
-            }
-        }
-    }
-
-    FileDialog {
-        id: workingFrequenciesSaveDialog
-        title: qsTr("Save Working Frequencies")
-        fileMode: FileDialog.SaveFile
-        nameFilters: [qsTr("Frequency files (*.qrg *.qrg.json)"), qsTr("All files (*)")]
-        onAccepted: {
-            var path = settingsDialog.fileUrlToLocalPath(selectedFile)
-            if (path.length > 0)
-                bridge.saveWorkingFrequenciesFile(path)
-        }
     }
 
     // ── Theme colors ─────────────────────────────────────────────────────
@@ -4622,10 +4601,7 @@ Dialog {
                                 text: qsTr("Load")
                                 implicitHeight: controlHeight
                                 Layout.preferredWidth: 78
-                                onClicked: {
-                                    workingFrequenciesLoadDialog.mergeMode = false
-                                    workingFrequenciesLoadDialog.open()
-                                }
+                                onClicked: settingsDialog.openWorkingFrequenciesLoadDialog(false)
                                 background: Rectangle { color: loadWorkingFrequenciesButton.hovered ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.24) : bgMedium; border.color: glassBorder; radius: 4 }
                                 contentItem: Text { text: loadWorkingFrequenciesButton.text; color: textSecondary; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                             }
@@ -4634,10 +4610,7 @@ Dialog {
                                 text: qsTr("Merge")
                                 implicitHeight: controlHeight
                                 Layout.preferredWidth: 78
-                                onClicked: {
-                                    workingFrequenciesLoadDialog.mergeMode = true
-                                    workingFrequenciesLoadDialog.open()
-                                }
+                                onClicked: settingsDialog.openWorkingFrequenciesLoadDialog(true)
                                 background: Rectangle { color: mergeWorkingFrequenciesButton.hovered ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.24) : bgMedium; border.color: glassBorder; radius: 4 }
                                 contentItem: Text { text: mergeWorkingFrequenciesButton.text; color: textSecondary; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                             }
@@ -4646,7 +4619,7 @@ Dialog {
                                 text: qsTr("Save as")
                                 implicitHeight: controlHeight
                                 Layout.preferredWidth: 88
-                                onClicked: workingFrequenciesSaveDialog.open()
+                                onClicked: settingsDialog.openWorkingFrequenciesSaveDialog()
                                 background: Rectangle { color: saveWorkingFrequenciesButton.hovered ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.24) : bgMedium; border.color: glassBorder; radius: 4 }
                                 contentItem: Text { text: saveWorkingFrequenciesButton.text; color: textSecondary; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                             }

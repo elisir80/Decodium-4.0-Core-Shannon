@@ -8,7 +8,6 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
-import QtQuick.Dialogs
 // import Qt.labs.settings 1.1  // non disponibile in questa build Qt
 import "components"
 
@@ -1037,6 +1036,24 @@ ApplicationWindow {
         settingsDialog.openTab(tabIndex)
     }
 
+    function chooseWavFileForDecode() {
+        var path = bridge.openFileDialog(qsTr("Open WAV file for decoding"),
+                                         "",
+                                         [qsTr("File WAV (*.wav)"), qsTr("All files (*)")])
+        if (path.length === 0)
+            return
+        console.log("Opening WAV for decode: " + path)
+        bridge.openWavForDecode(path)
+    }
+
+    function chooseWavFolderForDecode() {
+        var path = bridge.openDirectoryDialog(qsTr("Select folder with WAV files"), "")
+        if (path.length === 0)
+            return
+        console.log("Batch decode folder: " + path)
+        bridge.openWavFolderDecode(path)
+    }
+
     property string rigErrorDialogTitle: ""
     property string rigErrorSummary: ""
     property string rigErrorDetails: ""
@@ -1046,38 +1063,6 @@ ApplicationWindow {
     property string warningDialogDetails: ""
     property bool warningDialogDetailsVisible: false
 
-    // WAV file open dialog - single file
-    FileDialog {
-        id: wavOpenDialog
-        title: "Open WAV file for decoding"
-        nameFilters: ["File WAV (*.wav)"]
-        onAccepted: {
-            var path = selectedFile.toString()
-            if (Qt.platform.os === "windows") {
-                path = path.replace("file:///", "")
-            } else {
-                path = path.replace("file://", "")
-            }
-            console.log("Opening WAV for decode: " + path)
-            bridge.openWavForDecode(path)
-        }
-    }
-
-    // WAV folder dialog - batch decode all WAVs in folder
-    FolderDialog {
-        id: wavFolderDialog
-        title: "Select folder with WAV files"
-        onAccepted: {
-            var path = selectedFolder.toString()
-            if (Qt.platform.os === "windows") {
-                path = path.replace("file:///", "")
-            } else {
-                path = path.replace("file://", "")
-            }
-            console.log("Batch decode folder: " + path)
-            bridge.openWavFolderDecode(path)
-        }
-    }
     property bool txPanelDockHighlighted: false
 
     // Dynamic theme colors from ThemeManager
@@ -2888,9 +2873,9 @@ ApplicationWindow {
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 onClicked: function(mouse) {
                                     if (mouse.button === Qt.RightButton)
-                                        wavFolderDialog.open()  // Right-click: batch folder
+                                        mainWindow.chooseWavFolderForDecode()  // Right-click: batch folder
                                     else
-                                        wavOpenDialog.open()    // Left-click: single file
+                                        mainWindow.chooseWavFileForDecode()    // Left-click: single file
                                 }
                             }
 

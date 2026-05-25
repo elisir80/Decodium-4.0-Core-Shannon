@@ -2166,6 +2166,7 @@ private:
     };
 
     QVERIFY (check (QStringLiteral ("CQ TEST K1ABC FN42")));
+    QVERIFY (check (QStringLiteral ("CQ BOTA 9H1SR JM68")));
     QVERIFY (check (QStringLiteral ("CQ GB13COL")));
     QVERIFY (check (QStringLiteral ("VP2V/GM4WJS K1ABC RR73")));
     QVERIFY (check (QStringLiteral ("CQ EA8/GM4WJS")));
@@ -2576,6 +2577,7 @@ private:
     QTest::newRow ("standard") << "CQ K1ABC FN42";
     QTest::newRow ("directed-cq-pota") << "CQ POTA IT9ARO JM68";
     QTest::newRow ("directed-cq-sota") << "CQ SOTA IT9ARO JM68";
+    QTest::newRow ("directed-cq-bota") << "CQ BOTA 9H1SR JM68";
     QTest::newRow ("field-day") << "K1ABC W9XYZ 3A EMA";
     QTest::newRow ("telemetry") << "0123456789ABCDEF01";
     QTest::newRow ("wspr1") << "K1ABC FN42 30";

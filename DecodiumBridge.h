@@ -898,6 +898,14 @@ public:
                                               const QString& db, int audioFreq);
 
     // WAV
+    Q_INVOKABLE QString openFileDialog(const QString& title,
+                                       const QString& initialPath,
+                                       const QStringList& nameFilters = QStringList()) const;
+    Q_INVOKABLE QString saveFileDialog(const QString& title,
+                                       const QString& initialPath,
+                                       const QStringList& nameFilters = QStringList()) const;
+    Q_INVOKABLE QString openDirectoryDialog(const QString& title,
+                                            const QString& initialPath) const;
     Q_INVOKABLE void openWavForDecode(const QString& path);
     Q_INVOKABLE void openWavFolderDecode(const QString& folderPath);
 

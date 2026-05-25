@@ -96,6 +96,7 @@
 #include "Network/FoxVerifier.hpp"
 #include "wsjtx_config.h"
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QSysInfo>
 #include <QTextStream>
@@ -2420,7 +2421,7 @@ static bool isDirectedCqModifierToken(QString const& token)
         QStringLiteral("EU"), QStringLiteral("AF"), QStringLiteral("AS"),
         QStringLiteral("OC"), QStringLiteral("TEST"), QStringLiteral("FD"),
         QStringLiteral("WW"), QStringLiteral("POTA"), QStringLiteral("SOTA"),
-        QStringLiteral("IOTA"), QStringLiteral("QRP")
+        QStringLiteral("IOTA"), QStringLiteral("BOTA"), QStringLiteral("QRP")
     };
     if (knownModifiers.contains(upper)) {
         return true;
@@ -11762,6 +11763,15 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
 #endif
                                         );
 
+    if (usingTciAudioInput()) {
+        if (!m_tciAudioCaptureActive) {
+            bridgeLog(QStringLiteral("post-TX TCI RX capture missing after %1, restarting capture")
+                          .arg(reason));
+            restartAudioCaptureFromWatchdog(QStringLiteral("post-TX TCI RX capture missing (%1)").arg(reason));
+        }
+        return;
+    }
+
     auto scheduleResumeProbe = [this, reason, resumeSerial, resumeStartMs](int delayMs) {
         QTimer::singleShot(delayMs, this, [this, reason, resumeSerial, resumeStartMs, delayMs]() {
             if (resumeSerial != m_postTxRxResumeSerial
@@ -11985,10 +11995,13 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
     QString error;
     if (ensureTxAudioPrepared(msg, effectiveTxAudioFrequencyHz(), needPcm,
                               &wave, &pcm, &format, &device, &error)) {
+        QString const pcmInfo = needPcm
+            ? QString::number(pcm.size())
+            : QStringLiteral("not-required");
         bridgeLog(QStringLiteral("TX audio precomputed (%1): mode=%2 msg=[%3] samples=%4 pcm=%5")
                       .arg(reason, m_mode, msg.trimmed())
                       .arg(wave.size())
-                      .arg(pcm.size()));
+                      .arg(pcmInfo));
     } else if (!error.isEmpty()) {
         bridgeLog(QStringLiteral("TX audio precompute skipped (%1): %2").arg(reason, error));
     }
@@ -19971,24 +19984,28 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     };
     bool const directedToMe = tokenIsMine(0) || tokenIsMine(1);
 
-    // 1.0.115: gate self-echo. In FT2 async (audio loopback / virtual cable
-    // setup, o cattiva isolazione TX/RX) il decoder cattura il nostro stesso
-    // TX e lo presenta come decode. Senza questo gate, l'engine interpreta
-    // l'eco come "risposta del partner" e avanza TX2 -> TX3 -> TX4 senza
-    // mai aver ricevuto nulla davvero. Il check: se i primi 2 token (DX, ME)
-    // coincidono coi primi 2 dell'ultimo TX, e' eco. Le risposte vere del
-    // partner hanno l'ordine invertito: tokens=[ME, DX, payload].
+    // Gate self-echo. Con nominativi speciali/non standard la forma corretta
+    // puo' mantenere lo stesso ordine dei primi due token tra TX e RX
+    // (es. "<II9MESC> KF9UG -05" seguito da "<II9MESC> KF9UG EN71").
+    // Scartare solo per i due token iniziali blocca l'autosequenza; l'eco
+    // locale e' il messaggio completo identico al nostro ultimo TX.
     if (!m_lastTransmittedMessage.isEmpty()) {
-        QStringList lastTxParts = m_lastTransmittedMessage.trimmed().toUpper()
-                                    .split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-        if (lastTxParts.size() >= 2 && parts.size() >= 2
-            && normalizeCallToken(parts.at(0)).toUpper()
-                 == normalizeCallToken(lastTxParts.at(0)).toUpper()
-            && normalizeCallToken(parts.at(1)).toUpper()
-                 == normalizeCallToken(lastTxParts.at(1)).toUpper()) {
-            bridgeLog(QStringLiteral("autoSequenceStep: skip self-echo (matches last TX): %1")
-                      .arg(msg));
-            return;
+        QString const canonicalMessage = canonicalDecodeMessage(msg).toUpper();
+        QString const canonicalLastTx = canonicalDecodeMessage(m_lastTransmittedMessage).toUpper();
+        if (!canonicalMessage.isEmpty()
+            && canonicalMessage == canonicalLastTx) {
+            if (m_mode == QStringLiteral("FT2")) {
+                QString localTxEchoReason;
+                if (shouldSuppressRecentLocalTxEchoDecode(msg,
+                                                          QStringLiteral("auto-seq"),
+                                                          &localTxEchoReason)) {
+                    return;
+                }
+            } else if (m_transmitting || m_tuning) {
+                bridgeLog(QStringLiteral("autoSequenceStep: skip self-echo (exact active local TX): %1")
+                          .arg(msg));
+                return;
+            }
         }
     }
 
@@ -27923,7 +27940,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             resetEarlyDecodeSchedule();
         }
         if (m_monitoring
-            && m_soundInput
+            && (m_soundInput || m_tciAudioCaptureActive || usingTciAudioInput())
             && !m_transmitting
             && !m_tuning
             && !m_rxAudioSuspendedForTx
@@ -29278,6 +29295,49 @@ void DecodiumBridge::playAlert(const QString& alertType)
 // ============================================================
 // WAV decode: decodifica un singolo file WAV o un'intera cartella
 // ============================================================
+
+static QString localDialogPath(QString path)
+{
+    path = path.trimmed();
+    if (path.startsWith(QLatin1String("file:")))
+        path = QUrl(path).toLocalFile();
+    if (path.isEmpty())
+        return QDir::homePath();
+    return QDir::toNativeSeparators(path);
+}
+
+static QString dialogFilterString(const QStringList& nameFilters)
+{
+    return nameFilters.isEmpty() ? QString() : nameFilters.join(QStringLiteral(";;"));
+}
+
+QString DecodiumBridge::openFileDialog(const QString& title,
+                                       const QString& initialPath,
+                                       const QStringList& nameFilters) const
+{
+    return QFileDialog::getOpenFileName(QApplication::activeWindow(),
+                                        title,
+                                        localDialogPath(initialPath),
+                                        dialogFilterString(nameFilters));
+}
+
+QString DecodiumBridge::saveFileDialog(const QString& title,
+                                       const QString& initialPath,
+                                       const QStringList& nameFilters) const
+{
+    return QFileDialog::getSaveFileName(QApplication::activeWindow(),
+                                        title,
+                                        localDialogPath(initialPath),
+                                        dialogFilterString(nameFilters));
+}
+
+QString DecodiumBridge::openDirectoryDialog(const QString& title,
+                                            const QString& initialPath) const
+{
+    return QFileDialog::getExistingDirectory(QApplication::activeWindow(),
+                                             title,
+                                             localDialogPath(initialPath));
+}
 
 void DecodiumBridge::openWavForDecode(const QString& path)
 {

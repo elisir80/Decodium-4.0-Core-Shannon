@@ -7,7 +7,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 Popup {
     id: logWindow
@@ -145,6 +144,37 @@ Popup {
         return path
     }
 
+    function openImportAdifDialog() {
+        var path = bridge.openFileDialog(qsTr("Importa file ADIF"),
+                                         "",
+                                         [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")])
+        if (path.length > 0 && appEngine && appEngine.logManager) {
+            appEngine.logManager.importFromAdif(path)
+            clearSelection()
+            refreshLog()
+        }
+    }
+
+    function openAddLogbookDialog() {
+        var path = bridge.openFileDialog(qsTr("Carica logbook ADIF"),
+                                         "",
+                                         [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")])
+        if (path.length > 0 && appEngine && appEngine.logManager) {
+            appEngine.logManager.addLogbook(path, "")
+            clearSelection()
+            refreshLogbookProfiles()
+            refreshLog()
+        }
+    }
+
+    function openExportAdifDialog() {
+        var path = bridge.saveFileDialog(qsTr("Esporta file ADIF"),
+                                         "",
+                                         [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")])
+        if (path.length > 0 && appEngine && appEngine.logManager)
+            appEngine.logManager.exportToAdif(path)
+    }
+
     function statsFromRows(rows) {
         var calls = ({})
         var grids = ({})
@@ -216,35 +246,6 @@ Popup {
         }
     }
 
-    // Import ADIF FileDialog
-    FileDialog {
-        id: importFileDialog
-        title: "Importa file ADIF"
-        nameFilters: ["ADIF files (*.adi *.adif)", "All files (*)"]
-        onAccepted: {
-            if (appEngine && appEngine.logManager) {
-                var path = fileUrlToLocalPath(selectedFile)
-                var count = appEngine.logManager.importFromAdif(path)
-                clearSelection()
-                refreshLog()
-            }
-        }
-    }
-
-    FileDialog {
-        id: addLogbookFileDialog
-        title: "Carica logbook ADIF"
-        nameFilters: ["ADIF files (*.adi *.adif)", "All files (*)"]
-        onAccepted: {
-            if (appEngine && appEngine.logManager) {
-                appEngine.logManager.addLogbook(fileUrlToLocalPath(selectedFile), "")
-                clearSelection()
-                refreshLogbookProfiles()
-                refreshLog()
-            }
-        }
-    }
-
     Dialog {
         id: createLogbookDialog
         title: "Nuovo logbook"
@@ -284,20 +285,6 @@ Popup {
                 clearSelection()
                 refreshLogbookProfiles()
                 refreshLog()
-            }
-        }
-    }
-
-    // Export ADIF FileDialog
-    FileDialog {
-        id: exportFileDialog
-        title: "Esporta file ADIF"
-        nameFilters: ["ADIF files (*.adi *.adif)", "All files (*)"]
-        fileMode: FileDialog.SaveFile
-        onAccepted: {
-            if (appEngine && appEngine.logManager) {
-                var path = fileUrlToLocalPath(selectedFile)
-                appEngine.logManager.exportToAdif(path)
             }
         }
     }
@@ -500,7 +487,7 @@ Popup {
                     color: loadLogbookMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.28) : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.10)
                     border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.55)
                     Text { anchors.centerIn: parent; text: "Load"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
-                    MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: addLogbookFileDialog.open() }
+                    MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logWindow.openAddLogbookDialog() }
                     ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Carica/usa un ADIF esistente come logbook"; ToolTip.delay: 500
                 }
 
@@ -601,7 +588,7 @@ Popup {
                     Text { id: importLabel; anchors.centerIn: parent; text: "Import ADIF"; font.pixelSize: 10; font.bold: true; color: accentGreen }
                     MouseArea {
                         id: importMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: importFileDialog.open()
+                        onClicked: logWindow.openImportAdifDialog()
                     }
                     ToolTip.visible: importMA.containsMouse; ToolTip.text: "Importa file ADIF"; ToolTip.delay: 500
                 }
@@ -616,7 +603,7 @@ Popup {
                     Text { id: adifLabel; anchors.centerIn: parent; text: "Export ADIF"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
                     MouseArea {
                         id: exportMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: exportFileDialog.open()
+                        onClicked: logWindow.openExportAdifDialog()
                     }
                     ToolTip.visible: exportMA.containsMouse; ToolTip.text: "Esporta ADIF"; ToolTip.delay: 500
                 }

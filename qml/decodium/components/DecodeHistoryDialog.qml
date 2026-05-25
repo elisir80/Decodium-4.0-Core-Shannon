@@ -12,7 +12,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
-import QtQuick.Dialogs
 
 Window {
     id: historyDialog
@@ -54,8 +53,7 @@ Window {
         modeCombo.model = ["Tutti"].concat(modes)
     }
 
-    function runQuery() {
-        if (!bridge) return
+    function currentFilters(includeSort) {
         var f = {}
         if (callsignField.text.trim().length > 0) f.callsign = callsignField.text.trim()
         if (bandCombo.currentIndex > 0)           f.band     = bandCombo.currentText
@@ -69,8 +67,26 @@ Window {
             if (!isNaN(td)) f.toUtc = td
         }
         f.limit = limitSpin.value
-        f.newestFirst = true
+        if (includeSort)
+            f.newestFirst = true
+        return f
+    }
+
+    function runQuery() {
+        if (!bridge) return
+        var f = currentFilters(true)
         results = bridge.queryDecodeHistory(f)
+    }
+
+    function openExportAdifDialog() {
+        if (!bridge) return
+        var path = bridge.saveFileDialog(qsTr("Esporta ADIF"), "", [qsTr("ADIF (*.adi)")])
+        if (path.length === 0)
+            return
+        var lower = path.toLowerCase()
+        if (lower.slice(-4) !== ".adi" && lower.slice(-5) !== ".adif")
+            path += ".adi"
+        bridge.exportAdifFromHistory(currentFilters(false), path)
     }
 
     function formatUtc(ms) {
@@ -398,7 +414,7 @@ Window {
                     enabled: historyDialog.results.length > 0
                     Layout.preferredWidth: 150
                     Layout.preferredHeight: 34
-                    onClicked: exportFileDialog.open()
+                    onClicked: historyDialog.openExportAdifDialog()
                     background: Rectangle {
                         color: parent.enabled
                                ? (parent.down ? Qt.alpha(historyDialog.cGreen, 0.36)
@@ -566,29 +582,4 @@ Window {
         }
     }
 
-    FileDialog {
-        id: exportFileDialog
-        title: qsTr("Esporta ADIF")
-        fileMode: FileDialog.SaveFile
-        nameFilters: ["ADIF (*.adi)"]
-        defaultSuffix: "adi"
-        onAccepted: {
-            if (!bridge) return
-            // Riusa stessi filtri della query corrente
-            var f = {}
-            if (callsignField.text.trim().length > 0) f.callsign = callsignField.text.trim()
-            if (bandCombo.currentIndex > 0)           f.band     = bandCombo.currentText
-            if (modeCombo.currentIndex > 0)           f.mode     = modeCombo.currentText
-            if (fromDateField.text.trim().length > 0) {
-                var fd = Date.parse(fromDateField.text.trim() + "T00:00:00Z")
-                if (!isNaN(fd)) f.fromUtc = fd
-            }
-            if (toDateField.text.trim().length > 0) {
-                var td = Date.parse(toDateField.text.trim() + "T23:59:59Z")
-                if (!isNaN(td)) f.toUtc = td
-            }
-            f.limit = limitSpin.value
-            bridge.exportAdifFromHistory(f, selectedFile)
-        }
-    }
 }
