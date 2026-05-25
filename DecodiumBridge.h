@@ -540,8 +540,11 @@ public:
     Q_INVOKABLE void stopTargetCall();
 
     bool asyncTxEnabled()      const { return m_asyncTxEnabled; }
-    void setAsyncTxEnabled(bool v)    { if (m_mode == "FT2") v = true;  /* FT2: sempre attivo */
-                                        if (m_asyncTxEnabled != v)      { m_asyncTxEnabled = v;      emit asyncTxEnabledChanged(); } }
+    void setAsyncTxEnabled(bool /*v*/) { /* FT2 async TX PERMANENTE: sempre ON, non disattivabile.
+                                            Elimina del tutto il path FT2 sync (e il suo bug di
+                                            QSO-completion: grace 250ms < settle 1000ms) rendendolo
+                                            irraggiungibile. Qualsiasi richiesta di disattivazione e' ignorata. */
+                                        if (!m_asyncTxEnabled)          { m_asyncTxEnabled = true;   emit asyncTxEnabledChanged(); } }
     bool asyncDecodeEnabled()  const { return m_asyncDecodeEnabled; }
     void setAsyncDecodeEnabled(bool v){ if (m_asyncDecodeEnabled != v)  { m_asyncDecodeEnabled = v;  emit asyncDecodeEnabledChanged(); } }
     bool dualCarrierEnabled()  const { return m_dualCarrierEnabled; }
@@ -1814,7 +1817,7 @@ private:
     bool m_avgDecodeEnabled {false};
     int  m_txPeriod         {0};   // 1=first/even (:00/:30), 0=second/odd (:15/:45)
     bool m_alt12Enabled     {false};
-    bool    m_asyncTxEnabled   {false};  // FT2 async TX (no periodo sync, come GitHub cbAsyncDecode)
+    bool    m_asyncTxEnabled   {true};   // FT2 async TX SEMPRE ON (permanente, non disattivabile): il path FT2 sync e' rimosso di fatto. Solo modo FT2 lo usa (gated ovunque da m_mode=="FT2").
     qint64  m_asyncLastTxEndMs {0};      // timestamp fine ultima TX FT2 async (per guard timer)
     bool m_dualCarrierEnabled{false}; // FT2 dual carrier mode
     bool m_quickQsoEnabled   {false}; // FT2 Quick QSO: salta TX1, flusso Ultra2 (2 messaggi)
