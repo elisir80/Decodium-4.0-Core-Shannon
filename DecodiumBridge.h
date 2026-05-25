@@ -2688,6 +2688,10 @@ private:
     void checkAndStartPeriodicTx();
     bool shouldDeferAutoTxUntilTimeSyncDecode(const QString& modeSnapshot) const;
     bool hasPendingTimeSyncDecodeForMode(const QString& modeSnapshot) const;
+    // Grace di attesa decode al boundary, CLAMPATO per CPU pressure. Usato sia dal
+    // fallback timer (scheduleDeferredAutoTxAfterTimeSyncDecode) sia dal gate
+    // "defer al prossimo slot" (onFt8DecodeReady), per evitare l'asimmetria P1-A.
+    int  effectiveAutoTxDecodeGraceMs(const QString& modeSnapshot) const;
     void scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& modeSnapshot,
                                                   quint64 sessionId);
     void autoSequenceStep(const QStringList& parsedFields);

@@ -19421,6 +19421,22 @@ bool DecodiumBridge::hasPendingTimeSyncDecodeForMode(const QString& modeSnapshot
     return false;
 }
 
+int DecodiumBridge::effectiveAutoTxDecodeGraceMs(const QString& modeSnapshot) const
+{
+    QString const normalizedMode = modeSnapshot.trimmed().toUpper();
+    int graceMs = autoTxDecodeGraceMs(normalizedMode);
+    if (cpuPressureActive() || m_lowCpuModeEnabled) {
+        // FT2 async resta reattivo (80ms). FT8/FT4 NON vanno tagliati sotto pressione:
+        // sulle macchine lente l'early-visible salta e il decode della risposta arriva
+        // tardi -> dobbiamo aspettarlo (>=900ms), altrimenti committiamo prima della
+        // risposta del partner e il QSO non si chiude.
+        graceMs = (normalizedMode == QStringLiteral("FT2"))
+            ? qMin(graceMs, 80)
+            : qMax(900, qMin(graceMs, 1200));
+    }
+    return graceMs;
+}
+
 void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& modeSnapshot,
                                                               quint64 sessionId)
 {
@@ -19433,17 +19449,7 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     int const elapsedMs = static_cast<int>(nowMs % static_cast<qint64>(periodMs));
-    int graceMs = autoTxDecodeGraceMs(normalizedMode);
-    if (cpuPressureActive() || m_lowCpuModeEnabled) {
-        // FT2 async resta reattivo (80ms). Ma FT8/FT4 NON vanno tagliati a 150ms sotto
-        // pressione: proprio sulle macchine lente (le piu' colpite) l'early-visible
-        // viene saltato e il decode dello slot finito arriva tardi -> dobbiamo comunque
-        // aspettarlo, altrimenti committiamo un CQ prima della risposta del partner e il
-        // QSO non si chiude. Manteniamo un grace utile (>=900ms) anche sotto pressione.
-        graceMs = (normalizedMode == QStringLiteral("FT2"))
-            ? qMin(graceMs, 80)
-            : qMax(900, qMin(graceMs, 1200));
-    }
+    int const graceMs = effectiveAutoTxDecodeGraceMs(normalizedMode);
     int const maxDelayMs = latestStartMs - elapsedMs - 250;
     if (maxDelayMs <= 0) {
         return;
@@ -25629,7 +25635,10 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             if (periodMs > 0) {
                 int const elapsedMs = static_cast<int>(
                     correctedUtcEpochMs() % static_cast<qint64>(periodMs));
-                int const graceMs = autoTxDecodeGraceMs(normalizedAutoTxMode);
+                // P1-A: stesso grace CLAMPATO sotto pressione del fallback timer, altrimenti
+                // su macchine lente FT8/FT4 una risposta decodificata tra 700 e 900ms verrebbe
+                // differita qui mentre il fallback l'avrebbe accettata -> ciclo perso.
+                int const graceMs = effectiveAutoTxDecodeGraceMs(normalizedAutoTxMode);
                 if (elapsedMs > graceMs) {
                     canStartInThisSlot = false;
                     bridgeLog(QStringLiteral("onFt8DecodeReady: auto-seq response after TX start grace, deferring to next slot mode=%1 elapsed=%2ms grace=%3ms")
