@@ -28158,10 +28158,23 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.ncontest = m_ncontest;
         req.mycall = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
-        if (reduceForTx && req.ndepth != decodeDepth) {
-            bridgeLog(QStringLiteral("FT2 decode depth reduced before TX: %1 -> %2")
-                          .arg(decodeDepth)
-                          .arg(req.ndepth));
+        // 1.0.291 — log diagnostico THROTTLED (1 riga su cambio-stato o ogni 10s):
+        // chiarisce PERCHÉ il sync decode si riduce — flag #1 in memoria, pressione CPU,
+        // txPending — e azzera lo spam "depth reduced" che annegava il diagnostic log.
+        {
+            static qint64 s_lastDepthLogMs = 0;
+            static int s_lastReduced = -1;
+            int const reducedNow = reduceForTx ? 1 : 0;
+            if (reducedNow != s_lastReduced || nowMs - s_lastDepthLogMs >= 10000) {
+                s_lastReduced = reducedNow;
+                s_lastDepthLogMs = nowMs;
+                bridgeLog(QStringLiteral("FT2 sync depth: %1->%2 reduce=%3 fullDecodeFlag=%4 cpuPressure=%5 txPending=%6")
+                              .arg(decodeDepth).arg(req.ndepth)
+                              .arg(reducedNow)
+                              .arg(m_ft2FullDecodeInAutoCq ? 1 : 0)
+                              .arg(cpuPressureActive() ? 1 : 0)
+                              .arg(txStartPending ? 1 : 0));
+            }
         }
         // markLatestDecodeSerial() DEVE essere chiamato prima di decode(),
         // altrimenti il controllo seriale in FT2DecodeWorker::decode() scarta sempre la richiesta.
