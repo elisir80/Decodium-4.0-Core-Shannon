@@ -8618,16 +8618,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         title: "Waterfall - Decodium"
         color: "transparent"
 
-        // 1.0.180 — Drag handle per Frameless windows: usa native window
-        // manager (DragHandler.startSystemMove non blocca main thread).
-        DragHandler {
-            id: waterfallDragHandler
-            target: null
-            enabled: bridge ? bridge.uiFramelessPopouts : false
-            onActiveChanged: {
-                if (active) waterfallWindow.startSystemMove()
-            }
-        }
+        // 1.0.286 — RIMOSSO il DragHandler root: era figlio del Window (non
+        // dell'header), quindi trascinava la finestra da QUALSIASI punto del corpo
+        // (bug: perdendo il pollice di uno Slider partiva startSystemMove e la
+        // finestra si muoveva). Il move-to-window resta SOLO sul MouseArea header
+        // 'dragArea' (sotto), header-only come tutte le altre pop-out, e mantiene il
+        // dock magnetico (che startSystemMove invece bypassava).
 
         // Position to right of main window initially
         x: mainWindow.x + mainWindow.width + 20
@@ -9721,16 +9717,10 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		        title: "Full Spectrum - Decodium"
 	        color: "transparent"
 
-	        // 1.0.180 — Drag handle per Frameless windows: usa native window
-	        // manager (DragHandler.startSystemMove non blocca main thread).
-	        DragHandler {
-	            id: period1FloatingDragHandler
-	            target: null
-	            enabled: bridge ? bridge.uiFramelessPopouts : false
-	            onActiveChanged: {
-	                if (active) period1FloatingWindow.startSystemMove()
-	            }
-	        }
+	        // 1.0.286 — RIMOSSO il DragHandler root (stesso fix della Waterfall): era
+	        // figlio del Window, trascinava la finestra da qualsiasi punto del corpo. Il
+	        // move resta SOLO sull'header (MouseArea 'p1DragArea'), header-only come le
+	        // altre pop-out, con dock magnetico (che startSystemMove bypassava).
 	        readonly property bool compactColumns: width < 560
 	        readonly property int utcColumnWidth: compactColumns ? 66 : 84
 	        readonly property int dbColumnWidth: compactColumns ? 34 : 38
