@@ -4500,6 +4500,16 @@ void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Quick give-up strong partner %1").arg(v ? "ON" : "OFF"));
 }
 
+void DecodiumBridge::setFt2AdaptiveDecode(bool v)
+{
+    if (m_ft2AdaptiveDecode == v) return;
+    m_ft2AdaptiveDecode = v;
+    QSettings settings;
+    settings.setValue(QStringLiteral("Ft2AdaptiveDecode"), v);
+    emit ft2AdaptiveDecodeChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Adaptive decode %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers RISCRITTI
 // dopo il revert di 1.0.186 (memoria project_186_reverted_partner_memory_bug).
 // Differenze chiave dalla versione revertita:
@@ -21028,6 +21038,7 @@ void DecodiumBridge::loadSettings()
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     m_ft2FullDecodeInAutoCq = s.value(QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
     m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
+    m_ft2AdaptiveDecode     = s.value(QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
     m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
@@ -25951,6 +25962,18 @@ void DecodiumBridge::onAsyncDecodeTimer()
         // mild pressure ora NON applica throttle (era 350ms, troppo
         // aggressivo, FT2 perdeva 90% dispatch su PC modesti).
         minAsyncDecodeIntervalMs = 500;
+    }
+    // 1.0.292 — #1+#3 decode adattivo (opt-in, default OFF): in SOLO-ASCOLTO (no CQ,
+    // no QSO, nessun partner) throttla il re-decode async a ~350ms — non ha senso
+    // ridecodificare ogni 100ms una finestra sovrapposta al 95% (risparmio CPU, meno
+    // picchi transitori). Quando ASPETTI una risposta (AutoCQ/QSO) resta a piena cadenza
+    // (100ms) per non aggiungere latenza. Non perde decode: la finestra scorrente copre
+    // comunque tutto l'audio.
+    if (m_ft2AdaptiveDecode && minAsyncDecodeIntervalMs < 350) {
+        bool const expectingReply = m_txEnabled || m_autoCqRepeat || !m_dxCall.isEmpty();
+        if (!expectingReply) {
+            minAsyncDecodeIntervalMs = 350;
+        }
     }
     if (minAsyncDecodeIntervalMs > 0
         && m_lastFt2AsyncDecodeDispatchMs > 0
