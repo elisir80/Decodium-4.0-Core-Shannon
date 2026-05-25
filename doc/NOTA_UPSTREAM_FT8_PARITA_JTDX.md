@@ -148,3 +148,42 @@ nuove, FT2 async intatto. Suggerirei di assorbirlo come default FT8/FT4. Punto a
 ortogonale: rendere la **early-visible** più sensibile ai deboli (o non saltarla sotto
 pressione) ridurrebbe il numero di risposte prese tardi, abbassando la dipendenza dal
 grace — ma il decode-then-decide è comunque la rete di sicurezza corretta.
+
+---
+
+# Parte 3 — FT2: stesso bug nel path sync, risolto rendendo FT2 sempre-async (1.0.285)
+
+Estesa l'analisi a **FT2** (commit `4a24539`). FT2 ha **due path TX**:
+
+- **FT2 async** (`m_asyncTxEnabled`, default del fork): **IMMUNE** al bug. È
+  decode-then-decide per costruzione — `onFt2AsyncDecodeReady`
+  (`DecodiumBridge.cpp:25654`) → quando un decode contiene il mio call →
+  `autoSequenceStep` + `scheduleSmartFt2AsyncTx("decode-response")` (`25720`). Il TX
+  è sempre conseguenza di un decode, mai committato al boundary.
+- **FT2 sync** (async OFF): **AFFETTO dallo stesso bug FT8** (Parte 2). Usa
+  `autoTxWaitsForDecode` ma con grace FT2 = **250ms** (`autoTxDecodeGraceMs("FT2")`,
+  `~3928`) **< settle decode FT2 = 1000ms** (`~26249`) → committa il TX prima del
+  decode della risposta → stesso loop. Inoltre, lo slot FT2 (3.75s) è così stretto
+  che la finestra di shift utile è solo ~980ms, oltre la quale si trimmerebbe.
+
+**Risoluzione scelta (più pulita del patch):** rendere **FT2 sempre-async,
+permanente e non disattivabile**, eliminando del tutto il path sync. Upstream già
+considera l'async FT2 "mandatory" (commento a `~9830`: *"Async L2 is mandatory and
+always ON"*), ma il flag poteva essere off all'avvio. Reso airtight in
+`DecodiumBridge.h`:
+- `m_asyncTxEnabled` default `false`→`true` (chiude il buco di startup quando il modo
+  FT2 è ripristinato prima della forzatura di mode-entry).
+- `setAsyncTxEnabled` ignora qualsiasi richiesta di disattivazione (sempre true).
+- `m_asyncTxEnabled` è gated da `m_mode=="FT2"` ovunque → inerte per FT8/FT4. Nessun
+  toggle UI scrivibile esisteva (solo un indicatore di stato).
+
+**Validato on-air:** QSO FT2 (OZ5BD) chiuso e loggato via path async
+(`smartFt2Tx [decode-response] strategy=S1-slot-est` → report → RR73 → 73 →
+`QSO completo` `logged=1`), con **zero** `brief FT2 decode grace` (il path sync non
+viene mai entrato). Rilasciato in **1.0.285** (FT2-async + fix FT8) insieme a
+**1.0.284** (solo fix FT8).
+
+**Per upstream:** se preferisci mantenere il path sync FT2 disponibile, l'alternativa
+è allineare il grace FT2 sync al settle (250→~1100ms) e cappare il latest-start FT2
+alla finestra shift (~980ms) come fatto per FT8/FT4 — ma rendere FT2 solo-async è più
+semplice e coerente con la regola "Async L2 mandatory" già presente.
