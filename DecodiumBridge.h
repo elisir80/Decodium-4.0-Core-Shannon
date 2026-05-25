@@ -390,7 +390,6 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2Conservative READ ft2Conservative WRITE setFt2Conservative NOTIFY ft2ConservativeChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
-    Q_PROPERTY(bool ft2CqEverySlot READ ft2CqEverySlot WRITE setFt2CqEverySlot NOTIFY ft2CqEverySlotChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
     // Diversamente dalla 1.0.186 revertita, qui e' default OFF e ha gate molto
@@ -1251,7 +1250,6 @@ signals:
     void asyncTxEnabledChanged();
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
-    void ft2CqEverySlotChanged();         // 1.0.289
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
@@ -1748,7 +1746,6 @@ private:
     bool m_ft2Conservative {false};
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
-    bool m_ft2CqEverySlot {false};         // #2: CQ a ogni slot (cqGuard 2→1)
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory state
     bool m_ft2PartnerMemoryEnabled {false};   // opt-in, default OFF
@@ -2459,8 +2456,6 @@ public:
     // 1.0.289 — FT2 enhancement toggles
     Q_INVOKABLE bool ft2FullDecodeInAutoCq() const { return m_ft2FullDecodeInAutoCq; }
     Q_INVOKABLE void setFt2FullDecodeInAutoCq(bool v);
-    Q_INVOKABLE bool ft2CqEverySlot() const { return m_ft2CqEverySlot; }
-    Q_INVOKABLE void setFt2CqEverySlot(bool v);
     Q_INVOKABLE bool ft2QuickGiveUpStrong() const { return m_ft2QuickGiveUpStrong; }
     Q_INVOKABLE void setFt2QuickGiveUpStrong(bool v);
 

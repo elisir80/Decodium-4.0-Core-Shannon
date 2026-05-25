@@ -2831,32 +2831,6 @@ Dialog {
                                     ToolTip.text: qsTr("Mentre chiami CQ (AutoCQ), mantiene la profondità di decodifica piena (OSD + 4ª passata di sottrazione + weak-signal averaging) invece di ridurla a 2. Aiuta a sentire i risponditori deboli. Si riduce comunque automaticamente sotto pressione CPU. Default OFF.")
                                 }
 
-                                // 1.0.289 — FT2 #2: CQ a ogni slot
-                                Text {
-                                    text: qsTr("FT2: CQ a ogni slot:")
-                                    color: textSecondary
-                                    font.pixelSize: 12
-                                    elide: Text.ElideRight
-                                    verticalAlignment: Text.AlignVCenter
-                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
-                                    Layout.preferredHeight: controlHeight
-                                }
-                                CheckBox {
-                                    id: ft2CqEverySlotCheck
-                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
-                                    Layout.preferredHeight: controlHeight
-                                    checked: bridge ? bridge.ft2CqEverySlot : false
-                                    onCheckedChanged: {
-                                        if (bridge) bridge.setFt2CqEverySlot(checked)
-                                    }
-                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                                    contentItem: Text { text: ""; leftPadding: 24 }
-                                    hoverEnabled: true
-                                    ToolTip.visible: hovered
-                                    ToolTip.delay: 400
-                                    ToolTip.text: qsTr("In AutoCQ trasmette il CQ a OGNI slot invece che a slot alterni → raddoppia la presenza on-air e le probabilità di essere chiamato. Default OFF (comportamento standard: CQ, RX, CQ, RX).")
-                                }
-
                                 // 1.0.289 — FT2 #3: chiusura rapida partner forti
                                 Text {
                                     text: qsTr("FT2: chiudi prima i partner forti:")

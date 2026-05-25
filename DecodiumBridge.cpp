@@ -4490,16 +4490,6 @@ void DecodiumBridge::setFt2FullDecodeInAutoCq(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Full decode in AutoCQ %1").arg(v ? "ON" : "OFF"));
 }
 
-void DecodiumBridge::setFt2CqEverySlot(bool v)
-{
-    if (m_ft2CqEverySlot == v) return;
-    m_ft2CqEverySlot = v;
-    QSettings settings;
-    settings.setValue(QStringLiteral("Ft2CqEverySlot"), v);
-    emit ft2CqEverySlotChanged();
-    bridgeLog(QStringLiteral("[FT2WS] CQ every slot %1").arg(v ? "ON" : "OFF"));
-}
-
 void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
 {
     if (m_ft2QuickGiveUpStrong == v) return;
@@ -19843,9 +19833,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // anche il prossimo slot TX valido: CQ, RX, CQ, RX.
         // FT8/FT4 sync mantengono lo stesso ritmo base: TX, RX, TX.
         bool isCqTx = (m_txEnabled && m_currentTx == 6);
-        // 1.0.289 — #2: con ft2CqEverySlot ON il CQ esce a OGNI slot (guard 1) invece che
-        // a slot alterni (guard 2). Raddoppia la presenza on-air in CQ-running. Default OFF.
-        int cqGuardPeriods = m_ft2CqEverySlot ? 1 : 2;
+        int cqGuardPeriods = 2;
         if (isCqTx && m_lastCqPidx >= 0 && (pidx - m_lastCqPidx) < cqGuardPeriods) {
             bridgeLog("checkAndStartPeriodicTx: CQ guard — pidx=" + QString::number(pidx) +
                       " lastCqPidx=" + QString::number(m_lastCqPidx) + " → pausa RX forzata");
@@ -21039,7 +21027,6 @@ void DecodiumBridge::loadSettings()
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     m_ft2FullDecodeInAutoCq = s.value(QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
-    m_ft2CqEverySlot        = s.value(QStringLiteral("Ft2CqEverySlot"),        false).toBool();
     m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
