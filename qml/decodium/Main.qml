@@ -4471,14 +4471,14 @@ ApplicationWindow {
                 orientation: Qt.Vertical
 
                 // Magnetic snap points for waterfall height
-                property var snapPoints: [150, 200, 250, 300, 350, 400]
-                property int snapThreshold: 20  // Pixels to trigger snap
+                property var snapPoints: [120, 200, 280, 360, 440]  // 1.0.288: >= minimumHeight 120, range ampio per restringere/allargare
+                property int snapThreshold: 0  // 1.0.288: snap disabilitato — resize altezza waterfall totalmente libero (richiesta utente)
 
                 // Vertical drag handle with magnetic snap indicator
                 handle: Rectangle {
                     id: splitHandle
-                    implicitWidth: 6
-                    implicitHeight: 6
+                    implicitWidth: 10
+                    implicitHeight: 10  // 1.0.288: era 6 → handle più alto = più facile da afferrare
                     color: SplitHandle.hovered || SplitHandle.pressed ? "#00e6e6" : "#505070"
                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -4548,8 +4548,13 @@ ApplicationWindow {
                 // ========== TOP: Waterfall Panel (embedded or placeholder) ==========
                 Rectangle {
                     id: waterfallPanel
-                    SplitView.preferredHeight: waterfallDetached ? 40 : mainWindow.waterfallPanelHeight
-                    SplitView.minimumHeight: waterfallDetached ? 40 : 260
+                    // 1.0.288 — preferredHeight NON è più bindato reattivamente a
+                    // waterfallPanelHeight: quel binding combatteva il drag dello splitter
+                    // (loop preferredHeight←waterfallPanelHeight←uiWaterfallHeight←onHeightChanged)
+                    // e impediva di restringere il waterfall ("superiore bloccata"). Ora è
+                    // gestito imperativamente: init one-shot in Component.onCompleted, drag/snap
+                    // liberi; un Binding dedicato forza 40px solo quando è staccato (placeholder).
+                    SplitView.minimumHeight: waterfallDetached ? 40 : 0  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                     radius: 8
                     border.color: isDockHighlighted ? secondaryCyan : glassBorder
@@ -4565,15 +4570,32 @@ ApplicationWindow {
                         globalDockZone = Qt.rect(globalPos.x, globalPos.y, waterfallPanel.width, waterfallPanel.height)
                     }
 
-                    Component.onCompleted: updateDockZone()
+                    Component.onCompleted: {
+                        updateDockZone()
+                        // 1.0.288 — init one-shot (no binding reattivo che combatte il drag)
+                        if (!waterfallDetached)
+                            SplitView.preferredHeight = mainWindow.waterfallPanelHeight
+                    }
                     onWidthChanged: updateDockZone()
                     onHeightChanged: {
                         updateDockZone()
+                        // 1.0.288 — persisti SOLO su bridge.uiWaterfallHeight (per il save).
+                        // NON riscrivere mainWindow.waterfallPanelHeight: romperebbe il binding
+                        // di riga 310 e rialimenterebbe il loop che bloccava il resize.
                         if (!waterfallDetached && height > 40) {
-                            mainWindow.waterfallPanelHeight = height
                             bridge.uiWaterfallHeight = height
                             mainWindow.scheduleSave()
                         }
+                    }
+
+                    // 1.0.288 — quando il waterfall è staccato, il pannello collassa al
+                    // placeholder 40px; tornato embedded ripristina l'altezza precedente.
+                    Binding {
+                        target: waterfallPanel
+                        property: "SplitView.preferredHeight"
+                        value: 40
+                        when: waterfallDetached
+                        restoreMode: Binding.RestoreBindingOrValue
                     }
 
                     // Placeholder when detached - magnetic dock zone
@@ -8664,218 +8686,17 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             border.color: secondaryCyan
             border.width: 2
 
-            // ===== RESIZE HANDLES (Smooth) =====
-            // Right edge
-            MouseArea {
-                id: rightResize
-                width: 10
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 16
-                anchors.bottomMargin: 16
-                cursorShape: Qt.SizeHorCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var newW = waterfallWindow.width + (mouseX - width/2)
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600)
-                            waterfallWindow.width = newW
-                    }
-                }
-            }
-
-            // Left edge
-            MouseArea {
-                id: leftResize
-                width: 10
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 16
-                anchors.bottomMargin: 16
-                cursorShape: Qt.SizeHorCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var delta = mouseX
-                        var newW = waterfallWindow.width - delta
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600) {
-                            waterfallWindow.x += delta
-                            waterfallWindow.width = newW
-                        }
-                    }
-                }
-            }
-
-            // Bottom edge
-            MouseArea {
-                id: bottomResize
-                height: 10
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-                cursorShape: Qt.SizeVerCursor
-                preventStealing: true
-
-                onMouseYChanged: {
-                    if (pressed) {
-                        var newH = waterfallWindow.height + (mouseY - height/2)
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900)
-                            waterfallWindow.height = newH
-                    }
-                }
-            }
-
-            // Top edge
-            MouseArea {
-                id: topResize
-                height: 10
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-                cursorShape: Qt.SizeVerCursor
-                preventStealing: true
-
-                onMouseYChanged: {
-                    if (pressed) {
-                        var delta = mouseY
-                        var newH = waterfallWindow.height - delta
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900) {
-                            waterfallWindow.y += delta
-                            waterfallWindow.height = newH
-                        }
-                    }
-                }
-            }
-
-            // Bottom-right corner
-            MouseArea {
-                id: brResize
-                width: 20; height: 20
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                cursorShape: Qt.SizeFDiagCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var newW = waterfallWindow.width + (mouseX - width/2)
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600)
-                            waterfallWindow.width = newW
-                    }
-                }
-                onMouseYChanged: {
-                    if (pressed) {
-                        var newH = waterfallWindow.height + (mouseY - height/2)
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900)
-                            waterfallWindow.height = newH
-                    }
-                }
-
-                // Visual indicator
-                Text {
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: 2
-                    text: "◢"
-                    font.pixelSize: 14
-                    color: secondaryCyan
-                    opacity: 0.8
-                }
-            }
-
-            // Bottom-left corner
-            MouseArea {
-                id: blResize
-                width: 20; height: 20
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                cursorShape: Qt.SizeBDiagCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var delta = mouseX
-                        var newW = waterfallWindow.width - delta
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600) {
-                            waterfallWindow.x += delta
-                            waterfallWindow.width = newW
-                        }
-                    }
-                }
-                onMouseYChanged: {
-                    if (pressed) {
-                        var newH = waterfallWindow.height + (mouseY - height/2)
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900)
-                            waterfallWindow.height = newH
-                    }
-                }
-            }
-
-            // Top-right corner
-            MouseArea {
-                id: trResize
-                width: 20; height: 20
-                anchors.right: parent.right
-                anchors.top: parent.top
-                cursorShape: Qt.SizeBDiagCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var newW = waterfallWindow.width + (mouseX - width/2)
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600)
-                            waterfallWindow.width = newW
-                    }
-                }
-                onMouseYChanged: {
-                    if (pressed) {
-                        var delta = mouseY
-                        var newH = waterfallWindow.height - delta
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900) {
-                            waterfallWindow.y += delta
-                            waterfallWindow.height = newH
-                        }
-                    }
-                }
-            }
-
-            // Top-left corner
-            MouseArea {
-                id: tlResize
-                width: 20; height: 20
-                anchors.left: parent.left
-                anchors.top: parent.top
-                cursorShape: Qt.SizeFDiagCursor
-                preventStealing: true
-
-                onMouseXChanged: {
-                    if (pressed) {
-                        var delta = mouseX
-                        var newW = waterfallWindow.width - delta
-                        if (newW >= waterfallWindow.minimumWidth && newW <= 1600) {
-                            waterfallWindow.x += delta
-                            waterfallWindow.width = newW
-                        }
-                    }
-                }
-                onMouseYChanged: {
-                    if (pressed) {
-                        var delta = mouseY
-                        var newH = waterfallWindow.height - delta
-                        if (newH >= waterfallWindow.minimumHeight && newH <= 900) {
-                            waterfallWindow.y += delta
-                            waterfallWindow.height = newH
-                        }
-                    }
-                }
+            // ===== RESIZE HANDLES =====
+            // 1.0.288 — sostituiti gli 8 MouseArea inline (che facevano
+            // waterfallWindow.width= da onMouseXChanged) con il componente
+            // condiviso FloatingResizeHandles (z:1000, onPositionChanged), lo
+            // stesso usato dalla Full Spectrum. Gli handle inline stavano SOTTO
+            // l'header dragArea (dichiarati prima del ColumnLayout) e in frameless
+            // ON (senza Qt.WindowStaysOnTopHint) perdevano il grab ai bordi →
+            // resize bloccato + "barra superiore bloccata". FloatingResizeHandles
+            // sta sopra l'header e funziona in entrambe le modalità frameless.
+            FloatingResizeHandles {
+                targetWindow: waterfallWindow
             }
 
             ColumnLayout {

@@ -25,9 +25,11 @@ Item {
     property bool dxClusterRefreshPending: false
 
     // Altezza minima/massima del grafico spettro (regolabile tramite drag)
-    readonly property int spectrumMinHeight: 60
-    readonly property int spectrumMaxHeight: 500
-    readonly property int waterfallMinHeight: 72
+    // 1.0.288 — vincoli rilassati: spettro e cascata ridimensionabili quasi liberamente
+    // (decidere quale aprire di più). Spettro 40..(altezza-24), cascata ≥24.
+    readonly property int spectrumMinHeight: 40
+    readonly property int spectrumMaxHeight: 4000
+    readonly property int waterfallMinHeight: 24
 
     // Colors
     property color bgDeep:      bridge.themeManager.bgDeep
@@ -677,15 +679,17 @@ Item {
         Rectangle {
             id: spectrumDivider
             Layout.fillWidth: true
-            Layout.preferredHeight: 6
+            Layout.preferredHeight: 12
             color: dividerMouse.containsMouse || dividerMouse.pressed
-                   ? accentCyan : Qt.rgba(1,1,1,0.08)
+                   ? Qt.rgba(accentCyan.r, accentCyan.g, accentCyan.b, 0.30) : Qt.rgba(1,1,1,0.06)
 
-            // Linea centrale visibile
+            // 1.0.288 — grip più evidente: trascina questa barra per regolare quanto
+            // spazio dare allo spettro (in alto) vs la cascata (in basso).
             Rectangle {
                 anchors.centerIn: parent
-                width: 40; height: 2; radius: 1
-                color: accentCyan; opacity: 0.6
+                width: 100; height: 4; radius: 2
+                color: accentCyan
+                opacity: dividerMouse.containsMouse || dividerMouse.pressed ? 1.0 : 0.75
             }
 
             MouseArea {
@@ -700,7 +704,11 @@ Item {
                     dragStartY = mouse.y + spectrumDivider.mapToItem(waterfallPanel, 0, 0).y
                     dragStartH = waterfallPanel.spectrumHeight
                 }
-                onMouseYChanged: {
+                // 1.0.288 — BUG FIX: era onMouseYChanged con `mouse.y`, ma in quell'handler
+                // il parametro `mouse` non esiste (è property-change) → TypeError → il drag
+                // non aggiornava mai spectrumHeight (split mai funzionante). Uso onPositionChanged
+                // (che riceve `mouse`) e mouseY come fallback.
+                onPositionChanged: function(mouse) {
                     if (pressed) {
                         var dy = (mouse.y + spectrumDivider.mapToItem(waterfallPanel, 0, 0).y) - dragStartY
                         var newH = dragStartH + dy
@@ -1114,7 +1122,9 @@ Item {
                     y: 0
                     width: 1
                     height: parent.height
-                    visible: spectrumGpuOverlay.txVisible
+                    // 1.0.288 — marker TX magenta nascosto: l'UNICO indicatore TX è la
+                    // linea rossa animata (txCarrierActiveBar), visibile solo in trasmissione.
+                    visible: false
                     Rectangle { x: -3; width: 7; height: parent.height; color: "#ff00ff"; opacity: 0.27 }
                     Rectangle { x: -1; width: 3; height: parent.height; color: "#ff00ff"; opacity: 0.94 }
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#ffc8ff" }
@@ -1124,7 +1134,9 @@ Item {
                     id: txSignalWidthGuide
                     z: -1
                     anchors.fill: parent
-                    visible: waterfallDisplay.txSignalGuideVisible
+                    // 1.0.288 — guida banda TX magenta nascosta: l'unico indicatore TX è
+                    // la linea rossa animata (txCarrierActiveBar), visibile solo in TX.
+                    visible: false
 
                     readonly property real leftX: waterfallDisplay.txSignalLeftX
                     readonly property real rightX: waterfallDisplay.txSignalRightX
@@ -1173,6 +1185,13 @@ Item {
                     height: parent.height
                     visible: bridge && (bridge.transmitting || bridge.tuning)
                              && markerX >= 0 && markerX < spectrumGpuOverlay.width
+                    // 1.0.288 — pulsazione animata: "linea rossa animata" che indica la TX in corso.
+                    SequentialAnimation on opacity {
+                        running: txCarrierActiveBar.visible
+                        loops: Animation.Infinite
+                        NumberAnimation { from: 1.0; to: 0.45; duration: 400; easing.type: Easing.InOutSine }
+                        NumberAnimation { from: 0.45; to: 1.0; duration: 400; easing.type: Easing.InOutSine }
+                    }
                     Rectangle {
                         anchors.fill: parent
                         color: Qt.rgba(1.0, 0.12, 0.12, 0.32)
@@ -1183,7 +1202,7 @@ Item {
                         x: parent.width / 2 - 1
                         width: 2
                         height: parent.height
-                        color: Qt.rgba(1.0, 0.85, 0.85, 0.95)
+                        color: Qt.rgba(1.0, 0.25, 0.25, 0.98)
                     }
                     // Etichetta "TX ON-AIR" sopra
                     Rectangle {
@@ -1239,7 +1258,8 @@ Item {
                     height: txMarkerText.implicitHeight + 6
                     x: spectrumGpuOverlay.markerBoxX(markerX, width)
                     y: spectrumGpuOverlay.markerBoxY(centerY, height)
-                    visible: spectrumGpuOverlay.txVisible
+                    // 1.0.288 — etichetta TX nascosta: unico indicatore TX = linea rossa animata in TX.
+                    visible: false
                     Rectangle {
                         anchors.fill: parent
                         radius: 4
@@ -1283,6 +1303,9 @@ Item {
                 border.width: 1
             }
 
+            // 1.0.288 — Linea TX ROSSA animata NELLA CASCATA (al centro della portante TX),
+            // visibile SOLO in trasmissione/tune. Sostituisce la vecchia guida magenta
+            // (nascosta come nello spettro). Solo visuale, niente mouse.
             Item {
                 id: txSignalWaterfallGuide
                 x: 0
@@ -1290,37 +1313,51 @@ Item {
                 z: 3
                 width: waterfallDisplay.width
                 height: Math.max(0, waterfallDisplay.height - waterfallDisplay.spectrumHeight)
-                visible: (bridge.monitoring || bridge.transmitting || bridge.tuning)
-                         && waterfallDisplay.txSignalGuideVisible
-                         && height > 0
+                readonly property real markerX: waterfallDisplay.freqToPixel(waterfallDisplay.txFreq)
+                visible: bridge && (bridge.transmitting || bridge.tuning)
+                         && height > 0 && markerX >= 0 && markerX < width
 
-                readonly property real leftX: waterfallDisplay.txSignalLeftX
-                readonly property real rightX: waterfallDisplay.txSignalRightX
-                readonly property real clampedLeftX: Math.max(0, Math.min(width, leftX))
-                readonly property real clampedRightX: Math.max(0, Math.min(width, rightX))
+                // 1.0.288 — onda rossa che si propaga lateralmente dal centro e svanisce
+                // (effetto evanescente "come se la riga si propagasse"), in loop durante il TX.
+                Rectangle {
+                    id: txCascadeWave
+                    y: 0
+                    height: parent.height
+                    radius: 3
+                    color: "#ff3030"
+                    x: txSignalWaterfallGuide.markerX - width / 2
+                    ParallelAnimation {
+                        running: txSignalWaterfallGuide.visible
+                        loops: Animation.Infinite
+                        NumberAnimation { target: txCascadeWave; property: "width"; from: 3; to: 54; duration: 1200; easing.type: Easing.OutQuad }
+                        NumberAnimation { target: txCascadeWave; property: "opacity"; from: 0.55; to: 0.0; duration: 1200; easing.type: Easing.OutQuad }
+                    }
+                }
 
+                // Linea centrale rossa (portante TX)
+                Rectangle { x: Math.round(txSignalWaterfallGuide.markerX) - 4; width: 9; height: parent.height; color: "#ff1414"; opacity: 0.22 }
+                Rectangle { x: Math.round(txSignalWaterfallGuide.markerX) - 1; width: 3; height: parent.height; color: "#ff2020"; opacity: 0.95 }
+                Rectangle { x: Math.round(txSignalWaterfallGuide.markerX);     width: 1; height: parent.height; color: "#ffd0d0" }
+
+                // Marca "TX" in cima alla linea
                 Rectangle {
-                    x: txSignalWaterfallGuide.clampedLeftX
-                    y: 0
-                    width: Math.max(1, txSignalWaterfallGuide.clampedRightX - txSignalWaterfallGuide.clampedLeftX)
-                    height: parent.height
-                    color: Qt.rgba(1.0, 0.0, 1.0, 0.060)
-                }
-                Rectangle {
-                    x: Math.round(txSignalWaterfallGuide.leftX) - 1
-                    y: 0
-                    width: 2
-                    height: parent.height
-                    visible: txSignalWaterfallGuide.leftX >= 0 && txSignalWaterfallGuide.leftX <= parent.width
-                    color: Qt.rgba(1.0, 0.42, 1.0, 0.78)
-                }
-                Rectangle {
-                    x: Math.round(txSignalWaterfallGuide.rightX) - 1
-                    y: 0
-                    width: 2
-                    height: parent.height
-                    visible: txSignalWaterfallGuide.rightX >= 0 && txSignalWaterfallGuide.rightX <= parent.width
-                    color: Qt.rgba(1.0, 0.42, 1.0, 0.78)
+                    y: 2
+                    width: txCascadeBadge.implicitWidth + 10
+                    height: txCascadeBadge.implicitHeight + 4
+                    radius: 3
+                    x: Math.max(0, Math.min(parent.width - width,
+                               Math.round(txSignalWaterfallGuide.markerX) - width / 2))
+                    color: Qt.rgba(0.85, 0.05, 0.05, 0.95)
+                    border.color: "#ffffff"
+                    border.width: 1
+                    Text {
+                        id: txCascadeBadge
+                        anchors.centerIn: parent
+                        text: "TX"
+                        color: "#ffffff"
+                        font.pixelSize: 9
+                        font.bold: true
+                    }
                 }
             }
 
