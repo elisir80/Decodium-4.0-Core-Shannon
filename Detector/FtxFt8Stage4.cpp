@@ -3041,7 +3041,13 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 
   auto const mycall13 = widen_call_for_pack77 (request.mycall);
   auto const hiscall13 = widen_call_for_pack77 (request.hiscall);
-  legacy_pack77_reset_context_c ();
+  // NON resettare il context per ogni candidato: il reset azzerava la hash table
+  // (call->hash dei call non-standard) prima di ogni candidato, impedendo qualsiasi
+  // accumulo e lasciando ~15% di decode come "<...>". Il context e' thread_local
+  // (un worker seriale) e l'unpack vi auto-salva i call completi decodificati, quindi
+  // senza reset accumula attraverso candidati e slot come JTDX, risolvendo i call
+  // hashati (compound/special). set_context aggiorna solo my/dx call senza azzerare.
+  // Gli hash sono mappe immutabili (cap 1000), nessun rischio di stato stantio.
   legacy_pack77_set_context_c (mycall13.data (), hiscall13.data ());
 
   ftx_ft8_prepare_candidate_c (candidate_values[2], candidate_values[0], candidate_values[1],
