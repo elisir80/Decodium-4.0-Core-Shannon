@@ -3893,6 +3893,14 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
         if (payloadMs <= 0 || minUsefulPayloadMs <= 0) {
             return d3CapMs;
         }
+        // Fix QSO-completion: per FT8/FT4 NON ammettere start oltre la finestra di shift
+        // (~2000ms). Oltre, il fronte verrebbe troncato (Costas persa -> il partner non
+        // decodifica). Meglio DEFERIRE al boundary successivo e trasmettere pulito: cosi'
+        // i CQ-resume tardivi (osservati a +4..8s) non escono trimmati ma slittano allo
+        // slot dopo. Entro 2000ms il path audio SHIFTA (invia tutto). FT2 invariato.
+        if (mode == QStringLiteral("FT8") || mode == QStringLiteral("FT4")) {
+            return qMax(0, qMin(d3CapMs, 2000));
+        }
         int const payloadCapMs =
             txSyncLeadInMsForMode(mode) + qMax(0, payloadMs - minUsefulPayloadMs);
         return qMax(0, qMin(d3CapMs, payloadCapMs));
@@ -3908,10 +3916,14 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
 static int autoTxDecodeGraceMs(const QString& mode)
 {
     QString const normalized = mode.trimmed().toUpper();
+    // Grace = quanto aspettare al boundary il decode dello slot appena finito prima
+    // di committare il TX auto. Deve superare (settle 650ms + decode + advanceQsoState)
+    // ~0.95-1.0s in FT8, altrimenti la fallback committa CQ con lo stato vecchio e la
+    // risposta al partner viene persa (QSO non si chiude).
     if (normalized == QStringLiteral("FT8"))
-        return 900;
+        return 1200;
     if (normalized == QStringLiteral("FT4"))
-        return 600;
+        return 700;
     if (normalized == QStringLiteral("FT2"))
         return 250;
     return 500;
@@ -12670,6 +12682,25 @@ qint64 DecodiumBridge::syncTxPcmStartOffsetBytes(const QAudioFormat& format,
         return 0;
     }
 
+    // Fix QSO-completion: partenza tardiva (es. TX di risposta committato dopo il
+    // decode dello slot precedente, ~+0.9-1.2s). Se l'INTERA forma d'onda entra ancora
+    // nello slot e il DT resta decodificabile, SHIFTA (invia tutto da ora, nessun trim)
+    // invece di TRONCARE il fronte: troncare distrugge la prima Costas e il partner non
+    // decodifica -> QSO non si chiude. Trim solo se davvero troppo tardi (la coda
+    // uscirebbe dallo slot) o DT oltre la tolleranza del decoder remoto.
+    {
+        qint64 const frameBytesShift = qMax<qint64>(1, format.bytesPerFrame());
+        qint64 const payloadFrames = pcmSizeBytes / frameBytesShift;
+        int const payloadDurationMs =
+            static_cast<int>((payloadFrames * qint64 {1000}) / qMax(1, format.sampleRate()));
+        int const slotTailMarginMs = 250;   // margine di coda prima della fine slot
+        int const maxShiftDtMs = 2000;       // DT max decodificabile; allineato al cap latest-start FT8/FT4
+        if (elapsedMs <= maxShiftDtMs
+            && (elapsedMs + payloadDurationMs + slotTailMarginMs) <= periodMs) {
+            return 0;  // shift: invia l'intera forma d'onda da ora, nessun trim del fronte
+        }
+    }
+
     qint64 const frameBytes = qMax<qint64>(1, format.bytesPerFrame());
     qint64 const offsetFrames =
         (static_cast<qint64>(payloadElapsedMs) * static_cast<qint64>(format.sampleRate())) / 1000;
@@ -19404,7 +19435,14 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
     int const elapsedMs = static_cast<int>(nowMs % static_cast<qint64>(periodMs));
     int graceMs = autoTxDecodeGraceMs(normalizedMode);
     if (cpuPressureActive() || m_lowCpuModeEnabled) {
-        graceMs = qMin(graceMs, normalizedMode == QStringLiteral("FT2") ? 80 : 150);
+        // FT2 async resta reattivo (80ms). Ma FT8/FT4 NON vanno tagliati a 150ms sotto
+        // pressione: proprio sulle macchine lente (le piu' colpite) l'early-visible
+        // viene saltato e il decode dello slot finito arriva tardi -> dobbiamo comunque
+        // aspettarlo, altrimenti committiamo un CQ prima della risposta del partner e il
+        // QSO non si chiude. Manteniamo un grace utile (>=900ms) anche sotto pressione.
+        graceMs = (normalizedMode == QStringLiteral("FT2"))
+            ? qMin(graceMs, 80)
+            : qMax(900, qMin(graceMs, 1200));
     }
     int const maxDelayMs = latestStartMs - elapsedMs - 250;
     if (maxDelayMs <= 0) {
@@ -26214,9 +26252,18 @@ void DecodiumBridge::onPeriodTimer()
         } else {
             feedAudioToDecoder(completedUtcSlot);
         }
+        // Fix QSO-completion FT8/FT4: in auto-seq / CQ-repeat dobbiamo aspettare il
+        // decode dello slot APPENA finito (dispatchato a +650ms) prima di committare
+        // il TX. Una risposta del partner — specie debole, mancata dall'early-visible —
+        // viene decodificata ~+0.8-1.0s e deve reindirizzare il TX da CQ a risposta.
+        // Senza questa attesa D4 committa CQ al boundary (+137ms) e rinvia la risposta
+        // di un intero ciclo -> il partner non riceve risposta in tempo -> QSO non si
+        // chiude (loop osservato dal vivo con EA3IXP). pendingAutoDecodeBeforeBoundary
+        // da solo e' falso al boundary perche' il decode dello slot finito non e'
+        // ancora partito; in time-sync mode aspettiamo sempre il decode imminente.
         bool const autoTxWaitsForDecode =
-            pendingAutoDecodeBeforeBoundary
-            && shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot);
+            shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)
+            && (pendingAutoDecodeBeforeBoundary || timeSyncMode);
         // Al boundary UTC: un click manuale tardivo in FT8/FT4/FT2 sync
         // viene armato qui invece di partire a meta' slot.
         bool const startedDeferredManualTx = tryStartDeferredManualSyncTx();
