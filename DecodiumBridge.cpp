@@ -98,6 +98,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QSysInfo>
 #include <QTextStream>
 #include <QAudioDevice>
@@ -151,8 +152,78 @@
 
 static QString extractRightCallsign(const QString& msg);
 
+static constexpr int kDefaultTxWatchdogMinutes = 6;
+static constexpr int kDefaultTxWatchdogCount = 3;
+
 static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
+}
+
+static QStringList ctyDatDownloadUrls()
+{
+    return {
+        QStringLiteral("https://www.country-files.com/bigcty/cty.dat"),
+        QStringLiteral("https://www.country-files.com/cty/cty.dat")
+    };
+}
+
+static bool ctyDatPayloadLooksValid(const QByteArray& payload, QString* reason = nullptr)
+{
+    auto fail = [reason](const QString& text) {
+        if (reason)
+            *reason = text;
+        return false;
+    };
+
+    QByteArray const trimmed = payload.left(4096).trimmed();
+    QByteArray const lower = trimmed.toLower();
+    if (payload.size() < 20000)
+        return fail(QStringLiteral("file troppo piccolo (%1 byte)").arg(payload.size()));
+    if (lower.startsWith("<!doctype") || lower.startsWith("<html") || lower.contains("<html"))
+        return fail(QStringLiteral("il server ha restituito HTML invece di cty.dat"));
+
+    const QString head = QString::fromLatin1(payload.left(16384));
+    const QStringList lines = head.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+    int countryRows = 0;
+    for (const QString& line : lines) {
+        const QString row = line.trimmed();
+        if (row.count(QLatin1Char(':')) >= 7 && row.endsWith(QLatin1Char(':')))
+            ++countryRows;
+        if (countryRows >= 2)
+            return true;
+    }
+
+    return fail(QStringLiteral("formato cty.dat non riconosciuto"));
+}
+
+static QNetworkRequest makeCtyDatRequest(const QUrl& url)
+{
+    QNetworkRequest req(url);
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                     QNetworkRequest::NoLessSafeRedirectPolicy);
+    req.setRawHeader("User-Agent",
+                     "Decodium/4.0 cty.dat updater (+https://github.com/elisir80/Decodium-4.0-Core-Shannon)");
+    req.setRawHeader("Accept", "text/plain, application/octet-stream, */*");
+    req.setRawHeader("Accept-Language", "en-US,en;q=0.8");
+    req.setRawHeader("Cache-Control", "no-cache");
+    return req;
+}
+
+static bool issueNextCtyDatRequest(QNetworkAccessManager* nam)
+{
+    const QStringList urls = nam->property("ctyUrls").toStringList();
+    int index = nam->property("ctyUrlIndex").toInt();
+    if (index >= urls.size())
+        return false;
+
+    const QUrl url(urls.at(index));
+    nam->setProperty("ctyUrlIndex", index + 1);
+    bridgeLog(QStringLiteral("cty.dat download attempt %1/%2: %3")
+              .arg(index + 1)
+              .arg(urls.size())
+              .arg(url.toString()));
+    nam->get(makeCtyDatRequest(url));
+    return true;
 }
 
 static QString audioDeviceIdForLog(const QAudioDevice& device)
@@ -2372,7 +2443,7 @@ static QString standardFtxQsoMessage(int txNumber,
         switch (txNumber) {
         case 1: return withGrid(dxHash + QLatin1Char(' ') + my);
         case 2: return dxHash + QLatin1Char(' ') + my + QLatin1Char(' ') + report;
-        case 3: return withQuick(my + QLatin1Char(' ') + dxHash + QStringLiteral(" R") + report);
+        case 3: return withQuick(dxHash + QLatin1Char(' ') + my + QStringLiteral(" R") + report);
         case 4: return dxHash + QLatin1Char(' ') + my + QLatin1Char(' ') + endMessage;
         case 5: return dxHash + QLatin1Char(' ') + my + QStringLiteral(" 73");
         default: return {};
@@ -4171,38 +4242,14 @@ bool decodeListModel_isTelemetryOnlyMessage(QString const& message)
     return decodeListModel_isTelemetryHexToken(parts.first());
 }
 
-QString decodeListModel_normalizedBaseCall(QString const& call)
-{
-    QString clean = call.toUpper().remove(QRegularExpression("[<>;,]")).trimmed();
-    if (clean.isEmpty()) return QString();
-    QStringList const parts = clean.split(QLatin1Char('/'), Qt::SkipEmptyParts);
-    QString best;
-    for (QString const& p : parts) {
-        if (p.size() > best.size() && p.contains(QRegularExpression("[A-Z]")) &&
-            p.contains(QRegularExpression("[0-9]"))) {
-            best = p;
-        }
-    }
-    return best.isEmpty() ? clean : best;
-}
-
-bool decodeListModel_messageContainsBase(QString const& message, QString const& base)
-{
-    if (base.isEmpty()) return false;
-    QStringList const parts = message.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-    for (QString const& p : parts) {
-        if (decodeListModel_normalizedBaseCall(p) == base) return true;
-    }
-    return false;
-}
-
 } // namespace
 
 bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry) const
 {
     if (entry.isEmpty()) return false;
-    // 1.0.145: prima cosa, filter ghost decode se attivo. Le entries TX e
-    // MyCall non sono mai considerate ghost (sono certe).
+    // 1.0.145: prima cosa, filter ghost decode se attivo. Le entries TX sono
+    // certe; MyCall resta passante solo quando non mostra segnali strutturali
+    // di falso positivo.
     if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) return false;
     if (!m_hideTelemetryOnlyDecodes) return true;
     QString const msg = entry.value(QStringLiteral("displayMessage")).toString();
@@ -4336,6 +4383,61 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
                         bridgeLog(QStringLiteral("[GhostFilter] corrupted-token reject: partner=%1 token=%2 db=%3")
                                       .arg(partnerCandidate, tok, QString::number(db)));
                         return true;
+                    }
+                }
+            }
+        }
+        // 1.0.291 — Directed false-call guard. A weak, low-confidence
+        // message addressed to my call with a grid that is geographically
+        // incompatible with the caller's DXCC is much more likely an LDPC
+        // ghost than a real first call. Example reported:
+        // "EA8DJR JE8TRM/P LO57 ?" at -26 dB while EA8DJR was only RX.
+        // Keep active-QSO replies untouched via the isActiveQso return above.
+        QString const msgFull = entry.value(QStringLiteral("displayMessage"))
+                                      .toString().trimmed().toUpper();
+        QString const msgFallback = entry.value(QStringLiteral("message"))
+                                          .toString().trimmed().toUpper();
+        QString const msgText = msgFull.isEmpty() ? msgFallback : msgFull;
+        QStringList const rawTokens = msgText.split(QRegularExpression(QStringLiteral("\\s+")),
+                                                    Qt::SkipEmptyParts);
+        bool const lowConfidence = !rawTokens.isEmpty()
+            && rawTokens.constLast().trimmed() == QStringLiteral("?");
+        QString grid = entry.value(QStringLiteral("dxGrid")).toString().trimmed().toUpper();
+        if (!isGridTokenStrict(grid)) {
+            grid = extractDecodedGrid(msgText);
+        }
+        if (db <= -16
+            && (lowConfidence || db <= -20)
+            && isGridTokenStrict(grid)
+            && m_dxccLookup
+            && m_dxccLookup->isLoaded()) {
+            QString callForEntity = partnerCandidate.trimmed().toUpper();
+            if (callForEntity.isEmpty()) {
+                callForEntity = directedPeerTokenFromMessage(msgText,
+                                                             m_callsign.trimmed().toUpper(),
+                                                             normalizedBaseCall(m_callsign)).trimmed().toUpper();
+            }
+            if (!callForEntity.isEmpty()) {
+                DxccEntity const ent = m_dxccLookup->lookup(callForEntity);
+                if (ent.isValid()) {
+                    double gridLon = 0.0;
+                    double gridLat = 0.0;
+                    if (grid2deg(grid, gridLon, gridLat)) {
+                        double mismatchAz = 0.0;
+                        double const entLonEast = -ent.lon;
+                        double const mismatchKm = azdist(ent.lat, entLonEast,
+                                                         gridLat, gridLon,
+                                                         mismatchAz);
+                        if (mismatchKm > 5000.0) {
+                            bridgeLog(QStringLiteral("[GhostFilter] directed call/grid mismatch reject: call=%1 dxcc=%2 grid=%3 mismatch=%4km db=%5 lowConfidence=%6")
+                                          .arg(callForEntity,
+                                               ent.name,
+                                               grid,
+                                               QString::number(qRound(mismatchKm)),
+                                               QString::number(db),
+                                               lowConfidence ? QStringLiteral("yes") : QStringLiteral("no")));
+                            return true;
+                        }
                     }
                 }
             }
@@ -5119,6 +5221,83 @@ void DecodiumBridge::setDecodeShowPeriodSeparator(bool v)
     rebuildRxDecodeModel();
 }
 
+void DecodiumBridge::persistTxWatchdogSettings()
+{
+    int const legacyMinutes = (m_txWatchdogMode == 1 && m_txWatchdogTime > 0)
+        ? m_txWatchdogTime
+        : 0;
+
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    settings.setValue(QStringLiteral("txWatchdogMode"), m_txWatchdogMode);
+    settings.setValue(QStringLiteral("txWatchdogTime"), m_txWatchdogTime);
+    settings.setValue(QStringLiteral("txWatchdogCount"), m_txWatchdogCount);
+    settings.setValue(QStringLiteral("TxWatchdog"), legacyMinutes);
+    settings.setValue(QStringLiteral("TXWatchdog"), legacyMinutes);
+    settings.sync();
+
+    syncSettingToLegacyIni(QStringLiteral("TxWatchdog"), legacyMinutes);
+    syncSettingToLegacyIni(QStringLiteral("TXWatchdog"), legacyMinutes);
+}
+
+void DecodiumBridge::setTxWatchdogMode(int v)
+{
+    v = qBound(0, v, 2);
+    if (m_txWatchdogMode == v) {
+        persistTxWatchdogSettings();
+        return;
+    }
+
+    m_txWatchdogMode = v;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    persistTxWatchdogSettings();
+
+    emit txWatchdogModeChanged();
+    emit settingValueChanged(QStringLiteral("txWatchdogMode"), m_txWatchdogMode);
+    emit settingValueChanged(QStringLiteral("TxWatchdog"),
+                             (m_txWatchdogMode == 1 && m_txWatchdogTime > 0) ? m_txWatchdogTime : 0);
+    emit settingValueChanged(QStringLiteral("TXWatchdog"),
+                             (m_txWatchdogMode == 1 && m_txWatchdogTime > 0) ? m_txWatchdogTime : 0);
+}
+
+void DecodiumBridge::setTxWatchdogTime(int v)
+{
+    v = qBound(0, v, 999);
+    if (m_txWatchdogTime == v) {
+        persistTxWatchdogSettings();
+        return;
+    }
+
+    m_txWatchdogTime = v;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    persistTxWatchdogSettings();
+
+    emit txWatchdogTimeChanged();
+    emit settingValueChanged(QStringLiteral("txWatchdogTime"), m_txWatchdogTime);
+    emit settingValueChanged(QStringLiteral("TxWatchdog"),
+                             (m_txWatchdogMode == 1 && m_txWatchdogTime > 0) ? m_txWatchdogTime : 0);
+    emit settingValueChanged(QStringLiteral("TXWatchdog"),
+                             (m_txWatchdogMode == 1 && m_txWatchdogTime > 0) ? m_txWatchdogTime : 0);
+}
+
+void DecodiumBridge::setTxWatchdogCount(int v)
+{
+    v = qBound(1, v, 50);
+    if (m_txWatchdogCount == v) {
+        persistTxWatchdogSettings();
+        return;
+    }
+
+    m_txWatchdogCount = v;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    persistTxWatchdogSettings();
+
+    emit txWatchdogCountChanged();
+    emit settingValueChanged(QStringLiteral("txWatchdogCount"), m_txWatchdogCount);
+}
+
 void DecodiumBridge::qmlDebugLog(QString const& msg) const
 {
     bridgeLog(QStringLiteral("[QML] %1").arg(msg));
@@ -5173,23 +5352,12 @@ QString DecodiumBridge::webServerUrl() const
 
 bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
 {
-    // 1.0.266 (fork-only iu8lmc) — Rimodulazione filtro Signal RX:
-    // mostra SOLO entries collegate alla nostra call. Tre casi accettati:
-    //   1. forceRxPane=true (override esplicito, es. period separator)
-    //   2. isTx=true: nostre trasmissioni (CQ IU8LMC, chiamate dirette, repliche QSO)
-    //   3. myMatch: messaggio contiene la nostra call OPPURE isMyCall=true
-    //      (chiamate ricevute verso di noi, self-echo, risposte partner in QSO)
-    // RIMOSSO il fallback "isAtRxFrequency +/-200Hz" che faceva spuntare nel
-    // pannello tutto il traffico della porzione di banda selezionata nel waterfall.
     if (entry.isEmpty()) return false;
-    if (entry.value(QStringLiteral("forceRxPane")).toBool()) return true;
-    bool const isTx = entry.value(QStringLiteral("isTx")).toBool();
-    if (isTx) return true;
-    QString const myBase = decodeListModel_normalizedBaseCall(m_callsign);
-    QString const message = entry.value(QStringLiteral("message")).toString();
-    bool const myMatch = entry.value(QStringLiteral("isMyCall")).toBool()
-        || decodeListModel_messageContainsBase(message, myBase);
-    return myMatch;
+    // Keep the rebuilt native model aligned with appendRxDecodeEntry().
+    // Otherwise a manual double-click on an older CQ/third-party row changes
+    // dxCall and TX messages, but Signal RX does not show that selected
+    // partner until a new decode arrives.
+    return shouldMirrorToRxPane(entry);
 }
 
 void DecodiumBridge::injectPeriodSeparators(QVariantList& filtered) const
@@ -5711,9 +5879,16 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     bridgeLog(QStringLiteral("DX Cluster auto-connect: waiting for Main.qml ready"));
 
 #if defined(Q_OS_MAC)
-    if (qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP")) {
+    bool const legacyTxOverride =
+        qEnvironmentVariableIsSet("DECODIUM_MAC_LEGACY_TX_BACKEND");
+    bool const forceStandaloneUdp =
+        qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP") || !legacyTxOverride;
+
+    if (forceStandaloneUdp) {
         m_useLegacyTxBackend = false;
-        bridgeLog(QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP"));
+        bridgeLog(qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP")
+                  ? QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP")
+                  : QStringLiteral("Legacy TX backend disabled by macOS default standalone UDP mode"));
     } else {
         m_useLegacyTxBackend = true;
         // Su Mac, crea il legacy backend in modo differito per non bloccare l'avvio
@@ -6569,11 +6744,15 @@ DecodiumBridge::~DecodiumBridge()
     if (m_soundOutput) m_soundOutput->stop();
     auto safeQuitThread = [](QThread *t, const char *name) {
         if (!t) return;
+        t->requestInterruption();
         t->quit();
-        if (!t->wait(5000)) {
-            qWarning("~DecodiumBridge: %s did not finish in 5s, terminating", name);
+        if (!t->wait(15000)) {
+            qWarning("~DecodiumBridge: %s did not finish in 15s, terminating", name);
             t->terminate();
-            t->wait(2000);
+            if (!t->wait(3000)) {
+                qWarning("~DecodiumBridge: %s still running after terminate; detaching to avoid QThread destructor abort", name);
+                t->setParent(nullptr);
+            }
         }
     };
     safeQuitThread(m_workerThread,       "ft8");
@@ -6769,10 +6948,22 @@ bool DecodiumBridge::shouldIgnoreDecodeCallbacks() const
 void DecodiumBridge::beginDecodeCallbackShutdown()
 {
     m_shuttingDown = true;
+    m_asyncDecodePending = false;
+    if (m_asyncDecodeTimer) {
+        m_asyncDecodeTimer->stop();
+    }
+
+    if (m_ft8Worker) {
+        m_ft8Worker->beginShutdown();
+    }
+    if (m_ft2Worker) {
+        m_ft2Worker->beginShutdown();
+    }
 
     auto disconnectWorker = [this](QObject *worker) {
         if (worker) {
             QObject::disconnect(worker, nullptr, this, nullptr);
+            QCoreApplication::removePostedEvents(worker, QEvent::MetaCall);
         }
     };
 
@@ -7327,6 +7518,12 @@ void DecodiumBridge::syncLegacyBackendState()
             extraSignals();
         }
     };
+#if defined(Q_OS_WIN)
+    bool const allowAudioDeviceProbe =
+        m_mainQmlReady || qEnvironmentVariableIsSet("DECODIUM_STARTUP_AUDIO_DIAGNOSTICS");
+#else
+    bool const allowAudioDeviceProbe = true;
+#endif
 
     QString const legacyCallsign = m_legacyBackend->callsign();
     if (!legacyCallsign.isEmpty()) {
@@ -7569,36 +7766,60 @@ void DecodiumBridge::syncLegacyBackendState()
 
     QString const legacyAudioInput = m_legacyBackend->audioInputDeviceName().trimmed();
     if (!legacyAudioInput.isEmpty()) {
-        bool const bridgeInputAvailable =
-            hasAudioDeviceNamed(QMediaDevices::audioInputs(), m_audioInputDevice);
-        bool const legacyInputAvailable =
-            hasAudioDeviceNamed(QMediaDevices::audioInputs(), legacyAudioInput);
-        if (!m_audioInputDevice.trimmed().isEmpty()
-            && bridgeInputAvailable
-            && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
-            bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio input [%1] over legacy [%2]")
-                          .arg(m_audioInputDevice, legacyAudioInput));
-            m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
-            m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
-        } else if (legacyInputAvailable || m_audioInputDevice.trimmed().isEmpty()) {
-            updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
+        if (!allowAudioDeviceProbe) {
+            if (!m_audioInputDevice.trimmed().isEmpty()
+                && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
+                bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio input [%1] over legacy [%2] without startup device probe")
+                              .arg(m_audioInputDevice, legacyAudioInput));
+                m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
+                m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
+            } else if (m_audioInputDevice.trimmed().isEmpty()) {
+                updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
+            }
+        } else {
+            bool const bridgeInputAvailable =
+                hasAudioDeviceNamed(QMediaDevices::audioInputs(), m_audioInputDevice);
+            bool const legacyInputAvailable =
+                hasAudioDeviceNamed(QMediaDevices::audioInputs(), legacyAudioInput);
+            if (!m_audioInputDevice.trimmed().isEmpty()
+                && bridgeInputAvailable
+                && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
+                bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio input [%1] over legacy [%2]")
+                              .arg(m_audioInputDevice, legacyAudioInput));
+                m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
+                m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
+            } else if (legacyInputAvailable || m_audioInputDevice.trimmed().isEmpty()) {
+                updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
+            }
         }
     }
     QString const legacyAudioOutput = m_legacyBackend->audioOutputDeviceName().trimmed();
     if (!legacyAudioOutput.isEmpty()) {
-        bool const bridgeOutputAvailable =
-            hasAudioDeviceNamed(QMediaDevices::audioOutputs(), m_audioOutputDevice);
-        bool const legacyOutputAvailable =
-            hasAudioDeviceNamed(QMediaDevices::audioOutputs(), legacyAudioOutput);
-        if (!m_audioOutputDevice.trimmed().isEmpty()
-            && bridgeOutputAvailable
-            && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
-            bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio output [%1] over legacy [%2]")
-                          .arg(m_audioOutputDevice, legacyAudioOutput));
-            m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
-            m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
-        } else if (legacyOutputAvailable || m_audioOutputDevice.trimmed().isEmpty()) {
-            updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
+        if (!allowAudioDeviceProbe) {
+            if (!m_audioOutputDevice.trimmed().isEmpty()
+                && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
+                bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio output [%1] over legacy [%2] without startup device probe")
+                              .arg(m_audioOutputDevice, legacyAudioOutput));
+                m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
+                m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
+            } else if (m_audioOutputDevice.trimmed().isEmpty()) {
+                updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
+            }
+        } else {
+            bool const bridgeOutputAvailable =
+                hasAudioDeviceNamed(QMediaDevices::audioOutputs(), m_audioOutputDevice);
+            bool const legacyOutputAvailable =
+                hasAudioDeviceNamed(QMediaDevices::audioOutputs(), legacyAudioOutput);
+            if (!m_audioOutputDevice.trimmed().isEmpty()
+                && bridgeOutputAvailable
+                && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
+                bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio output [%1] over legacy [%2]")
+                              .arg(m_audioOutputDevice, legacyAudioOutput));
+                m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
+                m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
+            } else if (legacyOutputAvailable || m_audioOutputDevice.trimmed().isEmpty()) {
+                updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
+            }
         }
     }
     updateInt(m_audioInputChannel, qBound(0, m_legacyBackend->audioInputChannel(), 3),
@@ -8413,6 +8634,11 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         entry["forceRxPane"] = rxPane;
         stabilizeLegacyTimeToken(entry);
         enrichDecodeEntry(entry);
+        if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+            bridgeLog(QStringLiteral("ghost decode filter legacy-mirror: msg='%1'")
+                          .arg(message));
+            continue;
+        }
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
             bridgeLog(QStringLiteral("user decode filter legacy-mirror: %1 msg='%2'")
@@ -8427,7 +8653,15 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
 
 bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
 {
-    if (entry.value("forceRxPane").toBool() || entry.value("isTx").toBool()) {
+    if (entry.value("isTx").toBool()) {
+        return true;
+    }
+    if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+        bridgeLog(QStringLiteral("[GhostFilter] Signal RX reject ghost decode msg=%1")
+                      .arg(entry.value("message").toString().trimmed()));
+        return false;
+    }
+    if (entry.value("forceRxPane").toBool()) {
         return true;
     }
 
@@ -10692,6 +10926,26 @@ void DecodiumBridge::setAlt12Enabled(bool v)
             m_legacyBackend->setAlt12Enabled(m_specialOperationActivity == kSpecialOpHound ? false : v);
         }
     }
+}
+
+void DecodiumBridge::setVhfUhfFeatures(bool v)
+{
+    if (m_vhfUhfFeatures == v) {
+        return;
+    }
+
+    m_vhfUhfFeatures = v;
+
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    s.setValue(QStringLiteral("vhfUhfFeatures"), m_vhfUhfFeatures);
+    s.setValue(QStringLiteral("VHFUHF"), m_vhfUhfFeatures);
+    s.sync();
+    syncSettingToLegacyIni(QStringLiteral("vhfUhfFeatures"), m_vhfUhfFeatures);
+    syncSettingToLegacyIni(QStringLiteral("VHFUHF"), m_vhfUhfFeatures);
+
+    emit vhfUhfFeaturesChanged();
+    emit settingValueChanged(QStringLiteral("vhfUhfFeatures"), m_vhfUhfFeatures);
+    emit settingValueChanged(QStringLiteral("VHFUHF"), m_vhfUhfFeatures);
 }
 
 // =====================================================================
@@ -15103,6 +15357,29 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         return;
     }
 
+    if (key == QStringLiteral("TxWatchdog") || key == QStringLiteral("TXWatchdog")) {
+        int const minutes = qBound(0, value.toInt(), 999);
+        setTxWatchdogTime(minutes);
+        setTxWatchdogMode(minutes > 0 ? 1 : 0);
+        return;
+    }
+    if (key == QStringLiteral("txWatchdogMode")) {
+        setTxWatchdogMode(value.toInt());
+        return;
+    }
+    if (key == QStringLiteral("txWatchdogTime")) {
+        setTxWatchdogTime(value.toInt());
+        return;
+    }
+    if (key == QStringLiteral("txWatchdogCount")) {
+        setTxWatchdogCount(value.toInt());
+        return;
+    }
+    if (key == QStringLiteral("VHFUHF") || key == QStringLiteral("vhfUhfFeatures")) {
+        setVhfUhfFeatures(value.toBool());
+        return;
+    }
+
     s.setValue(key, value);
     if (legacyKey != key) {
         s.setValue(legacyKey, value);
@@ -17540,6 +17817,11 @@ void DecodiumBridge::saveSettings()
     s.setValue("txWatchdogMode",  m_txWatchdogMode);
     s.setValue("txWatchdogTime",  m_txWatchdogTime);
     s.setValue("txWatchdogCount", m_txWatchdogCount);
+    int const legacyTxWatchdogMinutes = (m_txWatchdogMode == 1 && m_txWatchdogTime > 0)
+        ? m_txWatchdogTime
+        : 0;
+    s.setValue("TxWatchdog",      legacyTxWatchdogMinutes);
+    s.setValue("TXWatchdog",      legacyTxWatchdogMinutes);
     s.setValue("filterCqOnly",    m_filterCqOnly);
     s.setValue("filterMyCallOnly",m_filterMyCallOnly);
     s.setValue("filtersBypassed", m_filtersBypassed);
@@ -21142,9 +21424,31 @@ void DecodiumBridge::loadSettings()
     m_contestNumber    = s.value("contestNumber",      1).toInt();
     m_swlMode          = s.value("swlMode",           false).toBool();
     m_splitMode        = s.value("splitMode",         false).toBool();
-    m_txWatchdogMode   = s.value("txWatchdogMode",     0).toInt();
-    m_txWatchdogTime   = s.value("txWatchdogTime",     5).toInt();
-    m_txWatchdogCount  = s.value("txWatchdogCount",    3).toInt();
+    QVariant legacyTxWatchdog = readSettingFromLegacyIni(QStringLiteral("TxWatchdog"));
+    if (!legacyTxWatchdog.isValid()) {
+        legacyTxWatchdog = readSettingFromLegacyIni(QStringLiteral("TXWatchdog"));
+    }
+    bool legacyTxWatchdogOk = false;
+    int const legacyTxWatchdogMinutes = legacyTxWatchdog.toInt(&legacyTxWatchdogOk);
+    bool const hasSavedTxWatchdogMode = s.contains(QStringLiteral("txWatchdogMode"));
+    bool const hasSavedTxWatchdogTime = s.contains(QStringLiteral("txWatchdogTime"));
+
+    m_txWatchdogTime = qBound(0,
+                              hasSavedTxWatchdogTime
+                                  ? s.value(QStringLiteral("txWatchdogTime")).toInt()
+                                  : (legacyTxWatchdog.isValid() && legacyTxWatchdogOk
+                                         ? legacyTxWatchdogMinutes
+                                         : kDefaultTxWatchdogMinutes),
+                              999);
+    m_txWatchdogMode = qBound(0,
+                              hasSavedTxWatchdogMode
+                                  ? s.value(QStringLiteral("txWatchdogMode")).toInt()
+                                  : (m_txWatchdogTime > 0 ? 1 : 0),
+                              2);
+    m_txWatchdogCount  = qBound(1,
+                                s.value(QStringLiteral("txWatchdogCount"),
+                                        kDefaultTxWatchdogCount).toInt(),
+                                50);
     m_filterCqOnly     = s.value("filterCqOnly",      false).toBool();
     m_filterMyCallOnly = s.value("filterMyCallOnly",  false).toBool();
     m_filtersBypassed  = s.value(QStringLiteral("filtersBypassed"),
@@ -22352,6 +22656,11 @@ QVariantList DecodiumBridge::augmentLegacyMirrorWithAllTxt(QVariantList const& m
         entry[QStringLiteral("fromCall")] = extractDecodedCallsign(message, isCQ);
         entry[QStringLiteral("forceRxPane")] = rxPane;
         enrichDecodeEntry(entry);
+        if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+            bridgeLog(QStringLiteral("ghost decode filter legacy-alltxt: msg='%1'")
+                          .arg(message));
+            continue;
+        }
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
             bridgeLog(QStringLiteral("user decode filter legacy-alltxt: %1 msg='%2'")
@@ -25425,6 +25734,12 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         entry["timestamp"] = static_cast<qulonglong>(
             decodeEntryTimestampMsecs(entryTime, QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
+        if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+            bridgeLog(QStringLiteral("ghost decode filter: mode=%1 msg='%2'")
+                          .arg(entry.value("mode").toString(), msg));
+            ++semanticFiltered;
+            continue;
+        }
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
             bridgeLog(QStringLiteral("user decode filter: %1 mode=%2 msg='%3'")
@@ -25862,6 +26177,12 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         entry["timestamp"] = static_cast<qulonglong>(
             decodeEntryTimestampMsecs(f[0], QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
+        if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+            bridgeLog(QStringLiteral("ghost decode filter FT2 async: msg='%1'")
+                          .arg(msg));
+            ++semanticFiltered;
+            continue;
+        }
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
             bridgeLog(QStringLiteral("user decode filter FT2 async: %1 msg='%2'")
@@ -26089,6 +26410,11 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         entry["fromCall"]   = fromCall;
         entry["decodeSessionId"] = static_cast<qulonglong>(m_decodeSessionId);
         enrichDecodeEntry(entry);
+        if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+            bridgeLog(QStringLiteral("ghost decode filter legacy-jt: msg='%1'")
+                          .arg(msg));
+            continue;
+        }
         QString userFilterReason;
         if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
             bridgeLog(QStringLiteral("user decode filter legacy-jt: %1 msg='%2'")
@@ -29160,49 +29486,120 @@ void DecodiumBridge::checkCtyDatUpdate()
               : "cty.dat stale, starting download from " + existing);
     emit statusMessage("Download cty.dat in corso...");
 
-    QString destPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/cty.dat";
+    QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dataDir.isEmpty())
+        dataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    if (dataDir.isEmpty()) {
+        m_ctyDatUpdating = false;
+        emit ctyDatUpdatingChanged();
+        emit errorMessage(QStringLiteral("Download cty.dat fallito: cartella dati utente non disponibile."));
+        return;
+    }
+
+    QString destPath = QDir(dataDir).absoluteFilePath(QStringLiteral("cty.dat"));
     QDir().mkpath(QFileInfo(destPath).absolutePath());
     bridgeLog("cty.dat destination: " + destPath);
 
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
-    QNetworkReply* reply = nam->get(QNetworkRequest(
-        QUrl("https://www.country-files.com/bigcty/cty.dat")));
+    nam->setProperty("ctyUrls", ctyDatDownloadUrls());
+    nam->setProperty("ctyUrlIndex", 0);
+    nam->setProperty("ctyLastError", QString());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, destPath, nam]() {
-        reply->deleteLater();
-        nam->deleteLater();
-        m_ctyDatUpdating = false;
-        emit ctyDatUpdatingChanged();
+    connect(nam, &QNetworkAccessManager::finished, this, [this, destPath, nam](QNetworkReply* reply) {
+        const QUrl sourceUrl = reply->url();
+        const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QByteArray payload = reply->readAll();
 
+        QString failureReason;
         if (reply->error() != QNetworkReply::NoError) {
-            bridgeLog("cty.dat download failed: " + reply->errorString());
-            emit errorMessage("Download cty.dat fallito: " + reply->errorString());
+            failureReason = statusCode > 0
+                ? QStringLiteral("%1 (%2, HTTP %3)")
+                      .arg(reply->errorString(), sourceUrl.toString())
+                      .arg(statusCode)
+                : QStringLiteral("%1 (%2)").arg(reply->errorString(), sourceUrl.toString());
+        } else if (statusCode >= 400) {
+            failureReason = QStringLiteral("HTTP %1 da %2").arg(statusCode).arg(sourceUrl.toString());
+        } else {
+            QString validationError;
+            if (!ctyDatPayloadLooksValid(payload, &validationError)) {
+                failureReason = QStringLiteral("%1 da %2")
+                    .arg(validationError, sourceUrl.toString());
+            }
+        }
+
+        reply->deleteLater();
+
+        if (!failureReason.isEmpty()) {
+            bridgeLog("cty.dat download attempt failed: " + failureReason);
+            nam->setProperty("ctyLastError", failureReason);
+            if (issueNextCtyDatRequest(nam))
+                return;
+
+            nam->deleteLater();
+            m_ctyDatUpdating = false;
+            emit ctyDatUpdatingChanged();
+            emit errorMessage("Download cty.dat fallito: " + failureReason);
             return;
         }
-        QFile f(destPath);
+
+        QSaveFile f(destPath);
         if (f.open(QIODevice::WriteOnly)) {
-            auto const payload = reply->readAll();
-            f.write(payload);
-            f.close();
-            bridgeLog(QStringLiteral("cty.dat downloaded (%1 bytes)").arg(payload.size()));
-            QString loadedPath;
-            if (reloadDxccLookup(&loadedPath)) {
-                refreshDecodeListDxcc();
-                bridgeLog("cty.dat updated and reloaded from " + loadedPath);
-                emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
+            const qint64 written = f.write(payload);
+            bool commitOk = false;
+            if (written == payload.size())
+                commitOk = f.commit();
+            else
+                f.cancelWriting();
+            const QString writeError = f.errorString();
+
+            if (commitOk) {
+                bridgeLog(QStringLiteral("cty.dat downloaded from %1 (%2 bytes)")
+                          .arg(sourceUrl.toString())
+                          .arg(payload.size()));
+                QString loadedPath;
+                if (reloadDxccLookup(&loadedPath)) {
+                    refreshDecodeListDxcc();
+                    bridgeLog("cty.dat updated and reloaded from " + loadedPath);
+                    emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
+                } else {
+                    bridgeLog("cty.dat downloaded but DXCC reload failed");
+                    emit errorMessage("cty.dat scaricato ma il caricamento DXCC è fallito.");
+                }
             } else {
-                bridgeLog("cty.dat downloaded but DXCC reload failed");
-                emit errorMessage("cty.dat scaricato ma il caricamento DXCC è fallito.");
+                bridgeLog(QStringLiteral("cty.dat save incomplete: wrote %1/%2 bytes, %3")
+                          .arg(written)
+                          .arg(payload.size())
+                          .arg(writeError));
+                emit errorMessage(QStringLiteral("Impossibile salvare cty.dat: scrittura incompleta (%1/%2 byte). %3")
+                                  .arg(written)
+                                  .arg(payload.size())
+                                  .arg(writeError));
             }
         } else {
             bridgeLog("cty.dat save failed: " + f.errorString());
             emit errorMessage("Impossibile salvare cty.dat: " + f.errorString());
         }
+        nam->deleteLater();
+        m_ctyDatUpdating = false;
+        emit ctyDatUpdatingChanged();
     });
+
+    if (!issueNextCtyDatRequest(nam)) {
+        nam->deleteLater();
+        m_ctyDatUpdating = false;
+        emit ctyDatUpdatingChanged();
+        emit errorMessage(QStringLiteral("Download cty.dat fallito: nessun URL configurato."));
+    }
 }
 
 void DecodiumBridge::downloadCall3Txt()
 {
+    if (m_call3TxtUpdating) {
+        bridgeLog("downloadCall3Txt: request ignored because an update is already running");
+        emit statusMessage(QStringLiteral("Download CALL3.TXT già in corso..."));
+        return;
+    }
+
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (dataDir.isEmpty()) {
         dataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
@@ -29219,6 +29616,9 @@ void DecodiumBridge::downloadCall3Txt()
         return;
     }
 
+    m_call3TxtUpdating = true;
+    emit call3TxtUpdatingChanged();
+
     bridgeLog("downloadCall3Txt: starting download to " + path);
     emit statusMessage("Download CALL3.TXT in corso...");
     auto* mgr = new QNetworkAccessManager(this);
@@ -29226,16 +29626,21 @@ void DecodiumBridge::downloadCall3Txt()
     QNetworkRequest req(QUrl(QStringLiteral("https://sourceforge.net/projects/wsjt-x-improved/files/Additional%20Files/CALL3.TXT/download")));
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                      QNetworkRequest::NoLessSafeRedirectPolicy);
-    req.setRawHeader("User-Agent", "Decodium/4 CALL3 updater");
+    req.setRawHeader("User-Agent", "Decodium/4.0 CALL3 updater (+https://github.com/elisir80/Decodium-4.0-Core-Shannon)");
+    req.setRawHeader("Accept", "text/plain, application/octet-stream, */*");
+    req.setRawHeader("Accept-Language", "en-US,en;q=0.8");
+    req.setRawHeader("Cache-Control", "no-cache");
 
     auto* reply = mgr->get(req);
     connect(reply, &QNetworkReply::finished, this, [this, reply, mgr, path]() {
         bool statusOk = false;
         int const statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(&statusOk);
 
-        auto cleanup = [reply, mgr]() {
+        auto cleanup = [this, reply, mgr]() {
             reply->deleteLater();
             mgr->deleteLater();
+            m_call3TxtUpdating = false;
+            emit call3TxtUpdatingChanged();
         };
 
         if (reply->error() != QNetworkReply::NoError || (statusOk && statusCode >= 400)) {
@@ -29258,8 +29663,8 @@ void DecodiumBridge::downloadCall3Txt()
             return;
         }
 
-        QFile f(path);
-        if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        QSaveFile f(path);
+        if (!f.open(QIODevice::WriteOnly)) {
             bridgeLog("downloadCall3Txt save failed: " + f.errorString());
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT in %1: %2")
                                   .arg(QDir::toNativeSeparators(path), f.errorString()));
@@ -29270,7 +29675,7 @@ void DecodiumBridge::downloadCall3Txt()
         qint64 const written = f.write(data);
         if (written != data.size()) {
             QString const reason = f.errorString();
-            f.close();
+            f.cancelWriting();
             bridgeLog(QStringLiteral("downloadCall3Txt incomplete write: %1/%2 bytes")
                           .arg(written).arg(data.size()));
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT: scrittura incompleta (%1/%2 byte). %3")
@@ -29279,9 +29684,8 @@ void DecodiumBridge::downloadCall3Txt()
             return;
         }
 
-        f.close();
-        if (f.error() != QFile::NoError) {
-            bridgeLog("downloadCall3Txt close failed: " + f.errorString());
+        if (!f.commit()) {
+            bridgeLog("downloadCall3Txt commit failed: " + f.errorString());
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT: %1").arg(f.errorString()));
             cleanup();
             return;

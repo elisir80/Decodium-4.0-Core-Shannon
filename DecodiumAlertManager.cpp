@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QOperatingSystemVersion>
 #include <QSet>
+#include <QSoundEffect>
 #include <QStandardPaths>
 #include <QtGlobal>
 
@@ -46,9 +47,21 @@ DecodiumAlertManager::DecodiumAlertManager(QObject* parent)
     : QObject(parent)
 {
     if (useNativeAlertBeep()) {
+        m_nativeBeepOnly = true;
         qInfo().noquote() << "[AlertAudio] using native macOS beep; set DECODIUM_QT_ALERT_AUDIO=1 to force QSoundEffect";
         return;
     }
+
+    qInfo().noquote() << "[AlertAudio] Qt alert audio deferred until first alert";
+}
+
+void DecodiumAlertManager::ensureEffects()
+{
+    if (m_effectsInitialized || m_nativeBeepOnly)
+        return;
+
+    m_effectsInitialized = true;
+    qInfo().noquote() << "[AlertAudio] initializing Qt alert sounds on demand";
 
     m_cqSound      = makeEffect(findSoundFile({QStringLiteral("CQ.wav"), QStringLiteral("cq.wav")}), m_volume, this);
     m_myCallSound  = makeEffect(findSoundFile({QStringLiteral("MyCall.wav"), QStringLiteral("mycall.wav")}), m_volume, this);
@@ -140,12 +153,13 @@ void DecodiumAlertManager::playAlert(const QString& type)
     if (!m_enabled)
         return;
 
-    if (useNativeAlertBeep()) {
+    if (m_nativeBeepOnly) {
         Q_UNUSED(type)
         QApplication::beep();
         return;
     }
 
+    ensureEffects();
     QSoundEffect* fx = soundForType(type);
     if (fx && fx->isLoaded() && !fx->source().isEmpty()) {
         fx->play();
@@ -162,6 +176,9 @@ void DecodiumAlertManager::playAlert(const QString& type)
 void DecodiumAlertManager::setVolume(float v)
 {
     m_volume = v;
+    if (!m_effectsInitialized)
+        return;
+
     for (QSoundEffect* fx : { m_cqSound, m_myCallSound, m_dxSound,
                                m_sound73, m_newDxccSound, m_errorSound }) {
         if (fx) fx->setVolume(static_cast<qreal>(v));

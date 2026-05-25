@@ -442,7 +442,7 @@ Rectangle {
             implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nRiporta tutte le finestre flottanti dentro la finestra principale\ne ricentra Decodium sul monitor principale.")
+            ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nMove all floating windows back into the main window\nand recenter Decodium on the primary monitor.")
             ToolTip.delay: 300
             onClicked: footerResetLayoutConfirm.open()
             background: Rectangle {
@@ -481,7 +481,7 @@ Rectangle {
             implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nApre il pannello di esplorazione dello storico decode\npersistito nel DB SQLite. Filtri + Export ADIF.")
+            ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nOpen the persisted decode history browser\nstored in the SQLite database. Filters + ADIF export.")
             ToolTip.delay: 300
             onClicked: {
                 if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
@@ -527,7 +527,7 @@ Rectangle {
             readonly property bool clusterOn: typeof mainWindow !== 'undefined'
                                               && mainWindow.dxClusterPanelVisible
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("DX Cluster (toggle)\nApre/chiude la finestra DX Cluster floating.\nLa finestra e' spostabile su qualsiasi monitor.")
+            ToolTip.text: qsTr("DX Cluster (toggle)\nOpen or close the floating DX Cluster window.\nThe window can be moved to any monitor.")
             ToolTip.delay: 300
             onClicked: {
                 if (typeof mainWindow !== 'undefined') {
@@ -583,7 +583,7 @@ Rectangle {
             implicitWidth: width
             onAccepted: { if (bridge) bridge.resetWindowLayout() }
             contentItem: Text {
-                text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
+                text: qsTr("Move all floating windows back into the main window\nand recenter Decodium on the primary monitor?\n\nSaved window coordinates will be cleared.")
                 color: textPrimary
                 wrapMode: Text.WordWrap
                 width: footerResetLayoutConfirm.width - footerResetLayoutConfirm.leftPadding - footerResetLayoutConfirm.rightPadding

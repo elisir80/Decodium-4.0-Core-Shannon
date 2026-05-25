@@ -747,10 +747,10 @@ Item {
                             }
                             ToolTip.visible: hovered
                             ToolTip.text: engine && engine.targetCallActive
-                                          ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire pannello").arg(engine.targetCallSign)
+                                          ? qsTr("Active call: %1 (attempt %2/%3)\nClick to open the panel").arg(engine.targetCallSign)
                                                 .arg(engine.targetCallRetryCount)
                                                 .arg(engine.targetCallMaxRetries === 0 ? "\u221e" : engine.targetCallMaxRetries)
-                                          : qsTr("Chiamate (CALL)\nApri pannello per chiamata diretta verso un callsign\ncon tentativi/timeout/periodo")
+                                          : qsTr("Calls (CALL)\nOpen the direct-call panel for a callsign\nwith attempts, timeout and period control")
                             ToolTip.delay: 500
 
                             onClicked: txPanel.callRequested()
@@ -1227,21 +1227,28 @@ Item {
                         radius: 4
                     }
 
-                    contentItem: Row {
-                        spacing: 4
-                        anchors.centerIn: parent
-                        Text {
-                            text: "\u270E"
-                            color: logQsoBtn.enabled ? accentGreen : textSecondary
-                            font.pixelSize: 14
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        Text {
-                            text: "LOG"
-                            color: logQsoBtn.enabled ? accentGreen : textSecondary
-                            font.pixelSize: 11
-                            font.bold: true
-                            anchors.verticalCenter: parent.verticalCenter
+                    contentItem: Item {
+                        implicitWidth: logButtonContent.implicitWidth
+                        implicitHeight: logButtonContent.implicitHeight
+
+                        Row {
+                            id: logButtonContent
+                            spacing: 5
+                            anchors.centerIn: parent
+
+                            Text {
+                                text: "\u270E"
+                                color: logQsoBtn.enabled ? accentGreen : textSecondary
+                                font.pixelSize: 14
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Text {
+                                text: "LOG"
+                                color: logQsoBtn.enabled ? accentGreen : textSecondary
+                                font.pixelSize: 11
+                                font.bold: true
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
                         }
                     }
 
@@ -1510,7 +1517,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    text: "Conferma Log QSO"
+                    text: qsTr("Confirm QSO Log")
                     color: accentGreen
                     font.pixelSize: 18
                     font.bold: true
@@ -1773,8 +1780,8 @@ Item {
         ToolTip.visible: hovered
         ToolTip.delay: 800
         ToolTip.text: isDisabled
-                          ? qsTr("TX%1 disabilitato (right-click per riattivare)").arg(txNum)
-                          : qsTr("Click: invia subito\nRight-click: salta TX%1 nella sequenza auto\nLong-press: modifica messaggio").arg(txNum)
+                          ? qsTr("TX%1 disabled (right-click to re-enable)").arg(txNum)
+                          : qsTr("Click: send now\nRight-click: skip TX%1 in auto sequence\nLong-press: edit message").arg(txNum)
 
         // 1.0.130: right-click ora toggla skip; edit messaggio si attiva con long-press
         TapHandler {

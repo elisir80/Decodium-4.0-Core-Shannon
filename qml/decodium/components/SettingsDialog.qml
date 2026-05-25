@@ -14,7 +14,7 @@ Dialog {
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
     width: Math.min(Math.round(((parent && parent.width > 0) ? parent.width : 1440) * 0.94), 1520)
-    height: Math.min(Math.round(((parent && parent.height > 0) ? parent.height : 960) * 0.94), 980)
+    height: Math.min(Math.round(((parent && parent.height > 0) ? parent.height : 960) * 0.98), 1080)
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
     property bool warmupInProgress: false
@@ -376,6 +376,25 @@ Dialog {
             interactive: true
             focus: true
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+            function clampContentY(value) {
+                return Math.max(0, Math.min(Math.max(0, contentHeight - height), value))
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onWheel: function(wheel) {
+                    var pixelDelta = wheel.pixelDelta ? wheel.pixelDelta.y : 0
+                    var angleDelta = wheel.angleDelta ? wheel.angleDelta.y : 0
+                    var step = pixelDelta !== 0 ? pixelDelta : angleDelta / 120 * 48
+                    if (step === 0)
+                        return
+
+                    comboPopupList.contentY = comboPopupList.clampContentY(comboPopupList.contentY - step)
+                    wheel.accepted = true
+                }
+            }
         }
     }
 
@@ -2951,18 +2970,15 @@ Dialog {
                         Text { text: qsTr("TX Watchdog (min):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         SpinBox {
                             id: txWdSpin
-                            from: 0; to: 999; value: Number(bridge.getSetting("TxWatchdog", bridge.txWatchdogMode === 1 ? bridge.txWatchdogTime : 6)); editable: true
+                            from: 0; to: 999; value: bridge.txWatchdogMode === 1 ? bridge.txWatchdogTime : 0; editable: true
                             property bool completed: false
                             function applyWatchdog() {
                                 bridge.txWatchdogTime = value
                                 bridge.txWatchdogMode = value > 0 ? 1 : 0
-                                bridge.setSetting("TxWatchdog", value)
-                                bridge.setSetting("txWatchdogMode", bridge.txWatchdogMode)
-                                bridge.setSetting("txWatchdogTime", bridge.txWatchdogTime)
                             }
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: if (completed) applyWatchdog()
-                            Component.onCompleted: { completed = true; applyWatchdog() }
+                            Component.onCompleted: completed = true
                             contentItem: TextInput { text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
@@ -3059,11 +3075,15 @@ Dialog {
 
                 // ═══════════ TAB 4 — DISPLAY ═══════════
                 ScrollView {
+                    id: displaySettingsScroll
                     clip: true
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    contentWidth: availableWidth
+                    contentHeight: displaySettingsGrid.implicitHeight + 28
 
                     GridLayout {
-                        width: parent.width - 20
+                        id: displaySettingsGrid
+                        width: displaySettingsScroll.availableWidth - 20
                         columns: 4; columnSpacing: 10; rowSpacing: 8
                         anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
 
@@ -3351,7 +3371,7 @@ Dialog {
 
                         Text { text: qsTr("Waterfall Calls:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
-                            checked: bridge.getSetting("uiWaterfallShowCallsigns", true)
+                            checked: settingsDialog.boolSetting("uiWaterfallShowCallsigns", true)
                             onCheckedChanged: bridge.setSetting("uiWaterfallShowCallsigns", checked)
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
@@ -3424,6 +3444,7 @@ Dialog {
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 18 }
                     }
                 }
 
@@ -5094,11 +5115,15 @@ Dialog {
 
                 // ═══════════ TAB 8 — COLORI ═══════════
                 ScrollView {
+                    id: colorsSettingsScroll
                     clip: true
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    contentWidth: availableWidth
+                    contentHeight: colorsSettingsGrid.implicitHeight + 34
 
                     GridLayout {
-                        width: parent.width - 20
+                        id: colorsSettingsGrid
+                        width: colorsSettingsScroll.availableWidth - 20
                         columns: 4; columnSpacing: 10; rowSpacing: 8
                         anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
 
@@ -5216,38 +5241,40 @@ Dialog {
                                 Item { Layout.fillWidth: true }
                             }
                         }
-	                        Text { text: qsTr("B4 Strikethrough:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-	                        CheckBox {
-	                            checked: bridge.b4Strikethrough
-	                            onCheckedChanged: {
-	                                bridge.b4Strikethrough = checked
+                        Text { text: qsTr("B4 Strikethrough:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: bridge.b4Strikethrough
+                            onCheckedChanged: {
+                                bridge.b4Strikethrough = checked
                                 bridge.setSetting("b4Strikethrough", checked)
                             }
-	                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-	                            contentItem: Text { text: ""; leftPadding: 24 }
-	                        }
-	                        Text { text: qsTr("Decode Boost:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-	                        RowLayout {
-	                            Layout.fillWidth: true
-	                            Layout.columnSpan: 3
-	                            spacing: 10
-	                            Slider {
-	                                id: decodeColorBoostSlider
-	                                from: 0
-	                                to: 100
-	                                stepSize: 1
-	                                value: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
-	                                Layout.fillWidth: true
-	                                onValueChanged: bridge.setSetting("uiDecodeColorBoost", Math.round(value))
-	                            }
-	                            Text {
-	                                text: Math.round(decodeColorBoostSlider.value) + "%"
-	                                color: textPrimary
-	                                font.pixelSize: 12
-	                                horizontalAlignment: Text.AlignRight
-	                                Layout.preferredWidth: 44
-	                            }
-	                        }
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+
+                        Text { text: qsTr("Decode Boost:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            spacing: 10
+                            Slider {
+                                id: decodeColorBoostSlider
+                                from: 0
+                                to: 100
+                                stepSize: 1
+                                value: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
+                                Layout.fillWidth: true
+                                onValueChanged: bridge.setSetting("uiDecodeColorBoost", Math.round(value))
+                            }
+                            Text {
+                                text: Math.round(decodeColorBoostSlider.value) + "%"
+                                color: textPrimary
+                                font.pixelSize: 12
+                                horizontalAlignment: Text.AlignRight
+                                Layout.preferredWidth: 44
+                            }
+                        }
 
 	                        // ── Highlighting ──
 	                        Text { text: qsTr("HIGHLIGHTING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
@@ -5363,10 +5390,27 @@ Dialog {
                             }
                             Rectangle {
                                 width: 190; height: controlHeight; radius: 4
-                                color: dlCall3MA.containsMouse ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium
+                                opacity: bridge.call3TxtUpdating ? 0.65 : 1.0
+                                color: dlCall3MA.containsMouse && !bridge.call3TxtUpdating ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium
                                 border.color: primaryBlue
-                                Text { anchors.centerIn: parent; text: qsTr("Download CALL3.TXT"); color: primaryBlue; font.pixelSize: 12 }
-                                MouseArea { id: dlCall3MA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: bridge.downloadCall3Txt() }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: bridge.call3TxtUpdating ? qsTr("Download CALL3.TXT...") : qsTr("Download CALL3.TXT")
+                                    color: primaryBlue
+                                    font.pixelSize: 12
+                                }
+                                MouseArea {
+                                    id: dlCall3MA
+                                    anchors.fill: parent
+                                    enabled: !bridge.call3TxtUpdating
+                                    hoverEnabled: true
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: {
+                                        dataDownloadStatus = "Download CALL3.TXT in corso..."
+                                        dataDownloadIsError = false
+                                        bridge.downloadCall3Txt()
+                                    }
+                                }
                             }
                         }
                         Text {
@@ -5376,6 +5420,7 @@ Dialog {
                             wrapMode: Text.Wrap
                             Layout.columnSpan: 4
                         }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 24 }
                     }
                 }
 

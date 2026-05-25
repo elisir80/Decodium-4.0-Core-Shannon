@@ -552,7 +552,7 @@ Window {
 	        var activeMatch = messageContainsCallBase(message, activeBase)
 	            || callsignBase(item.fromCall || "") === activeBase
 	            || callsignBase(item.dxCallsign || "") === activeBase
-	        return activeMatch && myMatch
+	        return activeMatch
 	    }
 
 	    function rxSortSeconds(item) {

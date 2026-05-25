@@ -49,8 +49,8 @@ Window {
         stats = bridge.queryDecodeStats()
         bands = bridge.queryDecodeBands()
         modes = bridge.queryDecodeModes()
-        bandCombo.model = ["Tutte"].concat(bands)
-        modeCombo.model = ["Tutti"].concat(modes)
+        bandCombo.model = ["All"].concat(bands)
+        modeCombo.model = ["All"].concat(modes)
     }
 
     function currentFilters(includeSort) {
@@ -80,7 +80,7 @@ Window {
 
     function openExportAdifDialog() {
         if (!bridge) return
-        var path = bridge.saveFileDialog(qsTr("Esporta ADIF"), "", [qsTr("ADIF (*.adi)")])
+        var path = bridge.saveFileDialog(qsTr("Export ADIF"), "", [qsTr("ADIF (*.adi)")])
         if (path.length === 0)
             return
         var lower = path.toLowerCase()
@@ -120,8 +120,8 @@ Window {
                 Item { Layout.fillWidth: true }
                 Text {
                     text: stats && stats.total !== undefined
-                          ? qsTr("%1 decodes totali  •  %2 sessioni").arg(stats.total).arg(stats.session_count || 0)
-                          : qsTr("DB vuoto")
+                          ? qsTr("%1 total decodes  •  %2 sessions").arg(stats.total).arg(stats.session_count || 0)
+                          : qsTr("Empty DB")
                     color: historyDialog.cMuted
                     font.pixelSize: 12
                 }
@@ -137,17 +137,17 @@ Window {
                 rowSpacing: 6
 
                 Text { text: qsTr("Callsign"); color: historyDialog.cMuted; font.pixelSize: 11 }
-                Text { text: qsTr("Banda");    color: historyDialog.cMuted; font.pixelSize: 11 }
-                Text { text: qsTr("Modo");     color: historyDialog.cMuted; font.pixelSize: 11 }
-                Text { text: qsTr("Da (UTC)"); color: historyDialog.cMuted; font.pixelSize: 11 }
-                Text { text: qsTr("A (UTC)");  color: historyDialog.cMuted; font.pixelSize: 11 }
+                Text { text: qsTr("Band");     color: historyDialog.cMuted; font.pixelSize: 11 }
+                Text { text: qsTr("Mode");     color: historyDialog.cMuted; font.pixelSize: 11 }
+                Text { text: qsTr("From (UTC)"); color: historyDialog.cMuted; font.pixelSize: 11 }
+                Text { text: qsTr("To (UTC)"); color: historyDialog.cMuted; font.pixelSize: 11 }
                 Text { text: qsTr("Limit");    color: historyDialog.cMuted; font.pixelSize: 11 }
 
                 TextField {
                     id: callsignField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    placeholderText: qsTr("es. F4CQS")
+                    placeholderText: qsTr("e.g. F4CQS")
                     placeholderTextColor: "#7d89a5"
                     color: historyDialog.cText
                     font.family: decodiumMonoFontFamily; font.pixelSize: 13
@@ -164,7 +164,7 @@ Window {
                     id: bandCombo
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    model: ["Tutte"]
+                    model: ["All"]
                     onActivated: historyDialog.runQuery()
                     contentItem: Text {
                         text: bandCombo.displayText
@@ -220,7 +220,7 @@ Window {
                     id: modeCombo
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    model: ["Tutti"]
+                    model: ["All"]
                     onActivated: historyDialog.runQuery()
                     contentItem: Text {
                         text: modeCombo.displayText
@@ -357,7 +357,7 @@ Window {
                 Layout.fillWidth: true
                 spacing: 8
                 Button {
-                    text: "🔍  " + qsTr("Cerca")
+                    text: "🔍  " + qsTr("Search")
                     Layout.preferredWidth: 112
                     Layout.preferredHeight: 34
                     onClicked: historyDialog.runQuery()
@@ -376,7 +376,7 @@ Window {
                     }
                 }
                 Button {
-                    text: qsTr("Pulisci filtri")
+                    text: qsTr("Clear filters")
                     Layout.preferredWidth: 118
                     Layout.preferredHeight: 34
                     onClicked: {
@@ -404,8 +404,8 @@ Window {
                 Item { Layout.fillWidth: true }
                 Text {
                     text: historyDialog.results.length > 0
-                          ? qsTr("%1 risultati").arg(historyDialog.results.length)
-                          : qsTr("Nessun risultato")
+                          ? qsTr("%1 results").arg(historyDialog.results.length)
+                          : qsTr("No results")
                     color: historyDialog.cMuted
                     font.pixelSize: 12
                 }
@@ -563,7 +563,7 @@ Window {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
                 Button {
-                    text: qsTr("Chiudi")
+                    text: qsTr("Close")
                     Layout.preferredWidth: 90
                     onClicked: historyDialog.close()
                     background: Rectangle {

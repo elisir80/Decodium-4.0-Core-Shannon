@@ -358,12 +358,21 @@ linuxdeploy_args+=(--plugin qt)
 "${LINUXDEPLOY_RUNNER}" "${linuxdeploy_args[@]}"
 
 log "Bundle QML modules"
-mkdir -p "${APPDIR}/usr/bin/qml"
+APP_QML_DIR="${APPDIR}/usr/bin/qml"
+QT_RUNTIME_QML_DIR="${APPDIR}/usr/qml"
+mkdir -p "${APP_QML_DIR}"
 QT_QML_DIR="$("${QMAKE}" -query QT_INSTALL_QML 2>/dev/null || true)"
 if [[ -n "${QT_QML_DIR}" && -d "${QT_QML_DIR}" ]]; then
-  cp -a "${QT_QML_DIR}/." "${APPDIR}/usr/bin/qml/"
+  cp -a "${QT_QML_DIR}/." "${APP_QML_DIR}/"
 fi
-cp -a "${BUILD_DIR}/qml/." "${APPDIR}/usr/bin/qml/"
+cp -a "${BUILD_DIR}/qml/." "${APP_QML_DIR}/"
+
+# linuxdeploy-plugin-qt writes qt.conf so QLibraryInfo often resolves QML imports
+# from usr/qml, while Decodium loads its own QML from usr/bin/qml. Keep both paths
+# pointed at the same complete tree so a partial linuxdeploy QtQuick.Controls copy
+# cannot shadow the bundled Material style.
+rm -rf "${QT_RUNTIME_QML_DIR}"
+ln -s bin/qml "${QT_RUNTIME_QML_DIR}"
 
 for qml_module in \
   QtQuick/qmldir \
@@ -377,8 +386,13 @@ for qml_module in \
   QtQml/qmldir \
   QtQml/Models/qmldir \
   QtQml/WorkerScript/qmldir; do
-  test -f "${APPDIR}/usr/bin/qml/${qml_module}"
+  test -f "${APP_QML_DIR}/${qml_module}"
+  test -f "${QT_RUNTIME_QML_DIR}/${qml_module}"
 done
+test -f "${APP_QML_DIR}/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+test -f "${APP_QML_DIR}/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+test -f "${QT_RUNTIME_QML_DIR}/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+test -f "${QT_RUNTIME_QML_DIR}/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
 
 log "Bundle supplemental Qt plugins"
 QT_PLUGIN_DIR="$("${QMAKE}" -query QT_INSTALL_PLUGINS 2>/dev/null || true)"
