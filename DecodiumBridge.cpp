@@ -3930,7 +3930,8 @@ static int autoTxDecodeGraceMs(const QString& mode)
 }
 
 static int deferredSignoffRetryCapForMode(const QString& mode, int configuredMaxRetries,
-                                           int partnerSnrDb = 127, bool conservative = false)
+                                           int partnerSnrDb = 127, bool conservative = false,
+                                           bool quickGiveUpStrong = false)
 {
     Q_UNUSED(configuredMaxRetries)
     QString const normalized = mode.trimmed().toUpper();
@@ -3950,6 +3951,11 @@ static int deferredSignoffRetryCapForMode(const QString& mode, int configuredMax
     }
     if (conservative) extra += 2;
     modeCap += extra;
+    // 1.0.289 — #3: partner FORTE (SNR>0) che non chiude → cap ridotto (early give-up),
+    // così non si ripete RR73 fino a 8/10 volte su una stazione già loggabile. Default OFF.
+    if (quickGiveUpStrong && partnerSnrDb != 127 && partnerSnrDb > 0) {
+        modeCap = qMin(modeCap, 4);
+    }
     // The caller retry setting controls report-step retries, not the final
     // RR73/73 wait. A low value here made AutoCQ leave the QSO after the first
     // RR73, before the partner's final 73 could arrive.
@@ -4471,6 +4477,37 @@ void DecodiumBridge::setFt2Conservative(bool v)
     settings.setValue(QStringLiteral("Ft2Conservative"), v);
     emit ft2ConservativeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Conservative mode %1").arg(v ? "ON" : "OFF"));
+}
+
+// 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
+void DecodiumBridge::setFt2FullDecodeInAutoCq(bool v)
+{
+    if (m_ft2FullDecodeInAutoCq == v) return;
+    m_ft2FullDecodeInAutoCq = v;
+    QSettings settings;
+    settings.setValue(QStringLiteral("Ft2FullDecodeInAutoCq"), v);
+    emit ft2FullDecodeInAutoCqChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Full decode in AutoCQ %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setFt2CqEverySlot(bool v)
+{
+    if (m_ft2CqEverySlot == v) return;
+    m_ft2CqEverySlot = v;
+    QSettings settings;
+    settings.setValue(QStringLiteral("Ft2CqEverySlot"), v);
+    emit ft2CqEverySlotChanged();
+    bridgeLog(QStringLiteral("[FT2WS] CQ every slot %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
+{
+    if (m_ft2QuickGiveUpStrong == v) return;
+    m_ft2QuickGiveUpStrong = v;
+    QSettings settings;
+    settings.setValue(QStringLiteral("Ft2QuickGiveUpStrong"), v);
+    emit ft2QuickGiveUpStrongChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Quick give-up strong partner %1").arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers RISCRITTI
@@ -19740,7 +19777,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             // FT8=3 (~45s), FT4=4 (~30s), FT2=8 (~30s).
             // 1.0.174 — passa partner SNR e Conservative flag per cap adattivo
             int const signoffCap = deferredSignoffRetryCapForMode(m_mode, m_maxCallerRetries,
-                                                                   m_currentPartnerSnrDb, m_ft2Conservative);
+                                                                   m_currentPartnerSnrDb, m_ft2Conservative,
+                                                                   m_ft2QuickGiveUpStrong);
             if (m_nTx73 < signoffCap) {
                 bridgeLog(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 count=%3/%4, waiting for final ack")
                               .arg(m_currentTx)
@@ -19805,7 +19843,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // anche il prossimo slot TX valido: CQ, RX, CQ, RX.
         // FT8/FT4 sync mantengono lo stesso ritmo base: TX, RX, TX.
         bool isCqTx = (m_txEnabled && m_currentTx == 6);
-        int cqGuardPeriods = 2;
+        // 1.0.289 — #2: con ft2CqEverySlot ON il CQ esce a OGNI slot (guard 1) invece che
+        // a slot alterni (guard 2). Raddoppia la presenza on-air in CQ-running. Default OFF.
+        int cqGuardPeriods = m_ft2CqEverySlot ? 1 : 2;
         if (isCqTx && m_lastCqPidx >= 0 && (pidx - m_lastCqPidx) < cqGuardPeriods) {
             bridgeLog("checkAndStartPeriodicTx: CQ guard — pidx=" + QString::number(pidx) +
                       " lastCqPidx=" + QString::number(m_lastCqPidx) + " → pausa RX forzata");
@@ -20997,6 +21037,10 @@ void DecodiumBridge::loadSettings()
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
+    // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
+    m_ft2FullDecodeInAutoCq = s.value(QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
+    m_ft2CqEverySlot        = s.value(QStringLiteral("Ft2CqEverySlot"),        false).toBool();
+    m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
     m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
@@ -28115,15 +28159,19 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.nutc = nutc; req.nqsoprogress = decodeQsoProgress;
         req.nfqso = nfqso;
         req.nfa = m_nfa; req.nfb = m_nfb;
-        req.ndepth = txStartPending ? qMin(decodeDepth, 2) : decodeDepth;
-        if (!txAudioActive && !txStartPending && req.ndepth >= 4) {
+        // 1.0.289 — #1: con ft2FullDecodeInAutoCq ON, NON degradare la profondità durante
+        // l'attesa AutoCQ (solo sotto CPU pressure) → OSD + 4ª passata + weak-averaging
+        // restano attivi proprio mentre cerchi un risponditore debole. Default OFF = 1.0.288.
+        bool const reduceForTx = txStartPending && (!m_ft2FullDecodeInAutoCq || cpuPressureActive());
+        req.ndepth = reduceForTx ? qMin(decodeDepth, 2) : decodeDepth;
+        if (!txAudioActive && !reduceForTx && req.ndepth >= 4) {
             req.ndepth |= 16;  // Enable FT2 weak-signal bitmetric averaging at deep decode.
         }
         req.threadCount = effectiveFtThreadLimit();
         req.ncontest = m_ncontest;
         req.mycall = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
-        if (txStartPending && req.ndepth != decodeDepth) {
+        if (reduceForTx && req.ndepth != decodeDepth) {
             bridgeLog(QStringLiteral("FT2 decode depth reduced before TX: %1 -> %2")
                           .arg(decodeDepth)
                           .arg(req.ndepth));

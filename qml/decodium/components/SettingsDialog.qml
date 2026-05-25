@@ -2805,6 +2805,84 @@ Dialog {
                                     ToolTip.text: qsTr("Tuning anti-QSB: ghost filter -24 dB invece di -22, retry cap esteso SNR-adattivo (+2..+4 extra), same-step wait rilassato per partner deboli. Default OFF — attivalo se hai partner DX deboli o propagazione marginale.")
                                 }
 
+                                // 1.0.289 — FT2 #1: piena profondità decode durante AutoCQ
+                                Text {
+                                    text: qsTr("FT2: full decode in AutoCQ:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2FullDecodeCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2FullDecodeInAutoCq : false
+                                    onCheckedChanged: {
+                                        if (bridge) bridge.setFt2FullDecodeInAutoCq(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Mentre chiami CQ (AutoCQ), mantiene la profondità di decodifica piena (OSD + 4ª passata di sottrazione + weak-signal averaging) invece di ridurla a 2. Aiuta a sentire i risponditori deboli. Si riduce comunque automaticamente sotto pressione CPU. Default OFF.")
+                                }
+
+                                // 1.0.289 — FT2 #2: CQ a ogni slot
+                                Text {
+                                    text: qsTr("FT2: CQ a ogni slot:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2CqEverySlotCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2CqEverySlot : false
+                                    onCheckedChanged: {
+                                        if (bridge) bridge.setFt2CqEverySlot(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("In AutoCQ trasmette il CQ a OGNI slot invece che a slot alterni → raddoppia la presenza on-air e le probabilità di essere chiamato. Default OFF (comportamento standard: CQ, RX, CQ, RX).")
+                                }
+
+                                // 1.0.289 — FT2 #3: chiusura rapida partner forti
+                                Text {
+                                    text: qsTr("FT2: chiudi prima i partner forti:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2QuickGiveUpCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2QuickGiveUpStrong : false
+                                    onCheckedChanged: {
+                                        if (bridge) bridge.setFt2QuickGiveUpStrong(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Se un partner FORTE (SNR > 0 dB) non manda il 73 finale, riduce le ripetizioni del RR73 da 8 a 4 (≈15s invece di 30s) prima di loggare e tornare in CQ. I partner deboli mantengono le ripetizioni extra anti-QSB. Default OFF.")
+                                }
+
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
                                 Text {
                                     text: qsTr("FT2 partner-memory (anti-QSB):")
