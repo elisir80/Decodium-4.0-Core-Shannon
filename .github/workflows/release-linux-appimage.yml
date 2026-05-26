@@ -202,9 +202,16 @@ jobs:
             cp -a "${QT_QML_DIR}/." AppDir/usr/bin/qml/
           fi
           cp -a build-appimage/qml/. AppDir/usr/bin/qml/
+          rm -rf AppDir/usr/qml
+          ln -s bin/qml AppDir/usr/qml
           test -f AppDir/usr/bin/qml/QtQuick/qmldir
           test -f AppDir/usr/bin/qml/QtQuick/Controls/qmldir
           test -f AppDir/usr/bin/qml/QtQuick/Controls/Material/qmldir
+          test -f AppDir/usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so
+          test -f AppDir/usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so
+          test -f AppDir/usr/qml/QtQuick/Controls/Material/qmldir
+          test -f AppDir/usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so
+          test -f AppDir/usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so
           test -f AppDir/usr/bin/qml/QtQuick/Dialogs/qmldir
           test -f AppDir/usr/bin/qml/QtQuick/Layouts/qmldir
           test -f AppDir/usr/bin/qml/QtQuick/Templates/qmldir

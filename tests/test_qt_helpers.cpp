@@ -2628,9 +2628,12 @@ private:
     };
 
     QVERIFY (!decodium::txmsg::isStandardFtxCall (QStringLiteral ("II9MESC")));
+    QVERIFY (!decodium::txmsg::isStandardFtxCall (QStringLiteral ("ZL100C")));
     QVERIFY (decodium::txmsg::isStandardFtxCall (QStringLiteral ("OE9GWV")));
     QCOMPARE (decodium::txmsg::bracketHashCall (QStringLiteral ("II9MESC")),
               QStringLiteral ("<II9MESC>"));
+    QCOMPARE (decodium::txmsg::bracketHashCall (QStringLiteral ("ZL100C")),
+              QStringLiteral ("<ZL100C>"));
 
     decodium::txmsg::EncodedMessage const unsafe =
         decodium::txmsg::encodeFt8 (QStringLiteral ("OE9GWV II9MESC -02"));
@@ -2649,6 +2652,8 @@ private:
       {"OE9GWV <II9MESC> R-02"},
       {"II9MESC <OE9GWV> RR73"},
       {"II9MESC <OE9GWV> 73"},
+      {"<ZL100C> IT9MRM R-12"},
+      {"<EH90ALL> IT9MRM R-14"},
     };
 
     for (MessageCase const& candidate : safeMessages)
@@ -2662,6 +2667,9 @@ private:
         decodium::txmsg::Decode77Context context;
         context.saveHashCall (QStringLiteral ("II9MESC"));
         context.saveHashCall (QStringLiteral ("OE9GWV"));
+        context.saveHashCall (QStringLiteral ("ZL100C"));
+        context.saveHashCall (QStringLiteral ("EH90ALL"));
+        context.saveHashCall (QStringLiteral ("IT9MRM"));
         decodium::txmsg::DecodedMessage const decoded =
             decodium::txmsg::decode77 (encoded.msgbits, encoded.i3, encoded.n3, &context, true);
         QVERIFY2 (decoded.ok, qPrintable (message));

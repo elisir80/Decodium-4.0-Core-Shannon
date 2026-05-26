@@ -1165,7 +1165,9 @@ int main(int argc, char* argv[])
         app.setProperty("decodiumLanguageOverride", languageOverride);
     }
     QLocale const uiLocale;
+    L("l10n constructing");
     L10nLoader l10n {&app, uiLocale, languageOverride};
+    L("l10n OK");
 
     // Single-instance detection: prevent multiple QML instances from running
     QDir tempDir{QStandardPaths::writableLocation(QStandardPaths::TempLocation)};
@@ -1183,6 +1185,7 @@ int main(int argc, char* argv[])
         g_shuttingDown.store(true, std::memory_order_relaxed);
     });
 
+    L("bridge constructing");
     DecodiumBridge bridge;
     app.setProperty("decodiumBridge", QVariant::fromValue<QObject*>(&bridge));
 #ifdef Q_OS_WIN
@@ -1256,6 +1259,27 @@ int main(int argc, char* argv[])
     engine.addImportPath(appQmlPath);
     if (QDir(bundledQtQmlPath).exists()) {
         engine.addImportPath(QDir(bundledQtQmlPath).canonicalPath());
+    }
+    {
+        QStringList importPaths = engine.importPathList();
+        auto promoteImportPath = [&importPaths](const QString& path) {
+            QString normalized = path;
+            if (QDir(path).exists()) {
+                normalized = QDir(path).canonicalPath();
+            }
+            qsizetype index = importPaths.indexOf(normalized);
+            if (index < 0 && normalized != path) {
+                index = importPaths.indexOf(path);
+            }
+            if (index > 0) {
+                importPaths.move(index, 0);
+            }
+        };
+        promoteImportPath(appQmlPath);
+        if (QDir(bundledQtQmlPath).exists()) {
+            promoteImportPath(QDir(bundledQtQmlPath).canonicalPath());
+        }
+        engine.setImportPathList(importPaths);
     }
     for (const QString& importPath : engine.importPathList()) {
         L(("QML import path: " + importPath.toLocal8Bit()).constData());

@@ -1,11 +1,12 @@
 #pragma once
 #include <QObject>
-#include <QSoundEffect>
 #include <QUrl>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QStringList>
+
+class QSoundEffect;
 
 class DecodiumAlertManager : public QObject {
     Q_OBJECT
@@ -22,6 +23,7 @@ public:
     void setVolume(float v);
 
 private:
+    void ensureEffects();
     QSoundEffect* soundForType(const QString& type);
     QString findSoundFile(const QString& name) const;
     QString findSoundFile(const QStringList& names) const;
@@ -34,4 +36,6 @@ private:
     QSoundEffect* m_errorSound  {nullptr};
     float         m_volume      {1.0f};
     bool          m_enabled     {true};
+    bool          m_effectsInitialized {false};
+    bool          m_nativeBeepOnly {false};
 };

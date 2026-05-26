@@ -328,6 +328,7 @@ class DecodiumBridge : public QObject
 
     // === B6 — cty.dat AUTO-UPDATE ===
     Q_PROPERTY(bool    ctyDatUpdating  READ ctyDatUpdating  NOTIFY ctyDatUpdatingChanged)
+    Q_PROPERTY(bool    call3TxtUpdating READ call3TxtUpdating NOTIFY call3TxtUpdatingChanged)
 
     // === B7 — COLOR HIGHLIGHTING ===
     Q_PROPERTY(QString colorCQ        READ colorCQ        WRITE setColorCQ        NOTIFY colorCQChanged)
@@ -569,11 +570,11 @@ public:
     bool splitMode() const { return m_splitMode; }
     void setSplitMode(bool v) { if (m_splitMode!=v){m_splitMode=v;emit splitModeChanged();} }
     int txWatchdogMode() const { return m_txWatchdogMode; }
-    void setTxWatchdogMode(int v) { if (m_txWatchdogMode!=v){m_txWatchdogMode=v;emit txWatchdogModeChanged();} }
+    void setTxWatchdogMode(int v);
     int txWatchdogTime() const { return m_txWatchdogTime; }
-    void setTxWatchdogTime(int v) { if (m_txWatchdogTime!=v){m_txWatchdogTime=v;emit txWatchdogTimeChanged();} }
+    void setTxWatchdogTime(int v);
     int txWatchdogCount() const { return m_txWatchdogCount; }
-    void setTxWatchdogCount(int v) { if (m_txWatchdogCount!=v){m_txWatchdogCount=v;emit txWatchdogCountChanged();} }
+    void setTxWatchdogCount(int v);
     bool filterCqOnly() const { return m_filterCqOnly; }
     void setFilterCqOnly(bool v) { if (m_filterCqOnly!=v){m_filterCqOnly=v;emit filterCqOnlyChanged();} }
     bool filterMyCallOnly() const { return m_filterMyCallOnly; }
@@ -700,7 +701,7 @@ public:
     bool    startFromTx2()   const { return m_startFromTx2; }
     void    setStartFromTx2(bool v) { if (m_startFromTx2!=v){m_startFromTx2=v;emit startFromTx2Changed();} }
     bool    vhfUhfFeatures() const { return m_vhfUhfFeatures; }
-    void    setVhfUhfFeatures(bool v){ if (m_vhfUhfFeatures!=v){m_vhfUhfFeatures=v;emit vhfUhfFeaturesChanged();} }
+    void    setVhfUhfFeatures(bool v);
     bool    directLogQso()   const { return m_directLogQso; }
     void    setDirectLogQso(bool v) { if (m_directLogQso!=v){m_directLogQso=v;emit directLogQsoChanged();} }
     bool    confirm73()      const { return m_confirm73; }
@@ -735,6 +736,7 @@ public:
 
     // B6 — cty.dat
     bool ctyDatUpdating() const { return m_ctyDatUpdating; }
+    bool call3TxtUpdating() const { return m_call3TxtUpdating; }
 
     // B7 — Color highlighting
     QString colorCQ()       const { return m_colorCQ; }
@@ -1319,6 +1321,7 @@ signals:
     void rigErrorRaised(const QString& title, const QString& summary, const QString& details);
     // B6 — cty.dat
     void ctyDatUpdatingChanged();
+    void call3TxtUpdatingChanged();
     // B7 — Color highlighting
     void colorCQChanged();
     void colorMyCallChanged();
@@ -1590,6 +1593,9 @@ private:
     bool shouldDeferManualSyncTxStart() const;
     bool tryStartDeferredManualSyncTx();
     void clearDeferredManualSyncTx(const QString& reason);
+    void scheduleSyncTxAtNextValidSlot(const QString& reason,
+                                       int elapsedMs = -1,
+                                       int latestStartMs = -1);
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
     void updateAutoCqPartnerLock();
@@ -1605,6 +1611,7 @@ private:
     bool isLegacySyncKey(const QString& key) const;
     void syncSettingToLegacyIni(const QString& key, const QVariant& value);
     QVariant readSettingFromLegacyIni(const QString& key) const;
+    void persistTxWatchdogSettings();
     QFont fontSettingFont(const QString& key,
                           const QString& fallbackFamily,
                           int fallbackPointSize) const;
@@ -1741,6 +1748,7 @@ private:
     // m_periodicTxCheckScheduled=true, gli altri short-circuit; il
     // callback resetta a false prima di entrare nel body.
     bool m_periodicTxCheckScheduled {false};
+    bool m_syncTxRetryScheduled {false};
     // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
     // a true a entry function, false via qScopeGuard al return. Copre i 11
     // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo
@@ -2145,8 +2153,8 @@ private:
     // appEngine stub members
     bool    m_swlMode {false};
     bool    m_splitMode {false};
-    int     m_txWatchdogMode {0};
-    int     m_txWatchdogTime {5};
+    int     m_txWatchdogMode {1};
+    int     m_txWatchdogTime {6};
     int     m_txWatchdogCount {3};
     bool    m_filterCqOnly {false};
     bool    m_filterMyCallOnly {false};
@@ -2212,6 +2220,7 @@ private:
 
     // B6 — cty.dat
     bool   m_ctyDatUpdating {false};
+    bool   m_call3TxtUpdating {false};
 
     // B7 — Color highlighting (default WSJT-X colors)
     QString m_colorCQ       {"#33FF33"};

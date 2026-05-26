@@ -27,9 +27,10 @@ Item {
     // Altezza minima/massima del grafico spettro (regolabile tramite drag)
     // 1.0.288 — vincoli rilassati: spettro e cascata ridimensionabili quasi liberamente
     // (decidere quale aprire di più). Spettro 40..(altezza-24), cascata ≥24.
+    readonly property bool controlsVisible: showControls && controlsExpanded
     readonly property int spectrumMinHeight: 40
     readonly property int spectrumMaxHeight: 4000
-    readonly property int waterfallMinHeight: 24
+    readonly property int waterfallMinHeight: controlsVisible ? 24 : 12
 
     // Colors
     property color bgDeep:      bridge.themeManager.bgDeep
@@ -65,14 +66,32 @@ Item {
         }
     }
 
+    function coerceBool(value, fallback) {
+        if (value === true || value === false)
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off" || text.length === 0)
+            return false
+        return !!fallback
+    }
+
+    function boolSetting(key, fallback) {
+        return coerceBool(bridge.getSetting(key, fallback), fallback)
+    }
+
     function loadPanadapterSettings() {
         restoringSettings = true
-        waterfallPanel.controlsExpanded = bridge.getSetting("uiWaterfallControlsExpanded", true)
+        waterfallPanel.controlsExpanded = boolSetting("uiWaterfallControlsExpanded", true)
         if (bridge.uiSpectrumHeight > 0) waterfallPanel.spectrumHeight = bridge.uiSpectrumHeight
         paletteCombo.currentIndex = Math.max(0, bridge.getSetting("uiPaletteIndex", bridge.uiPaletteIndex))
-        autoRangeCheck.checked = bridge.getSetting("uiWaterfallAutoRange", true)
-        txBracketsCheck.checked = bridge.getSetting("uiWaterfallShowTxBrackets", true)
-        peakHoldCheck.checked = bridge.getSetting("uiWaterfallPeakHold", true)
+        autoRangeCheck.checked = boolSetting("uiWaterfallAutoRange", true)
+        txBracketsCheck.checked = boolSetting("uiWaterfallShowTxBrackets", true)
+        peakHoldCheck.checked = boolSetting("uiWaterfallPeakHold", true)
         blackSlider.value = bridge.getSetting("uiWaterfallBlackLevel", 15)
         gainSlider.value = bridge.getSetting("uiWaterfallColorGain", 50)
         contrastSlider.value = bridge.getSetting("uiWaterfallContrast", 80)
@@ -80,11 +99,11 @@ Item {
         zoomSlider.value = bridge.uiZoomFactor > 0 ? bridge.uiZoomFactor : 1.0
         labelFontSlider.value = bridge.getSetting("uiLabelFontSize", 8)
         labelSpacingSlider.value = bridge.getSetting("uiLabelSpacing", 2)
-        labelBoldCheck.checked = bridge.getSetting("uiLabelBold", true)
+        labelBoldCheck.checked = boolSetting("uiLabelBold", true)
         labelColorCombo.currentIndex = Math.max(0, Math.min(labelColorPresets.length - 1,
                                            bridge.getSetting("uiLabelColorPreset", 0)))
-        waterfallPanel.showDecodeCallsigns = bridge.getSetting("uiWaterfallShowCallsigns", true)
-        dxClusterCheck.checked = bridge.getSetting("uiWaterfallShowDxCluster", false)
+        waterfallPanel.setShowDecodeCallsigns(boolSetting("uiWaterfallShowCallsigns", true), false)
+        dxClusterCheck.checked = boolSetting("uiWaterfallShowDxCluster", false)
         waterfallDisplay.showDxClusterSpots = dxClusterCheck.checked
 
         // In light theme la palette è forzata a 11 (mockup pastello). Non sovrascrivere col valore Settings.
@@ -103,8 +122,6 @@ Item {
         waterfallDisplay.labelUseCustomColor = preset.custom
         waterfallDisplay.labelColor = preset.color
         waterfallPanel.applyManualContrast()
-        if (!waterfallPanel.showDecodeCallsigns)
-            clearDecodeLabels()
         restoringSettings = false
     }
 
@@ -119,6 +136,23 @@ Item {
     function clearDecodeLabels() {
         spectrumDecodeLabels = []
         waterfallDisplay.setDecodeLabels([])
+    }
+
+    function setShowDecodeCallsigns(enabled, persist) {
+        var next = coerceBool(enabled, true)
+        var changed = waterfallPanel.showDecodeCallsigns !== next
+        waterfallPanel.showDecodeCallsigns = next
+        if (!next) {
+            clearDecodeLabels()
+        } else if (changed) {
+            refreshDecodeLabels()
+        }
+        if (persist === undefined)
+            persist = !waterfallPanel.restoringSettings
+        if (persist) {
+            bridge.setSetting("uiWaterfallShowCallsigns", next)
+            mainWindow.scheduleSave()
+        }
     }
 
     function txSignalBandwidthHz(modeName) {
@@ -305,9 +339,9 @@ Item {
         spacing: 0
 
         Rectangle {
-            Layout.fillWidth: true; Layout.preferredHeight: 46
-            Layout.bottomMargin: 6
-            color: wfToolbarBg; visible: showControls && controlsExpanded
+            Layout.fillWidth: true; Layout.preferredHeight: waterfallPanel.controlsVisible ? 46 : 0
+            Layout.bottomMargin: waterfallPanel.controlsVisible ? 6 : 0
+            color: wfToolbarBg; visible: waterfallPanel.controlsVisible
             border.color: wfFrame; border.width: 1
             clip: true
             RowLayout {
@@ -316,6 +350,20 @@ Item {
                 spacing: 6
 
                 Text { text: "Calls:"; color: accentCyan; font.pixelSize: 10; font.bold: true }
+                CheckBox {
+                    id: showCallsCheck
+                    checked: waterfallPanel.showDecodeCallsigns
+                    onClicked: waterfallPanel.setShowDecodeCallsigns(checked)
+                    ToolTip.text: "Show decoded callsigns on the waterfall"
+                    ToolTip.visible: showCallsCheck.hovered
+                    ToolTip.delay: 400
+                    indicator: Rectangle {
+                        implicitWidth: 14; implicitHeight: 14; radius: 2
+                        color: showCallsCheck.checked ? accentCyan : wfToolbarBg
+                        border.color: accentCyan; border.width: 1
+                        Text { anchors.centerIn: parent; text: "C"; color: "black"; font.pixelSize: 9; font.bold: true; visible: showCallsCheck.checked }
+                    }
+                }
 
                 Text { text: "Font"; color: wfText; font.pixelSize: 10 }
                 Slider {
@@ -615,8 +663,8 @@ Item {
 
         // ── Slider Black / Gain ─────────────────────────────────────────
         Rectangle {
-            Layout.fillWidth: true; Layout.preferredHeight: 22
-            color: wfToolbarBg; visible: showControls && controlsExpanded
+            Layout.fillWidth: true; Layout.preferredHeight: waterfallPanel.controlsVisible ? 22 : 0
+            color: wfToolbarBg; visible: waterfallPanel.controlsVisible
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 6; anchors.rightMargin: 6; spacing: 6
                 Text { text: "Black:"; color: wfSlate; font.pixelSize: 10 }
@@ -679,7 +727,8 @@ Item {
         Rectangle {
             id: spectrumDivider
             Layout.fillWidth: true
-            Layout.preferredHeight: 12
+            Layout.preferredHeight: waterfallPanel.controlsVisible ? 12 : 0
+            visible: waterfallPanel.controlsVisible
             color: dividerMouse.containsMouse || dividerMouse.pressed
                    ? Qt.rgba(accentCyan.r, accentCyan.g, accentCyan.b, 0.30) : Qt.rgba(1,1,1,0.06)
 
@@ -736,8 +785,10 @@ Item {
             txFreq:         bridge.txFrequency
             running:        bridge.monitoring
             showTxBrackets: true
-            spectrumHeight: Math.max(40, Math.min(waterfallPanel.spectrumHeight,
-                                                  Math.max(40, waterfallDisplay.height - waterfallPanel.waterfallMinHeight)))
+            spectrumHeight: Math.max(waterfallPanel.spectrumMinHeight,
+                                     Math.min(waterfallPanel.spectrumHeight,
+                                              Math.max(waterfallPanel.spectrumMinHeight,
+                                                       waterfallDisplay.height - waterfallPanel.waterfallMinHeight)))
             // Low CPU mode riattiva un throttle leggero per contenere il render
             // QML/RHI sui PC datati. A profilo normale resta fluido a pieno rate.
             throttleActive: bridge.lowCpuModeEnabled
@@ -921,10 +972,20 @@ Item {
                 Connections {
                     target: waterfallPanel
                     function onSpectrumDecodeLabelsChanged() {
+                        if (!waterfallPanel.showDecodeCallsigns) {
+                            decodeLabelRefreshTimer.stop()
+                            spectrumGpuOverlay.cachedDecodeLabelModel = []
+                            return
+                        }
                         if (!decodeLabelRefreshTimer.running)
                             decodeLabelRefreshTimer.start()
                     }
                     function onShowDecodeCallsignsChanged() {
+                        if (!waterfallPanel.showDecodeCallsigns) {
+                            decodeLabelRefreshTimer.stop()
+                            spectrumGpuOverlay.cachedDecodeLabelModel = []
+                            return
+                        }
                         if (!decodeLabelRefreshTimer.running)
                             decodeLabelRefreshTimer.start()
                     }
@@ -1472,8 +1533,7 @@ Item {
                 contrastSlider.value = Number(value)
                 waterfallPanel.applyManualContrast()
             } else if (key === "uiWaterfallShowCallsigns") {
-                waterfallPanel.showDecodeCallsigns = !!value
-                waterfallPanel.refreshDecodeLabels()
+                waterfallPanel.setShowDecodeCallsigns(waterfallPanel.coerceBool(value, true), false)
             }
             waterfallPanel.restoringSettings = false
         }

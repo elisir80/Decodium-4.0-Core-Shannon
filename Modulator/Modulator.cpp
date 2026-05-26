@@ -307,7 +307,11 @@ void Modulator::close ()
     {
       if (m_quickClose)
         {
+#if defined(Q_OS_MAC)
+          m_stream->finishPlayback ();
+#else
           m_stream->reset ();
+#endif
         }
       else
         {

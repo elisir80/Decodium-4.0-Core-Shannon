@@ -394,10 +394,21 @@ void DecodiumLogging::logStartupDiagnostics() {
     diagInfo(QString("Locale: %1 | TZ: %2").arg(QLocale::system().name(), QString(QTimeZone::systemTimeZone().id())));
     if (auto* s = QGuiApplication::primaryScreen())
         diagInfo(QString("Screen: %1x%2 @%3dpi").arg(s->size().width()).arg(s->size().height()).arg(s->logicalDotsPerInch()));
+#ifdef Q_OS_WIN
+    if (qEnvironmentVariableIsSet("DECODIUM_STARTUP_AUDIO_DIAGNOSTICS")) {
+        for (auto const& d : QMediaDevices::audioInputs())
+            diagInfo("AudioIn: " + d.description() + " | " + diagAudioFormatSummary(d.preferredFormat()));
+        for (auto const& d : QMediaDevices::audioOutputs())
+            diagInfo("AudioOut: " + d.description() + " | " + diagAudioFormatSummary(d.preferredFormat()));
+    } else {
+        diagInfo("Audio device diagnostics skipped on Windows startup; set DECODIUM_STARTUP_AUDIO_DIAGNOSTICS=1 to enable");
+    }
+#else
     for (auto const& d : QMediaDevices::audioInputs())
         diagInfo("AudioIn: " + d.description() + " | " + diagAudioFormatSummary(d.preferredFormat()));
     for (auto const& d : QMediaDevices::audioOutputs())
         diagInfo("AudioOut: " + d.description() + " | " + diagAudioFormatSummary(d.preferredFormat()));
+#endif
 #ifdef Q_OS_WIN
     MEMORYSTATUSEX m; m.dwLength = sizeof(m); GlobalMemoryStatusEx(&m);
     diagInfo(QString("RAM: %1 MB free / %2 MB total").arg(m.ullAvailPhys/1048576).arg(m.ullTotalPhys/1048576));

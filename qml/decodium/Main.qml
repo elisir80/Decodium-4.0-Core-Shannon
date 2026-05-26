@@ -5090,7 +5090,7 @@ ApplicationWindow {
 	                        var activeMatch = messageContainsCallBase(message, activeBase)
 	                            || mainWindow.callsignBase(item.fromCall || "") === activeBase
 	                            || mainWindow.callsignBase(item.dxCallsign || "") === activeBase
-	                        return activeMatch && myMatch
+	                        return activeMatch
 	                    }
 
 	                    function rxSortSeconds(item) {
@@ -5252,7 +5252,7 @@ ApplicationWindow {
                         height: 28
                         radius: 4
                         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
-                        border.color: timingBar.isTxPhase ? bridge.themeManager.ledRed : Qt.rgba(76/255, 175/255, 80/255, 0.55)
+                        border.color: !timingBar.timerActive ? glassBorder : (timingBar.isTxPhase ? bridge.themeManager.ledRed : Qt.rgba(76/255, 175/255, 80/255, 0.55))
                         border.width: 1
 
                         property real periodLen: decodePanel.periodLength
@@ -5260,12 +5260,19 @@ ApplicationWindow {
                         property real progress: 0.0
                         property real secInPeriod: 0.0
                         property bool isTxPhase: !!(bridge && bridge.transmitting)
+                        property bool timerActive: !!(bridge && (bridge.monitoring || bridge.transmitting || bridge.tuning))
                         property bool isEvenPeriod: true
                         property string periodLabel: isTxPhase ? "TX" : "RX"
+                        onTimerActiveChanged: {
+                            if (!timerActive) {
+                                progress = 0.0
+                                secInPeriod = 0.0
+                            }
+                        }
 
                         Timer {
                             interval: 50
-                            running: true
+                            running: timingBar.timerActive
                             repeat: true
                             onTriggered: {
                                 var now = new Date()
@@ -5310,6 +5317,7 @@ ApplicationWindow {
 
                             // Playhead marker
                             Rectangle {
+                                visible: timingBar.timerActive
                                 x: parent.width * timingBar.progress - 2
                                 y: -2
                                 width: 4
@@ -5339,7 +5347,7 @@ ApplicationWindow {
                             font.pixelSize: 11
                             font.bold: true
                             font.family: decodiumMonoFontFamily
-                            color: timingBar.isTxPhase ? bridge.themeManager.ledRed : bridge.themeManager.successColor
+                            color: !timingBar.timerActive ? textSecondary : (timingBar.isTxPhase ? bridge.themeManager.ledRed : bridge.themeManager.successColor)
                         }
 
                         // Mode + phase label (left of bar)
@@ -8471,9 +8479,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 visible: bridge.txWatchdogMode === 1
                 Text { text: "Time (min):"; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
-                    from: 1; to: 30
+                    from: 1; to: 999
                     value: bridge.txWatchdogTime
-                    onValueChanged: bridge.txWatchdogTime = value
+                    onValueChanged: if (bridge.txWatchdogTime !== value) bridge.txWatchdogTime = value
                 }
             }
 
@@ -8484,7 +8492,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 SpinBox {
                     from: 1; to: 50
                     value: bridge.txWatchdogCount
-                    onValueChanged: bridge.txWatchdogCount = value
+                    onValueChanged: if (bridge.txWatchdogCount !== value) bridge.txWatchdogCount = value
                 }
             }
         }
