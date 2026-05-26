@@ -64,6 +64,12 @@ subtract-and-research è inferiore a JTDX (`nPreampass=4` + decoder ottimizzato)
 1. **Sottrazione iterativa stile JTDX** (`nPreampass`): più cicli di
    subtract-strongest-and-research sul residuo, per scoprire i segnali sovrapposti.
    È il gap architetturale dominante su banda affollata.
+   > **Aggiornamento (vedi Parte 4):** analizzando il codice si è scoperto che la
+   > sottrazione è GIÀ iterativa (subtract-in-place per-candidato, fino a 5 passate di
+   > research sul residuo). Il gap NON era "poche passate" ma la **qualità** della
+   > sottrazione: si sottraeva senza raffinare il DT del forte. Risolto col Quick-win A
+   > (`lrefinedt=1`) — 93.5%→101.4%. Il `nPreampass` esterno aggiuntivo resta possibile
+   > ma con ROI ormai basso.
 2. **Parallelismo reale del decode** (across-candidate / across-band-segment) per
    permettere un decode profondo *entro la finestra timely* invece del follow-up
    tardivo (+13s). Oggi `run_main_passes` itera candidati in serie.
@@ -187,3 +193,75 @@ viene mai entrato). Rilasciato in **1.0.285** (FT2-async + fix FT8) insieme a
 è allineare il grace FT2 sync al settle (250→~1100ms) e cappare il latest-start FT2
 alla finestra shift (~980ms) come fatto per FT8/FT4 — ma rendere FT2 solo-async è più
 semplice e coerente con la regola "Async L2 mandatory" già presente.
+
+---
+
+# Parte 4 — Quick-win A: raffinamento DT pre-sottrazione (2026-05-26, fork 1.0.298)
+
+Ripresa dell'indagine di parità (Parte 1) per attaccare il gap residuo su banda
+affollata (segnali sovrapposti). **Ribalta l'assunzione iniziale della raccomandazione #1.**
+
+## Scoperta: la sottrazione è GIÀ iterativa
+Contrariamente all'ipotesi "facciamo poca subtract-and-research", il codice fa già
+fino a **5 passate** di sottrazione-e-ricerca sul residuo (`ndepth>=3`):
+- `run_main_passes` (`Detector/FtxFt8Stage4.cpp:3447`) itera le passate; `npass=5` per
+  `ndepth>=3`, `3` per `ndepth<=2`, `2` per `ndepth==1` (`:3455-3463`).
+- Ogni candidato decodificato con CRC-14 OK viene **sottratto in-place** dal buffer
+  condiviso `dd0` (`ftx_subtract_ft8_c`, `:3258-3261`), con `lsubtract=1` su OGNI
+  passata (`FtxDecodeBookkeeping.cpp`, `local_lsubtract=1` costante).
+- La passata successiva ri-cerca i candidati (`ftx_sync8_search_stage4_c`) **sul
+  residuo già decurtato dai forti**. Più l'early→subtract→full
+  (`ftx_ft8_apply_saved_subtractions_c`) = ~1.x preampass effettivi.
+
+Quindi il `nPreampass` di JTDX e le nostre passate sync sono concetti vicini: NON è la
+quantità di giri il problema dominante.
+
+## La vera leva: QUALITÀ della sottrazione (DT refinement)
+Nel main pass sottraevamo i forti con `lrefinedt=0` (`FtxFt8Stage4.cpp:3260`, ultimo
+arg): **nessun raffinamento del DT** del segnale prima di toglierlo. Una sottrazione
+con DT non allineato al sub-campione lascia un **residuo "sporco"** (buche/code
+spettrali) che maschera proprio i segnali sovrapposti deboli. JTDX raffina il DT del
+forte prima di sottrarlo → residuo pulito → i deboli sotto emergono.
+
+`ftx_subtract_ft8_c` SUPPORTA già il refinement (`FtxSubtract.cpp:717`, path
+`lrefinedt!=0` a `:745-768`): valuta la metrica di sottrazione a idt −90/0/+90,
+fit parabolico per l'offset ottimale `dx`, poi sottrae al DT raffinato `round(90·dx)`.
+Era semplicemente **mai attivato** nel main pass.
+
+## Fix applicato
+
+| File | Modifica | Effetto misurato |
+|------|----------|------------------|
+| `Detector/FtxFt8Stage4.cpp:3260` | sottrazione main-pass: `lrefinedt` da `0` a `(request.ndepth>=4)?1:0` → raffina il DT del forte prima di sottrarlo, solo su decode profondo | parità JTDX **93.5%→101.4%** (30 slot, densità ~18 dec/slot); ora pareggia/supera JTDX, slot peggiore 75%→82% |
+
+**Gate `request.ndepth>=4`**: stesso opt-in "Deep Search" dei fix #1/#2 (Parte 1).
+Per FT8 `request.ndepth` è il depth base 1-4 (NON i bit legacy con flag 0x10/0x20);
+`>=4` = decode più profondo, coerente con `live_full_ap` (`:3149`). Sotto soglia il
+refinement non scatta (zero costo per i preset leggeri).
+
+> ⚠️ **Trappola da evitare:** il subtract è dentro la funzione di decode per-candidato,
+> dove l'unica variabile "pass" in scope è `pass_index` (`:3166`), che è l'**AP-pass del
+> candidato**, NON la passata di subtract-research esterna (quella è in `run_main_passes`
+> `:3447`). Gateare su `pass_index>=4` sarebbe stato sbagliato (gaterebbe sul tipo AP).
+> Il gate corretto in scope è `request.ndepth`.
+
+## Costo e sicurezza
+- Costo: il path `lrefinedt=1` fa **3× subtract-eval** (idt −90/0/+90) per il fit, ma
+  solo sui candidati forti delle passate deep → trascurabile (il subtract è 1 FFT-pair).
+- Protetto dal **deadline hard** per-candidato e per-passata (`stage4_should_cancel`,
+  `FtxFt8Stage4.cpp:101`, `FT8DecodeWorker.cpp:57`): nessun rischio stall/sforo slot.
+- **Validazione no-regression (on-air, 30 slot 20m):** zero stall/underrun/cancel/
+  deadline-truncation; decode timing invariato (slow pass ~12s, timely dall'early
+  preview); Decodium decodifica **di più** (19.1 vs 18.8 dec/slot), nessun calo.
+
+## Dead-end ri-confermati (NON rifare)
+- Aggiungere passate "deep" al final/fast pass → lento e regredisce (Parte 1).
+- `nPreampass` esterno aggiuntivo (loop attorno a `run_main_passes`): possibile ma ROI
+  ormai basso dopo Quick-win A (già a parità+); il guadagno marginale dei preampass
+  cala in fretta.
+
+## Per upstream
+Modifica di **1 riga** (più gate), zero dipendenze nuove, opt-in deep, FT4/FT2 intatti
+(il path è FT8). Candidata all'assorbimento come default sotto Deep Search, coerente
+coi 3 fix di Parte 1 già assorbiti. Eventuale estensione futura: applicare il
+refinement anche a `ndepth==3` (Deep "leggero") se si vuole il guadagno anche lì.
