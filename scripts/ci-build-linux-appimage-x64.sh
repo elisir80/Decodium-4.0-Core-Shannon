@@ -40,6 +40,7 @@ require_cmd tar
 require_cmd pkg-config
 require_cmd sha256sum
 require_cmd file
+require_cmd ldd
 
 QMAKE="$(command -v qmake6 || command -v qmake || true)"
 if [[ -z "${QMAKE}" ]]; then
@@ -363,7 +364,10 @@ QT_RUNTIME_QML_DIR="${APPDIR}/usr/qml"
 mkdir -p "${APP_QML_DIR}"
 QT_QML_DIR="$("${QMAKE}" -query QT_INSTALL_QML 2>/dev/null || true)"
 if [[ -n "${QT_QML_DIR}" && -d "${QT_QML_DIR}" ]]; then
-  cp -a "${QT_QML_DIR}/." "${APP_QML_DIR}/"
+  # Dereference Qt QML symlinks. Some aqt/Qt layouts expose QML plugin .so
+  # files as links into the Qt prefix; preserving those links makes the
+  # AppImage pass build-time file tests but fail on user machines.
+  cp -aL "${QT_QML_DIR}/." "${APP_QML_DIR}/"
 fi
 cp -a "${BUILD_DIR}/qml/." "${APP_QML_DIR}/"
 
@@ -394,13 +398,72 @@ test -f "${APP_QML_DIR}/QtQuick/Controls/Material/impl/libqtquickcontrols2materi
 test -f "${QT_RUNTIME_QML_DIR}/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
 test -f "${QT_RUNTIME_QML_DIR}/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
 
+bundle_qml_plugin_dependencies() {
+  local plugin
+  local dep
+  local app_lib_dir="${APPDIR}/usr/lib"
+  mkdir -p "${app_lib_dir}"
+
+  while IFS= read -r -d '' plugin; do
+    while IFS= read -r dep; do
+      [[ -n "${dep}" && -f "${dep}" ]] || continue
+      if [[ -n "${QT_PREFIX_FOR_BUILD}" && "${dep}" == "${QT_PREFIX_FOR_BUILD}/"* ]] \
+        || [[ -n "${QT_LIB_DIR_FOR_BUILD}" && "${dep}" == "${QT_LIB_DIR_FOR_BUILD}/"* ]]; then
+        cp -aL "${dep}" "${app_lib_dir}/"
+      fi
+    done < <(ldd "${plugin}" 2>/dev/null | awk '/=> \// {print $3} /^\// {print $1}')
+  done < <(find "${APP_QML_DIR}" -type f -name '*.so' -print0)
+}
+
+verify_qml_plugin_dependencies() {
+  local context="$1"
+  local qml_root="$2"
+  local lib_root="$3"
+  local bin_root
+  local ld_path
+  local failed=0
+  local plugin
+  bin_root="$(cd "${lib_root}/../bin" 2>/dev/null && pwd || true)"
+  ld_path="${lib_root}"
+  if [[ -n "${bin_root}" ]]; then
+    ld_path="${ld_path}:${bin_root}"
+  fi
+
+  while IFS= read -r -d '' plugin; do
+    if ! LD_LIBRARY_PATH="${ld_path}" \
+        ldd "${plugin}" >/tmp/decodium-qml-ldd.txt 2>&1; then
+      cat /tmp/decodium-qml-ldd.txt >&2 || true
+      failed=1
+      continue
+    fi
+    if grep -q "not found" /tmp/decodium-qml-ldd.txt; then
+      echo "error: unresolved QML plugin dependencies in ${context}: ${plugin}" >&2
+      cat /tmp/decodium-qml-ldd.txt >&2
+      failed=1
+    fi
+  done < <(find "${qml_root}" -type f -name '*.so' -print0)
+  rm -f /tmp/decodium-qml-ldd.txt
+  if [[ "${failed}" != "0" ]]; then
+    exit 1
+  fi
+}
+
+bundle_qml_plugin_dependencies
+verify_qml_plugin_dependencies "AppDir" "${APP_QML_DIR}" "${APPDIR}/usr/lib"
+
+if find "${APP_QML_DIR}" -xtype l -print -quit | grep -q .; then
+  echo "error: bundled QML tree contains broken symlinks" >&2
+  find "${APP_QML_DIR}" -xtype l -print >&2
+  exit 1
+fi
+
 log "Bundle supplemental Qt plugins"
 QT_PLUGIN_DIR="$("${QMAKE}" -query QT_INSTALL_PLUGINS 2>/dev/null || true)"
 copy_qt_plugin_dir() {
   local plugin_dir="$1"
   if [[ -n "${QT_PLUGIN_DIR}" && -d "${QT_PLUGIN_DIR}/${plugin_dir}" ]]; then
     mkdir -p "${APPDIR}/usr/plugins/${plugin_dir}"
-    cp -a "${QT_PLUGIN_DIR}/${plugin_dir}/." "${APPDIR}/usr/plugins/${plugin_dir}/"
+    cp -aL "${QT_PLUGIN_DIR}/${plugin_dir}/." "${APPDIR}/usr/plugins/${plugin_dir}/"
     echo "Bundled Qt plugin dir: ${plugin_dir}"
   fi
 }
@@ -414,7 +477,7 @@ copy_qt_plugin_dir wayland-shell-integration
 if [[ -n "${QT_PLUGIN_DIR}" && -d "${QT_PLUGIN_DIR}/platforms" ]] \
    && compgen -G "${QT_PLUGIN_DIR}/platforms/libqwayland*.so" >/dev/null; then
   mkdir -p "${APPDIR}/usr/plugins/platforms"
-  cp -a "${QT_PLUGIN_DIR}"/platforms/libqwayland*.so "${APPDIR}/usr/plugins/platforms/"
+  cp -aL "${QT_PLUGIN_DIR}"/platforms/libqwayland*.so "${APPDIR}/usr/plugins/platforms/"
   echo "Bundled Qt Wayland platform plugin"
 fi
 
@@ -437,6 +500,11 @@ HERE="$(dirname "$(readlink -f "$0")")"
 # by the host. Prefer XCB unless the user explicitly overrides it.
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 export QT_MEDIA_BACKEND="${QT_MEDIA_BACKEND:-ffmpeg}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib:${HERE}/usr/bin:${LD_LIBRARY_PATH:-}"
+export QT_PLUGIN_PATH="${HERE}/usr/plugins:${QT_PLUGIN_PATH:-}"
+export QML_IMPORT_PATH="${HERE}/usr/bin/qml:${HERE}/usr/qml:${QML_IMPORT_PATH:-}"
+export QML2_IMPORT_PATH="${HERE}/usr/bin/qml:${HERE}/usr/qml:${QML2_IMPORT_PATH:-}"
+export QT_QUICK_CONTROLS_STYLE="${QT_QUICK_CONTROLS_STYLE:-Material}"
 
 exec "${HERE}/AppRun.decodium-real" "$@"
 APPRUN
@@ -467,6 +535,26 @@ fi
 mkdir -p "${OUTPUT_DIR}"
 mv "${APPIMAGE_SRC}" "${OUTPUT_DIR}/${APPIMAGE_NAME}"
 sha256sum "${OUTPUT_DIR}/${APPIMAGE_NAME}" > "${OUTPUT_DIR}/${APPIMAGE_NAME}.sha256.txt"
+
+log "Validate final AppImage QML payload"
+verify_dir="${ROOT_DIR}/.appimage-qml-verify"
+rm -rf "${verify_dir}"
+mkdir -p "${verify_dir}"
+(
+  cd "${verify_dir}"
+  APPIMAGE_EXTRACT_AND_RUN=1 "${OUTPUT_DIR}/${APPIMAGE_NAME}" --appimage-extract >/dev/null
+)
+EXTRACTED_APPDIR="${verify_dir}/squashfs-root"
+test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/qmldir"
+test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/qmldir"
+test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+verify_qml_plugin_dependencies "final AppImage" \
+  "${EXTRACTED_APPDIR}/usr/bin/qml" \
+  "${EXTRACTED_APPDIR}/usr/lib"
+rm -rf "${verify_dir}"
 
 log "Done"
 ls -lh "${OUTPUT_DIR}/${APPIMAGE_NAME}" "${OUTPUT_DIR}/${APPIMAGE_NAME}.sha256.txt"

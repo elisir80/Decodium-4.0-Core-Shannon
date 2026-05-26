@@ -327,6 +327,7 @@ Item {
                                     { label: "15", lambda: "15M" },
                                     { label: "12", lambda: "12M" },
                                     { label: "10", lambda: "10M" },
+                                    { label: "8", lambda: "8M" },
                                     { label: "6", lambda: "6M" },
                                     { label: "4", lambda: "4M" },
                                     { label: "2", lambda: "2M" },

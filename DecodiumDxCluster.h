@@ -27,6 +27,8 @@ public:
     explicit DecodiumDxCluster(QObject* parent = nullptr);
     ~DecodiumDxCluster() override;
 
+    static QString bandLabelFromFrequencyKhz(double freqKhz);
+
     // --- property accessors ---
     bool        connected() const { return m_connected; }
 

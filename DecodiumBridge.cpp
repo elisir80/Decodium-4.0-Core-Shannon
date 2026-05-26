@@ -10854,6 +10854,15 @@ void DecodiumBridge::setTxEnabled(bool v)
     if (v) {
         scheduleTxAudioPrecompute(25);
         ensureSyncTxSchedulerActive(QStringLiteral("tx-enable"));
+        if (!usingLegacyBackendForTx()
+            && usesDeferredManualSyncTx()
+            && m_monitoring
+            && !m_transmitting
+            && !m_tuning
+            && shouldDeferManualSyncTxStart()) {
+            m_deferredManualSyncTx = true;
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("tx-enable"), -1, 0);
+        }
         if (!usingLegacyBackendForTx()) {
             QTimer::singleShot(0, this, [this]() {
                 if (m_shuttingDown || QCoreApplication::closingDown()
@@ -14143,6 +14152,7 @@ void DecodiumBridge::sendTx(int n)
         m_deferredManualSyncTx = true;
         ensureSyncTxSchedulerActive(QStringLiteral("manual-sync-tx"));
         scheduleTxAudioPrecompute(25);
+        scheduleSyncTxAtNextValidSlot(QStringLiteral("manual-sync-tx"), -1, 0);
         bridgeLog(QStringLiteral("manualSyncTx: queued TX%1 for next valid slot (mode=%2 txPeriod=%3 transmitting=%4)")
                       .arg(n)
                       .arg(m_mode)
@@ -18675,6 +18685,7 @@ QString DecodiumBridge::autoCqBandKeyForFrequency(double freqHz) const
         { 21000000.0,  21450000.0, "15M"   },
         { 24890000.0,  24990000.0, "12M"   },
         { 28000000.0,  29700000.0, "10M"   },
+        { 40000000.0,  45000000.0, "8M"    },
         { 50000000.0,  54000000.0, "6M"    },
         { 70000000.0,  71000000.0, "4M"    },
         {144000000.0, 148000000.0, "2M"    },
@@ -19089,14 +19100,20 @@ bool DecodiumBridge::shouldPreserveDeferredAutoSeqTxForRearm(QString* staleReaso
     }
 
     int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
-    if (deferredTx != 3 && deferredTx != 4) {
+    bool const ft2AutoCqFirstReply =
+        deferredTx == 2
+        && m_autoCqRepeat
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled;
+    if (deferredTx != 3 && deferredTx != 4 && !ft2AutoCqFirstReply) {
         if (staleReason && deferredTx > 0) {
-            *staleReason = QStringLiteral("deferred TX%1 is not a report/RR73 step").arg(deferredTx);
+            *staleReason = QStringLiteral("deferred TX%1 is not a preserved FT2 AutoCQ/report/RR73 step")
+                               .arg(deferredTx);
         }
         return false;
     }
 
-    if (!m_ft2PartnerMemoryEnabled) {
+    if (!ft2AutoCqFirstReply && !m_ft2PartnerMemoryEnabled) {
         if (staleReason) {
             *staleReason = QStringLiteral("PartnerMemory disabled");
         }
@@ -19619,6 +19636,8 @@ void DecodiumBridge::clearDeferredManualSyncTx(const QString& reason)
         return;
     }
     m_deferredManualSyncTx = false;
+    m_syncTxRetryScheduled = false;
+    ++m_syncTxRetrySerial;
     bridgeLog(QStringLiteral("manualSyncTx: cleared (%1)").arg(reason));
 }
 
@@ -19672,10 +19691,7 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
     }
 
     scheduleTxAudioPrecompute(qMin<qint64>(delayMs, 250));
-    if (m_syncTxRetryScheduled) {
-        return;
-    }
-
+    quint64 const retrySerial = ++m_syncTxRetrySerial;
     m_syncTxRetryScheduled = true;
     QString const modeSnapshot = m_mode;
     bridgeLog(QStringLiteral("sync TX late guard: defer TX%1 (%2) mode=%3 elapsed=%4ms latest=%5ms delay=%6ms")
@@ -19684,7 +19700,10 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
                   .arg(elapsedMs)
                   .arg(latestStartMs)
                   .arg(delayMs));
-    QTimer::singleShot(delayMs, this, [this, reason, modeSnapshot]() {
+    QTimer::singleShot(delayMs, this, [this, reason, modeSnapshot, retrySerial]() {
+        if (retrySerial != m_syncTxRetrySerial) {
+            return;
+        }
         m_syncTxRetryScheduled = false;
         if (m_mode != modeSnapshot
             || !m_monitoring
@@ -20146,7 +20165,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         setTxEnabled(true);
         if (!m_txEnabled) return;
     }
-    if (m_autoCqRepeat && m_dxCall.isEmpty() && m_currentTx != 6) {
+    if (m_autoCqRepeat
+        && !m_autoCqLockedCall.trimmed().isEmpty()
+        && (m_dxCall.isEmpty() || m_currentTx == 6 || m_qsoProgress <= 1)) {
         restoreAutoCqPartnerLock();
     }
 
@@ -20308,7 +20329,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // - Per AutoCQ (nessuna stazione DX): usa il controllo di periodo normale
     //   → evita loop CQ continuo (CQ ogni 3.75s senza pausa RX)
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
-                          m_txEnabled && !m_dxCall.isEmpty());
+                          m_txEnabled && !m_dxCall.isEmpty() &&
+                          m_currentTx >= 1 && m_currentTx <= 5);
     bool skipPeriodCheck = inQsoResponse;
 
     if (!skipPeriodCheck) {
@@ -20791,8 +20813,10 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         restoreAutoCqPartnerLock();
     }
 
+    bool const autoCqCallingCq = m_autoCqRepeat && m_currentTx == 6;
     bool const autoCqExchangeInProgress =
         m_autoCqRepeat
+        && !autoCqCallingCq
         && !duplicateActiveBase.isEmpty()
         && (m_qsoProgress > 1
             || (m_txEnabled && m_currentTx >= 1 && m_currentTx <= 5)
@@ -21164,6 +21188,20 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             setDxGrid(last.toUpper());
         }
 
+        if (m_autoCqRepeat
+            && m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && cqModeAcceptedFreshCaller
+            && isGridTokenStrict(last)) {
+            m_autoCqLockedCall = messagePartner.trimmed();
+            m_autoCqLockedGrid = last.toUpper();
+            m_autoCqLockedNtx = 2;
+            m_autoCqLockedProgress = 3;
+            m_asyncLastTxEndMs = 0;
+            bridgeLog(QStringLiteral("FT2 AutoCQ latch: caller=%1 grid=%2 -> TX2")
+                          .arg(callerBase, m_autoCqLockedGrid));
+        }
+
         bridgeLog("autoSeq: start AutoCQ partner " + callerBase + " msg=" + msg);
     }
 
@@ -21367,6 +21405,17 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                 m_pendingAutoSeqPartnerBase = activeBaseForNextTx;
                 m_pendingAutoSeqMessage = txMessage(nextTx).trimmed();
                 m_pendingAutoSeqMode = m_mode.trimmed().toUpper();
+            }
+            if (m_autoCqRepeat
+                && nextTx >= 1 && nextTx <= 5
+                && !m_dxCall.trimmed().isEmpty()) {
+                m_autoCqLockedCall = m_dxCall.trimmed();
+                m_autoCqLockedGrid = m_dxGrid.trimmed();
+                m_autoCqLockedNtx = nextTx;
+                m_autoCqLockedProgress = qMax(2, m_qsoProgress);
+                if (nextTx == 2) {
+                    m_autoCqLockedProgress = qMax(3, m_autoCqLockedProgress);
+                }
             }
             if (!m_txEnabled) {
                 setTxEnabled(true);
@@ -30459,20 +30508,12 @@ void DecodiumBridge::verifyOtp(const QString& callsign, const QString& code, int
 // ============================================================
 
 static QString bandFromFreqHz(double hz) {
-    double mhz = hz / 1e6;
-    if      (mhz <  2.0)  return "160M";
-    else if (mhz <  4.0)  return "80M";
-    else if (mhz <  6.0)  return "60M";
-    else if (mhz <  8.0)  return "40M";
-    else if (mhz < 11.0)  return "30M";
-    else if (mhz < 15.0)  return "20M";
-    else if (mhz < 19.0)  return "17M";
-    else if (mhz < 22.0)  return "15M";
-    else if (mhz < 25.0)  return "12M";
-    else if (mhz < 30.0)  return "10M";
-    else if (mhz < 52.0)  return "6M";
-    else if (mhz < 150.0) return "2M";
-    else                  return "70CM";
+    if (hz <= 0.0 || hz > static_cast<double>(std::numeric_limits<Radio::Frequency>::max())) {
+        return "OOB";
+    }
+    Bands bands;
+    QString const band = bands.find(static_cast<Radio::Frequency>(std::llround(hz)));
+    return band.isEmpty() ? QStringLiteral("OOB") : band.toUpper();
 }
 
 static QString bridgeAdifField(const QString& tag, const QString& value)

@@ -1326,23 +1326,46 @@ QVariantMap DecodiumDxCluster::parseSpotLine(const QString& line) const
 
 QString DecodiumDxCluster::bandFromFreq(double freqKhz) const
 {
+    return bandLabelFromFrequencyKhz(freqKhz);
+}
+
+QString DecodiumDxCluster::bandLabelFromFrequencyKhz(double freqKhz)
+{
     // Boundaries chosen so that any frequency that falls within a standard
     // amateur allocation maps to the correct band name.
-    if      (freqKhz <   1800.0) return "UNK";   // below 160m or invalid
-    else if (freqKhz <   2000.0) return "160M";
-    else if (freqKhz <   4000.0) return "80M";
-    else if (freqKhz <   6000.0) return "60M";
-    else if (freqKhz <   8000.0) return "40M";
-    else if (freqKhz <  11000.0) return "30M";
-    else if (freqKhz <  15000.0) return "20M";
-    else if (freqKhz <  19000.0) return "17M";
-    else if (freqKhz <  22000.0) return "15M";
-    else if (freqKhz <  25000.0) return "12M";
-    else if (freqKhz <  30000.0) return "10M";
-    else if (freqKhz <  52000.0) return "6M";
-    else if (freqKhz < 150000.0) return "2M";
-    else if (freqKhz < 440000.0) return "70CM";
-    else                          return "UNK";
+    struct BandRange
+    {
+        double lowerKhz;
+        double upperKhz;
+        char const* label;
+    };
+
+    static constexpr BandRange kRanges[] = {
+        {  1800.0,   2000.0, "160M"},
+        {  3500.0,   4000.0, "80M"},
+        {  5060.0,   5450.0, "60M"},
+        {  7000.0,   7300.0, "40M"},
+        { 10100.0,  10150.0, "30M"},
+        { 14000.0,  14350.0, "20M"},
+        { 18068.0,  18168.0, "17M"},
+        { 21000.0,  21450.0, "15M"},
+        { 24890.0,  24990.0, "12M"},
+        { 28000.0,  29700.0, "10M"},
+        { 40000.0,  45000.0, "8M"},
+        { 50000.0,  54000.0, "6M"},
+        { 54000.0,  69900.0, "5M"},
+        { 70000.0,  71000.0, "4M"},
+        {144000.0, 148000.0, "2M"},
+        {222000.0, 225000.0, "1.25M"},
+        {420000.0, 450000.0, "70CM"},
+    };
+
+    for (auto const& range : kRanges) {
+        if (freqKhz >= range.lowerKhz && freqKhz <= range.upperKhz) {
+            return QString::fromLatin1(range.label);
+        }
+    }
+    return QStringLiteral("UNK");
 }
 
 // ---------------------------------------------------------------------------

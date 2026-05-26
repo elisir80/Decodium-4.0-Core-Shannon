@@ -1751,6 +1751,7 @@ private:
     // callback resetta a false prima di entrare nel body.
     bool m_periodicTxCheckScheduled {false};
     bool m_syncTxRetryScheduled {false};
+    quint64 m_syncTxRetrySerial {0};
     // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
     // a true a entry function, false via qScopeGuard al return. Copre i 11
     // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo
