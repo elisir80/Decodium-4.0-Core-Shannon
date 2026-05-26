@@ -2233,7 +2233,9 @@ private:
     int     m_autoCqLockedProgress {0};
     int     m_ft2AutoCqAwaitingPartnerTx {0};
     QString m_ft2AutoCqAwaitingPartnerBase;
+    QString m_ft2AutoCqAwaitingPartnerDecodeIdentity;
     qint64  m_ft2AutoCqAwaitingPartnerSinceMs {0};
+    QString m_lastAutoSeqDecodeIdentity;
     QHash<QString, QDateTime> m_recentAutoCqAbandonedUtcByKey;
     QHash<QString, QDateTime> m_recentAutoCqWorkedUtcByKey;
     QHash<QString, QDateTime> m_recentQsoLogUtcByKey;
