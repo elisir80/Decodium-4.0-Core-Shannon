@@ -131,6 +131,7 @@ Item {
         refreshLogPreview()
         syncLogSatelliteFields()
         logCommentField.text = logPreviewComment
+        logGridField.text = logPreviewGrid
         logConfirmPopup.open()
     }
 
@@ -1491,6 +1492,7 @@ Item {
             txPanel.refreshLogPreview()
             txPanel.syncLogSatelliteFields()
             logCommentField.text = txPanel.logPreviewComment
+            logGridField.text = txPanel.logPreviewGrid
             txPanel.logClusterSpotAvailable = !!(engine && engine.dxCluster && engine.dxCluster.connected)
             txPanel.logClusterSpotChecked = txPanel.logClusterSpotAvailable && !!engine.autoSpotEnabled
         }
@@ -1544,7 +1546,27 @@ Item {
                 Text { text: logPreviewCall || "-"; color: textPrimary; font.pixelSize: 14; font.bold: true }
 
                 Text { text: "Grid:"; color: textSecondary; font.pixelSize: 13 }
-                Text { text: logPreviewGrid || "-"; color: textPrimary; font.pixelSize: 14 }
+                TextField {
+                    id: logGridField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    color: textPrimary
+                    selectedTextColor: bgDeep
+                    selectionColor: accentGreen
+                    font.pixelSize: 14
+                    selectByMouse: true
+                    placeholderText: qsTr("Locatore (es. JN71) — inseribile a mano")
+                    onTextEdited: {
+                        var up = text.toUpperCase()
+                        if (up !== text) { var p = cursorPosition; text = up; cursorPosition = p }
+                    }
+                    background: Rectangle {
+                        radius: 4
+                        color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                        border.color: logGridField.activeFocus ? accentGreen : glassBorder
+                        border.width: 1
+                    }
+                }
 
                 Text { text: "Report:"; color: textSecondary; font.pixelSize: 13 }
                 Text { text: (logPreviewSent || "-") + " / " + (logPreviewRcvd || "-"); color: textPrimary; font.pixelSize: 14 }
@@ -1671,6 +1693,8 @@ Item {
                                 engine.setNextLogComment(logCommentField.text)
                             else
                                 engine.setSetting("LogComments", logCommentField.text)
+                            if (engine.setNextLogGrid)  // 1.0.302: locator editabile a mano
+                                engine.setNextLogGrid(logGridField.text)
                             engine.setNextLogClusterSpotEnabled(txPanel.logClusterSpotAvailable && txPanel.logClusterSpotChecked)
                             txPanel.logPromptAccepted = true
                             if (engine.confirmLogQso)
@@ -1781,18 +1805,43 @@ Item {
         ToolTip.visible: hovered
         ToolTip.delay: 800
         ToolTip.text: isDisabled
-                          ? qsTr("TX%1 disabled (right-click to re-enable)").arg(txNum)
-                          : qsTr("Click: send now\nRight-click: skip TX%1 in auto sequence\nLong-press: edit message").arg(txNum)
+                          ? qsTr("TX%1 disabilitato (clic destro → menu per riabilitare)").arg(txNum)
+                          : qsTr("Clic: invia ora\nClic destro: menu (Modifica / Salta TX%1)\nLong-press: modifica messaggio").arg(txNum)
 
-        // 1.0.130: right-click ora toggla skip; edit messaggio si attiva con long-press
+        // 1.0.302: clic destro apre il menu contestuale (Modifica messaggio + Salta TX),
+        // su richiesta tester. L'edit resta disponibile anche via long-press.
+        // Prima (1.0.130) il clic destro faceva solo skip diretto.
         TapHandler {
             acceptedButtons: Qt.RightButton
-            onTapped: if (bridge) bridge.setTxDisabled(txNum, !txButton.isDisabled)
+            onTapped: txButtonContextMenu.popup()
         }
         TapHandler {
             acceptedButtons: Qt.LeftButton
             longPressThreshold: 600
             onLongPressed: editRequested(txNum, message)
+        }
+        Menu {
+            id: txButtonContextMenu
+            MenuItem {
+                text: qsTr("Modifica messaggio TX%1").arg(txNum)
+                height: 32
+                onTriggered: editRequested(txNum, message)
+                contentItem: Text { text: parent.text; color: textPrimary; font.pixelSize: 12; leftPadding: 10; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : "transparent" }
+            }
+            MenuItem {
+                text: txButton.isDisabled ? qsTr("Riabilita TX%1").arg(txNum) : qsTr("Salta TX%1 (skip auto-seq)").arg(txNum)
+                height: 32
+                onTriggered: if (bridge) bridge.setTxDisabled(txNum, !txButton.isDisabled)
+                contentItem: Text { text: parent.text; color: textPrimary; font.pixelSize: 12; leftPadding: 10; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : "transparent" }
+            }
+            background: Rectangle {
+                implicitWidth: 230
+                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+                border.color: glassBorder
+                radius: 6
+            }
         }
     }
 }

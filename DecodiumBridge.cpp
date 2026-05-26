@@ -15253,6 +15253,15 @@ void DecodiumBridge::setNextLogComment(const QString& comment)
     setSetting(QStringLiteral("LogComments"), m_promptLogComment);
 }
 
+// 1.0.302 — locator editabile nel dialog di conferma log QSO. Sovrascrive il grid
+// dello snapshot prompt (m_promptLogGrid), che logQsoNow usa al commit quando
+// m_promptLogSnapshotValid. Permette di inserire/correggere il locator a mano
+// quando il partner non l'ha trasmesso (feedback tester 2026-05).
+void DecodiumBridge::setNextLogGrid(const QString& grid)
+{
+    m_promptLogGrid = grid.trimmed().toUpper();
+}
+
 void DecodiumBridge::clearNextLogClusterSpotOverride()
 {
     m_nextLogClusterSpotOverrideValid = false;

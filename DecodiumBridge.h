@@ -893,6 +893,7 @@ public:
     Q_INVOKABLE void disconnectDxCluster();
     Q_INVOKABLE void setNextLogClusterSpotEnabled(bool enabled);
     Q_INVOKABLE void setNextLogComment(const QString& comment);
+    Q_INVOKABLE void setNextLogGrid(const QString& grid);  // 1.0.302: locator editabile nel log QSO
     bool dxClusterConnected() const { return m_dxCluster && m_dxCluster->connected(); }
     QVariantList dxClusterSpots() const { return m_dxCluster ? m_dxCluster->spots() : QVariantList{}; }
     QString dxClusterHost() const { return m_dxCluster ? m_dxCluster->host() : QString{}; }
