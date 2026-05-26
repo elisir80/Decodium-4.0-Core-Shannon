@@ -1540,6 +1540,13 @@ private:
     bool isRecentAutoCqDuplicate(const QString& call,
                                  double freqHz = -1.0,
                                  const QString& mode = QString()) const;
+    bool isRecentAutoCqWorkedOrLoggedDuplicate(const QString& call,
+                                               double freqHz = -1.0,
+                                               const QString& mode = QString()) const;
+    void clearRecentAutoCqAbandoned(const QString& call,
+                                    double freqHz = -1.0,
+                                    const QString& mode = QString(),
+                                    const QString& reason = QString());
     void rememberRecentAutoCqAbandoned(const QString& call, double freqHz, const QString& mode);
     void rememberRecentAutoCqWorked(const QString& call, double freqHz, const QString& mode);
     void rememberCompletedAutoCqPartner(const QString& call, bool logged, const QString& reason);

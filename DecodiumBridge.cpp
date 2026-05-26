@@ -18780,6 +18780,59 @@ bool DecodiumBridge::isRecentAutoCqDuplicate(const QString& call, double freqHz,
     return isWithinRecentDuplicateWindow(loggedIt.value(), nowUtc);
 }
 
+bool DecodiumBridge::isRecentAutoCqWorkedOrLoggedDuplicate(const QString& call,
+                                                           double freqHz,
+                                                           const QString& mode) const
+{
+    QString const dedupeCall = Radio::base_callsign(call).trimmed().toUpper();
+    if (dedupeCall.isEmpty()) {
+        return false;
+    }
+
+    QString const dedupeBand = autoCqBandKeyForFrequency(freqHz).trimmed().toUpper();
+    QString const dedupeMode = (mode.isEmpty() ? m_mode : mode).trimmed().toUpper();
+    if (dedupeBand.isEmpty() || dedupeBand == QStringLiteral("--") || dedupeMode.isEmpty()) {
+        return false;
+    }
+
+    QString const dedupeKey = QStringLiteral("%1|%2|%3").arg(dedupeCall, dedupeBand, dedupeMode);
+    QDateTime const nowUtc = QDateTime::currentDateTimeUtc();
+
+    auto const workedIt = m_recentAutoCqWorkedUtcByKey.constFind(dedupeKey);
+    if (workedIt != m_recentAutoCqWorkedUtcByKey.constEnd()) {
+        return isWithinRecentDuplicateWindow(workedIt.value(), nowUtc);
+    }
+
+    auto const loggedIt = m_recentQsoLogUtcByKey.constFind(dedupeKey);
+    if (loggedIt == m_recentQsoLogUtcByKey.constEnd()) {
+        return false;
+    }
+
+    return isWithinRecentDuplicateWindow(loggedIt.value(), nowUtc);
+}
+
+void DecodiumBridge::clearRecentAutoCqAbandoned(const QString& call,
+                                                double freqHz,
+                                                const QString& mode,
+                                                const QString& reason)
+{
+    QString const dedupeCall = Radio::base_callsign(call).trimmed().toUpper();
+    QString const dedupeBand = autoCqBandKeyForFrequency(freqHz).trimmed().toUpper();
+    QString const dedupeMode = (mode.isEmpty() ? m_mode : mode).trimmed().toUpper();
+    if (dedupeCall.isEmpty() || dedupeBand.isEmpty() || dedupeBand == QStringLiteral("--") || dedupeMode.isEmpty()) {
+        return;
+    }
+
+    QString const dedupeKey = QStringLiteral("%1|%2|%3").arg(dedupeCall, dedupeBand, dedupeMode);
+    if (m_recentAutoCqAbandonedUtcByKey.remove(dedupeKey) <= 0) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("AutoCQ clear-abandoned: %1 (%2)")
+                  .arg(dedupeKey,
+                       reason.trimmed().isEmpty() ? QStringLiteral("live caller") : reason.trimmed()));
+}
+
 void DecodiumBridge::rememberRecentAutoCqAbandoned(const QString& call, double freqHz, const QString& mode)
 {
     QString const dedupeCall = Radio::base_callsign(call).trimmed().toUpper();
@@ -20910,6 +20963,14 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !messagePartnerBase.isEmpty()
         && messagePartnerBase != myBaseUpper
         && (is_73 || isRogerSignalReportToken(last_word));
+    bool const liveFt2AutoCqDirectedGrid =
+        m_autoCqRepeat
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && directedToMe
+        && !messagePartnerBase.isEmpty()
+        && messagePartnerBase != myBaseUpper
+        && isGridTokenStrict(last_word);
     QString const cooldownKey = !messagePartnerBase.isEmpty()
         ? messagePartnerBase
         : Radio::base_callsign(from).trimmed().toUpper();
@@ -20973,12 +21034,24 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !duplicateActiveBase.isEmpty()
         && messagePartnerBase == duplicateActiveBase;
     if (m_autoCqRepeat && !messagePartnerBase.isEmpty()
-        && !finalSignoffFromActivePartner
-        && isRecentAutoCqDuplicate(messagePartnerBase, m_frequency, m_mode)) {
-        bridgeLog(QStringLiteral("autoSeq: skip recently completed AutoCQ partner %1 msg=%2")
-                      .arg(messagePartnerBase, msg));
-        removeCallerFromQueue(messagePartnerBase);
-        return;
+        && !finalSignoffFromActivePartner) {
+        if (liveFt2AutoCqDirectedGrid) {
+            if (isRecentAutoCqWorkedOrLoggedDuplicate(messagePartnerBase, m_frequency, m_mode)) {
+                bridgeLog(QStringLiteral("autoSeq: skip recently worked/logged AutoCQ partner %1 msg=%2")
+                              .arg(messagePartnerBase, msg));
+                removeCallerFromQueue(messagePartnerBase);
+                return;
+            }
+            clearRecentAutoCqAbandoned(messagePartnerBase,
+                                       m_frequency,
+                                       m_mode,
+                                       QStringLiteral("live FT2 directed grid"));
+        } else if (isRecentAutoCqDuplicate(messagePartnerBase, m_frequency, m_mode)) {
+            bridgeLog(QStringLiteral("autoSeq: skip recently completed AutoCQ partner %1 msg=%2")
+                          .arg(messagePartnerBase, msg));
+            removeCallerFromQueue(messagePartnerBase);
+            return;
+        }
     }
 
     if (m_autoCqRepeat
@@ -21323,9 +21396,20 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             return;
         }
 
-        if (m_dxCall.trimmed().isEmpty() && isRecentAutoCqDuplicate(callerBase, m_frequency, m_mode)) {
-            bridgeLog("autoSeq: skip recent AutoCQ caller " + callerBase);
-            return;
+        if (m_dxCall.trimmed().isEmpty()) {
+            if (liveFt2AutoCqDirectedGrid) {
+                if (isRecentAutoCqWorkedOrLoggedDuplicate(callerBase, m_frequency, m_mode)) {
+                    bridgeLog("autoSeq: skip recently worked/logged AutoCQ caller " + callerBase);
+                    return;
+                }
+                clearRecentAutoCqAbandoned(callerBase,
+                                           m_frequency,
+                                           m_mode,
+                                           QStringLiteral("CQ-mode live FT2 directed grid"));
+            } else if (isRecentAutoCqDuplicate(callerBase, m_frequency, m_mode)) {
+                bridgeLog("autoSeq: skip recent AutoCQ caller " + callerBase);
+                return;
+            }
         }
 
         QString const previousDxBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
