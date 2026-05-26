@@ -37,6 +37,7 @@ Item {
         { index: 10, lambda: "15M",  name: "21 MHz" },
         { index: 11, lambda: "12M",  name: "24 MHz" },
         { index: 12, lambda: "10M",  name: "28 MHz" },
+        { index: 13, lambda: "8M",   name: "40 MHz" },
         { index: 14, lambda: "6M",   name: "50 MHz" }
     ]
 

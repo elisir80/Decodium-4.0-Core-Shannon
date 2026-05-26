@@ -120,24 +120,29 @@ void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
     }
     guard->disconnect();
     if (guard->state() == QAudio::StoppedState) {
+#if defined(Q_OS_MAC)
+      qInfo() << "TX SoundOutput CoreAudio sink left parked stopped after lifetime:" << reason;
+      return;
+#else
       guard->deleteLater();
       qInfo() << "TX SoundOutput sink deferred delete released:" << reason;
       return;
+#endif
     }
 #if defined(Q_OS_MAC)
     if (owner && owner->m_stream && owner->m_stream.data() != guard.data()) {
-      qInfo() << "TX SoundOutput CoreAudio parked sink cleanup deferred during active stream:"
+      qInfo() << "TX SoundOutput CoreAudio sink left parked during active stream:"
               << reason
               << "retired_state=" << audioStateName(guard->state())
               << "active_state=" << audioStateName(owner->m_stream->state());
-      owner->deleteRetiredStreamAfterCoreAudioCallbacks(guard.data(), reason, 750);
       return;
     }
 #endif
 
     // Il sink potrebbe non essere arrivato in StoppedState (es. underrun
-    // cronico o CoreAudio rimasto Idle). In quel caso forziamo stop() ora:
-    // la safe-window post-TX e' gia' passata e non c'e' uno stream TX attivo.
+    // cronico o CoreAudio rimasto Idle). Windows puo' forzare stop() dopo la
+    // safe-window; macOS/Qt 6.11 puo' invece invalidare QSocketNotifier se
+    // fermiamo o distruggiamo il sink differito.
 #if defined(Q_OS_WIN)
     QString const parkedState = audioStateName(guard->state());
     guard->stop();
@@ -149,9 +154,7 @@ void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
 #elif defined(Q_OS_MAC)
     QString const parkedState = audioStateName(guard->state());
     QString const parkedError = audioErrorName(guard->error());
-    guard->stop();
-    guard->deleteLater();
-    qInfo() << "TX SoundOutput CoreAudio sink parked stop+delete after lifetime:"
+    qInfo() << "TX SoundOutput CoreAudio sink left parked after lifetime:"
             << reason
             << "state=" << parkedState
             << "error=" << parkedError;

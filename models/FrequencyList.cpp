@@ -312,6 +312,8 @@ namespace
       {28124600, Modes::FST4W, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {28180000, Modes::FT4, IARURegions::ALL, "","", QDateTime(), QDateTime(), true},
 
+      {40680000, Modes::FT8, IARURegions::ALL, "","", QDateTime(), QDateTime(), true},
+
       {50200000, Modes::Echo, IARURegions::ALL, "","", QDateTime(), QDateTime(), false},
       {50211000, Modes::Q65, IARURegions::ALL, "EME","", QDateTime(), QDateTime(), false},
       {50275000, Modes::Q65, IARURegions::ALL, "","", QDateTime(), QDateTime(), true},

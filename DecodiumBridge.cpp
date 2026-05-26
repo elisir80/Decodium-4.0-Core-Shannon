@@ -348,6 +348,12 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
             if (sinkGuard) {
                 sinkGuard->disconnect();
                 if (sinkGuard->state() == QAudio::StoppedState) {
+#if defined(Q_OS_MAC)
+                    qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
+                    bridgeLog(QStringLiteral("TX CoreAudio sink left parked stopped after lifetime: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
+                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
+                    return;
+#else
                     sinkGuard->deleteLater();
                     if (bufferGuard) {
                         bufferGuard->deleteLater();
@@ -356,11 +362,13 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                     bridgeLog(QStringLiteral("TX audio sink deferred delete released: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
                     bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
                     return;
+#endif
                 }
-                // Dopo la safe-window forziamo stop+delete se il backend non
-                // ha gia' raggiunto StoppedState. Su macOS evita accumulo di
-                // CoreAudio sink parcheggiati che puo' far sparire il payload
-                // TX successivo; su Windows evita pressure su risorse WASAPI.
+                // Dopo la safe-window forziamo stop+delete solo sui backend
+                // dove e' stabile. Su macOS/Qt 6.11 il cleanup differito puo'
+                // toccare socket notifier CoreAudio da un QThread diverso
+                // (warning QSocketNotifier + crash), quindi il sink resta
+                // parcheggiato e muto finche' non viene reclamato a exit.
 #if defined(Q_OS_WIN)
                 QString const parkedState = audioStateToString(sinkGuard->state());
                 sinkGuard->stop();
@@ -377,17 +385,12 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 #elif defined(Q_OS_MAC)
                 QString const parkedState = audioStateToString(sinkGuard->state());
                 QString const parkedError = audioErrorToString(sinkGuard->error());
-                sinkGuard->stop();
-                sinkGuard->deleteLater();
-                if (bufferGuard) {
-                    bufferGuard->deleteLater();
-                }
                 qint64 const parkSpanMsForcedMac = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
-                bridgeLog(QStringLiteral("TX CoreAudio sink parked stop+delete after lifetime: reason=%1 state=%2 err=%3")
+                bridgeLog(QStringLiteral("TX CoreAudio sink left parked after lifetime: reason=%1 state=%2 err=%3")
                               .arg(reason)
                               .arg(parkedState)
                               .arg(parkedError));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_mac").arg(reason).arg(parkSpanMsForcedMac));
+                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
                 return;
 #else
                 bridgeLog(QStringLiteral("TX CoreAudio sink parked to avoid Qt stopAudioUnit crash: reason=%1 state=%2 err=%3")
@@ -5932,18 +5935,28 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     bridgeLog(QStringLiteral("DX Cluster auto-connect: waiting for Main.qml ready"));
 
 #if defined(Q_OS_MAC)
-    bool const legacyTxOverride =
-        qEnvironmentVariableIsSet("DECODIUM_MAC_LEGACY_TX_BACKEND");
-    bool const forceStandaloneUdp =
-        qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP") || !legacyTxOverride;
+    auto const envFlagEnabled = [](const char* name) {
+        if (!qEnvironmentVariableIsSet(name)) {
+            return false;
+        }
+        QByteArray const value = qgetenv(name).trimmed().toLower();
+        return value.isEmpty()
+            || value == "1"
+            || value == "true"
+            || value == "yes"
+            || value == "on";
+    };
+    bool const legacyTxOverride = envFlagEnabled("DECODIUM_MAC_LEGACY_TX_BACKEND");
+    bool const forceStandaloneUdp = envFlagEnabled("DECODIUM_FORCE_STANDALONE_UDP");
 
     if (forceStandaloneUdp) {
         m_useLegacyTxBackend = false;
-        bridgeLog(qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP")
-                  ? QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP")
-                  : QStringLiteral("Legacy TX backend disabled by macOS default standalone UDP mode"));
+        bridgeLog(QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP"));
     } else {
         m_useLegacyTxBackend = true;
+        bridgeLog(legacyTxOverride
+                  ? QStringLiteral("Legacy TX backend enabled by DECODIUM_MAC_LEGACY_TX_BACKEND")
+                  : QStringLiteral("Legacy TX backend enabled by macOS default"));
         // Su Mac, crea il legacy backend in modo differito per non bloccare l'avvio
         QTimer::singleShot(3000, this, [this]() {
             if (m_useLegacyTxBackend && !ensureLegacyBackendAvailable()) {
@@ -10623,6 +10636,11 @@ void DecodiumBridge::setDxCall(const QString& v) {
                                                nextBase.isEmpty() ? QStringLiteral("<none>") : nextBase));
             }
         }
+        if (previousBase != nextBase && m_ft2AutoCqAwaitingPartnerTx > 0) {
+            clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("dxCall changed %1->%2")
+                                                    .arg(previousBase.isEmpty() ? QStringLiteral("<none>") : previousBase,
+                                                         nextBase.isEmpty() ? QStringLiteral("<none>") : nextBase));
+        }
         if (!m_ft2PartnerMemoryEnabled && !m_partnerMemory.isEmpty()) {
             m_partnerMemory.clear();
         }
@@ -10854,6 +10872,15 @@ void DecodiumBridge::setTxEnabled(bool v)
     if (v) {
         scheduleTxAudioPrecompute(25);
         ensureSyncTxSchedulerActive(QStringLiteral("tx-enable"));
+        if (!usingLegacyBackendForTx()
+            && usesDeferredManualSyncTx()
+            && m_monitoring
+            && !m_transmitting
+            && !m_tuning
+            && shouldDeferManualSyncTxStart()) {
+            m_deferredManualSyncTx = true;
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("tx-enable"), -1, 0);
+        }
         if (!usingLegacyBackendForTx()) {
             QTimer::singleShot(0, this, [this]() {
                 if (m_shuttingDown || QCoreApplication::closingDown()
@@ -12202,6 +12229,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     }
 
     bool const wasTransmitting = m_transmitting || wasBridgeLegacyTx;
+    int const finishedTx = m_activeTxNumber;
     noteTxPlaybackFinished(reason, false);
 
     if (m_tuning) {
@@ -12216,6 +12244,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    bool const appliedDeferredAutoSeqAfterActiveTx =
+        wasTransmitting && applyPendingAutoSeqTxAfterCompletedTx(finishedTx);
+    if (wasTransmitting && !appliedDeferredAutoSeqAfterActiveTx) {
+        armFt2AutoCqOneShotAfterCompletedTx(finishedTx, reason);
+    }
 }
 
 // ===========================================================================
@@ -13219,61 +13252,35 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
 
-    if (wasTransmitting && m_pendingAutoSeqTxAfterActiveTx > 0) {
-        int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
-        QString const pendingPartnerBase = m_pendingAutoSeqPartnerBase;
-        QString const pendingMessage = m_pendingAutoSeqMessage;
-        QString const pendingMode = m_pendingAutoSeqMode;
-        m_pendingAutoSeqTxAfterActiveTx = 0;
-        m_pendingAutoSeqPartnerBase.clear();
-        m_pendingAutoSeqMessage.clear();
-        m_pendingAutoSeqMode.clear();
+    bool const appliedDeferredAutoSeqAfterActiveTx =
+        wasTransmitting && applyPendingAutoSeqTxAfterCompletedTx(finishedTx);
 
-        QString const activePartnerBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
-        QString staleReason;
-        if (!pendingMode.isEmpty()
-            && pendingMode != m_mode.trimmed().toUpper()) {
-            staleReason = QStringLiteral("mode changed %1->%2")
-                .arg(pendingMode, m_mode.trimmed().toUpper());
-        } else if (!pendingPartnerBase.isEmpty()
-                   && (activePartnerBase.isEmpty() || pendingPartnerBase != activePartnerBase)) {
-            staleReason = QStringLiteral("partner changed %1->%2")
-                .arg(pendingPartnerBase,
-                     activePartnerBase.isEmpty() ? QStringLiteral("<none>") : activePartnerBase);
-        } else if (!pendingMessage.isEmpty()
-                   && !activePartnerBase.isEmpty()
-                   && !messageContainsCallToken(pendingMessage, m_dxCall, activePartnerBase)) {
-            staleReason = QStringLiteral("pending message does not mention active partner");
-        }
+    // FT2 async manual QSO is edge-triggered by a double-click/map/cluster
+    // selection. Keeping txEnabled latched after the audio ends makes the timer
+    // retry the same TX step every FT2 slot. AutoCQ and queued callers keep the
+    // old retry behavior; pre-signoff manual QSO steps re-arm only when
+    // autoSequenceStep() receives a fresh partner decode and selects the next
+    // TX message. TX4/TX5 keep the existing signoff/autolog path.
+    if (wasTransmitting
+        && !error
+        && !appliedDeferredAutoSeqAfterActiveTx
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && !m_autoCqRepeat
+        && !m_multiAnswerMode
+        && m_txEnabled
+        && finishedTx >= 1
+        && finishedTx <= 3
+        && !m_dxCall.trimmed().isEmpty()) {
+        bridgeLog(QStringLiteral("FT2 manual one-shot: TX%1 completed, disarm until partner decode")
+                      .arg(finishedTx));
+        setTxEnabled(false);
+    }
 
-        if (!staleReason.isEmpty()) {
-            bridgeLog(QStringLiteral("auto-seq: discard stale deferred TX%1 after active TX%2 completed: %3 pendingMsg=[%4]")
-                          .arg(deferredTx)
-                          .arg(finishedTx)
-                          .arg(staleReason, pendingMessage));
-        } else if (deferredTx != m_currentTx) {
-            bridgeLog(QStringLiteral("auto-seq: applying deferred TX%1 after active TX%2 completed")
-                          .arg(deferredTx)
-                          .arg(finishedTx));
-            advanceQsoState(deferredTx);
-            m_txRetryCount = 0;
-            m_txWatchdogTicks = 0;
-            m_autoCQPeriodsMissed = 0;
-            if (!m_txEnabled) {
-                setTxEnabled(true);
-            }
-            updateAutoCqPartnerLock();
-        } else {
-            bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
-                          .arg(deferredTx));
-            m_txRetryCount = 0;
-            m_txWatchdogTicks = 0;
-            m_autoCQPeriodsMissed = 0;
-            if (!m_txEnabled) {
-                setTxEnabled(true);
-            }
-            updateAutoCqPartnerLock();
-        }
+    if (wasTransmitting
+        && !error
+        && !appliedDeferredAutoSeqAfterActiveTx) {
+        armFt2AutoCqOneShotAfterCompletedTx(finishedTx, reason);
     }
 
     if (wasTransmitting) {
@@ -14143,6 +14150,7 @@ void DecodiumBridge::sendTx(int n)
         m_deferredManualSyncTx = true;
         ensureSyncTxSchedulerActive(QStringLiteral("manual-sync-tx"));
         scheduleTxAudioPrecompute(25);
+        scheduleSyncTxAtNextValidSlot(QStringLiteral("manual-sync-tx"), -1, 0);
         bridgeLog(QStringLiteral("manualSyncTx: queued TX%1 for next valid slot (mode=%2 txPeriod=%3 transmitting=%4)")
                       .arg(n)
                       .arg(m_mode)
@@ -18675,6 +18683,7 @@ QString DecodiumBridge::autoCqBandKeyForFrequency(double freqHz) const
         { 21000000.0,  21450000.0, "15M"   },
         { 24890000.0,  24990000.0, "12M"   },
         { 28000000.0,  29700000.0, "10M"   },
+        { 40000000.0,  45000000.0, "8M"    },
         { 50000000.0,  54000000.0, "6M"    },
         { 70000000.0,  71000000.0, "4M"    },
         {144000000.0, 148000000.0, "2M"    },
@@ -18724,6 +18733,59 @@ bool DecodiumBridge::isRecentAutoCqDuplicate(const QString& call, double freqHz,
     }
 
     return isWithinRecentDuplicateWindow(loggedIt.value(), nowUtc);
+}
+
+bool DecodiumBridge::isRecentAutoCqWorkedOrLoggedDuplicate(const QString& call,
+                                                           double freqHz,
+                                                           const QString& mode) const
+{
+    QString const dedupeCall = Radio::base_callsign(call).trimmed().toUpper();
+    if (dedupeCall.isEmpty()) {
+        return false;
+    }
+
+    QString const dedupeBand = autoCqBandKeyForFrequency(freqHz).trimmed().toUpper();
+    QString const dedupeMode = (mode.isEmpty() ? m_mode : mode).trimmed().toUpper();
+    if (dedupeBand.isEmpty() || dedupeBand == QStringLiteral("--") || dedupeMode.isEmpty()) {
+        return false;
+    }
+
+    QString const dedupeKey = QStringLiteral("%1|%2|%3").arg(dedupeCall, dedupeBand, dedupeMode);
+    QDateTime const nowUtc = QDateTime::currentDateTimeUtc();
+
+    auto const workedIt = m_recentAutoCqWorkedUtcByKey.constFind(dedupeKey);
+    if (workedIt != m_recentAutoCqWorkedUtcByKey.constEnd()) {
+        return isWithinRecentDuplicateWindow(workedIt.value(), nowUtc);
+    }
+
+    auto const loggedIt = m_recentQsoLogUtcByKey.constFind(dedupeKey);
+    if (loggedIt == m_recentQsoLogUtcByKey.constEnd()) {
+        return false;
+    }
+
+    return isWithinRecentDuplicateWindow(loggedIt.value(), nowUtc);
+}
+
+void DecodiumBridge::clearRecentAutoCqAbandoned(const QString& call,
+                                                double freqHz,
+                                                const QString& mode,
+                                                const QString& reason)
+{
+    QString const dedupeCall = Radio::base_callsign(call).trimmed().toUpper();
+    QString const dedupeBand = autoCqBandKeyForFrequency(freqHz).trimmed().toUpper();
+    QString const dedupeMode = (mode.isEmpty() ? m_mode : mode).trimmed().toUpper();
+    if (dedupeCall.isEmpty() || dedupeBand.isEmpty() || dedupeBand == QStringLiteral("--") || dedupeMode.isEmpty()) {
+        return;
+    }
+
+    QString const dedupeKey = QStringLiteral("%1|%2|%3").arg(dedupeCall, dedupeBand, dedupeMode);
+    if (m_recentAutoCqAbandonedUtcByKey.remove(dedupeKey) <= 0) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("AutoCQ clear-abandoned: %1 (%2)")
+                  .arg(dedupeKey,
+                       reason.trimmed().isEmpty() ? QStringLiteral("live caller") : reason.trimmed()));
 }
 
 void DecodiumBridge::rememberRecentAutoCqAbandoned(const QString& call, double freqHz, const QString& mode)
@@ -19089,14 +19151,20 @@ bool DecodiumBridge::shouldPreserveDeferredAutoSeqTxForRearm(QString* staleReaso
     }
 
     int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
-    if (deferredTx != 3 && deferredTx != 4) {
+    bool const ft2AutoCqFirstReply =
+        deferredTx == 2
+        && m_autoCqRepeat
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled;
+    if (deferredTx != 3 && deferredTx != 4 && !ft2AutoCqFirstReply) {
         if (staleReason && deferredTx > 0) {
-            *staleReason = QStringLiteral("deferred TX%1 is not a report/RR73 step").arg(deferredTx);
+            *staleReason = QStringLiteral("deferred TX%1 is not a preserved FT2 AutoCQ/report/RR73 step")
+                               .arg(deferredTx);
         }
         return false;
     }
 
-    if (!m_ft2PartnerMemoryEnabled) {
+    if (!ft2AutoCqFirstReply && !m_ft2PartnerMemoryEnabled) {
         if (staleReason) {
             *staleReason = QStringLiteral("PartnerMemory disabled");
         }
@@ -19619,6 +19687,8 @@ void DecodiumBridge::clearDeferredManualSyncTx(const QString& reason)
         return;
     }
     m_deferredManualSyncTx = false;
+    m_syncTxRetryScheduled = false;
+    ++m_syncTxRetrySerial;
     bridgeLog(QStringLiteral("manualSyncTx: cleared (%1)").arg(reason));
 }
 
@@ -19672,10 +19742,7 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
     }
 
     scheduleTxAudioPrecompute(qMin<qint64>(delayMs, 250));
-    if (m_syncTxRetryScheduled) {
-        return;
-    }
-
+    quint64 const retrySerial = ++m_syncTxRetrySerial;
     m_syncTxRetryScheduled = true;
     QString const modeSnapshot = m_mode;
     bridgeLog(QStringLiteral("sync TX late guard: defer TX%1 (%2) mode=%3 elapsed=%4ms latest=%5ms delay=%6ms")
@@ -19684,7 +19751,10 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
                   .arg(elapsedMs)
                   .arg(latestStartMs)
                   .arg(delayMs));
-    QTimer::singleShot(delayMs, this, [this, reason, modeSnapshot]() {
+    QTimer::singleShot(delayMs, this, [this, reason, modeSnapshot, retrySerial]() {
+        if (retrySerial != m_syncTxRetrySerial) {
+            return;
+        }
         m_syncTxRetryScheduled = false;
         if (m_mode != modeSnapshot
             || !m_monitoring
@@ -19727,6 +19797,171 @@ void DecodiumBridge::clearAutoCqPartnerLock()
     m_autoCqLockedGrid.clear();
     m_autoCqLockedNtx = 6;
     m_autoCqLockedProgress = 1;
+    m_ft2AutoCqAwaitingPartnerTx = 0;
+    m_ft2AutoCqAwaitingPartnerBase.clear();
+    m_ft2AutoCqAwaitingPartnerDecodeIdentity.clear();
+    m_ft2AutoCqAwaitingPartnerSinceMs = 0;
+}
+
+bool DecodiumBridge::ft2AutoCqAwaitingPartnerDecode() const
+{
+    if (m_mode != QStringLiteral("FT2")
+        || !m_asyncTxEnabled
+        || !m_autoCqRepeat
+        || m_ft2AutoCqAwaitingPartnerTx <= 0
+        || m_pendingAutoSeqTxAfterActiveTx > 0) {
+        return false;
+    }
+    if (m_currentTx != m_ft2AutoCqAwaitingPartnerTx) {
+        return false;
+    }
+
+    QString activePartner = m_dxCall.trimmed();
+    if (activePartner.isEmpty()) {
+        activePartner = m_autoCqLockedCall.trimmed();
+    }
+    QString const activeBase = Radio::base_callsign(activePartner).trimmed().toUpper();
+    return !activeBase.isEmpty()
+        && activeBase == m_ft2AutoCqAwaitingPartnerBase;
+}
+
+void DecodiumBridge::armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason)
+{
+    if (m_mode != QStringLiteral("FT2")
+        || !m_asyncTxEnabled
+        || !m_autoCqRepeat
+        || txNum < 2
+        || txNum > 4) {
+        return;
+    }
+
+    QString activePartner = m_dxCall.trimmed();
+    if (activePartner.isEmpty()) {
+        activePartner = m_autoCqLockedCall.trimmed();
+    }
+    QString const activeBase = Radio::base_callsign(activePartner).trimmed().toUpper();
+    if (activeBase.isEmpty()) {
+        return;
+    }
+
+    bool const changed = m_ft2AutoCqAwaitingPartnerTx != txNum
+        || m_ft2AutoCqAwaitingPartnerBase != activeBase;
+    m_ft2AutoCqAwaitingPartnerTx = txNum;
+    m_ft2AutoCqAwaitingPartnerBase = activeBase;
+    m_ft2AutoCqAwaitingPartnerDecodeIdentity = m_lastAutoSeqDecodeIdentity;
+    m_ft2AutoCqAwaitingPartnerSinceMs = QDateTime::currentMSecsSinceEpoch();
+    if (changed) {
+        bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: TX%1 completed for %2, wait partner decode (%3)")
+                      .arg(txNum)
+                      .arg(activeBase, reason));
+    }
+}
+
+void DecodiumBridge::clearFt2AutoCqAwaitingPartnerDecode(const QString& reason)
+{
+    if (m_ft2AutoCqAwaitingPartnerTx <= 0
+        && m_ft2AutoCqAwaitingPartnerBase.isEmpty()) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: release wait TX%1 partner=%2 (%3)")
+                  .arg(m_ft2AutoCqAwaitingPartnerTx)
+                  .arg(m_ft2AutoCqAwaitingPartnerBase.isEmpty()
+                           ? QStringLiteral("<none>")
+                           : m_ft2AutoCqAwaitingPartnerBase,
+                       reason));
+    m_ft2AutoCqAwaitingPartnerTx = 0;
+    m_ft2AutoCqAwaitingPartnerBase.clear();
+    m_ft2AutoCqAwaitingPartnerDecodeIdentity.clear();
+    m_ft2AutoCqAwaitingPartnerSinceMs = 0;
+}
+
+void DecodiumBridge::armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason)
+{
+    if (m_mode != QStringLiteral("FT2")
+        || !m_asyncTxEnabled
+        || !m_autoCqRepeat
+        || m_multiAnswerMode
+        || txNum < 2
+        || txNum > 4
+        || m_dxCall.trimmed().isEmpty()) {
+        return;
+    }
+
+    armFt2AutoCqAwaitingPartnerDecode(txNum, reason);
+    if (!m_txEnabled) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: TX%1 internally disarmed until fresh partner decode")
+                  .arg(txNum));
+    m_txEnabled = false;
+    emit txEnabledChanged();
+    clearDeferredManualSyncTx(QStringLiteral("ft2-autocq-one-shot"));
+    if (usingLegacyBackendForTx() && legacyBackendAvailable()) {
+        m_legacyBackend->setTxEnabled(false);
+        scheduleLegacyStateRefreshBurst();
+    }
+}
+
+bool DecodiumBridge::applyPendingAutoSeqTxAfterCompletedTx(int finishedTx)
+{
+    if (m_pendingAutoSeqTxAfterActiveTx <= 0) {
+        return false;
+    }
+
+    int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
+    QString const pendingPartnerBase = m_pendingAutoSeqPartnerBase;
+    QString const pendingMessage = m_pendingAutoSeqMessage;
+    QString const pendingMode = m_pendingAutoSeqMode;
+    m_pendingAutoSeqTxAfterActiveTx = 0;
+    m_pendingAutoSeqPartnerBase.clear();
+    m_pendingAutoSeqMessage.clear();
+    m_pendingAutoSeqMode.clear();
+
+    QString const activePartnerBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
+    QString staleReason;
+    if (!pendingMode.isEmpty()
+        && pendingMode != m_mode.trimmed().toUpper()) {
+        staleReason = QStringLiteral("mode changed %1->%2")
+            .arg(pendingMode, m_mode.trimmed().toUpper());
+    } else if (!pendingPartnerBase.isEmpty()
+               && (activePartnerBase.isEmpty() || pendingPartnerBase != activePartnerBase)) {
+        staleReason = QStringLiteral("partner changed %1->%2")
+            .arg(pendingPartnerBase,
+                 activePartnerBase.isEmpty() ? QStringLiteral("<none>") : activePartnerBase);
+    } else if (!pendingMessage.isEmpty()
+               && !activePartnerBase.isEmpty()
+               && !messageContainsCallToken(pendingMessage, m_dxCall, activePartnerBase)) {
+        staleReason = QStringLiteral("pending message does not mention active partner");
+    }
+
+    if (!staleReason.isEmpty()) {
+        bridgeLog(QStringLiteral("auto-seq: discard stale deferred TX%1 after active TX%2 completed: %3 pendingMsg=[%4]")
+                      .arg(deferredTx)
+                      .arg(finishedTx)
+                      .arg(staleReason, pendingMessage));
+        return false;
+    }
+
+    if (deferredTx != m_currentTx) {
+        bridgeLog(QStringLiteral("auto-seq: applying deferred TX%1 after active TX%2 completed")
+                      .arg(deferredTx)
+                      .arg(finishedTx));
+        advanceQsoState(deferredTx);
+    } else {
+        bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
+                      .arg(deferredTx));
+    }
+
+    m_txRetryCount = 0;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    if (!m_txEnabled) {
+        setTxEnabled(true);
+    }
+    updateAutoCqPartnerLock();
+    return true;
 }
 
 void DecodiumBridge::updateAutoCqPartnerLock()
@@ -20140,13 +20375,18 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     auto inFlightReset = qScopeGuard([this]() { m_periodicTxInFlight = false; });
 
     if (m_manualTxHold || !m_monitoring || m_transmitting || m_tuning) return;
+    if (ft2AutoCqAwaitingPartnerDecode()) {
+        return;
+    }
     if (!m_txEnabled) {
         if (!m_autoCqRepeat) return;
         bridgeLog(QStringLiteral("checkAndStartPeriodicTx: AutoCQ active with TX disabled -> rearm TX"));
         setTxEnabled(true);
         if (!m_txEnabled) return;
     }
-    if (m_autoCqRepeat && m_dxCall.isEmpty() && m_currentTx != 6) {
+    if (m_autoCqRepeat
+        && !m_autoCqLockedCall.trimmed().isEmpty()
+        && (m_dxCall.isEmpty() || m_currentTx == 6 || m_qsoProgress <= 1)) {
         restoreAutoCqPartnerLock();
     }
 
@@ -20301,14 +20541,50 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         return;
     }
 
+    auto const autoCqHasActivePartner = [&]() {
+        return m_autoCqRepeat
+            && ((m_qsoProgress > 1 && m_qsoProgress < 6)
+                || !m_dxCall.trimmed().isEmpty()
+                || !m_autoCqLockedCall.trimmed().isEmpty()
+                || m_pendingAutoSeqTxAfterActiveTx > 0);
+    };
+    auto const autoCqHasPartnerIdentity = [&]() {
+        return m_autoCqRepeat
+            && (!m_dxCall.trimmed().isEmpty()
+                || !m_autoCqLockedCall.trimmed().isEmpty()
+                || m_pendingAutoSeqTxAfterActiveTx > 0);
+    };
+
+    if (m_currentTx == 6 && autoCqHasPartnerIdentity()) {
+        if (!applyDeferredAutoSeqTxForRearm(QStringLiteral("AutoCQ partner-active CQ suppress"))) {
+            restoreAutoCqPartnerLock();
+        }
+        if (m_currentTx == 6) {
+            bridgeLog(QStringLiteral("checkAndStartPeriodicTx: suppress AutoCQ CQ while partner active dx=%1 lock=%2 pending=%3")
+                          .arg(m_dxCall.trimmed().isEmpty() ? QStringLiteral("<none>") : m_dxCall.trimmed(),
+                               m_autoCqLockedCall.trimmed().isEmpty()
+                                   ? QStringLiteral("<none>")
+                                   : m_autoCqLockedCall.trimmed())
+                          .arg(m_pendingAutoSeqTxAfterActiveTx));
+            return;
+        }
+    }
+
+    if (ft2AutoCqAwaitingPartnerDecode()) {
+        return;
+    }
+
     // FT2 async mode:
-    // - Per risposte QSO (m_txEnabled, stazione DX nota): salta solo la
-    //   parita' periodo, ma mantiene il guard "late start" separato sotto.
-    //   Risposta rapida sì, avvio a fine slot no.
+    // - Per risposte QSO gia' avviate (TX2..TX5): salta solo la parita'
+    //   periodo, ma mantiene il guard "late start" separato sotto.
+    //   TX1 da doppio-click resta invece period-gated: se lo facciamo
+    //   entrare qui, il callback di fine audio FT2 riavvia TX1 a ogni slot
+    //   senza lasciare uno slot RX reale.
     // - Per AutoCQ (nessuna stazione DX): usa il controllo di periodo normale
     //   → evita loop CQ continuo (CQ ogni 3.75s senza pausa RX)
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
-                          m_txEnabled && !m_dxCall.isEmpty());
+                          m_txEnabled && !m_dxCall.isEmpty() &&
+                          m_currentTx >= 2 && m_currentTx <= 5);
     bool skipPeriodCheck = inQsoResponse;
 
     if (!skipPeriodCheck) {
@@ -20381,7 +20657,21 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         }
     }
 
-    QString const selectedTxPayload = buildCurrentTxMessage().trimmed();
+    QString selectedTxPayload = buildCurrentTxMessage().trimmed();
+    if (selectedTxPayload.isEmpty() && autoCqHasActivePartner()) {
+        restoreAutoCqPartnerLock();
+        regenerateTxMessages();
+        selectedTxPayload = buildCurrentTxMessage().trimmed();
+        if (selectedTxPayload.isEmpty()) {
+            bridgeLog(QStringLiteral("checkAndStartPeriodicTx: suppress AutoCQ CQ fallback while partner active tx=%1 progress=%2 lock=%3")
+                          .arg(m_currentTx)
+                          .arg(m_qsoProgress)
+                          .arg(m_autoCqLockedCall.trimmed().isEmpty()
+                                   ? QStringLiteral("<none>")
+                                   : m_autoCqLockedCall.trimmed()));
+            return;
+        }
+    }
     if (m_txEnabled && !selectedTxPayload.isEmpty()) {
         if (m_logAfterOwn73 && m_currentTx != 5 && !m_tx5.isEmpty()) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: own 73 pending -> force TX5 (current TX%1)")
@@ -20508,6 +20798,16 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         }
         startTx();
     } else if (m_autoCqRepeat && !m_tx6.isEmpty()) {
+        if (autoCqHasActivePartner()) {
+            bridgeLog(QStringLiteral("checkAndStartPeriodicTx: suppress AutoCQ CQ fallback while partner active tx=%1 progress=%2 dx=%3 lock=%4")
+                          .arg(m_currentTx)
+                          .arg(m_qsoProgress)
+                          .arg(m_dxCall.trimmed().isEmpty() ? QStringLiteral("<none>") : m_dxCall.trimmed(),
+                               m_autoCqLockedCall.trimmed().isEmpty()
+                                   ? QStringLiteral("<none>")
+                                   : m_autoCqLockedCall.trimmed()));
+            return;
+        }
         bridgeLog("checkAndStartPeriodicTx: AutoCQ async=" + QString::number(m_asyncTxEnabled));
         advanceQsoState(6);  // CQ → CALLING (0)
         // Aggiorna lastCqPidx per la guardia anti-consecutivi
@@ -20527,6 +20827,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     if (f.size() < 5) return;
 
     QString msg = f[4].trimmed();
+    QString const autoSeqDecodeIdentity =
+        QStringLiteral("%1|%2").arg(normalizeUtcDisplayToken(f.value(0)), msg);
     QString semanticRejectReason;
     if (!shouldAcceptDecodedMessage(msg, &semanticRejectReason)) {
         bridgeLog(QStringLiteral("autoSequenceStep: semantic reject (%1): %2")
@@ -20712,6 +21014,14 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !messagePartnerBase.isEmpty()
         && messagePartnerBase != myBaseUpper
         && (is_73 || isRogerSignalReportToken(last_word));
+    bool const liveFt2AutoCqDirectedGrid =
+        m_autoCqRepeat
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && directedToMe
+        && !messagePartnerBase.isEmpty()
+        && messagePartnerBase != myBaseUpper
+        && isGridTokenStrict(last_word);
     QString const cooldownKey = !messagePartnerBase.isEmpty()
         ? messagePartnerBase
         : Radio::base_callsign(from).trimmed().toUpper();
@@ -20775,12 +21085,24 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !duplicateActiveBase.isEmpty()
         && messagePartnerBase == duplicateActiveBase;
     if (m_autoCqRepeat && !messagePartnerBase.isEmpty()
-        && !finalSignoffFromActivePartner
-        && isRecentAutoCqDuplicate(messagePartnerBase, m_frequency, m_mode)) {
-        bridgeLog(QStringLiteral("autoSeq: skip recently completed AutoCQ partner %1 msg=%2")
-                      .arg(messagePartnerBase, msg));
-        removeCallerFromQueue(messagePartnerBase);
-        return;
+        && !finalSignoffFromActivePartner) {
+        if (liveFt2AutoCqDirectedGrid) {
+            if (isRecentAutoCqWorkedOrLoggedDuplicate(messagePartnerBase, m_frequency, m_mode)) {
+                bridgeLog(QStringLiteral("autoSeq: skip recently worked/logged AutoCQ partner %1 msg=%2")
+                              .arg(messagePartnerBase, msg));
+                removeCallerFromQueue(messagePartnerBase);
+                return;
+            }
+            clearRecentAutoCqAbandoned(messagePartnerBase,
+                                       m_frequency,
+                                       m_mode,
+                                       QStringLiteral("live FT2 directed grid"));
+        } else if (isRecentAutoCqDuplicate(messagePartnerBase, m_frequency, m_mode)) {
+            bridgeLog(QStringLiteral("autoSeq: skip recently completed AutoCQ partner %1 msg=%2")
+                          .arg(messagePartnerBase, msg));
+            removeCallerFromQueue(messagePartnerBase);
+            return;
+        }
     }
 
     if (m_autoCqRepeat
@@ -20791,8 +21113,10 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         restoreAutoCqPartnerLock();
     }
 
+    bool const autoCqCallingCq = m_autoCqRepeat && m_currentTx == 6;
     bool const autoCqExchangeInProgress =
         m_autoCqRepeat
+        && !autoCqCallingCq
         && !duplicateActiveBase.isEmpty()
         && (m_qsoProgress > 1
             || (m_txEnabled && m_currentTx >= 1 && m_currentTx <= 5)
@@ -21123,9 +21447,20 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             return;
         }
 
-        if (m_dxCall.trimmed().isEmpty() && isRecentAutoCqDuplicate(callerBase, m_frequency, m_mode)) {
-            bridgeLog("autoSeq: skip recent AutoCQ caller " + callerBase);
-            return;
+        if (m_dxCall.trimmed().isEmpty()) {
+            if (liveFt2AutoCqDirectedGrid) {
+                if (isRecentAutoCqWorkedOrLoggedDuplicate(callerBase, m_frequency, m_mode)) {
+                    bridgeLog("autoSeq: skip recently worked/logged AutoCQ caller " + callerBase);
+                    return;
+                }
+                clearRecentAutoCqAbandoned(callerBase,
+                                           m_frequency,
+                                           m_mode,
+                                           QStringLiteral("CQ-mode live FT2 directed grid"));
+            } else if (isRecentAutoCqDuplicate(callerBase, m_frequency, m_mode)) {
+                bridgeLog("autoSeq: skip recent AutoCQ caller " + callerBase);
+                return;
+            }
         }
 
         QString const previousDxBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
@@ -21158,10 +21493,27 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         m_lastCqPidx = -1;
         m_autoCQPeriodsMissed = 0;
         m_txWatchdogTicks = 0;
+        if (m_autoCqRepeat && cqModeAcceptedFreshCaller) {
+            clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("AutoCQ fresh caller"));
+        }
         setReportSent(QString::number(decodeSnrOrDefault(f.value(1), -10)));
 
         if (isGridTokenStrict(last)) {
             setDxGrid(last.toUpper());
+        }
+
+        if (m_autoCqRepeat
+            && m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && cqModeAcceptedFreshCaller
+            && isGridTokenStrict(last)) {
+            m_autoCqLockedCall = messagePartner.trimmed();
+            m_autoCqLockedGrid = last.toUpper();
+            m_autoCqLockedNtx = 2;
+            m_autoCqLockedProgress = 3;
+            m_asyncLastTxEndMs = 0;
+            bridgeLog(QStringLiteral("FT2 AutoCQ latch: caller=%1 grid=%2 -> TX2")
+                          .arg(callerBase, m_autoCqLockedGrid));
         }
 
         bridgeLog("autoSeq: start AutoCQ partner " + callerBase + " msg=" + msg);
@@ -21332,9 +21684,54 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                                msg));
             return;
         }
+        bool const sameTxFt2AutoCqWait =
+            m_autoCqRepeat
+            && m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && m_ft2AutoCqAwaitingPartnerTx > 0
+            && m_currentTx == m_ft2AutoCqAwaitingPartnerTx
+            && nextTx == m_currentTx
+            && !messagePartnerBase.isEmpty()
+            && messagePartnerBase == m_ft2AutoCqAwaitingPartnerBase;
+        if (sameTxFt2AutoCqWait && m_ft2AutoCqAwaitingPartnerSinceMs > 0) {
+            if (!m_ft2AutoCqAwaitingPartnerDecodeIdentity.isEmpty()
+                && autoSeqDecodeIdentity == m_ft2AutoCqAwaitingPartnerDecodeIdentity) {
+                bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: ignore replayed same-TX%1 decode from %2 identity=%3")
+                              .arg(nextTx)
+                              .arg(messagePartnerBase, autoSeqDecodeIdentity));
+                return;
+            }
+            int const decodeSeconds = secondsFromUtcDisplayToken(f.value(0));
+            if (decodeSeconds >= 0) {
+                int const waitStartSeconds =
+                    QDateTime::fromMSecsSinceEpoch(m_ft2AutoCqAwaitingPartnerSinceMs, Qt::UTC)
+                        .time()
+                        .msecsSinceStartOfDay() / 1000;
+                int const afterWaitSeconds = signedUtcSecondDelta(waitStartSeconds, decodeSeconds);
+                if (afterWaitSeconds < -2) {
+                    bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: ignore stale same-TX%1 decode from %2 time=%3 waitDelta=%4s msg=%5")
+                                  .arg(nextTx)
+                                  .arg(messagePartnerBase,
+                                       f.value(0),
+                                       QString::number(afterWaitSeconds),
+                                       msg));
+                    return;
+                }
+            }
+        }
         // Deduplicazione: se stiamo già trasmettendo o abbiamo già impostato
         // lo stesso TX step → non avanzare di nuovo (evita loop in FT2 async)
         if (nextTx == m_currentTx && (m_transmitting || m_txEnabled)) {
+            if (m_autoCqRepeat
+                && m_mode == QStringLiteral("FT2")
+                && m_asyncTxEnabled
+                && !messagePartnerBase.isEmpty()
+                && messagePartnerBase == activeBaseForNextTx) {
+                if (sameTxFt2AutoCqWait) {
+                    m_lastAutoSeqDecodeIdentity = autoSeqDecodeIdentity;
+                    clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("fresh partner same-TX%1 retry").arg(nextTx));
+                }
+            }
             m_txRetryCount = 0;
             m_txWatchdogTicks = 0;
             m_autoCQPeriodsMissed = 0;
@@ -21360,6 +21757,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             && (isTimeSyncDecodeMode(m_mode)
                 || (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled));
         if (deferAutoSeqUntilTxComplete) {
+            m_lastAutoSeqDecodeIdentity = autoSeqDecodeIdentity;
+            clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("auto-seq defer TX%1").arg(nextTx));
             int const pendingRank = autoSeqTxRank(m_pendingAutoSeqTxAfterActiveTx);
             int const nextRank = autoSeqTxRank(nextTx);
             if (m_pendingAutoSeqTxAfterActiveTx <= 0 || nextRank >= pendingRank) {
@@ -21367,6 +21766,17 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                 m_pendingAutoSeqPartnerBase = activeBaseForNextTx;
                 m_pendingAutoSeqMessage = txMessage(nextTx).trimmed();
                 m_pendingAutoSeqMode = m_mode.trimmed().toUpper();
+            }
+            if (m_autoCqRepeat
+                && nextTx >= 1 && nextTx <= 5
+                && !m_dxCall.trimmed().isEmpty()) {
+                m_autoCqLockedCall = m_dxCall.trimmed();
+                m_autoCqLockedGrid = m_dxGrid.trimmed();
+                m_autoCqLockedNtx = nextTx;
+                m_autoCqLockedProgress = qMax(2, m_qsoProgress);
+                if (nextTx == 2) {
+                    m_autoCqLockedProgress = qMax(3, m_autoCqLockedProgress);
+                }
             }
             if (!m_txEnabled) {
                 setTxEnabled(true);
@@ -21397,6 +21807,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             return;
         }
         // Avanza stato QSO
+        m_lastAutoSeqDecodeIdentity = autoSeqDecodeIdentity;
+        clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("auto-seq TX%1").arg(nextTx));
         advanceQsoState(nextTx);
         // Resetta guard FT2: risposta ricevuta → ritrasmetti subito
         m_asyncLastTxEndMs = 0;
@@ -30459,20 +30871,12 @@ void DecodiumBridge::verifyOtp(const QString& callsign, const QString& code, int
 // ============================================================
 
 static QString bandFromFreqHz(double hz) {
-    double mhz = hz / 1e6;
-    if      (mhz <  2.0)  return "160M";
-    else if (mhz <  4.0)  return "80M";
-    else if (mhz <  6.0)  return "60M";
-    else if (mhz <  8.0)  return "40M";
-    else if (mhz < 11.0)  return "30M";
-    else if (mhz < 15.0)  return "20M";
-    else if (mhz < 19.0)  return "17M";
-    else if (mhz < 22.0)  return "15M";
-    else if (mhz < 25.0)  return "12M";
-    else if (mhz < 30.0)  return "10M";
-    else if (mhz < 52.0)  return "6M";
-    else if (mhz < 150.0) return "2M";
-    else                  return "70CM";
+    if (hz <= 0.0 || hz > static_cast<double>(std::numeric_limits<Radio::Frequency>::max())) {
+        return "OOB";
+    }
+    Bands bands;
+    QString const band = bands.find(static_cast<Radio::Frequency>(std::llround(hz)));
+    return band.isEmpty() ? QStringLiteral("OOB") : band.toUpper();
 }
 
 static QString bridgeAdifField(const QString& tag, const QString& value)

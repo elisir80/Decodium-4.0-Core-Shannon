@@ -52,6 +52,10 @@ add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
 
+add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../DecodiumDxCluster.cpp)
+target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
+add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)
+
 add_executable (test_ftx_weak_decode test_ftx_weak_decode.cpp)
 target_link_libraries (test_ftx_weak_decode wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ftx_weak_decode COMMAND $<TARGET_FILE:test_ftx_weak_decode>)

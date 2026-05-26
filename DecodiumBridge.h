@@ -1540,6 +1540,13 @@ private:
     bool isRecentAutoCqDuplicate(const QString& call,
                                  double freqHz = -1.0,
                                  const QString& mode = QString()) const;
+    bool isRecentAutoCqWorkedOrLoggedDuplicate(const QString& call,
+                                               double freqHz = -1.0,
+                                               const QString& mode = QString()) const;
+    void clearRecentAutoCqAbandoned(const QString& call,
+                                    double freqHz = -1.0,
+                                    const QString& mode = QString(),
+                                    const QString& reason = QString());
     void rememberRecentAutoCqAbandoned(const QString& call, double freqHz, const QString& mode);
     void rememberRecentAutoCqWorked(const QString& call, double freqHz, const QString& mode);
     void rememberCompletedAutoCqPartner(const QString& call, bool logged, const QString& reason);
@@ -1600,6 +1607,11 @@ private:
                                        int latestStartMs = -1);
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
+    bool ft2AutoCqAwaitingPartnerDecode() const;
+    void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
+    void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
+    void armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason);
+    bool applyPendingAutoSeqTxAfterCompletedTx(int finishedTx);
     void updateAutoCqPartnerLock();
     void restoreAutoCqPartnerLock();
     bool enqueueCallerInternal(const QString& call,
@@ -1751,6 +1763,7 @@ private:
     // callback resetta a false prima di entrare nel body.
     bool m_periodicTxCheckScheduled {false};
     bool m_syncTxRetryScheduled {false};
+    quint64 m_syncTxRetrySerial {0};
     // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
     // a true a entry function, false via qScopeGuard al return. Copre i 11
     // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo
@@ -2220,6 +2233,11 @@ private:
     QString m_autoCqLockedGrid;
     int     m_autoCqLockedNtx {6};
     int     m_autoCqLockedProgress {0};
+    int     m_ft2AutoCqAwaitingPartnerTx {0};
+    QString m_ft2AutoCqAwaitingPartnerBase;
+    QString m_ft2AutoCqAwaitingPartnerDecodeIdentity;
+    qint64  m_ft2AutoCqAwaitingPartnerSinceMs {0};
+    QString m_lastAutoSeqDecodeIdentity;
     QHash<QString, QDateTime> m_recentAutoCqAbandonedUtcByKey;
     QHash<QString, QDateTime> m_recentAutoCqWorkedUtcByKey;
     QHash<QString, QDateTime> m_recentQsoLogUtcByKey;
