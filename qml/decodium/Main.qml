@@ -829,6 +829,20 @@ ApplicationWindow {
     property bool asyncIconVisible:           settingBool("uiAsyncIconVisible", true)
     property bool liveMapPanelVisible:        settingBool("WorldMapDisplayed", true)
     property bool decoSyncMonitorVisible:     settingBool("uiDecoSyncMonitorVisible", false)
+
+    // === Visibilità pulsanti UI (tab "Pulsanti UI" in Settings) — default tutti visibili ===
+    property bool uiBtnMonitorVisible:        settingBool("uiBtnMonitorVisible", true)
+    property bool uiBtnSetupVisible:          settingBool("uiBtnSetupVisible", true)
+    property bool uiBtnRecVisible:            settingBool("uiBtnRecVisible", true)
+    property bool uiBtnWavVisible:            settingBool("uiBtnWavVisible", true)
+    property bool uiBtnLogVisible:            settingBool("uiBtnLogVisible", true)
+    property bool uiBtnMacroVisible:          settingBool("uiBtnMacroVisible", true)
+    property bool uiBtnAstroVisible:          settingBool("uiBtnAstroVisible", true)
+    property bool uiBtnCatVisible:            settingBool("uiBtnCatVisible", true)
+    property bool uiBtnFooterResetVisible:    settingBool("uiBtnFooterResetVisible", true)
+    property bool uiBtnFooterHistoryVisible:  settingBool("uiBtnFooterHistoryVisible", true)
+    property bool uiBtnFooterDxcVisible:      settingBool("uiBtnFooterDxcVisible", true)
+
     property string uiLanguage: normalizeUiLanguage(String(bridge.getSetting("UILanguage", "en") || "en"))
     readonly property var uiLanguageOptions: [
         { code: "en", name: "English" },
@@ -1144,6 +1158,30 @@ ApplicationWindow {
                 mainWindow.asyncIconVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiDecoSyncMonitorVisible")
                 mainWindow.decoSyncMonitorVisible = mainWindow.coerceBool(value, false)
+            else if (key === "uiBtnMonitorVisible")
+                mainWindow.uiBtnMonitorVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnSetupVisible")
+                mainWindow.uiBtnSetupVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnRecVisible")
+                mainWindow.uiBtnRecVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnWavVisible")
+                mainWindow.uiBtnWavVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnLogVisible")
+                mainWindow.uiBtnLogVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnMacroVisible")
+                mainWindow.uiBtnMacroVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnAstroVisible")
+                mainWindow.uiBtnAstroVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnCatVisible")
+                mainWindow.uiBtnCatVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnFooterResetVisible")
+                mainWindow.uiBtnFooterResetVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnFooterHistoryVisible")
+                mainWindow.uiBtnFooterHistoryVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiBtnFooterDxcVisible")
+                mainWindow.uiBtnFooterDxcVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiWorldClockVisible")
+                worldClock.showWorldClock = mainWindow.coerceBool(value, true)
             else if (key === "CompactFullSpectrum")
                 mainWindow.compactFullSpectrum = mainWindow.coerceBool(value, false)
             else if (key === "CompactSignalRx")
@@ -2699,6 +2737,7 @@ ApplicationWindow {
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 16
+                                visible: mainWindow.uiBtnMonitorVisible
                                 color: bridge.monitoring ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
                                 border.color: bridge.monitoring ? accentGreen : glassBorder
                                 border.width: 1
@@ -2769,6 +2808,7 @@ ApplicationWindow {
                         // Settings
                         Rectangle {
                             id: settingsButton
+                            visible: mainWindow.uiBtnSetupVisible
                             Layout.preferredWidth: 50
                             Layout.fillHeight: true
                             radius: 3
@@ -2804,6 +2844,7 @@ ApplicationWindow {
 
                         // REC
                         Rectangle {
+                            visible: mainWindow.uiBtnRecVisible
                             Layout.preferredWidth: 50
                             Layout.fillHeight: true
                             radius: 3
@@ -2844,6 +2885,7 @@ ApplicationWindow {
 
                         // Open WAV for decode
                         Rectangle {
+                            visible: mainWindow.uiBtnWavVisible
                             Layout.preferredWidth: 45
                             Layout.fillHeight: true
                             radius: 3
@@ -2888,6 +2930,7 @@ ApplicationWindow {
 
                         // Log
                         Rectangle {
+                            visible: mainWindow.uiBtnLogVisible
                             Layout.preferredWidth: 45
                             Layout.fillHeight: true
                             radius: 3
@@ -2923,6 +2966,7 @@ ApplicationWindow {
 
                         // Macro
                         Rectangle {
+                            visible: mainWindow.uiBtnMacroVisible
                             Layout.preferredWidth: 50
                             Layout.fillHeight: true
                             radius: 3
@@ -2964,6 +3008,7 @@ ApplicationWindow {
 
                         // Astro
                         Rectangle {
+                            visible: mainWindow.uiBtnAstroVisible
                             Layout.preferredWidth: 48
                             Layout.fillHeight: true
                             radius: 3
@@ -3002,6 +3047,7 @@ ApplicationWindow {
 
                         // CAT - native HvRigControl
                         Rectangle {
+                            visible: mainWindow.uiBtnCatVisible
                             Layout.preferredWidth: 48
                             Layout.fillHeight: true
                             radius: 3

@@ -20,7 +20,7 @@ Dialog {
     property bool warmupInProgress: false
     property int currentTab: {
         var savedTab = Number(bridge.getSetting("uiSettingsCurrentTab", 0))
-        return isFinite(savedTab) ? Math.max(0, Math.min(11, Math.floor(savedTab))) : 0
+        return isFinite(savedTab) ? Math.max(0, Math.min(12, Math.floor(savedTab))) : 0
     }
     readonly property int labelWidth: 140
     readonly property int fieldMinWidth: 300
@@ -860,7 +860,7 @@ Dialog {
 
     function openTab(index) {
         var tab = Number(index)
-        currentTab = isFinite(tab) ? Math.max(0, Math.min(11, Math.floor(tab))) : 0
+        currentTab = isFinite(tab) ? Math.max(0, Math.min(12, Math.floor(tab))) : 0
         open()
     }
 
@@ -1396,7 +1396,7 @@ Dialog {
                     spacing: 2
 
                     Repeater {
-                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters")]
+                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("Pulsanti UI")]
                         delegate: Rectangle {
                             width: parent.width; height: 36; radius: 6
                             color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
@@ -6408,6 +6408,85 @@ Dialog {
                         }
 
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+                    }
+                }
+
+                // ═══════════ TAB 12 — PULSANTI UI ═══════════
+                ScrollView {
+                    clip: true
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                    GridLayout {
+                        id: uiButtonsGrid
+                        width: parent.width - 20
+                        columns: 2; columnSpacing: 28; rowSpacing: 8
+                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+
+                        readonly property var toolbarButtons: [
+                            { label: qsTr("Monitor (MON / STOP)"),  key: "uiBtnMonitorVisible" },
+                            { label: qsTr("Setup (⚙)"),         key: "uiBtnSetupVisible" },
+                            { label: "REC",                          key: "uiBtnRecVisible" },
+                            { label: "WAV",                          key: "uiBtnWavVisible" },
+                            { label: "Log",                          key: "uiBtnLogVisible" },
+                            { label: "Macro",                        key: "uiBtnMacroVisible" },
+                            { label: "Astro",                        key: "uiBtnAstroVisible" },
+                            { label: "CAT",                          key: "uiBtnCatVisible" },
+                            { label: qsTr("Async FT2 (A)"),          key: "uiAsyncIconVisible" },
+                            { label: "PSK Reporter",                 key: "uiPskReporterToolbarVisible" },
+                            { label: qsTr("DX Cluster (toolbar)"),   key: "uiDxClusterToolbarVisible" },
+                            { label: qsTr("Orologio mondiale"),      key: "uiWorldClockVisible" }
+                        ]
+                        readonly property var footerButtons: [
+                            { label: qsTr("Layout (reset finestre)"),       key: "uiBtnFooterResetVisible" },
+                            { label: qsTr("History (storico decodifiche)"), key: "uiBtnFooterHistoryVisible" },
+                            { label: qsTr("DX Cluster (footer)"),           key: "uiBtnFooterDxcVisible" }
+                        ]
+
+                        Text {
+                            text: qsTr("Mostra o nascondi i pulsanti dell'interfaccia a piacere dell'operatore. Le modifiche sono immediate e salvate automaticamente.")
+                            color: textSecondary; font.pixelSize: 12; wrapMode: Text.WordWrap
+                            Layout.columnSpan: 2; Layout.fillWidth: true; Layout.bottomMargin: 4
+                        }
+
+                        // ── Toolbar in alto ──
+                        Text { text: qsTr("TOOLBAR IN ALTO"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 4 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Repeater {
+                            model: uiButtonsGrid.toolbarButtons
+                            delegate: RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+                                Text { text: modelData.label; color: textPrimary; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                CheckBox {
+                                    checked: settingsDialog.boolSetting(modelData.key, true)
+                                    onToggled: settingsDialog.setBoolSettingIfChanged(modelData.key, checked, true)
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                }
+                            }
+                        }
+
+                        // ── Barra in basso (footer) ──
+                        Text { text: qsTr("BARRA IN BASSO (FOOTER)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 14 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Repeater {
+                            model: uiButtonsGrid.footerButtons
+                            delegate: RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+                                Text { text: modelData.label; color: textPrimary; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                CheckBox {
+                                    checked: settingsDialog.boolSetting(modelData.key, true)
+                                    onToggled: settingsDialog.setBoolSettingIfChanged(modelData.key, checked, true)
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                }
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 2; Layout.fillHeight: true }
                     }
                 }
 

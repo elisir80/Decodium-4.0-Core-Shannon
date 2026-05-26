@@ -436,6 +436,7 @@ Rectangle {
 
         Button {
             id: footerResetLayoutButton
+            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterResetVisible
             Layout.preferredWidth: narrowFooter ? 88 : (compactFooter ? 108 : 150)
             Layout.preferredHeight: footerButtonHeight
             implicitWidth: Layout.preferredWidth
@@ -475,6 +476,7 @@ Rectangle {
 
         Button {
             id: footerHistoryButton
+            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterHistoryVisible
             Layout.preferredWidth: narrowFooter ? 92 : (compactFooter ? 112 : 150)
             Layout.preferredHeight: footerButtonHeight
             implicitWidth: Layout.preferredWidth
@@ -519,6 +521,7 @@ Rectangle {
         // un modo "footer" per riaprirla. Verde acceso quando il pannello e' visibile.
         Button {
             id: footerDxClusterButton
+            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterDxcVisible
             Layout.preferredWidth: showFooterDxText ? (compactFooter ? 96 : 110) : 38
             Layout.preferredHeight: footerButtonHeight
             implicitWidth: Layout.preferredWidth
