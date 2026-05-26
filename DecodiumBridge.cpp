@@ -348,6 +348,12 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
             if (sinkGuard) {
                 sinkGuard->disconnect();
                 if (sinkGuard->state() == QAudio::StoppedState) {
+#if defined(Q_OS_MAC)
+                    qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
+                    bridgeLog(QStringLiteral("TX CoreAudio sink left parked stopped after lifetime: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
+                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
+                    return;
+#else
                     sinkGuard->deleteLater();
                     if (bufferGuard) {
                         bufferGuard->deleteLater();
@@ -356,11 +362,13 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                     bridgeLog(QStringLiteral("TX audio sink deferred delete released: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
                     bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
                     return;
+#endif
                 }
-                // Dopo la safe-window forziamo stop+delete se il backend non
-                // ha gia' raggiunto StoppedState. Su macOS evita accumulo di
-                // CoreAudio sink parcheggiati che puo' far sparire il payload
-                // TX successivo; su Windows evita pressure su risorse WASAPI.
+                // Dopo la safe-window forziamo stop+delete solo sui backend
+                // dove e' stabile. Su macOS/Qt 6.11 il cleanup differito puo'
+                // toccare socket notifier CoreAudio da un QThread diverso
+                // (warning QSocketNotifier + crash), quindi il sink resta
+                // parcheggiato e muto finche' non viene reclamato a exit.
 #if defined(Q_OS_WIN)
                 QString const parkedState = audioStateToString(sinkGuard->state());
                 sinkGuard->stop();
@@ -377,17 +385,12 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 #elif defined(Q_OS_MAC)
                 QString const parkedState = audioStateToString(sinkGuard->state());
                 QString const parkedError = audioErrorToString(sinkGuard->error());
-                sinkGuard->stop();
-                sinkGuard->deleteLater();
-                if (bufferGuard) {
-                    bufferGuard->deleteLater();
-                }
                 qint64 const parkSpanMsForcedMac = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
-                bridgeLog(QStringLiteral("TX CoreAudio sink parked stop+delete after lifetime: reason=%1 state=%2 err=%3")
+                bridgeLog(QStringLiteral("TX CoreAudio sink left parked after lifetime: reason=%1 state=%2 err=%3")
                               .arg(reason)
                               .arg(parkedState)
                               .arg(parkedError));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_mac").arg(reason).arg(parkSpanMsForcedMac));
+                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
                 return;
 #else
                 bridgeLog(QStringLiteral("TX CoreAudio sink parked to avoid Qt stopAudioUnit crash: reason=%1 state=%2 err=%3")
