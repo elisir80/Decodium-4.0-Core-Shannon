@@ -2795,6 +2795,14 @@ Dialog {
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
 
+                                // ── completa la riga corrente prima dell'header FT2 ──
+                                Item { Layout.preferredWidth: autoSequenceGrid.labelWidth; Layout.preferredHeight: controlHeight }
+                                Item { Layout.preferredWidth: autoSequenceGrid.checkWidth; Layout.preferredHeight: controlHeight }
+
+                                // ══════════ FT2 UTILITY ══════════
+                                Text { text: qsTr("FT2 UTILITY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                                Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
                                 // anti-QSB: ghost filter rilassato, retry cap esteso SNR-
                                 // adattivo, same-step wait piu' permissivo per partner

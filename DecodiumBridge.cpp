@@ -4594,7 +4594,7 @@ void DecodiumBridge::setFt2Conservative(bool v)
 {
     if (m_ft2Conservative == v) return;
     m_ft2Conservative = v;
-    QSettings settings;
+    QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2Conservative"), v);
     emit ft2ConservativeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Conservative mode %1").arg(v ? "ON" : "OFF"));
@@ -4605,7 +4605,7 @@ void DecodiumBridge::setFt2FullDecodeInAutoCq(bool v)
 {
     if (m_ft2FullDecodeInAutoCq == v) return;
     m_ft2FullDecodeInAutoCq = v;
-    QSettings settings;
+    QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2FullDecodeInAutoCq"), v);
     emit ft2FullDecodeInAutoCqChanged();
     bridgeLog(QStringLiteral("[FT2WS] Full decode in AutoCQ %1").arg(v ? "ON" : "OFF"));
@@ -4615,7 +4615,7 @@ void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
 {
     if (m_ft2QuickGiveUpStrong == v) return;
     m_ft2QuickGiveUpStrong = v;
-    QSettings settings;
+    QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2QuickGiveUpStrong"), v);
     emit ft2QuickGiveUpStrongChanged();
     bridgeLog(QStringLiteral("[FT2WS] Quick give-up strong partner %1").arg(v ? "ON" : "OFF"));
@@ -4625,7 +4625,7 @@ void DecodiumBridge::setFt2AdaptiveDecode(bool v)
 {
     if (m_ft2AdaptiveDecode == v) return;
     m_ft2AdaptiveDecode = v;
-    QSettings settings;
+    QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2AdaptiveDecode"), v);
     emit ft2AdaptiveDecodeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Adaptive decode %1").arg(v ? "ON" : "OFF"));
@@ -4635,7 +4635,7 @@ void DecodiumBridge::setFt2ApHashCache(bool v)
 {
     if (m_ft2ApHashCache == v) return;
     m_ft2ApHashCache = v;
-    QSettings settings;
+    QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2ApHashCache"), v);
     emit ft2ApHashCacheChanged();
     bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Fase 0: seed+hit-rate)").arg(v ? "ON" : "OFF"));
@@ -4779,7 +4779,7 @@ void DecodiumBridge::setFt2PartnerMemoryEnabled(bool v)
 {
     if (m_ft2PartnerMemoryEnabled == v) return;
     m_ft2PartnerMemoryEnabled = v;
-    QSettings().setValue(QStringLiteral("Ft2PartnerMemoryEnabled"), v);
+    QSettings("Decodium", "Decodium3").setValue(QStringLiteral("Ft2PartnerMemoryEnabled"), v);
     if (!v) {
         m_partnerMemory.clear();  // se disattivo, svuota cache
         clearPendingAutoSeqTx(QStringLiteral("PartnerMemory OFF"));
@@ -4821,7 +4821,7 @@ void DecodiumBridge::setFt2Tx2ResendOnStall(bool v)
 {
     if (m_ft2Tx2ResendOnStall == v) return;
     m_ft2Tx2ResendOnStall = v;
-    QSettings().setValue(QStringLiteral("Ft2Tx2ResendOnStall"), v);
+    QSettings("Decodium", "Decodium3").setValue(QStringLiteral("Ft2Tx2ResendOnStall"), v);
     emit ft2Tx2ResendOnStallChanged();
     bridgeLog(QStringLiteral("[FT2WS-G] TX2ResendOnStall %1").arg(v ? "ON" : "OFF"));
 }
@@ -10998,7 +10998,7 @@ void DecodiumBridge::setTargetCallSign(const QString& v)
     if (m_targetCallSign != cleaned) {
         m_targetCallSign = cleaned;
         emit targetCallSignChanged();
-        QSettings().setValue(QStringLiteral("CallFeature/TargetCallSign"), m_targetCallSign);
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/TargetCallSign"), m_targetCallSign);
     }
 }
 
@@ -11008,7 +11008,7 @@ void DecodiumBridge::setTargetCallMaxRetries(int v)
     if (m_targetCallMaxRetries != v) {
         m_targetCallMaxRetries = v;
         emit targetCallMaxRetriesChanged();
-        QSettings().setValue(QStringLiteral("CallFeature/MaxRetries"), v);
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/MaxRetries"), v);
     }
 }
 
@@ -11018,7 +11018,7 @@ void DecodiumBridge::setTargetCallTimeoutS(int v)
     if (m_targetCallTimeoutS != v) {
         m_targetCallTimeoutS = v;
         emit targetCallTimeoutSChanged();
-        QSettings().setValue(QStringLiteral("CallFeature/TimeoutS"), v);
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/TimeoutS"), v);
     }
 }
 
@@ -11028,7 +11028,7 @@ void DecodiumBridge::setTargetCallPeriod(int v)
     if (m_targetCallPeriod != v) {
         m_targetCallPeriod = v;
         emit targetCallPeriodChanged();
-        QSettings().setValue(QStringLiteral("CallFeature/Period"), v);
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/Period"), v);
     }
 }
 
@@ -11038,7 +11038,7 @@ void DecodiumBridge::setTargetCallPauseS(int v)
     if (m_targetCallPauseS != v) {
         m_targetCallPauseS = v;
         emit targetCallPauseSChanged();
-        QSettings().setValue(QStringLiteral("CallFeature/PauseS"), v);
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/PauseS"), v);
     }
 }
 
