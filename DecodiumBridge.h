@@ -392,6 +392,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2Conservative READ ft2Conservative WRITE setFt2Conservative NOTIFY ft2ConservativeChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
+    Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
@@ -1255,6 +1256,7 @@ signals:
     void asyncTxEnabledChanged();
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
+    void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2ApHashCacheChanged();         // 1.0.293
@@ -1762,6 +1764,7 @@ private:
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
     bool m_ft2ApHashCache {false};         // 1.0.293: AP hashed-callsign cache (Fase 0: seed + hit-rate, no decode change)
+    bool m_ft8DeepDecodeInTx {false};      // 1.0.299: deep depth-4 follow-up (decode-list-only) anche durante TX/QSO. Opt-in.
     // 1.0.293 — cache band-wide degli hash28 dei call visti in banda (single-thread, GUI-confined).
     HashedCallsignCache m_hashedCallsignCache;
     qint64 m_lastApHashLogMs {0};          // throttle del log hit-rate
@@ -1976,6 +1979,9 @@ private:
     bool m_ft8EarlyDecode41Sent {false};
     bool m_ft8EarlyDecode47Sent {false};
     QSet<quint64> m_ft8EarlyDecodeSerials;
+    // 1.0.299 — serial dei deep follow-up lanciati durante TX: aggiornano SOLO la
+    // decode-list (UI), MAI l'auto-seq (niente doppio advanceQsoState/checkAndStartPeriodicTx).
+    QSet<quint64> m_ft8DeepInTxSerials;
     QHash<quint64, quint64> m_decodeSessionBySerial;
     qint64 m_ft4EarlyDecodeSlot {-1};
     bool m_ft4EarlyDecodeSent {false};
@@ -2481,6 +2487,8 @@ public:
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
     Q_INVOKABLE bool ft2ApHashCache() const { return m_ft2ApHashCache; }
     Q_INVOKABLE void setFt2ApHashCache(bool v);
+    Q_INVOKABLE bool ft8DeepDecodeInTx() const { return m_ft8DeepDecodeInTx; }
+    Q_INVOKABLE void setFt8DeepDecodeInTx(bool v);
 
     // 1.0.179 — Smooth Decode Flow scheduler: spalma il rilascio dei decode
     // FT8/FT4 dal batch (15-30 row insieme) in stream progressivo con

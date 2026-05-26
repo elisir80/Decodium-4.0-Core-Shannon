@@ -3786,6 +3786,19 @@ Dialog {
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
+
+                        // 1.0.299 — deep decode-list-only durante TX (recupera stazioni terze in QSO)
+                        Text { text: qsTr("Deep decode in TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: bridge.ft8DeepDecodeInTx
+                            onCheckedChanged: bridge.ft8DeepDecodeInTx = checked
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Mentre operi/QSO in FT8, lancia ANCHE il deep decode depth-4 (solo per la lista decode) oltre al fast depth-2 che decide il TX. Recupera le stazioni di terzi che il fast pass perde durante l'operazione, SENZA toccare il timing né la chiusura del QSO (è puramente decode-list, non auto-seq). Costa CPU extra durante i QSO. Default OFF.")
+                        }
                     }
                 }
 

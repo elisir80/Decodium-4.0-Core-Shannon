@@ -4641,6 +4641,20 @@ void DecodiumBridge::setFt2ApHashCache(bool v)
     bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Fase 0: seed+hit-rate)").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.299 — Deep decode anche in TX (decode-list-only). Quando ON, il deep depth-4
+// follow-up gira anche durante l'operazione TX/QSO (txStartPending) per recuperare le
+// stazioni di terzi che il fast pass depth-2 perde, SENZA toccare il timing/decisione TX
+// (il suo serial e' marcato list-only -> niente auto-seq). Default OFF (opt-in).
+void DecodiumBridge::setFt8DeepDecodeInTx(bool v)
+{
+    if (m_ft8DeepDecodeInTx == v) return;
+    m_ft8DeepDecodeInTx = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft8DeepDecodeInTx"), v);
+    emit ft8DeepDecodeInTxChanged();
+    bridgeLog(QStringLiteral("[FT8] Deep decode in TX %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers RISCRITTI
 // dopo il revert di 1.0.186 (memoria project_186_reverted_partner_memory_bug).
 // Differenze chiave dalla versione revertita:
@@ -21522,6 +21536,8 @@ void DecodiumBridge::loadSettings()
     m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     m_ft2AdaptiveDecode     = s.value(QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
     m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
+    // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
+    m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
     m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
@@ -26103,8 +26119,14 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // Shannon (linea 9699): auto-seq attiva se m_auto=true e cbAutoSeq checked
     // Processa qualsiasi messaggio che contiene il nostro callsign — identico a Shannon
     // (Shannon condizione: "message contains my_call" OR "calling CQ && m_bAutoReply")
+    // 1.0.299 — i deep follow-up lanciati durante TX (ft8DeepDecodeInTx) sono
+    // decode-list-only: la lista UI e' gia' stata aggiornata sopra; qui SALTIAMO l'auto-seq
+    // per non ri-triggerare advanceQsoState/checkAndStartPeriodicTx sul partner (la decisione
+    // TX l'ha gia' presa il fast pass depth-2). .remove() pulisce anche il set.
+    bool const ft8DeepInTxListOnly = m_ft8DeepInTxSerials.remove(serial) > 0;
     bool autoSeqActive =
-        !m_callsign.isEmpty()
+        !ft8DeepInTxListOnly
+        && !m_callsign.isEmpty()
         && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
             || m_autoCqRepeat);
     bool autoSeqGotResponse = false;
@@ -28662,6 +28684,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             m_decodeModeBySerial.remove(it.key());
             m_decodeUtcTokenBySerial.remove(it.key());
             m_decodeSessionBySerial.remove(it.key());
+            m_ft8DeepInTxSerials.remove(it.key());  // 1.0.299: anti-leak se il deep e' stato cancellato
             it = m_decodeStartMsBySerial.erase(it);
         } else {
             ++it;
@@ -28688,9 +28711,15 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                           .arg(serial));
         }
         int const fastDepth = qMin(decodeDepth, 2);
+        // 1.0.299 — opt-in: il deep follow-up depth-4 gira anche durante l'operazione TX
+        // (txStartPending) per recuperare le stazioni di terzi che il fast depth-2 perde.
+        // SOLO come decode-list (il serial e' marcato list-only -> niente auto-seq, niente
+        // doppio advanceQsoState/checkAndStartPeriodicTx). Mai sotto txAudioActive reale
+        // (li' il clamp di queueFt8DecodeRequest forza depth 2 e l'audio TX gira).
+        bool const deepFollowupInTx = txStartPending && !txAudioActive && m_ft8DeepDecodeInTx;
         bool const runDeepFollowup =
             !txAudioActive
-            && !txStartPending
+            && (!txStartPending || deepFollowupInTx)
             && !m_lowCpuModeEnabled
             && (decodeDepth > fastDepth || m_ft8ApEnabled);
         bridgeLog("FT8 final fast pass: serial=" + QString::number(serial) +
@@ -28703,6 +28732,10 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
 
         if (runDeepFollowup) {
             quint64 deepSerial = ++m_decodeSerial;
+            if (deepFollowupInTx) {
+                // serial list-only: onFt8DecodeReady aggiorna la decode-list ma salta l'auto-seq
+                m_ft8DeepInTxSerials.insert(deepSerial);
+            }
             if (isTimeSyncDecodeMode(modeSnapshot)) {
                 qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
                 m_decodeStartMsBySerial.insert(deepSerial, nowMs);
@@ -28712,7 +28745,8 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             }
             bridgeLog("FT8 final deep followup: serial=" + QString::number(deepSerial) +
                       " depth=" + QString::number(decodeDepth) +
-                      " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0));
+                      " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0) +
+                      (deepFollowupInTx ? " inTx=1(list-only)" : QString()));
             queueFt8DecodeRequest(audioSnapshot, deepSerial, nutc, slotIndexForUtc, decodeDepth,
                                   decodeQsoProgress, cqHint, 50, m_ft8ApEnabled, false);
         }
