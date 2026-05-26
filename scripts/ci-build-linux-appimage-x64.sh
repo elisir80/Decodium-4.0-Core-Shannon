@@ -371,6 +371,54 @@ if [[ -n "${QT_QML_DIR}" && -d "${QT_QML_DIR}" ]]; then
 fi
 cp -a "${BUILD_DIR}/qml/." "${APP_QML_DIR}/"
 
+prune_unused_qml_modules() {
+  local module_path
+  local module_name
+
+  # aqt's Qt 6.11 package can include optional QML modules whose companion
+  # libraries are not installed unless their Qt addon is requested. Decodium
+  # does not import those modules; pruning them keeps dependency validation
+  # focused on the runtime QML surface we actually ship.
+  while IFS= read -r -d '' module_path; do
+    module_name="$(basename "${module_path}")"
+    case "${module_name}" in
+      QtQuick|QtQml|QtCore|Qt|decodium|dialogs|panels|QML)
+        ;;
+      *)
+        rm -rf "${module_path}"
+        ;;
+    esac
+  done < <(find "${APP_QML_DIR}" -mindepth 1 -maxdepth 1 -type d -print0)
+
+  if [[ -d "${APP_QML_DIR}/Qt" ]]; then
+    while IFS= read -r -d '' module_path; do
+      module_name="$(basename "${module_path}")"
+      case "${module_name}" in
+        labs)
+          ;;
+        *)
+          rm -rf "${module_path}"
+          ;;
+      esac
+    done < <(find "${APP_QML_DIR}/Qt" -mindepth 1 -maxdepth 1 -type d -print0)
+  fi
+
+  if [[ -d "${APP_QML_DIR}/Qt/labs" ]]; then
+    while IFS= read -r -d '' module_path; do
+      module_name="$(basename "${module_path}")"
+      case "${module_name}" in
+        folderlistmodel)
+          ;;
+        *)
+          rm -rf "${module_path}"
+          ;;
+      esac
+    done < <(find "${APP_QML_DIR}/Qt/labs" -mindepth 1 -maxdepth 1 -type d -print0)
+  fi
+}
+
+prune_unused_qml_modules
+
 # linuxdeploy-plugin-qt writes qt.conf so QLibraryInfo often resolves QML imports
 # from usr/qml, while Decodium loads its own QML from usr/bin/qml. Keep both paths
 # pointed at the same complete tree so a partial linuxdeploy QtQuick.Controls copy

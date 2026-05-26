@@ -23,7 +23,7 @@ Release 1.0.300 is a post-1.0.299 field-fix release. It keeps the fork aligned w
 - Added the 8 metre FT8 frequency preset at `40.680 MHz`.
 - Added the `8M` band entry to the dashboard band controls and Band Selector, with the dashboard button labelled `8`.
 - Updated bridge-side band derivation for ADIF/B4 logic to use the shared `Bands` table instead of the older approximate frequency ladder.
-- Hardened Linux x86_64 AppImage packaging for Qt 6.11 by dereferencing bundled Qt QML symlinks, bundling QML plugin library dependencies, setting runtime QML/plugin paths in `AppRun`, and validating the final AppImage payload for `QtQuick.Controls.Material`.
+- Hardened Linux x86_64 AppImage packaging for Qt 6.11 by dereferencing bundled Qt QML symlinks, pruning unused optional QML modules such as QtQuick3D, bundling QML plugin library dependencies, setting runtime QML/plugin paths in `AppRun`, and validating the final AppImage payload for `QtQuick.Controls.Material`.
 
 ## Verification Notes
 
