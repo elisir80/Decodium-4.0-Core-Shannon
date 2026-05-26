@@ -12,6 +12,7 @@ Release 1.0.300 is a post-1.0.299 field-fix release. It keeps the fork aligned w
 - Fixed FT2 AutoCQ latch handling for direct replies in the form `MYCALL CALL GRID`: AutoCQ now immediately locks the caller/grid, exits raw CQ repeat behavior, and arms TX2 even if the previous CQ has just finished or audio cleanup is still running.
 - Prevented FT2 AutoCQ from transmitting CQ every short FT2 period without a real RX opportunity. CQ repeat now respects the normal period check unless a QSO response is already in progress.
 - Preserved FT2 AutoCQ partner state through the first reply/report transition, avoiding the loop where Decodium kept sending CQ or repeating the same report while the caller had already answered.
+- Added an FT2 AutoCQ one-shot wait after TX2/TX3/TX4 audio completion. AutoCQ stays enabled, but Decodium now waits for a fresh decode from the locked partner before retransmitting or advancing, which prevents the macOS CoreAudio cleanup path from re-entering TX in a tight loop.
 - Reworked DX Cluster band detection to use explicit amateur allocations instead of broad MHz thresholds. This fixes 70 MHz spots as `4M` rather than `2M` and introduces correct `8M` detection for 40-45 MHz.
 - Added regression coverage for DX Cluster band mapping, including 40.680 MHz as `8M` and 70.154 MHz as `4M`.
 - Added the 8 metre FT8 frequency preset at `40.680 MHz`.

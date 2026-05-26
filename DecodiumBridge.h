@@ -1600,6 +1600,9 @@ private:
                                        int latestStartMs = -1);
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
+    bool ft2AutoCqAwaitingPartnerDecode() const;
+    void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
+    void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
     void updateAutoCqPartnerLock();
     void restoreAutoCqPartnerLock();
     bool enqueueCallerInternal(const QString& call,
@@ -2221,6 +2224,9 @@ private:
     QString m_autoCqLockedGrid;
     int     m_autoCqLockedNtx {6};
     int     m_autoCqLockedProgress {0};
+    int     m_ft2AutoCqAwaitingPartnerTx {0};
+    QString m_ft2AutoCqAwaitingPartnerBase;
+    qint64  m_ft2AutoCqAwaitingPartnerSinceMs {0};
     QHash<QString, QDateTime> m_recentAutoCqAbandonedUtcByKey;
     QHash<QString, QDateTime> m_recentAutoCqWorkedUtcByKey;
     QHash<QString, QDateTime> m_recentQsoLogUtcByKey;
