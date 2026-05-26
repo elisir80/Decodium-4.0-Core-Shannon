@@ -3257,7 +3257,17 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 
       if (lsubtract != 0)
         {
-          ftx_subtract_ft8_c (dd0, candidate_itone.data (), f1, xdt, 0);
+          // 1.0.298 (Quick-win A — parita' FT8 vs JTDX) — su decode profondo
+          // (ndepth>=4, stesso gate opt-in di fix #1/#2 "Deep Search") raffina il DT
+          // del segnale forte PRIMA di sottrarlo: ftx_subtract_ft8_c con lrefinedt=1
+          // fa un fit parabolico (idt -90/0/+90) per allineare il riferimento al
+          // sub-campione, lasciando un residuo piu' pulito. Cosi' i segnali
+          // SOVRAPPOSTI deboli (cluster a pochi Hz) emergono meglio nelle passate di
+          // subtract-research successive — e' la radice del gap su banda affollata,
+          // come JTDX. Costo: 3x subtract-eval solo sui forti in deep (trascurabile,
+          // protetto dal deadline per-candidato). Vedi NOTA_UPSTREAM_FT8_PARITA_JTDX.md.
+          int const refine_dt = (request.ndepth >= 4) ? 1 : 0;
+          ftx_subtract_ft8_c (dd0, candidate_itone.data (), f1, xdt, refine_dt);
         }
 
       float pass_xsnr = 0.0f;
