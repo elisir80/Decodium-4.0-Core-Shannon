@@ -12216,6 +12216,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     }
 
     bool const wasTransmitting = m_transmitting || wasBridgeLegacyTx;
+    int const finishedTx = m_activeTxNumber;
     noteTxPlaybackFinished(reason, false);
 
     if (m_tuning) {
@@ -12230,6 +12231,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    bool const appliedDeferredAutoSeqAfterActiveTx =
+        wasTransmitting && applyPendingAutoSeqTxAfterCompletedTx(finishedTx);
+    if (wasTransmitting && !appliedDeferredAutoSeqAfterActiveTx) {
+        armFt2AutoCqOneShotAfterCompletedTx(finishedTx, reason);
+    }
 }
 
 // ===========================================================================
@@ -13233,65 +13239,8 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
 
-    bool appliedDeferredAutoSeqAfterActiveTx = false;
-    if (wasTransmitting && m_pendingAutoSeqTxAfterActiveTx > 0) {
-        int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
-        QString const pendingPartnerBase = m_pendingAutoSeqPartnerBase;
-        QString const pendingMessage = m_pendingAutoSeqMessage;
-        QString const pendingMode = m_pendingAutoSeqMode;
-        m_pendingAutoSeqTxAfterActiveTx = 0;
-        m_pendingAutoSeqPartnerBase.clear();
-        m_pendingAutoSeqMessage.clear();
-        m_pendingAutoSeqMode.clear();
-
-        QString const activePartnerBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
-        QString staleReason;
-        if (!pendingMode.isEmpty()
-            && pendingMode != m_mode.trimmed().toUpper()) {
-            staleReason = QStringLiteral("mode changed %1->%2")
-                .arg(pendingMode, m_mode.trimmed().toUpper());
-        } else if (!pendingPartnerBase.isEmpty()
-                   && (activePartnerBase.isEmpty() || pendingPartnerBase != activePartnerBase)) {
-            staleReason = QStringLiteral("partner changed %1->%2")
-                .arg(pendingPartnerBase,
-                     activePartnerBase.isEmpty() ? QStringLiteral("<none>") : activePartnerBase);
-        } else if (!pendingMessage.isEmpty()
-                   && !activePartnerBase.isEmpty()
-                   && !messageContainsCallToken(pendingMessage, m_dxCall, activePartnerBase)) {
-            staleReason = QStringLiteral("pending message does not mention active partner");
-        }
-
-        if (!staleReason.isEmpty()) {
-            bridgeLog(QStringLiteral("auto-seq: discard stale deferred TX%1 after active TX%2 completed: %3 pendingMsg=[%4]")
-                          .arg(deferredTx)
-                          .arg(finishedTx)
-                          .arg(staleReason, pendingMessage));
-        } else if (deferredTx != m_currentTx) {
-            bridgeLog(QStringLiteral("auto-seq: applying deferred TX%1 after active TX%2 completed")
-                          .arg(deferredTx)
-                          .arg(finishedTx));
-            advanceQsoState(deferredTx);
-            appliedDeferredAutoSeqAfterActiveTx = true;
-            m_txRetryCount = 0;
-            m_txWatchdogTicks = 0;
-            m_autoCQPeriodsMissed = 0;
-            if (!m_txEnabled) {
-                setTxEnabled(true);
-            }
-            updateAutoCqPartnerLock();
-        } else {
-            bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
-                          .arg(deferredTx));
-            appliedDeferredAutoSeqAfterActiveTx = true;
-            m_txRetryCount = 0;
-            m_txWatchdogTicks = 0;
-            m_autoCQPeriodsMissed = 0;
-            if (!m_txEnabled) {
-                setTxEnabled(true);
-            }
-            updateAutoCqPartnerLock();
-        }
-    }
+    bool const appliedDeferredAutoSeqAfterActiveTx =
+        wasTransmitting && applyPendingAutoSeqTxAfterCompletedTx(finishedTx);
 
     // FT2 async manual QSO is edge-triggered by a double-click/map/cluster
     // selection. Keeping txEnabled latched after the audio ends makes the timer
@@ -13317,20 +13266,8 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
 
     if (wasTransmitting
         && !error
-        && !appliedDeferredAutoSeqAfterActiveTx
-        && m_mode == QStringLiteral("FT2")
-        && m_asyncTxEnabled
-        && m_autoCqRepeat
-        && !m_multiAnswerMode
-        && finishedTx >= 2
-        && finishedTx <= 4
-        && !m_dxCall.trimmed().isEmpty()) {
-        armFt2AutoCqAwaitingPartnerDecode(finishedTx, reason);
-        if (m_txEnabled) {
-            bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: TX%1 disarmed until fresh partner decode")
-                          .arg(finishedTx));
-            setTxEnabled(false);
-        }
+        && !appliedDeferredAutoSeqAfterActiveTx) {
+        armFt2AutoCqOneShotAfterCompletedTx(finishedTx, reason);
     }
 
     if (wasTransmitting) {
@@ -19926,6 +19863,94 @@ void DecodiumBridge::clearFt2AutoCqAwaitingPartnerDecode(const QString& reason)
     m_ft2AutoCqAwaitingPartnerSinceMs = 0;
 }
 
+void DecodiumBridge::armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason)
+{
+    if (m_mode != QStringLiteral("FT2")
+        || !m_asyncTxEnabled
+        || !m_autoCqRepeat
+        || m_multiAnswerMode
+        || txNum < 2
+        || txNum > 4
+        || m_dxCall.trimmed().isEmpty()) {
+        return;
+    }
+
+    armFt2AutoCqAwaitingPartnerDecode(txNum, reason);
+    if (!m_txEnabled) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: TX%1 internally disarmed until fresh partner decode")
+                  .arg(txNum));
+    m_txEnabled = false;
+    emit txEnabledChanged();
+    clearDeferredManualSyncTx(QStringLiteral("ft2-autocq-one-shot"));
+    if (usingLegacyBackendForTx() && legacyBackendAvailable()) {
+        m_legacyBackend->setTxEnabled(false);
+        scheduleLegacyStateRefreshBurst();
+    }
+}
+
+bool DecodiumBridge::applyPendingAutoSeqTxAfterCompletedTx(int finishedTx)
+{
+    if (m_pendingAutoSeqTxAfterActiveTx <= 0) {
+        return false;
+    }
+
+    int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
+    QString const pendingPartnerBase = m_pendingAutoSeqPartnerBase;
+    QString const pendingMessage = m_pendingAutoSeqMessage;
+    QString const pendingMode = m_pendingAutoSeqMode;
+    m_pendingAutoSeqTxAfterActiveTx = 0;
+    m_pendingAutoSeqPartnerBase.clear();
+    m_pendingAutoSeqMessage.clear();
+    m_pendingAutoSeqMode.clear();
+
+    QString const activePartnerBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
+    QString staleReason;
+    if (!pendingMode.isEmpty()
+        && pendingMode != m_mode.trimmed().toUpper()) {
+        staleReason = QStringLiteral("mode changed %1->%2")
+            .arg(pendingMode, m_mode.trimmed().toUpper());
+    } else if (!pendingPartnerBase.isEmpty()
+               && (activePartnerBase.isEmpty() || pendingPartnerBase != activePartnerBase)) {
+        staleReason = QStringLiteral("partner changed %1->%2")
+            .arg(pendingPartnerBase,
+                 activePartnerBase.isEmpty() ? QStringLiteral("<none>") : activePartnerBase);
+    } else if (!pendingMessage.isEmpty()
+               && !activePartnerBase.isEmpty()
+               && !messageContainsCallToken(pendingMessage, m_dxCall, activePartnerBase)) {
+        staleReason = QStringLiteral("pending message does not mention active partner");
+    }
+
+    if (!staleReason.isEmpty()) {
+        bridgeLog(QStringLiteral("auto-seq: discard stale deferred TX%1 after active TX%2 completed: %3 pendingMsg=[%4]")
+                      .arg(deferredTx)
+                      .arg(finishedTx)
+                      .arg(staleReason, pendingMessage));
+        return false;
+    }
+
+    if (deferredTx != m_currentTx) {
+        bridgeLog(QStringLiteral("auto-seq: applying deferred TX%1 after active TX%2 completed")
+                      .arg(deferredTx)
+                      .arg(finishedTx));
+        advanceQsoState(deferredTx);
+    } else {
+        bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
+                      .arg(deferredTx));
+    }
+
+    m_txRetryCount = 0;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    if (!m_txEnabled) {
+        setTxEnabled(true);
+    }
+    updateAutoCqPartnerLock();
+    return true;
+}
+
 void DecodiumBridge::updateAutoCqPartnerLock()
 {
     if (!m_autoCqRepeat || m_qsoProgress <= 1) {
@@ -20337,6 +20362,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     auto inFlightReset = qScopeGuard([this]() { m_periodicTxInFlight = false; });
 
     if (m_manualTxHold || !m_monitoring || m_transmitting || m_tuning) return;
+    if (ft2AutoCqAwaitingPartnerDecode()) {
+        return;
+    }
     if (!m_txEnabled) {
         if (!m_autoCqRepeat) return;
         bridgeLog(QStringLiteral("checkAndStartPeriodicTx: AutoCQ active with TX disabled -> rearm TX"));

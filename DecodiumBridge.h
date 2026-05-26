@@ -1610,6 +1610,8 @@ private:
     bool ft2AutoCqAwaitingPartnerDecode() const;
     void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
     void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
+    void armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason);
+    bool applyPendingAutoSeqTxAfterCompletedTx(int finishedTx);
     void updateAutoCqPartnerLock();
     void restoreAutoCqPartnerLock();
     bool enqueueCallerInternal(const QString& call,
