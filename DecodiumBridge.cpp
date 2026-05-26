@@ -5932,18 +5932,28 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     bridgeLog(QStringLiteral("DX Cluster auto-connect: waiting for Main.qml ready"));
 
 #if defined(Q_OS_MAC)
-    bool const legacyTxOverride =
-        qEnvironmentVariableIsSet("DECODIUM_MAC_LEGACY_TX_BACKEND");
-    bool const forceStandaloneUdp =
-        qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP") || !legacyTxOverride;
+    auto const envFlagEnabled = [](const char* name) {
+        if (!qEnvironmentVariableIsSet(name)) {
+            return false;
+        }
+        QByteArray const value = qgetenv(name).trimmed().toLower();
+        return value.isEmpty()
+            || value == "1"
+            || value == "true"
+            || value == "yes"
+            || value == "on";
+    };
+    bool const legacyTxOverride = envFlagEnabled("DECODIUM_MAC_LEGACY_TX_BACKEND");
+    bool const forceStandaloneUdp = envFlagEnabled("DECODIUM_FORCE_STANDALONE_UDP");
 
     if (forceStandaloneUdp) {
         m_useLegacyTxBackend = false;
-        bridgeLog(qEnvironmentVariableIsSet("DECODIUM_FORCE_STANDALONE_UDP")
-                  ? QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP")
-                  : QStringLiteral("Legacy TX backend disabled by macOS default standalone UDP mode"));
+        bridgeLog(QStringLiteral("Legacy TX backend disabled by DECODIUM_FORCE_STANDALONE_UDP"));
     } else {
         m_useLegacyTxBackend = true;
+        bridgeLog(legacyTxOverride
+                  ? QStringLiteral("Legacy TX backend enabled by DECODIUM_MAC_LEGACY_TX_BACKEND")
+                  : QStringLiteral("Legacy TX backend enabled by macOS default"));
         // Su Mac, crea il legacy backend in modo differito per non bloccare l'avvio
         QTimer::singleShot(3000, this, [this]() {
             if (m_useLegacyTxBackend && !ensureLegacyBackendAvailable()) {
