@@ -17,6 +17,7 @@ Release 1.0.300 is a post-1.0.299 field-fix release. It keeps the fork aligned w
 - Tightened the FT2 AutoCQ report latch on both generic and macOS PCM completion paths: after TX2/TX3/TX4 completes, TX is internally disarmed while AutoCQ remains enabled, and only a fresh partner decode newer than the completed transmission can rearm it.
 - Mirrored deferred auto-sequence handoff on the macOS PCM completion path, so a caller decoded during an active CQ applies pending TX2 immediately when CQ audio ends instead of allowing one more CQ/retry cycle.
 - Restored macOS startup to the legacy TX backend by default. `DECODIUM_FORCE_STANDALONE_UDP=1` now explicitly opts into standalone UDP, while `DECODIUM_FORCE_STANDALONE_UDP=0` or an unset variable leaves standalone UDP disabled.
+- Avoided a macOS CoreAudio/Qt socket-notifier crash after TX audio completion by leaving retired CoreAudio TX sinks parked instead of stopping/deleting them during the unsafe cleanup window.
 - Reworked DX Cluster band detection to use explicit amateur allocations instead of broad MHz thresholds. This fixes 70 MHz spots as `4M` rather than `2M` and introduces correct `8M` detection for 40-45 MHz.
 - Added regression coverage for DX Cluster band mapping, including 40.680 MHz as `8M` and 70.154 MHz as `4M`.
 - Added the 8 metre FT8 frequency preset at `40.680 MHz`.
