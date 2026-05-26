@@ -13228,6 +13228,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
 
+    bool appliedDeferredAutoSeqAfterActiveTx = false;
     if (wasTransmitting && m_pendingAutoSeqTxAfterActiveTx > 0) {
         int const deferredTx = m_pendingAutoSeqTxAfterActiveTx;
         QString const pendingPartnerBase = m_pendingAutoSeqPartnerBase;
@@ -13265,6 +13266,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
                           .arg(deferredTx)
                           .arg(finishedTx));
             advanceQsoState(deferredTx);
+            appliedDeferredAutoSeqAfterActiveTx = true;
             m_txRetryCount = 0;
             m_txWatchdogTicks = 0;
             m_autoCQPeriodsMissed = 0;
@@ -13275,6 +13277,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         } else {
             bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
                           .arg(deferredTx));
+            appliedDeferredAutoSeqAfterActiveTx = true;
             m_txRetryCount = 0;
             m_txWatchdogTicks = 0;
             m_autoCQPeriodsMissed = 0;
@@ -13283,6 +13286,28 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
             }
             updateAutoCqPartnerLock();
         }
+    }
+
+    // FT2 async manual QSO is edge-triggered by a double-click/map/cluster
+    // selection. Keeping txEnabled latched after the audio ends makes the timer
+    // retry the same TX step every FT2 slot. AutoCQ and queued callers keep the
+    // old retry behavior; pre-signoff manual QSO steps re-arm only when
+    // autoSequenceStep() receives a fresh partner decode and selects the next
+    // TX message. TX4/TX5 keep the existing signoff/autolog path.
+    if (wasTransmitting
+        && !error
+        && !appliedDeferredAutoSeqAfterActiveTx
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && !m_autoCqRepeat
+        && !m_multiAnswerMode
+        && m_txEnabled
+        && finishedTx >= 1
+        && finishedTx <= 3
+        && !m_dxCall.trimmed().isEmpty()) {
+        bridgeLog(QStringLiteral("FT2 manual one-shot: TX%1 completed, disarm until partner decode")
+                      .arg(finishedTx));
+        setTxEnabled(false);
     }
 
     if (wasTransmitting) {
