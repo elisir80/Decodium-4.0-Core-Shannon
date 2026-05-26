@@ -7,6 +7,7 @@ Release 1.0.300 is a post-1.0.299 field-fix release. It keeps the fork aligned w
 - Fixed late manual FT8/FT4 TX arming: when TX is armed too late for the current sync window, Decodium now explicitly queues the next valid slot instead of silently waiting multiple periods.
 - Added a retry serial guard to the sync TX scheduler so stale delayed callbacks cannot start a previous TX request after the operator or auto-sequence state has changed.
 - Tightened deferred manual sync TX cleanup so cancelled or consumed deferred starts clear both the scheduled retry flag and its pending callback generation.
+- Fixed the FT2 double-click TX1 race: an initial call started from a decoded callsign now remains period-gated, so the audio-completion callback cannot immediately restart TX1 on every FT2 slot without a real RX gap.
 - Fixed FT2 AutoCQ latch handling for direct replies in the form `MYCALL CALL GRID`: AutoCQ now immediately locks the caller/grid, exits raw CQ repeat behavior, and arms TX2 even if the previous CQ has just finished or audio cleanup is still running.
 - Prevented FT2 AutoCQ from transmitting CQ every short FT2 period without a real RX opportunity. CQ repeat now respects the normal period check unless a QSO response is already in progress.
 - Preserved FT2 AutoCQ partner state through the first reply/report transition, avoiding the loop where Decodium kept sending CQ or repeating the same report while the caller had already answered.

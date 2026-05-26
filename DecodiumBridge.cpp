@@ -20323,14 +20323,16 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     }
 
     // FT2 async mode:
-    // - Per risposte QSO (m_txEnabled, stazione DX nota): salta solo la
-    //   parita' periodo, ma mantiene il guard "late start" separato sotto.
-    //   Risposta rapida sì, avvio a fine slot no.
+    // - Per risposte QSO gia' avviate (TX2..TX5): salta solo la parita'
+    //   periodo, ma mantiene il guard "late start" separato sotto.
+    //   TX1 da doppio-click resta invece period-gated: se lo facciamo
+    //   entrare qui, il callback di fine audio FT2 riavvia TX1 a ogni slot
+    //   senza lasciare uno slot RX reale.
     // - Per AutoCQ (nessuna stazione DX): usa il controllo di periodo normale
     //   → evita loop CQ continuo (CQ ogni 3.75s senza pausa RX)
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
                           m_txEnabled && !m_dxCall.isEmpty() &&
-                          m_currentTx >= 1 && m_currentTx <= 5);
+                          m_currentTx >= 2 && m_currentTx <= 5);
     bool skipPeriodCheck = inQsoResponse;
 
     if (!skipPeriodCheck) {
