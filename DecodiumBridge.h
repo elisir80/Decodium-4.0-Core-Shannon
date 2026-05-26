@@ -1588,6 +1588,9 @@ private:
     bool shouldDeferManualSyncTxStart() const;
     bool tryStartDeferredManualSyncTx();
     void clearDeferredManualSyncTx(const QString& reason);
+    void scheduleSyncTxAtNextValidSlot(const QString& reason,
+                                       int elapsedMs = -1,
+                                       int latestStartMs = -1);
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
     void updateAutoCqPartnerLock();
@@ -1740,6 +1743,7 @@ private:
     // m_periodicTxCheckScheduled=true, gli altri short-circuit; il
     // callback resetta a false prima di entrare nel body.
     bool m_periodicTxCheckScheduled {false};
+    bool m_syncTxRetryScheduled {false};
     // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
     // a true a entry function, false via qScopeGuard al return. Copre i 11
     // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo

@@ -40,6 +40,7 @@ public Q_SLOTS:
   void restart(QIODevice*);
   void suspend();
   void resume();
+  void finishPlayback();
   void reset();
   void stop();
   void setAttenuation(qreal);
@@ -51,6 +52,9 @@ Q_SIGNALS:
 
 private:
   bool checkStream() const;
+  void deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
+                                                  QString const& reason,
+                                                  int delayMs = -1);
   void retireStream(QString const& reason);
 
 private Q_SLOTS:
@@ -61,6 +65,7 @@ private:
   QAudioDevice m_device;
   unsigned m_channels {1};
   QScopedPointer<QAudioSink> m_stream;
+  QByteArray m_openDeviceId;
   QPointer<QIODevice> m_streamDevice;
   QPointer<QIODevice> m_sourceDevice;
   QByteArray m_pendingWrite;

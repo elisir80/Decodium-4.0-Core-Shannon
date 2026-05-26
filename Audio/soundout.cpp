@@ -72,8 +72,10 @@ bool deferCoreAudioSinkDelete()
 int parkedSinkLifetimeMs()
 {
 #if defined(Q_OS_MAC)
-  // Mac: 30s come pre-1.0.216 (workaround stopAudioUnit crash CoreAudio).
-  return 30000;
+  // Mac: keep the retired sink alive beyond the next FT2 slot and release it
+  // only when no replacement sink is active. Stopping a retired CoreAudio sink
+  // while the next payload is already playing can mute that next payload.
+  return 20000;
 #elif defined(Q_OS_WIN)
   // Win: 8s = oltre 1 slot FT2 (7.5s), sotto 2 slot. Max ~2 sink parked
   // contemporanei, no accumulo memoria.
@@ -83,7 +85,11 @@ int parkedSinkLifetimeMs()
 #endif
 }
 
-void deleteStreamAfterCoreAudioCallbacks(QAudioSink *stream, QString const& reason)
+}
+
+void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
+                                                             QString const& reason,
+                                                             int delayMs)
 {
   if (!stream) {
     return;
@@ -104,10 +110,11 @@ void deleteStreamAfterCoreAudioCallbacks(QAudioSink *stream, QString const& reas
 #endif
   }
 
+  QPointer<SoundOutput> owner(this);
   QPointer<QAudioSink> guard(stream);
   stream->setParent(nullptr);
-  int const lifetimeMs = parkedSinkLifetimeMs();
-  QTimer::singleShot(lifetimeMs, context, [guard, reason]() {
+  int const lifetimeMs = delayMs > 0 ? delayMs : parkedSinkLifetimeMs();
+  QTimer::singleShot(lifetimeMs, context, [owner, guard, reason]() {
     if (!guard) {
       return;
     }
@@ -117,15 +124,37 @@ void deleteStreamAfterCoreAudioCallbacks(QAudioSink *stream, QString const& reas
       qInfo() << "TX SoundOutput sink deferred delete released:" << reason;
       return;
     }
-    // Su Windows il sink potrebbe non essere arrivato in StoppedState
-    // (es. underrun cronico). In quel caso forziamo stop() ora — l'utente
-    // ha gia' avuto i suoi 8s di safe-window post-TX.
+#if defined(Q_OS_MAC)
+    if (owner && owner->m_stream && owner->m_stream.data() != guard.data()) {
+      qInfo() << "TX SoundOutput CoreAudio parked sink cleanup deferred during active stream:"
+              << reason
+              << "retired_state=" << audioStateName(guard->state())
+              << "active_state=" << audioStateName(owner->m_stream->state());
+      owner->deleteRetiredStreamAfterCoreAudioCallbacks(guard.data(), reason, 750);
+      return;
+    }
+#endif
+
+    // Il sink potrebbe non essere arrivato in StoppedState (es. underrun
+    // cronico o CoreAudio rimasto Idle). In quel caso forziamo stop() ora:
+    // la safe-window post-TX e' gia' passata e non c'e' uno stream TX attivo.
 #if defined(Q_OS_WIN)
+    QString const parkedState = audioStateName(guard->state());
     guard->stop();
     guard->deleteLater();
     qInfo() << "TX SoundOutput sink parked stop+delete after lifetime:"
             << reason
-            << "state=" << audioStateName(guard->state());
+            << "state=" << parkedState;
+    return;
+#elif defined(Q_OS_MAC)
+    QString const parkedState = audioStateName(guard->state());
+    QString const parkedError = audioErrorName(guard->error());
+    guard->stop();
+    guard->deleteLater();
+    qInfo() << "TX SoundOutput CoreAudio sink parked stop+delete after lifetime:"
+            << reason
+            << "state=" << parkedState
+            << "error=" << parkedError;
     return;
 #else
     qInfo() << "TX SoundOutput sink parked to avoid backend crash:"
@@ -134,7 +163,6 @@ void deleteStreamAfterCoreAudioCallbacks(QAudioSink *stream, QString const& reas
             << "error=" << audioErrorName(guard->error());
 #endif
   });
-}
 }
 
 bool SoundOutput::checkStream() const
@@ -183,9 +211,10 @@ void SoundOutput::setFormat(QAudioDevice const& device, unsigned channels, int f
 void SoundOutput::restart(QIODevice* source)
 {
   m_pumpTimer.stop();
-  m_streamDevice.clear();
   m_sourceDevice.clear();
   m_pendingWrite.clear();
+
+  m_streamDevice.clear();
   retireStream(QStringLiteral("restart"));
 
   if (!m_device.id().isEmpty()) {
@@ -223,12 +252,16 @@ void SoundOutput::restart(QIODevice* source)
     }
 
     m_stream.reset(new QAudioSink(m_device, format));
+    m_openDeviceId = m_device.id();
     checkStream();
     m_stream->setVolume(static_cast<float>(m_volume));
     error_ = false;
     Q_EMIT status(QStringLiteral("TX audio sink opened fmt=%1 dev=%2")
                       .arg(formatSummary(m_stream->format()))
                       .arg(m_device.description()));
+    qInfo().noquote() << "TX SoundOutput sink opened"
+                      << "fmt=" << formatSummary(m_stream->format())
+                      << "dev=" << m_device.description();
 
     connect(m_stream.data(), &QAudioSink::stateChanged,
             this, &SoundOutput::handleStateChanged);
@@ -272,6 +305,11 @@ void SoundOutput::restart(QIODevice* source)
                       audioErrorName(m_stream->error())));
     return;
   }
+  qInfo().noquote() << "TX SoundOutput start"
+                    << "state=" << audioStateName(m_stream->state())
+                    << "error=" << audioErrorName(m_stream->error())
+                    << "bytesFree=" << m_stream->bytesFree()
+                    << "buffer=" << m_stream->bufferSize();
   pumpAudio();
   if (m_sourceDevice || !m_pendingWrite.isEmpty()) {
     m_pumpTimer.start();
@@ -298,6 +336,15 @@ void SoundOutput::resume()
     m_stream->resume();
     checkStream();
   }
+}
+
+void SoundOutput::finishPlayback()
+{
+  m_pumpTimer.stop();
+  m_pendingWrite.clear();
+  m_sourceDevice.clear();
+  m_streamDevice.clear();
+  retireStream(QStringLiteral("finish"));
 }
 
 void SoundOutput::reset()
@@ -332,13 +379,14 @@ void SoundOutput::retireStream(QString const& reason)
   }
 
   QAudioSink *stream = m_stream.take();
+  m_openDeviceId.clear();
   stream->disconnect(this);
   stream->disconnect();
 
   if (deferCoreAudioSinkDelete()) {
     stream->setVolume(0.0f);
     Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink retired without immediate stop: %1").arg(reason));
-    deleteStreamAfterCoreAudioCallbacks(stream, reason);
+    deleteRetiredStreamAfterCoreAudioCallbacks(stream, reason);
     return;
   }
 
@@ -377,6 +425,9 @@ void SoundOutput::pumpAudio()
 
   constexpr qsizetype maxChunkBytes = 16384;
   const int bytesPerFrame = qMax(1, m_stream->format().bytesPerFrame());
+  qint64 totalRead = 0;
+  qint64 totalWritten = 0;
+  int chunks = 0;
 
   while (true) {
     if (!m_pendingWrite.isEmpty()) {
@@ -399,6 +450,8 @@ void SoundOutput::pumpAudio()
 
       if (written > 0) {
         m_pendingWrite.remove(0, static_cast<int>(written));
+        totalWritten += written;
+        ++chunks;
       }
 
       if (!m_pendingWrite.isEmpty()) {
@@ -437,6 +490,7 @@ void SoundOutput::pumpAudio()
     }
 
     chunk.truncate(static_cast<int>(read));
+    totalRead += read;
     const qint64 written = m_streamDevice->write(chunk.constData(), chunk.size());
     if (written < 0) {
       m_pumpTimer.stop();
@@ -450,8 +504,26 @@ void SoundOutput::pumpAudio()
 
     if (written < chunk.size()) {
       m_pendingWrite = chunk.mid(static_cast<int>(written));
+      if (written > 0) {
+        totalWritten += written;
+        ++chunks;
+      }
       break;
     }
+    if (written > 0) {
+      totalWritten += written;
+      ++chunks;
+    }
+  }
+  if ((totalRead > 0 || totalWritten > 0)
+      && qEnvironmentVariableIsSet("DECODIUM_TX_PUMP_TRACE")) {
+    qInfo().noquote() << "TX SoundOutput pump"
+                      << "read=" << totalRead
+                      << "written=" << totalWritten
+                      << "chunks=" << chunks
+                      << "pending=" << m_pendingWrite.size()
+                      << "state=" << audioStateName(m_stream->state())
+                      << "bytesFree=" << m_stream->bytesFree();
   }
 #endif
 }

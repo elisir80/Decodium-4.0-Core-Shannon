@@ -268,13 +268,16 @@ static void deleteBufferLater(QBuffer *buffer, QObject *context)
 }
 
 // 1.0.217 — Lifetime parking allineato per platform.
-// Mac: 30s (workaround stopAudioUnit crash CoreAudio).
+// Mac: short grace window (workaround stopAudioUnit crash CoreAudio) without
+// leaving parked TX sinks alive across multiple FT2 slots.
 // Windows: 8s (oltre 1 slot FT2 7.5s ma sotto 2 slot, max ~2 sink parked
 // contemporanei. Pre-1.0.217 era 30s hardcoded come Mac, ma con park
 // abilitato su Windows da 1.0.216 si accumulava 4 sink/slot FT2 =
 // memory leak temporaneo + WASAPI session pressure).
 static constexpr int kRetireAudioSinkParkMs =
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_MAC)
+    6000;
+#elif defined(Q_OS_WIN)
     8000;
 #else
     30000;
@@ -353,11 +356,12 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                     bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
                     return;
                 }
-                // 1.0.217 — Su Windows forziamo stop+delete dopo il lifetime.
-                // L'utente ha gia' avuto la safe-window post-TX (8s); attendere
-                // ulteriormente puo' lasciare sink WASAPI in IdleState con un
-                // session aperto = pressure su resources WASAPI.
+                // Dopo la safe-window forziamo stop+delete se il backend non
+                // ha gia' raggiunto StoppedState. Su macOS evita accumulo di
+                // CoreAudio sink parcheggiati che puo' far sparire il payload
+                // TX successivo; su Windows evita pressure su risorse WASAPI.
 #if defined(Q_OS_WIN)
+                QString const parkedState = audioStateToString(sinkGuard->state());
                 sinkGuard->stop();
                 sinkGuard->deleteLater();
                 if (bufferGuard) {
@@ -366,8 +370,23 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                 qint64 const parkSpanMsForcedWin = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
                 bridgeLog(QStringLiteral("TX audio sink parked stop+delete after lifetime: reason=%1 state=%2")
                               .arg(reason)
-                              .arg(audioStateToString(sinkGuard->state())));
+                              .arg(parkedState));
                 bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_win").arg(reason).arg(parkSpanMsForcedWin));
+                return;
+#elif defined(Q_OS_MAC)
+                QString const parkedState = audioStateToString(sinkGuard->state());
+                QString const parkedError = audioErrorToString(sinkGuard->error());
+                sinkGuard->stop();
+                sinkGuard->deleteLater();
+                if (bufferGuard) {
+                    bufferGuard->deleteLater();
+                }
+                qint64 const parkSpanMsForcedMac = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
+                bridgeLog(QStringLiteral("TX CoreAudio sink parked stop+delete after lifetime: reason=%1 state=%2 err=%3")
+                              .arg(reason)
+                              .arg(parkedState)
+                              .arg(parkedError));
+                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_mac").arg(reason).arg(parkSpanMsForcedMac));
                 return;
 #else
                 bridgeLog(QStringLiteral("TX CoreAudio sink parked to avoid Qt stopAudioUnit crash: reason=%1 state=%2 err=%3")
@@ -3964,13 +3983,12 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
         if (payloadMs <= 0 || minUsefulPayloadMs <= 0) {
             return d3CapMs;
         }
-        // Fix QSO-completion: per FT8/FT4 NON ammettere start oltre la finestra di shift
-        // (~2000ms). Oltre, il fronte verrebbe troncato (Costas persa -> il partner non
-        // decodifica). Meglio DEFERIRE al boundary successivo e trasmettere pulito: cosi'
-        // i CQ-resume tardivi (osservati a +4..8s) non escono trimmati ma slittano allo
-        // slot dopo. Entro 2000ms il path audio SHIFTA (invia tutto). FT2 invariato.
+        // FT8/FT4 must keep the Costas start close to the nominal 500 ms slot lead-in.
+        // A shifted CQ at +1.4s is decodable only by luck and is visibly out of slot,
+        // so defer late starts to the next valid TX period instead of sending now.
         if (mode == QStringLiteral("FT8") || mode == QStringLiteral("FT4")) {
-            return qMax(0, qMin(d3CapMs, 2000));
+            int const latestCleanStartMs = txSyncLeadInMsForMode(mode) + 150;
+            return qMax(0, qMin(d3CapMs, latestCleanStartMs));
         }
         int const payloadCapMs =
             txSyncLeadInMsForMode(mode) + qMax(0, payloadMs - minUsefulPayloadMs);
@@ -11622,6 +11640,12 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_txPcmBuffer->open(QIODevice::ReadOnly);
     m_txPcmBuffer->seek(0);
     QPointer<QBuffer> const bufferGuard(m_txPcmBuffer);
+    qInfo().noquote() << "TX legacy bridge payload"
+                      << "reason=" << reason
+                      << "msg=" << msg.trimmed()
+                      << "waveSamples=" << wave.size()
+                      << "pcmBytes=" << m_txPcmData.size()
+                      << "bufferSize=" << m_txPcmBuffer->size();
     m_soundOutput->restart(m_txPcmBuffer);
     QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
         if (!m_bridgeAudioLegacyTxActive || !m_transmitting || bufferGuard != m_txPcmBuffer) {
@@ -11673,7 +11697,7 @@ void DecodiumBridge::stopBridgeAudioForLegacyDigitalTx(const QString& reason)
         m_modulator->stop(true);
     }
     if (m_soundOutput) {
-        m_soundOutput->stop();
+        m_soundOutput->finishPlayback();
     }
     if (m_txPcmBuffer) {
         m_txPcmBuffer->close();
@@ -12134,10 +12158,8 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
 
-    // Ferma SoundOutput solo dopo il tempo minimo di playback, altrimenti il
-    // buffer hardware puo' essere tagliato mentre il messaggio e' ancora in aria.
-    if (m_soundOutput) m_soundOutput->stop();
-    if (wasBridgeLegacyTx && m_txPcmBuffer) {
+    if (m_soundOutput) m_soundOutput->finishPlayback();
+    if (m_txPcmBuffer) {
         m_txPcmBuffer->close();
         delete m_txPcmBuffer;
         m_txPcmBuffer = nullptr;
@@ -12975,7 +12997,10 @@ qint64 DecodiumBridge::syncTxPcmStartOffsetBytes(const QAudioFormat& format,
         int const payloadDurationMs =
             static_cast<int>((payloadFrames * qint64 {1000}) / qMax(1, format.sampleRate()));
         int const slotTailMarginMs = 250;   // margine di coda prima della fine slot
-        int const maxShiftDtMs = 2000;       // DT max decodificabile; allineato al cap latest-start FT8/FT4
+        int maxShiftDtMs = 2000;            // DT max for modes that tolerate late shifted audio
+        if (m_mode == QStringLiteral("FT8") || m_mode == QStringLiteral("FT4")) {
+            maxShiftDtMs = txSyncLeadInMsForMode(m_mode) + 150;
+        }
         if (elapsedMs <= maxShiftDtMs
             && (elapsedMs + payloadDurationMs + slotTailMarginMs) <= periodMs) {
             return 0;  // shift: invia l'intera forma d'onda da ora, nessun trim del fronte
@@ -13123,7 +13148,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         m_txPcmData.clear();
     }
     if (wasBridgeLegacyTx && m_soundOutput) {
-        m_soundOutput->stop();
+        m_soundOutput->finishPlayback();
     }
     if (wasBridgeLegacyTx && m_txPcmBuffer) {
         m_txPcmBuffer->close();
@@ -13346,7 +13371,10 @@ void DecodiumBridge::startTx()
                           .arg(elapsedMs)
                           .arg(latestStartMs)
                           .arg(msg.trimmed()));
-            scheduleTxAudioPrecompute(25);
+            if (usesDeferredManualSyncTx() && !m_txEnabled && !m_autoCqRepeat) {
+                m_deferredManualSyncTx = true;
+            }
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("startTx"), elapsedMs, latestStartMs);
             emit statusMessage(QStringLiteral("TX%1 rimandato: slot %2 troppo avanzato")
                                .arg(m_currentTx)
                                .arg(m_mode));
@@ -13431,6 +13459,40 @@ void DecodiumBridge::startTx()
         const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
         const AudioDevice::Channel outChannel = txOutputChannelForFormat(outFmt, m_audioOutputChannel);
         const qreal attenuationDb = txAttenuationFromSlider(m_txOutputLevel);
+        QByteArray macPcm = buildTxPcmBuffer(wave, outFmt, outChannel);
+        if (macPcm.isEmpty()) {
+            QString const errorText =
+                QStringLiteral("Audio TX: PCM macOS non valido | device=\"%1\" formato=%2 canale=%3 msg=\"%4\"")
+                    .arg(outDev.description(),
+                         audioFormatToString(outFmt),
+                         QString::number(static_cast<int>(outChannel)),
+                         msg.trimmed());
+            bridgeLog("startTx(mac-pcm): " + errorText);
+            emit errorMessage(errorText);
+            return;
+        }
+
+        int const macPeriodMs = periodMsForMode(m_mode);
+        int const macSlotElapsedMs = macPeriodMs > 0
+            ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(macPeriodMs))
+            : -1;
+        int const macNominalLeadInMs =
+            (m_mode == QStringLiteral("FT2")) ? 450 : txSyncLeadInMsForMode(m_mode);
+        int macInitialSilenceMs = macNominalLeadInMs;
+        if (shouldAlignTxAudioToCurrentSyncSlot() && macSlotElapsedMs >= 0) {
+            macInitialSilenceMs = macSlotElapsedMs < macNominalLeadInMs
+                ? macNominalLeadInMs - macSlotElapsedMs
+                : 0;
+        }
+        int const macLeadInFrames =
+            qMax(0, qRound(static_cast<double>(outFmt.sampleRate()) * macInitialSilenceMs / 1000.0));
+        qsizetype const macLeadInBytes = outFmt.bytesForFrames(macLeadInFrames);
+        if (macLeadInBytes > 0 && macLeadInBytes <= std::numeric_limits<int>::max()) {
+            macPcm.prepend(QByteArray(static_cast<int>(macLeadInBytes), '\0'));
+        }
+        qint64 const txPayloadMs = qMax<qint64>(
+            1, qRound64(static_cast<double>(wave.size()) * 1000.0 / 48000.0));
+        qint64 const txPlaybackMs = txPayloadMs + macInitialSilenceMs;
 
         updateSoundOutputDevice();
         m_soundOutput->setAttenuation(attenuationDb);
@@ -13500,47 +13562,51 @@ void DecodiumBridge::startTx()
             saveTxRecordingAsync(txRecordPath, wave, 48000, QStringLiteral("TX"));
         }
 
-        unsigned symbolsLength = 79;
-        double framesPerSymbol = 1920.0;
-        double toneSpacing = -3.0;
-        if (m_mode == "FT2") {
-            symbolsLength = 103;
-            framesPerSymbol = 288.0;
-            toneSpacing = -2.0;
-        } else if (m_mode == "FT4") {
-            symbolsLength = 105;
-            framesPerSymbol = 576.0;
-            toneSpacing = -2.0;
-        } else if (m_mode == "WSPR") {
-            symbolsLength = 162;
-            framesPerSymbol = 8192.0;
-            toneSpacing = -2.0;
-        }
-
-        double const txPeriodSeconds = periodMsForMode(m_mode) / 1000.0;
-        m_modulator->setTRPeriod(txPeriodSeconds);
-        m_modulator->setPrecomputedWave(m_mode, wave);
-        qint64 const txPlaybackMs = qMax<qint64>(
-            1, qRound64(static_cast<double>(wave.size()) * 1000.0 / 48000.0));
+        double const txPeriodSeconds = macPeriodMs / 1000.0;
         qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
         m_txPlaybackHoldUntilMs = nowMs + txPlaybackMs + 300;
         m_txPlaybackHardDeadlineMs = nowMs + txPlaybackMs + 5000;
         m_txPlaybackReleasePending = false;
         m_txAudioRestartPending = false;
-        int const macPeriodMs = periodMsForMode(m_mode);
-        int const macSlotElapsedMs = macPeriodMs > 0
-            ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(macPeriodMs))
-            : -1;
-        int const macLeadInMs = txSyncLeadInMsForMode(m_mode);
-        bridgeLog(QStringLiteral("startTx(mac): playback hold %1 ms for %2 samples")
+        if (m_txPcmBuffer) {
+            m_txPcmBuffer->close();
+            delete m_txPcmBuffer;
+            m_txPcmBuffer = nullptr;
+        }
+        m_txPcmData = macPcm;
+        m_txPcmBuffer = new QBuffer(this);
+        m_txPcmBuffer->setData(m_txPcmData);
+        m_txPcmBuffer->open(QIODevice::ReadOnly);
+        m_txPcmBuffer->seek(0);
+        QPointer<QBuffer> const bufferGuard(m_txPcmBuffer);
+
+        bridgeLog(QStringLiteral("startTx(mac-pcm): playback hold %1 ms for %2 samples")
                       .arg(txPlaybackMs + 300)
                       .arg(wave.size()));
-        m_modulator->start(m_mode, symbolsLength, framesPerSymbol,
-                           static_cast<double>(txAudioFrequency), toneSpacing,
-                           m_soundOutput, outChannel, true, false,
-                           99.0, txPeriodSeconds);
+        qInfo().noquote() << "TX mac PCM payload"
+                          << "mode=" << m_mode
+                          << "msg=" << msg.trimmed()
+                          << "waveSamples=" << wave.size()
+                          << "peak=" << QString::number(txWavePeak(wave), 'f', 6)
+                          << "payloadMs=" << txPayloadMs
+                          << "nominalLeadMs=" << macNominalLeadInMs
+                          << "initialSilenceMs=" << macInitialSilenceMs
+                          << "slotElapsedMs=" << macSlotElapsedMs
+                          << "pcmBytes=" << m_txPcmData.size()
+                          << "bufferSize=" << m_txPcmBuffer->size();
+        m_soundOutput->restart(m_txPcmBuffer);
+        QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
+            if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer) {
+                return;
+            }
+            bridgeLog(QStringLiteral("startTx(mac-pcm) completion timer: playback_ms=%1 bufPos=%2/%3")
+                          .arg(txPlaybackMs)
+                          .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
+                          .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1));
+            finishModulatorIdlePlayback(QStringLiteral("mac-pcm"));
+        });
 
-        bridgeLog("startTx(mac) modulator: mode=" + m_mode +
+        bridgeLog("startTx(mac-pcm): mode=" + m_mode +
                   " msg=" + msg.trimmed() +
                   " dev=" + outDev.description() +
                   " fmt=" + audioFormatToString(outFmt) +
@@ -13548,9 +13614,12 @@ void DecodiumBridge::startTx()
                   " attn=" + QString::number(attenuationDb, 'f', 2) +
                   " gain=" + QString::number(txGainFromSlider(m_txOutputLevel), 'f', 4) +
                   " slot_elapsed=" + QString::number(macSlotElapsedMs) + "ms" +
-                  " lead_in=" + QString::number(macLeadInMs) + "ms" +
+                  " lead_in=" + QString::number(macNominalLeadInMs) + "ms" +
+                  " initial_silence=" + QString::number(macInitialSilenceMs) + "ms" +
+                  " period=" + QString::number(txPeriodSeconds, 'f', 3) + "s" +
                   " peak=" + QString::number(txWavePeak(wave), 'f', 6) +
-                  " samples=" + QString::number(wave.size()));
+                  " samples=" + QString::number(wave.size()) +
+                  " pcm=" + QString::number(m_txPcmData.size()));
 
         emit statusMessage("TX: " + msg.trimmed());
         return;
@@ -19498,6 +19567,7 @@ bool DecodiumBridge::tryStartDeferredManualSyncTx()
                       .arg(m_currentTx)
                       .arg(elapsedMs)
                       .arg(latestStartMs));
+        scheduleSyncTxAtNextValidSlot(QStringLiteral("manual-sync-tx"), elapsedMs, latestStartMs);
         return false;
     }
 
@@ -19515,6 +19585,89 @@ void DecodiumBridge::clearDeferredManualSyncTx(const QString& reason)
     }
     m_deferredManualSyncTx = false;
     bridgeLog(QStringLiteral("manualSyncTx: cleared (%1)").arg(reason));
+}
+
+void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
+                                                   int elapsedMs,
+                                                   int latestStartMs)
+{
+    if (!usesDeferredManualSyncTx() || !m_monitoring || m_manualTxHold) {
+        return;
+    }
+
+    int const periodMs = periodMsForMode(m_mode);
+    if (periodMs <= 0) {
+        return;
+    }
+
+    qint64 const msNow = correctedUtcMsecsSinceStartOfDay();
+    qint64 const slotIndex = msNow / static_cast<qint64>(periodMs);
+    int const currentElapsedMs = static_cast<int>(msNow % static_cast<qint64>(periodMs));
+    if (elapsedMs < 0) {
+        elapsedMs = currentElapsedMs;
+    }
+    if (latestStartMs <= 0) {
+        latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs);
+    }
+
+    auto slotIsOurPeriod = [this](qint64 index) {
+        bool const isEvenPeriod = ((index % 2) == 0);
+        return bridgeTxPeriodIsEven(m_txPeriod) ? isEvenPeriod : !isEvenPeriod;
+    };
+
+    qint64 delayMs = -1;
+    for (int slotsAhead = 0; slotsAhead <= 4; ++slotsAhead) {
+        qint64 const candidateIndex = slotIndex + slotsAhead;
+        if (!slotIsOurPeriod(candidateIndex)) {
+            continue;
+        }
+        int const candidateElapsedMs = (slotsAhead == 0) ? currentElapsedMs : 0;
+        if (latestStartMs > 0 && candidateElapsedMs >= latestStartMs) {
+            continue;
+        }
+        delayMs = static_cast<qint64>(slotsAhead) * periodMs - currentElapsedMs + 40;
+        break;
+    }
+
+    if (delayMs < 0) {
+        delayMs = static_cast<qint64>(periodMs) * 2 - currentElapsedMs + 40;
+    }
+    if (delayMs < 40) {
+        delayMs = 40;
+    }
+
+    scheduleTxAudioPrecompute(qMin<qint64>(delayMs, 250));
+    if (m_syncTxRetryScheduled) {
+        return;
+    }
+
+    m_syncTxRetryScheduled = true;
+    QString const modeSnapshot = m_mode;
+    bridgeLog(QStringLiteral("sync TX late guard: defer TX%1 (%2) mode=%3 elapsed=%4ms latest=%5ms delay=%6ms")
+                  .arg(m_currentTx)
+                  .arg(reason, modeSnapshot)
+                  .arg(elapsedMs)
+                  .arg(latestStartMs)
+                  .arg(delayMs));
+    QTimer::singleShot(delayMs, this, [this, reason, modeSnapshot]() {
+        m_syncTxRetryScheduled = false;
+        if (m_mode != modeSnapshot
+            || !m_monitoring
+            || m_manualTxHold
+            || m_transmitting
+            || m_tuning) {
+            return;
+        }
+
+        bridgeLog(QStringLiteral("sync TX late guard: retry at valid slot (%1) mode=%2")
+                      .arg(reason, modeSnapshot));
+        if (tryStartDeferredManualSyncTx()) {
+            return;
+        }
+        if (m_txEnabled || m_autoCqRepeat) {
+            checkAndStartPeriodicTx();
+        }
+    });
 }
 
 void DecodiumBridge::ensureSyncTxSchedulerActive(const QString& reason)
@@ -19756,11 +19909,44 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
         return;
     }
 
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const nowMs = correctedUtcEpochMs();
     int const elapsedMs = static_cast<int>(nowMs % static_cast<qint64>(periodMs));
     int const graceMs = effectiveAutoTxDecodeGraceMs(normalizedMode);
     int const maxDelayMs = latestStartMs - elapsedMs - 250;
     if (maxDelayMs <= 0) {
+        if (sessionId != m_periodTimerSessionId
+            || m_mode != modeSnapshot
+            || m_manualTxHold
+            || m_transmitting
+            || m_tuning
+            || !shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)) {
+            return;
+        }
+        if (elapsedMs < latestStartMs) {
+            bridgeLog(QStringLiteral("time-sync auto TX: no %1 decode-grace budget, checking TX now elapsed=%2ms latest=%3ms")
+                          .arg(modeSnapshot)
+                          .arg(elapsedMs)
+                          .arg(latestStartMs));
+            QTimer::singleShot(0, this, [this, modeSnapshot, sessionId]() {
+                if (sessionId != m_periodTimerSessionId
+                    || m_mode != modeSnapshot
+                    || m_manualTxHold
+                    || m_transmitting
+                    || m_tuning
+                    || !shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)) {
+                    return;
+                }
+                checkAndStartPeriodicTx();
+            });
+        } else {
+            bridgeLog(QStringLiteral("time-sync auto TX: no safe %1 start budget, defer elapsed=%2ms latest=%3ms")
+                          .arg(modeSnapshot)
+                          .arg(elapsedMs)
+                          .arg(latestStartMs));
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("time-sync-decode-budget"),
+                                          elapsedMs,
+                                          latestStartMs);
+        }
         return;
     }
     int const delayMs = qMax(50, qMin(graceMs, maxDelayMs));
@@ -20107,6 +20293,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                           .arg(m_currentTx)
                           .arg(elapsedMs)
                           .arg(latestStartMs));
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("checkAndStartPeriodicTx"),
+                                          elapsedMs,
+                                          latestStartMs);
             return;
         }
 
