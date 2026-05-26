@@ -20,9 +20,29 @@
 #include "commons.h"
 #include "helper_functions.h"
 #include "Modulator/FtxMessageEncoder.hpp"
+#include "Detector/CallsignHash28.h"  // 1.0.294 — hash28 condiviso per AP cache
 
 namespace
 {
+
+// 1.0.294 — AP hashed-callsign cache Fase 1: snapshot per-thread degli hash28 dei
+// call visti in banda, settato dal worker (ftx_ft2_set_ap_hash_cache_c) PRIMA del
+// decode. Confronto post-decode: se una call del messaggio decodificato è in cache,
+// il decode borderline (nharderror 49..60) viene promosso invece di scartato.
+thread_local std::vector<quint32> g_ft2ApHashCache;
+
+// Vero se almeno una call del messaggio decodificato è nella cache band-wide.
+// USA ft2MessageCallHashes (CallsignHash28.h), IDENTICA al seed del bridge → match garantito.
+inline bool ft2_decode_cache_confirmed (QByteArray const& message_fixed)
+{
+    if (g_ft2ApHashCache.empty ()) return false;
+    QVector<quint32> const msgHashes =
+        decodium::ft2MessageCallHashes (QString::fromLatin1 (message_fixed));
+    for (quint32 const h : msgHashes)
+        for (quint32 const c : g_ft2ApHashCache)
+            if (h == c) return true;
+    return false;
+}
 
 using Complex = std::complex<float>;
 using fortran_charlen_t = size_t;
@@ -2225,17 +2245,26 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               float const xdt = static_cast<float> (ibest) * kFt2FreqDtScale - 0.5f;
               float const qual = 1.0f - (static_cast<float> (decoded_best.nharderror) + decoded_best.dmin) / 60.0f;
 
-              if (decoded_best.nharderror > 48)
+              // 1.0.294 — AP cache Fase 1 (Strategy B): se una call del messaggio è in
+              // cache band-wide, rilassa il gate nharderror da 48 a 60 (recupera decode
+              // borderline confermati). Strict-call già applicato in ft2MessageCallHashes.
+              bool const cacheConfirmed = ft2_decode_cache_confirmed (decoded_best.message_fixed);
+              int const harderrLimit = cacheConfirmed ? 60 : 48;
+              if (decoded_best.nharderror > harderrLimit)
                 {
-                  stage7_debug_logf ("pass=%d cand=%d provisional decode=\"%s\" nharderror=%d dmin=%.3f",
+                  stage7_debug_logf ("pass=%d cand=%d provisional decode=\"%s\" nharderror=%d dmin=%.3f confirmed=%d",
                                      isp, icand + 1, decoded_best.message_fixed.constData (),
-                                     decoded_best.nharderror, decoded_best.dmin);
+                                     decoded_best.nharderror, decoded_best.dmin, cacheConfirmed ? 1 : 0);
                   break;
                 }
 
+              // nap=7 marca i decode RESCUED dalla cache (nharderror 49..60) per audit;
+              // gli altri mantengono il loro iaptype.
+              int const napForRow = (cacheConfirmed && decoded_best.nharderror > 48)
+                                    ? 7 : decoded_best.iaptype;
               if (ndecodes < kFt2MaxLines)
                 {
-                  copy_decode_row (ndecodes, smax, nsnr, xdt, f1_best, decoded_best.iaptype, qual,
+                  copy_decode_row (ndecodes, smax, nsnr, xdt, f1_best, napForRow, qual,
                                    decoded_best.bits, decoded_best.message_fixed, syncs, snrs, dts, freqs,
                                    naps, quals, bits77, decodeds);
                 }
@@ -2335,6 +2364,15 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 extern "C" void ftx_ft2_stage7_set_cancel_c (int cancel)
 {
   stage7_cancel_requested ().store (cancel != 0, std::memory_order_relaxed);
+}
+
+// 1.0.294 — AP cache Fase 1: il worker setta lo snapshot degli hash28 (call viste in
+// banda) PRIMA del decode e lo azzera dopo. thread_local → per-thread, niente lock.
+extern "C" void ftx_ft2_set_ap_hash_cache_c (quint32 const* hashes, int count)
+{
+  g_ft2ApHashCache.clear ();
+  if (hashes && count > 0)
+    g_ft2ApHashCache.assign (hashes, hashes + count);
 }
 
 extern "C" void ftx_ft2_async_decode_stage7_c (short const* iwave, int* nqsoprogress, int* nfqso,

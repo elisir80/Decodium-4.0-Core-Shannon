@@ -23,6 +23,7 @@ extern "C"
                                       float* quals, signed char* bits77, char* decodeds,
                                       int* nout);
   void ftx_ft2_stage7_set_cancel_c (int cancel);
+  void ftx_ft2_set_ap_hash_cache_c (quint32 const* hashes, int count);  // 1.0.294 AP cache Fase 1
 }
 
 namespace
@@ -232,10 +233,15 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
   auto mycall = to_fortran_field (request.mycall, 12);
   auto hiscall = to_fortran_field (request.hiscall, 12);
 
+  // 1.0.294 — AP cache Fase 1: passa lo snapshot hash28 (thread_local) prima del decode,
+  // azzera subito dopo (così il decode() sincrono non eredita una cache stale).
+  ftx_ft2_set_ap_hash_cache_c (request.apHashCache.constData (),
+                               static_cast<int> (request.apHashCache.size ()));
   ftx_ft2_async_decode_stage7_c (iwave, &nqsoprogress, &nfqso, &nfa, &nfb,
                                  &ndepth, &ncontest, mycall.data (), hiscall.data (),
                                  &snrs[0], &dts[0], &freqs[0], &naps[0], &quals[0],
                                  &bits77[0], &decodeds[0], &nout);
+  ftx_ft2_set_ap_hash_cache_c (nullptr, 0);
 
   if (m_shuttingDown.load (std::memory_order_relaxed))
     {

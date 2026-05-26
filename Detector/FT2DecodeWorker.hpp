@@ -26,6 +26,7 @@ struct AsyncDecodeRequest
   int ncontest {0};
   QByteArray mycall;
   QByteArray hiscall;
+  QVector<quint32> apHashCache;  // 1.0.294 — snapshot hash28 call viste in banda (AP cache Fase 1)
 };
 
 struct DecodeRequest
