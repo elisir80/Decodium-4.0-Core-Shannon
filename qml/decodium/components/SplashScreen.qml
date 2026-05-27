@@ -10,7 +10,7 @@ import QtQuick.Layouts
 Rectangle {
     id: splashRoot
 
-    property int splashDuration: 2800   // ms prima della chiusura automatica
+    property int splashDuration: 10000   // 1.0.310: resta 10s (o "Avvia" per proseguire)
     property color bgDeep:        "#0a0e1a"
     property color primaryBlue:   "#1a73e8"
     property color secondaryCyan: "#00bcd4"
@@ -23,12 +23,8 @@ Rectangle {
     color: bgDeep
     z:     9999
 
-    // Chiudi al click
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: splashRoot.close()
-    }
+    // 1.0.310: niente più click-anywhere — si prosegue col pulsante "Avvia"
+    // (così la splash resta i 10s pieni senza chiusure accidentali)
 
     // Timer auto-close
     Timer {
@@ -196,6 +192,56 @@ Rectangle {
             text: "Caricamento in corso…"
             font.pixelSize: 11
             color: Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.6)
+        }
+
+        Item { height: 26 }
+
+        // 1.0.310: pulsanti — Offrimi un caffè + Avvia (prosegui subito)
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 14
+
+            // ☕ Buy me a coffee → buymeacoffee.com/iu8lmc
+            Rectangle {
+                width: 200; height: 38; radius: 8
+                color: bmacMA.containsMouse ? Qt.rgba(1, 0.86, 0.25, 0.32) : Qt.rgba(1, 0.86, 0.25, 0.16)
+                border.color: "#FFD740"; border.width: 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Text {
+                    anchors.centerIn: parent
+                    text: "☕  Offrimi un caffè"
+                    font.pixelSize: 13; font.bold: true
+                    color: "#FFE082"
+                }
+                MouseArea {
+                    id: bmacMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Qt.openUrlExternally("https://buymeacoffee.com/iu8lmc")
+                }
+            }
+
+            // ▶ Avvia → chiude la splash e prosegue
+            Rectangle {
+                width: 140; height: 38; radius: 8
+                color: startMA.containsMouse ? Qt.rgba(0, 0.74, 0.83, 0.45) : Qt.rgba(0, 0.74, 0.83, 0.26)
+                border.color: secondaryCyan; border.width: 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Text {
+                    anchors.centerIn: parent
+                    text: "Avvia  ▶"
+                    font.pixelSize: 13; font.bold: true
+                    color: textPrimary
+                }
+                MouseArea {
+                    id: startMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: splashRoot.close()
+                }
+            }
         }
     }
 
