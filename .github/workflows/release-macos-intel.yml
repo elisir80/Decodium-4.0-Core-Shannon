@@ -1,4 +1,4 @@
-name: Release macOS Intel
+name: Release macOS Intel Qt 6.11
 
 on:
   workflow_dispatch:
@@ -17,6 +17,9 @@ permissions:
   contents: write
 
 env:
+  QT_VERSION: "6.11.0"
+  QT_ARCH: "clang_64"
+  QT_CACHE_ROOT: ".ci/cache/qt-macos-6.11.0-clang_64"
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
 
@@ -28,20 +31,20 @@ jobs:
   build:
     name: Build ${{ matrix.asset_suffix }} on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
-    continue-on-error: ${{ matrix.experimental }}
     timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
         include:
           - runner: macos-15-intel
+            compat_macos: "13.0"
+            asset_suffix: "macos-ventura-x86_64"
+          - runner: macos-15-intel
+            compat_macos: "14.0"
+            asset_suffix: "macos-sonoma-x86_64"
+          - runner: macos-15-intel
             compat_macos: "15.0"
             asset_suffix: "macos-sequoia-x86_64"
-            experimental: false
-          - runner: macos-15-intel
-            compat_macos: "12.0"
-            asset_suffix: "macos-monterey-x86_64"
-            experimental: true
 
     steps:
       - name: Checkout repository
@@ -60,10 +63,10 @@ jobs:
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
           echo "Using version: ${VERSION}"
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           brew update
-          brew install qt gcc fftw libusb boost pkg-config create-dmg dylibbundler
+          brew install cmake gcc fftw libusb boost pkg-config create-dmg dylibbundler
 
           GCC_PREFIX="$(brew --prefix gcc)"
           GFORTRAN="$(ls "${GCC_PREFIX}"/bin/gfortran-* 2>/dev/null | head -1 || true)"
@@ -74,11 +77,49 @@ jobs:
           echo "FC=${GFORTRAN}" >> "$GITHUB_ENV"
           "${GFORTRAN}" --version
 
-          QT_PREFIX="$(brew --prefix qt)"
+      - name: Restore Qt 6.11 cache
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.QT_CACHE_ROOT }}
+          key: macos-intel-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-v1
+
+      - name: Install Qt 6.11
+        run: |
+          set -euo pipefail
+          QT_INSTALL_ROOT="${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}"
+
+          QMAKE_PATH="$(find "${QT_INSTALL_ROOT}" -path '*/bin/qmake6' -type f 2>/dev/null | head -n1 || true)"
+          if [[ -z "${QMAKE_PATH}" || ! -x "${QMAKE_PATH}" ]]; then
+            rm -rf "${QT_INSTALL_ROOT}"
+            python3 -m venv "${RUNNER_TEMP}/aqt-venv"
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m pip install --upgrade pip aqtinstall
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m aqt install-qt mac desktop "${QT_VERSION}" "${QT_ARCH}" \
+              -O "${QT_INSTALL_ROOT}" \
+              -m qt5compat qtimageformats qtmultimedia qtserialport qtshadertools qtsvg qtwebsockets
+          fi
+
+          QMAKE_PATH="$(find "${QT_INSTALL_ROOT}" -path '*/bin/qmake6' -type f 2>/dev/null | head -n1 || true)"
+          if [[ -z "${QMAKE_PATH}" || ! -x "${QMAKE_PATH}" ]]; then
+            echo "Unable to locate Qt 6.11 qmake6 under ${QT_INSTALL_ROOT}"
+            exit 1
+          fi
+
+          QT_PREFIX="$(cd "$(dirname "${QMAKE_PATH}")/.." && pwd)"
+          QT_REPORTED_VERSION="$("${QMAKE_PATH}" -query QT_VERSION)"
+          case "${QT_REPORTED_VERSION}" in
+            6.11.*) ;;
+            *)
+              echo "Expected Qt 6.11.x, got ${QT_REPORTED_VERSION}"
+              exit 1
+              ;;
+          esac
+
           echo "${QT_PREFIX}/bin" >> "$GITHUB_PATH"
           echo "QT_PREFIX=${QT_PREFIX}" >> "$GITHUB_ENV"
+          echo "QMAKE=${QMAKE_PATH}" >> "$GITHUB_ENV"
           echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "$GITHUB_ENV"
-          qmake6 -v
+          "${QMAKE_PATH}" -v
 
       - name: Build and install Hamlib
         run: |
@@ -113,16 +154,10 @@ jobs:
 
       - name: Build release assets
         run: |
-          EXTRA_ARGS=()
-          if [[ "${{ matrix.experimental }}" == "true" ]]; then
-            echo "Experimental legacy build enabled for ${{ matrix.asset_suffix }}; skipping strict compatibility gate."
-            EXTRA_ARGS+=(--skip-compat-check)
-          fi
           scripts/release-macos.sh "${VERSION}" \
             --compat-macos "${{ matrix.compat_macos }}" \
             --asset-suffix "${{ matrix.asset_suffix }}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            "${EXTRA_ARGS[@]}"
+            --repo "${GITHUB_REPOSITORY}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -166,16 +201,15 @@ jobs:
         run: |
           ls -lh release-assets
           VERSION="${{ steps.version.outputs.version }}"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
+          test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.dmg"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.zip"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64-sha256.txt"
-          if [[ -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.dmg" && \
-                -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.zip" && \
-                -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64-sha256.txt" ]]; then
-            echo "Monterey Intel artifact detected and will be published."
-          else
-            echo "Monterey Intel artifact not produced in this run (experimental target)."
-          fi
 
       - name: Publish release
         env:
@@ -195,19 +229,16 @@ jobs:
           fi
 
           ASSETS=(
+            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
+            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
+            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
+            "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
+            "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
+            "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.dmg"
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.zip"
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64-sha256.txt"
           )
-          if [[ -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.dmg" && \
-                -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.zip" && \
-                -f "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64-sha256.txt" ]]; then
-            ASSETS+=(
-              "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.dmg"
-              "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64.zip"
-              "release-assets/decodium4-ft2-${VERSION}-macos-monterey-x86_64-sha256.txt"
-            )
-          fi
 
           if gh release view "${VERSION}" --repo "${REPO}" >/dev/null 2>&1; then
             gh release upload "${VERSION}" "${ASSETS[@]}" --repo "${REPO}" --clobber
