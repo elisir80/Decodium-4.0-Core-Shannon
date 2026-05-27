@@ -2851,6 +2851,33 @@ Dialog {
                                 Text { text: qsTr("FT2 UTILITY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                                 Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+                                // 1.0.311 — FT2: ripetizioni del 73/RR73 finale regolabili (era fisso 8)
+                                Text {
+                                    text: qsTr("FT2: ripetizioni signoff (73/RR73):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                SpinBox {
+                                    id: ft2SignoffCapSpin
+                                    Layout.columnSpan: 3
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 1; to: 8; editable: true
+                                    value: bridge ? bridge.ft2SignoffRetryCap : 4
+                                    onValueChanged: if (bridge && bridge.ft2SignoffRetryCap !== value) bridge.setFt2SignoffRetryCap(value)
+                                    contentItem: TextInput { text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT2 aspettando l'ack del partner prima di loggare e chiudere. Default 4 (~28s). Più basso = chiude prima (meno 'incantato' sulla stessa stazione); più alto = più paziente con partner deboli/QSB. Non tocca FT8/FT4.")
+                                }
+
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
                                 // anti-QSB: ghost filter rilassato, retry cap esteso SNR-
                                 // adattivo, same-step wait piu' permissivo per partner

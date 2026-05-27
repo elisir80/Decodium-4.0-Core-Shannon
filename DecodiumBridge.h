@@ -391,6 +391,8 @@ class DecodiumBridge : public QObject
 
     // 1.0.174 — FT2 Weak-Signal Pack master flag
     Q_PROPERTY(bool ft2Conservative READ ft2Conservative WRITE setFt2Conservative NOTIFY ft2ConservativeChanged)
+    // 1.0.311 — quante volte ripetere il 73/RR73 in FT2 prima di chiudere (cap deferred signoff)
+    Q_PROPERTY(int ft2SignoffRetryCap READ ft2SignoffRetryCap WRITE setFt2SignoffRetryCap NOTIFY ft2SignoffRetryCapChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
@@ -1259,6 +1261,7 @@ signals:
     void windowLayoutResetRequested();
     void asyncTxEnabledChanged();
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
+    void ft2SignoffRetryCapChanged();  // 1.0.311 — cap ripetizioni 73/RR73 FT2
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
@@ -1778,6 +1781,8 @@ private:
     // FT2 doppia TX in 1.0.255 era due chiamate concorrenti entrare prima
     // che m_transmitting fosse true.
     bool m_periodicTxInFlight {false};
+    // 1.0.311 — cap ripetizioni 73/RR73 in FT2 (default 4; era hardcoded 8). Regolabile 1-8.
+    int  m_ft2SignoffRetryCap {4};
     // 1.0.174 — FT2 weak-signal pack master flag (opt-in, default OFF).
     bool m_ft2Conservative {false};
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -2510,6 +2515,9 @@ public:
     Q_INVOKABLE bool ft2Tx2ResendOnStall() const { return m_ft2Tx2ResendOnStall; }
     Q_INVOKABLE void setFt2Tx2ResendOnStall(bool v);
     Q_INVOKABLE void setFt2Conservative(bool v);
+    // 1.0.311 — cap ripetizioni 73/RR73 in FT2 (1-8, default 4), regolabile da Settings
+    Q_INVOKABLE int  ft2SignoffRetryCap() const { return m_ft2SignoffRetryCap; }
+    Q_INVOKABLE void setFt2SignoffRetryCap(int v);
     // 1.0.289 — FT2 enhancement toggles
     Q_INVOKABLE bool ft2FullDecodeInAutoCq() const { return m_ft2FullDecodeInAutoCq; }
     Q_INVOKABLE void setFt2FullDecodeInAutoCq(bool v);
