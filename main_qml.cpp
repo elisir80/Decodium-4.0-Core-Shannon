@@ -769,6 +769,21 @@ int main(int argc, char* argv[])
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
+    // 1.0.307 (#2) — Scala UI globale opzionale (feedback tester "icone troppo piccole").
+    // Va impostata PRIMA della QApplication: QT_SCALE_FACTOR e' il moltiplicatore nativo Qt
+    // che ingrandisce icone+font+layout in modo coerente, sopra il DPI dello schermo.
+    // Persistita come "uiScaleFactor" nello store canonico (Decodium3). Default 1.0 = nessun
+    // cambio. Si applica al riavvio. Rispetta un QT_SCALE_FACTOR gia' impostato dall'utente.
+    if (!qEnvironmentVariableIsSet("QT_SCALE_FACTOR")) {
+        double const uiScale = QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+                                   .value(QStringLiteral("uiScaleFactor"), 1.0).toDouble();
+        if (uiScale >= 0.8 && uiScale <= 2.5 && !qFuzzyCompare(uiScale, 1.0)) {
+            qputenv("QT_SCALE_FACTOR", QByteArray::number(uiScale, 'g', 4));
+            L((QByteArray("UI scale factor applied (QT_SCALE_FACTOR): ")
+               + QByteArray::number(uiScale, 'g', 4)).constData());
+        }
+    }
+
 #if !defined(Q_OS_WIN)
     if (qEnvironmentVariableIsSet("DECODIUM_GRAPHICS_BACKEND")
         && !qEnvironmentVariableIsSet("QSG_RHI_BACKEND")

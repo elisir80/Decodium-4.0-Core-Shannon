@@ -3225,6 +3225,45 @@ Dialog {
                         // riga vuota per riempire le 4 colonne
                         Item { Layout.columnSpan: 2; Layout.preferredHeight: controlHeight }
 
+                        // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
+                        Text { text: qsTr("Scala interfaccia:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        ComboBox {
+                            id: uiScaleCombo
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            readonly property var scaleValues: [1.0, 1.1, 1.25, 1.5, 1.75]
+                            model: ["100%", "110%", "125%", "150%", "175%"]
+                            currentIndex: {
+                                var f = bridge ? Number(bridge.getSetting("uiScaleFactor", 1.0)) : 1.0
+                                var best = 0; var bestd = 99
+                                for (var i = 0; i < scaleValues.length; ++i) {
+                                    var d = Math.abs(scaleValues[i] - f)
+                                    if (d < bestd) { bestd = d; best = i }
+                                }
+                                return best
+                            }
+                            onActivated: {
+                                if (bridge) bridge.setSetting("uiScaleFactor", scaleValues[currentIndex])
+                                uiScaleRestartNote.visible = true
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: parent.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            delegate: ItemDelegate {
+                                contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium }
+                            }
+                        }
+                        Text {
+                            id: uiScaleRestartNote
+                            Layout.columnSpan: 2
+                            Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            text: qsTr("↻ riavvia per applicare")
+                            color: bridge.themeManager.warningColor
+                            font.pixelSize: 11
+                            visible: false
+                        }
+
                         // ── Bande Operative (#4) — quali bande mostrare nel selettore ──
                         Text { text: qsTr("BANDE OPERATIVE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
