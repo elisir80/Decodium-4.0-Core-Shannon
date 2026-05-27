@@ -2489,6 +2489,10 @@ private:
     void injectPeriodSeparators(QVariantList& filtered) const;
     // 1.0.145: detection ghost decode (SNR marginale + AP-aided high-FP-rate).
     bool looksLikeGhostDecode(QVariantMap const& entry) const;
+    bool directedDecodePeerHasInvalidDxcc(const QString& peerToken,
+                                          const QString& message,
+                                          const QString& context,
+                                          bool logReject = true) const;
 
 public:
     Q_INVOKABLE bool hideGhostDecodes() const { return m_hideGhostDecodes; }
@@ -2719,6 +2723,9 @@ private:
     bool specialOperationRequiresLegacyTx() const;
     bool usingLegacyBackendForTx() const;
     bool shouldUseBridgeAudioForLegacyDigitalTx() const;
+    bool legacyBridgeAudioTxInFlight() const;
+    bool preflightLegacyBridgeTxBeforePtt(const QString& reason);
+    void abortLegacyBridgeTxRequest(const QString& reason);
     bool startBridgeAudioForLegacyDigitalTx(const QString& reason);
     void stopBridgeAudioForLegacyDigitalTx(const QString& reason);
     bool useModernSpectrumFeedWithLegacy() const;

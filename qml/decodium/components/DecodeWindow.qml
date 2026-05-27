@@ -126,29 +126,29 @@ Window {
             decodeWindow.rxDecodeModel = currentRxDecodes()
             decodeWindow.rxDecodeListVersion++
             if (bandActivityList)
-                bandActivityList.forceTailFollow()
+                bandActivityList.followTailAfterModelUpdate()
             if (rxFrequencyList)
-                rxFrequencyList.forceTailFollow()
+                rxFrequencyList.followTailAfterModelUpdate()
         }
         function onRxDecodeListChanged() {
             decodeWindow.rxDecodeModel = currentRxDecodes()
             decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
-	                rxFrequencyList.forceTailFollow()
+	                rxFrequencyList.followTailAfterModelUpdate()
 	        }
 	        function onDxCallChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
 	            decodeWindow.rxDecodeModel = currentRxDecodes()
 	            decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
-	                rxFrequencyList.forceTailFollow()
+	                rxFrequencyList.followTailAfterModelUpdate()
 	        }
 	        function onRxFrequencyChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
 	            decodeWindow.rxDecodeModel = currentRxDecodes()
 	            decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
-	                rxFrequencyList.forceTailFollow()
+	                rxFrequencyList.followTailAfterModelUpdate()
 	        }
 	    }
 
@@ -157,7 +157,7 @@ Window {
         rxDecodeModel = currentRxDecodes()
         rxDecodeListVersion++
         if (rxFrequencyList)
-            rxFrequencyList.forceTailFollow()
+            rxFrequencyList.followTailAfterModelUpdate()
     }
     Component.onCompleted: {
         rxDecodeModel = currentRxDecodes()
@@ -942,6 +942,13 @@ Window {
                                 tailFollowPending = false
                                 followTail = isNearTail()
                             }
+                            function shouldSnapTailFollow() {
+                                return appEngine && appEngine.transmitting
+                            }
+                            function followTailAfterModelUpdate() {
+                                if (followTail || isNearTail())
+                                    forceTailFollow()
+                            }
                             function forceTailFollow() {
     followTail = true
     tailFollowPending = true
@@ -956,7 +963,9 @@ Window {
         var distance = Math.abs(bandActivityList.contentY - targetY)
         bandActivityTailAnimation.stop()
         bandActivityList.tailFollowPending = true
-        if (distance < 1 || distance > Math.max(12000, bandActivityList.height * 18)) {
+        if (bandActivityList.shouldSnapTailFollow()
+                || distance < 1
+                || distance > Math.max(12000, bandActivityList.height * 18)) {
             bandActivityList.contentY = targetY
             bandActivityList.finishTailFollow()
             return
@@ -991,8 +1000,15 @@ NumberAnimation {
                             })
                             onContentYChanged: updateFollowTail()
 	                            onContentHeightChanged: {
-	                                if (followTail || tailFollowPending)
-	                                    bandActivityTailSettleTimer.restart()
+	                                if (followTail || tailFollowPending) {
+	                                    if (shouldSnapTailFollow()) {
+	                                        bandActivityTailAnimation.stop()
+	                                        contentY = tailContentY()
+	                                        finishTailFollow()
+	                                    } else {
+	                                        bandActivityTailSettleTimer.restart()
+	                                    }
+	                                }
 	                            }
 	                            onHeightChanged: {
 	                                if (followTail || tailFollowPending)
@@ -1450,6 +1466,13 @@ Component.onCompleted: {
                                 tailFollowPending = false
                                 followTail = isNearTail()
                             }
+                            function shouldSnapTailFollow() {
+                                return appEngine && appEngine.transmitting
+                            }
+                            function followTailAfterModelUpdate() {
+                                if (followTail || isNearTail())
+                                    forceTailFollow()
+                            }
                             function forceTailFollow() {
     followTail = true
     tailFollowPending = true
@@ -1464,7 +1487,9 @@ Component.onCompleted: {
         var distance = Math.abs(rxFrequencyList.contentY - targetY)
         rxFrequencyTailAnimation.stop()
         rxFrequencyList.tailFollowPending = true
-        if (distance < 1 || distance > Math.max(12000, rxFrequencyList.height * 18)) {
+        if (rxFrequencyList.shouldSnapTailFollow()
+                || distance < 1
+                || distance > Math.max(12000, rxFrequencyList.height * 18)) {
             rxFrequencyList.contentY = targetY
             rxFrequencyList.finishTailFollow()
             return
@@ -1499,8 +1524,15 @@ NumberAnimation {
                             })
                             onContentYChanged: updateFollowTail()
 	                            onContentHeightChanged: {
-	                                if (followTail || tailFollowPending)
-	                                    rxFrequencyTailSettleTimer.restart()
+	                                if (followTail || tailFollowPending) {
+	                                    if (shouldSnapTailFollow()) {
+	                                        rxFrequencyTailAnimation.stop()
+	                                        contentY = tailContentY()
+	                                        finishTailFollow()
+	                                    } else {
+	                                        rxFrequencyTailSettleTimer.restart()
+	                                    }
+	                                }
 	                            }
 	                            onHeightChanged: {
 	                                if (followTail || tailFollowPending)

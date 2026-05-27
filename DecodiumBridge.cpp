@@ -1569,21 +1569,8 @@ static qint64 decodeEntryTimestampMsecs(QString const& utcToken, qint64 fallback
     return approxUtc.toMSecsSinceEpoch();
 }
 
-static qint64 decodeDisplaySortMsecs(QVariantMap const& entry, QDateTime const& nowUtc)
+static qint64 decodeDisplaySortMsecsFromTime(QString const& normalizedTime, QDateTime const& nowUtc)
 {
-    // 1.0.139: preferisci entry["timestamp"] ms epoch (sempre popolato in FT2
-    // async, dove entry["time"] è vuoto — vedi commento riga ~18734 e fix
-    // dedup 1.0.136). Se manca, fallback al parsing del campo time. Senza
-    // questa preferenza i decode FT2 async finivano tutti con sortMsecs =
-    // INT_MAX e venivano mescolati a entries con time valido (es. quelle
-    // mirrorate da ALL.TXT legacy) → ordinamento sporadico, vecchie entries
-    // potevano apparire "fresche" in cima alla list visibile.
-    qulonglong const tsMs = entry.value(QStringLiteral("timestamp")).toULongLong();
-    if (tsMs > 0) {
-        return static_cast<qint64>(tsMs);
-    }
-
-    QString const normalizedTime = normalizeUtcDisplayToken(entry.value(QStringLiteral("time")).toString());
     int const decodeSeconds = secondsFromUtcDisplayToken(normalizedTime);
     if (decodeSeconds < 0) {
         return std::numeric_limits<qint64>::max();
@@ -1601,6 +1588,31 @@ static qint64 decodeDisplaySortMsecs(QVariantMap const& entry, QDateTime const& 
     QTime decodedTime(0, 0, 0);
     decodedTime = decodedTime.addSecs(decodeSeconds);
     return QDateTime(decodedDate, decodedTime, Qt::UTC).toMSecsSinceEpoch();
+}
+
+static qint64 decodeDisplaySortMsecs(QVariantMap const& entry, QDateTime const& nowUtc)
+{
+    // 1.0.139: preferisci entry["timestamp"] ms epoch (sempre popolato in FT2
+    // async, dove entry["time"] è vuoto — vedi commento riga ~18734 e fix
+    // dedup 1.0.136). Se manca, fallback al parsing del campo time. Senza
+    // questa preferenza i decode FT2 async finivano tutti con sortMsecs =
+    // INT_MAX e venivano mescolati a entries con time valido (es. quelle
+    // mirrorate da ALL.TXT legacy) → ordinamento sporadico, vecchie entries
+    // potevano apparire "fresche" in cima alla list visibile.
+    QString const normalizedTime = normalizeUtcDisplayToken(entry.value(QStringLiteral("time")).toString());
+    if (entry.value(QStringLiteral("isTx")).toBool()) {
+        qint64 const txVisualSortMs = decodeDisplaySortMsecsFromTime(normalizedTime, nowUtc);
+        if (txVisualSortMs != std::numeric_limits<qint64>::max()) {
+            return txVisualSortMs;
+        }
+    }
+
+    qulonglong const tsMs = entry.value(QStringLiteral("timestamp")).toULongLong();
+    if (tsMs > 0) {
+        return static_cast<qint64>(tsMs);
+    }
+
+    return decodeDisplaySortMsecsFromTime(normalizedTime, nowUtc);
 }
 
 static void sortDecodeEntriesChronologically(QVariantList& entries)
@@ -3956,7 +3968,7 @@ static int minimumUsefulSyncPayloadMs(const QString& mode)
 
 static int ft2AsyncTxStartSafetyMs()
 {
-    return 300;
+    return 550;
 }
 
 static int latestFt2AsyncTxStartMs(int periodMs)
@@ -4545,6 +4557,61 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
     }
 
     return false;
+}
+
+bool DecodiumBridge::directedDecodePeerHasInvalidDxcc(const QString& peerToken,
+                                                      const QString& message,
+                                                      const QString& context,
+                                                      bool logReject) const
+{
+    if (!m_dxccLookup || !m_dxccLookup->isLoaded()) {
+        return false;
+    }
+
+    QString const peer = normalizedUsableCallToken(peerToken);
+    if (peer.isEmpty() || isPlaceholderCallToken(peer)) {
+        return false;
+    }
+
+    QString const base = Radio::base_callsign(peer).trimmed().toUpper();
+    if (base.isEmpty() || !Radio::is_callsign(base)) {
+        return false;
+    }
+
+    auto const peerMatchesCall = [&peer, &base](QString const& call) {
+        QString const normalized = normalizeCallToken(call).trimmed().toUpper();
+        QString const callBase = normalizedBaseCall(normalized);
+        return (!normalized.isEmpty() && normalized == peer)
+            || (!callBase.isEmpty() && callBase == base);
+    };
+    if (peerMatchesCall(m_dxCall)
+        || peerMatchesCall(m_autoCqLockedCall)
+        || peerMatchesCall(inferredPartnerForAutolog())
+        || messageContainsCallToken(buildCurrentTxMessage(), peer, base)
+        || messageContainsCallToken(m_lastTransmittedMessage, peer, base)) {
+        return false;
+    }
+
+    // I call chiaramente corrotti sono gia' gestiti dal filtro strutturale.
+    // Qui colpiamo solo i falsi positivi apparentemente plausibili ma con
+    // prefisso non risolto in CTY/DXCC, es. X49IKP/P.
+    if (!isPlausibleDecodedCallsign(peer)) {
+        return false;
+    }
+
+    DxccEntity const ent = m_dxccLookup->lookup(peer);
+    if (ent.isValid()) {
+        return false;
+    }
+
+    if (logReject) {
+        bridgeLog(QStringLiteral("[GhostFilter] directed invalid-DXCC reject context=%1 peer=%2 base=%3 msg=%4")
+                      .arg(context,
+                           peer,
+                           base,
+                           message.trimmed()));
+    }
+    return true;
 }
 
 // 1.0.226 — Q_INVOKABLE wrapper per uso da QML fallback. Restituisce true
@@ -5521,11 +5588,12 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
             filtered.append(e);
         }
     }
-    // Sort per timestamp ms (1.0.139 fix style)
+    coalesceRxPaneTxRows(filtered, m_mode);
+    QDateTime const sortReferenceUtc = QDateTime::currentDateTimeUtc();
     std::stable_sort(filtered.begin(), filtered.end(),
-        [](QVariant const& a, QVariant const& b) {
-            qulonglong const ta = a.toMap().value(QStringLiteral("timestamp")).toULongLong();
-            qulonglong const tb = b.toMap().value(QStringLiteral("timestamp")).toULongLong();
+        [&sortReferenceUtc](QVariant const& a, QVariant const& b) {
+            qint64 const ta = decodeDisplaySortMsecs(a.toMap(), sortReferenceUtc);
+            qint64 const tb = decodeDisplaySortMsecs(b.toMap(), sortReferenceUtc);
             if (ta != tb) return ta < tb;
             return false;
         });
@@ -7179,6 +7247,11 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                     if (!enabled && m_bridgeAudioLegacyTxActive) {
                         stopBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-off"));
                     }
+                    if (enabled && shouldUseBridgeAudioForLegacyDigitalTx()
+                        && !preflightLegacyBridgeTxBeforePtt(QStringLiteral("legacy-ptt-on"))) {
+                        abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-on-preflight"));
+                        return;
+                    }
 #endif
                     if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
                         double txDialHz = 0.0;
@@ -7193,10 +7266,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                             syncLegacyBackendState();
                             if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-on"))) {
                                 bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed, stopping legacy TX"));
-                                if (m_legacyBackend) {
-                                    m_legacyBackend->stopTransmission();
-                                }
-                                activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+                                abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-on-audio-failed"));
                             }
                         }
 #endif
@@ -7210,6 +7280,13 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                 }
                                 if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
                                     bridgeLog(QStringLiteral("legacyPttRequested: applying delayed PTT after CAT reconnect"));
+#if defined(Q_OS_MAC)
+                                    if (shouldUseBridgeAudioForLegacyDigitalTx()
+                                        && !preflightLegacyBridgeTxBeforePtt(QStringLiteral("legacy-ptt-delayed"))) {
+                                        abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-delayed-preflight"));
+                                        return;
+                                    }
+#endif
                                     syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-delayed"));
                                     activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
                                                       true, catSplitTxDialFrequencyHz(),
@@ -7219,10 +7296,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                         syncLegacyBackendState();
                                         if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-delayed"))) {
                                             bridgeLog(QStringLiteral("legacyPttRequested: delayed bridge TX audio failed, stopping legacy TX"));
-                                            if (m_legacyBackend) {
-                                                m_legacyBackend->stopTransmission();
-                                            }
-                                            activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+                                            abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-delayed-audio-failed"));
                                         }
                                     }
 #endif
@@ -8793,6 +8867,9 @@ bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
         if (directedPeerLooksStructurallyGhost(peerToken)) {
             bridgeLog(QStringLiteral("[GhostFilter] Signal RX reject directed invalid peer=%1 msg=%2")
                           .arg(peerToken, message));
+            return false;
+        }
+        if (directedDecodePeerHasInvalidDxcc(peerToken, message, QStringLiteral("signal-rx"))) {
             return false;
         }
         return true;
@@ -11585,6 +11662,98 @@ bool DecodiumBridge::shouldUseBridgeAudioForLegacyDigitalTx() const
 #endif
 }
 
+bool DecodiumBridge::legacyBridgeAudioTxInFlight() const
+{
+#if defined(Q_OS_MAC)
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool const playbackWindowOpen =
+        (m_txPlaybackHoldUntilMs > nowMs) || (m_txPlaybackHardDeadlineMs > nowMs);
+    return m_bridgeAudioLegacyTxActive
+        || (m_txPcmBuffer && (m_transmitting || m_tuning || playbackWindowOpen))
+        || (m_txAudioSink && (m_transmitting || m_tuning || playbackWindowOpen));
+#else
+    return false;
+#endif
+}
+
+bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
+{
+#if defined(Q_OS_MAC)
+    if (!shouldUseBridgeAudioForLegacyDigitalTx()) {
+        return true;
+    }
+    if (legacyBridgeAudioTxInFlight()) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight already in-flight (%1)").arg(reason));
+        return true;
+    }
+
+    syncLegacyBackendState();
+    if (!checkSwrAllowsTransmission(QStringLiteral("legacyBridgeTxPreflight"))) {
+        return false;
+    }
+
+    QString msg = buildCurrentTxMessage();
+    if (msg.trimmed().isEmpty()) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight blocked empty TX message (%1)")
+                      .arg(reason));
+        emit errorMessage(QStringLiteral("Nessun messaggio TX selezionato"));
+        return false;
+    }
+    if (!repairOrRejectStalePartnerTxMessage(msg,
+                                             QStringLiteral("legacyBridgeTxPreflight:%1").arg(reason))) {
+        emit statusMessage(QStringLiteral("TX bloccato: messaggio non coerente con il QSO attivo"));
+        return false;
+    }
+    return true;
+#else
+    Q_UNUSED(reason);
+    return true;
+#endif
+}
+
+void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
+{
+#if defined(Q_OS_MAC)
+    bridgeLog(QStringLiteral("legacyBridgeTxAudio abort request: reason=%1 active=%2 transmitting=%3")
+                  .arg(reason)
+                  .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
+                  .arg(m_transmitting ? 1 : 0));
+
+    if (m_legacyBackend && m_legacyBackend->transmitting()) {
+        m_legacyBackend->stopTransmission();
+    }
+    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    }
+
+    if (m_bridgeAudioLegacyTxActive) {
+        stopBridgeAudioForLegacyDigitalTx(reason);
+        return;
+    }
+
+    m_txPlaybackHoldUntilMs = 0;
+    m_txPlaybackHardDeadlineMs = 0;
+    m_txPlaybackReleasePending = false;
+    m_txAudioRestartPending = false;
+    m_activeTxNumber = 0;
+    m_activeTxMessage.clear();
+    if (m_txPcmBuffer) {
+        m_txPcmBuffer->close();
+        delete m_txPcmBuffer;
+        m_txPcmBuffer = nullptr;
+    }
+    m_txPcmData.clear();
+    if (m_transmitting) {
+        m_transmitting = false;
+        emit transmittingChanged();
+    }
+    resumeRxAudioAfterTx(reason);
+    resumeNonAudioTxWork(reason);
+#else
+    Q_UNUSED(reason);
+#endif
+}
+
 bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
@@ -11601,6 +11770,15 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     if (m_bridgeAudioTuneActive) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio: stopping bridge tune first (%1)").arg(reason));
         stopTune();
+    }
+    if (legacyBridgeAudioTxInFlight()) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio duplicate start ignored (%1): tx=%2 tune=%3 pcm=%4 sink=%5")
+                      .arg(reason)
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_tuning ? 1 : 0)
+                      .arg(m_txPcmBuffer ? 1 : 0)
+                      .arg(m_txAudioSink ? 1 : 0));
+        return true;
     }
     if (m_tuning) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio blocked by active Tune (%1)").arg(reason));
@@ -12709,9 +12887,14 @@ void DecodiumBridge::noteTxPlaybackFinished(const QString& reason, bool error)
 bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
 {
     QString const normalized = m_mode.trimmed().toUpper();
+    bool const ft2AutoCqCalling =
+        normalized == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && m_autoCqRepeat
+        && m_currentTx == 6;
     return normalized == QStringLiteral("FT8")
         || normalized == QStringLiteral("FT4")
-        || (normalized == QStringLiteral("FT2") && !m_asyncTxEnabled);
+        || (normalized == QStringLiteral("FT2") && (!m_asyncTxEnabled || ft2AutoCqCalling));
 }
 
 bool DecodiumBridge::isSyncTxStartTooLate(int* elapsedMsOut, int* latestStartMsOut) const
@@ -13569,10 +13752,15 @@ void DecodiumBridge::startTx()
         int const macSlotElapsedMs = macPeriodMs > 0
             ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(macPeriodMs))
             : -1;
+        bool const macFt2Async =
+            m_mode == QStringLiteral("FT2") && m_asyncTxEnabled;
+        bool const macAlignToSyncSlot = shouldAlignTxAudioToCurrentSyncSlot();
         int const macNominalLeadInMs =
-            (m_mode == QStringLiteral("FT2")) ? 450 : txSyncLeadInMsForMode(m_mode);
+            (m_mode == QStringLiteral("FT2"))
+                ? ((macFt2Async && !macAlignToSyncSlot) ? 0 : 450)
+                : txSyncLeadInMsForMode(m_mode);
         int macInitialSilenceMs = macNominalLeadInMs;
-        if (shouldAlignTxAudioToCurrentSyncSlot() && macSlotElapsedMs >= 0) {
+        if (macAlignToSyncSlot && macSlotElapsedMs >= 0) {
             macInitialSilenceMs = macSlotElapsedMs < macNominalLeadInMs
                 ? macNominalLeadInMs - macSlotElapsedMs
                 : 0;
@@ -13682,6 +13870,8 @@ void DecodiumBridge::startTx()
                           << "waveSamples=" << wave.size()
                           << "peak=" << QString::number(txWavePeak(wave), 'f', 6)
                           << "payloadMs=" << txPayloadMs
+                          << "ft2Async=" << macFt2Async
+                          << "alignSlot=" << macAlignToSyncSlot
                           << "nominalLeadMs=" << macNominalLeadInMs
                           << "initialSilenceMs=" << macInitialSilenceMs
                           << "slotElapsedMs=" << macSlotElapsedMs
@@ -13707,6 +13897,8 @@ void DecodiumBridge::startTx()
                   " attn=" + QString::number(attenuationDb, 'f', 2) +
                   " gain=" + QString::number(txGainFromSlider(m_txOutputLevel), 'f', 4) +
                   " slot_elapsed=" + QString::number(macSlotElapsedMs) + "ms" +
+                  " ft2_async=" + QString::number(macFt2Async ? 1 : 0) +
+                  " align_slot=" + QString::number(macAlignToSyncSlot ? 1 : 0) +
                   " lead_in=" + QString::number(macNominalLeadInMs) + "ms" +
                   " initial_silence=" + QString::number(macInitialSilenceMs) + "ms" +
                   " period=" + QString::number(txPeriodSeconds, 'f', 3) + "s" +
@@ -20985,6 +21177,12 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             && tokenMatchesCall(parts.at(index), myCallUpper, myBaseUpper);
     };
     bool const directedToMe = tokenIsMine(0) || tokenIsMine(1);
+    if (directedToMe) {
+        QString const peerToken = directedPeerTokenFromMessage(msg, myCallUpper, myBaseUpper);
+        if (directedDecodePeerHasInvalidDxcc(peerToken, msg, QStringLiteral("auto-seq"))) {
+            return;
+        }
+    }
 
     // Gate self-echo. Con nominativi speciali/non standard la forma corretta
     // puo' mantenere lo stesso ordine dei primi due token tra TX e RX
@@ -21149,7 +21347,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         : Radio::base_callsign(from).trimmed().toUpper();
     if (is_73 && !cooldownKey.isEmpty()) {
         qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
-        int cooldownMs = (m_mode == "FT2" && m_asyncTxEnabled) ? 8000 : 20000;
+        int cooldownMs = 30000;
         // purge entries scadute
         for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
             if (nowMs - it.value() > cooldownMs) it = m_qsoCooldown.erase(it);
@@ -21206,8 +21404,13 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !messagePartnerBase.isEmpty()
         && !duplicateActiveBase.isEmpty()
         && messagePartnerBase == duplicateActiveBase;
+    bool const finalSignoffFromActiveExchange =
+        finalSignoffFromActivePartner
+        && m_currentTx != 6
+        && m_qsoProgress > 1
+        && m_qsoProgress < 6;
     if (m_autoCqRepeat && !messagePartnerBase.isEmpty()
-        && !finalSignoffFromActivePartner) {
+        && !finalSignoffFromActiveExchange) {
         if (liveFt2AutoCqDirectedGrid) {
             if (isRecentAutoCqWorkedOrLoggedDuplicate(messagePartnerBase, m_frequency, m_mode)) {
                 bridgeLog(QStringLiteral("autoSeq: skip recently worked/logged AutoCQ partner %1 msg=%2")
@@ -21442,9 +21645,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     bool const localSignoffAlreadySentForMessagePartner =
         lastTransmittedSignoffForMessagePartner
         && (m_nTx73 > 0 || m_lastNtx == 4 || m_lastNtx == 5);
-    bool const localSignoffAlreadyArmedOrSent =
-        localSignoffStateForMessagePartner
-        || localSignoffAlreadySentForMessagePartner;
+    bool const localFinal73AlreadyArmedOrSentForMessagePartner =
+        ((m_currentTx == 5) && currentPayloadMentionsMessagePartnerNow())
+        || ((m_lastNtx == 5) && lastPayloadMentionsMessagePartnerNow());
     bool const partnerSignoff73 =
         (last.compare(QStringLiteral("73"), Qt::CaseInsensitive) == 0
          && m_qsoProgress >= 4);
@@ -21480,7 +21683,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
          || m_mode == QStringLiteral("FT4"));
     bool const partnerSignoffNeedsOwn73 =
         partnerAnySignoff
-        && !localSignoffAlreadyArmedOrSent
+        && !localFinal73AlreadyArmedOrSentForMessagePartner
         && profileNeedsOwn73BeforeLog;
     bool const partnerFinalAck =
         partnerAnySignoff && !partnerSignoffNeedsOwn73;
@@ -26165,6 +26368,19 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     entry["dxDistance"] = distKm;
     entry["dxGrid"] = dxGridExtracted;
 
+    QString const directedPeer = directedPeerTokenFromMessage(msg,
+                                                              m_callsign.trimmed().toUpper(),
+                                                              myBase);
+    if (directedDecodePeerHasInvalidDxcc(directedPeer,
+                                         msg,
+                                         QStringLiteral("enrich"),
+                                         false)) {
+        entry[QStringLiteral("directedInvalidDxcc")] = true;
+        entry[QStringLiteral("isMyCall")] = false;
+    } else {
+        entry[QStringLiteral("directedInvalidDxcc")] = false;
+    }
+
     // 1.0.138: pre-calcola la cascata WSJT-X UNA volta qui, quando il decode
     // entra. Prima Waterfall.qml::refreshDecodeLabels() chiamava
     // bridge.decodeHighlightBg(d) per ogni call ad ogni decodeListChanged
@@ -26505,6 +26721,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         entry["timestamp"] = static_cast<qulonglong>(
             decodeEntryTimestampMsecs(entryTime, QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
+        isMyCall = entry.value(QStringLiteral("isMyCall")).toBool();
         if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
             bridgeLog(QStringLiteral("ghost decode filter: mode=%1 msg='%2'")
                           .arg(entry.value("mode").toString(), msg));
@@ -26961,6 +27178,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         entry["timestamp"] = static_cast<qulonglong>(
             decodeEntryTimestampMsecs(f[0], QDateTime::currentMSecsSinceEpoch()));
         enrichDecodeEntry(entry);
+        isMyCall = entry.value(QStringLiteral("isMyCall")).toBool();
         if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
             bridgeLog(QStringLiteral("ghost decode filter FT2 async: msg='%1'")
                           .arg(msg));
@@ -27233,6 +27451,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         entry["fromCall"]   = fromCall;
         entry["decodeSessionId"] = static_cast<qulonglong>(m_decodeSessionId);
         enrichDecodeEntry(entry);
+        isMyCall = entry.value(QStringLiteral("isMyCall")).toBool();
         if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
             bridgeLog(QStringLiteral("ghost decode filter legacy-jt: msg='%1'")
                           .arg(msg));
