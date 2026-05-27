@@ -5416,6 +5416,62 @@ Dialog {
                             onTextChanged: bridge.setSetting("HighlightBlueCallsigns", text.toUpperCase())
                         }
 
+                        // ── Colori Interfaccia (sfondo + testo) — #6, stile v3 ──
+                        Text { text: qsTr("COLORI INTERFACCIA (sfondo + testo)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        RowLayout {
+                            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+                            Text { text: qsTr("Usa colori personalizzati:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
+                            CheckBox {
+                                checked: bridge.themeManager.customColorsEnabled
+                                onToggled: bridge.themeManager.customColorsEnabled = checked
+                                indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                contentItem: Text { text: ""; leftPadding: 24 }
+                            }
+                            Text { text: qsTr("(sovrascrive sfondo e testo del tema)"); color: textSecondary; font.pixelSize: 10; Layout.fillWidth: true; elide: Text.ElideRight }
+                        }
+
+                        RowLayout {
+                            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+                            enabled: bridge.themeManager.customColorsEnabled
+                            opacity: enabled ? 1.0 : 0.4
+                            Text { text: qsTr("Sfondo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
+                            Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
+                                color: settingsDialog.validHexColor(bridge.themeManager.customBgColor) ? bridge.themeManager.customBgColor : bgDeep }
+                            TextField {
+                                id: customBgField
+                                Layout.preferredWidth: 120; implicitHeight: 28; leftPadding: 8
+                                text: bridge.themeManager.customBgColor
+                                placeholderText: "#0A0F1A"
+                                color: settingsDialog.validHexColor(text) ? textPrimary : "#ff5555"
+                                font.pixelSize: 12; selectByMouse: true
+                                onEditingFinished: if (settingsDialog.validHexColor(text)) bridge.themeManager.customBgColor = text
+                                background: Rectangle { color: bgMedium; border.color: customBgField.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        RowLayout {
+                            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+                            enabled: bridge.themeManager.customColorsEnabled
+                            opacity: enabled ? 1.0 : 0.4
+                            Text { text: qsTr("Testo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
+                            Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
+                                color: settingsDialog.validHexColor(bridge.themeManager.customTextColor) ? bridge.themeManager.customTextColor : textPrimary }
+                            TextField {
+                                id: customTextField
+                                Layout.preferredWidth: 120; implicitHeight: 28; leftPadding: 8
+                                text: bridge.themeManager.customTextColor
+                                placeholderText: "#E8F4FD"
+                                color: settingsDialog.validHexColor(text) ? textPrimary : "#ff5555"
+                                font.pixelSize: 12; selectByMouse: true
+                                onEditingFinished: if (settingsDialog.validHexColor(text)) bridge.themeManager.customTextColor = text
+                                background: Rectangle { color: bgMedium; border.color: customTextField.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+
                         // ── Spettro ──
                         Text { text: qsTr("SPECTRUM"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }

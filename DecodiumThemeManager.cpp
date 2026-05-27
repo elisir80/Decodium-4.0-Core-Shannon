@@ -80,6 +80,61 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     } else {
         m_currentTheme = "Ocean Blue";
     }
+    // 1.0.305 (#6) — colori UI personalizzati (sfondo+testo), opt-in default OFF
+    m_customColorsEnabled = s.value("theme/customEnabled", false).toBool();
+    m_customBgColor       = s.value("theme/customBg", QString()).toString();
+    m_customTextColor     = s.value("theme/customText", QString()).toString();
+}
+
+// 1.0.305 (#6) — override colori UI ----------------------------------------
+QColor DecodiumThemeManager::customBg() const
+{
+    if (!m_customColorsEnabled) return QColor();
+    QColor c(m_customBgColor);
+    return c.isValid() ? c : QColor();
+}
+
+QColor DecodiumThemeManager::customText() const
+{
+    if (!m_customColorsEnabled) return QColor();
+    QColor c(m_customTextColor);
+    return c.isValid() ? c : QColor();
+}
+
+// Sfumatura "elevazione" per i livelli di sfondo: su uno sfondo scuro schiarisce,
+// su uno chiaro scurisce leggermente → i pannelli restano leggibili su qualsiasi base.
+QColor DecodiumThemeManager::elevate(const QColor& base, double factor)
+{
+    if (!base.isValid()) return base;
+    return base.lightnessF() < 0.5
+        ? base.lighter(static_cast<int>(100 + factor * 100))
+        : base.darker(static_cast<int>(100 + factor * 45));
+}
+
+void DecodiumThemeManager::setCustomColorsEnabled(bool v)
+{
+    if (m_customColorsEnabled == v) return;
+    m_customColorsEnabled = v;
+    QSettings("Decodium", "Decodium").setValue("theme/customEnabled", v);
+    emit paletteChanged();
+}
+
+void DecodiumThemeManager::setCustomBgColor(const QString& hex)
+{
+    QString const h = hex.trimmed();
+    if (m_customBgColor == h) return;
+    m_customBgColor = h;
+    QSettings("Decodium", "Decodium").setValue("theme/customBg", h);
+    if (m_customColorsEnabled) emit paletteChanged();
+}
+
+void DecodiumThemeManager::setCustomTextColor(const QString& hex)
+{
+    QString const h = hex.trimmed();
+    if (m_customTextColor == h) return;
+    m_customTextColor = h;
+    QSettings("Decodium", "Decodium").setValue("theme/customText", h);
+    if (m_customColorsEnabled) emit paletteChanged();
 }
 
 const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette() const
@@ -98,24 +153,58 @@ void DecodiumThemeManager::setCurrentTheme(const QString& name)
     emit paletteChanged();
 }
 
-bool   DecodiumThemeManager::isLightTheme()   const { return currentPalette().isLight; }
-QColor DecodiumThemeManager::bgDeep()         const { return currentPalette().bgDeep; }
-QColor DecodiumThemeManager::bgMedium()       const { return currentPalette().bgMedium; }
-QColor DecodiumThemeManager::bgLight()        const { return currentPalette().bgLight; }
+bool DecodiumThemeManager::isLightTheme() const
+{
+    QColor const c = customBg();
+    if (c.isValid()) return c.lightnessF() >= 0.5;
+    return currentPalette().isLight;
+}
+QColor DecodiumThemeManager::bgDeep() const
+{
+    QColor const c = customBg();
+    return c.isValid() ? c : currentPalette().bgDeep;
+}
+QColor DecodiumThemeManager::bgMedium() const
+{
+    QColor const c = customBg();
+    return c.isValid() ? elevate(c, 0.18) : currentPalette().bgMedium;
+}
+QColor DecodiumThemeManager::bgLight() const
+{
+    QColor const c = customBg();
+    return c.isValid() ? elevate(c, 0.40) : currentPalette().bgLight;
+}
 QColor DecodiumThemeManager::primaryColor()   const { return currentPalette().primaryColor; }
 QColor DecodiumThemeManager::secondaryColor() const { return currentPalette().secondaryColor; }
 QColor DecodiumThemeManager::accentColor()    const { return currentPalette().accentColor; }
 QColor DecodiumThemeManager::warningColor()   const { return currentPalette().warningColor; }
 QColor DecodiumThemeManager::errorColor()     const { return currentPalette().errorColor; }
-QColor DecodiumThemeManager::textPrimary()    const { return currentPalette().textPrimary; }
-QColor DecodiumThemeManager::textSecondary()  const { return currentPalette().textSecondary; }
+QColor DecodiumThemeManager::textPrimary() const
+{
+    QColor const c = customText();
+    return c.isValid() ? c : currentPalette().textPrimary;
+}
+QColor DecodiumThemeManager::textSecondary() const
+{
+    QColor c = customText();
+    if (c.isValid()) { c.setAlphaF(0.62); return c; }
+    return currentPalette().textSecondary;
+}
 QColor DecodiumThemeManager::successColor()   const { return currentPalette().successColor; }
 QColor DecodiumThemeManager::glassOverlay()   const { return currentPalette().glassOverlay; }
 QColor DecodiumThemeManager::glassBorder()    const { return currentPalette().glassBorder; }
 QColor DecodiumThemeManager::borderColor()    const { return currentPalette().borderColor; }
 QColor DecodiumThemeManager::borderSoft()     const { return currentPalette().borderSoft; }
-QColor DecodiumThemeManager::panelColor()     const { return currentPalette().panelColor; }
-QColor DecodiumThemeManager::panelHeader()    const { return currentPalette().panelHeader; }
+QColor DecodiumThemeManager::panelColor() const
+{
+    QColor const c = customBg();
+    return c.isValid() ? elevate(c, 0.40) : currentPalette().panelColor;
+}
+QColor DecodiumThemeManager::panelHeader() const
+{
+    QColor const c = customBg();
+    return c.isValid() ? elevate(c, 0.26) : currentPalette().panelHeader;
+}
 QColor DecodiumThemeManager::rowMatchBg()     const { return currentPalette().rowMatchBg; }
 QColor DecodiumThemeManager::rowMatchBorder() const { return currentPalette().rowMatchBorder; }
 QColor DecodiumThemeManager::ledRed()         const { return currentPalette().ledRed; }

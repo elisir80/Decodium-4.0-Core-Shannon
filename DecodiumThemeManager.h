@@ -34,6 +34,10 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QStringList availableThemes READ availableThemes CONSTANT)
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
+    // 1.0.305 (#6) — colori UI personalizzati (sfondo + testo) come in v3, sopra il tema.
+    Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
+    Q_PROPERTY(QString customBgColor       READ customBgColor       WRITE setCustomBgColor       NOTIFY paletteChanged)
+    Q_PROPERTY(QString customTextColor     READ customTextColor     WRITE setCustomTextColor     NOTIFY paletteChanged)
 
 public:
     explicit DecodiumThemeManager(QObject* parent = nullptr);
@@ -66,6 +70,14 @@ public:
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
+
+    // 1.0.305 (#6) — override colori UI (sfondo+testo). Stringhe hex "#RRGGBB" (vuote = tema).
+    bool    customColorsEnabled() const { return m_customColorsEnabled; }
+    void    setCustomColorsEnabled(bool v);
+    QString customBgColor()   const { return m_customBgColor; }
+    void    setCustomBgColor(const QString& hex);
+    QString customTextColor() const { return m_customTextColor; }
+    void    setCustomTextColor(const QString& hex);
 
 public slots:
     Q_INVOKABLE void applyThemeByName(const QString& name) { setCurrentTheme(name); }
@@ -107,5 +119,13 @@ private:
 
     const ThemePalette& currentPalette() const;
 
+    // 1.0.305 (#6) — colori custom: override valido solo se enabled + hex parsabile.
+    QColor customBg() const;    // QColor(m_customBgColor) se enabled+valido, altrimenti invalido
+    QColor customText() const;
+    static QColor elevate(const QColor& base, double factor);  // sfumatura lightness-aware per i livelli bg
+
     QString m_currentTheme {"Ocean Blue"};
+    bool    m_customColorsEnabled {false};
+    QString m_customBgColor;    // "#RRGGBB" o vuoto
+    QString m_customTextColor;
 };
