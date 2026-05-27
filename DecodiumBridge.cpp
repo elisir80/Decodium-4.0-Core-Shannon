@@ -4658,6 +4658,20 @@ void DecodiumBridge::setFt8DeepDecodeInTx(bool v)
     bridgeLog(QStringLiteral("[FT8] Deep decode in TX %1").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.304 (#9) — resume-on-reply opt-in. Alla Halt con un QSO attivo memorizza il partner;
+// se quello ri-risponde (suo call + mio call) entro 2 min riprende il QSO. Default OFF:
+// l'hard-stop v4 dell'Halt resta il comportamento di default (feedback tester 2026-05).
+void DecodiumBridge::setResumeQsoOnReply(bool v)
+{
+    if (m_resumeQsoOnReply == v) return;
+    m_resumeQsoOnReply = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("ResumeQsoOnReply"), v);
+    if (!v) { m_resumeTargetCall.clear(); m_resumeArmedMs = 0; }  // disattivando, disarma
+    emit resumeQsoOnReplyChanged();
+    bridgeLog(QStringLiteral("[Resume] resume-on-reply %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers RISCRITTI
 // dopo il revert di 1.0.186 (memoria project_186_reverted_partner_memory_bug).
 // Differenze chiave dalla versione revertita:
@@ -18657,6 +18671,17 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
               " TX=" + QString::number(newCurrentTx) +
               " progress=" + QString::number(m_qsoProgress) +
               " txPeriod=" + QString::number(m_txPeriod));
+
+    // 1.0.304 (#9) — se c'è un resume armato su un partner DIVERSO e l'utente ingaggia
+    // manualmente qualcun altro, disarma (ha cambiato target). Il resume stesso azzera
+    // m_resumeTargetCall PRIMA di chiamare questo metodo, quindi non si auto-disarma.
+    if (!m_resumeTargetCall.isEmpty()
+        && normalizedBaseCall(hisCall.trimmed().toUpper()) != m_resumeTargetCall) {
+        bridgeLog(QStringLiteral("[Resume] disarmato: ingaggiato %1 != target %2")
+                      .arg(hisCall, m_resumeTargetCall));
+        m_resumeTargetCall.clear();
+        m_resumeArmedMs = 0;
+    }
     emit statusMessage("QSO con " + hisCall + " — TX" + QString::number(newCurrentTx));
 
     // Decodium3 recalculated m_bTxTime on every GUI tick, so a double-click just
@@ -19274,6 +19299,16 @@ void DecodiumBridge::engageManualTxHold(const QString& reason, bool clearQueue)
         bridgeLog(QStringLiteral("manualTxHold: engaged (%1)").arg(reason));
     }
     m_manualTxHold = true;
+    // 1.0.304 (#9) — resume-on-reply: arma il partner PRIMA dei wipe sottostanti
+    // (clearFt2AsyncAbortQsoState in FT2-async azzera m_dxCall). Solo se toggle ON e c'è un
+    // partner ingaggiato. NON azzero nell'else: l'arm persiste fino a resume/timeout/altro
+    // ingaggio (vedi tryResumeQsoOnReply, processDecodeDoubleClick, setResumeQsoOnReply).
+    if (m_resumeQsoOnReply && !m_dxCall.trimmed().isEmpty()) {
+        m_resumeTargetCall = normalizedBaseCall(m_dxCall.trimmed().toUpper());
+        m_resumeArmedMs = QDateTime::currentMSecsSinceEpoch();
+        bridgeLog(QStringLiteral("[Resume] armato su %1 (Halt) — riprende se risponde entro 2 min")
+                      .arg(m_resumeTargetCall));
+    }
     clearAutoCqPartnerLock();
     clearPendingAutoLogSnapshot();
     clearLateAutoLogSnapshot();
@@ -19319,6 +19354,47 @@ void DecodiumBridge::clearManualTxHold(const QString& reason)
     }
     m_manualTxHold = false;
     bridgeLog(QStringLiteral("manualTxHold: cleared (%1)").arg(reason));
+}
+
+// 1.0.304 (#9) — resume-on-reply. Se armato (Halt con partner, toggle ON) e quel partner
+// torna a rispondere a NOI (decode con suo call + mio call) entro 2 min, riprende il QSO via
+// processDecodeDoubleClick (stessa via del doppio-click: re-ingaggia + sceglie il TX giusto +
+// rilascia il manual hold). Chiamato all'inizio dei path decode, PRIMA dei gate su
+// m_manualTxHold. Ritorna true se ha ripreso. Inerte (return rapido) se OFF/non-armato.
+bool DecodiumBridge::tryResumeQsoOnReply(const QStringList& rows)
+{
+    if (!m_resumeQsoOnReply || !m_manualTxHold || m_resumeTargetCall.isEmpty())
+        return false;
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (m_resumeArmedMs <= 0 || nowMs - m_resumeArmedMs > 120000) {  // 2 min
+        bridgeLog(QStringLiteral("[Resume] disarmato (timeout 2 min) target=%1").arg(m_resumeTargetCall));
+        m_resumeTargetCall.clear();
+        m_resumeArmedMs = 0;
+        return false;
+    }
+    QString const myCallUpper = m_callsign.trimmed().toUpper();
+    if (myCallUpper.isEmpty()) return false;
+    QString const myBaseUpper = normalizedBaseCall(myCallUpper);
+    QString const targetBase = m_resumeTargetCall;  // già base-call upper
+    for (QString const& row : rows) {
+        QStringList f = parseFt8Row(row);
+        if (f.size() < 5) continue;
+        QString const msg = f[4];
+        if (!shouldAcceptDecodedMessage(msg)) continue;
+        // Deve contenere SIA il partner sospeso SIA il mio call → mi sta rispondendo.
+        if (!messageContainsCallToken(msg, targetBase, targetBase)) continue;
+        if (!messageContainsCallToken(msg, myCallUpper, myBaseUpper)) continue;
+        QString echoReason;
+        if (shouldSuppressRecentLocalTxEchoDecode(msg, QStringLiteral("resume-on-reply"), &echoReason))
+            continue;
+        bridgeLog(QStringLiteral("[Resume] %1 è tornato a rispondere → riprendo il QSO (msg='%2')")
+                      .arg(targetBase, msg));
+        m_resumeTargetCall.clear();  // disarma PRIMA del re-ingaggio (no ri-trigger)
+        m_resumeArmedMs = 0;
+        processDecodeDoubleClick(msg, f[0], f[1], f[3].toInt());
+        return true;
+    }
+    return false;
 }
 
 void DecodiumBridge::clearFt2AsyncAbortQsoState(const QString& reason)
@@ -21977,6 +22053,8 @@ void DecodiumBridge::loadSettings()
     m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
+    // 1.0.304 (#9) — resume-on-reply, opt-in default OFF
+    m_resumeQsoOnReply      = s.value(QStringLiteral("ResumeQsoOnReply"),      false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
     m_targetCallSign          = s.value(QStringLiteral("CallFeature/TargetCallSign"), QString()).toString();
     m_targetCallMaxRetries    = qBound(0,  s.value(QStringLiteral("CallFeature/MaxRetries"), 10).toInt(),  999);
@@ -26236,6 +26314,11 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         return;
     }
 
+    // 1.0.304 (#9) — resume-on-reply: se in Halt con partner armato e quello ri-risponde,
+    // riprende il QSO (re-ingaggio via processDecodeDoubleClick). Se ha ripreso, salta
+    // l'auto-seq su QUESTA batch (più sotto) per evitare doppio advance sullo stesso decode.
+    bool const resumedQso = tryResumeQsoOnReply(rows);
+
     if (isTimeSyncDecodeMode(m_mode)) {
         if (serialMode.isEmpty()) {
             bridgeLog("onFt8DecodeReady: ignored stale time-sync callback serial=" + QString::number(serial) +
@@ -26565,6 +26648,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     bool const ft8DeepInTxListOnly = m_ft8DeepInTxSerials.remove(serial) > 0;
     bool autoSeqActive =
         !ft8DeepInTxListOnly
+        && !resumedQso  // 1.0.304 (#9): il resume ha già re-ingaggiato su questo decode
         && !m_callsign.isEmpty()
         && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
             || m_autoCqRepeat);
@@ -26705,10 +26789,16 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     bridgeLog("onFt2AsyncDecodeReady: rows=" + QString::number(rows.size()));
     bridgeLog("  async_raw[0]='" + rows[0] + "'");
 
+    // 1.0.304 (#9) — resume-on-reply (FT2-async): l'Halt qui wipa m_dxCall, ma l'arm in
+    // engageManualTxHold ha salvato il partner; se ri-risponde, processDecodeDoubleClick lo
+    // re-ingaggia. Se ha ripreso, salta l'auto-seq su questa batch (evita doppio advance).
+    bool const resumedQso = tryResumeQsoOnReply(rows);
+
     // FT2 async is latency sensitive: drive the QSO sequencer before the
     // heavier UI/list/DXCC work below, so a directed reply can arm the next
     // TX without waiting for repaint and band-map bookkeeping.
     bool const earlyAutoSeqActive =
+        !resumedQso &&
         !m_callsign.isEmpty() &&
         ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
          || m_autoCqRepeat);

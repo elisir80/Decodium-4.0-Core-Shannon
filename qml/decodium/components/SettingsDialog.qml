@@ -2759,6 +2759,30 @@ Dialog {
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
+
+                                // 1.0.304 (#9) — resume-on-reply: riprende il QSO se il partner
+                                // torna a rispondere entro 2 min dall'Halt. Opt-in, default OFF.
+                                Text {
+                                    text: qsTr("Riprendi QSO se risponde:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.resumeQsoOnReply : false
+                                    onCheckedChanged: if (bridge) bridge.resumeQsoOnReply = checked
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Se interrompi (Halt) mentre lavori una stazione e quella torna a risponderti entro 2 minuti, Decodium riprende automaticamente il QSO (come la v3). Vale per FT8/FT4/FT2. Default OFF: di base l'Halt ferma del tutto la sequenza.")
+                                }
                                 Text {
                                     text: qsTr("Disable TX after 73:")
                                     color: textSecondary

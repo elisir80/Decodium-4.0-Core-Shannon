@@ -197,6 +197,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool asyncDecodeEnabled READ asyncDecodeEnabled WRITE setAsyncDecodeEnabled NOTIFY asyncDecodeEnabledChanged)
     Q_PROPERTY(bool dualCarrierEnabled READ dualCarrierEnabled WRITE setDualCarrierEnabled NOTIFY dualCarrierEnabledChanged)
     Q_PROPERTY(bool quickQsoEnabled    READ quickQsoEnabled    WRITE setQuickQsoEnabled    NOTIFY quickQsoEnabledChanged)
+    Q_PROPERTY(bool resumeQsoOnReply   READ resumeQsoOnReply   WRITE setResumeQsoOnReply   NOTIFY resumeQsoOnReplyChanged)
     Q_PROPERTY(int  asyncSnrDb         READ asyncSnrDb                                     NOTIFY asyncSnrDbChanged)
 
     // === CAT/TRANSCEIVER ===
@@ -559,6 +560,8 @@ public:
     void setDualCarrierEnabled(bool v){ if (m_dualCarrierEnabled!=v){ m_dualCarrierEnabled=v; emit dualCarrierEnabledChanged(); } }
     bool quickQsoEnabled()     const { return m_quickQsoEnabled; }
     void setQuickQsoEnabled(bool v)   { if (m_quickQsoEnabled != v) { m_quickQsoEnabled = v; emit quickQsoEnabledChanged(); } }
+    bool resumeQsoOnReply()    const { return m_resumeQsoOnReply; }
+    void setResumeQsoOnReply(bool v);  // 1.0.304: resume-on-reply opt-in (persist Decodium3)
     int  asyncSnrDb()          const { return m_asyncSnrDb; }
     void setAsyncSnrDb(int v)         { if (m_asyncSnrDb != v)          { m_asyncSnrDb = v;          emit asyncSnrDbChanged(); } }
 
@@ -1274,6 +1277,7 @@ signals:
     void uiStyleChanged();
     void dualCarrierEnabledChanged();
     void quickQsoEnabledChanged();
+    void resumeQsoOnReplyChanged();
     void settingValueChanged(QString key, QVariant value);
     void asyncSnrDbChanged();
     void catConnectedChanged();
@@ -1595,6 +1599,9 @@ private:
     void clearLateAutoLogSnapshot();
     void engageManualTxHold(const QString& reason, bool clearQueue = false);
     void clearManualTxHold(const QString& reason);
+    // 1.0.304 (#9) — se armato (Halt con partner) e il partner ri-risponde, riprende il QSO.
+    // Ritorna true se ha ripreso. Inerte se toggle OFF / non armato / timeout.
+    bool tryResumeQsoOnReply(const QStringList& rows);
     void resetManualTxRearmState(const QString& reason);
     void armCqAutoReplyWindow(const QString& reason);
     void clearCqAutoReplyWindow(const QString& reason);
@@ -1864,6 +1871,12 @@ private:
     qint64  m_asyncLastTxEndMs {0};      // timestamp fine ultima TX FT2 async (per guard timer)
     bool m_dualCarrierEnabled{false}; // FT2 dual carrier mode
     bool m_quickQsoEnabled   {false}; // FT2 Quick QSO: salta TX1, flusso Ultra2 (2 messaggi)
+    // 1.0.304 — resume-on-reply (#9): se attivo, alla Halt con QSO attivo memorizza il
+    // partner; se quello ri-risponde (decode con suo call + mio call) entro 2 min, riprende
+    // il QSO via processDecodeDoubleClick. Opt-in, default OFF (l'hard-stop v4 resta default).
+    bool m_resumeQsoOnReply  {false};
+    QString m_resumeTargetCall;        // base-call del partner sospeso (vuoto = disarmato)
+    qint64  m_resumeArmedMs   {0};     // epoch ms dell'arm (timeout 120s)
     int  m_asyncSnrDb          {-99};   // SNR ultimo decode FT2 (per AsyncModeWidget S-meter)
     // FT2 QSO cooldown: evita re-triggering sullo stesso 73 decodificato ogni ~4s (Shannon m_qsoCooldown)
     QMap<QString, qint64> m_qsoCooldown;  // callsign → timestamp msec UTC
