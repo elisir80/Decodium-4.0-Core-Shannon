@@ -6331,6 +6331,24 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 QSettings s("Decodium", "Decodium3");
                 s.setValue("lastSuccessfulCatConnected", false);
                 s.setValue("lastSuccessfulCatBackend", m_catBackend);
+                // 1.0.303 — auto-reconnect runtime OmniRig (feedback tester "OmniRig si
+                // disconnette dopo inattività"). Distinguo un DROP (la disconnessione da
+                // "rig non risponde" lascia m_lastCatError valorizzato) da una disconnessione
+                // VOLONTARIA (utente preme Disconnetti → nessun errore → niente reconnect).
+                // Burst di tentativi (riusa retryRigConnection), gated off durante TX/tune
+                // (non toccare PTT/DTR) e a bassa cadenza (anti-stall, vedi connectRig blocking).
+                if (backend == QStringLiteral("omnirig") && !m_lastCatError.isEmpty()) {
+                    static constexpr int kOmniReconnectDelaysMs[] = {3000, 8000, 16000, 30000};
+                    for (int const delayMs : kOmniReconnectDelaysMs) {
+                        QTimer::singleShot(delayMs, this, [this, delayMs]() {
+                            if (m_shuttingDown || m_catConnected) return;
+                            if (m_transmitting || m_tuning) return;
+                            if (m_catBackend != QStringLiteral("omnirig")) return;
+                            bridgeLog(QStringLiteral("OmniRig auto-reconnect runtime: tentativo (delay=%1ms)").arg(delayMs));
+                            retryRigConnection();
+                        });
+                    }
+                }
             }
 
             if (c) {

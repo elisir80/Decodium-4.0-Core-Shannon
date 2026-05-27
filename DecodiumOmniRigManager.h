@@ -176,6 +176,7 @@ private:
     QString m_rigName       {"OmniRig Rig 1"};
     QString m_pttMethod     {"CAT"};
     int     m_pollInterval  {2};
+    int     m_notRespondingPolls {0};  // 1.0.303: tollera NOTRESPONDING transitori prima di staccare
     int     m_readableParams{0};
     int     m_writableParams{0};
     QString m_splitMode     {"none"};  // "none" | "rig" | "emulate" (Fake It)

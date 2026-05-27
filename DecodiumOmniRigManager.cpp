@@ -363,6 +363,7 @@ void DecodiumOmniRigManager::connectRig()
 void DecodiumOmniRigManager::disconnectRig()
 {
     m_pollTimer->stop();
+    m_notRespondingPolls = 0;  // 1.0.303: la tolleranza NOTRESPONDING riparte pulita al prossimo connect
 
     if (m_pttActive)
         setRigPtt(false);
@@ -422,11 +423,21 @@ void DecodiumOmniRigManager::onPollTimer()
         emit modeChanged();
     }
 
-    // Status: se ST_NOTRESPONDING → disconnetti
+    // Status: tollera NOTRESPONDING transitori (idle/blip della radio o della porta)
+    // prima di staccare. 1.0.303 — feedback tester "OmniRig si disconnette dopo
+    // inattività": prima bastava UN poll NOTRESPONDING per fare disconnectRig() one-way.
+    // Ora servono N poll consecutivi (~10 s a 2 s/poll); il reconnect runtime lato bridge
+    // (su connectedChanged=false) ritenta comunque la riconnessione.
+    static constexpr int kOmniNotRespondingTolerance = 5;
     int status = m_rig->property("Status").toInt();
     if (status == OMNI_ST_NOTRESPONDING && m_connected) {
-        emit errorOccurred("OmniRig: rig non risponde.");
-        disconnectRig();
+        ++m_notRespondingPolls;
+        if (m_notRespondingPolls >= kOmniNotRespondingTolerance) {
+            emit errorOccurred("OmniRig: rig non risponde, disconnesso.");
+            disconnectRig();
+        }
+    } else if (m_notRespondingPolls != 0) {
+        m_notRespondingPolls = 0;  // primo poll buono → azzera il contatore
     }
 }
 
