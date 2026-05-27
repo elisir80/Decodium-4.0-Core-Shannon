@@ -298,6 +298,11 @@ DecodiumLogging::~DecodiumLogging ()
 DecodiumLogging* DecodiumLogging::s_instance = nullptr;
 static QMutex g_diagMutex;
 static QFile* g_diagFile = nullptr;
+// 1.0.312 — guard di ri-entranza per-thread. Una qWarning interna di QFile emessa
+// mentre teniamo g_diagMutex (es. durante la rotazione a 5MB) verrebbe instradata dal
+// Qt message handler di nuovo qui (qtMsgHandler → L → DIAG_INFO → diag) sullo STESSO
+// thread → ri-lock di un QMutex non-ricorsivo = DEADLOCK che congelava il log a 5MB.
+static thread_local bool g_inDiag = false;
 
 static QString diagDir() { return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation); }
 static QString diagPath() { return QDir(diagDir()).absoluteFilePath("decodium_diagnostic.log"); }
@@ -340,6 +345,12 @@ QString DecodiumLogging::categoryToString(DiagCategory cat) {
 }
 
 void DecodiumLogging::diag(DiagCategory cat, const QString& message) {
+    // 1.0.312 — se siamo già dentro diag() su questo thread (ri-entranza via Qt message
+    // handler), scarta il messaggio invece di ri-lockare g_diagMutex → niente deadlock.
+    if (g_inDiag) return;
+    g_inDiag = true;
+    struct ReentryGuard { ~ReentryGuard() { g_inDiag = false; } } reentryGuard;
+
     QMutexLocker lock(&g_diagMutex);
     if (!g_diagFile) {
         QDir().mkpath(diagDir());
@@ -351,12 +362,18 @@ void DecodiumLogging::diag(DiagCategory cat, const QString& message) {
     if (g_diagFile->size() > 5*1024*1024) {
         g_diagFile->close(); delete g_diagFile; g_diagFile = nullptr;
         QDir d(diagDir());
+        // Cascata: ogni rename libera la destinazione del successivo (Windows-safe).
         QFile::remove(d.absoluteFilePath("decodium_diagnostic.3.log"));
         QFile::rename(d.absoluteFilePath("decodium_diagnostic.2.log"), d.absoluteFilePath("decodium_diagnostic.3.log"));
         QFile::rename(d.absoluteFilePath("decodium_diagnostic.1.log"), d.absoluteFilePath("decodium_diagnostic.2.log"));
-        QFile::rename(diagPath(), d.absoluteFilePath("decodium_diagnostic.1.log"));
+        bool const rotated = QFile::rename(diagPath(), d.absoluteFilePath("decodium_diagnostic.1.log"));
         g_diagFile = new QFile(diagPath());
-        if (!g_diagFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        // 1.0.312 — se la rotazione del .log corrente è fallita (lock/permessi), il file
+        // è ancora ~5MB: aprilo in TRUNCATE per non congelare MAI il logger (si perde il
+        // vecchio contenuto, ma la scrittura riparte sempre).
+        QIODevice::OpenMode const mode = QIODevice::WriteOnly | QIODevice::Text
+            | (rotated ? QIODevice::Append : QIODevice::Truncate);
+        if (!g_diagFile->open(mode)) {
             delete g_diagFile; g_diagFile = nullptr; return;
         }
     }
