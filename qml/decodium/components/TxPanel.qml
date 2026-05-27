@@ -15,6 +15,22 @@ Item {
     required property var engine
     property bool handleLogPrompt: true
     property bool showAsyncIcon: true
+
+    // 1.0.308 (#4 fix) — filtro "bande operative" nel band-bar REALE. BandSelector.qml era
+    // codice morto (non istanziato): il selettore effettivo è questo (bandSelectorBar).
+    // Le bande deselezionate in Settings>Display (setting uiDisabledBands, CSV di lambda)
+    // vengono nascoste. Reattivo via onSettingValueChanged.
+    property string bandDisabledCsv: engine ? String(engine.getSetting("uiDisabledBands", "") || "") : ""
+    function bandIsEnabled(lambda) {
+        if (!bandDisabledCsv || bandDisabledCsv.length === 0) return true
+        return ("," + bandDisabledCsv + ",").indexOf("," + lambda + ",") < 0
+    }
+    Connections {
+        target: engine
+        function onSettingValueChanged(key, value) {
+            if (key === "uiDisabledBands") txPanel.bandDisabledCsv = String(value || "")
+        }
+    }
     readonly property bool txVisualActive: !!(engine && (engine.transmitting || engine.tuning))
     property string logPreviewCall: ""
     property string logPreviewGrid: ""
@@ -347,6 +363,8 @@ Item {
                                     id: bandRect
                                     readonly property string bandLabel: modelData.label
                                     readonly property string bandLambda: modelData.lambda
+
+                                    visible: txPanel.bandIsEnabled(bandLambda)  // 1.0.308 (#4 fix)
 
                                     width: Math.max(38, Math.min(68, bandLabel.length * 8 + 14))
                                     height: 26
