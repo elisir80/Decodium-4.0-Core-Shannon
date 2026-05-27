@@ -7212,41 +7212,75 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         z: 9997
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.topMargin: 72
+        // 1.0.308 (#7) — slide-in dall'alto: scende quando appare (più evidente del solo fade)
+        anchors.topMargin: statusToastVisible ? 76 : 40
         anchors.rightMargin: 24
-        width: Math.min(parent.width * 0.42, 520)
-        implicitHeight: toastContent.implicitHeight + 24
+        width: Math.min(parent.width * 0.5, 600)
+        implicitHeight: toastContent.implicitHeight + 28
         radius: 12
-        visible: statusToastVisible
-        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.96)
-        border.color: Qt.rgba(statusToastColor.r, statusToastColor.g, statusToastColor.b, 0.55)
-        border.width: 1
+        // resta renderizzato durante il fade-out
+        visible: opacity > 0.01
+        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.97)
+        border.color: statusToastColor
+        border.width: 2
         opacity: statusToastVisible ? 1.0 : 0.0
 
-        Column {
+        // 1.0.308 (#7) — glow pulsante: attira l'occhio anche con la visione periferica
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -4
+            radius: parent.radius + 4
+            color: "transparent"
+            border.color: statusToastColor
+            border.width: 3
+            opacity: 0.0
+            z: -1
+            SequentialAnimation on opacity {
+                running: statusToastVisible && (!bridge || bridge.uiQuality !== "Low")
+                loops: Animation.Infinite
+                NumberAnimation { from: 0.0; to: 0.65; duration: 600; easing.type: Easing.OutQuad }
+                NumberAnimation { from: 0.65; to: 0.0; duration: 600; easing.type: Easing.InQuad }
+            }
+        }
+
+        Row {
             id: toastContent
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 6
+            anchors.margins: 14
+            spacing: 11
 
-            Text {
-                text: "Aggiornamento"
-                font.pixelSize: 12
-                font.bold: true
+            Rectangle {
+                width: 10; height: 10; radius: 5
                 color: statusToastColor
+                anchors.verticalCenter: parent.verticalCenter
             }
 
-            Text {
-                width: parent.width
-                text: statusToastText
-                wrapMode: Text.Wrap
-                font.pixelSize: 12
-                color: textPrimary
+            Column {
+                width: parent.width - 21
+                spacing: 5
+
+                Text {
+                    text: qsTr("Notifica")
+                    font.pixelSize: 13
+                    font.bold: true
+                    color: statusToastColor
+                }
+
+                Text {
+                    width: parent.width
+                    text: statusToastText
+                    wrapMode: Text.Wrap
+                    font.pixelSize: 14
+                    color: textPrimary
+                }
             }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: statusToastVisible ? 180 : 260; easing.type: statusToastVisible ? Easing.OutQuad : Easing.InQuad }
+            NumberAnimation { duration: statusToastVisible ? 220 : 300; easing.type: statusToastVisible ? Easing.OutQuad : Easing.InQuad }
+        }
+        Behavior on anchors.topMargin {
+            NumberAnimation { duration: 260; easing.type: Easing.OutBack }
         }
     }
 
@@ -7344,6 +7378,44 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         sequence: "Ctrl+Shift+H"
         context: Qt.ApplicationShortcut
         onActivated: { if (historyDialogInstance) historyDialogInstance.show() }
+    }
+
+    // 1.0.308 (#10) — scorciatoie operative: erano documentate nell'Info dialog (KEYBOARD
+    // SHORTCUTS) ma NON implementate → il tester le premeva e "non funzionavano". Ora reali.
+    Shortcut {
+        sequence: "F1"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (bridge) { bridge.monitoring ? bridge.stopMonitor() : bridge.startMonitor() } }
+    }
+    Shortcut {
+        sequence: "F3"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (bridge) bridge.autoSeq = !bridge.autoSeq }
+    }
+    Shortcut {
+        sequence: "F4"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (bridge) bridge.promptLogQso() }
+    }
+    Shortcut {
+        sequence: "Esc"
+        context: Qt.ApplicationShortcut
+        onActivated: { if (bridge) bridge.halt() }
+    }
+    Shortcut {
+        sequence: "Ctrl+S"
+        context: Qt.ApplicationShortcut
+        onActivated: mainWindow.openSettingsDialog()
+    }
+    Shortcut {
+        sequence: "Ctrl+L"
+        context: Qt.ApplicationShortcut
+        onActivated: mainWindow.openLogWindow()
+    }
+    Shortcut {
+        sequence: "Ctrl+M"
+        context: Qt.ApplicationShortcut
+        onActivated: mainWindow.openMacroDialog()
     }
 
     // 1.0.233 — DevOverlay floating panel (async Loader, zero overhead
@@ -7674,7 +7746,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
     // QSO Progress Badge - Auto-hide timer
     Timer { id: badgeHideTimer; interval: 2500; onTriggered: badgeVisible = false }
-    Timer { id: statusToastHideTimer; interval: 3200; onTriggered: statusToastVisible = false }
+    Timer { id: statusToastHideTimer; interval: 5000; onTriggered: statusToastVisible = false }  // 1.0.308 (#7): più tempo per notarlo
 
     // Main Menu (Hamburger)
     Menu {

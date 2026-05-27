@@ -706,13 +706,17 @@ Dialog {
                                 Repeater {
                                     model: [
                                         { key: "F1", action: "Monitor On/Off" },
-                                        { key: "F2", action: "Enable TX" },
-                                        { key: "F3", action: "Auto Sequence" },
+                                        { key: "F2", action: "QSY Quick Picker" },
+                                        { key: "F3", action: "Auto Sequence On/Off" },
                                         { key: "F4", action: "Log QSO" },
-                                        { key: "ESC", action: "Halt TX" },
-                                        { key: "Ctrl+S", action: "Open Settings" },
-                                        { key: "Ctrl+L", action: "Open Log" },
-                                        { key: "Ctrl+M", action: "Open Macro" }
+                                        { key: "Esc", action: "Halt TX" },
+                                        { key: "Ctrl+S", action: "Apri Impostazioni" },
+                                        { key: "Ctrl+L", action: "Apri Log" },
+                                        { key: "Ctrl+M", action: "Apri Macro" },
+                                        { key: "Ctrl+Shift+H", action: "Decode History" },
+                                        { key: "Ctrl+Shift+L", action: "Reset Layout finestre" },
+                                        { key: "Ctrl+Shift+C", action: "Full Spectrum compatto" },
+                                        { key: "Ctrl+Shift+F", action: "Dev Overlay" }
                                     ]
 
                                     RowLayout {
