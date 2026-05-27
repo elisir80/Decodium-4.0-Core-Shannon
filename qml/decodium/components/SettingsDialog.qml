@@ -78,6 +78,30 @@ Dialog {
             bridge.setSetting(key, value)
     }
 
+    // 1.0.306 (#4) — config "bande operative": lista completa (lambda + etichetta) e helper
+    // per il setting "uiDisabledBands" (CSV di lambda nascosti dal selettore). Vuoto = tutte.
+    readonly property var allBandsForConfig: [
+        { l: "160M", n: "1.8" }, { l: "80M", n: "3.5" }, { l: "60M", n: "5" }, { l: "40M", n: "7" },
+        { l: "30M", n: "10" }, { l: "20M", n: "14" }, { l: "17M", n: "18" }, { l: "15M", n: "21" },
+        { l: "12M", n: "24" }, { l: "10M", n: "28" }, { l: "8M", n: "40" }, { l: "6M", n: "50" },
+        { l: "4M", n: "70" }, { l: "2M", n: "144" }, { l: "1.25M", n: "222" }, { l: "70CM", n: "432" },
+        { l: "33CM", n: "902" }, { l: "23CM", n: "1296" }, { l: "13CM", n: "2304" }, { l: "9CM", n: "3400" },
+        { l: "6CM", n: "5760" }, { l: "3CM", n: "10G" }, { l: "1.25CM", n: "24G" }
+    ]
+    property string disabledBandsCsv: bridge ? String(bridge.getSetting("uiDisabledBands", "") || "") : ""
+    function bandEnabledCfg(lambda) {
+        return ("," + disabledBandsCsv + ",").indexOf("," + lambda + ",") < 0
+    }
+    function toggleBandCfg(lambda, enable) {
+        var set = disabledBandsCsv.length ? disabledBandsCsv.split(",").filter(function(x){ return x.length > 0 }) : []
+        var idx = set.indexOf(lambda)
+        if (enable) { if (idx >= 0) set.splice(idx, 1) }
+        else        { if (idx <  0) set.push(lambda) }
+        var csv = set.join(",")
+        if (bridge) bridge.setSetting("uiDisabledBands", csv)
+        disabledBandsCsv = csv
+    }
+
     function setLoggingMode(promptMode) {
         if (loggingChecksUpdating)
             return
@@ -3200,6 +3224,45 @@ Dialog {
                         }
                         // riga vuota per riempire le 4 colonne
                         Item { Layout.columnSpan: 2; Layout.preferredHeight: controlHeight }
+
+                        // ── Bande Operative (#4) — quali bande mostrare nel selettore ──
+                        Text { text: qsTr("BANDE OPERATIVE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+                        Text {
+                            text: qsTr("Clicca per mostrare/nascondere le bande nel selettore. Le bande deselezionate spariscono dalla barra HF/V-U/SHF.")
+                            color: textSecondary; font.pixelSize: 10; wrapMode: Text.WordWrap
+                            Layout.columnSpan: 4; Layout.fillWidth: true; Layout.bottomMargin: 2
+                        }
+                        Flow {
+                            Layout.columnSpan: 4; Layout.fillWidth: true
+                            spacing: 6
+                            Repeater {
+                                model: settingsDialog.allBandsForConfig
+                                delegate: Rectangle {
+                                    width: 64; height: 26; radius: 4
+                                    property bool bandOn: settingsDialog.bandEnabledCfg(modelData.l)
+                                    color: bandOn ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.28)
+                                                  : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
+                                    border.color: bandOn ? primaryBlue : glassBorder
+                                    border.width: 1
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.l
+                                        color: bandOn ? textPrimary : textSecondary
+                                        font.pixelSize: 10; font.bold: bandOn
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
+                                        onClicked: settingsDialog.toggleBandCfg(modelData.l, !parent.bandOn)
+                                        ToolTip.visible: containsMouse
+                                        ToolTip.delay: 500
+                                        ToolTip.text: modelData.n + " MHz — " + (parent.bandOn ? qsTr("visibile (clic per nascondere)") : qsTr("nascosta (clic per mostrare)"))
+                                    }
+                                }
+                            }
+                        }
 
                         // 1.0.189 — Riorganizzato in 2 sub-section per UX migliore:
                         // PERFORMANCE (gates anti-stall) + STYLE (estetica).

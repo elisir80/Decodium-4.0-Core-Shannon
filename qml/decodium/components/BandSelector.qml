@@ -60,6 +60,21 @@ Item {
         { index: 26, lambda: "1.25CM", name: "24 GHz" }
     ]
 
+    // 1.0.306 (#4) — filtro "bande operative": l'utente può nascondere dal selettore le bande
+    // che non usa. Setting "uiDisabledBands" = CSV di lambda disabilitati (es. "1.25M,33CM").
+    // Vuoto = tutte abilitate. Reattivo via onSettingValueChanged.
+    property string disabledBandsCsv: bridge ? String(bridge.getSetting("uiDisabledBands", "") || "") : ""
+    function bandEnabled(lambda) {
+        if (!disabledBandsCsv || disabledBandsCsv.length === 0) return true
+        return ("," + disabledBandsCsv + ",").indexOf("," + lambda + ",") < 0
+    }
+    Connections {
+        target: bridge
+        function onSettingValueChanged(key, value) {
+            if (key === "uiDisabledBands") bandSelector.disabledBandsCsv = String(value || "")
+        }
+    }
+
     implicitHeight: contentColumn.height
 
     ColumnLayout {
@@ -138,6 +153,7 @@ Item {
                     bandIndex: modelData.index
                     bandLambda: modelData.lambda
                     bandName: modelData.name
+                    visible: bandSelector.bandEnabled(modelData.lambda)
                     onClicked: {
                         if (bandMgr) {
                             bandMgr.changeBand(bandIndex)
@@ -167,6 +183,7 @@ Item {
                     bandIndex: modelData.index
                     bandLambda: modelData.lambda
                     bandName: modelData.name
+                    visible: bandSelector.bandEnabled(modelData.lambda)
                     onClicked: {
                         if (bandMgr) {
                             bandMgr.changeBand(bandIndex)
@@ -198,6 +215,7 @@ Item {
                     bandIndex: modelData.index
                     bandLambda: modelData.lambda
                     bandName: modelData.name
+                    visible: bandSelector.bandEnabled(modelData.lambda)
                     onClicked: {
                         if (bandMgr) {
                             bandMgr.changeBand(bandIndex)
