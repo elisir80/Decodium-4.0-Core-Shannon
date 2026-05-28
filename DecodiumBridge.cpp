@@ -20989,7 +20989,13 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         if (!isOurPeriod) return;
 
         int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
-        int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs);
+        // 1.0.318 — P2 fix: questo call site (auto-seq period-check) era l'unico che NON
+        // riceveva m_ftxImmediateClickTx → cap stretto bloccava la fast-sequence anche con
+        // toggle ON. Ora rilassa quando ftxImmediateClickTx ON (qualunque modo) OPPURE
+        // ft8FastSequence ON in modo FT8.
+        bool const relaxLatestCap = m_ftxImmediateClickTx
+                                 || (m_ft8FastSequence && m_mode == QStringLiteral("FT8"));
+        int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, relaxLatestCap);
         if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: too late in %1 slot, defer TX%2 elapsed=%3ms latest=%4ms")
                           .arg(m_mode)
