@@ -11,6 +11,11 @@ BUILD_DIR="${BUILD_DIR:-${ROOT_DIR}/build-linux-appimage-x64}"
 APPDIR="${APPDIR:-${ROOT_DIR}/AppDir-linux-x86_64}"
 OUTPUT_DIR="${OUTPUT_DIR:-${ROOT_DIR}/dist-linux-appimage}"
 TOOLS_DIR="${TOOLS_DIR:-${ROOT_DIR}/.ci/tools}"
+APPIMAGE_ARCH="${APPIMAGE_ARCH:-x86_64}"
+APPIMAGE_OUTPUT_ARCH="${APPIMAGE_OUTPUT_ARCH:-${APPIMAGE_ARCH}}"
+LINUXDEPLOY_ARCH="${LINUXDEPLOY_ARCH:-${APPIMAGE_ARCH}}"
+LINUXDEPLOY_URL="${LINUXDEPLOY_URL:-https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage}"
+LINUXDEPLOY_QT_PLUGIN_URL="${LINUXDEPLOY_QT_PLUGIN_URL:-https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 2)}"
 
 if [[ -z "${VERSION}" ]]; then
@@ -120,6 +125,7 @@ echo "Hamlib prefix:  ${HAMLIB_PREFIX}"
 echo "Build dir:      ${BUILD_DIR}"
 echo "Output dir:     ${OUTPUT_DIR}"
 echo "Jobs:           ${JOBS}"
+echo "AppImage arch:  ${APPIMAGE_ARCH}"
 echo "QMake:          ${QMAKE} ($("${QMAKE}" -query QT_VERSION 2>/dev/null || true))"
 echo "Qt prefix:      ${QT_PREFIX_FOR_BUILD}"
 echo "Qt libs:        ${QT_LIB_DIR_FOR_BUILD}"
@@ -254,16 +260,14 @@ if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrive
     echo "Skipping temporary Qt SQL driver stash: ${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers is not writable"
   fi
 fi
-LINUXDEPLOY="${TOOLS_DIR}/linuxdeploy-x86_64.AppImage"
-QT_PLUGIN="${TOOLS_DIR}/linuxdeploy-plugin-qt-x86_64.AppImage"
+LINUXDEPLOY="${TOOLS_DIR}/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage"
+QT_PLUGIN="${TOOLS_DIR}/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage"
 if [[ ! -x "${LINUXDEPLOY}" ]]; then
-  curl -fsSL -o "${LINUXDEPLOY}" \
-    https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+  curl -fsSL -o "${LINUXDEPLOY}" "${LINUXDEPLOY_URL}"
   chmod +x "${LINUXDEPLOY}"
 fi
 if [[ ! -x "${QT_PLUGIN}" ]]; then
-  curl -fsSL -o "${QT_PLUGIN}" \
-    https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+  curl -fsSL -o "${QT_PLUGIN}" "${LINUXDEPLOY_QT_PLUGIN_URL}"
   chmod +x "${QT_PLUGIN}"
 fi
 
@@ -315,8 +319,8 @@ LINUXDEPLOY_RUNNER="$(resolve_appimage_runner "${LINUXDEPLOY}" linuxdeploy)"
 QT_PLUGIN_RUNNER="$(resolve_appimage_runner "${QT_PLUGIN}" linuxdeploy-plugin-qt)"
 if [[ "${QT_PLUGIN_RUNNER}" == */linuxdeploy-plugin-qt-extracted/AppRun ]]; then
   mkdir -p "${TOOLS_DIR}/disabled-appimages"
-  if [[ -f "${QT_PLUGIN}" && ! -f "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-x86_64.AppImage.real" ]]; then
-    cp -a "${QT_PLUGIN}" "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-x86_64.AppImage.real"
+  if [[ -f "${QT_PLUGIN}" && ! -f "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage.real" ]]; then
+    cp -a "${QT_PLUGIN}" "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage.real"
   fi
   for qt_plugin_launcher in "${TOOLS_DIR}/linuxdeploy-plugin-qt" "${QT_PLUGIN}"; do
     {
@@ -337,7 +341,7 @@ fi
 export APPIMAGE_EXTRACT_AND_RUN=1
 export QMAKE="${QMAKE}"
 export QML_SOURCES_PATHS="${ROOT_DIR}/qml"
-export ARCH=x86_64
+export ARCH="${APPIMAGE_ARCH}"
 export PATH="${TOOLS_DIR}:${PATH}"
 
 linuxdeploy_args=(
@@ -573,7 +577,7 @@ log "Create AppImage"
     --output appimage
 )
 
-APPIMAGE_NAME="decodium4-ft2-${VERSION}-linux-x86_64.AppImage"
+APPIMAGE_NAME="decodium4-ft2-${VERSION}-linux-${APPIMAGE_OUTPUT_ARCH}.AppImage"
 APPIMAGE_SRC="$(find "${ROOT_DIR}" -maxdepth 1 -name '*.AppImage' ! -name 'linuxdeploy*.AppImage' | head -n1)"
 if [[ -z "${APPIMAGE_SRC}" ]]; then
   echo "error: linuxdeploy did not create an AppImage" >&2
