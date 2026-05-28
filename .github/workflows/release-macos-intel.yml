@@ -158,7 +158,6 @@ jobs:
             address-model=64 \
             architecture=x86 \
             cxxstd=17 \
-            macosx-version="${MACOS_DEPLOYMENT_TARGET}" \
             cflags="-arch x86_64 -mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET}" \
             cxxflags="-arch x86_64 -mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET}" \
             linkflags="-arch x86_64 -mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET}"
