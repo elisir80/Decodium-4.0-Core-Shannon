@@ -189,7 +189,7 @@ Rectangle {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Caricamento in corso…"
+            text: qsTr("Loading…")
             font.pixelSize: 11
             color: Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.6)
         }
@@ -209,7 +209,7 @@ Rectangle {
                 Behavior on color { ColorAnimation { duration: 150 } }
                 Text {
                     anchors.centerIn: parent
-                    text: "☕  Offrimi un caffè"
+                    text: qsTr("☕  Buy me a coffee")
                     font.pixelSize: 13; font.bold: true
                     color: "#FFE082"
                 }
@@ -230,7 +230,7 @@ Rectangle {
                 Behavior on color { ColorAnimation { duration: 150 } }
                 Text {
                     anchors.centerIn: parent
-                    text: "Avvia  ▶"
+                    text: qsTr("Start  ▶")
                     font.pixelSize: 13; font.bold: true
                     color: textPrimary
                 }

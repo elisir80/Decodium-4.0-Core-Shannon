@@ -1420,7 +1420,7 @@ Dialog {
                     spacing: 2
 
                     Repeater {
-                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("Pulsanti UI")]
+                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons")]
                         delegate: Rectangle {
                             width: parent.width; height: 36; radius: 6
                             color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
@@ -2787,7 +2787,7 @@ Dialog {
                                 // 1.0.304 (#9) — resume-on-reply: riprende il QSO se il partner
                                 // torna a rispondere entro 2 min dall'Halt. Opt-in, default OFF.
                                 Text {
-                                    text: qsTr("Riprendi QSO se risponde:")
+                                    text: qsTr("Resume QSO on partner reply:")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2805,7 +2805,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Se interrompi (Halt) mentre lavori una stazione e quella torna a risponderti entro 2 minuti, Decodium riprende automaticamente il QSO (come la v3). Vale per FT8/FT4/FT2. Default OFF: di base l'Halt ferma del tutto la sequenza.")
+                                    ToolTip.text: qsTr("If you Halt while working a station and that station replies to you again within 2 minutes, Decodium automatically resumes the QSO (like v3).\n\nApplies to FT8/FT4/FT2.\n\nDefault: OFF (= Halt fully stops the sequence by default).")
                                 }
                                 Text {
                                     text: qsTr("Disable TX after 73:")
@@ -2853,7 +2853,7 @@ Dialog {
 
                                 // 1.0.311 — FT2: ripetizioni del 73/RR73 finale regolabili (era fisso 8)
                                 Text {
-                                    text: qsTr("FT2: ripetizioni signoff (73/RR73):")
+                                    text: qsTr("FT2: signoff retries (73/RR73):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2875,12 +2875,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT2 aspettando l'ack del partner prima di loggare e chiudere. Default 4 (~28s). Più basso = chiude prima (meno 'incantato' sulla stessa stazione); più alto = più paziente con partner deboli/QSB. Non tocca FT8/FT4.")
+                                    ToolTip.text: qsTr("How many times to repeat the final 73/RR73 in FT2 waiting for the partner's ack before logging and closing.\n\nDefault: 4 (~28s).\n\nLower = closes earlier (less 'stuck' on the same station).\nHigher = more patient with weak/QSB partners.\n\nDoesn't affect FT8/FT4.")
                                 }
 
                                 // 1.0.315 — FT4: ripetizioni del 73/RR73 finale regolabili
                                 Text {
-                                    text: qsTr("FT4: ripetizioni signoff (73/RR73):")
+                                    text: qsTr("FT4: signoff retries (73/RR73):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2902,12 +2902,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT4. Default 4 (~30s). Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative auto). Non tocca FT2/FT8.")
+                                    ToolTip.text: qsTr("How many times to repeat the final 73/RR73 in FT4.\n\nDefault: 4 (~30s).\n\nIncrease to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).\n\nDoesn't affect FT2/FT8.")
                                 }
 
                                 // 1.0.315 — FT8: ripetizioni del 73/RR73 finale regolabili
                                 Text {
-                                    text: qsTr("FT8: ripetizioni signoff (73/RR73):")
+                                    text: qsTr("FT8: signoff retries (73/RR73):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2929,12 +2929,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT8. Default 3 (~45s). Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative auto). Non tocca FT2/FT4.")
+                                    ToolTip.text: qsTr("How many times to repeat the final 73/RR73 in FT8.\n\nDefault: 3 (~45s).\n\nIncrease to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).\n\nDoesn't affect FT2/FT4.")
                                 }
 
                                 // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283)
                                 Text {
-                                    text: qsTr("TX immediato al click (stile 1.0.283):")
+                                    text: qsTr("Immediate TX on click (1.0.283 style):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2956,12 +2956,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Ripristina il comportamento 'TX parte SUBITO al doppio-click' della 1.0.283. Rilassa il period-gate FT2 (TX1 da click bypassa l'attesa del prossimo slot) e alza il cap della finestra cliccabile FT8/FT4 a d3CapMs (~11s su FT8, 5.6s su FT4) = comportamento 1.0.283 reale. Default OFF = comportamento sicuro upstream (Salvatore). Attiva se ti dà fastidio aspettare 1 ciclo dopo il click.")
+                                    ToolTip.text: qsTr("Restores the 'TX starts IMMEDIATELY on double-click' behaviour of 1.0.283.\n\n• FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)\n• FT8/FT4: raises the clickable window cap to d3CapMs (~11s on FT8, 5.6s on FT4) = real 1.0.283 behaviour\n\nDefault: OFF (= safe upstream behaviour).\n\nEnable if it bothers you to wait 1 cycle after the click.")
                                 }
 
                                 // 1.0.317 — opt-in: FT8 fast sequence (grace ridotta + late-decode accept)
                                 Text {
-                                    text: qsTr("FT8: sequenze veloci (stile WSJT-X/JTDX):")
+                                    text: qsTr("FT8: fast sequences (WSJT-X/JTDX style):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -2983,7 +2983,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Riduce le attese sequenza FT8 per chi preferisce reattività stile WSJT-X/JTDX. Cambia 2 cose: (1) grace al boundary 1200ms → 400ms = TX parte ~800ms prima dopo il boundary slot; (2) onFt8DecodeReady accetta decode tardivi entro d3CapMs (~11s) invece di scartare lo slot = niente più 'aspetto 15s in più dopo la risposta del partner'. SAFETY: sotto pressione CPU il clamp pre-esistente forza grace≥900ms (sicurezza > reattività su PC carichi). Default OFF = comportamento upstream conservativo (massima affidabilità decode).")
+                                    ToolTip.text: qsTr("Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.\n\nTwo changes:\n  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary\n  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'\n\nSAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety > reactivity on loaded PCs).\n\nDefault: OFF (= conservative upstream behaviour, max decode reliability).")
                                 }
 
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
@@ -3012,7 +3012,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Tuning anti-QSB: ghost filter -24 dB invece di -22, retry cap esteso SNR-adattivo (+2..+4 extra), same-step wait rilassato per partner deboli. Default OFF — attivalo se hai partner DX deboli o propagazione marginale.")
+                                    ToolTip.text: qsTr("Anti-QSB tuning:\n  • Ghost filter -24 dB instead of -22\n  • Retry cap extended SNR-adaptive (+2..+4 extra)\n  • Same-step wait relaxed for weak partners\n\nDefault: OFF — enable it if you have weak DX partners or marginal propagation.")
                                 }
 
                                 // 1.0.289 — FT2 #1: piena profondità decode durante AutoCQ
@@ -3038,12 +3038,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Mentre chiami CQ (AutoCQ), mantiene la profondità di decodifica piena (OSD + 4ª passata di sottrazione + weak-signal averaging) invece di ridurla a 2. Aiuta a sentire i risponditori deboli. Si riduce comunque automaticamente sotto pressione CPU. Default OFF.")
+                                    ToolTip.text: qsTr("While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.\n\nHelps you hear weak responders. Reduces automatically under CPU pressure anyway.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.289 — FT2 #3: chiusura rapida partner forti
                                 Text {
-                                    text: qsTr("FT2: chiudi prima i partner forti:")
+                                    text: qsTr("FT2: close strong partners earlier:")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -3064,12 +3064,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Se un partner FORTE (SNR > 0 dB) non manda il 73 finale, riduce le ripetizioni del RR73 da 8 a 4 (≈15s invece di 30s) prima di loggare e tornare in CQ. I partner deboli mantengono le ripetizioni extra anti-QSB. Default OFF.")
+                                    ToolTip.text: qsTr("If a STRONG partner (SNR > 0 dB) doesn't send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.\n\nWeak partners keep the extra anti-QSB repetitions.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.292 — FT2: decode adattivo (dedup re-decode async in solo-ascolto)
                                 Text {
-                                    text: qsTr("FT2: decode adattivo (risparmio CPU):")
+                                    text: qsTr("FT2: adaptive decode (CPU saver):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -3090,12 +3090,12 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("In SOLO-ASCOLTO (non stai chiamando CQ né in QSO) dirada il re-decode async da 100ms a ~350ms: non ridecodifica audio sovrapposto al 95% → risparmia CPU e riduce i picchi che possono abbassare la profondità decode. Quando aspetti una risposta (AutoCQ/QSO) resta a piena cadenza. Non perde decode. Utile soprattutto su PC modesti. Default OFF.")
+                                    ToolTip.text: qsTr("In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.\n\nWhen waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.\n\nUseful mainly on modest PCs.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.293 — FT2: AP hashed-callsign cache (Fase 0: solo osservabilità)
                                 Text {
-                                    text: qsTr("FT2: AP cache (sperimentale, Fase 0):")
+                                    text: qsTr("FT2: AP cache (experimental, Phase 0):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -3116,7 +3116,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("FASE 0 (osservabilità): registra in una cache i callsign visti in banda (hash, TTL 30 min) e misura quanto spesso una call decodificata era già stata vista — log [FT2WS-AP] nel diagnostico. NON cambia ancora il decode. È la base per l'AP decoding band-wide (obiettivo −3 dB) che arriverà nelle fasi successive. Default OFF.")
+                                    ToolTip.text: qsTr("PHASE 0 (observability): logs into a cache the callsigns seen in-band (hashed, TTL 30 min) and measures how often a decoded call had already been seen — logged as [FT2WS-AP] in the diagnostic log.\n\nDoesn't change the decoder yet. It's the foundation for band-wide AP decoding (−3 dB target) coming in later phases.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
@@ -3143,7 +3143,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Cache stato partner (callsign + TX num + qsoProgress + SNR) per 30 secondi: se il partner sparisce per QSB e ricompare entro 30s, ripristina il qsoProgress invece di ripartire da TX1. Richiede Conservative FT2 attivo. Default OFF (opt-in dopo revert 1.0.186 — gate stretto + log [FT2WS-F]). Disattivato in automatico se Conservative OFF.")
+                                    ToolTip.text: qsTr("Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.\n\nRequires Conservative FT2 active.\n\nDefault: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.")
                                 }
 
                                 // 1.0.187 — FT2 Weak-Signal Pack G: TX2 re-send forzato pre-fallback
@@ -3170,7 +3170,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Se sei in TX3 (R+report) e il partner non risponde per 2 periodi (~7.5s), ri-trasmette TX2 (signal report) una volta sola prima di lasciare il QSO. Aiuta sui partner deboli che non hanno acked la prima volta. Cap a 1 re-send per QSO (no loop). Richiede Conservative FT2 attivo. Default ON sotto Conservative.")
+                                    ToolTip.text: qsTr("If you're in TX3 (R+report) and the partner doesn't reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.\n\nHelps with weak partners that didn't ack the first time. Capped to 1 re-send per QSO (no loops).\n\nRequires Conservative FT2 active. Default: ON under Conservative.")
                                 }
 
                                 // Smooth decode flow (streaming progressivo FT8/FT4)
@@ -3334,7 +3334,7 @@ Dialog {
                         Text { text: qsTr("ASPETTO / TEMA"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Tema:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text { text: qsTr("Theme:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         ComboBox {
                             id: themeCombo
                             Layout.fillWidth: true
@@ -3361,7 +3361,7 @@ Dialog {
                         Item { Layout.columnSpan: 2; Layout.preferredHeight: controlHeight }
 
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
-                        Text { text: qsTr("Scala interfaccia:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text { text: qsTr("UI Scale:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         ComboBox {
                             id: uiScaleCombo
                             Layout.fillWidth: true
@@ -3393,7 +3393,7 @@ Dialog {
                             Layout.columnSpan: 2
                             Layout.preferredHeight: controlHeight
                             verticalAlignment: Text.AlignVCenter
-                            text: qsTr("↻ riavvia per applicare")
+                            text: qsTr("↻ restart to apply")
                             color: bridge.themeManager.warningColor
                             font.pixelSize: 11
                             visible: false
@@ -3403,7 +3403,7 @@ Dialog {
                         Text { text: qsTr("BANDE OPERATIVE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
                         Text {
-                            text: qsTr("Clicca per mostrare/nascondere le bande nel selettore. Le bande deselezionate spariscono dalla barra HF/V-U/SHF.")
+                            text: qsTr("Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.")
                             color: textSecondary; font.pixelSize: 10; wrapMode: Text.WordWrap
                             Layout.columnSpan: 4; Layout.fillWidth: true; Layout.bottomMargin: 2
                         }
@@ -3432,7 +3432,7 @@ Dialog {
                                         onClicked: settingsDialog.toggleBandCfg(modelData.l, !parent.bandOn)
                                         ToolTip.visible: containsMouse
                                         ToolTip.delay: 500
-                                        ToolTip.text: modelData.n + " MHz — " + (parent.bandOn ? qsTr("visibile (clic per nascondere)") : qsTr("nascosta (clic per mostrare)"))
+                                        ToolTip.text: modelData.n + " MHz — " + (parent.bandOn ? qsTr("visible (click to hide)") : qsTr("hidden (click to show)"))
                                     }
                                 }
                             }
@@ -3462,7 +3462,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Low = nessun effetto (PC modesti). Medium = animazioni leggere. High = tutte le animazioni disponibili. Default Medium.")
+                            ToolTip.text: qsTr("Low = no effects (modest PCs).\nMedium = light animations.\nHigh = all available animations.\n\nDefault: Medium.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
@@ -3513,7 +3513,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Le finestre pop-out (Waterfall, Period1, DecoSync) diventano frameless con drag tramite il bordo. Estetica Windows 11. Default OFF. Richiede chiusura+riapertura della finestra.")
+                            ToolTip.text: qsTr("Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.\n\nWindows 11 aesthetic.\n\nDefault: OFF. Requires closing and reopening the window.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
@@ -3530,7 +3530,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("All'avvio apre il Full Spectrum (Band Activity) in finestra separata, isolando il render thread del Main dalle animazioni ListView. Riduce stall su PC modesti. Default OFF. Richiede restart.")
+                            ToolTip.text: qsTr("At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.\n\nReduces stalls on modest PCs.\n\nDefault: OFF. Requires restart.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
@@ -3555,7 +3555,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Frame rate massimo del waterfall/panadapter integrato. 15=PC modesti, 20=default bilanciato, 30=hardware moderno. Quando Full Spectrum è detached il render thread separato regge i 30 fps senza impatto sul decode.")
+                            ToolTip.text: qsTr("Maximum frame rate of the embedded waterfall/panadapter.\n\n  • 15 = modest PCs\n  • 20 = balanced default\n  • 30 = modern hardware\n\nWhen Full Spectrum is detached the separate render thread holds 30 fps without affecting the decoder.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
@@ -3588,7 +3588,7 @@ Dialog {
                                 acceptedButtons: Qt.NoButton
                                 ToolTip.visible: containsMouse
                                 ToolTip.delay: 400
-                                ToolTip.text: qsTr("Contatori eventi cpuPressure dalla sessione corrente. Severi (≥1100ms o burst 4+ short stall) sono il segnale più forte: se vedi >=5 dopo un'ora di uso, abbassa UI Quality a Low oppure Spectrum FPS cap a 15.")
+                                ToolTip.text: qsTr("cpuPressure event counters for the current session.\n\nSevere ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.")
                             }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
@@ -4058,7 +4058,7 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Mentre operi/QSO in FT8, lancia ANCHE il deep decode depth-4 (solo per la lista decode) oltre al fast depth-2 che decide il TX. Recupera le stazioni di terzi che il fast pass perde durante l'operazione, SENZA toccare il timing né la chiusura del QSO (è puramente decode-list, non auto-seq). Costa CPU extra durante i QSO. Default OFF.")
+                            ToolTip.text: qsTr("While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.\n\nRecovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it's pure decode-list, not auto-seq).\n\nCosts extra CPU during QSOs. Default: OFF.")
                         }
                     }
                 }
@@ -5673,7 +5673,7 @@ Dialog {
                             Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
                             enabled: bridge.themeManager.customColorsEnabled
                             opacity: enabled ? 1.0 : 0.4
-                            Text { text: qsTr("Sfondo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
+                            Text { text: qsTr("Background:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
                             Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
                                 color: settingsDialog.validHexColor(bridge.themeManager.customBgColor) ? bridge.themeManager.customBgColor : bgDeep }
                             TextField {
@@ -5693,7 +5693,7 @@ Dialog {
                             Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
                             enabled: bridge.themeManager.customColorsEnabled
                             opacity: enabled ? 1.0 : 0.4
-                            Text { text: qsTr("Testo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
+                            Text { text: qsTr("Text:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
                             Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
                                 color: settingsDialog.validHexColor(bridge.themeManager.customTextColor) ? bridge.themeManager.customTextColor : textPrimary }
                             TextField {
@@ -6772,22 +6772,22 @@ Dialog {
                             { label: qsTr("Async FT2 (A)"),          key: "uiAsyncIconVisible" },
                             { label: "PSK Reporter",                 key: "uiPskReporterToolbarVisible" },
                             { label: qsTr("DX Cluster (toolbar)"),   key: "uiDxClusterToolbarVisible" },
-                            { label: qsTr("Orologio mondiale"),      key: "uiWorldClockVisible" }
+                            { label: qsTr("World Clock"),            key: "uiWorldClockVisible" }
                         ]
                         readonly property var footerButtons: [
-                            { label: qsTr("Layout (reset finestre)"),       key: "uiBtnFooterResetVisible" },
-                            { label: qsTr("History (storico decodifiche)"), key: "uiBtnFooterHistoryVisible" },
+                            { label: qsTr("Layout (window reset)"),         key: "uiBtnFooterResetVisible" },
+                            { label: qsTr("History (decode history)"),      key: "uiBtnFooterHistoryVisible" },
                             { label: qsTr("DX Cluster (footer)"),           key: "uiBtnFooterDxcVisible" }
                         ]
 
                         Text {
-                            text: qsTr("Mostra o nascondi i pulsanti dell'interfaccia a piacere dell'operatore. Le modifiche sono immediate e salvate automaticamente.")
+                            text: qsTr("Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.")
                             color: textSecondary; font.pixelSize: 12; wrapMode: Text.WordWrap
                             Layout.columnSpan: 2; Layout.fillWidth: true; Layout.bottomMargin: 4
                         }
 
                         // ── Toolbar in alto ──
-                        Text { text: qsTr("TOOLBAR IN ALTO"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 4 }
+                        Text { text: qsTr("TOP TOOLBAR"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Repeater {
@@ -6806,7 +6806,7 @@ Dialog {
                         }
 
                         // ── Barra in basso (footer) ──
-                        Text { text: qsTr("BARRA IN BASSO (FOOTER)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 14 }
+                        Text { text: qsTr("BOTTOM BAR (FOOTER)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 14 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Repeater {
