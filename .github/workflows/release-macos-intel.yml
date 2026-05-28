@@ -96,7 +96,7 @@ jobs:
             "${RUNNER_TEMP}/aqt-venv/bin/python" -m pip install --upgrade pip aqtinstall
             "${RUNNER_TEMP}/aqt-venv/bin/python" -m aqt install-qt mac desktop "${QT_VERSION}" "${QT_ARCH}" \
               -O "${QT_INSTALL_ROOT}" \
-              -m qt5compat qtimageformats qtmultimedia qtserialport qtshadertools qtsvg qtwebsockets
+              -m qt5compat qtimageformats qtmultimedia qtserialport qtshadertools qtwebsockets
           fi
 
           QMAKE_PATH="$(find "${QT_INSTALL_ROOT}" -path '*/bin/qmake6' -type f 2>/dev/null | head -n1 || true)"
