@@ -4040,19 +4040,29 @@ static int autoTxDecodeGraceMs(const QString& mode)
 
 static int deferredSignoffRetryCapForMode(const QString& mode, int configuredMaxRetries,
                                            int partnerSnrDb = 127, bool conservative = false,
-                                           bool quickGiveUpStrong = false, int ft2SignoffCap = 8)
+                                           bool quickGiveUpStrong = false,
+                                           int ft2SignoffCap = 8,
+                                           int ft4SignoffCap = 4,
+                                           int ft8SignoffCap = 3)
 {
     Q_UNUSED(configuredMaxRetries)
     QString const normalized = mode.trimmed().toUpper();
-    // 1.0.311 — FT2: cap ripetizioni 73/RR73 controllato dall'utente (Settings),
-    // valore ASSOLUTO e prevedibile (niente extra conservative/weak che prima lo
-    // gonfiavano fino a 8-10). quickGiveUpStrong può solo ridurlo. FT8/FT4 invariati.
-    if (normalized == QStringLiteral("FT2")) {
-        int cap = qBound(1, ft2SignoffCap, 8);
+    // 1.0.311/1.0.315 — cap ripetizioni 73/RR73 controllato dall'utente per modo
+    // (FT2/FT4/FT8): valore ASSOLUTO e prevedibile (niente extra conservative/weak
+    // che prima lo gonfiavano fino a 8-10). quickGiveUpStrong può solo ridurlo.
+    // Default per modo: FT8=3, FT4=4, FT2=4 (= comportamento "tipico" pre-1.0.315
+    // senza conservative/weak). Per partner deboli/QSB: alzare lo spinbox a 6-8.
+    int userCap = -1;
+    if (normalized == QStringLiteral("FT2"))      userCap = ft2SignoffCap;
+    else if (normalized == QStringLiteral("FT4")) userCap = ft4SignoffCap;
+    else if (normalized == QStringLiteral("FT8")) userCap = ft8SignoffCap;
+    if (userCap >= 0) {
+        int cap = qBound(1, userCap, 8);
         if (quickGiveUpStrong && partnerSnrDb != 127 && partnerSnrDb > 0)
             cap = qMin(cap, 4);
         return cap;
     }
+    // Fallback per modi non-FTX (Q65, JT9, MSK144, ecc.): logica legacy modeCap + extras
     int modeCap = 3;
     if (normalized == QStringLiteral("FT4")) {
         modeCap = 4;
@@ -4704,6 +4714,30 @@ void DecodiumBridge::setFtxImmediateClickTx(bool v)
     settings.setValue(QStringLiteral("FtxImmediateClickTx"), v);
     emit ftxImmediateClickTxChanged();
     bridgeLog(QStringLiteral("[FT2WS] Immediate-click TX (FT2/FT8/FT4) %1").arg(v ? "ON" : "OFF"));
+}
+
+// 1.0.315 — cap ripetizioni 73/RR73 in FT4 (1-8, default 4). Persistito Decodium3.
+void DecodiumBridge::setFt4SignoffRetryCap(int v)
+{
+    int const clamped = qBound(1, v, 8);
+    if (m_ft4SignoffRetryCap == clamped) return;
+    m_ft4SignoffRetryCap = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft4SignoffRetryCap"), clamped);
+    emit ft4SignoffRetryCapChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT4) = %1").arg(clamped));
+}
+
+// 1.0.315 — cap ripetizioni 73/RR73 in FT8 (1-8, default 3). Persistito Decodium3.
+void DecodiumBridge::setFt8SignoffRetryCap(int v)
+{
+    int const clamped = qBound(1, v, 8);
+    if (m_ft8SignoffRetryCap == clamped) return;
+    m_ft8SignoffRetryCap = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft8SignoffRetryCap"), clamped);
+    emit ft8SignoffRetryCapChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT8) = %1").arg(clamped));
 }
 
 // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -20842,7 +20876,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             // 1.0.174 — passa partner SNR e Conservative flag per cap adattivo
             int const signoffCap = deferredSignoffRetryCapForMode(m_mode, m_maxCallerRetries,
                                                                    m_currentPartnerSnrDb, m_ft2Conservative,
-                                                                   m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap);
+                                                                   m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap,
+                                                                   m_ft4SignoffRetryCap, m_ft8SignoffRetryCap);
             if (m_nTx73 < signoffCap) {
                 bridgeLog(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 count=%3/%4, waiting for final ack")
                               .arg(m_currentTx)
@@ -22290,6 +22325,9 @@ void DecodiumBridge::loadSettings()
     m_ft2SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft2SignoffRetryCap"), 4).toInt(), 8);
     // 1.0.314 — opt-in TX immediato al click (stile 1.0.283), default OFF = upstream sicuro.
     m_ftxImmediateClickTx = s.value(QStringLiteral("FtxImmediateClickTx"), false).toBool();
+    // 1.0.315 — cap ripetizioni 73/RR73 anche per FT4 (default 4) e FT8 (default 3). Range 1-8.
+    m_ft4SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft4SignoffRetryCap"), 4).toInt(), 8);
+    m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();

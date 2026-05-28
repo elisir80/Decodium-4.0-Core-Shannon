@@ -2878,6 +2878,60 @@ Dialog {
                                     ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT2 aspettando l'ack del partner prima di loggare e chiudere. Default 4 (~28s). Più basso = chiude prima (meno 'incantato' sulla stessa stazione); più alto = più paziente con partner deboli/QSB. Non tocca FT8/FT4.")
                                 }
 
+                                // 1.0.315 — FT4: ripetizioni del 73/RR73 finale regolabili
+                                Text {
+                                    text: qsTr("FT4: ripetizioni signoff (73/RR73):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                SpinBox {
+                                    id: ft4SignoffCapSpin
+                                    Layout.columnSpan: 3
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 1; to: 8; editable: true
+                                    value: bridge ? bridge.ft4SignoffRetryCap : 4
+                                    onValueChanged: if (bridge && bridge.ft4SignoffRetryCap !== value) bridge.setFt4SignoffRetryCap(value)
+                                    contentItem: TextInput { text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT4. Default 4 (~30s). Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative auto). Non tocca FT2/FT8.")
+                                }
+
+                                // 1.0.315 — FT8: ripetizioni del 73/RR73 finale regolabili
+                                Text {
+                                    text: qsTr("FT8: ripetizioni signoff (73/RR73):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                SpinBox {
+                                    id: ft8SignoffCapSpin
+                                    Layout.columnSpan: 3
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 1; to: 8; editable: true
+                                    value: bridge ? bridge.ft8SignoffRetryCap : 3
+                                    onValueChanged: if (bridge && bridge.ft8SignoffRetryCap !== value) bridge.setFt8SignoffRetryCap(value)
+                                    contentItem: TextInput { text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT8. Default 3 (~45s). Aumenta a 6-8 per partner deboli/QSB (sostituisce gli ex extra weak/conservative auto). Non tocca FT2/FT4.")
+                                }
+
                                 // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283)
                                 Text {
                                     text: qsTr("TX immediato al click (stile 1.0.283):")
