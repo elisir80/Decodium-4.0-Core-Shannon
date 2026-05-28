@@ -95,7 +95,7 @@ jobs:
       - name: Restore Ventura source dependency cache
         id: source-deps-cache
         if: matrix.source_deps == true
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.SOURCE_DEPS_ROOT }}-${{ matrix.compat_macos }}
           key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-v1
@@ -164,6 +164,13 @@ jobs:
 
           find "${DEPS_PREFIX}/lib" -maxdepth 1 -name '*.dylib' -print | sort
 
+      - name: Save Ventura source dependency cache
+        if: matrix.source_deps == true && steps.source-deps-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.SOURCE_DEPS_ROOT }}-${{ matrix.compat_macos }}
+          key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-v1
+
       - name: Restore Qt 6.11 cache
         id: qt-cache
         uses: actions/cache@v4
@@ -224,6 +231,7 @@ jobs:
           echo "BOOST_LIBRARYDIR=${DEPS_PREFIX}/lib" >> "$GITHUB_ENV"
           echo "Boost_NO_SYSTEM_PATHS=ON" >> "$GITHUB_ENV"
           echo "FFTW3_ROOT_DIR=${DEPS_PREFIX}" >> "$GITHUB_ENV"
+          echo "DECODIUM_BUNDLE_LIBRARY_DIRS=${DEPS_PREFIX}/lib" >> "$GITHUB_ENV"
           echo "DYLD_FALLBACK_LIBRARY_PATH=${DEPS_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build and install Hamlib

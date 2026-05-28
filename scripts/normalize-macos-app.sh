@@ -667,6 +667,17 @@ resolve_external_rpath_dependency() {
     fi
   done < <(expanded_rpaths_for_file "${file_path}")
 
+  if [[ -n "${DECODIUM_BUNDLE_LIBRARY_DIRS:-}" ]]; then
+    while IFS= read -r search_root; do
+      [[ -n "${search_root}" && -d "${search_root}" ]] || continue
+      candidate="${search_root}/${dep_suffix}"
+      if [[ -e "${candidate}" ]]; then
+        printf '%s\n' "$(resolve_realpath "${candidate}")"
+        return 0
+      fi
+    done < <(tr ':' '\n' <<<"${DECODIUM_BUNDLE_LIBRARY_DIRS}")
+  fi
+
   for search_root in \
     "${QT_PREFIX:+${QT_PREFIX}/lib}" \
     "${QTDIR:+${QTDIR}/lib}" \
