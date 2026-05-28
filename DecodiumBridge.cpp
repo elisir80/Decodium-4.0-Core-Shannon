@@ -4027,15 +4027,18 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bo
     return qMax(0, periodMs - payloadMs - syncTxStartBudgetMs(mode));
 }
 
-static int autoTxDecodeGraceMs(const QString& mode)
+static int autoTxDecodeGraceMs(const QString& mode, bool ft8FastSequence = false)
 {
     QString const normalized = mode.trimmed().toUpper();
     // Grace = quanto aspettare al boundary il decode dello slot appena finito prima
     // di committare il TX auto. Deve superare (settle 650ms + decode + advanceQsoState)
     // ~0.95-1.0s in FT8, altrimenti la fallback committa CQ con lo stato vecchio e la
     // risposta al partner viene persa (QSO non si chiude).
+    // 1.0.317 — opt-in ft8FastSequence: grace FT8 ridotta a 400ms per reattività stile
+    // WSJT-X/JTDX. Sotto pressione CPU il qMax(900,...) in effectiveAutoTxDecodeGraceMs
+    // sovrascrive automaticamente (sicurezza > reattività su PC carichi).
     if (normalized == QStringLiteral("FT8"))
-        return 1200;
+        return ft8FastSequence ? 400 : 1200;
     if (normalized == QStringLiteral("FT4"))
         return 700;
     if (normalized == QStringLiteral("FT2"))
@@ -4743,6 +4746,20 @@ void DecodiumBridge::setFt8SignoffRetryCap(int v)
     settings.setValue(QStringLiteral("Ft8SignoffRetryCap"), clamped);
     emit ft8SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT8) = %1").arg(clamped));
+}
+
+// 1.0.317 — opt-in FT8 fast sequence: grace ridotta (1200→400ms) + onFt8DecodeReady
+// accetta decode tardivi entro d3CapMs invece di scartare lo slot. Pensata per "ci
+// mette troppo dopo che chiamo" (feedback Pasquale). Default OFF = comportamento
+// upstream conservativo (massima affidabilità decode). Persistito Decodium3.
+void DecodiumBridge::setFt8FastSequence(bool v)
+{
+    if (m_ft8FastSequence == v) return;
+    m_ft8FastSequence = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft8FastSequence"), v);
+    emit ft8FastSequenceChanged();
+    bridgeLog(QStringLiteral("[FT2WS] FT8 fast sequence %1").arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -20526,7 +20543,7 @@ bool DecodiumBridge::hasPendingTimeSyncDecodeForMode(const QString& modeSnapshot
 int DecodiumBridge::effectiveAutoTxDecodeGraceMs(const QString& modeSnapshot) const
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
-    int graceMs = autoTxDecodeGraceMs(normalizedMode);
+    int graceMs = autoTxDecodeGraceMs(normalizedMode, m_ft8FastSequence);
     if (cpuPressureActive() || m_lowCpuModeEnabled) {
         // FT2 async resta reattivo (80ms). FT8/FT4 NON vanno tagliati sotto pressione:
         // sulle macchine lente l'early-visible salta e il decode della risposta arriva
@@ -22333,6 +22350,8 @@ void DecodiumBridge::loadSettings()
     // 1.0.315 — cap ripetizioni 73/RR73 anche per FT4 (default 4) e FT8 (default 3). Range 1-8.
     m_ft4SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft4SignoffRetryCap"), 4).toInt(), 8);
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
+    // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
+    m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
@@ -27046,12 +27065,26 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 // su macchine lente FT8/FT4 una risposta decodificata tra 700 e 900ms verrebbe
                 // differita qui mentre il fallback l'avrebbe accettata -> ciclo perso.
                 int const graceMs = effectiveAutoTxDecodeGraceMs(normalizedAutoTxMode);
-                if (elapsedMs > graceMs) {
+                // 1.0.317 — opt-in ft8FastSequence: invece di scartare lo slot quando
+                // il decode arriva tardivo (>grace), accetta fino a d3CapMs (~11s slot 15s).
+                // Il TX risulta shiftato ma resta nello stesso slot → niente +15s di defer.
+                // Su PC carichi la pressure-clamp in effectiveAutoTxDecodeGraceMs già
+                // forza grace>=900ms quindi il flag non danneggia la stabilità.
+                int effectiveCap = graceMs;
+                if (m_ft8FastSequence && normalizedAutoTxMode == QStringLiteral("FT8")) {
+                    int const periodMs = periodMsForMode(normalizedAutoTxMode);
+                    if (periodMs > 0) {
+                        int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedAutoTxMode, periodMs, true);
+                        effectiveCap = qMax(graceMs, latestStartMs);
+                    }
+                }
+                if (elapsedMs > effectiveCap) {
                     canStartInThisSlot = false;
-                    bridgeLog(QStringLiteral("onFt8DecodeReady: auto-seq response after TX start grace, deferring to next slot mode=%1 elapsed=%2ms grace=%3ms")
+                    bridgeLog(QStringLiteral("onFt8DecodeReady: auto-seq response after TX start grace, deferring to next slot mode=%1 elapsed=%2ms grace=%3ms cap=%4ms")
                                   .arg(autoTxMode)
                                   .arg(elapsedMs)
-                                  .arg(graceMs));
+                                  .arg(graceMs)
+                                  .arg(effectiveCap));
                 }
             }
         }

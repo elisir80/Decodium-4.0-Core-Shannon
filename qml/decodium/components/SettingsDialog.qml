@@ -2956,7 +2956,34 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Ripristina il comportamento 'TX parte SUBITO al doppio-click' della 1.0.283. Rilassa il period-gate FT2 (TX1 da click bypassa l'attesa del prossimo slot) e alza il cap della finestra cliccabile FT8/FT4 da ~650ms (4% slot) a 2000ms (D3/JTDX accettano shift fino a 2s). Default OFF = comportamento sicuro upstream (Salvatore). Attiva se ti dà fastidio aspettare 1 ciclo dopo il click.")
+                                    ToolTip.text: qsTr("Ripristina il comportamento 'TX parte SUBITO al doppio-click' della 1.0.283. Rilassa il period-gate FT2 (TX1 da click bypassa l'attesa del prossimo slot) e alza il cap della finestra cliccabile FT8/FT4 a d3CapMs (~11s su FT8, 5.6s su FT4) = comportamento 1.0.283 reale. Default OFF = comportamento sicuro upstream (Salvatore). Attiva se ti dà fastidio aspettare 1 ciclo dopo il click.")
+                                }
+
+                                // 1.0.317 — opt-in: FT8 fast sequence (grace ridotta + late-decode accept)
+                                Text {
+                                    text: qsTr("FT8: sequenze veloci (stile WSJT-X/JTDX):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft8FastSequenceCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft8FastSequence : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft8FastSequence !== checked)
+                                            bridge.setFt8FastSequence(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Riduce le attese sequenza FT8 per chi preferisce reattività stile WSJT-X/JTDX. Cambia 2 cose: (1) grace al boundary 1200ms → 400ms = TX parte ~800ms prima dopo il boundary slot; (2) onFt8DecodeReady accetta decode tardivi entro d3CapMs (~11s) invece di scartare lo slot = niente più 'aspetto 15s in più dopo la risposta del partner'. SAFETY: sotto pressione CPU il clamp pre-esistente forza grace≥900ms (sicurezza > reattività su PC carichi). Default OFF = comportamento upstream conservativo (massima affidabilità decode).")
                                 }
 
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
