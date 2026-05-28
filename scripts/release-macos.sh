@@ -436,6 +436,22 @@ cmake_args=(
 if [[ -n "${CMAKE_PREFIX_PATH:-}" ]]; then
   cmake_args+=("-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 fi
+BOOST_ROOT_VALUE="${Boost_ROOT:-${BOOST_ROOT:-}}"
+if [[ -n "${BOOST_ROOT_VALUE}" ]]; then
+  cmake_args+=("-DBoost_ROOT=${BOOST_ROOT_VALUE}" "-DBOOST_ROOT=${BOOST_ROOT_VALUE}")
+fi
+if [[ -n "${Boost_NO_SYSTEM_PATHS:-}" ]]; then
+  cmake_args+=("-DBoost_NO_SYSTEM_PATHS=${Boost_NO_SYSTEM_PATHS}")
+fi
+if [[ -n "${BOOST_INCLUDEDIR:-}" ]]; then
+  cmake_args+=("-DBOOST_INCLUDEDIR=${BOOST_INCLUDEDIR}")
+fi
+if [[ -n "${BOOST_LIBRARYDIR:-}" ]]; then
+  cmake_args+=("-DBOOST_LIBRARYDIR=${BOOST_LIBRARYDIR}")
+fi
+if [[ -n "${FFTW3_ROOT_DIR:-}" ]]; then
+  cmake_args+=("-DFFTW3_ROOT_DIR=${FFTW3_ROOT_DIR}")
+fi
 # Ensure CMake uses the real gfortran binary path (not a generic symlink),
 # so bundle fixup can resolve the correct GCC runtime directories.
 if [[ -n "${FC:-}" ]]; then
