@@ -4005,8 +4005,13 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bo
         // 1.0.314 — opt-in: con ftxImmediateClickTx ON il cap sale a 2000ms (D3/JTDX
         // accettano shift fino a ~2s; ripristina il "TX immediato al click" stile 1.0.283).
         if (mode == QStringLiteral("FT8") || mode == QStringLiteral("FT4")) {
+            // 1.0.316 (hotfix Pasquale): 2000ms era troppo stretto — su FT8 (slot 15s)
+            // l'utente clicca tipicamente dopo 2-5s e ricadeva nel defer. Ora con
+            // immediateClickTx ON la finestra sale a d3CapMs (75% slot) = comportamento
+            // 1.0.283 reale. Trade-off: click molto tardi (>50% slot) → TX shiftato e
+            // il partner potrebbe non decodificare; il toggle è opt-in e l'utente sceglie.
             int const latestCleanStartMs = immediateClickTx
-                ? 2000
+                ? d3CapMs
                 : (txSyncLeadInMsForMode(mode) + 150);
             return qMax(0, qMin(d3CapMs, latestCleanStartMs));
         }
