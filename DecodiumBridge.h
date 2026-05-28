@@ -1605,6 +1605,7 @@ private:
     void saveLogbookSettings() const;
     void ensureLogbookProfile(const QString& name, const QString& path);
     void reloadActiveLogbookState(const QString& reason);
+    void resetCompletedQsoLatchesForCq(const QString& reason);
     void clearCompletedQsoTxFields(const QString& completedCall, const QString& reason);
     void clearTxArmedAfterCompletedQso(const QString& completedCall, const QString& reason);
     void showLogQsoPromptDialog();
@@ -2527,6 +2528,10 @@ private:
                                           const QString& message,
                                           const QString& context,
                                           bool logReject = true) const;
+    bool shouldSuppressDirectedGhostDecode(const QStringList& fields,
+                                           const QString& context) const;
+    bool shouldSuppressDirectedGhostDecode(const QVariantMap& entry,
+                                           const QString& context) const;
 
 public:
     Q_INVOKABLE bool hideGhostDecodes() const { return m_hideGhostDecodes; }

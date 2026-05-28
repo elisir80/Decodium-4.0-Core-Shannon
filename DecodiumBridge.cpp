@@ -4636,6 +4636,115 @@ bool DecodiumBridge::directedDecodePeerHasInvalidDxcc(const QString& peerToken,
     return true;
 }
 
+bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields,
+                                                       const QString& context) const
+{
+    if (fields.size() < 5) {
+        return false;
+    }
+
+    QString const msg = fields.value(4).trimmed();
+    if (msg.isEmpty()) {
+        return false;
+    }
+
+    QString const myCallUpper = m_callsign.trimmed().toUpper();
+    QString const myBaseUpper = normalizedBaseCall(myCallUpper);
+    if (myCallUpper.isEmpty()
+        || !messageContainsCallToken(msg, myCallUpper, myBaseUpper)) {
+        return false;
+    }
+
+    QString const peerToken = directedPeerTokenFromMessage(msg, myCallUpper, myBaseUpper);
+    QString const peer = normalizedUsableCallToken(peerToken);
+    if (peer.isEmpty()) {
+        return false;
+    }
+    QString const peerBase = normalizedBaseCall(peer);
+    if (peerBase.isEmpty()) {
+        return false;
+    }
+
+    auto const peerMatchesCall = [&peer, &peerBase](QString const& call) {
+        QString const normalized = normalizeCallToken(call).trimmed().toUpper();
+        QString const callBase = normalizedBaseCall(normalized);
+        return (!normalized.isEmpty() && normalized == peer)
+            || (!callBase.isEmpty() && callBase == peerBase);
+    };
+    bool const activeOrManualTarget =
+        peerMatchesCall(m_dxCall)
+        || peerMatchesCall(m_autoCqLockedCall)
+        || peerMatchesCall(m_resumeTargetCall)
+        || peerMatchesCall(m_pendingAutoSeqPartnerBase)
+        || peerMatchesCall(inferredPartnerForAutolog())
+        || messageContainsCallToken(buildCurrentTxMessage(), peer, peerBase)
+        || messageContainsCallToken(m_lastTransmittedMessage, peer, peerBase)
+        || messageContainsCallToken(m_pendingAutoSeqMessage, peer, peerBase);
+    if (activeOrManualTarget) {
+        return false;
+    }
+
+    if (directedPeerLooksStructurallyGhost(peerToken)) {
+        bridgeLog(QStringLiteral("[GhostFilter] directed ghost suppress context=%1 reason=structural peer=%2 msg=%3")
+                      .arg(context, peerToken.trimmed(), msg));
+        return true;
+    }
+
+    if (directedDecodePeerHasInvalidDxcc(peerToken, msg, context)) {
+        return true;
+    }
+
+    QString grid = extractDecodedGrid(msg);
+    if (isGridTokenStrict(grid) && m_dxccLookup && m_dxccLookup->isLoaded()) {
+        DxccEntity const ent = m_dxccLookup->lookup(peer);
+        if (ent.isValid()) {
+            double gridLon = 0.0;
+            double gridLat = 0.0;
+            if (grid2deg(grid, gridLon, gridLat)) {
+                double mismatchAz = 0.0;
+                double const entLonEast = -ent.lon;
+                double const mismatchKm = azdist(ent.lat, entLonEast,
+                                                 gridLat, gridLon,
+                                                 mismatchAz);
+                if (mismatchKm > 5000.0) {
+                    bridgeLog(QStringLiteral("[GhostFilter] directed call/grid mismatch suppress context=%1 call=%2 dxcc=%3 grid=%4 mismatch=%5km msg=%6")
+                                  .arg(context,
+                                       peer,
+                                       ent.name,
+                                       grid,
+                                       QString::number(qRound(mismatchKm)),
+                                       msg));
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QVariantMap& entry,
+                                                       const QString& context) const
+{
+    if (entry.value(QStringLiteral("isTx")).toBool()) {
+        return false;
+    }
+    QString const msg = entry.value(QStringLiteral("message")).toString().trimmed();
+    if (msg.isEmpty()) {
+        return false;
+    }
+    QStringList fields;
+    fields << entry.value(QStringLiteral("time")).toString()
+           << entry.value(QStringLiteral("db")).toString()
+           << entry.value(QStringLiteral("dt")).toString()
+           << entry.value(QStringLiteral("freq")).toString()
+           << msg
+           << entry.value(QStringLiteral("aptype")).toString()
+           << entry.value(QStringLiteral("quality")).toString()
+           << entry.value(QStringLiteral("freq")).toString();
+    return shouldSuppressDirectedGhostDecode(fields, context);
+}
+
 // 1.0.226 — Q_INVOKABLE wrapper per uso da QML fallback. Restituisce true
 // SOLO se m_hideGhostDecodes attivo E looksLikeGhostDecode positivo.
 // Cosi' il QML chiama un singolo metodo invece di duplicare la logica.
@@ -8402,6 +8511,18 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             bool freqOk = false;
             int const freq = entry.value(QStringLiteral("freq")).toString().trimmed().toInt(&freqOk);
             int const snr = decodeSnrOrDefault(entry.value(QStringLiteral("db")).toString(), -99);
+            QStringList fields;
+            fields << entry.value(QStringLiteral("time")).toString()
+                   << entry.value(QStringLiteral("db")).toString()
+                   << entry.value(QStringLiteral("dt")).toString()
+                   << entry.value(QStringLiteral("freq")).toString()
+                   << message
+                   << entry.value(QStringLiteral("aptype")).toString()
+                   << entry.value(QStringLiteral("quality")).toString()
+                   << entry.value(QStringLiteral("freq")).toString();
+            if (shouldSuppressDirectedGhostDecode(fields, QStringLiteral("legacy-mirror-mam"))) {
+                continue;
+            }
             maybeEnqueueMamCallerFromMessage(message, freqOk ? freq : -1, snr, true);
         }
     };
@@ -8554,6 +8675,9 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                    << entry.value(QStringLiteral("aptype")).toString()
                    << entry.value(QStringLiteral("quality")).toString()
                    << entry.value(QStringLiteral("freq")).toString();
+            if (shouldSuppressDirectedGhostDecode(fields, QStringLiteral("legacy-mirror-autoseq"))) {
+                continue;
+            }
             bridgeLog(QStringLiteral("legacy-mirror autoSeq feed: %1").arg(message));
             autoSequenceStep(fields);
         }
@@ -8937,9 +9061,6 @@ bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
                       .arg(entry.value("message").toString().trimmed()));
         return false;
     }
-    if (entry.value("forceRxPane").toBool()) {
-        return true;
-    }
 
     QString const message = entry.value("message").toString().trimmed();
     QString const myCallUpper = m_callsign.trimmed().toUpper();
@@ -8948,15 +9069,13 @@ bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
         || messageContainsCallToken(message, myCallUpper, myBaseUpper);
 
     if (directedToMe) {
-        QString const peerToken = directedPeerTokenFromMessage(message, myCallUpper, myBaseUpper);
-        if (directedPeerLooksStructurallyGhost(peerToken)) {
-            bridgeLog(QStringLiteral("[GhostFilter] Signal RX reject directed invalid peer=%1 msg=%2")
-                          .arg(peerToken, message));
+        if (shouldSuppressDirectedGhostDecode(entry, QStringLiteral("signal-rx"))) {
             return false;
         }
-        if (directedDecodePeerHasInvalidDxcc(peerToken, message, QStringLiteral("signal-rx"))) {
-            return false;
-        }
+        return true;
+    }
+
+    if (entry.value("forceRxPane").toBool()) {
         return true;
     }
 
@@ -10817,6 +10936,9 @@ void DecodiumBridge::setCurrentTx(int v) {
         bridgeLog(QStringLiteral("setCurrentTx: TX%1 user-disabled, ignored").arg(v));
         return;
     }
+    if (v == 6) {
+        resetCompletedQsoLatchesForCq(QStringLiteral("set-current-tx6"));
+    }
     if (m_currentTx!=v) {
         m_currentTx=v;
         emit currentTxChanged();
@@ -11152,6 +11274,15 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
     if (m_autoCqRepeat != v) {
         m_autoCqRepeat = v;
         if (m_autoCqRepeat) {
+            bool const cqOrCompletedState = m_currentTx == 6
+                || m_qsoProgress <= 1
+                || m_qsoProgress >= 5
+                || m_dxCall.trimmed().isEmpty()
+                || m_logAfterOwn73
+                || m_ft2DeferredLogPending;
+            if (cqOrCompletedState) {
+                resetCompletedQsoLatchesForCq(QStringLiteral("autocq-enabled"));
+            }
             clearManualTxHold(QStringLiteral("autocq-enabled"));
             m_autoCqCycleCount = 0;  // reset contatore cicli
             armCqAutoReplyWindow(QStringLiteral("autocq-enabled"));
@@ -19262,6 +19393,9 @@ void DecodiumBridge::maybeEnqueueMamCallerFromDecode(const QStringList& fields,
     if ((!m_multiAnswerMode && !m_autoCqRepeat) || m_manualTxHold || fields.size() < 5) {
         return;
     }
+    if (shouldSuppressDirectedGhostDecode(fields, QStringLiteral("mam-queue"))) {
+        return;
+    }
 
     QString const msg = fields.value(4).trimmed();
     bool freqOk = false;
@@ -19687,6 +19821,8 @@ bool DecodiumBridge::tryResumeQsoOnReply(const QStringList& rows)
         if (!messageContainsCallToken(msg, myCallUpper, myBaseUpper)) continue;
         QString echoReason;
         if (shouldSuppressRecentLocalTxEchoDecode(msg, QStringLiteral("resume-on-reply"), &echoReason))
+            continue;
+        if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("resume-on-reply")))
             continue;
         bridgeLog(QStringLiteral("[Resume] %1 è tornato a rispondere → riprendo il QSO (msg='%2')")
                       .arg(targetBase, msg));
@@ -20503,6 +20639,9 @@ void DecodiumBridge::advanceQsoState(int txNum)
         case 6: progress = 1; break; // TX6 (CQ)           → CALLING_CQ
         default: return;
     }
+    if (txNum == 6) {
+        resetCompletedQsoLatchesForCq(QStringLiteral("advance-tx6"));
+    }
     setCurrentTx(txNum);
     if (m_qsoProgress != progress) { m_qsoProgress = progress; emit qsoProgressChanged(); }
     m_txWatchdogTicks = 0;  // reset watchdog ad ogni avanzamento di stato
@@ -21278,11 +21417,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             && tokenMatchesCall(parts.at(index), myCallUpper, myBaseUpper);
     };
     bool const directedToMe = tokenIsMine(0) || tokenIsMine(1);
-    if (directedToMe) {
-        QString const peerToken = directedPeerTokenFromMessage(msg, myCallUpper, myBaseUpper);
-        if (directedDecodePeerHasInvalidDxcc(peerToken, msg, QStringLiteral("auto-seq"))) {
-            return;
-        }
+    if (directedToMe
+        && shouldSuppressDirectedGhostDecode(f, QStringLiteral("auto-seq"))) {
+        return;
     }
 
     // Gate self-echo. Con nominativi speciali/non standard la forma corretta
@@ -24367,6 +24504,49 @@ void DecodiumBridge::clearCompletedQsoTxFields(const QString& completedCall, con
     setCurrentTx(m_tx6.trimmed().isEmpty() ? 1 : 6);
 }
 
+void DecodiumBridge::resetCompletedQsoLatchesForCq(const QString& reason)
+{
+    bool const hadState = m_logAfterOwn73
+        || m_ft2DeferredLogPending
+        || m_pendingAutoSeqTxAfterActiveTx != 0
+        || !m_pendingAutoSeqPartnerBase.isEmpty()
+        || !m_pendingAutoSeqMessage.isEmpty()
+        || !m_pendingAutoSeqMode.isEmpty()
+        || !m_autoCqLockedCall.trimmed().isEmpty()
+        || !m_autoSeqRogerReportBase.isEmpty()
+        || m_quickPeerSignaled
+        || m_nTx73 != 0
+        || m_lastNtx != -1
+        || m_txRetryCount != 0
+        || m_txWatchdogTicks != 0
+        || m_autoCQPeriodsMissed != 0;
+
+    if (hadState) {
+        bridgeLog(QStringLiteral("CQ clean-slate: clearing completed/signoff latches (%1)").arg(reason));
+    }
+
+    m_logAfterOwn73 = false;
+    m_ft2DeferredLogPending = false;
+    m_pendingAutoSeqTxAfterActiveTx = 0;
+    m_pendingAutoSeqPartnerBase.clear();
+    m_pendingAutoSeqMessage.clear();
+    m_pendingAutoSeqMode.clear();
+    clearAutoCqPartnerLock();
+    m_autoSeqRogerReportBase.clear();
+    m_quickPeerSignaled = false;
+    m_nTx73 = 0;
+    m_lastNtx = -1;
+    m_txRetryCount = 0;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+
+    if (m_dxCall.trimmed().isEmpty()) {
+        m_lastTransmittedMessage.clear();
+        m_activeTxNumber = 0;
+        m_activeTxMessage.clear();
+    }
+}
+
 void DecodiumBridge::clearTxArmedAfterCompletedQso(const QString& completedCall, const QString& reason)
 {
     markWorldMapQsoClosed(completedCall, reason);
@@ -27015,6 +27195,9 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             }
             if (messageContainsCallToken(msgText, m_callsign.trimmed().toUpper(),
                                          normalizedBaseCall(m_callsign.trimmed().toUpper()))) {
+                if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("ft-sync-autoseq"))) {
+                    continue;
+                }
                 autoSequenceStep(f);
                 autoSeqGotResponse = true;
             }
@@ -27151,6 +27334,14 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     bridgeLog("onFt2AsyncDecodeReady: rows=" + QString::number(rows.size()));
     bridgeLog("  async_raw[0]='" + rows[0] + "'");
 
+    if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
+        QString loadedPath;
+        if (reloadDxccLookup(&loadedPath)) {
+            bridgeLog("DXCC: caricato on-demand da " + loadedPath);
+            refreshDecodeListDxcc();
+        }
+    }
+
     // 1.0.304 (#9) — resume-on-reply (FT2-async): l'Halt qui wipa m_dxCall, ma l'arm in
     // engageManualTxHold ha salvato il partner; se ri-risponde, processDecodeDoubleClick lo
     // re-ingaggia. Se ha ripreso, salta l'auto-seq su questa batch (evita doppio advance).
@@ -27179,6 +27370,9 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                 continue;
             }
             if (messageContainsCallToken(f[4], myCallUpper, myBaseUpper)) {
+                if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("ft2-autoseq"))) {
+                    continue;
+                }
                 autoSequenceStep(f);
                 gotResponse = true;
             }
@@ -27201,14 +27395,6 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             } else {
                 checkAndStartPeriodicTx();
             }
-        }
-    }
-
-    if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato on-demand da " + loadedPath);
-            refreshDecodeListDxcc();
         }
     }
 
