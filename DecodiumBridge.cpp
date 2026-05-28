@@ -3980,7 +3980,7 @@ static int latestFt2AsyncTxStartMs(int periodMs)
     return qMax(0, periodMs - payloadMs - ft2AsyncTxStartSafetyMs());
 }
 
-static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
+static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bool immediateClickTx = false)
 {
     if (periodMs <= 0) {
         return 0;
@@ -4002,8 +4002,12 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs)
         // FT8/FT4 must keep the Costas start close to the nominal 500 ms slot lead-in.
         // A shifted CQ at +1.4s is decodable only by luck and is visibly out of slot,
         // so defer late starts to the next valid TX period instead of sending now.
+        // 1.0.314 — opt-in: con ftxImmediateClickTx ON il cap sale a 2000ms (D3/JTDX
+        // accettano shift fino a ~2s; ripristina il "TX immediato al click" stile 1.0.283).
         if (mode == QStringLiteral("FT8") || mode == QStringLiteral("FT4")) {
-            int const latestCleanStartMs = txSyncLeadInMsForMode(mode) + 150;
+            int const latestCleanStartMs = immediateClickTx
+                ? 2000
+                : (txSyncLeadInMsForMode(mode) + 150);
             return qMax(0, qMin(d3CapMs, latestCleanStartMs));
         }
         int const payloadCapMs =
@@ -4687,6 +4691,19 @@ void DecodiumBridge::setFt2SignoffRetryCap(int v)
     settings.setValue(QStringLiteral("Ft2SignoffRetryCap"), clamped);
     emit ft2SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT2) = %1").arg(clamped));
+}
+
+// 1.0.314 — TX immediato al click (stile 1.0.283). Default OFF = comportamento upstream
+// sicuro (period-gate stretto FT2/FT8/FT4). ON = rilassa: FT2 bypassa TX1, FT8/FT4 alzano
+// la finestra cliccabile da ~650ms a 2000ms (shift ancora dentro la tolleranza partner).
+void DecodiumBridge::setFtxImmediateClickTx(bool v)
+{
+    if (m_ftxImmediateClickTx == v) return;
+    m_ftxImmediateClickTx = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("FtxImmediateClickTx"), v);
+    emit ftxImmediateClickTxChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Immediate-click TX (FT2/FT8/FT4) %1").arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -12914,7 +12931,7 @@ bool DecodiumBridge::isSyncTxStartTooLate(int* elapsedMsOut, int* latestStartMsO
         return false;
     }
 
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs);
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs, m_ftxImmediateClickTx);
     if (latestStartMsOut) {
         *latestStartMsOut = latestStartMs;
     }
@@ -19943,7 +19960,7 @@ bool DecodiumBridge::shouldDeferManualSyncTxStart() const
     }
 
     int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(periodMs));
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs);
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs, m_ftxImmediateClickTx);
     return latestStartMs > 0 && elapsedMs >= latestStartMs;
 }
 
@@ -19978,7 +19995,7 @@ bool DecodiumBridge::tryStartDeferredManualSyncTx()
     }
 
     int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(periodMs));
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs);
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs, m_ftxImmediateClickTx);
     if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
         bridgeLog(QStringLiteral("manualSyncTx: slot too late for queued TX%1 elapsed=%2ms latest=%3ms")
                       .arg(m_currentTx)
@@ -20026,7 +20043,7 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
         elapsedMs = currentElapsedMs;
     }
     if (latestStartMs <= 0) {
-        latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs);
+        latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, periodMs, m_ftxImmediateClickTx);
     }
 
     auto slotIsOurPeriod = [this](qint64 index) {
@@ -20488,7 +20505,7 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
     int const periodMs = periodMsForMode(normalizedMode);
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs);
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs, m_ftxImmediateClickTx);
     if (periodMs <= 0 || latestStartMs <= 0) {
         return;
     }
@@ -20896,9 +20913,13 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     //   senza lasciare uno slot RX reale.
     // - Per AutoCQ (nessuna stazione DX): usa il controllo di periodo normale
     //   → evita loop CQ continuo (CQ ogni 3.75s senza pausa RX)
+    // 1.0.314 — opt-in ftxImmediateClickTx: rilassa TX1 (bypass period-gate)
+    // = ripristina comportamento 1.0.283 (commit 06f3e8b di 1.0.300 aveva irrigidito a >=2
+    // per fixare una race ora mitigata da ed7ffeb "FT2 manual double-click TX latch").
+    int const ft2MinTxForBypass = m_ftxImmediateClickTx ? 1 : 2;
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
                           m_txEnabled && !m_dxCall.isEmpty() &&
-                          m_currentTx >= 2 && m_currentTx <= 5);
+                          m_currentTx >= ft2MinTxForBypass && m_currentTx <= 5);
     bool skipPeriodCheck = inQsoResponse;
 
     if (!skipPeriodCheck) {
@@ -22267,6 +22288,8 @@ void DecodiumBridge::loadSettings()
     m_ft2Conservative = s.value(QStringLiteral("Ft2Conservative"), false).toBool();
     // 1.0.311 — cap ripetizioni 73/RR73 FT2 (default 4; era hardcoded 8). Range 1-8.
     m_ft2SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft2SignoffRetryCap"), 4).toInt(), 8);
+    // 1.0.314 — opt-in TX immediato al click (stile 1.0.283), default OFF = upstream sicuro.
+    m_ftxImmediateClickTx = s.value(QStringLiteral("FtxImmediateClickTx"), false).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();

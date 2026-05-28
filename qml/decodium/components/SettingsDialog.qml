@@ -2878,6 +2878,33 @@ Dialog {
                                     ToolTip.text: qsTr("Quante volte ripetere il 73/RR73 finale in FT2 aspettando l'ack del partner prima di loggare e chiudere. Default 4 (~28s). Più basso = chiude prima (meno 'incantato' sulla stessa stazione); più alto = più paziente con partner deboli/QSB. Non tocca FT8/FT4.")
                                 }
 
+                                // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283)
+                                Text {
+                                    text: qsTr("TX immediato al click (stile 1.0.283):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ftxImmediateClickCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ftxImmediateClickTx : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ftxImmediateClickTx !== checked)
+                                            bridge.setFtxImmediateClickTx(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Ripristina il comportamento 'TX parte SUBITO al doppio-click' della 1.0.283. Rilassa il period-gate FT2 (TX1 da click bypassa l'attesa del prossimo slot) e alza il cap della finestra cliccabile FT8/FT4 da ~650ms (4% slot) a 2000ms (D3/JTDX accettano shift fino a 2s). Default OFF = comportamento sicuro upstream (Salvatore). Attiva se ti dà fastidio aspettare 1 ciclo dopo il click.")
+                                }
+
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
                                 // anti-QSB: ghost filter rilassato, retry cap esteso SNR-
                                 // adattivo, same-step wait piu' permissivo per partner
