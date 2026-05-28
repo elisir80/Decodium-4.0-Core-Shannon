@@ -398,6 +398,10 @@ class DecodiumBridge : public QObject
     // 1.0.315 — ripetizioni signoff (73/RR73) regolabili anche per FT4 e FT8 (oltre a FT2)
     Q_PROPERTY(int ft4SignoffRetryCap READ ft4SignoffRetryCap WRITE setFt4SignoffRetryCap NOTIFY ft4SignoffRetryCapChanged)
     Q_PROPERTY(int ft8SignoffRetryCap READ ft8SignoffRetryCap WRITE setFt8SignoffRetryCap NOTIFY ft8SignoffRetryCapChanged)
+    // 1.0.321 — opt-in: FT2 manual one-shot disarm (Salvatore 1.0.300 ed7ffeb).
+    // OFF (default fork) = TX1 manuale ripete fino a maxCallerRetries (weak-signal friendly).
+    // ON = comportamento upstream (disarm dopo TX1, re-arm solo a decode partner).
+    Q_PROPERTY(bool ft2ManualOneShotEnabled READ ft2ManualOneShotEnabled WRITE setFt2ManualOneShotEnabled NOTIFY ft2ManualOneShotEnabledChanged)
     // 1.0.317 — opt-in: FT8 sequenze veloci (grace 1200→400ms + accetta decode tardivi entro d3Cap)
     Q_PROPERTY(bool ft8FastSequence READ ft8FastSequence WRITE setFt8FastSequence NOTIFY ft8FastSequenceChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -1272,6 +1276,7 @@ signals:
     void ftxImmediateClickTxChanged(); // 1.0.314 — TX immediato al click (stile 1.0.283)
     void ft4SignoffRetryCapChanged();  // 1.0.315 — cap ripetizioni 73/RR73 FT4
     void ft8SignoffRetryCapChanged();  // 1.0.315 — cap ripetizioni 73/RR73 FT8
+    void ft2ManualOneShotEnabledChanged(); // 1.0.321 — FT2 manual one-shot disarm opt-in
     void ft8FastSequenceChanged();     // 1.0.317 — grace ridotta + late-decode accept FT8
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
@@ -1801,6 +1806,12 @@ private:
     // Stesso pattern di m_ft2SignoffRetryCap: valore ASSOLUTO (niente extra conservative/weak).
     int  m_ft4SignoffRetryCap {4};
     int  m_ft8SignoffRetryCap {3};
+    // 1.0.321 — FT2 manual one-shot disarm (Salvatore commit ed7ffeb / 1.0.300).
+    // OFF (default fork): TX1 ripete fino a maxCallerRetries — risolve "TX1 stacca su partner deboli"
+    //                     (feedback Pasquale). Comportamento pre-1.0.300.
+    // ON: disarm dopo ogni TX1-TX3, re-arm SOLO se decode partner riceve a iniziativa autoSeqStep.
+    //     Era il fix Salvatore al latch doppio-click, OK per partner forti.
+    bool m_ft2ManualOneShotEnabled {false};
     // 1.0.317 — opt-in: FT8 sequenze veloci (per "dopo che chiamo, ci mette troppo").
     // ON: grace al boundary 1200→400ms + onFt8DecodeReady accetta decode tardivo fino a
     // d3CapMs (~11s) invece di scartare lo slot. Sotto pressione CPU la safety
@@ -2553,6 +2564,9 @@ public:
     Q_INVOKABLE void setFt4SignoffRetryCap(int v);
     Q_INVOKABLE int  ft8SignoffRetryCap() const { return m_ft8SignoffRetryCap; }
     Q_INVOKABLE void setFt8SignoffRetryCap(int v);
+    // 1.0.321 — FT2 manual one-shot disarm opt-in (Salvatore latch fix)
+    Q_INVOKABLE bool ft2ManualOneShotEnabled() const { return m_ft2ManualOneShotEnabled; }
+    Q_INVOKABLE void setFt2ManualOneShotEnabled(bool v);
     // 1.0.317 — FT8 fast sequence (grace 400ms + accept late decodes)
     Q_INVOKABLE bool ft8FastSequence() const { return m_ft8FastSequence; }
     Q_INVOKABLE void setFt8FastSequence(bool v);

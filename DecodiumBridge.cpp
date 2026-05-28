@@ -4748,6 +4748,18 @@ void DecodiumBridge::setFt8SignoffRetryCap(int v)
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT8) = %1").arg(clamped));
 }
 
+// 1.0.321 — opt-in FT2 manual one-shot disarm (Salvatore latch fix da 1.0.300).
+// Default OFF su fork = TX1 ripete fino a maxCallerRetries → no "TX1 stacca su weak signal".
+void DecodiumBridge::setFt2ManualOneShotEnabled(bool v)
+{
+    if (m_ft2ManualOneShotEnabled == v) return;
+    m_ft2ManualOneShotEnabled = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2ManualOneShotEnabled"), v);
+    emit ft2ManualOneShotEnabledChanged();
+    bridgeLog(QStringLiteral("[FT2WS] FT2 manual one-shot disarm %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.317 — opt-in FT8 fast sequence: grace ridotta (1200→400ms) + onFt8DecodeReady
 // accetta decode tardivi entro d3CapMs invece di scartare lo slot. Pensata per "ci
 // mette troppo dopo che chiamo" (feedback Pasquale). Default OFF = comportamento
@@ -13568,7 +13580,12 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     // old retry behavior; pre-signoff manual QSO steps re-arm only when
     // autoSequenceStep() receives a fresh partner decode and selects the next
     // TX message. TX4/TX5 keep the existing signoff/autolog path.
-    if (wasTransmitting
+    // 1.0.321 — opt-in via m_ft2ManualOneShotEnabled (default OFF su fork iu8lmc).
+    // OFF = comportamento pre-1.0.300 = TX1 ripete fino a maxCallerRetries
+    //       (cruciale per partner deboli che non decodificano al primo periodo RX).
+    // ON  = comportamento Salvatore 1.0.300 (disarm dopo TX1-TX3, re-arm da decode).
+    if (m_ft2ManualOneShotEnabled
+        && wasTransmitting
         && !error
         && !appliedDeferredAutoSeqAfterActiveTx
         && m_mode == QStringLiteral("FT2")
@@ -22356,6 +22373,8 @@ void DecodiumBridge::loadSettings()
     // 1.0.315 — cap ripetizioni 73/RR73 anche per FT4 (default 4) e FT8 (default 3). Range 1-8.
     m_ft4SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft4SignoffRetryCap"), 4).toInt(), 8);
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
+    // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
+    m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
     // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
     m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G

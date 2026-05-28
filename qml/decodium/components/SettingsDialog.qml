@@ -2986,6 +2986,60 @@ Dialog {
                                     ToolTip.text: qsTr("Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.\n\nTwo changes:\n  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary\n  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'\n\nSAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety > reactivity on loaded PCs).\n\nDefault: OFF (= conservative upstream behaviour, max decode reliability).")
                                 }
 
+                                // 1.0.321 — opt-in: FT2 manual one-shot disarm (Salvatore 1.0.300 latch fix)
+                                Text {
+                                    text: qsTr("FT2: manual one-shot disarm (1.0.300+):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2ManualOneShotCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2ManualOneShotEnabled : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft2ManualOneShotEnabled !== checked)
+                                            bridge.setFt2ManualOneShotEnabled(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don't decode in the first RX period the QSO is lost (= 'TX1 stops without completing').\n\nWhen OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until 'Caller Retries' is reached — better for weak-signal QSOs (Pasquale's case).\n\nEnable only if you double-click stations that consistently reply on the first attempt.")
+                                }
+
+                                // 1.0.321 — Caller retries (era Q_PROPERTY non esposta in UI)
+                                Text {
+                                    text: qsTr("Caller retries (max TX repeats per step):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                SpinBox {
+                                    id: maxCallerRetriesSpin
+                                    Layout.columnSpan: 3
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 1; to: 99; editable: true
+                                    value: bridge ? bridge.maxCallerRetries : 10
+                                    onValueChanged: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
+                                    contentItem: TextInput { text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn't reply.\n\nDefault: 10.\n\nFT2 (slot 3.75s): 10 retries ≈ 38s of calling.\nFT8 (slot 15s): 10 retries ≈ 150s.\n\nLower (4-6) = less time wasted on stations that don't reply.\nHigher (15-20) = patience for weak DX / marginal propagation.\n\nNote: with 'FT2 manual one-shot disarm' OFF (default) this is what stops TX1 from looping forever.")
+                                }
+
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
                                 // anti-QSB: ghost filter rilassato, retry cap esteso SNR-
                                 // adattivo, same-step wait piu' permissivo per partner
