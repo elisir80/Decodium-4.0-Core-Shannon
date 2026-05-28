@@ -36,9 +36,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-15-intel
-            compat_macos: "13.0"
-            asset_suffix: "macos-ventura-x86_64"
+          # GitHub retired the macOS 13 Intel runner. Building a true Ventura
+          # x86_64 release now requires a self-hosted Ventura Intel runner or
+          # source-built dependencies with deployment target 13.0.
           - runner: macos-15-intel
             compat_macos: "14.0"
             asset_suffix: "macos-sonoma-x86_64"
@@ -125,6 +125,13 @@ jobs:
         run: |
           set -euo pipefail
           HAMLIB_PREFIX="${RUNNER_TEMP}/hamlib-prefix"
+          MACOS_DEPLOYMENT_TARGET="${{ matrix.compat_macos }}"
+
+          export MACOSX_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET}"
+          export CFLAGS="-mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET} ${CFLAGS:-}"
+          export CXXFLAGS="-mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET} ${CXXFLAGS:-}"
+          export OBJCFLAGS="-mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET} ${OBJCFLAGS:-}"
+          export LDFLAGS="-mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET} ${LDFLAGS:-}"
 
           echo "Using Hamlib ${HAMLIB_TAG}"
           cd "${RUNNER_TEMP}"
@@ -201,9 +208,6 @@ jobs:
         run: |
           ls -lh release-assets
           VERSION="${{ steps.version.outputs.version }}"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
@@ -229,9 +233,6 @@ jobs:
           fi
 
           ASSETS=(
-            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
-            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
-            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
             "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
             "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
             "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
