@@ -435,13 +435,22 @@ Item {
                     }
                 }
 
-                // Full Spectrum · Decode — PLACEHOLDER (extracted component in 2b).
+                // Full Spectrum · Decode — REAL (FullSpectrumPanel, global bridge).
                 DxPanel {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     title: "Full Spectrum · Decode"
-                    meta: "phase 2b"
-                    PanelStub { anchors.fill: parent; note: "Full Spectrum · Decode — phase 2b" }
+                    meta: "live"
+                    live: true
+                    Loader {
+                        anchors.fill: parent
+                        active: workspace.visible
+                        sourceComponent: fullSpectrumComp
+                    }
+                    Component {
+                        id: fullSpectrumComp
+                        FullSpectrumPanel { anchors.fill: parent }
+                    }
                 }
             }
 
@@ -452,14 +461,23 @@ Item {
                 Layout.fillHeight: true
                 spacing: 12
 
-                // Signal RX · QSO Lock — PLACEHOLDER (extracted in 2b).
+                // Signal RX · QSO Lock — REAL (SignalRxPanel, global bridge).
                 DxPanel {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 350
                     Layout.minimumHeight: 180
                     title: "Signal RX · QSO Lock"
-                    meta: "phase 2b"
-                    PanelStub { anchors.fill: parent; note: "Signal RX · QSO Lock — phase 2b" }
+                    meta: "live"
+                    live: true
+                    Loader {
+                        anchors.fill: parent
+                        active: workspace.visible
+                        sourceComponent: signalRxComp
+                    }
+                    Component {
+                        id: signalRxComp
+                        SignalRxPanel { anchors.fill: parent }
+                    }
                 }
 
                 // TX Macros — REAL TxPanel (requires `engine`).
@@ -485,13 +503,21 @@ Item {
                     }
                 }
 
-                // Log · QSO Entry — PLACEHOLDER compact form (full logbook in 2b).
+                // Log · QSO Entry — REAL compact form (LogQsoPanel, global bridge).
                 DxPanel {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     title: "Log · QSO Entry"
-                    meta: "phase 2b"
-                    PanelStub { anchors.fill: parent; note: "Log · QSO Entry — phase 2b" }
+                    meta: "live"
+                    Loader {
+                        anchors.fill: parent
+                        active: workspace.visible
+                        sourceComponent: logQsoComp
+                    }
+                    Component {
+                        id: logQsoComp
+                        LogQsoPanel { anchors.fill: parent }
+                    }
                 }
             }
         }
