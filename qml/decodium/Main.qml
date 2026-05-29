@@ -1093,6 +1093,13 @@ ApplicationWindow {
     property color successGreen: bridge.themeManager.successColor
     property color glassOverlay: bridge.themeManager.glassOverlay
     property color glassBorder: bridge.themeManager.glassBorder
+    // DX-Pedition Fase 1 — token aggiuntivi (validi su tutti i temi via fallback in ThemeManager)
+    property color accentDim: bridge.themeManager.accentDim
+    property color accentDeep: bridge.themeManager.accentDeep
+    property color pileColor: bridge.themeManager.pileColor
+    property color gridColor: bridge.themeManager.gridColor
+    property color txColor: bridge.themeManager.txColor
+    property color rxColor: bridge.themeManager.rxColor
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     property bool highlight73: bridge.getSetting("Highlight73", true)

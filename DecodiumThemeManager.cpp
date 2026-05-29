@@ -25,6 +25,12 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
     /* ledBlue        */ QColor("#4A90E2"),
     /* ledYellow      */ QColor("#FFD700"),
     /* ledMagenta     */ QColor("#FF00FF"),
+    /* accentDim      */ QColor(),
+    /* accentDeep     */ QColor(),
+    /* pileColor      */ QColor(),
+    /* gridColor      */ QColor(),
+    /* txColor        */ QColor(),
+    /* rxColor        */ QColor(),
     /* isLight        */ false
 };
 
@@ -52,7 +58,48 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
     /* ledBlue        */ QColor("#2D6BB0"),
     /* ledYellow      */ QColor("#B68726"),
     /* ledMagenta     */ QColor("#6B5BAB"),
+    /* accentDim      */ QColor(),
+    /* accentDeep     */ QColor(),
+    /* pileColor      */ QColor(),
+    /* gridColor      */ QColor(),
+    /* txColor        */ QColor(),
+    /* rxColor        */ QColor(),
     /* isLight        */ true
+};
+
+// DX-Pedition Fase 1 — tema phosphor dark opt-in. accent qui = default phosphor;
+// il variant attivo (cyan/amber/red) viene risolto a runtime in accentTriple().
+const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_dxPedition {
+    /* bgDeep         */ QColor("#050706"),
+    /* bgMedium       */ QColor("#0d1310"),  // panel
+    /* bgLight        */ QColor("#182019"),  // line
+    /* primaryColor   */ QColor("#19ff88"),  // accent phosphor
+    /* secondaryColor */ QColor("#66e6ff"),  // pile
+    /* accentColor    */ QColor("#19ff88"),  // accent phosphor (override via variant)
+    /* warningColor   */ QColor("#ffb84a"),  // warn
+    /* errorColor     */ QColor("#ff5466"),  // hot
+    /* textPrimary    */ QColor("#d6dcd8"),  // txt
+    /* textSecondary  */ QColor("#6c7872"),  // txt-dim
+    /* successColor   */ QColor("#19ff88"),  // rx == phosphor
+    /* glassOverlay   */ QColor(13, 19, 16, 160),     // panel @ ~63%
+    /* glassBorder    */ QColor(31, 42, 34, 200),     // line-2
+    /* borderColor    */ QColor("#182019"),  // line
+    /* borderSoft     */ QColor("#1f2a22"),  // line-2
+    /* panelColor     */ QColor("#0d1310"),  // panel
+    /* panelHeader    */ QColor("#0a0e0c"),  // bg-2
+    /* rowMatchBg     */ QColor(25, 255, 136, 28),    // accent soft
+    /* rowMatchBorder */ QColor("#19ff88"),  // accent
+    /* ledRed         */ QColor("#ff5466"),  // hot
+    /* ledBlue        */ QColor("#66e6ff"),  // pile
+    /* ledYellow      */ QColor("#ffb84a"),  // warn
+    /* ledMagenta     */ QColor("#ff7a5c"),  // tx
+    /* accentDim      */ QColor("#0fa55a"),  // accent-dim phosphor (override via variant)
+    /* accentDeep     */ QColor("#052d1a"),  // accent-deep phosphor (override via variant)
+    /* pileColor      */ QColor("#66e6ff"),
+    /* gridColor      */ QColor("#00d4b4"),
+    /* txColor        */ QColor("#ff7a5c"),
+    /* rxColor        */ QColor("#19ff88"),
+    /* isLight        */ false
 };
 
 DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
@@ -75,10 +122,20 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
         s.setValue("theme/migrated_v2", true);
     }
     QString const stored = s.value("theme/current", "Ocean Blue").toString();
-    if (stored == "Stellar Light" || stored == "Ocean Blue") {
+    if (stored == "Stellar Light" || stored == "Ocean Blue" || stored == "DX-Pedition") {
         m_currentTheme = stored;
     } else {
         m_currentTheme = "Ocean Blue";
+    }
+    // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
+    {
+        QSettings ds("Decodium", "Decodium3");
+        QString const av = ds.value("ThemeAccentVariant", "phosphor").toString();
+        if (av == "phosphor" || av == "cyan" || av == "amber" || av == "red")
+            m_accentVariant = av;
+        QString const dn = ds.value("ThemeDensity", "regular").toString();
+        if (dn == "compact" || dn == "regular" || dn == "comfy")
+            m_density = dn;
     }
     // 1.0.305 (#6) — colori UI personalizzati (sfondo+testo), opt-in default OFF
     m_customColorsEnabled = s.value("theme/customEnabled", false).toBool();
@@ -140,17 +197,77 @@ void DecodiumThemeManager::setCustomTextColor(const QString& hex)
 const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette() const
 {
     if (m_currentTheme == "Stellar Light") return s_stellarLight;
+    if (m_currentTheme == "DX-Pedition")   return s_dxPedition;
     return s_oceanBlue;
 }
 
 void DecodiumThemeManager::setCurrentTheme(const QString& name)
 {
     if (m_currentTheme == name) return;
-    if (name != "Ocean Blue" && name != "Stellar Light") return;
+    if (name != "Ocean Blue" && name != "Stellar Light" && name != "DX-Pedition") return;
     m_currentTheme = name;
     QSettings("Decodium", "Decodium").setValue("theme/current", name);
     emit currentThemeChanged();
     emit paletteChanged();
+}
+
+// DX-Pedition Fase 1 — accent swappabile + densità ---------------------------
+void DecodiumThemeManager::accentTriple(QColor& accent, QColor& dim, QColor& deep) const
+{
+    // Default = phosphor (anche se per qualche motivo il variant è ignoto).
+    if (m_accentVariant == "cyan") {
+        accent = QColor("#66e6ff"); dim = QColor("#1b9fcc"); deep = QColor("#04222d");
+    } else if (m_accentVariant == "amber") {
+        accent = QColor("#ffb820"); dim = QColor("#a06d10"); deep = QColor("#2e1d04");
+    } else if (m_accentVariant == "red") {
+        accent = QColor("#ff5466"); dim = QColor("#a82c3a"); deep = QColor("#2e090f");
+    } else { // phosphor
+        accent = QColor("#19ff88"); dim = QColor("#0fa55a"); deep = QColor("#052d1a");
+    }
+}
+
+void DecodiumThemeManager::setAccentVariant(const QString& name)
+{
+    QString const n = name.trimmed();
+    if (n != "phosphor" && n != "cyan" && n != "amber" && n != "red") return;
+    if (m_accentVariant == n) return;
+    m_accentVariant = n;
+    QSettings("Decodium", "Decodium3").setValue("ThemeAccentVariant", n);
+    // Influisce sui colori solo quando il tema DX-Pedition è attivo, ma emettiamo
+    // comunque: i binding QML restano corretti e l'effetto è nullo sugli altri temi.
+    emit paletteChanged();
+}
+
+void DecodiumThemeManager::setDensity(const QString& name)
+{
+    QString const n = name.trimmed();
+    if (n != "compact" && n != "regular" && n != "comfy") return;
+    if (m_density == n) return;
+    m_density = n;
+    QSettings("Decodium", "Decodium3").setValue("ThemeDensity", n);
+    emit densityChanged();
+}
+
+int DecodiumThemeManager::densityRowHeight() const
+{
+    // "Row pad" → altezza riga effettiva indicativa (compact/regular/comfy).
+    if (m_density == "compact") return 22;
+    if (m_density == "comfy")   return 30;
+    return 26; // regular
+}
+
+int DecodiumThemeManager::densityFontSize() const
+{
+    if (m_density == "compact") return 11;
+    if (m_density == "comfy")   return 13;
+    return 12; // regular
+}
+
+int DecodiumThemeManager::densityPanelHeight() const
+{
+    if (m_density == "compact") return 26;
+    if (m_density == "comfy")   return 38;
+    return 30; // regular
 }
 
 bool DecodiumThemeManager::isLightTheme() const
@@ -176,7 +293,13 @@ QColor DecodiumThemeManager::bgLight() const
 }
 QColor DecodiumThemeManager::primaryColor()   const { return currentPalette().primaryColor; }
 QColor DecodiumThemeManager::secondaryColor() const { return currentPalette().secondaryColor; }
-QColor DecodiumThemeManager::accentColor()    const { return currentPalette().accentColor; }
+QColor DecodiumThemeManager::accentColor() const
+{
+    if (m_currentTheme == "DX-Pedition") {
+        QColor a, d, p; accentTriple(a, d, p); return a;
+    }
+    return currentPalette().accentColor;
+}
 QColor DecodiumThemeManager::warningColor()   const { return currentPalette().warningColor; }
 QColor DecodiumThemeManager::errorColor()     const { return currentPalette().errorColor; }
 QColor DecodiumThemeManager::textPrimary() const
@@ -211,3 +334,41 @@ QColor DecodiumThemeManager::ledRed()         const { return currentPalette().le
 QColor DecodiumThemeManager::ledBlue()        const { return currentPalette().ledBlue; }
 QColor DecodiumThemeManager::ledYellow()      const { return currentPalette().ledYellow; }
 QColor DecodiumThemeManager::ledMagenta()     const { return currentPalette().ledMagenta; }
+
+// DX-Pedition Fase 1 — token extra. Per il tema DX-Pedition usano i token design
+// (accentDim/Deep seguono il variant); per Ocean Blue/Stellar derivano fallback
+// ragionevoli dai getter esistenti, così quei temi restano invariati e validi.
+QColor DecodiumThemeManager::accentDim() const
+{
+    if (m_currentTheme == "DX-Pedition") {
+        QColor a, d, p; accentTriple(a, d, p); return d;
+    }
+    return accentColor().darker(160);
+}
+QColor DecodiumThemeManager::accentDeep() const
+{
+    if (m_currentTheme == "DX-Pedition") {
+        QColor a, d, p; accentTriple(a, d, p); return p;
+    }
+    return accentColor().darker(420);
+}
+QColor DecodiumThemeManager::pileColor() const
+{
+    QColor const c = currentPalette().pileColor;
+    return c.isValid() ? c : currentPalette().secondaryColor;
+}
+QColor DecodiumThemeManager::gridColor() const
+{
+    QColor const c = currentPalette().gridColor;
+    return c.isValid() ? c : currentPalette().successColor;
+}
+QColor DecodiumThemeManager::txColor() const
+{
+    QColor const c = currentPalette().txColor;
+    return c.isValid() ? c : currentPalette().warningColor;
+}
+QColor DecodiumThemeManager::rxColor() const
+{
+    QColor const c = currentPalette().rxColor;
+    return c.isValid() ? c : currentPalette().successColor;
+}

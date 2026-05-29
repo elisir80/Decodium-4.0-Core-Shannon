@@ -31,6 +31,13 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(QColor ledBlue        READ ledBlue        NOTIFY paletteChanged)
     Q_PROPERTY(QColor ledYellow      READ ledYellow      NOTIFY paletteChanged)
     Q_PROPERTY(QColor ledMagenta     READ ledMagenta     NOTIFY paletteChanged)
+    // DX-Pedition Fase 1 — token aggiuntivi (NOTIFY paletteChanged così seguono accent/tema)
+    Q_PROPERTY(QColor accentDim      READ accentDim      NOTIFY paletteChanged)
+    Q_PROPERTY(QColor accentDeep     READ accentDeep     NOTIFY paletteChanged)
+    Q_PROPERTY(QColor pileColor      READ pileColor      NOTIFY paletteChanged)
+    Q_PROPERTY(QColor gridColor      READ gridColor      NOTIFY paletteChanged)
+    Q_PROPERTY(QColor txColor        READ txColor        NOTIFY paletteChanged)
+    Q_PROPERTY(QColor rxColor        READ rxColor        NOTIFY paletteChanged)
     Q_PROPERTY(QStringList availableThemes READ availableThemes CONSTANT)
     Q_PROPERTY(QString currentTheme  READ currentTheme   WRITE setCurrentTheme NOTIFY currentThemeChanged)
     Q_PROPERTY(bool   isLightTheme   READ isLightTheme   NOTIFY paletteChanged)
@@ -38,6 +45,9 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
     Q_PROPERTY(QString customBgColor       READ customBgColor       WRITE setCustomBgColor       NOTIFY paletteChanged)
     Q_PROPERTY(QString customTextColor     READ customTextColor     WRITE setCustomTextColor     NOTIFY paletteChanged)
+    // DX-Pedition Fase 1 — accent swappabile (solo tema "DX-Pedition") + densità (metrica)
+    Q_PROPERTY(QString accentVariant       READ accentVariant       WRITE setAccentVariant       NOTIFY paletteChanged)
+    Q_PROPERTY(QString density             READ density             WRITE setDensity             NOTIFY densityChanged)
 
 public:
     explicit DecodiumThemeManager(QObject* parent = nullptr);
@@ -65,8 +75,15 @@ public:
     QColor ledBlue()        const;
     QColor ledYellow()      const;
     QColor ledMagenta()     const;
+    // DX-Pedition Fase 1 — token aggiuntivi
+    QColor accentDim()      const;
+    QColor accentDeep()     const;
+    QColor pileColor()      const;
+    QColor gridColor()      const;
+    QColor txColor()        const;
+    QColor rxColor()        const;
 
-    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light"}; }
+    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "DX-Pedition"}; }
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
@@ -79,12 +96,23 @@ public:
     QString customTextColor() const { return m_customTextColor; }
     void    setCustomTextColor(const QString& hex);
 
+    // DX-Pedition Fase 1 — accent variant (phosphor/cyan/amber/red) + densità
+    QString accentVariant() const { return m_accentVariant; }
+    void    setAccentVariant(const QString& name);
+    QString density() const { return m_density; }
+    void    setDensity(const QString& name);
+    // Helper metrica densità (compact/regular/comfy) — non colori.
+    Q_INVOKABLE int densityRowHeight()   const;
+    Q_INVOKABLE int densityFontSize()    const;
+    Q_INVOKABLE int densityPanelHeight() const;
+
 public slots:
     Q_INVOKABLE void applyThemeByName(const QString& name) { setCurrentTheme(name); }
 
 signals:
     void currentThemeChanged();
     void paletteChanged();
+    void densityChanged();
 
 private:
     struct ThemePalette {
@@ -111,13 +139,23 @@ private:
         QColor ledBlue;
         QColor ledYellow;
         QColor ledMagenta;
+        // DX-Pedition Fase 1 — token extra (gli altri temi lasciano invalidi → fallback derivati)
+        QColor accentDim;
+        QColor accentDeep;
+        QColor pileColor;
+        QColor gridColor;
+        QColor txColor;
+        QColor rxColor;
         bool   isLight;
     };
 
     static const ThemePalette s_oceanBlue;
     static const ThemePalette s_stellarLight;
+    static const ThemePalette s_dxPedition;
 
     const ThemePalette& currentPalette() const;
+    // DX-Pedition Fase 1 — tripletta accent del variant scelto (solo tema DX-Pedition)
+    void accentTriple(QColor& accent, QColor& dim, QColor& deep) const;
 
     // 1.0.305 (#6) — colori custom: override valido solo se enabled + hex parsabile.
     QColor customBg() const;    // QColor(m_customBgColor) se enabled+valido, altrimenti invalido
@@ -128,4 +166,7 @@ private:
     bool    m_customColorsEnabled {false};
     QString m_customBgColor;    // "#RRGGBB" o vuoto
     QString m_customTextColor;
+    // DX-Pedition Fase 1
+    QString m_accentVariant {"phosphor"};   // phosphor/cyan/amber/red — usato solo dal tema DX-Pedition
+    QString m_density {"regular"};           // compact/regular/comfy — metrica, non colore
 };
