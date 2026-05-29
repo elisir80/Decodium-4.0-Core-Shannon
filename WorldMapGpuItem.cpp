@@ -12,7 +12,6 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPolygonF>
-#include <QSet>
 #include <QSGFlatColorMaterial>
 #include <QSGGeometry>
 #include <QSGGeometryNode>
@@ -43,6 +42,8 @@ constexpr int kMaxVisibleContactLabels = 20;
 constexpr int kRoleDowngradeHoldSeconds = 75;
 constexpr int kGreatCircleSteps = 56;
 constexpr qint64 kGpuProfileLogMs = 5000;
+constexpr int kMaxLabelTextureCache = 192;
+constexpr qint64 kLabelTextureTtlMs = 5 * 60 * 1000;
 
 const char* liveMapGraphicsApiName(QSGRendererInterface::GraphicsApi api)
 {
@@ -102,6 +103,7 @@ public:
     }
 
     QHash<QString, QSGTexture*> textureCache;
+    QHash<QString, qint64> textureLastUsedMs;
     QVector<QSGSimpleTextureNode*> labelNodes;
 };
 
@@ -530,9 +532,18 @@ QRectF labelTextureRectForBaseline(const QString& text, const QPointF& baseline)
 
 QString labelTextureKey(const QString& text, const QColor& color)
 {
+    QFont const font = liveMapLabelFont();
     return text
         + QLatin1Char('|')
-        + QString::number(static_cast<qulonglong>(color.rgba()), 16);
+        + QString::number(static_cast<qulonglong>(color.rgba()), 16)
+        + QLatin1Char('|')
+        + font.family()
+        + QLatin1Char('|')
+        + QString::number(font.pixelSize())
+        + QLatin1Char('|')
+        + QString::number(font.pointSizeF(), 'f', 2)
+        + QLatin1Char('|')
+        + QString::number(font.weight());
 }
 
 QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, const QString& text, const QColor& color)
@@ -542,8 +553,10 @@ QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, cons
     }
 
     QString const key = labelTextureKey(text, color);
+    qint64 const nowMs = monotonicNowMs();
     QSGTexture* texture = layer->textureCache.value(key, nullptr);
     if (texture) {
+        layer->textureLastUsedMs.insert(key, nowMs);
         return texture;
     }
 
@@ -553,23 +566,71 @@ QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, cons
     }
     texture->setFiltering(QSGTexture::Linear);
     layer->textureCache.insert(key, texture);
+    layer->textureLastUsedMs.insert(key, nowMs);
     return texture;
 }
 
-void pruneLabelTextureCache(LabelLayerNode* layer, const QSet<QString>& liveKeys)
+void pruneLabelTextureCache(LabelLayerNode* layer)
 {
     if (!layer) {
         return;
     }
 
+    qint64 const nowMs = monotonicNowMs();
     for (auto it = layer->textureCache.begin(); it != layer->textureCache.end(); ) {
-        if (liveKeys.contains(it.key())) {
+        qint64 const lastUsed = layer->textureLastUsedMs.value(it.key(), 0);
+        if (lastUsed > 0 && nowMs - lastUsed <= kLabelTextureTtlMs) {
             ++it;
             continue;
         }
         delete it.value();
+        layer->textureLastUsedMs.remove(it.key());
         it = layer->textureCache.erase(it);
     }
+
+    if (layer->textureCache.size() <= kMaxLabelTextureCache) {
+        return;
+    }
+
+    QVector<QPair<qint64, QString>> entries;
+    entries.reserve(layer->textureCache.size());
+    for (auto it = layer->textureCache.constBegin(); it != layer->textureCache.constEnd(); ++it) {
+        entries.push_back({layer->textureLastUsedMs.value(it.key(), 0), it.key()});
+    }
+    std::sort(entries.begin(), entries.end(), [](const auto& a, const auto& b) {
+        return a.first < b.first;
+    });
+
+    int removeCount = layer->textureCache.size() - kMaxLabelTextureCache;
+    for (int i = 0; i < entries.size() && removeCount > 0; ++i) {
+        QSGTexture* texture = layer->textureCache.take(entries[i].second);
+        layer->textureLastUsedMs.remove(entries[i].second);
+        delete texture;
+        --removeCount;
+    }
+}
+
+struct MarkerVertex {
+    float lon;
+    float lat;
+    float offsetX;
+    float offsetY;
+    float texU;
+    float texV;
+};
+
+const QSGGeometry::AttributeSet& markerAttributes()
+{
+    static QSGGeometry::Attribute attributes[] = {
+        QSGGeometry::Attribute::create(0, 2, QSGGeometry::FloatType),
+        QSGGeometry::Attribute::create(1, 4, QSGGeometry::FloatType)
+    };
+    static QSGGeometry::AttributeSet attributeSet {
+        2,
+        sizeof(MarkerVertex),
+        attributes
+    };
+    return attributeSet;
 }
 
 #ifdef DECODIUM_LIVEMAP_MARKER_QSB
@@ -598,11 +659,21 @@ public:
                 return -1;
             if (color[i] > rhs->color[i])
                 return 1;
+            if (viewParams[i] < rhs->viewParams[i])
+                return -1;
+            if (viewParams[i] > rhs->viewParams[i])
+                return 1;
+            if (rectParams[i] < rhs->rectParams[i])
+                return -1;
+            if (rectParams[i] > rhs->rectParams[i])
+                return 1;
         }
         return 0;
     }
 
     float color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float viewParams[4] = {0.0f, 0.0f, 360.0f, 180.0f};
+    float rectParams[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 };
 
 class MarkerShader final : public QSGMaterialShader
@@ -617,8 +688,8 @@ public:
     bool updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial*) override
     {
         QByteArray* uniformData = state.uniformData();
-        if (uniformData->size() < 96) {
-            uniformData->resize(96);
+        if (uniformData->size() < 128) {
+            uniformData->resize(128);
             std::memset(uniformData->data(), 0, static_cast<size_t>(uniformData->size()));
         }
         auto* material = static_cast<MarkerMaterial*>(newMaterial);
@@ -627,6 +698,8 @@ public:
         float const opacity = state.opacity();
         std::memcpy(uniformData->data() + 64, &opacity, 4);
         std::memcpy(uniformData->data() + 80, material->color, sizeof(material->color));
+        std::memcpy(uniformData->data() + 96, material->viewParams, sizeof(material->viewParams));
+        std::memcpy(uniformData->data() + 112, material->rectParams, sizeof(material->rectParams));
         return true;
     }
 };
@@ -808,12 +881,21 @@ void updateTriangleNode(QSGNode* parent, QSGGeometryNode*& node, const QVector<Q
     node->markDirty(QSGNode::DirtyGeometry);
 }
 
-void updateMarkerNode(QSGNode* parent, QSGGeometryNode*& node,
-                      const QVector<QPointF>& points, const QColor& color, float radius)
+void updateGeoMarkerNode(QSGNode* parent, QSGGeometryNode*& node,
+                         const QVector<QPointF>& lonLatPoints,
+                         const QColor& color,
+                         float radius,
+                         double centerLon,
+                         double centerLat,
+                         double spanLon,
+                         double spanLat,
+                         const QRectF& rect,
+                         bool updateGeometry)
 {
 #ifdef DECODIUM_LIVEMAP_MARKER_QSB
+    bool created = false;
     if (!node) {
-        auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 0);
+        auto* geometry = new QSGGeometry(markerAttributes(), 0);
         geometry->setDrawingMode(QSGGeometry::DrawTriangles);
         geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
 
@@ -825,22 +907,39 @@ void updateMarkerNode(QSGNode* parent, QSGGeometryNode*& node,
         node->setMaterial(material);
         node->setFlag(QSGNode::OwnsMaterial);
         parent->appendChildNode(node);
+        created = true;
     }
     if (auto* material = static_cast<MarkerMaterial*>(node->material())) {
         colorToFloat4(color, material->color);
+        material->viewParams[0] = static_cast<float>(centerLon);
+        material->viewParams[1] = static_cast<float>(centerLat);
+        material->viewParams[2] = static_cast<float>(spanLon);
+        material->viewParams[3] = static_cast<float>(spanLat);
+        material->rectParams[0] = static_cast<float>(rect.left());
+        material->rectParams[1] = static_cast<float>(rect.top());
+        material->rectParams[2] = static_cast<float>(rect.width());
+        material->rectParams[3] = static_cast<float>(rect.height());
         node->markDirty(QSGNode::DirtyMaterial);
     }
     auto* geometry = node->geometry();
-    geometry->allocate(points.size() * 6);
+    int const vertexCount = lonLatPoints.size() * 6;
+    if (!created && !updateGeometry && geometry->vertexCount() == vertexCount) {
+        return;
+    }
+
+    geometry->allocate(vertexCount);
     geometry->setDrawingMode(QSGGeometry::DrawTriangles);
-    auto* vertices = geometry->vertexDataAsTexturedPoint2D();
+    auto* vertices = static_cast<MarkerVertex*>(geometry->vertexData());
     int out = 0;
     auto write = [&](const QPointF& p, float dx, float dy, float u, float v) {
-        vertices[out++].set(static_cast<float>(p.x()) + dx * radius,
-                            static_cast<float>(p.y()) + dy * radius,
-                            u, v);
+        vertices[out++] = {static_cast<float>(p.x()),
+                           static_cast<float>(p.y()),
+                           dx * radius,
+                           dy * radius,
+                           u,
+                           v};
     };
-    for (const QPointF& p : points) {
+    for (const QPointF& p : lonLatPoints) {
         write(p, -1.0f, -1.0f, 0.0f, 0.0f);
         write(p,  1.0f, -1.0f, 1.0f, 0.0f);
         write(p, -1.0f,  1.0f, 0.0f, 1.0f);
@@ -853,10 +952,60 @@ void updateMarkerNode(QSGNode* parent, QSGGeometryNode*& node,
 #else
     Q_UNUSED(parent);
     Q_UNUSED(node);
-    Q_UNUSED(points);
+    Q_UNUSED(lonLatPoints);
     Q_UNUSED(color);
     Q_UNUSED(radius);
+    Q_UNUSED(centerLon);
+    Q_UNUSED(centerLat);
+    Q_UNUSED(spanLon);
+    Q_UNUSED(spanLat);
+    Q_UNUSED(rect);
+    Q_UNUSED(updateGeometry);
 #endif
+}
+
+void updateScreenCircleNode(QSGNode* parent, QSGGeometryNode*& node,
+                            const QVector<QPointF>& points, const QColor& color, float radius)
+{
+    if (!node) {
+        auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 0);
+        geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+        geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
+
+        auto* material = new QSGFlatColorMaterial;
+        material->setColor(color);
+
+        node = new QSGGeometryNode;
+        node->setGeometry(geometry);
+        node->setFlag(QSGNode::OwnsGeometry);
+        node->setMaterial(material);
+        node->setFlag(QSGNode::OwnsMaterial);
+        parent->appendChildNode(node);
+    }
+    if (auto* material = static_cast<QSGFlatColorMaterial*>(node->material())) {
+        material->setColor(color);
+        node->markDirty(QSGNode::DirtyMaterial);
+    }
+
+    constexpr int segments = 14;
+    auto* geometry = node->geometry();
+    geometry->allocate(points.size() * segments * 3);
+    geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+    auto* vertices = geometry->vertexDataAsPoint2D();
+    int out = 0;
+    for (const QPointF& center : points) {
+        for (int i = 0; i < segments; ++i) {
+            double const a0 = 2.0 * M_PI * static_cast<double>(i) / static_cast<double>(segments);
+            double const a1 = 2.0 * M_PI * static_cast<double>(i + 1) / static_cast<double>(segments);
+            QPointF const p0 = center + QPointF(std::cos(a0) * radius, std::sin(a0) * radius);
+            QPointF const p1 = center + QPointF(std::cos(a1) * radius, std::sin(a1) * radius);
+            vertices[out++].set(static_cast<float>(center.x()), static_cast<float>(center.y()));
+            vertices[out++].set(static_cast<float>(p0.x()), static_cast<float>(p0.y()));
+            vertices[out++].set(static_cast<float>(p1.x()), static_cast<float>(p1.y()));
+        }
+    }
+    geometry->markVertexDataDirty();
+    node->markDirty(QSGNode::DirtyGeometry);
 }
 
 void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
@@ -866,9 +1015,11 @@ void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
                     double centerLat,
                     double spanLon,
                     double spanLat,
-                    const QRectF& rect)
+                    const QRectF& rect,
+                    bool updateGeometry)
 {
 #ifdef DECODIUM_LIVEMAP_PATH_QSB
+    bool created = false;
     if (!node) {
         auto* geometry = new QSGGeometry(pathAttributes(), 0);
         geometry->setDrawingMode(QSGGeometry::DrawLines);
@@ -883,6 +1034,7 @@ void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
         node->setMaterial(material);
         node->setFlag(QSGNode::OwnsMaterial);
         parent->appendChildNode(node);
+        created = true;
     }
     if (auto* material = static_cast<PathMaterial*>(node->material())) {
         colorToFloat4(color, material->color);
@@ -898,6 +1050,10 @@ void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
     }
     auto* geometry = node->geometry();
     int const vertexCount = paths.size() * kGreatCircleSteps * 2;
+    if (!created && !updateGeometry && geometry->vertexCount() == vertexCount) {
+        return;
+    }
+
     geometry->allocate(vertexCount);
     geometry->setDrawingMode(QSGGeometry::DrawLines);
     geometry->setLineWidth(1.0f);
@@ -931,6 +1087,7 @@ void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
     Q_UNUSED(spanLon);
     Q_UNUSED(spanLat);
     Q_UNUSED(rect);
+    Q_UNUSED(updateGeometry);
 #endif
 }
 
@@ -950,7 +1107,11 @@ WorldMapGpuItem::WorldMapGpuItem(QQuickItem* parent)
             bool const pruned = pruneExpiredContacts();
             updateViewportTargets();
             bool const viewportChanged = smoothViewport();
-            if (pruned || viewportChanged) {
+            if (pruned) {
+                m_greylineGeometryDirty = true;
+                m_geometryDirty = true;
+                m_contactGeometryDirty = true;
+            } else if (viewportChanged) {
                 m_greylineGeometryDirty = true;
                 m_geometryDirty = true;
             }
@@ -1332,6 +1493,7 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         root->appendChildNode(animationLayer);
         m_greylineGeometryDirty = true;
         m_geometryDirty = true;
+        m_contactGeometryDirty = true;
     }
 
     if (m_greylineEnabled && m_greylineShaderAllowed) {
@@ -1369,33 +1531,47 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         clearNode(greylineLayer);
     }
 
-    if (m_geometryDirty) {
+    bool const rebuildBatch = m_geometryDirty || m_contactGeometryDirty;
+    bool const uploadContactGeometry = m_contactGeometryDirty;
+    if (rebuildBatch) {
         rebuildGeometryBatch();
         updateFlatLineNode(geometryLayer, geometryLayer->gridLines, m_batch.gridLines, QColor(170, 210, 225, 42));
         updatePathNode(geometryLayer, geometryLayer->genericPaths, m_batch.genericPaths, colorForRole(PathRole::Generic),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect);
+                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
         updatePathNode(geometryLayer, geometryLayer->incomingPaths, m_batch.incomingPaths, colorForRole(PathRole::IncomingToMe),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect);
+                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
         updatePathNode(geometryLayer, geometryLayer->outgoingPaths, m_batch.outgoingPaths, colorForRole(PathRole::OutgoingFromMe),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect);
+                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
 
-        updateMarkerNode(geometryLayer, geometryLayer->genericHaloMarkers,
-                         m_batch.genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f);
-        updateMarkerNode(geometryLayer, geometryLayer->incomingHaloMarkers,
-                         m_batch.incomingMarkers, withAlpha(colorForRole(PathRole::IncomingToMe), 92), 6.4f);
-        updateMarkerNode(geometryLayer, geometryLayer->outgoingHaloMarkers,
-                         m_batch.outgoingMarkers, withAlpha(colorForRole(PathRole::OutgoingFromMe), 92), 6.4f);
-        updateMarkerNode(geometryLayer, geometryLayer->bandHaloMarkers,
-                         m_batch.bandMarkers, withAlpha(colorForRole(PathRole::BandOnly), 95), 6.2f);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->genericHaloMarkers,
+                            m_batch.genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->incomingHaloMarkers,
+                            m_batch.incomingMarkers, withAlpha(colorForRole(PathRole::IncomingToMe), 92), 6.4f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingHaloMarkers,
+                            m_batch.outgoingMarkers, withAlpha(colorForRole(PathRole::OutgoingFromMe), 92), 6.4f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->bandHaloMarkers,
+                            m_batch.bandMarkers, withAlpha(colorForRole(PathRole::BandOnly), 95), 6.2f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
 
-        updateMarkerNode(geometryLayer, geometryLayer->genericCoreMarkers,
-                         m_batch.genericMarkers, colorForRole(PathRole::Generic), 3.5f);
-        updateMarkerNode(geometryLayer, geometryLayer->incomingCoreMarkers,
-                         m_batch.incomingMarkers, colorForRole(PathRole::IncomingToMe), 3.5f);
-        updateMarkerNode(geometryLayer, geometryLayer->outgoingCoreMarkers,
-                         m_batch.outgoingMarkers, colorForRole(PathRole::OutgoingFromMe), 3.5f);
-        updateMarkerNode(geometryLayer, geometryLayer->bandCoreMarkers,
-                         m_batch.bandMarkers, colorForRole(PathRole::BandOnly), 3.4f);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->genericCoreMarkers,
+                            m_batch.genericMarkers, colorForRole(PathRole::Generic), 3.5f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->incomingCoreMarkers,
+                            m_batch.incomingMarkers, colorForRole(PathRole::IncomingToMe), 3.5f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingCoreMarkers,
+                            m_batch.outgoingMarkers, colorForRole(PathRole::OutgoingFromMe), 3.5f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateGeoMarkerNode(geometryLayer, geometryLayer->bandCoreMarkers,
+                            m_batch.bandMarkers, colorForRole(PathRole::BandOnly), 3.4f,
+                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+
+        if (uploadContactGeometry) {
+            m_contactGeometryDirty = false;
+        }
     }
 
     QVector<QPointF> genericArrows;
@@ -1415,8 +1591,14 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             }
         }
 
+        QVector<QPointF> projectedPath;
+        projectedPath.reserve(path.points.size());
+        for (const QPointF& lonLat : path.points) {
+            projectedPath.push_back(projectLonLatToPoint(lonLat));
+        }
+
         QPolygonF arrow;
-        if (!arrowOnPath(path.points, progress, &arrow)) {
+        if (!arrowOnPath(projectedPath, progress, &arrow)) {
             continue;
         }
         QVector<QPointF>* target = &genericArrows;
@@ -1457,9 +1639,9 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
                                  overlayTextColor});
 
         x += 104.0;
-        updateMarkerNode(geometryLayer, geometryLayer->legendBandMarker,
-                         QVector<QPointF> {QPointF(x + 8.0, legendY)},
-                         QColor(255, 212, 96, 230), 3.4f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->legendBandMarker,
+                               QVector<QPointF> {QPointF(x + 8.0, legendY)},
+                               QColor(255, 212, 96, 230), 3.4f);
         displayLabels.push_back({QStringLiteral("BAND"),
                                  QPointF(x + 21.0, legendY + 4.0),
                                  labelTextureRectForBaseline(QStringLiteral("BAND"), QPointF(x + 21.0, legendY + 4.0)),
@@ -1467,7 +1649,7 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     } else {
         updateFlatLineNode(geometryLayer, geometryLayer->legendIncomingLine, {}, QColor(255, 126, 92, 230));
         updateFlatLineNode(geometryLayer, geometryLayer->legendOutgoingLine, {}, QColor(84, 238, 165, 230));
-        updateMarkerNode(geometryLayer, geometryLayer->legendBandMarker, {}, QColor(255, 212, 96, 230), 3.4f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->legendBandMarker, {}, QColor(255, 212, 96, 230), 3.4f);
     }
 
     QString const bottomLeft = m_lastVisibleBandCount > 0
@@ -1501,23 +1683,17 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         delete node;
     }
 
-    QSet<QString> liveLabelTextureKeys;
-    bool allLabelTexturesAssigned = true;
     for (int i = 0; i < displayLabels.size(); ++i) {
         const Label& label = displayLabels[i];
         auto* node = labelLayer->labelNodes[i];
         if (QSGTexture* texture = cachedLabelTexture(labelLayer, window(), label.text, label.color)) {
-            liveLabelTextureKeys.insert(labelTextureKey(label.text, label.color));
             node->setTexture(texture);
             node->setRect(label.rect);
         } else {
-            allLabelTexturesAssigned = false;
             node->setRect(QRectF());
         }
     }
-    if (allLabelTexturesAssigned) {
-        pruneLabelTextureCache(labelLayer, liveLabelTextureKeys);
-    }
+    pruneLabelTextureCache(labelLayer);
 
 #ifdef DECODIUM_LIVEMAP_GREYLINE_QSB
     int const greylineShaderActive = m_greylineShaderAllowed ? 1 : 0;
@@ -1552,6 +1728,20 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
 #else
             << 0;
 #endif
+        qInfo().nospace()
+            << "[MAPGPU] LiveMap geometry optimization markerGpuProjection="
+#ifdef DECODIUM_LIVEMAP_MARKER_QSB
+            << 1
+#else
+            << 0
+#endif
+            << " pathVboReuse="
+#ifdef DECODIUM_LIVEMAP_PATH_QSB
+            << 1
+#else
+            << 0
+#endif
+            << " labelCachePersistent=1";
     }
 
     qint64 const nowMs = monotonicNowMs();
@@ -1586,7 +1776,20 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             << 0
 #endif
             << " greylineShader="
-            << greylineShaderActive;
+            << greylineShaderActive
+            << " markerGpuProjection="
+#ifdef DECODIUM_LIVEMAP_MARKER_QSB
+            << 1
+#else
+            << 0
+#endif
+            << " pathVboReuse="
+#ifdef DECODIUM_LIVEMAP_PATH_QSB
+            << 1
+#else
+            << 0
+#endif
+            << " labelCachePersistent=1";
     }
 
     return root;
@@ -1660,7 +1863,7 @@ void WorldMapGpuItem::mouseMoveEvent(QMouseEvent* event)
     m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
                                 newLat,
                                 90.0 - 0.5 * m_targetSpanLat);
-    markDirty();
+    markDirty(false);
     event->accept();
 }
 
@@ -1706,7 +1909,7 @@ void WorldMapGpuItem::zoomIn(double factor)
     constexpr double kMinSpanLat = 8.0;
     m_targetSpanLon = qMax(kMinSpanLon, m_targetSpanLon / factor);
     m_targetSpanLat = qMax(kMinSpanLat, m_targetSpanLat / factor);
-    markDirty();
+    markDirty(false);
 }
 
 void WorldMapGpuItem::zoomOut(double factor)
@@ -1724,7 +1927,7 @@ void WorldMapGpuItem::zoomOut(double factor)
     m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
                                 m_targetCenterLat,
                                 90.0 - 0.5 * m_targetSpanLat);
-    markDirty();
+    markDirty(false);
 }
 
 void WorldMapGpuItem::resetView()
@@ -1735,7 +1938,7 @@ void WorldMapGpuItem::resetView()
     }
     // Forza un updateViewportTargets immediato per ricalcolare auto-fit.
     updateViewportTargets();
-    markDirty();
+    markDirty(false);
 }
 
 void WorldMapGpuItem::panBy(double deltaLonDeg, double deltaLatDeg)
@@ -1748,7 +1951,7 @@ void WorldMapGpuItem::panBy(double deltaLonDeg, double deltaLatDeg)
     m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
                                 m_targetCenterLat + deltaLatDeg,
                                 90.0 - 0.5 * m_targetSpanLat);
-    markDirty();
+    markDirty(false);
 }
 
 void WorldMapGpuItem::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry)
@@ -1756,7 +1959,7 @@ void WorldMapGpuItem::geometryChange(const QRectF& newGeometry, const QRectF& ol
     QQuickItem::geometryChange(newGeometry, oldGeometry);
     if (newGeometry.size() != oldGeometry.size()) {
         m_greylineGeometryDirty = true;
-        markDirty();
+        markDirty(false);
     }
 }
 
@@ -2168,7 +2371,7 @@ void WorldMapGpuItem::rebuildGeometryBatch()
         QPointF const home = projectLonLatToPoint(m_homeLonLat);
         bool const homeVisible = isInViewport(rect, home, 18.0);
         if (homeVisible) {
-            m_batch.genericMarkers.push_back(home);
+            m_batch.genericMarkers.push_back(m_homeLonLat);
         }
         if (homeVisible && !m_homeGrid.isEmpty()) {
             m_labels.push_back({m_homeGrid.left(6), home + QPointF(9.0, -8.0), QRectF(), QColor(235, 250, 255, 235)});
@@ -2206,42 +2409,40 @@ void WorldMapGpuItem::rebuildGeometryBatch()
                 m_batch.genericPaths.push_back(path);
             }
 
-            QVector<QPointF> projectedArc;
             auto const arc = greatCircle(contact.sourceLonLat, contact.destinationLonLat, kGreatCircleSteps);
-            projectedArc.reserve(arc.size());
-            for (const QPointF& lonLat : arc) {
-                projectedArc.push_back(projectLonLatToPoint(lonLat));
-            }
-            if (projectedArc.size() >= 2) {
+            if (arc.size() >= 2) {
                 AnimatedPath animated;
                 animated.key = contact.call;
                 animated.role = contact.role;
                 animated.sourceLonLat = contact.sourceLonLat;
                 animated.destinationLonLat = contact.destinationLonLat;
-                animated.points = projectedArc;
+                animated.points = arc;
                 m_animatedPaths.push_back(animated);
             }
         }
 
+        QPointF const markerLonLat = contact.role == PathRole::OutgoingFromMe
+            ? contact.destinationLonLat
+            : contact.sourceLonLat;
         QPointF const marker = contact.role == PathRole::OutgoingFromMe ? destination : source;
         bool const markerVisible = isInViewport(rect, marker, 18.0);
         if (markerVisible) {
             switch (contact.role) {
             case PathRole::IncomingToMe:
-                m_batch.incomingMarkers.push_back(marker);
+                m_batch.incomingMarkers.push_back(markerLonLat);
                 ++m_lastVisiblePathCount;
                 break;
             case PathRole::OutgoingFromMe:
-                m_batch.outgoingMarkers.push_back(marker);
+                m_batch.outgoingMarkers.push_back(markerLonLat);
                 ++m_lastVisiblePathCount;
                 break;
             case PathRole::BandOnly:
-                m_batch.bandMarkers.push_back(marker);
+                m_batch.bandMarkers.push_back(markerLonLat);
                 ++m_lastVisibleBandCount;
                 break;
             case PathRole::Generic:
             default:
-                m_batch.genericMarkers.push_back(marker);
+                m_batch.genericMarkers.push_back(markerLonLat);
                 ++m_lastVisiblePathCount;
                 break;
             }
@@ -2301,9 +2502,12 @@ QRectF WorldMapGpuItem::mapRect() const
     return boundingRect();
 }
 
-void WorldMapGpuItem::markDirty()
+void WorldMapGpuItem::markDirty(bool contactGeometryChanged)
 {
     m_geometryDirty = true;
+    if (contactGeometryChanged) {
+        m_contactGeometryDirty = true;
+    }
     if (isVisible()) {
         update();
     }

@@ -127,7 +127,7 @@ private:
     void configureRendererPolicy();
     bool pruneExpiredContacts();
     void trimContactsToLimit();
-    void markDirty();
+    void markDirty(bool contactGeometryChanged = true);
 
     QImage m_mapImage;
     QHash<QString, Contact> m_contacts;
@@ -161,6 +161,7 @@ private:
     bool m_active {true};
     bool m_transmitting {false};
     bool m_geometryDirty {true};
+    bool m_contactGeometryDirty {true};
     bool m_greylineGeometryDirty {true};
     bool m_rendererPolicyInitialized {false};
     bool m_conservativeRenderer {false};
