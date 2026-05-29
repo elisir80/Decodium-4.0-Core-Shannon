@@ -1904,6 +1904,8 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
 
 void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
 {
+    QElapsedTimer totalTimer;
+    totalTimer.start();
     double const rxHz = d->desired.frequency() > 0
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
@@ -1929,7 +1931,17 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
         << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
         << "txHz=" << QString::number(hz, 'f', 0);
     d->desired.ptt(on);
+    QElapsedTimer sendTimer;
+    sendTimer.start();
     sendStateSync(d.get());
+    qInfo().noquote()
+        << "[TX-TL] hamlib_set_tx_frequency_ptt"
+        << "total_ms=" << totalTimer.elapsed()
+        << "send_state_ms=" << sendTimer.elapsed()
+        << "splitMode=" << m_splitMode
+        << "on=" << on
+        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
+        << "txHz=" << QString::number(hz, 'f', 0);
 }
 
 void DecodiumTransceiverManager::setRigPtt(bool on)

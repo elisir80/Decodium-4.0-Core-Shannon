@@ -162,6 +162,11 @@ static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
 }
 
+static void txTimelineLog(const QString& msg) {
+    bridgeLog(msg);
+    qInfo().noquote() << msg;
+}
+
 static QStringList ctyDatDownloadUrls()
 {
     return {
@@ -344,7 +349,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
         // park e delayed-delete release. Aiuta a distinguere stutter da
         // sink-create dal stutter da park-delete-overlap.
         qint64 const parkEntryMs = QDateTime::currentMSecsSinceEpoch();
-        bridgeLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=%2")
+        txTimelineLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=%2")
                       .arg(reason).arg(kRetireAudioSinkParkMs));
         QTimer::singleShot(kRetireAudioSinkParkMs, context, [sinkGuard, bufferGuard, reason, parkEntryMs]() {
             if (sinkGuard) {
@@ -353,7 +358,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 #if defined(Q_OS_MAC)
                     qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
                     bridgeLog(QStringLiteral("TX CoreAudio sink left parked stopped after lifetime: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
-                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
+                    txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
                     return;
 #else
                     sinkGuard->deleteLater();
@@ -362,7 +367,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                     }
                     qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
                     bridgeLog(QStringLiteral("TX audio sink deferred delete released: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
-                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
+                    txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
                     return;
 #endif
                 }
@@ -382,7 +387,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                 bridgeLog(QStringLiteral("TX audio sink parked stop+delete after lifetime: reason=%1 state=%2")
                               .arg(reason)
                               .arg(parkedState));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_win").arg(reason).arg(parkSpanMsForcedWin));
+                txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_win").arg(reason).arg(parkSpanMsForcedWin));
                 return;
 #elif defined(Q_OS_MAC)
                 QString const parkedState = audioStateToString(sinkGuard->state());
@@ -392,7 +397,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                               .arg(reason)
                               .arg(parkedState)
                               .arg(parkedError));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
+                txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
                 return;
 #else
                 bridgeLog(QStringLiteral("TX CoreAudio sink parked to avoid Qt stopAudioUnit crash: reason=%1 state=%2 err=%3")
@@ -7474,7 +7479,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                         activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
                                           enabled, txDialHz, m_omniRigCat, m_legacyBackend);
                         qint64 const catMs = catTimer.elapsed();
-                        bridgeLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-on on=%1 total_ms=%2 sync_ms=%3 cat_ms=%4 backend=%5 txDialHz=%6")
+                        txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-on on=%1 total_ms=%2 sync_ms=%3 cat_ms=%4 backend=%5 txDialHz=%6")
                                       .arg(enabled ? 1 : 0)
                                       .arg(pttTimer.elapsed())
                                       .arg(syncMs)
@@ -7522,7 +7527,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                                       true, txDialHz,
                                                       m_omniRigCat, m_legacyBackend);
                                     qint64 const catMs = catTimer.elapsed();
-                                    bridgeLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-delayed on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 txDialHz=%5")
+                                    txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-delayed on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 txDialHz=%5")
                                                   .arg(pttTimer.elapsed())
                                                   .arg(syncMs)
                                                   .arg(catMs)
@@ -12004,7 +12009,7 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
         return false;
     }
     qint64 const repairMs = phaseTimer.elapsed();
-    bridgeLog(QStringLiteral("[TX-TL] legacy_preflight reason=%1 total_ms=%2 sync_ms=%3 swr_ms=%4 msg_ms=%5 repair_ms=%6 msg=[%7]")
+    txTimelineLog(QStringLiteral("[TX-TL] legacy_preflight reason=%1 total_ms=%2 sync_ms=%3 swr_ms=%4 msg_ms=%5 repair_ms=%6 msg=[%7]")
                   .arg(reason)
                   .arg(totalTimer.elapsed())
                   .arg(syncMs)
@@ -12277,7 +12282,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         qint64 const queueDelayMs = QDateTime::currentMSecsSinceEpoch() - audioLaunchScheduledAtMs;
         if (!m_bridgeAudioLegacyTxActive || !m_transmitting || bufferGuard != m_txPcmBuffer || !soundOutputGuard) {
             m_txAudioRestartPending = false;
-            bridgeLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch skipped reason=%1 queue_delay_ms=%2 active=%3 transmitting=%4 buffer_ok=%5 sound_ok=%6 msg=[%7]")
+            txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch skipped reason=%1 queue_delay_ms=%2 active=%3 transmitting=%4 buffer_ok=%5 sound_ok=%6 msg=[%7]")
                           .arg(launchReason)
                           .arg(queueDelayMs)
                           .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
@@ -12291,7 +12296,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         soundOutputGuard->restart(m_txPcmBuffer);
         qint64 const restartMs = launchTimer.elapsed();
         m_txAudioRestartPending = false;
-        bridgeLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch reason=%1 queue_delay_ms=%2 restart_ms=%3 bufPos=%4/%5 msg=[%6]")
+        txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch reason=%1 queue_delay_ms=%2 restart_ms=%3 bufPos=%4/%5 msg=[%6]")
                       .arg(launchReason)
                       .arg(queueDelayMs)
                       .arg(restartMs)
@@ -12321,7 +12326,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                   .arg(txWaveMetricsSummary(wave))
                   .arg(m_txPcmData.size())
                   .arg(txPlaybackMs + 300));
-    bridgeLog(QStringLiteral("[TX-TL] legacy_bridge_audio_prepare reason=%1 total_ms=%2 msg_ms=%3 ensure_ms=%4 output_ms=%5 mod_stop_ms=%6 sync_ms=%7 buffer_ms=%8 schedule_ms=%9 wave_samples=%10 pcm_bytes=%11 msg=[%12]")
+    txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_prepare reason=%1 total_ms=%2 msg_ms=%3 ensure_ms=%4 output_ms=%5 mod_stop_ms=%6 sync_ms=%7 buffer_ms=%8 schedule_ms=%9 wave_samples=%10 pcm_bytes=%11 msg=[%12]")
                   .arg(reason)
                   .arg(totalTimer.elapsed())
                   .arg(msgMs)
@@ -12876,7 +12881,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
     resumeMs = phaseTimer.elapsed();
-    bridgeLog(QStringLiteral("[TX-TL] tx_finish reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 bridge_legacy=%7 was_transmitting=%8")
+    txTimelineLog(QStringLiteral("[TX-TL] tx_finish reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 bridge_legacy=%7 was_transmitting=%8")
                   .arg(reason)
                   .arg(totalTimer.elapsed())
                   .arg(pttOffMs)
@@ -13050,7 +13055,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                          int pcmBytes,
                          const QAudioFormat& format,
                          const QAudioDevice& device) {
-        bridgeLog(QStringLiteral("[TX-TL] ensure_tx_audio mode=%1 msg=[%2] need_pcm=%3 cache=%4 total_ms=%5 wave_ms=%6 resolve_ms=%7 format_ms=%8 pcm_ms=%9 wave_samples=%10 pcm_bytes=%11 fmt=%12 dev=%13")
+        txTimelineLog(QStringLiteral("[TX-TL] ensure_tx_audio mode=%1 msg=[%2] need_pcm=%3 cache=%4 total_ms=%5 wave_ms=%6 resolve_ms=%7 format_ms=%8 pcm_ms=%9 wave_samples=%10 pcm_bytes=%11 fmt=%12 dev=%13")
                       .arg(mode, message)
                       .arg(needPcm ? 1 : 0)
                       .arg(cacheHit ? 1 : 0)
@@ -13852,7 +13857,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     qint64 const bufRemaining = m_txPcmBuffer
         ? qMax<qint64>(0, m_txPcmBuffer->size() - m_txPcmBuffer->pos())
         : -1;
-    bridgeLog(QStringLiteral("[TX-TL] complete_entry reason=%1 err=%2 tx=%3 hold_ms=%4 buf_rem=%5")
+    txTimelineLog(QStringLiteral("[TX-TL] complete_entry reason=%1 err=%2 tx=%3 hold_ms=%4 buf_rem=%5")
                   .arg(reason).arg(error ? 1 : 0).arg(m_transmitting ? 1 : 0)
                   .arg(holdRemaining).arg(bufRemaining));
 
@@ -14640,7 +14645,7 @@ void DecodiumBridge::startTx()
         qint64 const sinkCreateStartMs = QDateTime::currentMSecsSinceEpoch();
         m_txAudioSink = new QAudioSink(outDev, outFmt, this);
         qint64 const sinkCreateEndMs = QDateTime::currentMSecsSinceEpoch();
-        bridgeLog(QStringLiteral("[TX-TL] sink_create dt=%1ms dev=%2")
+        txTimelineLog(QStringLiteral("[TX-TL] sink_create dt=%1ms dev=%2")
                       .arg(sinkCreateEndMs - sinkCreateStartMs)
                       .arg(outDev.description().isEmpty()
                            ? QStringLiteral("<default>")
@@ -14683,7 +14688,7 @@ void DecodiumBridge::startTx()
                 + "/" + QString::number(m_txPcmBuffer->size());
             bridgeLog("TX QAudioSink stateChanged: " + QString::number(static_cast<int>(st)) + extra);
             // 1.0.218 — [TX-TL] state transition con timestamp ms
-            bridgeLog(QStringLiteral("[TX-TL] sink_state st=%1%2")
+            txTimelineLog(QStringLiteral("[TX-TL] sink_state st=%1%2")
                           .arg(static_cast<int>(st)).arg(extra));
             if (st == QAudio::IdleState) {
                 bool const bufferIncomplete = m_txPcmBuffer && !m_txPcmBuffer->atEnd();
@@ -15234,7 +15239,7 @@ bool DecodiumBridge::launchTuneAudio()
     qint64 const tuneSinkCreateStartMs = QDateTime::currentMSecsSinceEpoch();
     m_txAudioSink = new QAudioSink(outDev, outFmt, this);
     qint64 const tuneSinkCreateEndMs = QDateTime::currentMSecsSinceEpoch();
-    bridgeLog(QStringLiteral("[TX-TL] tune_sink_create dt=%1ms dev=%2")
+    txTimelineLog(QStringLiteral("[TX-TL] tune_sink_create dt=%1ms dev=%2")
                   .arg(tuneSinkCreateEndMs - tuneSinkCreateStartMs)
                   .arg(outDev.description().isEmpty()
                        ? QStringLiteral("<default>")
