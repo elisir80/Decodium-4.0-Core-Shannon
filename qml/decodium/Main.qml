@@ -265,6 +265,8 @@ ApplicationWindow {
         callerQueuePanelVisible = settingBool("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
         startupLog("fox/caller queue state restored")
         decodePanelLayoutSaved = settingBool("uiDecodePanelsLayoutSaved", false)
+        dxPeditionMode = settingBool("uiDxPeditionMode", false)
+        startupLog("dx-pedition mode restored = " + dxPeditionMode)
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
         savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
@@ -1100,6 +1102,8 @@ ApplicationWindow {
     property color gridColor: bridge.themeManager.gridColor
     property color txColor: bridge.themeManager.txColor
     property color rxColor: bridge.themeManager.rxColor
+    // DX-Pedition Fase 2a — opt-in 3-column tactical workspace (default OFF)
+    property bool dxPeditionMode: false
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     property bool highlight73: bridge.getSetting("Highlight73", true)
@@ -2059,8 +2063,9 @@ ApplicationWindow {
         Rectangle {
             id: headerBar
             Layout.fillWidth: true
-            Layout.preferredHeight: headerFlow.height + 12
-            Layout.minimumHeight: 86
+            visible: !mainWindow.dxPeditionMode
+            Layout.preferredHeight: visible ? headerFlow.height + 12 : 0
+            Layout.minimumHeight: visible ? 86 : 0
             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
             z: 100
 
@@ -4496,8 +4501,10 @@ ApplicationWindow {
         // when the window is shorter than the minimum usable layout height)
         Flickable {
             id: contentScroll
+            visible: !mainWindow.dxPeditionMode
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.fillHeight: visible
+            Layout.preferredHeight: visible ? -1 : 0
             Layout.margins: 8
             Layout.topMargin: 0
             contentWidth: width
@@ -6931,9 +6938,29 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         }
         } // End contentScroll Flickable
 
+        // DX-Pedition Fase 2a — alternative 3-column tactical workspace (opt-in).
+        // Loader is inactive (zero cost) unless mainWindow.dxPeditionMode is ON, in
+        // which case the classic header / contentScroll / StatusBar above collapse to 0.
+        Loader {
+            id: dxPeditionLoader
+            Layout.fillWidth: true
+            Layout.fillHeight: active
+            Layout.preferredHeight: active ? -1 : 0
+            visible: active
+            active: mainWindow.dxPeditionMode
+            asynchronous: true
+            source: "components/DxPeditionWorkspace.qml"
+            onLoaded: {
+                item.bridge = bridge
+                item.engine = bridge
+            }
+        }
+
         // Status Bar
         StatusBar {
             Layout.fillWidth: true
+            visible: !mainWindow.dxPeditionMode
+            Layout.preferredHeight: visible ? implicitHeight : 0
             audioLevel: bridge ? bridge.audioLevel : 0.0
             signalLevel: bridge ? bridge.sMeter : 0.0
             monitoring: bridge ? bridge.monitoring : false

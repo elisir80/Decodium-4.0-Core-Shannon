@@ -3607,6 +3607,29 @@ Dialog {
                             Item { Layout.fillWidth: true }
                         }
 
+                        // DX-Pedition Fase 2a — opt-in 3-column tactical workspace toggle.
+                        CheckBox {
+                            id: dxPeditionWorkspaceCheck
+                            Layout.columnSpan: 4
+                            Layout.fillWidth: true
+                            text: qsTr("DX-Pedition Workspace (3-column tactical layout)")
+                            checked: mainWindow.dxPeditionMode
+                            onToggled: {
+                                mainWindow.dxPeditionMode = checked
+                                bridge.setSetting("uiDxPeditionMode", checked)
+                            }
+                            contentItem: Text {
+                                text: dxPeditionWorkspaceCheck.text
+                                color: textPrimary
+                                font.pixelSize: 12
+                                leftPadding: dxPeditionWorkspaceCheck.indicator.width + 8
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 600
+                            ToolTip.text: qsTr("Alternative single-pane operator view optimized for DX pile-ups: a 3-column tactical dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in; the standard layout is unchanged when this is off.")
+                        }
+
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
                         Text { text: qsTr("UI Scale:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         ComboBox {
