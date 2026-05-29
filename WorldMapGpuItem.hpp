@@ -141,6 +141,10 @@ private:
     QPointF m_homeLonLat;
     qint64 m_txStartMs {0};
     qint64 m_lastProfileLogMs {0};
+    qint64 m_lastMapRebuildUs {0};
+    qint64 m_lastLabelLayoutUs {0};
+    qint64 m_lastLabelTextureCreateUs {0};
+    qint64 m_lastMapSyncNodesUs {0};
     int m_txTravelMs {5200};
     int m_frameIntervalMs {80};
     qreal m_animationPhase {0.0};
@@ -163,6 +167,7 @@ private:
     bool m_transmitting {false};
     bool m_geometryDirty {true};
     bool m_contactGeometryDirty {true};
+    bool m_animationGeometryDirty {true};
     bool m_greylineGeometryDirty {true};
     bool m_rendererPolicyInitialized {false};
     bool m_conservativeRenderer {false};
