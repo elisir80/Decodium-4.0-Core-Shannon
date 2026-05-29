@@ -138,9 +138,11 @@ public:
     {
         clearNode(this);
         delete texture;
+        delete blankTexture;
     }
 
     QSGTexture* texture {nullptr};
+    QSGTexture* blankTexture {nullptr};
     QVector<QSGSimpleTextureNode*> tileNodes;
 };
 
@@ -341,6 +343,22 @@ QSGGeometryNode* makeTexturedQuadNode(const QRectF& rect, QSGMaterial* material)
     return node;
 }
 
+QSGTexture* mapBlankTexture(MapLayerNode* layer, QQuickWindow* window)
+{
+    if (!layer || !window) {
+        return nullptr;
+    }
+    if (!layer->blankTexture) {
+        QImage image(1, 1, QImage::Format_RGBA8888_Premultiplied);
+        image.fill(QColor(10, 18, 24, 255));
+        layer->blankTexture = window->createTextureFromImage(image);
+        if (layer->blankTexture) {
+            layer->blankTexture->setFiltering(QSGTexture::Nearest);
+        }
+    }
+    return layer->blankTexture;
+}
+
 void appendMapTileNodes(MapLayerNode* layer,
                         const QRectF& rect,
                         double centerLon,
@@ -350,7 +368,7 @@ void appendMapTileNodes(MapLayerNode* layer,
                         int textureWidth,
                         int textureHeight)
 {
-    if (!layer || !layer->texture || rect.isEmpty() || textureWidth <= 0 || textureHeight <= 0) {
+    if (!layer || rect.isEmpty() || spanLon <= 0.0 || spanLat <= 0.0) {
         if (layer) {
             while (!layer->tileNodes.isEmpty()) {
                 auto* node = layer->tileNodes.takeLast();
@@ -360,6 +378,17 @@ void appendMapTileNodes(MapLayerNode* layer,
         }
         return;
     }
+    QSGTexture* layerTexture = layer->texture ? layer->texture : layer->blankTexture;
+    if (!layerTexture) {
+        while (!layer->tileNodes.isEmpty()) {
+            auto* node = layer->tileNodes.takeLast();
+            layer->removeChildNode(node);
+            delete node;
+        }
+        return;
+    }
+    textureWidth = qMax(1, textureWidth);
+    textureHeight = qMax(1, textureHeight);
 
     double const topLat = qBound(-90.0, centerLat + 0.5 * spanLat, 90.0);
     double const bottomLat = qBound(-90.0, centerLat - 0.5 * spanLat, 90.0);
@@ -397,7 +426,7 @@ void appendMapTileNodes(MapLayerNode* layer,
 
     while (layer->tileNodes.size() < tiles.size()) {
         auto* node = new QSGSimpleTextureNode;
-        node->setTexture(layer->texture);
+        node->setTexture(layerTexture);
         node->setOwnsTexture(false);
         node->setFiltering(QSGTexture::Linear);
         layer->appendChildNode(node);
@@ -412,7 +441,7 @@ void appendMapTileNodes(MapLayerNode* layer,
 
     for (int i = 0; i < tiles.size(); ++i) {
         auto* node = layer->tileNodes[i];
-        node->setTexture(layer->texture);
+        node->setTexture(layerTexture);
         node->setRect(tiles[i].target);
         node->setSourceRect(tiles[i].source);
     }
@@ -1879,10 +1908,17 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         }
         root->appendChildNode(mapLayer);
     }
+    int mapTextureWidth = m_mapImage.width();
+    int mapTextureHeight = m_mapImage.height();
+    if (!mapLayer->texture) {
+        mapBlankTexture(mapLayer, window());
+        mapTextureWidth = 1;
+        mapTextureHeight = 1;
+    }
     appendMapTileNodes(mapLayer, rect,
                        m_viewCenterLon, m_viewCenterLat,
                        m_viewSpanLon, m_viewSpanLat,
-                       m_mapImage.width(), m_mapImage.height());
+                       mapTextureWidth, mapTextureHeight);
 
     auto* greylineLayer = dynamic_cast<GreylineLayerNode*>(mapLayer->nextSibling());
     auto* geometryLayer = greylineLayer

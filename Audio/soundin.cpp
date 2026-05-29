@@ -11,6 +11,7 @@
 #include <QMediaDevices>
 #include <QSysInfo>
 #include <QDebug>
+#include <QThread>
 #include <QTimer>
 
 #include "Logger.hpp"
@@ -68,7 +69,7 @@ void soundInputTimelineLog(QString const& label,
                            qint64 elapsedMs,
                            QString const& details = {})
 {
-  QString msg = QStringLiteral("[MAIN-TL] %1 elapsed_ms=%2")
+  QString msg = QStringLiteral("[AUDIO-TL] %1 elapsed_ms=%2")
       .arg(label)
       .arg(elapsedMs);
   if (!details.trimmed().isEmpty())
@@ -77,6 +78,14 @@ void soundInputTimelineLog(QString const& label,
       msg += details.trimmed();
     }
   qInfo().noquote() << msg;
+}
+
+bool shouldDispatchToSoundInputThread(QObject const* object)
+{
+  QThread *ownerThread = object ? object->thread() : nullptr;
+  return ownerThread
+      && ownerThread->isRunning()
+      && ownerThread != QThread::currentThread();
 }
 
 class SoundInputTraceScope
@@ -176,6 +185,17 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
                               unsigned downSampleFactor,
                               AudioDevice::Channel channel) const
 {
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      bool result = false;
+      auto *self = const_cast<SoundInput *> (this);
+      QAudioDevice deviceCopy {device};
+      QMetaObject::invokeMethod (self, [self, deviceCopy, downSampleFactor, channel, &result] {
+        result = self->isActiveFor (deviceCopy, downSampleFactor, channel);
+      }, Qt::BlockingQueuedConnection);
+      return result;
+    }
+
   QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel);
   QString const startKey = QStringLiteral("%1|%2|%3|%4")
       .arg(device.description())
@@ -193,6 +213,40 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
       && m_channelSelector == static_cast<int>(channel);
+}
+
+void SoundInput::setInputGain (float gain)
+{
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QMetaObject::invokeMethod (this, [guard, gain] {
+        if (guard)
+          {
+            guard->setInputGain (gain);
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
+  m_inputGain = qMax (0.0f, gain);
+  if (m_sink) m_sink->setInputGainLinear (m_inputGain);
+  if (m_stream) m_stream->setVolume (1.0f);
+}
+
+float SoundInput::inputGain () const
+{
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      float result = 1.0f;
+      auto *self = const_cast<SoundInput *> (this);
+      QMetaObject::invokeMethod (self, [self, &result] {
+        result = self->inputGain ();
+      }, Qt::BlockingQueuedConnection);
+      return result;
+    }
+
+  return m_inputGain;
 }
 
 bool SoundInput::checkStream ()
@@ -258,6 +312,21 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
                        , unsigned downSampleFactor, AudioDevice::Channel channel)
 {
   Q_ASSERT (sink);
+
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QPointer<AudioDevice> sinkGuard {sink};
+      QAudioDevice deviceCopy {device};
+      QMetaObject::invokeMethod (this, [guard, deviceCopy, framesPerBuffer, sinkGuard,
+                                        downSampleFactor, channel] {
+        if (guard && sinkGuard)
+          {
+            guard->start (deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
 
   m_sink = sink;
 
@@ -390,6 +459,18 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
 void SoundInput::suspend ()
 {
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QMetaObject::invokeMethod (this, [guard] {
+        if (guard)
+          {
+            guard->suspend ();
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
   if (m_stream)
     {
       if (m_stream->state () == QAudio::ActiveState
@@ -404,6 +485,18 @@ void SoundInput::suspend ()
 
 void SoundInput::resume ()
 {
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QMetaObject::invokeMethod (this, [guard] {
+        if (guard)
+          {
+            guard->resume ();
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
   if (m_sink)
     {
       m_sink->reset ();
@@ -555,6 +648,18 @@ void SoundInput::retireCurrentStream ()
 
 void SoundInput::reset (bool report_dropped_frames)
 {
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QMetaObject::invokeMethod (this, [guard, report_dropped_frames] {
+        if (guard)
+          {
+            guard->reset (report_dropped_frames);
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
   constexpr qint64 dropped_audio_warning_usec {750000};
   constexpr qint64 dropped_audio_warning_interval_ms {15000};
   if (m_stream)
@@ -597,6 +702,18 @@ void SoundInput::reset (bool report_dropped_frames)
 
 void SoundInput::stop()
 {
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QMetaObject::invokeMethod (this, [guard] {
+        if (guard)
+          {
+            guard->stop ();
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
   retireCurrentStream ();
   m_deviceDescription.clear ();
   m_sampleRate = 0;

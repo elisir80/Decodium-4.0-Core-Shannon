@@ -50,6 +50,18 @@ QString audioErrorName(QAudio::Error error)
   return QStringLiteral("UnknownError(%1)").arg(static_cast<int>(error));
 }
 
+QAudioFormat txPcmFormat(unsigned channels)
+{
+  QAudioFormat format;
+  format.setChannelCount(static_cast<int>(channels));
+  format.setChannelConfig(channels == 1
+                              ? QAudioFormat::ChannelConfigMono
+                              : QAudioFormat::ChannelConfigStereo);
+  format.setSampleRate(48000);
+  format.setSampleFormat(QAudioFormat::Int16);
+  return format;
+}
+
 // 1.0.216 — park-and-delete anche su Windows per eliminare lo stutter
 // "WASAPI destroy + recreate" ad ogni fine TX FT2 (slot 7.5s). Pre-1.0.216
 // retireStream() su Windows faceva reset()+stop()+delete sincrono, e
@@ -96,24 +108,23 @@ void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
     return;
   }
 
+  stream->disconnect();
+  stream->setParent(nullptr);
+#if defined(Q_OS_MAC)
+  stream->setVolume(0.0f);
+  qInfo() << "TX SoundOutput CoreAudio sink left parked without delayed Qt/CoreAudio callbacks:"
+          << reason;
+  return;
+#endif
+
   QObject *context = QCoreApplication::instance();
   if (!context) {
-#if defined(Q_OS_MAC)
-    stream->setVolume(0.0f);
-    qInfo() << "TX SoundOutput sink parked without app context:"
-            << reason
-            << "state=" << audioStateName(stream->state())
-            << "error=" << audioErrorName(stream->error());
-    return;
-#else
     delete stream;
     return;
-#endif
   }
 
   QPointer<SoundOutput> owner(this);
   QPointer<QAudioSink> guard(stream);
-  stream->setParent(nullptr);
   int const lifetimeMs = delayMs > 0 ? delayMs : parkedSinkLifetimeMs();
   QTimer::singleShot(lifetimeMs, context, [owner, guard, reason]() {
     if (!guard) {
@@ -169,6 +180,16 @@ void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
   });
 }
 
+SoundOutput::~SoundOutput()
+{
+  m_pumpTimer.stop();
+  m_pendingWrite.clear();
+  m_streamDevice.clear();
+  m_sourceDevice.clear();
+  m_coreAudioKeepAlive = false;
+  retireStream(QStringLiteral("dtor"));
+}
+
 bool SoundOutput::checkStream() const
 {
   bool result {false};
@@ -222,9 +243,51 @@ void SoundOutput::restart(QIODevice* source)
   qint64 startMs = 0;
   qint64 pumpMs = 0;
 
+  QAudioFormat const format = txPcmFormat(m_channels);
+
   m_pumpTimer.stop();
   m_sourceDevice.clear();
   m_pendingWrite.clear();
+
+#if defined(Q_OS_MAC)
+  if (m_stream
+      && !m_streamDevice.isNull()
+      && m_openDeviceId == m_device.id()
+      && m_stream->format().sampleRate() == format.sampleRate()
+      && m_stream->format().channelCount() == format.channelCount()
+      && m_stream->format().sampleFormat() == format.sampleFormat()
+      && m_stream->state() != QAudio::StoppedState) {
+    QElapsedTimer phaseTimer;
+    phaseTimer.start();
+    m_coreAudioKeepAlive = false;
+    m_sourceDevice = source;
+    m_stream->setVolume(static_cast<float>(m_volume));
+    error_ = false;
+    pumpAudio();
+    pumpMs = phaseTimer.elapsed();
+    if (m_sourceDevice || !m_pendingWrite.isEmpty()) {
+      m_pumpTimer.start();
+    }
+    qInfo().noquote() << "[TX-TL] sound_output_restart"
+                      << "total_ms=" << totalTimer.elapsed()
+                      << "retire_ms=0"
+                      << "create_ms=0"
+                      << "config_ms=0"
+                      << "start_ms=0"
+                      << "pump_ms=" << pumpMs
+                      << "reuse=1"
+                      << "state=" << audioStateName(m_stream->state())
+                      << "error=" << audioErrorName(m_stream->error())
+                      << "pending_bytes=" << m_pendingWrite.size()
+                      << "source_pos=" << (source ? source->pos() : -1)
+                      << "source_size=" << (source ? source->size() : -1)
+                      << "dev=" << m_device.description();
+    Q_EMIT status(QString("after_start: state=%1 err=%2 bufSize=%3 reuse=1")
+      .arg(m_stream->state()).arg(m_stream->error()).arg(m_stream->bufferSize()));
+    return;
+  }
+  m_coreAudioKeepAlive = false;
+#endif
 
   m_streamDevice.clear();
   QElapsedTimer phaseTimer;
@@ -238,14 +301,6 @@ void SoundOutput::restart(QIODevice* source)
     // On macOS many devices report Float32 as their native format; Qt/CoreAudio
     // can still convert this stream internally, so we log unsupported-native
     // formats instead of aborting early.
-    QAudioFormat format;
-    format.setChannelCount(static_cast<int>(m_channels));
-    format.setChannelConfig(m_channels == 1
-                                ? QAudioFormat::ChannelConfigMono
-                                : QAudioFormat::ChannelConfigStereo);
-    format.setSampleRate(48000);
-    format.setSampleFormat(QAudioFormat::Int16);
-
     QAudioFormat const preferred = m_device.preferredFormat();
     Q_EMIT status(QStringLiteral("TX audio fmt req=%1 pref=%2 dev=%3")
                       .arg(formatSummary(format))
@@ -383,6 +438,20 @@ void SoundOutput::finishPlayback()
   m_pumpTimer.stop();
   m_pendingWrite.clear();
   m_sourceDevice.clear();
+#if defined(Q_OS_MAC)
+  if (m_stream && !m_streamDevice.isNull()) {
+    m_coreAudioKeepAlive = true;
+    m_stream->setVolume(0.0f);
+    pumpAudio();
+    m_pumpTimer.start();
+    Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink kept warm after finish"));
+    qInfo().noquote() << "[TX-TL] sound_output_retire"
+                      << "reason=finish"
+                      << "mode=keepalive"
+                      << "elapsed_ms=0";
+    return;
+  }
+#endif
   m_streamDevice.clear();
   retireStream(QStringLiteral("finish"));
 }
@@ -393,6 +462,7 @@ void SoundOutput::reset()
   m_pendingWrite.clear();
   m_streamDevice.clear();
   m_sourceDevice.clear();
+  m_coreAudioKeepAlive = false;
   if (m_stream) {
     if (deferCoreAudioSinkDelete()) {
       retireStream(QStringLiteral("reset"));
@@ -407,8 +477,23 @@ void SoundOutput::stop()
 {
   m_pumpTimer.stop();
   m_pendingWrite.clear();
-  m_streamDevice.clear();
   m_sourceDevice.clear();
+#if defined(Q_OS_MAC)
+  if (m_stream && !m_streamDevice.isNull()) {
+    m_coreAudioKeepAlive = true;
+    m_stream->setVolume(0.0f);
+    pumpAudio();
+    m_pumpTimer.start();
+    Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink kept warm after stop"));
+    qInfo().noquote() << "[TX-TL] sound_output_retire"
+                      << "reason=stop"
+                      << "mode=keepalive"
+                      << "elapsed_ms=0";
+    return;
+  }
+#endif
+  m_streamDevice.clear();
+  m_coreAudioKeepAlive = false;
   retireStream(QStringLiteral("stop"));
 }
 
@@ -429,12 +514,19 @@ void SoundOutput::retireStream(QString const& reason)
     stream->setVolume(0.0f);
     Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink retired without immediate stop: %1").arg(reason));
     deleteRetiredStreamAfterCoreAudioCallbacks(stream, reason);
+#if defined(Q_OS_MAC)
+    qInfo().noquote() << "[TX-TL] sound_output_retire"
+                      << "reason=" << reason
+                      << "mode=parked_mac"
+                      << "elapsed_ms=" << timer.elapsed();
+#else
     qInfo().noquote() << "[TX-TL] sound_output_retire"
                       << "reason=" << reason
                       << "mode=defer"
                       << "elapsed_ms=" << timer.elapsed()
                       << "state=" << audioStateName(stream->state())
                       << "error=" << audioErrorName(stream->error());
+#endif
     return;
   }
 
@@ -517,6 +609,20 @@ void SoundOutput::pumpAudio()
 
     if (!m_sourceDevice) {
       if (m_pendingWrite.isEmpty()) {
+        if (m_coreAudioKeepAlive) {
+          qsizetype request = qMin<qsizetype>(m_stream->bytesFree(), 1024);
+          request -= request % bytesPerFrame;
+          if (request > 0) {
+            QByteArray silence(static_cast<int>(request), Qt::Uninitialized);
+            silence.fill('\0');
+            const qint64 written = m_streamDevice->write(silence.constData(), silence.size());
+            if (written > 0) {
+              totalWritten += written;
+              ++chunks;
+            }
+          }
+          break;
+        }
         m_pumpTimer.stop();
       }
       break;
@@ -540,7 +646,9 @@ void SoundOutput::pumpAudio()
     if (read == 0) {
       m_sourceDevice.clear();
       if (m_pendingWrite.isEmpty()) {
-        m_pumpTimer.stop();
+        if (!m_coreAudioKeepAlive) {
+          m_pumpTimer.stop();
+        }
       }
       break;
     }
@@ -598,6 +706,12 @@ void SoundOutput::handleStateChanged(QAudio::State newState)
     Q_EMIT status(tr("Suspended"));
     break;
   case QAudio::StoppedState:
+#if defined(Q_OS_MAC)
+    if (m_coreAudioKeepAlive) {
+      Q_EMIT status(tr("TX output stopped while parked"));
+      break;
+    }
+#endif
     if (!checkStream())
       Q_EMIT status(tr("Audio TX output stopped with error: device=\"%1\", state=%2")
                     .arg(m_device.description().isEmpty() ? QStringLiteral("<default output>") : m_device.description(),

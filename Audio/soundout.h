@@ -32,6 +32,7 @@ public:
     m_pumpTimer.setInterval(5);
     connect(&m_pumpTimer, &QTimer::timeout, this, &SoundOutput::pumpAudio);
   }
+  ~SoundOutput() override;
 
   qreal attenuation() const;
 
@@ -72,6 +73,7 @@ private:
   QTimer m_pumpTimer;
   int m_framesBuffered;
   qreal m_volume;
+  bool m_coreAudioKeepAlive {false};
   bool error_;
 };
 

@@ -6,7 +6,7 @@ RequestExecutionLevel admin
 !include "x64.nsh"
 
 !define APP_NAME "Decodium"
-!define APP_VERSION "1.0.322"
+!define APP_VERSION "1.0.332"
 !define APP_PUBLISHER "IU8LMC"
 !define APP_EXE "decodium.exe"
 !define STAGE_DIR "C:\Users\racca\CodexLocalBuilds\Decodium-installer-stage"

@@ -52,6 +52,7 @@ class DecodiumAudioSink;
 class Modulator;
 class QAudioSink;
 class QBuffer;
+class QMediaDevices;
 class NtpClient;
 class DecoSyncTime;
 class DecodiumWebServer;
@@ -2121,6 +2122,19 @@ private:
     QTimer* m_uiStallTimer     {nullptr};
     QTimer* m_asyncDecodeTimer {nullptr};   // FT2 turbo async 100ms
     QTimer* m_legacyStateTimer {nullptr};
+    QTimer* m_audioDeviceRefreshTimer {nullptr};
+    QMediaDevices* m_mediaDevices {nullptr};
+    bool m_audioDeviceCacheValid {false};
+    bool m_audioDeviceCacheDirty {true};
+    bool m_pendingAudioDeviceRefreshVerbose {false};
+    qint64 m_audioDeviceCacheRefreshMs {0};
+    qint64 m_lastAudioDeviceCacheLogMs {0};
+    QString m_audioDeviceCacheSignature;
+    QList<QAudioDevice> m_cachedAudioInputs;
+    QList<QAudioDevice> m_cachedAudioOutputs;
+    QAudioDevice m_cachedDefaultAudioInput;
+    QAudioDevice m_cachedDefaultAudioOutput;
+    QThread* m_soundInputThread {nullptr};
     SoundInput*        m_soundInput  {nullptr};
     SoundOutput*       m_soundOutput {nullptr};
     Modulator*         m_modulator   {nullptr};
@@ -2710,6 +2724,13 @@ private:
     QStringList parseJt65Row(const QString& row) const;
     void startAudioCapture();
     void stopAudioCapture();
+    void scheduleAudioDeviceRefresh(int delayMs = 250, bool verboseLog = false);
+    void refreshAudioDeviceCache(const QString& reason, bool verboseLog, bool emitSignals = true);
+    QList<QAudioDevice> cachedAudioInputs(const QString& reason, bool refreshIfStale);
+    QList<QAudioDevice> cachedAudioOutputs(const QString& reason, bool refreshIfStale);
+    QAudioDevice cachedDefaultAudioInput(const QString& reason, bool refreshIfStale);
+    QAudioDevice cachedDefaultAudioOutput(const QString& reason, bool refreshIfStale);
+    QAudioDevice resolveRxInputDevice(const QString& requestedName, bool* requestedDeviceFound);
     bool usingTciAudioInput() const;
     bool startTciTxAudioStream(QVector<float> const& wave, QString const& mode,
                                unsigned symbolsLength, double framesPerSymbol,

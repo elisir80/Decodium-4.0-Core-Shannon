@@ -23,6 +23,7 @@
 #include <QMutexLocker>
 #include <QPointer>
 #include <QDebug>
+#include <QRunnable>
 #include <QVariant>
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
 #if __has_include(<rhi/qrhi.h>)
@@ -273,6 +274,28 @@ QSize panadapterOverlayTextureSize(int logicalWidth, int logicalHeight, qreal dp
 {
     return QSize(qMax(1, qRound(static_cast<qreal>(logicalWidth) * dpr)),
                  qMax(1, qRound(static_cast<qreal>(logicalHeight) * dpr)));
+}
+
+void drawCrispOverlayText(QPainter& painter, int x, int y, const QString& text, const QColor& color)
+{
+    painter.setPen(QColor(0, 0, 0, 220));
+    painter.drawText(x - 1, y, text);
+    painter.drawText(x + 1, y, text);
+    painter.drawText(x, y - 1, text);
+    painter.drawText(x, y + 1, text);
+    painter.setPen(color);
+    painter.drawText(x, y, text);
+}
+
+void drawCrispOverlayText(QPainter& painter, const QRect& rect, int flags, const QString& text, const QColor& color)
+{
+    painter.setPen(QColor(0, 0, 0, 220));
+    painter.drawText(rect.translated(-1, 0), flags, text);
+    painter.drawText(rect.translated(1, 0), flags, text);
+    painter.drawText(rect.translated(0, -1), flags, text);
+    painter.drawText(rect.translated(0, 1), flags, text);
+    painter.setPen(color);
+    painter.drawText(rect, flags, text);
 }
 
 QSGNode* sceneGraphChildAt(QSGNode* parent, int index)
@@ -812,10 +835,21 @@ struct PanadapterItem::GpuFftState
     quint64 readbackSerial = 0;
     bool loggedActive = false;
     bool loggedReadbackStats = false;
+    QVector<QRhiTexture*> retiredDirectTextures;
 
     ~GpuFftState()
     {
         reset();
+    }
+
+    void retireDirectTexture(QRhiTexture*& texture)
+    {
+        if (!texture)
+            return;
+        retiredDirectTextures.append(texture);
+        texture = nullptr;
+        while (retiredDirectTextures.size() > 16)
+            delete retiredDirectTextures.takeFirst();
     }
 
     void reset()
@@ -832,6 +866,9 @@ struct PanadapterItem::GpuFftState
         delete directWaterfallTexture;
         delete directRowParamsTexture;
         delete directPeakTexture;
+        for (QRhiTexture* texture : retiredDirectTextures)
+            delete texture;
+        retiredDirectTextures.clear();
         pipeline = nullptr;
         directPipeline = nullptr;
         srb = nullptr;
@@ -879,6 +916,9 @@ public:
         delete intensityTexture;
         delete paletteTexture;
         delete rowParamsTexture;
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        delete fallbackTexture;
+#endif
         for (QSGTexture* texture : retiredTextures)
             delete texture;
     }
@@ -921,6 +961,22 @@ public:
             delete retiredTextures.takeFirst();
     }
 
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    QSGTexture* fallbackSampledTexture()
+    {
+        if (!fallbackTexture) {
+            auto* texture = new DecodiumRhiImageTexture(false);
+            texture->setFiltering(QSGTexture::Nearest);
+            QImage image(1, 1, QImage::Format_RGBA8888);
+            image.fill(Qt::black);
+            texture->uploadFullRgbaImage(image, false);
+            fallbackTexture = texture;
+        }
+        return fallbackTexture;
+    }
+
+    QSGTexture* fallbackTexture = nullptr;
+#endif
     QVector<QSGTexture*> retiredTextures;
 };
 
@@ -964,15 +1020,32 @@ public:
                 << "[GPUDBG] Panadapter waterfall shader sampled-image binding"
                 << binding;
         }
+        QSGTexture* selected = nullptr;
         if (binding == 1)
-            *texture = material->intensityTexture;
+            selected = material->intensityTexture;
         else if (binding == 2)
-            *texture = material->paletteTexture;
+            selected = material->paletteTexture;
         else if (binding == 3)
-            *texture = material->rowParamsTexture;
+            selected = material->rowParamsTexture;
 
-        if (*texture) {
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        auto commitReadyTexture = [&state](QSGTexture* candidate) -> QSGTexture* {
+            if (!candidate)
+                return nullptr;
+            candidate->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+            return candidate->rhiTexture() ? candidate : nullptr;
+        };
+
+        QSGTexture* ready = commitReadyTexture(selected);
+        if (!ready)
+            ready = commitReadyTexture(material->fallbackSampledTexture());
+        *texture = ready;
+#else
+        *texture = selected;
+        if (*texture)
             (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+#endif
+        if (*texture) {
             static std::atomic_bool loggedTextureCommit {false};
             if (!loggedTextureCommit.exchange(true, std::memory_order_relaxed)) {
                 qInfo().noquote()
@@ -1002,6 +1075,9 @@ public:
     {
         delete spectrumTexture;
         delete peakTexture;
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        delete fallbackTexture;
+#endif
     }
 
     QSGMaterialType* type() const override
@@ -1031,6 +1107,22 @@ public:
     float glow[4] = {0.2f, 0.9f, 1.0f, 0.45f};
     float trace[4] = {0.8f, 1.0f, 1.0f, 1.0f};
     float peak[4] = {1.0f, 1.0f, 1.0f, 0.65f};
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    QSGTexture* fallbackSampledTexture()
+    {
+        if (!fallbackTexture) {
+            auto* texture = new DecodiumRhiImageTexture(false);
+            texture->setFiltering(QSGTexture::Nearest);
+            QImage image(1, 1, QImage::Format_RGBA8888);
+            image.fill(Qt::black);
+            texture->uploadFullRgbaImage(image, false);
+            fallbackTexture = texture;
+        }
+        return fallbackTexture;
+    }
+
+    QSGTexture* fallbackTexture = nullptr;
+#endif
 };
 
 class PanadapterSpectrumShader final : public QSGMaterialShader
@@ -1068,13 +1160,29 @@ public:
                             QSGMaterial* newMaterial, QSGMaterial*) override
     {
         auto* material = static_cast<PanadapterSpectrumMaterial*>(newMaterial);
+        QSGTexture* selected = nullptr;
         if (binding == 1)
-            *texture = material->spectrumTexture;
+            selected = material->spectrumTexture;
         else if (binding == 2)
-            *texture = material->peakTexture;
+            selected = material->peakTexture;
 
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        auto commitReadyTexture = [&state](QSGTexture* candidate) -> QSGTexture* {
+            if (!candidate)
+                return nullptr;
+            candidate->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+            return candidate->rhiTexture() ? candidate : nullptr;
+        };
+
+        QSGTexture* ready = commitReadyTexture(selected);
+        if (!ready)
+            ready = commitReadyTexture(material->fallbackSampledTexture());
+        *texture = ready;
+#else
+        *texture = selected;
         if (*texture)
             (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+#endif
     }
 };
 
@@ -2595,6 +2703,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     QPainter p(&m_spectrumOverlayImage);
     p.scale(dpr, dpr);
     p.setRenderHint(QPainter::Antialiasing, false);
+    p.setRenderHint(QPainter::TextAntialiasing, false);
 
     float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
     float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
@@ -2633,8 +2742,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         int const gy = h - 1 - static_cast<int>(norm * static_cast<float>(qMax(1, h - 16)));
         p.setPen(QPen(QColor(38, 38, 38), 1));
         p.drawLine(0, gy, w, gy);
-        p.setPen(QColor(160, 160, 160));
-        p.drawText(2, qMax(8, gy - 1), QString::number(static_cast<int>(std::round(displayMinDb + norm * range))));
+        drawCrispOverlayText(p,
+                             2,
+                             qMax(8, gy - 1),
+                             QString::number(static_cast<int>(std::round(displayMinDb + norm * range))),
+                             QColor(190, 190, 190));
     }
 
     int const freqStep = viewRange > 3000.0f ? 500 : (viewRange > 1000.0f ? 200 : 100);
@@ -2646,13 +2758,12 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             continue;
         p.setPen(QPen(QColor(40, 40, 40), 1));
         p.drawLine(x, 0, x, qMax(0, h - 16));
-        p.setPen(QColor(220, 220, 220));
         QString const label = f >= 1000
             ? QStringLiteral("%1k").arg(static_cast<double>(f) / 1000.0, 0, 'f', 1)
             : QString::number(f);
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
-        p.drawText(tx, h - 3, label);
+        drawCrispOverlayText(p, tx, h - 3, label, QColor(235, 235, 235));
     }
 
     for (int f = (static_cast<int>(viewStart / 500.0f) * 500) + 500;
@@ -2663,11 +2774,10 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             continue;
         p.setPen(QPen(QColor(255, 230, 0, 180), 1));
         p.drawLine(x, qMax(0, h - 18), x, qMax(0, h - 6));
-        p.setPen(QColor(220, 210, 0));
         QString const label = QString::number(f);
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
-        p.drawText(tx, qMax(10, h - 20), label);
+        drawCrispOverlayText(p, tx, qMax(10, h - 20), label, QColor(255, 240, 0));
     }
 
     if (rxX >= 0 && rxX < w) {
@@ -2744,8 +2854,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             int const textY = topPad + rowH * (chosenRow + 1) - fm.descent();
             p.setPen(QPen(it.color, 1, Qt::DotLine));
             p.drawLine(it.x, 0, it.x, qMax(0, h - bottomKeepOut));
-            p.setPen(it.color);
-            p.drawText(textX, textY, it.text);
+            drawCrispOverlayText(p, textX, textY, it.text, it.color);
             rowRight[chosenRow] = textX + it.textW;
             QRect const hitRect(textX - 2, textY - rowH + fm.descent(), it.textW + 4, rowH);
             m_decodeHitRects.push_back({hitRect, it.call, it.freq});
@@ -2789,7 +2898,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             p.fillRect(labelRect, QColor(0, 0, 0, 180));
             p.setPen(QPen(m_dxClusterSpotColor, 1));
             p.drawRect(labelRect);
-            p.drawText(textX, clusterBaseline, call);
+            drawCrispOverlayText(p, textX, clusterBaseline, call, m_dxClusterSpotColor);
             m_clusterHitRects.push_back({labelRect.adjusted(-2, -2, 2, 2), call, freq});
             ++renderedClusterLabels;
         }
@@ -2823,10 +2932,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         p.setPen(QPen(border, 1));
         p.drawPath(box);
         p.setRenderHint(QPainter::Antialiasing, false);
-        p.setPen(accent);
-        p.drawText(QRect(boxX + padX, boxY + padY, boxW - padX * 2, boxH - padY * 2),
-                   Qt::AlignCenter,
-                   text);
+        drawCrispOverlayText(p,
+                             QRect(boxX + padX, boxY + padY, boxW - padX * 2, boxH - padY * 2),
+                             Qt::AlignCenter,
+                             text,
+                             accent);
     };
 
     int const txX = fToX(static_cast<float>(m_txFreq));
@@ -2836,8 +2946,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
 
     if (m_autoRange) {
         p.setFont(panadapterMonoFont(8));
-        p.setPen(QColor(100, 100, 100));
-        p.drawText(w - 100, h - 3, QStringLiteral("NF:%1dB").arg(static_cast<int>(m_measuredFloor)));
+        drawCrispOverlayText(p,
+                             w - 100,
+                             h - 3,
+                             QStringLiteral("NF:%1dB").arg(static_cast<int>(m_measuredFloor)),
+                             QColor(130, 130, 130));
     }
 
     m_spectrumOverlayDirty = false;
@@ -2918,20 +3031,20 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
         || !tex->hasAlphaChannel() || tex->failed()) {
         tex = new DecodiumRhiImageTexture(true);
-        tex->setFiltering(QSGTexture::Linear);
+        tex->setFiltering(QSGTexture::Nearest);
         overlay->setTexture(tex);
         uploadTexture = true;
     }
     if (uploadTexture)
         tex->uploadFullImage(m_spectrumOverlayImage, true);
-    overlay->setFiltering(QSGTexture::Linear);
+    overlay->setFiltering(QSGTexture::Nearest);
 #else
     if (needsUpload || !overlay->texture()) {
         auto* tex = window()->createTextureFromImage(
             m_spectrumOverlayImage,
             QQuickWindow::CreateTextureOptions(QQuickWindow::TextureHasAlphaChannel));
         if (tex) {
-            tex->setFiltering(QSGTexture::Linear);
+            tex->setFiltering(QSGTexture::Nearest);
             overlay->setTexture(tex);
         }
     }
@@ -3354,8 +3467,22 @@ void PanadapterItem::releaseResources()
 void PanadapterItem::releaseGpuFftResources()
 {
 #if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
-    delete m_gpuFft;
+    GpuFftState* state = m_gpuFft;
     m_gpuFft = nullptr;
+    m_gpuDirectTextureReady = false;
+    m_gpuFftUiBinsExpected = 0;
+    m_hasPendingPcmFrame = false;
+    if (!state)
+        return;
+
+    if (QQuickWindow* win = window()) {
+        auto* cleanup = QRunnable::create([state]() {
+            delete state;
+        });
+        win->scheduleRenderJob(cleanup, QQuickWindow::AfterSynchronizingStage);
+    } else {
+        delete state;
+    }
 #else
     m_gpuFft = nullptr;
 #endif
@@ -3653,7 +3780,7 @@ void PanadapterItem::recordGpuFftCompute()
                 return false;
             if (texture && currentSize == desiredSize && texture->pixelSize() == desiredSize)
                 return false;
-            delete texture;
+            m_gpuFft->retireDirectTexture(texture);
             texture = rhi->newTexture(QRhiTexture::R32F,
                                       desiredSize,
                                       1,
