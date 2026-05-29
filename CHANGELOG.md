@@ -1,5 +1,55 @@
 # Changelog / Registro Modifiche
 
+## [1.0.335] - 2026-05-30
+
+### Italiano
+
+Release di stabilizzazione per la selezione delle periferiche audio Qt/Windows e per l'autosequenza con nominativi speciali.
+
+#### Aggiunto
+
+- Persistenza degli ID stabili Qt delle periferiche audio in `audioInputDeviceId` e `audioOutputDeviceId`, oltre ai nomi visibili gia' salvati.
+- Log diagnostici piu' espliciti per periferica salvata, ID salvato, periferica scelta, ID scelto, motivo del match e default disponibile.
+- Log di salute audio RX subito dopo l'avvio, con RMS, picco, range e clipping, per capire rapidamente se l'audio reale arriva dal dispositivo corretto.
+- Copertura test per messaggi FT speciali con nominativo locale non standard, incluso il caso `II9MESC` verso `KQ5I`.
+
+#### Modificato
+
+- La risoluzione audio preferisce l'ID stabile del dispositivo e usa il nome visibile solo come fallback esatto e univoco.
+- Quando piu' dispositivi hanno lo stesso nome, ad esempio piu' `USB Audio CODEC`, Decodium non riscrive piu' silenziosamente la scelta salvata sul default.
+- La cache TX e il riuso dello stream RX distinguono ora dispositivi con stesso nome ma ID diverso.
+- Metadati locali e installer NSIS sono allineati alla versione `1.0.335`.
+
+#### Corretto
+
+- Corretto il caso in cui l'utente con piu' periferiche audio omonime vedeva Decodium scegliere o salvare il default sbagliato dopo l'enumerazione Qt.
+- Corretta la sequenza FT per nominativo locale speciale e corrispondente standard: il report viene indirizzato al DX (`KQ5I <II9MESC> -15`) e non alla chiamata locale hashata in posizione errata, evitando che il corrispondente continui a rimandare il locator e blocchi l'autosequenza.
+- Migliorata la diagnosi di fallback audio: quando un dispositivo salvato non viene trovato o non e' univoco, il log conserva nome e ID richiesti invece di nascondere il problema dietro il default.
+
+### English
+
+Stabilization release for Qt/Windows audio-device selection and special-callsign autosequencing.
+
+#### Added
+
+- Stable Qt audio device IDs are now persisted as `audioInputDeviceId` and `audioOutputDeviceId` alongside the existing visible device names.
+- Clearer diagnostics for saved device, saved ID, selected device, selected ID, match reason, and available default.
+- RX startup audio-health logging with RMS, peak, range, and clipping to confirm that real audio arrives from the selected device.
+- Test coverage for FT special-call messages, including local non-standard call `II9MESC` with standard peer `KQ5I`.
+
+#### Changed
+
+- Audio resolution now prefers the stable device ID and uses the visible name only as an exact, unique fallback.
+- When multiple devices share the same visible name, such as multiple `USB Audio CODEC` entries, Decodium no longer silently rewrites the saved selection to the default.
+- TX audio caching and RX stream reuse now distinguish devices with the same visible name but different IDs.
+- Local metadata and NSIS installer metadata are aligned to version `1.0.335`.
+
+#### Fixed
+
+- Fixed the case where users with multiple same-name audio devices could have Decodium select or save the wrong default device after Qt enumeration.
+- Fixed FT sequencing for a non-standard local special call and a standard peer: the report is now addressed to the DX (`KQ5I <II9MESC> -15`), preventing the peer from repeatedly sending its locator and stalling autosequence.
+- Improved audio fallback diagnostics by preserving requested name and ID in the log when the saved device is missing or ambiguous.
+
 ## [1.0.333] - 2026-05-30
 
 ### Italiano

@@ -1749,6 +1749,8 @@ private:
     QStringList m_audioOutputDevices;
     QString m_audioInputDevice;
     QString m_audioOutputDevice;
+    QString m_audioInputDeviceId;
+    QString m_audioOutputDeviceId;
     int m_audioInputChannel {0};
     int m_audioOutputChannel {0};
     QVariantList m_decodeList;
@@ -2143,6 +2145,10 @@ private:
     qint64             m_lastAudioCaptureStartMs {0};
     QAudioSink*        m_txAudioSink  {nullptr};
     bool               m_rxAudioSuspendedForTx {false};
+    QString            m_activeRxInputDeviceName;
+    QString            m_activeRxInputDeviceId;
+    qint64             m_rxAudioStartupStartMs {0};
+    bool               m_pendingRxAudioStartupHealthLog {false};
     bool               m_spectrumTimerPausedForTx {false};
     qint64             m_txPlaybackHoldUntilMs {0};
     qint64             m_txPlaybackHardDeadlineMs {0};
@@ -2202,6 +2208,7 @@ private:
     bool               m_txAudioPrecomputeScheduled {false};
     bool               m_cachedTxOutputDeviceValid {false};
     QString            m_cachedTxOutputDeviceName;
+    QString            m_cachedTxOutputDeviceId;
     bool               m_cachedTxOutputDeviceFound {false};
     QAudioDevice       m_cachedTxOutputDevice;
     bool               m_tciAudioCaptureActive {false};
@@ -2730,7 +2737,16 @@ private:
     QList<QAudioDevice> cachedAudioOutputs(const QString& reason, bool refreshIfStale);
     QAudioDevice cachedDefaultAudioInput(const QString& reason, bool refreshIfStale);
     QAudioDevice cachedDefaultAudioOutput(const QString& reason, bool refreshIfStale);
-    QAudioDevice resolveRxInputDevice(const QString& requestedName, bool* requestedDeviceFound);
+    QAudioDevice resolveRxInputDevice(const QString& requestedName,
+                                      const QString& requestedId,
+                                      bool* requestedDeviceFound,
+                                      QString* matchReason);
+    void rememberAudioInputDeviceIdentity(QAudioDevice const& device,
+                                          const QString& reason,
+                                          bool updateDisplayName);
+    void rememberAudioOutputDeviceIdentity(QAudioDevice const& device,
+                                           const QString& reason,
+                                           bool updateDisplayName);
     bool usingTciAudioInput() const;
     bool startTciTxAudioStream(QVector<float> const& wave, QString const& mode,
                                unsigned symbolsLength, double framesPerSymbol,

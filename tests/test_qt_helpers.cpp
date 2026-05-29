@@ -2649,7 +2649,16 @@ private:
       {"CQ II9MESC"},
       {"<II9MESC> OE9GWV JM77"},
       {"<II9MESC> OE9GWV -02"},
+      {"<OE9GWV> II9MESC"},
+      {"OE9GWV <II9MESC> JM77"},
+      {"OE9GWV <II9MESC> -02"},
       {"OE9GWV <II9MESC> R-02"},
+      {"OE9GWV <II9MESC> RR73"},
+      {"OE9GWV <II9MESC> 73"},
+      {"KQ5I <II9MESC> -15"},
+      {"KQ5I <II9MESC> R-15"},
+      {"<KQ5I> II9MESC RR73"},
+      {"<KQ5I> II9MESC 73"},
       {"II9MESC <OE9GWV> RR73"},
       {"II9MESC <OE9GWV> 73"},
       {"<ZL100C> IT9MRM R-12"},
@@ -2667,6 +2676,7 @@ private:
         decodium::txmsg::Decode77Context context;
         context.saveHashCall (QStringLiteral ("II9MESC"));
         context.saveHashCall (QStringLiteral ("OE9GWV"));
+        context.saveHashCall (QStringLiteral ("KQ5I"));
         context.saveHashCall (QStringLiteral ("ZL100C"));
         context.saveHashCall (QStringLiteral ("EH90ALL"));
         context.saveHashCall (QStringLiteral ("IT9MRM"));
