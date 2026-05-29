@@ -247,6 +247,20 @@ QFont panadapterMonoFont(int pointSize, QFont::Weight weight = QFont::Normal)
     return font;
 }
 
+qreal panadapterOverlayDevicePixelRatio(QQuickWindow* window)
+{
+    qreal dpr = window ? window->devicePixelRatio() : 1.0;
+    if (!std::isfinite(dpr) || dpr < 1.0)
+        dpr = 1.0;
+    return qBound<qreal>(1.0, dpr, 3.0);
+}
+
+QSize panadapterOverlayTextureSize(int logicalWidth, int logicalHeight, qreal dpr)
+{
+    return QSize(qMax(1, qRound(static_cast<qreal>(logicalWidth) * dpr)),
+                 qMax(1, qRound(static_cast<qreal>(logicalHeight) * dpr)));
+}
+
 QSGNode* sceneGraphChildAt(QSGNode* parent, int index)
 {
     if (!parent || index < 0)
@@ -2405,16 +2419,19 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     qint64 const overlayStartUs = monotonicUs();
     int renderedDecodeLabels = 0;
     int renderedClusterLabels = 0;
+    qreal const dpr = panadapterOverlayDevicePixelRatio(window());
+    QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
 
-    if (m_spectrumOverlayImage.size() != QSize(w, h)
+    if (m_spectrumOverlayImage.size() != textureSize
         || m_spectrumOverlayImage.format() != QImage::Format_ARGB32_Premultiplied) {
-        m_spectrumOverlayImage = QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+        m_spectrumOverlayImage = QImage(textureSize, QImage::Format_ARGB32_Premultiplied);
     }
     m_spectrumOverlayImage.fill(Qt::transparent);
     m_decodeHitRects.clear();
     m_clusterHitRects.clear();
 
     QPainter p(&m_spectrumOverlayImage);
+    p.scale(dpr, dpr);
     p.setRenderHint(QPainter::Antialiasing, false);
 
     float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
@@ -2705,14 +2722,17 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
     float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
     bool const sizeChanged = m_spectrumOverlaySize != QSize(w, h);
+    qreal const dpr = panadapterOverlayDevicePixelRatio(window());
+    QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
+    bool const textureSizeChanged = m_spectrumOverlayImage.size() != textureSize;
     bool const rangeChanged = std::abs(displayMinDb - m_spectrumOverlayDisplayMinDb) > 0.75f
         || std::abs(displayMaxDb - m_spectrumOverlayDisplayMaxDb) > 0.75f;
     bool const rangeRefreshDue = monotonicMs() - m_lastSpectrumOverlayRebuildMs >= 250;
-    if (sizeChanged || (rangeChanged && rangeRefreshDue)) {
+    if (sizeChanged || textureSizeChanged || (rangeChanged && rangeRefreshDue)) {
         m_spectrumOverlayDirty = true;
     }
 
-    bool const needsUpload = m_spectrumOverlayDirty || m_spectrumOverlayImage.size() != QSize(w, h);
+    bool const needsUpload = m_spectrumOverlayDirty || textureSizeChanged;
     if (needsUpload)
         rebuildSpectrumOverlayImage(w, h, gpuDirectReady);
     if (m_spectrumOverlayImage.isNull()) {
@@ -2764,6 +2784,9 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
             << "api=" << (window() && window()->rendererInterface()
                               ? waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
                               : "Unknown")
+            << "dpr=" << dpr
+            << "logical=" << QStringLiteral("%1x%2").arg(w).arg(h)
+            << "texture=" << QStringLiteral("%1x%2").arg(m_spectrumOverlayImage.width()).arg(m_spectrumOverlayImage.height())
             << "reason= grid/labels/markers batched into one QSG texture; QML repeaters bypassed";
     }
 }
