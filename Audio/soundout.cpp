@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <QCoreApplication>
+#include <QElapsedTimer>
 #include <qmath.h>
 #include <QDebug>
 
@@ -213,14 +214,26 @@ void SoundOutput::setFormat(QAudioDevice const& device, unsigned channels, int f
 
 void SoundOutput::restart(QIODevice* source)
 {
+  QElapsedTimer totalTimer;
+  totalTimer.start();
+  qint64 retireMs = 0;
+  qint64 createMs = 0;
+  qint64 configMs = 0;
+  qint64 startMs = 0;
+  qint64 pumpMs = 0;
+
   m_pumpTimer.stop();
   m_sourceDevice.clear();
   m_pendingWrite.clear();
 
   m_streamDevice.clear();
+  QElapsedTimer phaseTimer;
+  phaseTimer.start();
   retireStream(QStringLiteral("restart"));
+  retireMs = phaseTimer.elapsed();
 
   if (!m_device.id().isEmpty()) {
+    phaseTimer.restart();
     // Keep TX format fixed to 48 kHz / Int16 to match the modulator output.
     // On macOS many devices report Float32 as their native format; Qt/CoreAudio
     // can still convert this stream internally, so we log unsupported-native
@@ -254,7 +267,10 @@ void SoundOutput::restart(QIODevice* source)
                     .arg(preferred.channelCount()));
     }
 
+    QElapsedTimer createTimer;
+    createTimer.start();
     m_stream.reset(new QAudioSink(m_device, format));
+    createMs = createTimer.elapsed();
     m_openDeviceId = m_device.id();
     checkStream();
     m_stream->setVolume(static_cast<float>(m_volume));
@@ -289,6 +305,7 @@ void SoundOutput::restart(QIODevice* source)
   // Buffer sizing: Windows + USB Audio CODEC needs a generous buffer to
   // prevent underruns mid-TX. macOS keeps the Decodium3-sized default
   // buffer so FT2 TX attack latency stays close to the legacy behavior.
+  phaseTimer.restart();
   if (m_framesBuffered > 0) {
     m_stream->setBufferSize(
         static_cast<qsizetype>(m_stream->format().bytesForFrames(m_framesBuffered)));
@@ -296,10 +313,13 @@ void SoundOutput::restart(QIODevice* source)
     m_stream->setBufferSize(
         static_cast<qsizetype>(m_stream->format().bytesForFrames(kDefaultTxBufferFrames)));
   }
+  configMs = phaseTimer.elapsed();
 
 #if defined(Q_OS_MAC)
   m_sourceDevice = source;
+  phaseTimer.restart();
   m_streamDevice = m_stream->start();
+  startMs = phaseTimer.elapsed();
   if (!m_streamDevice) {
     Q_EMIT error(tr("Audio TX output start failed: Qt did not return a writable sink device. device=\"%1\", format=%2, state=%3, qt-error=%4")
                  .arg(m_device.description(),
@@ -313,13 +333,30 @@ void SoundOutput::restart(QIODevice* source)
                     << "error=" << audioErrorName(m_stream->error())
                     << "bytesFree=" << m_stream->bytesFree()
                     << "buffer=" << m_stream->bufferSize();
+  phaseTimer.restart();
   pumpAudio();
+  pumpMs = phaseTimer.elapsed();
   if (m_sourceDevice || !m_pendingWrite.isEmpty()) {
     m_pumpTimer.start();
   }
 #else
+  phaseTimer.restart();
   m_stream->start(source);
+  startMs = phaseTimer.elapsed();
 #endif
+  qInfo().noquote() << "[TX-TL] sound_output_restart"
+                    << "total_ms=" << totalTimer.elapsed()
+                    << "retire_ms=" << retireMs
+                    << "create_ms=" << createMs
+                    << "config_ms=" << configMs
+                    << "start_ms=" << startMs
+                    << "pump_ms=" << pumpMs
+                    << "state=" << (m_stream ? audioStateName(m_stream->state()) : QStringLiteral("no-stream"))
+                    << "error=" << (m_stream ? audioErrorName(m_stream->error()) : QStringLiteral("no-stream"))
+                    << "pending_bytes=" << m_pendingWrite.size()
+                    << "source_pos=" << (source ? source->pos() : -1)
+                    << "source_size=" << (source ? source->size() : -1)
+                    << "dev=" << m_device.description();
   // diagnostico: stato subito dopo start
   Q_EMIT status(QString("after_start: state=%1 err=%2 bufSize=%3")
     .arg(m_stream->state()).arg(m_stream->error()).arg(m_stream->bufferSize()));
@@ -381,6 +418,8 @@ void SoundOutput::retireStream(QString const& reason)
     return;
   }
 
+  QElapsedTimer timer;
+  timer.start();
   QAudioSink *stream = m_stream.take();
   m_openDeviceId.clear();
   stream->disconnect(this);
@@ -390,11 +429,25 @@ void SoundOutput::retireStream(QString const& reason)
     stream->setVolume(0.0f);
     Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink retired without immediate stop: %1").arg(reason));
     deleteRetiredStreamAfterCoreAudioCallbacks(stream, reason);
+    qInfo().noquote() << "[TX-TL] sound_output_retire"
+                      << "reason=" << reason
+                      << "mode=defer"
+                      << "elapsed_ms=" << timer.elapsed()
+                      << "state=" << audioStateName(stream->state())
+                      << "error=" << audioErrorName(stream->error());
     return;
   }
 
+  QAudio::State const beforeState = stream->state();
   stream->reset();
   stream->stop();
+  qInfo().noquote() << "[TX-TL] sound_output_retire"
+                    << "reason=" << reason
+                    << "mode=stop_delete"
+                    << "elapsed_ms=" << timer.elapsed()
+                    << "state_before=" << audioStateName(beforeState)
+                    << "state_after=" << audioStateName(stream->state())
+                    << "error=" << audioErrorName(stream->error());
   delete stream;
 }
 

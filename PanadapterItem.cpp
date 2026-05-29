@@ -4557,10 +4557,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                                 << "rows=" << rows
                                 << "qimage_dependency=0";
                         }
-                        bool const shouldLogStats =
-                            !m_loggedWaterfallGpuUploadStats
-                            || (m_lastWaterfallGpuStatsRow >= 0
-                                && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows);
+                        bool const shouldLogStats = m_wfWriteRow > 0
+                            && (!m_loggedWaterfallGpuUploadStats
+                                || (m_lastWaterfallGpuStatsRow >= 0
+                                    && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
                         if (shouldLogStats) {
                             m_loggedWaterfallGpuUploadStats = true;
                             m_lastWaterfallGpuStatsRow = m_wfWriteRow;
@@ -4660,10 +4660,11 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 if (!m_shaderWaterfallBlocked && material->intensityTexture && material->paletteTexture && material->rowParamsTexture) {
                     wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
                     bool const shouldLogStats = uploadedTextureData
+                        && m_wfWriteRow > 0
                         && (!m_loggedWaterfallGpuUploadStats
-                        || uploadedFullTexture
-                        || (m_lastWaterfallGpuStatsRow >= 0
-                            && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
+                            || uploadedFullTexture
+                            || (m_lastWaterfallGpuStatsRow >= 0
+                                && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
                     if (shouldLogStats) {
                         m_loggedWaterfallGpuUploadStats = true;
                         m_lastWaterfallGpuStatsRow = m_wfWriteRow;
