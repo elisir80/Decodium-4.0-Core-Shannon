@@ -553,7 +553,7 @@ QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, cons
     }
 
     QString const key = labelTextureKey(text, color);
-    qint64 const nowMs = monotonicNowMs();
+    qint64 const nowMs = qMax<qint64>(1, monotonicNowMs());
     QSGTexture* texture = layer->textureCache.value(key, nullptr);
     if (texture) {
         layer->textureLastUsedMs.insert(key, nowMs);
@@ -576,10 +576,10 @@ void pruneLabelTextureCache(LabelLayerNode* layer)
         return;
     }
 
-    qint64 const nowMs = monotonicNowMs();
+    qint64 const nowMs = qMax<qint64>(1, monotonicNowMs());
     for (auto it = layer->textureCache.begin(); it != layer->textureCache.end(); ) {
         qint64 const lastUsed = layer->textureLastUsedMs.value(it.key(), 0);
-        if (lastUsed > 0 && nowMs - lastUsed <= kLabelTextureTtlMs) {
+        if (lastUsed <= 0 || nowMs - lastUsed <= kLabelTextureTtlMs) {
             ++it;
             continue;
         }
