@@ -206,6 +206,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString catMode READ catMode NOTIFY catModeChanged)
     Q_PROPERTY(double rigPowerWatts READ rigPowerWatts NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigSwr READ rigSwr NOTIFY rigTelemetryChanged)
+    Q_PROPERTY(double rigAlc READ rigAlc NOTIFY rigTelemetryChanged)  // 1.0.323 — ALC meter 0..100
     Q_PROPERTY(double processCpuUsage READ processCpuUsage NOTIFY processCpuUsageChanged)
     Q_PROPERTY(double processGpuUsage READ processGpuUsage NOTIFY processGpuUsageChanged)
     Q_PROPERTY(QString lastCatError READ lastCatError NOTIFY lastCatErrorChanged)
@@ -611,6 +612,7 @@ public:
     QString catMode() const;
     double rigPowerWatts() const { return m_rigPowerWatts; }
     double rigSwr() const { return m_rigSwr; }
+    double rigAlc() const { return m_rigAlc; }
     double processCpuUsage() const { return m_processCpuUsage; }
     double processGpuUsage() const { return m_processGpuUsage; }
     QString lastCatError() const { return m_lastCatError; }
@@ -1517,7 +1519,7 @@ private:
     QString configuredCatRigMode() const;
     bool configuredCatRigModeRequestsDataPacket() const;
     void applyConfiguredCatRigMode(const QString& reason);
-    void updateRigTelemetry(double powerWatts, double swr);
+    void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0);
     void applyNtpSettings();
     void configureNtpClientForMode(const QString& mode);
     void resetStartupTransientQsoState();
@@ -1926,6 +1928,7 @@ private:
     QString m_catMode;
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
+    double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
     double m_processCpuUsage {0.0};
     double m_processGpuUsage {-1.0};
     qint64 m_cpuPressureUntilMs {0};

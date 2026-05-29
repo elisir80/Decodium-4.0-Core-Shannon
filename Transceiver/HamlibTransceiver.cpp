@@ -512,7 +512,7 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
   if (!m_->is_dummy_)
     {
       // printf("Hamlib open params: power_on=%d power_off=%d ptt_share=%d\n",(params.poll_interval & rig__power) == rig__power,(params.poll_interval & rig__power_off) == rig__power_off,(params.poll_interval & ptt__share) == ptt__share);
-      if (params.poll_interval & do__pwr) { do_pwr_ = true; do_pwr2_ = true; do_swr_ = true;}
+      if (params.poll_interval & do__pwr) { do_pwr_ = true; do_pwr2_ = true; do_swr_ = true; do_alc_ = true;}
 
       switch (rig_get_caps_int (m_->model_, RIG_CAPS_PORT_TYPE))
         {
@@ -722,7 +722,7 @@ int HamlibTransceiver::do_start ()
   m_->tickle_hamlib_ = false;
   m_->get_vfo_works_ = true;
   m_->set_vfo_works_ = true;
-  bool const requestedPowerSwrPolling = do_pwr_ || do_pwr2_ || do_swr_;
+  bool const requestedPowerSwrPolling = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
   bool const hasGetLevelFunction = !m_->is_dummy_ && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_LEVEL);
   int const getLevelCaps = !m_->is_dummy_ ? rig_get_caps_int (m_->model_, RIG_CAPS_HAS_GET_LEVEL) : 0;
   bool const hasRfPowerMeterWatts = hasGetLevelFunction
@@ -731,10 +731,14 @@ int HamlibTransceiver::do_start ()
       && (getLevelCaps & RIG_LEVEL_RFPOWER) == RIG_LEVEL_RFPOWER;
   bool const hasSwr = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_SWR) == RIG_LEVEL_SWR;
+  // 1.0.323 — ALC: stessa logica caps di SWR (RIG_LEVEL_ALC). go/no-go reale per FT-991.
+  bool const hasAlc = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_ALC) == RIG_LEVEL_ALC;
 
   do_pwr_ &= hasRfPowerMeterWatts;
   do_pwr2_ &= hasRfPower;
   do_swr_ &= hasSwr;
+  do_alc_ &= hasAlc;
   if (requestedPowerSwrPolling)
     {
       qInfo ().noquote ()
@@ -744,7 +748,8 @@ int HamlibTransceiver::do_start ()
         << "getLevel=" << hasGetLevelFunction
         << "rfpowerMeterWatts=" << hasRfPowerMeterWatts
         << "rfpower=" << hasRfPower
-        << "swr=" << hasSwr;
+        << "swr=" << hasSwr
+        << "alc=" << hasAlc;
     }
 
   // the Net rigctl back end promises all functions work but we must
@@ -1341,7 +1346,7 @@ void HamlibTransceiver::do_poll ()
   // skip 3 out of 4 RX ticks otherwise — meters can also be updated by
   // schedule_transmit_telemetry_burst when PTT transitions.
   bool const tx_active_for_meters = ptt_on_ || state ().ptt ();
-  bool const telemetry_enabled = do_pwr_ || do_pwr2_ || do_swr_;
+  bool const telemetry_enabled = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
   if (telemetry_enabled && !tx_active_for_meters)
     {
       ++telemetry_tick_;
@@ -1372,6 +1377,7 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
     {
       update_power (0);
       update_swr (0);
+      update_alc (0);
       if (force_signal)
         {
           update_complete (true);
@@ -1392,6 +1398,22 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
         {
           CAT_TRACE ("rig_get_level RIG_LEVEL_SWR failed with rc:" << rc << "ignoring");
           update_swr (0);
+        }
+    }
+
+  // 1.0.323 — ALC: scala Hamlib 0.0..1.0 → 0..100 (come SWR). Usato da display ALC
+  // (fase 1) e in seguito dal loop ALC automatico (fase 2). Letto solo in TX.
+  if (do_alc_)
+    {
+      rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_ALC, &strength);
+      if (RIG_OK == rc && tx_active)
+        {
+          update_alc (strength.f > 0.0 ? static_cast<unsigned int> (strength.f * 100) : 0);
+        }
+      else
+        {
+          CAT_TRACE ("rig_get_level RIG_LEVEL_ALC failed with rc:" << rc << "ignoring");
+          update_alc (0);
         }
     }
 

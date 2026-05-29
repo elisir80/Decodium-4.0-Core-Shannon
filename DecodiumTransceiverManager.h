@@ -57,6 +57,7 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(bool    split       READ split       NOTIFY splitChanged)
     Q_PROPERTY(double  powerWatts  READ powerWatts  NOTIFY powerWattsChanged)
     Q_PROPERTY(double  swr         READ swr         NOTIFY swrChanged)
+    Q_PROPERTY(double  alc         READ alc         NOTIFY alcChanged)  // 1.0.323 — ALC meter 0..100
 
     // ── Liste per UI ──────────────────────────────────────────────────────
     Q_PROPERTY(QStringList rigList  READ rigList  NOTIFY rigListChanged)
@@ -104,6 +105,7 @@ public:
     bool    split()        const { return m_split; }
     double  powerWatts()   const { return m_powerWatts; }
     double  swr()          const { return m_swr; }
+    double  alc()          const { return m_alc; }
 
     QStringList rigList()       const;
     QStringList portList()      const { return m_portList; }
@@ -194,6 +196,7 @@ signals:
     void splitChanged();
     void powerWattsChanged();
     void swrChanged();
+    void alcChanged();
     void catAutoConnectChanged();
     void audioAutoStartChanged();
     void tciAudioEnabledChanged();
@@ -206,7 +209,7 @@ signals:
 
 private:
     void enforceForceLineAvailability();
-    void updateTelemetry(double powerWatts, double swr);
+    void updateTelemetry(double powerWatts, double swr, double alc = 0.0);
     void reconnectRigForParameterChange(const QString& reason);
     void scheduleTransientReconnect(const QString& reason);
     void setConnecting(bool v);
@@ -245,6 +248,7 @@ private:
     bool    m_split        {false};
     double  m_powerWatts   {0.0};
     double  m_swr          {0.0};
+    double  m_alc          {0.0};  // 1.0.323 — ALC meter 0..100
 
     QStringList m_portList;
     bool    m_catAutoConnect {false};

@@ -6759,14 +6759,17 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         if (!m_hamlibCat
             || !catSignalMatchesBackend(m_catBackend, QStringLiteral("hamlib"))
             || !m_hamlibCat->connected()) {
-            updateRigTelemetry(0.0, 0.0);
+            updateRigTelemetry(0.0, 0.0, 0.0);
             return;
         }
-        updateRigTelemetry(m_hamlibCat->powerWatts(), m_hamlibCat->swr());
+        // 1.0.323 — passa ALC meter (0..100) come terzo argomento
+        updateRigTelemetry(m_hamlibCat->powerWatts(), m_hamlibCat->swr(), m_hamlibCat->alc());
     };
     connect(m_hamlibCat, &DecodiumTransceiverManager::powerWattsChanged,
             this, syncHamlibTelemetry);
     connect(m_hamlibCat, &DecodiumTransceiverManager::swrChanged,
+            this, syncHamlibTelemetry);
+    connect(m_hamlibCat, &DecodiumTransceiverManager::alcChanged,   // 1.0.323
             this, syncHamlibTelemetry);
     connect(m_hamlibCat, &DecodiumTransceiverManager::connectedChanged,
             this, syncHamlibTelemetry);
@@ -11545,12 +11548,13 @@ bool DecodiumBridge::catConnected() const { return m_catConnected; }
 QString DecodiumBridge::catRigName() const { return m_catRigName; }
 QString DecodiumBridge::catMode() const { return m_catMode; }
 
-void DecodiumBridge::updateRigTelemetry(double powerWatts, double swr)
+void DecodiumBridge::updateRigTelemetry(double powerWatts, double swr, double alc)
 {
-    if (m_rigPowerWatts == powerWatts && m_rigSwr == swr)
+    if (m_rigPowerWatts == powerWatts && m_rigSwr == swr && m_rigAlc == alc)
         return;
     m_rigPowerWatts = powerWatts;
     m_rigSwr = swr;
+    m_rigAlc = alc;  // 1.0.323 — ALC meter
     emit rigTelemetryChanged();
     enforceSwrTransmissionLimit(QStringLiteral("telemetry"));
 }
@@ -22868,9 +22872,9 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
         }
         refreshPskReporterLocalStation();
         if (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->connected()) {
-            updateRigTelemetry(m_hamlibCat->powerWatts(), m_hamlibCat->swr());
+            updateRigTelemetry(m_hamlibCat->powerWatts(), m_hamlibCat->swr(), m_hamlibCat->alc());  // 1.0.323
         } else {
-            updateRigTelemetry(0.0, 0.0);
+            updateRigTelemetry(0.0, 0.0, 0.0);
         }
     }
 
