@@ -1688,7 +1688,8 @@ void DecodiumTransceiverManager::connectRig()
                 if (m_pttActive != ptt) { m_pttActive = ptt; emit pttActiveChanged(); }
                 if (m_split   != spl)  { m_split   = spl;  emit splitChanged(); }
                 updateTelemetry(static_cast<double>(state.power()) / 1000.0,
-                                static_cast<double>(state.swr()) / 100.0);
+                                static_cast<double>(state.swr()) / 100.0,
+                                static_cast<double>(state.alc()));
             },
             Qt::QueuedConnection);
 
@@ -1824,7 +1825,7 @@ void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reaso
     });
 }
 
-void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr)
+void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr, double alc)
 {
     if (m_powerWatts != powerWatts) {
         m_powerWatts = powerWatts;
@@ -1833,6 +1834,10 @@ void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr)
     if (m_swr != swr) {
         m_swr = swr;
         emit swrChanged();
+    }
+    if (m_alc != alc) {  // 1.0.323 — ALC meter
+        m_alc = alc;
+        emit alcChanged();
     }
 }
 

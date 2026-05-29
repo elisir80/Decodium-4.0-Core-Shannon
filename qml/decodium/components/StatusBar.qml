@@ -32,6 +32,7 @@ Rectangle {
     readonly property bool gpuMonitorVisible: Qt.platform.os !== "osx"
     property double rigPowerWatts: bridge ? bridge.rigPowerWatts : 0.0
     property double rigSwr: bridge ? bridge.rigSwr : 0.0
+    property double rigAlc: bridge ? bridge.rigAlc : 0.0  // 1.0.323 — ALC meter 0..100
     property bool pwrAndSwrEnabled: bridge ? bridge.getSetting("PWRandSWR", false) : false
     property bool checkSwrEnabled: bridge ? bridge.getSetting("CheckSWR", false) : false
     readonly property bool rigTelemetryBackendActive: bridge && (bridge.catBackend === "hamlib" || bridge.catBackend === "tci")
@@ -39,6 +40,8 @@ Rectangle {
     readonly property color swrStatusColor: rigSwr >= 2.0 ? colorRed
         : rigSwr >= 1.5 ? colorYellow
         : textSecondary
+    // 1.0.323 — ALC: verde se 0 < ALC ≤ 60, rosso se > 60 (over-ALC)
+    readonly property color alcStatusColor: rigAlc > 60 ? colorRed : accentGreen
 
     // Scala logaritmica: -60 dBFS → 0.0, 0 dBFS → 1.0
     // Mappa valori RMS tipici (0.001..0.3) su tutto il range S-meter
@@ -426,6 +429,41 @@ Rectangle {
                             ? "Check SWR active: TX is blocked/stopped when SWR > 2.5"
                             : "Power/SWR telemetry from CAT"
                     }
+                }
+            }
+        }
+
+        // 1.0.323 — ALC display (visibile solo quando PWR/SWR telemetry è attivo e in TX)
+        RowLayout {
+            spacing: 4
+            visible: rigTelemetryVisible
+
+            Rectangle {
+                height: 18
+                width: 56
+                radius: 9
+                color: rigAlc > 60 ? Qt.rgba(244/255, 67/255, 54/255, 0.35)
+                    : rigAlc > 0 ? Qt.rgba(76/255, 175/255, 80/255, 0.18)
+                    : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                border.color: rigAlc > 0 ? alcStatusColor : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
+
+                Text {
+                    anchors.centerIn: parent
+                    text: rigAlc > 0 ? "ALC " + Math.round(rigAlc) : "ALC --"
+                    font.family: decodiumMonoFontFamily
+                    font.pixelSize: 10
+                    font.bold: rigAlc > 60
+                    color: rigAlc > 60 ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : alcStatusColor
+
+                    ToolTip.visible: alcMouseArea.containsMouse
+                    ToolTip.delay: 500
+                    ToolTip.text: qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
+                }
+
+                MouseArea {
+                    id: alcMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
                 }
             }
         }

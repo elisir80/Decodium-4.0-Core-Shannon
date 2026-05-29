@@ -206,6 +206,11 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString catMode READ catMode NOTIFY catModeChanged)
     Q_PROPERTY(double rigPowerWatts READ rigPowerWatts NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigSwr READ rigSwr NOTIFY rigTelemetryChanged)
+    Q_PROPERTY(double rigAlc READ rigAlc NOTIFY rigTelemetryChanged)  // 1.0.323 — ALC meter 0..100
+    // 1.0.324 — ALC auto-calibration (Fase 2)
+    Q_PROPERTY(int    alcTarget              READ alcTarget              WRITE setAlcTarget              NOTIFY alcTargetChanged)
+    Q_PROPERTY(bool   alcCalibrating         READ alcCalibrating                                         NOTIFY alcCalibratingChanged)
+    Q_PROPERTY(QString alcCalibrationStatus  READ alcCalibrationStatus                                   NOTIFY alcCalibrationStatusChanged)
     Q_PROPERTY(double processCpuUsage READ processCpuUsage NOTIFY processCpuUsageChanged)
     Q_PROPERTY(double processGpuUsage READ processGpuUsage NOTIFY processGpuUsageChanged)
     Q_PROPERTY(QString lastCatError READ lastCatError NOTIFY lastCatErrorChanged)
@@ -528,7 +533,7 @@ public:
     bool autoCqRepeat()      const { return m_autoCqRepeat; }
     void setAutoCqRepeat(bool v);
     int  maxCallerRetries()  const { return m_maxCallerRetries; }
-    void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); } }
+    void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store
     int  txDisabledMask() const { return m_txDisabledMask; }
     Q_INVOKABLE bool isTxDisabled(int n) const { return n >= 1 && n <= 6 && (m_txDisabledMask & (1 << (n - 1))); }
     Q_INVOKABLE void setTxDisabled(int n, bool disabled);
@@ -611,6 +616,12 @@ public:
     QString catMode() const;
     double rigPowerWatts() const { return m_rigPowerWatts; }
     double rigSwr() const { return m_rigSwr; }
+    double rigAlc() const { return m_rigAlc; }
+    // 1.0.324 — ALC auto-calibration getters
+    int     alcTarget()             const { return m_alcTarget; }
+    bool    alcCalibrating()        const { return m_alcCalibrating; }
+    QString alcCalibrationStatus()  const { return m_alcCalStatus; }
+    Q_INVOKABLE void setAlcTarget(int v);
     double processCpuUsage() const { return m_processCpuUsage; }
     double processGpuUsage() const { return m_processGpuUsage; }
     QString lastCatError() const { return m_lastCatError; }
@@ -875,6 +886,9 @@ public slots:
     Q_INVOKABLE void clearTxMessages();
     Q_INVOKABLE void startTune();      // tono continuo fino a stopTune()
     Q_INVOKABLE void stopTune();
+    // 1.0.324 — ALC auto-calibration (Fase 2)
+    Q_INVOKABLE void startAlcCalibration();
+    Q_INVOKABLE void cancelAlcCalibration();
     Q_INVOKABLE bool openAllTxtFolder() const;
     Q_INVOKABLE void halt();           // ferma TX e Tune immediatamente
     Q_INVOKABLE void haltWithReason(const QString& reason);
@@ -1303,6 +1317,10 @@ signals:
     void catRigNameChanged();
     void catModeChanged();
     void rigTelemetryChanged();
+    // 1.0.324 — ALC calibration signals
+    void alcTargetChanged();
+    void alcCalibratingChanged();
+    void alcCalibrationStatusChanged();
     void processCpuUsageChanged();
     void processGpuUsageChanged();
     void lastCatErrorChanged();
@@ -1478,6 +1496,7 @@ private slots:
     void onLegacyAudioSamples(QByteArray const& pcmSamples);
     void onAsyncDecodeTimer();   // FT2 turbo async ogni 100ms
     void regenerateTxMessages();  // auto-genera TX6 (CQ) e TX1-5 da callsign/grid/dxCall
+    void onAlcCalibrationTick(); // 1.0.324 — ALC calibration timer slot
     void processNextInQueue();   // mainwindow processNextInQueue: auto-handoff al prossimo caller
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
@@ -1517,7 +1536,7 @@ private:
     QString configuredCatRigMode() const;
     bool configuredCatRigModeRequestsDataPacket() const;
     void applyConfiguredCatRigMode(const QString& reason);
-    void updateRigTelemetry(double powerWatts, double swr);
+    void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0);
     void applyNtpSettings();
     void configureNtpClientForMode(const QString& mode);
     void resetStartupTransientQsoState();
@@ -1926,6 +1945,18 @@ private:
     QString m_catMode;
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
+    double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
+    // 1.0.324 — ALC auto-calibration state
+    int     m_alcTarget        {20};
+    bool    m_alcCalibrating   {false};
+    QString m_alcCalStatus;
+    QTimer* m_alcCalTimer      {nullptr};
+    double  m_alcEma           {0.0};
+    int     m_alcConvergeCount {0};
+    int     m_alcStuckCount    {0};   // 1.0.325 — saturazione: tick consecutivi con level clampato
+    double  m_alcCalStartLevel {0.0};
+    qint64  m_alcCalStartMs    {0};
+    void    finishAlcCalibration(bool success, const QString& reason);
     double m_processCpuUsage {0.0};
     double m_processGpuUsage {-1.0};
     qint64 m_cpuPressureUntilMs {0};
@@ -2575,6 +2606,8 @@ public:
     // 1.0.317 — FT8 fast sequence (grace 400ms + accept late decodes)
     Q_INVOKABLE bool ft8FastSequence() const { return m_ft8FastSequence; }
     Q_INVOKABLE void setFt8FastSequence(bool v);
+    // 1.0.326 B4 — helper: relax latestD3 cap se ftxImmediateClickTx OR ft8FastSequence+FT8
+    bool effectiveRelaxLatestCap() const { return m_ftxImmediateClickTx || (m_ft8FastSequence && m_mode == QStringLiteral("FT8")); }
     // 1.0.289 — FT2 enhancement toggles
     Q_INVOKABLE bool ft2FullDecodeInAutoCq() const { return m_ft2FullDecodeInAutoCq; }
     Q_INVOKABLE void setFt2FullDecodeInAutoCq(bool v);
