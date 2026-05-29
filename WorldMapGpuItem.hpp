@@ -100,6 +100,7 @@ private:
         QPointF baseline;
         QRectF rect;
         QColor color;
+        bool persistentCache {true};
     };
 
     struct AnimatedPath {

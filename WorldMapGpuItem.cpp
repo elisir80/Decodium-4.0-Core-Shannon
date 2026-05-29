@@ -100,11 +100,13 @@ public:
     {
         clearNode(this);
         qDeleteAll(textureCache);
+        qDeleteAll(transientTextures);
     }
 
     QHash<QString, QSGTexture*> textureCache;
     QHash<QString, qint64> textureLastUsedMs;
     QVector<QSGSimpleTextureNode*> labelNodes;
+    QVector<QSGTexture*> transientTextures;
 };
 
 class AnimationLayerNode final : public QSGNode
@@ -546,6 +548,20 @@ QString labelTextureKey(const QString& text, const QColor& color)
         + QString::number(font.weight());
 }
 
+QSGTexture* createLabelTexture(QQuickWindow* window, const QString& text, const QColor& color)
+{
+    if (!window || text.isEmpty()) {
+        return nullptr;
+    }
+
+    QSGTexture* texture = window->createTextureFromImage(renderLabelTexture(text, color));
+    if (!texture) {
+        return nullptr;
+    }
+    texture->setFiltering(QSGTexture::Linear);
+    return texture;
+}
+
 QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, const QString& text, const QColor& color)
 {
     if (!layer || !window || text.isEmpty()) {
@@ -560,11 +576,10 @@ QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, cons
         return texture;
     }
 
-    texture = window->createTextureFromImage(renderLabelTexture(text, color));
+    texture = createLabelTexture(window, text, color);
     if (!texture) {
         return nullptr;
     }
-    texture->setFiltering(QSGTexture::Linear);
     layer->textureCache.insert(key, texture);
     layer->textureLastUsedMs.insert(key, nowMs);
     return texture;
@@ -1659,7 +1674,8 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     displayLabels.push_back({bottomLeft,
                              bottomLeftBaseline,
                              labelTextureRectForBaseline(bottomLeft, bottomLeftBaseline),
-                             QColor(225, 235, 245, 205)});
+                             QColor(225, 235, 245, 205),
+                             false});
 
     QString const utcText = QDateTime::currentDateTimeUtc().toString(QStringLiteral("hh:mm:ss 'UTC'"));
     QRectF const utcRect = labelTextureRectForBaseline(utcText, QPointF(0.0, 0.0));
@@ -1668,7 +1684,8 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     displayLabels.push_back({utcText,
                              utcBaseline,
                              labelTextureRectForBaseline(utcText, utcBaseline),
-                             QColor(225, 235, 245, 205)});
+                             QColor(225, 235, 245, 205),
+                             false});
 
     while (labelLayer->labelNodes.size() < displayLabels.size()) {
         auto* node = new QSGSimpleTextureNode;
@@ -1676,22 +1693,33 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         node->setFiltering(QSGTexture::Linear);
         labelLayer->appendChildNode(node);
         labelLayer->labelNodes.push_back(node);
+        labelLayer->transientTextures.push_back(nullptr);
     }
     while (labelLayer->labelNodes.size() > displayLabels.size()) {
         auto* node = labelLayer->labelNodes.takeLast();
+        QSGTexture* transientTexture = labelLayer->transientTextures.takeLast();
+        node->setTexture(nullptr);
         labelLayer->removeChildNode(node);
         delete node;
+        delete transientTexture;
     }
 
     for (int i = 0; i < displayLabels.size(); ++i) {
         const Label& label = displayLabels[i];
         auto* node = labelLayer->labelNodes[i];
-        if (QSGTexture* texture = cachedLabelTexture(labelLayer, window(), label.text, label.color)) {
+        QSGTexture* texture = label.persistentCache
+            ? cachedLabelTexture(labelLayer, window(), label.text, label.color)
+            : createLabelTexture(window(), label.text, label.color);
+        QSGTexture* oldTransientTexture = labelLayer->transientTextures[i];
+        if (texture) {
             node->setTexture(texture);
             node->setRect(label.rect);
         } else {
+            node->setTexture(nullptr);
             node->setRect(QRectF());
         }
+        labelLayer->transientTextures[i] = label.persistentCache ? nullptr : texture;
+        delete oldTransientTexture;
     }
     pruneLabelTextureCache(labelLayer);
 
