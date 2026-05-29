@@ -3532,6 +3532,81 @@ Dialog {
                         // riga vuota per riempire le 4 colonne
                         Item { Layout.columnSpan: 2; Layout.preferredHeight: controlHeight }
 
+                        // DX-Pedition Fase 1 — Accent + Density (visibili solo col tema DX-Pedition)
+                        Text {
+                            text: qsTr("Accent:")
+                            color: textSecondary; font.pixelSize: 12
+                            Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                        }
+                        RowLayout {
+                            id: dxpAccentRow
+                            Layout.columnSpan: 3; Layout.fillWidth: true
+                            spacing: 8
+                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            readonly property var accents: [
+                                { key: "phosphor", color: "#19ff88" },
+                                { key: "cyan",     color: "#66e6ff" },
+                                { key: "amber",    color: "#ffb820" },
+                                { key: "red",      color: "#ff5466" }
+                            ]
+                            Repeater {
+                                model: dxpAccentRow.accents
+                                delegate: Rectangle {
+                                    Layout.preferredWidth: 34; Layout.preferredHeight: controlHeight
+                                    radius: 6
+                                    color: modelData.color
+                                    readonly property bool sel: bridge.themeManager.accentVariant === modelData.key
+                                    border.width: sel ? 2 : 1
+                                    border.color: sel ? textPrimary : glassBorder
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: bridge.themeManager.accentVariant = modelData.key
+                                    }
+                                }
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        Text {
+                            text: qsTr("Density:")
+                            color: textSecondary; font.pixelSize: 12
+                            Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                        }
+                        RowLayout {
+                            id: dxpDensityRow
+                            Layout.columnSpan: 3; Layout.fillWidth: true
+                            spacing: 0
+                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            readonly property var densities: ["compact", "regular", "comfy"]
+                            Repeater {
+                                model: dxpDensityRow.densities
+                                delegate: Rectangle {
+                                    Layout.preferredWidth: 86; Layout.preferredHeight: controlHeight
+                                    readonly property bool sel: bridge.themeManager.density === modelData
+                                    color: sel ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.30) : bgMedium
+                                    border.color: glassBorder
+                                    border.width: 1
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.charAt(0).toUpperCase() + modelData.slice(1)
+                                        color: parent.sel ? textPrimary : textSecondary
+                                        font.pixelSize: controlFontSize
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: bridge.themeManager.density = modelData
+                                    }
+                                }
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
                         Text { text: qsTr("UI Scale:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         ComboBox {
