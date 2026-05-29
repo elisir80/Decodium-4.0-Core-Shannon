@@ -18935,6 +18935,153 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
     });
 }
 
+// ============================================================
+// DX-Pedition Mode Fase 3 — PSK Reporter "heard-by"
+// Stessa query/endpoint di searchPskReporter, ma con senderCallsign = il MIO
+// call: PSK Reporter risponde con chi MI ha ricevuto nell'ultima ora. Parser
+// esteso: receiverCallsign / receiverLocator / sNR / frequency per ogni
+// <receptionReport>. distKm via calcDistance() esistente (grid2deg+azdist),
+// dxcc via m_dxccLookup esistente (cty.dat). Nessun NAM/thread/lib nuovo.
+// Anti-spam: ignora se fetch in corso o se < 60s dall'ultima fetch.
+// ============================================================
+void DecodiumBridge::fetchPskHeardBy()
+{
+    if (m_pskHeardByFetching) {
+        bridgeLog(QStringLiteral("PSK heard-by: fetch gia' in corso, ignoro"));
+        return;
+    }
+    QString const call = m_callsign.trimmed().toUpper();
+    if (call.isEmpty()) {
+        bridgeLog(QStringLiteral("PSK heard-by: callsign vuoto, no-op"));
+        return;
+    }
+    // Rate-limit: max 1 fetch / 60s.
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (m_pskHeardByLastFetchMs > 0 && (nowMs - m_pskHeardByLastFetchMs) < 60000) {
+        bridgeLog(QStringLiteral("PSK heard-by: rate-limit 60s (%1ms fa), ignoro")
+                      .arg(nowMs - m_pskHeardByLastFetchMs));
+        return;
+    }
+    m_pskHeardByLastFetchMs = nowMs;
+    m_pskHeardByFetching = true;
+    emit pskHeardByFetchingChanged();
+
+    QString const myGrid = m_grid.trimmed();
+
+    QNetworkAccessManager* nam = new QNetworkAccessManager(this);
+    QUrl url(QStringLiteral("https://retrieve.pskreporter.info/query"));
+    QUrlQuery q;
+    q.addQueryItem(QStringLiteral("senderCallsign"), call);     // il MIO call = chi trasmette
+    q.addQueryItem(QStringLiteral("flowStartSeconds"), QStringLiteral("-3600"));
+    q.addQueryItem(QStringLiteral("rptlimit"), QStringLiteral("50"));
+    q.addQueryItem(QStringLiteral("rronly"), QStringLiteral("1"));
+    url.setQuery(q);
+    QNetworkRequest req(url);
+    req.setRawHeader("User-Agent", "Decodium/4.0 (+pskreporter heard-by)");
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                     QNetworkRequest::NoLessSafeRedirectPolicy);
+    QNetworkReply* reply = nam->get(req);
+
+    QTimer* timeout = new QTimer(this);
+    timeout->setSingleShot(true);
+    timeout->setInterval(10000);
+    connect(timeout, &QTimer::timeout, reply, [reply]() {
+        if (reply && reply->isRunning()) reply->abort();
+    });
+    connect(reply, &QNetworkReply::finished, timeout, &QTimer::deleteLater);
+    timeout->start();
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid]() {
+        QByteArray const data = reply->readAll();
+        QNetworkReply::NetworkError const err = reply->error();
+        QString const errStr = reply->errorString();
+        reply->deleteLater();
+        nam->deleteLater();
+
+        QVariantList rows;
+        QSet<QString> dxccSet;
+        double maxKm = 0.0;
+
+        if (err == QNetworkReply::NoError) {
+            QString const xml = QString::fromUtf8(data);
+            // Ogni spot e' un <receptionReport ... /> con attributi in ordine
+            // variabile: catturiamo l'intero tag e poi i singoli attributi.
+            QRegularExpression reTag(QStringLiteral("<receptionReport\\b([^>]*)/?>"));
+            QRegularExpression reRx(QStringLiteral("\\breceiverCallsign=\"([^\"]*)\""));
+            QRegularExpression reLoc(QStringLiteral("\\breceiverLocator=\"([^\"]*)\""));
+            QRegularExpression reSnr(QStringLiteral("\\bsNR=\"(-?[0-9]+)\""));
+            QRegularExpression reFreq(QStringLiteral("\\bfrequency=\"([0-9]+)\""));
+            QSet<QString> seenReceivers;   // dedup per receiverCallsign (spot multipli)
+            auto it = reTag.globalMatch(xml);
+            while (it.hasNext()) {
+                QString const attrs = it.next().captured(1);
+
+                QString rxCall;
+                auto mRx = reRx.match(attrs);
+                if (mRx.hasMatch()) rxCall = mRx.captured(1).trimmed().toUpper();
+                if (rxCall.isEmpty()) continue;
+                if (seenReceivers.contains(rxCall)) continue;   // tieni solo 1 riga/ricevitore
+                seenReceivers.insert(rxCall);
+
+                QString rxGrid;
+                auto mLoc = reLoc.match(attrs);
+                if (mLoc.hasMatch()) rxGrid = mLoc.captured(1).trimmed().toUpper();
+
+                int snr = 0; bool hasSnr = false;
+                auto mSnr = reSnr.match(attrs);
+                if (mSnr.hasMatch()) { snr = mSnr.captured(1).toInt(); hasSnr = true; }
+
+                qint64 freqHz = 0;
+                auto mFreq = reFreq.match(attrs);
+                if (mFreq.hasMatch()) freqHz = mFreq.captured(1).toLongLong();
+
+                // Distanza: riusa calcDistance (grid2deg + azdist). -1 se grid assente.
+                double distKm = -1.0;
+                if (!rxGrid.isEmpty() && !myGrid.isEmpty()) {
+                    double const d = calcDistance(myGrid, rxGrid);
+                    if (d >= 0.0) {
+                        distKm = d;
+                        if (d > maxKm) maxKm = d;
+                    }
+                }
+
+                // DXCC: riusa il lookup cty.dat esistente.
+                QString dxccName;
+                if (m_dxccLookup && m_dxccLookup->isLoaded()) {
+                    DxccEntity const ent = m_dxccLookup->lookup(rxCall);
+                    dxccName = ent.name;
+                    if (!dxccName.isEmpty()) dxccSet.insert(dxccName);
+                }
+
+                QVariantMap row;
+                row.insert(QStringLiteral("call"), rxCall);
+                row.insert(QStringLiteral("grid"), rxGrid);
+                row.insert(QStringLiteral("snr"), hasSnr ? QVariant(snr) : QVariant());
+                row.insert(QStringLiteral("freq"), freqHz);
+                row.insert(QStringLiteral("distKm"), distKm);
+                row.insert(QStringLiteral("dxcc"), dxccName);
+                rows.append(row);
+            }
+            bridgeLog(QStringLiteral("PSK heard-by '%1': %2 ricevitori, %3 DXCC, maxKm=%4")
+                          .arg(call)
+                          .arg(rows.size())
+                          .arg(dxccSet.size())
+                          .arg(static_cast<int>(maxKm)));
+        } else {
+            bridgeLog(QStringLiteral("PSK heard-by '%1': network error: %2")
+                          .arg(call, errStr));
+        }
+
+        m_pskHeardByList = rows;
+        m_pskHeardByCount = static_cast<int>(rows.size());
+        m_pskHeardByDxccCount = static_cast<int>(dxccSet.size());
+        m_pskHeardByMaxKm = maxKm;
+        m_pskHeardByFetching = false;
+        emit pskHeardByChanged();
+        emit pskHeardByFetchingChanged();
+    });
+}
+
 bool DecodiumBridge::tryStartWaitPounceFromEntry(const QVariantMap& entry,
                                                  const QVariantList& previousEntries,
                                                  const QString& source)

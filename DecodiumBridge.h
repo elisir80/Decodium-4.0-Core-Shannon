@@ -242,6 +242,12 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString    pskSearchCallsign   READ pskSearchCallsign   NOTIFY pskSearchCallsignChanged)
     Q_PROPERTY(bool       pskSearching        READ pskSearching        NOTIFY pskSearchingChanged)
     Q_PROPERTY(QStringList pskSearchBands     READ pskSearchBands      NOTIFY pskSearchBandsChanged)
+    // DX-Pedition Mode Fase 3 — PSK Reporter "heard-by" (chi mi riceve nel mondo).
+    Q_PROPERTY(QVariantList pskHeardByList    READ pskHeardByList      NOTIFY pskHeardByChanged)
+    Q_PROPERTY(int        pskHeardByCount     READ pskHeardByCount     NOTIFY pskHeardByChanged)
+    Q_PROPERTY(int        pskHeardByDxccCount READ pskHeardByDxccCount NOTIFY pskHeardByChanged)
+    Q_PROPERTY(double     pskHeardByMaxKm     READ pskHeardByMaxKm     NOTIFY pskHeardByChanged)
+    Q_PROPERTY(bool       pskHeardByFetching  READ pskHeardByFetching  NOTIFY pskHeardByFetchingChanged)
     Q_PROPERTY(bool       pskReporterEnabled  READ pskReporterEnabled  WRITE setPskReporterEnabled  NOTIFY pskReporterEnabledChanged)
     Q_PROPERTY(bool       pskReporterConnected READ pskReporterConnected NOTIFY pskReporterConnectedChanged)
 
@@ -662,6 +668,11 @@ public:
     QString     pskSearchCallsign()    const { return m_pskSearchCallsign; }
     bool        pskSearching()         const { return m_pskSearching; }
     QStringList pskSearchBands()       const { return m_pskSearchBands; }
+    QVariantList pskHeardByList()      const { return m_pskHeardByList; }
+    int         pskHeardByCount()      const { return m_pskHeardByCount; }
+    int         pskHeardByDxccCount()  const { return m_pskHeardByDxccCount; }
+    double      pskHeardByMaxKm()      const { return m_pskHeardByMaxKm; }
+    bool        pskHeardByFetching()   const { return m_pskHeardByFetching; }
     bool        pskReporterEnabled()   const { return m_pskReporterEnabled; }
     void setPskReporterEnabled(bool v);
     bool        pskReporterConnected() const;
@@ -964,6 +975,9 @@ public:
     // PSK Reporter
     Q_INVOKABLE void searchPskReporter(const QString& callsign);
     Q_INVOKABLE void sendPskReporterNow();
+    // DX-Pedition Mode Fase 3 — fetch "heard-by" (chi riceve il MIO segnale).
+    // Async, riusa il pattern HTTP di searchPskReporter. Rate-limit 60s interno.
+    Q_INVOKABLE void fetchPskHeardBy();
 
     // LED
     Q_INVOKABLE void refreshLedStatus() {}
@@ -1347,6 +1361,8 @@ signals:
     void pskSearchCallsignChanged();
     void pskSearchingChanged();
     void pskSearchBandsChanged();
+    void pskHeardByChanged();
+    void pskHeardByFetchingChanged();
     void fontScaleChanged();
     void nfaChanged(); void nfbChanged();
     void ndepthChanged(); void ncontestChanged();
@@ -2004,6 +2020,13 @@ private:
     QString     m_pskSearchCallsign;
     bool        m_pskSearching {false};
     QStringList m_pskSearchBands {"160m","80m","40m","20m","15m","10m"};
+    // DX-Pedition Mode Fase 3 — "heard-by" state.
+    QVariantList m_pskHeardByList;
+    int          m_pskHeardByCount {0};
+    int          m_pskHeardByDxccCount {0};
+    double       m_pskHeardByMaxKm {0.0};
+    bool         m_pskHeardByFetching {false};
+    qint64       m_pskHeardByLastFetchMs {0};   // rate-limit guard (QDateTime msecs)
     bool        m_pskReporterEnabled {false};
     int         m_ftThreads {3};
     bool        m_lowCpuModeEnabled {false};

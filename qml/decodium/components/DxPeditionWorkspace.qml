@@ -396,15 +396,26 @@ Item {
                     }
                 }
 
-                // PSK Reporter — PLACEHOLDER (real feed in Fase 3).
+                // PSK Reporter — REAL "heard-by" feed (Fase 3).
+                // PSKReporterPanel reads the GLOBAL bridge; it self-fetches on
+                // activation + auto-refreshes (300s) only while visible.
                 DxPanel {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.preferredHeight: 1
                     Layout.verticalStretchFactor: 10  // 1fr
                     title: "PSK Reporter"
-                    meta: "phase 3"
-                    PanelStub { anchors.fill: parent; note: "PSK Reporter — phase 3" }
+                    meta: "heard-by"
+                    live: true
+                    Loader {
+                        anchors.fill: parent
+                        active: workspace.visible
+                        sourceComponent: pskReporterComp
+                    }
+                    Component {
+                        id: pskReporterComp
+                        PSKReporterPanel { anchors.fill: parent }
+                    }
                 }
             }
 
