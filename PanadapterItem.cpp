@@ -95,6 +95,13 @@ qint64 monotonicUs()
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+QString metricMs(qint64 us)
+{
+    if (us < 0)
+        return QStringLiteral("n/a");
+    return QString::number(static_cast<double>(us) / 1000.0, 'f', 2);
+}
+
 DecodiumBridge* diagnosticBridge()
 {
     QCoreApplication* app = QCoreApplication::instance();
@@ -1164,17 +1171,48 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
     connect(this, &QQuickItem::windowChanged, this, [this](QQuickWindow* win) {
         if (m_qsgMetricWindow == win)
             return;
-        if (m_qsgFrameConnection)
-            QObject::disconnect(m_qsgFrameConnection);
+        auto disconnectMetricSignal = [](QMetaObject::Connection& connection) {
+            if (connection) {
+                QObject::disconnect(connection);
+                connection = QMetaObject::Connection();
+            }
+        };
+        disconnectMetricSignal(m_qsgFrameConnection);
+        disconnectMetricSignal(m_qsgBeforeSyncConnection);
+        disconnectMetricSignal(m_qsgBeforeRenderConnection);
+        disconnectMetricSignal(m_qsgAfterRenderConnection);
         m_qsgMetricWindow = win;
-        m_qsgFrameConnection = QMetaObject::Connection();
         m_qsgFrameLastSwapUs = 0;
+        m_qsgBeforeSyncUs.store(0, std::memory_order_relaxed);
+        m_qsgBeforeRenderUs.store(0, std::memory_order_relaxed);
+        m_qsgAfterRenderUs.store(0, std::memory_order_relaxed);
+        m_qsgBeforeSyncCount.store(0, std::memory_order_relaxed);
+        m_qsgBeforeRenderCount.store(0, std::memory_order_relaxed);
+        m_qsgAfterRenderCount.store(0, std::memory_order_relaxed);
+        m_qsgLastBeforeSyncCount = 0;
+        m_qsgLastBeforeRenderCount = 0;
+        m_qsgLastAfterRenderCount = 0;
+        m_qsgLastSwapCount = 0;
+        m_qsgSwapCount = 0;
         if (!win)
             return;
+        m_qsgBeforeSyncConnection = connect(win, &QQuickWindow::beforeSynchronizing, this, [this]() {
+            m_qsgBeforeSyncUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgBeforeSyncCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
+        m_qsgBeforeRenderConnection = connect(win, &QQuickWindow::beforeRendering, this, [this]() {
+            m_qsgBeforeRenderUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgBeforeRenderCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
+        m_qsgAfterRenderConnection = connect(win, &QQuickWindow::afterRendering, this, [this]() {
+            m_qsgAfterRenderUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgAfterRenderCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
         m_qsgFrameConnection = connect(win, &QQuickWindow::frameSwapped, this, [this]() {
             qint64 const nowUs = monotonicUs();
+            ++m_qsgSwapCount;
             if (m_qsgFrameLastSwapUs > 0)
-                recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs);
+                recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs, nowUs);
             m_qsgFrameLastSwapUs = nowUs;
         });
     });
@@ -1184,6 +1222,12 @@ PanadapterItem::~PanadapterItem()
 {
     if (m_qsgFrameConnection)
         QObject::disconnect(m_qsgFrameConnection);
+    if (m_qsgBeforeSyncConnection)
+        QObject::disconnect(m_qsgBeforeSyncConnection);
+    if (m_qsgBeforeRenderConnection)
+        QObject::disconnect(m_qsgBeforeRenderConnection);
+    if (m_qsgAfterRenderConnection)
+        QObject::disconnect(m_qsgAfterRenderConnection);
     releaseGpuFftResources();
 }
 
@@ -1248,7 +1292,7 @@ void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
     m_paintMetricMaxUs = 0;
 }
 
-void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
+void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
 {
     constexpr qint64 kSpikeThresholdUs = 80000;
 
@@ -1257,6 +1301,43 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
     m_qsgFrameMetricAccumUs += frameUs;
     ++m_qsgFrameMetricSamples;
     m_qsgFrameMetricMaxUs = qMax(m_qsgFrameMetricMaxUs, static_cast<int>(qMin<qint64>(frameUs, std::numeric_limits<int>::max())));
+
+    int const beforeSyncCount = m_qsgBeforeSyncCount.load(std::memory_order_relaxed);
+    int const beforeRenderCount = m_qsgBeforeRenderCount.load(std::memory_order_relaxed);
+    int const afterRenderCount = m_qsgAfterRenderCount.load(std::memory_order_relaxed);
+    int const swapCount = m_qsgSwapCount;
+    int const beforeSyncDelta = beforeSyncCount - m_qsgLastBeforeSyncCount;
+    int const beforeRenderDelta = beforeRenderCount - m_qsgLastBeforeRenderCount;
+    int const afterRenderDelta = afterRenderCount - m_qsgLastAfterRenderCount;
+    int const swapDelta = swapCount - m_qsgLastSwapCount;
+    m_qsgLastBeforeSyncCount = beforeSyncCount;
+    m_qsgLastBeforeRenderCount = beforeRenderCount;
+    m_qsgLastAfterRenderCount = afterRenderCount;
+    m_qsgLastSwapCount = swapCount;
+
+    qint64 const previousSwapUs = swapUs - frameUs;
+    qint64 const beforeSyncUs = m_qsgBeforeSyncUs.load(std::memory_order_relaxed);
+    qint64 const beforeRenderUs = m_qsgBeforeRenderUs.load(std::memory_order_relaxed);
+    qint64 const afterRenderUs = m_qsgAfterRenderUs.load(std::memory_order_relaxed);
+    qint64 const idleUs = (beforeSyncUs >= previousSwapUs && beforeSyncUs <= swapUs)
+        ? beforeSyncUs - previousSwapUs : -1;
+    qint64 const syncUs = (beforeSyncUs > 0 && beforeRenderUs >= beforeSyncUs && beforeRenderUs <= swapUs)
+        ? beforeRenderUs - beforeSyncUs : -1;
+    qint64 const renderUs = (beforeRenderUs > 0 && afterRenderUs >= beforeRenderUs && afterRenderUs <= swapUs)
+        ? afterRenderUs - beforeRenderUs : -1;
+    qint64 const presentUs = (afterRenderUs > 0 && afterRenderUs <= swapUs)
+        ? swapUs - afterRenderUs : -1;
+    if (idleUs >= 0 && syncUs >= 0 && renderUs >= 0 && presentUs >= 0) {
+        ++m_qsgPhaseSamples;
+        m_qsgPhaseIdleAccumUs += idleUs;
+        m_qsgPhaseSyncAccumUs += syncUs;
+        m_qsgPhaseRenderAccumUs += renderUs;
+        m_qsgPhasePresentAccumUs += presentUs;
+        m_qsgPhaseIdleMaxUs = qMax(m_qsgPhaseIdleMaxUs, static_cast<int>(qMin<qint64>(idleUs, std::numeric_limits<int>::max())));
+        m_qsgPhaseSyncMaxUs = qMax(m_qsgPhaseSyncMaxUs, static_cast<int>(qMin<qint64>(syncUs, std::numeric_limits<int>::max())));
+        m_qsgPhaseRenderMaxUs = qMax(m_qsgPhaseRenderMaxUs, static_cast<int>(qMin<qint64>(renderUs, std::numeric_limits<int>::max())));
+        m_qsgPhasePresentMaxUs = qMax(m_qsgPhasePresentMaxUs, static_cast<int>(qMin<qint64>(presentUs, std::numeric_limits<int>::max())));
+    }
 
     qint64 const nowMs = monotonicMs();
     if (frameUs >= kSpikeThresholdUs) {
@@ -1271,6 +1352,12 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
             << "spikes=" << m_qsgFrameSpikeCount
             << "window_samples=" << m_qsgFrameMetricSamples
             << "window_max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
+            << "phase_idle_ms=" << metricMs(idleUs)
+            << "phase_sync_ms=" << metricMs(syncUs)
+            << "phase_render_ms=" << metricMs(renderUs)
+            << "phase_present_ms=" << metricMs(presentUs)
+            << "phase_counts="
+            << QStringLiteral("%1/%2/%3/%4").arg(beforeSyncDelta).arg(beforeRenderDelta).arg(afterRenderDelta).arg(swapDelta)
             << "paint_last_us=" << m_paintMetricLastUs
             << "paint_avg_us=" << paintAvgUs
             << "paint_max_us=" << m_paintMetricMaxUs
@@ -1309,10 +1396,32 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
         << "avg_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricAccumUs) / m_qsgFrameMetricSamples / 1000.0, 'f', 2)
         << "max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
         << "samples=" << m_qsgFrameMetricSamples;
+    if (m_qsgPhaseSamples > 0) {
+        qInfo().noquote()
+            << "[PANMETRIC] qsg_phase"
+            << "samples=" << m_qsgPhaseSamples
+            << "idle_avg_ms=" << metricMs(m_qsgPhaseIdleAccumUs / m_qsgPhaseSamples)
+            << "idle_max_ms=" << metricMs(m_qsgPhaseIdleMaxUs)
+            << "sync_avg_ms=" << metricMs(m_qsgPhaseSyncAccumUs / m_qsgPhaseSamples)
+            << "sync_max_ms=" << metricMs(m_qsgPhaseSyncMaxUs)
+            << "render_avg_ms=" << metricMs(m_qsgPhaseRenderAccumUs / m_qsgPhaseSamples)
+            << "render_max_ms=" << metricMs(m_qsgPhaseRenderMaxUs)
+            << "present_avg_ms=" << metricMs(m_qsgPhasePresentAccumUs / m_qsgPhaseSamples)
+            << "present_max_ms=" << metricMs(m_qsgPhasePresentMaxUs);
+    }
     m_qsgFrameMetricLastLogMs = nowMs;
     m_qsgFrameMetricAccumUs = 0;
     m_qsgFrameMetricSamples = 0;
     m_qsgFrameMetricMaxUs = 0;
+    m_qsgPhaseIdleAccumUs = 0;
+    m_qsgPhaseSyncAccumUs = 0;
+    m_qsgPhaseRenderAccumUs = 0;
+    m_qsgPhasePresentAccumUs = 0;
+    m_qsgPhaseSamples = 0;
+    m_qsgPhaseIdleMaxUs = 0;
+    m_qsgPhaseSyncMaxUs = 0;
+    m_qsgPhaseRenderMaxUs = 0;
+    m_qsgPhasePresentMaxUs = 0;
 }
 
 bool PanadapterItem::shaderWaterfallSupported()

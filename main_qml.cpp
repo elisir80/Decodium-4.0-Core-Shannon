@@ -43,6 +43,7 @@
 #include <cstdio>
 #include <clocale>
 #include <cstring>
+#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -199,6 +200,50 @@ static void logQtQuickGraphicsApi(QQuickWindow* window, const char* context)
 static void logFirstQuickWindowGraphicsApi(QQmlApplicationEngine& engine, const char* context)
 {
     logQtQuickGraphicsApi(firstQuickWindow(engine), context);
+}
+
+static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
+{
+    constexpr int kIntervalMs = 25;
+    constexpr qint64 kStallThresholdMs = 90;
+
+    auto* timer = new QTimer(parent);
+    timer->setObjectName(QStringLiteral("decodiumMainThreadWatchdog"));
+    timer->setTimerType(Qt::PreciseTimer);
+    timer->setInterval(kIntervalMs);
+
+    auto clock = std::make_shared<QElapsedTimer>();
+    clock->start();
+    auto lastNs = std::make_shared<qint64>(clock->nsecsElapsed());
+    auto stallCount = std::make_shared<int>(0);
+
+    QObject::connect(timer, &QTimer::timeout, parent,
+                     [clock, lastNs, stallCount, bridge]() {
+        qint64 const nowNs = clock->nsecsElapsed();
+        qint64 const deltaMs = (nowNs - *lastNs) / 1000000;
+        *lastNs = nowNs;
+        if (deltaMs < kStallThresholdMs)
+            return;
+
+        ++(*stallCount);
+        qInfo().noquote()
+            << "[MAINWATCH] event_loop_stall"
+            << "loop_ms=" << deltaMs
+            << "overrun_ms=" << qMax<qint64>(0, deltaMs - kIntervalMs)
+            << "threshold_ms=" << kStallThresholdMs
+            << "stalls=" << *stallCount
+            << "monitoring=" << (bridge && bridge->monitoring() ? 1 : 0)
+            << "tx=" << (bridge && bridge->transmitting() ? 1 : 0)
+            << "tune=" << (bridge && bridge->tuning() ? 1 : 0)
+            << "spectrum_visible=" << (bridge && bridge->spectrumVisible() ? 1 : 0)
+            << "fps_cap=" << (bridge ? bridge->spectrumFpsCap() : -1);
+    });
+
+    timer->start();
+    qInfo().noquote()
+        << "[MAINWATCH] event loop watchdog active"
+        << "interval_ms=" << kIntervalMs
+        << "threshold_ms=" << kStallThresholdMs;
 }
 
 #ifdef Q_OS_WIN
@@ -1613,6 +1658,8 @@ int main(int argc, char* argv[])
             app.quit();
         });
     }
+
+    installMainThreadWatchdog(&app, &bridge);
 
     int r = app.exec();
     g_shuttingDown.store(true, std::memory_order_relaxed);
