@@ -6957,6 +6957,15 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             onLoaded: {
                 item.bridge = bridge
                 item.engine = bridge
+                // Let the workspace exit the mode / open Settings (its EXIT + SETUP
+                // buttons) — the classic footer/menu is collapsed while DX-Ped is ON.
+                item.requestExitDxPedition.connect(function() {
+                    mainWindow.dxPeditionMode = false
+                    bridge.setSetting("uiDxPeditionMode", false)
+                })
+                item.requestOpenSettings.connect(function() {
+                    mainWindow.openSettingsDialog()
+                })
             }
         }
 

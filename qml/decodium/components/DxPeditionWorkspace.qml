@@ -18,6 +18,12 @@ Item {
     property var bridge: (typeof appEngine !== 'undefined' ? appEngine : null)
     property var engine: (typeof appEngine !== 'undefined' ? appEngine : null)
 
+    // Wired by Main.qml's Loader.onLoaded — let the user leave the mode or open
+    // Settings from inside the workspace (the classic footer/menu is collapsed here,
+    // so without these the user would be trapped). See Main.qml dxPeditionLoader.
+    signal requestExitDxPedition()
+    signal requestOpenSettings()
+
     // --- Theme token shortcuts (Fase 1) — NO hardcoded hex anywhere below ---------
     readonly property var tm: bridge ? bridge.themeManager : null
     readonly property color cAccent:     tm ? tm.accentColor   : "#19ff88"
@@ -250,7 +256,7 @@ Item {
                     }
                 }
 
-                // Mini toolbar (placeholder buttons — real actions wired in 2b).
+                // Mini toolbar. SETUP opens Settings; others are placeholders (2b).
                 RowLayout {
                     spacing: 6
                     Layout.alignment: Qt.AlignVCenter
@@ -271,7 +277,47 @@ Item {
                                 color: tbMA.containsMouse ? workspace.cAccent : workspace.cTextDim
                                 font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0
                             }
-                            MouseArea { id: tbMA; anchors.fill: parent; hoverEnabled: true }
+                            MouseArea {
+                                id: tbMA; anchors.fill: parent; hoverEnabled: true
+                                cursorShape: parent.modelData === "SETUP"
+                                             ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                onClicked: {
+                                    if (parent.modelData === "SETUP")
+                                        workspace.requestOpenSettings()
+                                }
+                            }
+                        }
+                    }
+
+                    // EXIT — leave DX-Pedition Mode and return to the classic layout.
+                    // Without this the user is trapped (classic footer/menu is hidden).
+                    Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        implicitWidth: exitTxt.implicitWidth + 22
+                        implicitHeight: 32
+                        radius: 6
+                        color: exitMA.containsMouse ? workspace.cHot : "transparent"
+                        border.color: workspace.cHot
+                        border.width: 1
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 5
+                            Text {
+                                text: "✕"
+                                color: exitMA.containsMouse ? workspace.cBg : workspace.cHot
+                                font.pixelSize: 12; font.bold: true
+                            }
+                            Text {
+                                id: exitTxt
+                                text: "EXIT"
+                                color: exitMA.containsMouse ? workspace.cBg : workspace.cHot
+                                font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0
+                            }
+                        }
+                        MouseArea {
+                            id: exitMA; anchors.fill: parent; hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: workspace.requestExitDxPedition()
                         }
                     }
                 }
