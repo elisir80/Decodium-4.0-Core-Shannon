@@ -207,6 +207,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double rigPowerWatts READ rigPowerWatts NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigSwr READ rigSwr NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigAlc READ rigAlc NOTIFY rigTelemetryChanged)  // 1.0.323 — ALC meter 0..100
+    // 1.0.324 — ALC auto-calibration (Fase 2)
+    Q_PROPERTY(int    alcTarget              READ alcTarget              WRITE setAlcTarget              NOTIFY alcTargetChanged)
+    Q_PROPERTY(bool   alcCalibrating         READ alcCalibrating                                         NOTIFY alcCalibratingChanged)
+    Q_PROPERTY(QString alcCalibrationStatus  READ alcCalibrationStatus                                   NOTIFY alcCalibrationStatusChanged)
     Q_PROPERTY(double processCpuUsage READ processCpuUsage NOTIFY processCpuUsageChanged)
     Q_PROPERTY(double processGpuUsage READ processGpuUsage NOTIFY processGpuUsageChanged)
     Q_PROPERTY(QString lastCatError READ lastCatError NOTIFY lastCatErrorChanged)
@@ -613,6 +617,11 @@ public:
     double rigPowerWatts() const { return m_rigPowerWatts; }
     double rigSwr() const { return m_rigSwr; }
     double rigAlc() const { return m_rigAlc; }
+    // 1.0.324 — ALC auto-calibration getters
+    int     alcTarget()             const { return m_alcTarget; }
+    bool    alcCalibrating()        const { return m_alcCalibrating; }
+    QString alcCalibrationStatus()  const { return m_alcCalStatus; }
+    void    setAlcTarget(int v);
     double processCpuUsage() const { return m_processCpuUsage; }
     double processGpuUsage() const { return m_processGpuUsage; }
     QString lastCatError() const { return m_lastCatError; }
@@ -877,6 +886,9 @@ public slots:
     Q_INVOKABLE void clearTxMessages();
     Q_INVOKABLE void startTune();      // tono continuo fino a stopTune()
     Q_INVOKABLE void stopTune();
+    // 1.0.324 — ALC auto-calibration (Fase 2)
+    Q_INVOKABLE void startAlcCalibration();
+    Q_INVOKABLE void cancelAlcCalibration();
     Q_INVOKABLE bool openAllTxtFolder() const;
     Q_INVOKABLE void halt();           // ferma TX e Tune immediatamente
     Q_INVOKABLE void haltWithReason(const QString& reason);
@@ -1305,6 +1317,10 @@ signals:
     void catRigNameChanged();
     void catModeChanged();
     void rigTelemetryChanged();
+    // 1.0.324 — ALC calibration signals
+    void alcTargetChanged();
+    void alcCalibratingChanged();
+    void alcCalibrationStatusChanged();
     void processCpuUsageChanged();
     void processGpuUsageChanged();
     void lastCatErrorChanged();
@@ -1480,6 +1496,7 @@ private slots:
     void onLegacyAudioSamples(QByteArray const& pcmSamples);
     void onAsyncDecodeTimer();   // FT2 turbo async ogni 100ms
     void regenerateTxMessages();  // auto-genera TX6 (CQ) e TX1-5 da callsign/grid/dxCall
+    void onAlcCalibrationTick(); // 1.0.324 — ALC calibration timer slot
     void processNextInQueue();   // mainwindow processNextInQueue: auto-handoff al prossimo caller
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
@@ -1929,6 +1946,16 @@ private:
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
     double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
+    // 1.0.324 — ALC auto-calibration state
+    int     m_alcTarget        {45};
+    bool    m_alcCalibrating   {false};
+    QString m_alcCalStatus;
+    QTimer* m_alcCalTimer      {nullptr};
+    double  m_alcEma           {0.0};
+    int     m_alcConvergeCount {0};
+    double  m_alcCalStartLevel {0.0};
+    qint64  m_alcCalStartMs    {0};
+    void    finishAlcCalibration(bool success, const QString& reason);
     double m_processCpuUsage {0.0};
     double m_processGpuUsage {-1.0};
     qint64 m_cpuPressureUntilMs {0};

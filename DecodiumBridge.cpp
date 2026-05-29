@@ -15103,6 +15103,146 @@ void DecodiumBridge::stopTune()
     resumeNonAudioTxWork(QStringLiteral("stopTune"));
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.0.324 — ALC AUTO-CALIBRATION (Fase 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+void DecodiumBridge::setAlcTarget(int v)
+{
+    int const clamped = qBound(20, v, 60);
+    if (m_alcTarget == clamped)
+        return;
+    m_alcTarget = clamped;
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    s.setValue(QStringLiteral("AlcTarget"), m_alcTarget);
+    emit alcTargetChanged();
+}
+
+void DecodiumBridge::startAlcCalibration()
+{
+    if (m_alcCalibrating)
+        return;
+
+    // Backend guard: solo hamlib connesso legge l'ALC
+    if (m_catBackend != QStringLiteral("hamlib") || !m_hamlibCat || !m_hamlibCat->connected()) {
+        m_alcCalStatus = QStringLiteral("ALC not available (Hamlib CAT must be connected)");
+        emit alcCalibrationStatusChanged();
+        return;
+    }
+
+    m_alcCalStartLevel  = m_txOutputLevel;
+    m_alcEma            = 0.0;
+    m_alcConvergeCount  = 0;
+    m_alcCalStartMs     = QDateTime::currentMSecsSinceEpoch();
+
+    m_alcCalibrating = true;
+    emit alcCalibratingChanged();
+    m_alcCalStatus = QStringLiteral("Calibrating...");
+    emit alcCalibrationStatusChanged();
+
+    if (!m_alcCalTimer) {
+        m_alcCalTimer = new QTimer(this);
+        m_alcCalTimer->setInterval(500);
+        connect(m_alcCalTimer, &QTimer::timeout, this, &DecodiumBridge::onAlcCalibrationTick);
+    }
+    m_alcCalTimer->start();
+
+    startTune();
+    bridgeLog(QStringLiteral("[ALC] calibration start target=%1 startLevel=%2")
+                  .arg(m_alcTarget)
+                  .arg(m_alcCalStartLevel, 0, 'f', 1));
+}
+
+void DecodiumBridge::onAlcCalibrationTick()
+{
+    qint64 const now = QDateTime::currentMSecsSinceEpoch();
+
+    // Timeout assoluto 20s
+    if (now - m_alcCalStartMs > 20000) {
+        finishAlcCalibration(false, QStringLiteral("timeout"));
+        return;
+    }
+
+    double const alc = m_rigAlc;
+
+    // EMA smussante (alpha=0.4 nuovo dato)
+    m_alcEma = (m_alcEma <= 0.0) ? alc : (0.6 * m_alcEma + 0.4 * alc);
+
+    // Se dopo >= 3 tick l'ALC è ancora ~0, la radio potrebbe non essere in TX
+    if ((now - m_alcCalStartMs) > 1500 && m_alcEma <= 0.5) {
+        bridgeLog(QStringLiteral("[ALC] tick: ALC ~0, waiting for TX"));
+        return;
+    }
+
+    double const err = m_alcEma - static_cast<double>(m_alcTarget);
+
+    // Deadband ±5
+    if (qAbs(err) <= 5.0) {
+        m_alcConvergeCount++;
+        if (m_alcConvergeCount >= 2) {
+            finishAlcCalibration(true, QString());
+        }
+        return;
+    }
+
+    m_alcConvergeCount = 0;
+
+    // Step proporzionale cappato ±20
+    // err > 0 → ALC troppo alto → abbassa drive (step > 0 → sottrai)
+    // err < 0 → ALC troppo basso → alza drive (step < 0 → sottrai un negativo = somma)
+    double const step     = qBound(-20.0, err * 2.0, 20.0);
+    double const oldLevel = m_txOutputLevel;
+    double const newLevel = qBound(5.0, oldLevel - step, 450.0);
+
+    bridgeLog(QStringLiteral("[ALC] tick alc=%1 ema=%2 target=%3 err=%4 level=%5->%6")
+                  .arg(alc,     0, 'f', 1)
+                  .arg(m_alcEma, 0, 'f', 1)
+                  .arg(m_alcTarget)
+                  .arg(err,     0, 'f', 1)
+                  .arg(oldLevel, 0, 'f', 1)
+                  .arg(newLevel, 0, 'f', 1));
+
+    setTxOutputLevel(newLevel);
+}
+
+void DecodiumBridge::finishAlcCalibration(bool success, const QString& reason)
+{
+    if (m_alcCalTimer)
+        m_alcCalTimer->stop();
+
+    stopTune();
+
+    m_alcCalibrating = false;
+    emit alcCalibratingChanged();
+
+    if (success) {
+        double const finalLevel = m_txOutputLevel;
+        double const finalAlc   = m_alcEma;
+        m_alcCalStatus = QStringLiteral("Calibration done: level %1 (ALC %2)")
+                             .arg(qRound(finalLevel))
+                             .arg(qRound(finalAlc));
+        // Persisti il livello TX nello store canonico (setTxOutputLevel non lo fa da solo)
+        QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        s.setValue(QStringLiteral("txOutputLevel"), finalLevel);
+        bridgeLog(QStringLiteral("[ALC] calibration OK level=%1 alc=%2")
+                      .arg(finalLevel, 0, 'f', 1)
+                      .arg(finalAlc,   0, 'f', 1));
+    } else {
+        setTxOutputLevel(m_alcCalStartLevel);
+        m_alcCalStatus = QStringLiteral("Calibration ") + reason
+                         + QStringLiteral(" — level restored");
+        bridgeLog(QStringLiteral("[ALC] calibration aborted: ") + reason);
+    }
+
+    emit alcCalibrationStatusChanged();
+}
+
+void DecodiumBridge::cancelAlcCalibration()
+{
+    if (m_alcCalibrating)
+        finishAlcCalibration(false, QStringLiteral("cancelled"));
+}
+
 void DecodiumBridge::halt()
 {
     haltWithReason(QStringLiteral("halt"));
@@ -22516,6 +22656,8 @@ void DecodiumBridge::loadSettings()
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
+    // 1.0.324 — ALC calibration target (default 45, range 20-60)
+    m_alcTarget = qBound(20, s.value(QStringLiteral("AlcTarget"), 45).toInt(), 60);
     // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
     m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G

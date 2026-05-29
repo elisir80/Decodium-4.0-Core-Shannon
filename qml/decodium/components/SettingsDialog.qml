@@ -2407,6 +2407,115 @@ Dialog {
                                 font.pixelSize: 11
                             }
                         }
+
+                        // ── ALC AUTO CALIBRATION (1.0.324) ──
+                        Text {
+                            text: qsTr("ALC AUTO CALIBRATION")
+                            color: secondaryCyan
+                            font.pixelSize: 12
+                            font.bold: true
+                            Layout.columnSpan: 4
+                            Layout.topMargin: 10
+                        }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                            height: 1
+                            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3)
+                        }
+
+                        Text {
+                            text: qsTr("ALC target:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                            ToolTip.visible: alcTargetHover.containsMouse
+                            ToolTip.delay: 600
+                            ToolTip.text: qsTr("ALC scale 0-100. Values >60 risk overdriving the PA. 45 is a conservative starting point.")
+                            HoverHandler { id: alcTargetHover }
+                        }
+                        SpinBox {
+                            id: alcTargetSpinBox
+                            from: 20
+                            to: 60
+                            value: bridge.alcTarget
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            onValueModified: bridge.setAlcTarget(value)
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            contentItem: Text {
+                                text: alcTargetSpinBox.value
+                                color: textPrimary
+                                font.pixelSize: controlFontSize
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            up.indicator: Rectangle {
+                                x: alcTargetSpinBox.mirrored ? 0 : parent.width - width
+                                width: 28; height: parent.height
+                                color: "transparent"
+                                Text { anchors.centerIn: parent; text: "+"; color: textPrimary; font.pixelSize: 14 }
+                            }
+                            down.indicator: Rectangle {
+                                x: alcTargetSpinBox.mirrored ? parent.width - width : 0
+                                width: 28; height: parent.height
+                                color: "transparent"
+                                Text { anchors.centerIn: parent; text: "-"; color: textPrimary; font.pixelSize: 14 }
+                            }
+                        }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+
+                        Text { text: ""; Layout.preferredWidth: 100 }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            spacing: 10
+
+                            Rectangle {
+                                id: alcCalBtn
+                                property bool calibrating: bridge.alcCalibrating
+                                width: 220; height: controlHeight; radius: 4
+                                color: calibrating
+                                       ? (alcCalMA.containsMouse ? Qt.rgba(1,0.5,0,0.3) : bgMedium)
+                                       : (alcCalMA.containsMouse ? Qt.rgba(1,0.6,0,0.3) : bgMedium)
+                                border.color: calibrating ? "#ff9800" : "#ff9800"
+                                ToolTip.visible: alcCalMA.containsMouse
+                                ToolTip.delay: 600
+                                ToolTip.text: qsTr("Transmits a tune carrier and auto-adjusts the TX audio level until the radio's ALC reaches the target. One-shot. Requires Hamlib CAT connected.")
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: alcCalBtn.calibrating
+                                          ? qsTr("Cancel calibration")
+                                          : qsTr("Calibrate ALC (transmits a carrier)")
+                                    color: "#ff9800"
+                                    font.pixelSize: 12
+                                    font.bold: alcCalBtn.calibrating
+                                }
+                                MouseArea {
+                                    id: alcCalMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (bridge.alcCalibrating)
+                                            bridge.cancelAlcCalibration()
+                                        else
+                                            bridge.startAlcCalibration()
+                                    }
+                                }
+                            }
+                        }
+
+                        Text { text: ""; Layout.preferredWidth: 100 }
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            text: bridge.alcCalibrationStatus
+                            visible: bridge.alcCalibrationStatus !== ""
+                            color: bridge.alcCalibrating ? "#ff9800" : (bridge.alcCalibrationStatus.indexOf("done") >= 0 ? accentGreen : "#f44336")
+                            font.pixelSize: 12
+                            wrapMode: Text.Wrap
+                        }
                     }
                 }
 
