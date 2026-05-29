@@ -2,7 +2,7 @@ name: Build Windows + SignPath Code Signing
 
 on:
   push:
-    tags: ['v*', '[0-9]*']
+    tags: ['v*']
   workflow_dispatch:
 
 env:
