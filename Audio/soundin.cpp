@@ -104,7 +104,9 @@ bool isReusableInputStream(QAudioSource const* stream)
     }
 
   QAudio::State const state = stream->state();
-  return state == QAudio::ActiveState || state == QAudio::IdleState;
+  return state == QAudio::ActiveState
+      || state == QAudio::IdleState
+      || state == QAudio::SuspendedState;
 }
 }
 
