@@ -142,14 +142,12 @@ void repairEmbeddedLegacyFt8TimingMigration(QSettings& settings)
     settings.setValue(repairMarker, true);
 }
 
-bool embeddedLegacyFastFt8TimingDisabled()
-{
-    return qEnvironmentVariableIntValue("DECODIUM_LEGACY_FT8_NORMAL_TIMING") != 0;
-}
-
 void applyEmbeddedLegacyFt8FastTimingMigration(QSettings& settings)
 {
 #if defined(Q_OS_MAC)
+    auto const embeddedLegacyFastFt8TimingDisabled = [] {
+        return qEnvironmentVariableIntValue("DECODIUM_LEGACY_FT8_NORMAL_TIMING") != 0;
+    };
     if (embeddedLegacyFastFt8TimingDisabled()) {
         return;
     }
