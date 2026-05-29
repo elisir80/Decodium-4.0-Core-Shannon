@@ -7,6 +7,8 @@ on:
 
 env:
   BUILD_TAG: ${{ github.run_number }}
+  HAMLIB_TAG: "4.7.0"
+  HAMLIB_VERSION: "4.7.0"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -55,45 +57,60 @@ jobs:
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-portaudio
             mingw-w64-x86_64-boost
-            unzip
 
-      - name: Install Hamlib pre-built binaries
+      - name: Restore Hamlib cache
+        id: hamlib-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}\.ci\hamlib-mingw64
+          key: windows-mingw64-hamlib-${{ env.HAMLIB_VERSION }}
+          restore-keys: |
+            windows-mingw64-hamlib-
+
+      - name: Build and install Hamlib
+        if: steps.hamlib-cache.outputs.cache-hit != 'true'
         run: |
-          # Hamlib non è in MSYS2, scarica i binari pre-compilati w64
-          curl -L -o hamlib-w64.zip https://github.com/Hamlib/Hamlib/releases/download/4.7.0/hamlib-w64-4.7.0.zip
-          mkdir -p /tmp/hamlib
-          unzip -o hamlib-w64.zip -d /tmp/hamlib
-          # La struttura dentro lo zip potrebbe avere una directory root
-          HAMLIB_DIR=$(find /tmp/hamlib -name "include" -type d | head -1 | xargs dirname)
-          echo "Hamlib extracted to: $HAMLIB_DIR"
-          ls "$HAMLIB_DIR"
-          # Copia headers e lib nel prefix MSYS2
-          cp -R "$HAMLIB_DIR"/include/* /mingw64/include/
-          # Le lib GCC (.dll.a) sono in lib/gcc/
-          cp "$HAMLIB_DIR"/lib/gcc/*.a /mingw64/lib/ 2>/dev/null || true
-          cp "$HAMLIB_DIR"/lib/gcc/*.dll.a /mingw64/lib/ 2>/dev/null || true
-          cp "$HAMLIB_DIR"/lib/*.a /mingw64/lib/ 2>/dev/null || true
-          cp "$HAMLIB_DIR"/bin/*.dll /mingw64/bin/ 2>/dev/null || true
-          cp "$HAMLIB_DIR"/bin/*.exe /mingw64/bin/ 2>/dev/null || true
-          # Crea pkg-config file
-          mkdir -p /mingw64/lib/pkgconfig
-          cat > /mingw64/lib/pkgconfig/hamlib.pc <<'PCEOF'
-          prefix=/mingw64
-          exec_prefix=${prefix}
-          libdir=${exec_prefix}/lib
-          includedir=${prefix}/include
-          Name: Hamlib
-          Description: Ham Radio Control Libraries
-          Version: 4.7.0
-          Libs: -L${libdir} -lhamlib
-          Cflags: -I${includedir}
-          PCEOF
-          echo "=== Hamlib installed ==="
-          ls -la /mingw64/lib/libhamlib* 2>/dev/null || echo "no hamlib in lib"
-          ls -la /mingw64/bin/libhamlib* 2>/dev/null || echo "no hamlib in bin"
-          ls /mingw64/include/hamlib/ 2>/dev/null || echo "no hamlib headers"
-          # Verifica che almeno la dll esista
-          test -f /mingw64/bin/libhamlib-4.dll || { echo "ERROR: libhamlib-4.dll not found"; exit 1; }
+          set -euo pipefail
+          HAMLIB_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/hamlib-mingw64"
+          mkdir -p "${HAMLIB_PREFIX}"
+          curl -fsSL -o "hamlib-${HAMLIB_VERSION}.tar.gz" \
+            "https://github.com/Hamlib/Hamlib/releases/download/${HAMLIB_TAG}/hamlib-${HAMLIB_VERSION}.tar.gz"
+          tar -xzf "hamlib-${HAMLIB_VERSION}.tar.gz"
+          cd "hamlib-${HAMLIB_VERSION}"
+          ./configure --prefix="${HAMLIB_PREFIX}" --disable-static --enable-shared
+          make -j"$(nproc)"
+          make install
+
+      - name: Save Hamlib cache
+        if: steps.hamlib-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}\.ci\hamlib-mingw64
+          key: windows-mingw64-hamlib-${{ env.HAMLIB_VERSION }}
+
+      - name: Export Hamlib environment
+        run: |
+          set -euo pipefail
+          HAMLIB_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/hamlib-mingw64"
+          HAMLIB_INCLUDE_DIR="${HAMLIB_PREFIX}/include"
+          HAMLIB_LIBRARY="$(find "${HAMLIB_PREFIX}/lib" -maxdepth 1 \( -name 'libhamlib*.dll.a' -o -name 'libhamlib*.a' -o -name 'libhamlib*.dll' \) | sort | head -n1)"
+          RIGCTL_EXE="${HAMLIB_PREFIX}/bin/rigctl"
+          RIGCTLD_EXE="${HAMLIB_PREFIX}/bin/rigctld"
+          RIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom"
+
+          test -f "${HAMLIB_INCLUDE_DIR}/hamlib/rig.h"
+          test -n "${HAMLIB_LIBRARY}"
+          test -x "${RIGCTL_EXE}"
+
+          echo "$(cygpath -w "${HAMLIB_PREFIX}/bin")" >> "${GITHUB_PATH}"
+          echo "HAMLIB_PREFIX=${HAMLIB_PREFIX}" >> "${GITHUB_ENV}"
+          echo "HAMLIB_INCLUDE_DIR=${HAMLIB_INCLUDE_DIR}" >> "${GITHUB_ENV}"
+          echo "HAMLIB_LIBRARY=${HAMLIB_LIBRARY}" >> "${GITHUB_ENV}"
+          echo "RIGCTL_EXE=${RIGCTL_EXE}" >> "${GITHUB_ENV}"
+          echo "RIGCTLD_EXE=${RIGCTLD_EXE}" >> "${GITHUB_ENV}"
+          echo "RIGCTLCOM_EXE=${RIGCTLCOM_EXE}" >> "${GITHUB_ENV}"
+          echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig" >> "${GITHUB_ENV}"
+          "${HAMLIB_PREFIX}/bin/rigctl" --version
 
       - name: Extract version from tag
         id: version
@@ -113,17 +130,13 @@ jobs:
           cmake --version
           ninja --version
           g++ --version
-          HAMLIB_LIBRARY="$(find /mingw64/lib -maxdepth 1 \( -name 'libhamlib*.dll.a' -o -name 'libhamlib*.a' \) | sort | head -n1)"
-          RIGCTL_EXE="$(command -v rigctl.exe || command -v rigctl)"
-          RIGCTLD_EXE="$(command -v rigctld.exe || command -v rigctld)"
-          RIGCTLCOM_EXE="$(command -v rigctlcom.exe || command -v rigctlcom)"
-          test -f /mingw64/include/hamlib/rig.h
+          test -f "${HAMLIB_INCLUDE_DIR}/hamlib/rig.h"
           test -n "${HAMLIB_LIBRARY}"
           test -x "${RIGCTL_EXE}"
           cmake -S . -B build-windows -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="/mingw64" \
-            -DHamlib_INCLUDE_DIR="/mingw64/include" \
+            -DCMAKE_PREFIX_PATH="${HAMLIB_PREFIX};/mingw64" \
+            -DHamlib_INCLUDE_DIR="${HAMLIB_INCLUDE_DIR}" \
             -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
             -DRIGCTLD_EXE="${RIGCTLD_EXE}" \
@@ -176,6 +189,7 @@ jobs:
                      libbrotlicommon libbrotlidec libzstd libcrypto-3-x64 libssl-3-x64; do
             [ -f "$QTDIR/bin/${dll}.dll" ] && cp "$QTDIR/bin/${dll}.dll" "$DIST/" 2>/dev/null || true
           done
+          cp "${HAMLIB_PREFIX}"/bin/libhamlib-*.dll "$DIST/" 2>/dev/null || true
 
           # ICU DLLs
           cp "$QTDIR"/bin/libicu*.dll "$DIST/" 2>/dev/null || true
