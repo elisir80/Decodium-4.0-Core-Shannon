@@ -116,6 +116,7 @@ public:
     QVector<QSGTexture*> retiredAtlasTextures;
     QVector<QSGSimpleTextureNode*> labelNodes;
     QVector<QSGTexture*> transientTextures;
+    QVector<QString> transientTextureKeys;
     QSGTexture* blankTexture {nullptr};
 };
 
@@ -2143,10 +2144,12 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         labelLayer->appendChildNode(node);
         labelLayer->labelNodes.push_back(node);
         labelLayer->transientTextures.push_back(nullptr);
+        labelLayer->transientTextureKeys.push_back(QString());
     }
     while (labelLayer->labelNodes.size() > displayLabels.size()) {
         auto* node = labelLayer->labelNodes.takeLast();
         QSGTexture* transientTexture = labelLayer->transientTextures.takeLast();
+        labelLayer->transientTextureKeys.takeLast();
         labelLayer->removeChildNode(node);
         delete node;
         delete transientTexture;
@@ -2166,17 +2169,27 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
                 node->setSourceRect(sourceRect);
                 node->setRect(label.rect);
                 labelLayer->transientTextures[i] = nullptr;
+                labelLayer->transientTextureKeys[i].clear();
                 delete oldTransientTexture;
             } else if (QSGTexture* blankTexture = labelBlankTexture(labelLayer, window())) {
                 node->setTexture(blankTexture);
                 node->setSourceRect(textureSourceRect(blankTexture));
                 node->setRect(QRectF());
                 labelLayer->transientTextures[i] = nullptr;
+                labelLayer->transientTextureKeys[i].clear();
                 delete oldTransientTexture;
             } else {
                 labelLayer->transientTextures[i] = oldTransientTexture;
                 node->setRect(QRectF());
             }
+            continue;
+        }
+
+        QString const transientKey = labelTextureKey(label.text, label.color);
+        if (oldTransientTexture && labelLayer->transientTextureKeys.value(i) == transientKey) {
+            node->setTexture(oldTransientTexture);
+            node->setSourceRect(textureSourceRect(oldTransientTexture));
+            node->setRect(label.rect);
             continue;
         }
 
@@ -2187,6 +2200,7 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             node->setSourceRect(textureSourceRect(replacementTexture));
             node->setRect(texture ? label.rect : QRectF());
             labelLayer->transientTextures[i] = texture;
+            labelLayer->transientTextureKeys[i] = texture ? transientKey : QString();
             delete oldTransientTexture;
         } else {
             labelLayer->transientTextures[i] = oldTransientTexture;
