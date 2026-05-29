@@ -512,7 +512,11 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
   if (!m_->is_dummy_)
     {
       // printf("Hamlib open params: power_on=%d power_off=%d ptt_share=%d\n",(params.poll_interval & rig__power) == rig__power,(params.poll_interval & rig__power_off) == rig__power_off,(params.poll_interval & ptt__share) == ptt__share);
-      if (params.poll_interval & do__pwr) { do_pwr_ = true; do_pwr2_ = true; do_swr_ = true; do_alc_ = true;}
+      if (params.poll_interval & do__pwr) { do_pwr_ = true; do_pwr2_ = true; do_swr_ = true; }
+      // ALC is needed by the one-shot audio calibration even when the user has
+      // not enabled the visible PWR/SWR telemetry widget. We only read it while
+      // TX/PTT is active, so RX polling stays cheap.
+      do_alc_ = true;
 
       switch (rig_get_caps_int (m_->model_, RIG_CAPS_PORT_TYPE))
         {
@@ -722,7 +726,7 @@ int HamlibTransceiver::do_start ()
   m_->tickle_hamlib_ = false;
   m_->get_vfo_works_ = true;
   m_->set_vfo_works_ = true;
-  bool const requestedPowerSwrPolling = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
+  bool const requestedTransmitTelemetry = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
   bool const hasGetLevelFunction = !m_->is_dummy_ && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_LEVEL);
   setting_t const getLevelCaps = !m_->is_dummy_ ? static_cast<setting_t>(rig_get_caps_int (m_->model_, RIG_CAPS_HAS_GET_LEVEL)) : 0; // 1.0.326 B1: was int (32-bit truncation; RIG_LEVEL_RFPOWER_METER_WATTS is bit 39)
   bool const hasRfPowerMeterWatts = hasGetLevelFunction
@@ -739,10 +743,10 @@ int HamlibTransceiver::do_start ()
   do_pwr2_ &= hasRfPower;
   do_swr_ &= hasSwr;
   do_alc_ &= hasAlc;
-  if (requestedPowerSwrPolling)
+  if (requestedTransmitTelemetry)
     {
       qInfo ().noquote ()
-        << "[CATDBG] Hamlib PWR/SWR polling support"
+        << "[CATDBG] Hamlib TX telemetry polling support"
         << "rig=" << rig_get_caps_cptr (m_->model_, RIG_CAPS_MODEL_NAME_CPTR)
         << "model=" << m_->model_
         << "getLevel=" << hasGetLevelFunction
@@ -1465,7 +1469,7 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
 
 void HamlibTransceiver::schedule_transmit_telemetry_burst ()
 {
-  if (!do_pwr_ && !do_pwr2_ && !do_swr_)
+  if (!do_pwr_ && !do_pwr2_ && !do_swr_ && !do_alc_)
     {
       return;
     }
