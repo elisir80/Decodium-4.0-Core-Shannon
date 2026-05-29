@@ -2506,15 +2506,24 @@ Dialog {
                             }
                         }
 
-                        Text { text: ""; Layout.preferredWidth: 100 }
-                        Text {
+                        // 1.0.325 — status label ALC: riga dedicata a tutta larghezza
+                        RowLayout {
                             Layout.fillWidth: true
-                            Layout.columnSpan: 3
-                            text: bridge.alcCalibrationStatus
+                            Layout.columnSpan: 4
+                            Layout.minimumHeight: bridge.alcCalibrationStatus !== "" ? controlHeight : 0
                             visible: bridge.alcCalibrationStatus !== ""
-                            color: bridge.alcCalibrating ? "#ff9800" : (bridge.alcCalibrationStatus.indexOf("done") >= 0 ? accentGreen : "#f44336")
-                            font.pixelSize: 12
-                            wrapMode: Text.Wrap
+                            spacing: 0
+                            Text {
+                                Layout.fillWidth: true
+                                text: bridge.alcCalibrationStatus
+                                color: bridge.alcCalibrating
+                                       ? "#ff9800"
+                                       : (bridge.alcCalibrationStatus.indexOf("Calibration done") >= 0
+                                          ? accentGreen
+                                          : "#f44336")
+                                font.pixelSize: 12
+                                wrapMode: Text.Wrap
+                            }
                         }
                     }
                 }

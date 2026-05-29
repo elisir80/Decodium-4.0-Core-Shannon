@@ -1953,6 +1953,7 @@ private:
     QTimer* m_alcCalTimer      {nullptr};
     double  m_alcEma           {0.0};
     int     m_alcConvergeCount {0};
+    int     m_alcStuckCount    {0};   // 1.0.325 — saturazione: tick consecutivi con level clampato
     double  m_alcCalStartLevel {0.0};
     qint64  m_alcCalStartMs    {0};
     void    finishAlcCalibration(bool success, const QString& reason);

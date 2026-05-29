@@ -15133,6 +15133,7 @@ void DecodiumBridge::startAlcCalibration()
     m_alcCalStartLevel  = m_txOutputLevel;
     m_alcEma            = 0.0;
     m_alcConvergeCount  = 0;
+    m_alcStuckCount     = 0;   // 1.0.325
     m_alcCalStartMs     = QDateTime::currentMSecsSinceEpoch();
 
     m_alcCalibrating = true;
@@ -15157,8 +15158,8 @@ void DecodiumBridge::onAlcCalibrationTick()
 {
     qint64 const now = QDateTime::currentMSecsSinceEpoch();
 
-    // Timeout assoluto 20s
-    if (now - m_alcCalStartMs > 20000) {
+    // Timeout assoluto 12s (ridotto da 20s in 1.0.325 — saturazione viene rilevata in ~1.5s)
+    if (now - m_alcCalStartMs > 12000) {
         finishAlcCalibration(false, QStringLiteral("timeout"));
         return;
     }
@@ -15202,6 +15203,23 @@ void DecodiumBridge::onAlcCalibrationTick()
                   .arg(oldLevel, 0, 'f', 1)
                   .arg(newLevel, 0, 'f', 1));
 
+    // 1.0.325 — rilevamento saturazione: il clamp ha bloccato newLevel = oldLevel
+    // ma siamo fuori deadband → drive fisicamente al limite, non convergerà mai
+    if (qFuzzyCompare(newLevel, oldLevel) && qAbs(err) > 5.0) {
+        m_alcStuckCount++;
+        if (m_alcStuckCount >= 3) {
+            // Distingui saturazione alta (maxDrive) da bassa (minDrive)
+            if (oldLevel >= 449.0) {
+                finishAlcCalibration(false, QStringLiteral("max-drive"));
+            } else {
+                finishAlcCalibration(false, QStringLiteral("min-drive"));
+            }
+            return;
+        }
+    } else {
+        m_alcStuckCount = 0;   // correzione reale applicata, reset contatore
+    }
+
     setTxOutputLevel(newLevel);
 }
 
@@ -15229,8 +15247,23 @@ void DecodiumBridge::finishAlcCalibration(bool success, const QString& reason)
                       .arg(finalAlc,   0, 'f', 1));
     } else {
         setTxOutputLevel(m_alcCalStartLevel);
-        m_alcCalStatus = QStringLiteral("Calibration ") + reason
-                         + QStringLiteral(" — level restored");
+        // 1.0.325 — messaggi dettagliati per saturazione fisica
+        if (reason == QStringLiteral("max-drive")) {
+            m_alcCalStatus = QString(QStringLiteral(
+                "Drive al massimo ma ALC solo %1 (target %2). "
+                "Alza il MIC/USB GAIN sulla radio, oppure abbassa il target."))
+                    .arg(qRound(m_alcEma))
+                    .arg(m_alcTarget);
+        } else if (reason == QStringLiteral("min-drive")) {
+            m_alcCalStatus = QString(QStringLiteral(
+                "Drive al minimo ma ALC ancora %1 (target %2). "
+                "Abbassa il MIC/USB GAIN sulla radio, oppure alza il target."))
+                    .arg(qRound(m_alcEma))
+                    .arg(m_alcTarget);
+        } else {
+            m_alcCalStatus = QStringLiteral("Calibration ") + reason
+                             + QStringLiteral(" — level restored");
+        }
         bridgeLog(QStringLiteral("[ALC] calibration aborted: ") + reason);
     }
 
