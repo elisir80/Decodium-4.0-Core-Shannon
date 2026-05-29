@@ -28574,6 +28574,7 @@ void DecodiumBridge::onSpectrumTimer()
                 }
 
                 m_lastPanadapterFrameMs = nowMs;
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
                 if (m_panadapterItem) {
                     bool const accepted = m_panadapterItem->addPcmFrameI16(m_wfRing,
                                                                            WF_RING_SIZE,
@@ -28596,6 +28597,7 @@ void DecodiumBridge::onSpectrumTimer()
                     }
                     return;
                 }
+#endif
 
                 QVector<float> pcmFrame(fftLen, 0.0f);
                 for (int i = 0; i < firstChunk; ++i)

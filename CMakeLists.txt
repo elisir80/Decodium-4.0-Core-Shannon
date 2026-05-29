@@ -1632,7 +1632,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread -Wno-error=array-bounds")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
-target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND)
+target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
 target_compile_options (decodium_qml PRIVATE -Wno-deprecated-declarations)
 target_include_directories (decodium_qml PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
