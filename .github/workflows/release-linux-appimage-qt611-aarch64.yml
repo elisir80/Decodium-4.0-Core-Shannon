@@ -112,14 +112,17 @@ jobs:
             libx11-dev \
             libx11-xcb-dev \
             libxcb-cursor-dev \
+            libxcb-glx0-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-keysyms1-dev \
             libxcb-randr0-dev \
+            libxcb-render0-dev \
             libxcb-render-util0-dev \
             libxcb-shape0-dev \
             libxcb-shm0-dev \
             libxcb-sync-dev \
+            libxcb-util-dev \
             libxcb-xfixes0-dev \
             libxcb-xinerama0-dev \
             libxcb1-dev \
@@ -153,7 +156,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.QT_CACHE_ROOT }}
-          key: linux-aarch64-qt-${{ env.QT_VERSION }}-source-v1
+          key: linux-aarch64-qt-${{ env.QT_VERSION }}-source-xcb-v2
 
       - name: Build Qt 6.11 from source
         run: |
@@ -178,6 +181,7 @@ jobs:
               -release \
               -nomake examples \
               -nomake tests \
+              -feature-xcb \
               -submodules qtbase,qtshadertools,qtdeclarative,qtsvg,qtimageformats,qtmultimedia,qtserialport,qtwebsockets,qt5compat,qttools
 
             cmake --build . --parallel "$(nproc)"
@@ -191,6 +195,12 @@ jobs:
           echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "${GITHUB_ENV}"
           "${QT_PREFIX}/bin/qmake6" -v
           test "$("${QT_PREFIX}/bin/qmake6" -query QT_VERSION)" = "${QT_VERSION}"
+          if [[ ! -f "${QT_PREFIX}/plugins/platforms/libqxcb.so" ]]; then
+            echo "::error::Qt ${QT_VERSION} aarch64 build did not produce plugins/platforms/libqxcb.so"
+            find "${QT_PREFIX}/plugins" -maxdepth 3 -type f | sort || true
+            exit 1
+          fi
+          ls -l "${QT_PREFIX}/plugins/platforms/libqxcb.so"
 
       - name: Restore Hamlib cache
         id: hamlib-cache
