@@ -157,6 +157,7 @@ static QString extractRightCallsign(const QString& msg);
 
 static constexpr int kDefaultTxWatchdogMinutes = 6;
 static constexpr int kDefaultTxWatchdogCount = 3;
+static constexpr int kLegacyBridgeAudioAfterAsyncPttDelayMs = 125;
 
 static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
@@ -4241,6 +4242,27 @@ static inline void activeCatSetTxPtt(DecodiumCatManager* n, DecodiumTransceiverM
     activeCatSetPtt(n, h, b, on, o, legacy);
 }
 
+static inline bool activeCatSetTxPttAsync(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
+                                          bool on, double txDialHz,
+                                          DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+{
+    if (on && txDialHz > 0.0 && isHamlibFamilyBackend(b) && h
+        && !useLegacyRigControlFallback(legacy, b)) {
+        qDebug().noquote()
+            << "[CATDBG] Hamlib async Fake-It/Split PTT"
+            << "backend=" << b.trimmed().toLower()
+            << "on=" << on
+            << "txDialHz=" << QString::number(txDialHz, 'f', 0);
+        h->setRigTxFrequencyAndPttAsync(txDialHz, true);
+        return true;
+    }
+
+    Q_UNUSED(n)
+    Q_UNUSED(o)
+    Q_UNUSED(legacy)
+    return false;
+}
+
 static inline void activeCatSetFreq(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b, double hz,
                                     DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
 {
@@ -7476,19 +7498,29 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                         }
                         QElapsedTimer catTimer;
                         catTimer.start();
-                        activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
-                                          enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        bool const useAsyncPtt =
+                            enabled && shouldUseBridgeAudioForLegacyDigitalTx();
+                        bool const asyncPtt = useAsyncPtt
+                            && activeCatSetTxPttAsync(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                      enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        if (!asyncPtt) {
+                            activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                              enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        }
                         qint64 const catMs = catTimer.elapsed();
-                        txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-on on=%1 total_ms=%2 sync_ms=%3 cat_ms=%4 backend=%5 txDialHz=%6")
+                        int const audioDelayMs = asyncPtt ? kLegacyBridgeAudioAfterAsyncPttDelayMs : 0;
+                        txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-on on=%1 total_ms=%2 sync_ms=%3 cat_ms=%4 backend=%5 txDialHz=%6 async=%7 audio_delay_ms=%8")
                                       .arg(enabled ? 1 : 0)
                                       .arg(pttTimer.elapsed())
                                       .arg(syncMs)
                                       .arg(catMs)
                                       .arg(m_catBackend)
-                                      .arg(txDialHz, 0, 'f', 0));
+                                      .arg(txDialHz, 0, 'f', 0)
+                                      .arg(asyncPtt ? 1 : 0)
+                                      .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                         if (enabled && shouldUseBridgeAudioForLegacyDigitalTx()) {
-                            QTimer::singleShot(0, this, [this]() {
+                            QTimer::singleShot(audioDelayMs, this, [this]() {
                                 syncLegacyBackendState();
                                 if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-on"))) {
                                     bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed, stopping legacy TX"));
@@ -7523,19 +7555,29 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                     double const txDialHz = catSplitTxDialFrequencyHz();
                                     QElapsedTimer catTimer;
                                     catTimer.start();
-                                    activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
-                                                      true, txDialHz,
-                                                      m_omniRigCat, m_legacyBackend);
+                                    bool const useAsyncPtt = shouldUseBridgeAudioForLegacyDigitalTx();
+                                    bool const asyncPtt = useAsyncPtt
+                                        && activeCatSetTxPttAsync(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                                  true, txDialHz,
+                                                                  m_omniRigCat, m_legacyBackend);
+                                    if (!asyncPtt) {
+                                        activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                          true, txDialHz,
+                                                          m_omniRigCat, m_legacyBackend);
+                                    }
                                     qint64 const catMs = catTimer.elapsed();
-                                    txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-delayed on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 txDialHz=%5")
+                                    int const audioDelayMs = asyncPtt ? kLegacyBridgeAudioAfterAsyncPttDelayMs : 0;
+                                    txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-delayed on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 txDialHz=%5 async=%6 audio_delay_ms=%7")
                                                   .arg(pttTimer.elapsed())
                                                   .arg(syncMs)
                                                   .arg(catMs)
                                                   .arg(m_catBackend)
-                                                  .arg(txDialHz, 0, 'f', 0));
+                                                  .arg(txDialHz, 0, 'f', 0)
+                                                  .arg(asyncPtt ? 1 : 0)
+                                                  .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                                     if (shouldUseBridgeAudioForLegacyDigitalTx()) {
-                                        QTimer::singleShot(0, this, [this]() {
+                                        QTimer::singleShot(audioDelayMs, this, [this]() {
                                             syncLegacyBackendState();
                                             if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-delayed"))) {
                                                 bridgeLog(QStringLiteral("legacyPttRequested: delayed bridge TX audio failed, stopping legacy TX"));
