@@ -95,6 +95,13 @@ qint64 monotonicUs()
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+DecodiumBridge* diagnosticBridge()
+{
+    QCoreApplication* app = QCoreApplication::instance();
+    QObject* bridgeObject = app ? app->property("decodiumBridge").value<QObject*>() : nullptr;
+    return qobject_cast<DecodiumBridge*>(bridgeObject);
+}
+
 class ScopeExit
 {
 public:
@@ -1185,9 +1192,11 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
                                          int clusterLabels,
                                          const QSize& size)
 {
-    m_overlayMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    m_overlayMetricLastUs = safeElapsedUs;
+    m_overlayMetricAccumUs += safeElapsedUs;
     ++m_overlayMetricSamples;
-    m_overlayMetricMaxUs = qMax(m_overlayMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+    m_overlayMetricMaxUs = qMax(m_overlayMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
     m_overlayMetricDecodeLabels = decodeLabels;
     m_overlayMetricClusterLabels = clusterLabels;
     m_overlayMetricSize = size;
@@ -1214,9 +1223,11 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
 
 void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
 {
-    m_paintMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    m_paintMetricLastUs = safeElapsedUs;
+    m_paintMetricAccumUs += safeElapsedUs;
     ++m_paintMetricSamples;
-    m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+    m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
 
     qint64 const nowMs = monotonicMs();
     if (m_paintMetricLastLogMs == 0)
@@ -1239,6 +1250,8 @@ void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
 
 void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
 {
+    constexpr qint64 kSpikeThresholdUs = 80000;
+
     if (frameUs <= 0)
         return;
     m_qsgFrameMetricAccumUs += frameUs;
@@ -1246,6 +1259,46 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
     m_qsgFrameMetricMaxUs = qMax(m_qsgFrameMetricMaxUs, static_cast<int>(qMin<qint64>(frameUs, std::numeric_limits<int>::max())));
 
     qint64 const nowMs = monotonicMs();
+    if (frameUs >= kSpikeThresholdUs) {
+        ++m_qsgFrameSpikeCount;
+        DecodiumBridge* bridge = diagnosticBridge();
+        qint64 const paintAvgUs = m_paintMetricSamples > 0 ? (m_paintMetricAccumUs / m_paintMetricSamples) : 0;
+        qint64 const overlayAvgUs = m_overlayMetricSamples > 0 ? (m_overlayMetricAccumUs / m_overlayMetricSamples) : 0;
+        qInfo().noquote()
+            << "[PANMETRIC] qsg_frame_spike"
+            << "frame_ms=" << QString::number(static_cast<double>(frameUs) / 1000.0, 'f', 2)
+            << "threshold_ms=" << QString::number(static_cast<double>(kSpikeThresholdUs) / 1000.0, 'f', 0)
+            << "spikes=" << m_qsgFrameSpikeCount
+            << "window_samples=" << m_qsgFrameMetricSamples
+            << "window_max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
+            << "paint_last_us=" << m_paintMetricLastUs
+            << "paint_avg_us=" << paintAvgUs
+            << "paint_max_us=" << m_paintMetricMaxUs
+            << "paint_samples=" << m_paintMetricSamples
+            << "overlay_last_us=" << m_overlayMetricLastUs
+            << "overlay_avg_us=" << overlayAvgUs
+            << "overlay_max_us=" << m_overlayMetricMaxUs
+            << "overlay_samples=" << m_overlayMetricSamples
+            << "decode_labels=" << m_overlayMetricDecodeLabels
+            << "cluster_labels=" << m_overlayMetricClusterLabels
+            << "overlay_size=" << QStringLiteral("%1x%2").arg(m_overlayMetricSize.width()).arg(m_overlayMetricSize.height())
+            << "running=" << (m_running ? 1 : 0)
+            << "throttle=" << (m_throttleActive ? 1 : 0)
+            << "throttle_ms=" << m_throttleIntervalMs
+            << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
+            << "waterfall_rows=" << m_renderWaterfallHistoryRows
+            << "pending_rows=" << m_pendingWaterfallRows.size()
+            << "spectrum_dirty=" << (m_spectrumDirty ? 1 : 0)
+            << "overlay_dirty=" << (m_spectrumOverlayDirty ? 1 : 0)
+            << "geometry_dirty=" << (m_geometryDirty ? 1 : 0)
+            << "item_size=" << QStringLiteral("%1x%2").arg(qRound(width())).arg(qRound(height()))
+            << "bridge_monitoring=" << (bridge && bridge->monitoring() ? 1 : 0)
+            << "bridge_tx=" << (bridge && bridge->transmitting() ? 1 : 0)
+            << "bridge_tune=" << (bridge && bridge->tuning() ? 1 : 0)
+            << "bridge_spectrum_visible=" << (bridge && bridge->spectrumVisible() ? 1 : 0)
+            << "bridge_fps_cap=" << (bridge ? bridge->spectrumFpsCap() : -1);
+    }
+
     if (m_qsgFrameMetricLastLogMs == 0)
         m_qsgFrameMetricLastLogMs = nowMs;
     if (nowMs - m_qsgFrameMetricLastLogMs < 10000 || m_qsgFrameMetricSamples <= 0)

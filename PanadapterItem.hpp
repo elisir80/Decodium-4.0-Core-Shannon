@@ -404,10 +404,12 @@ private:
     qint64 m_qsgFrameMetricAccumUs = 0;
     int    m_qsgFrameMetricSamples = 0;
     int    m_qsgFrameMetricMaxUs = 0;
+    int    m_qsgFrameSpikeCount = 0;
     qint64 m_overlayMetricLastLogMs = 0;
     qint64 m_overlayMetricAccumUs = 0;
     int    m_overlayMetricSamples = 0;
     int    m_overlayMetricMaxUs = 0;
+    qint64 m_overlayMetricLastUs = 0;
     int    m_overlayMetricDecodeLabels = 0;
     int    m_overlayMetricClusterLabels = 0;
     QSize  m_overlayMetricSize;
@@ -415,6 +417,7 @@ private:
     qint64 m_paintMetricAccumUs = 0;
     int    m_paintMetricSamples = 0;
     int    m_paintMetricMaxUs = 0;
+    qint64 m_paintMetricLastUs = 0;
     qint64 m_decodeLabelMetricLastLogMs = 0;
     struct GpuFftState;
     GpuFftState* m_gpuFft = nullptr;
