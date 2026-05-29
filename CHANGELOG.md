@@ -1,5 +1,57 @@
 # Changelog / Registro Modifiche
 
+## [1.0.332] - 2026-05-29
+
+### Italiano
+
+Release focalizzata sulla stabilita' macOS Apple Silicon, sulla riduzione degli stalli audio/UI e sulla robustezza dei percorsi GPU di panadapter, waterfall e LiveMap.
+
+#### Aggiunto
+
+- Aggiunta una cache debounced dei dispositivi audio Qt per evitare enumerazioni ripetute su startup, wake e cambio dispositivo.
+- Aggiunta strumentazione piu' leggibile per timeline audio/TX, stalli main-thread e fasi QSG.
+- Aggiunta una texture fallback 1x1 per i layer LiveMap quando la texture reale non e' ancora pronta.
+
+#### Modificato
+
+- `SoundInput` ora esegue start, stop, suspend, resume, reset e gain sul proprio thread, riducendo il lavoro CoreAudio/Qt Multimedia sul thread UI.
+- Il TX audio macOS riusa il sink CoreAudio quando possibile e lo mantiene caldo/silenziato fra un TX e il successivo.
+- Il percorso GPU panadapter/waterfall ritira le texture QRhi in modo differito e rilascia risorse nello stage corretto del render thread.
+- Il detach della finestra waterfall viene differito al giro Qt successivo per evitare collisioni con la sincronizzazione QSG.
+- Metadati locali, installer Windows e workflow macOS legacy sono allineati alla versione `1.0.332`.
+
+#### Corretto
+
+- Mitigato il crash CoreAudio in `AudioObjectRemovePropertyListenerBlock` / `QCoreAudioSinkStream::stopAudioUnit()` visto dopo fine TX o cambio stato audio.
+- Mitigato il crash QSGRenderThread in `WorldMapGpuItem::updatePaintNode()` causato da `QSGSimpleTextureNode::setTexture(nullptr)`.
+- Corretta la gestione delle label decode native sul waterfall quando l'overlay C++/GPU e' attivo, mantenendo leggibilita' e click sugli spot DX.
+- Migliorata la leggibilita' dell'overlay panadapter con testo piu' netto e fallback texture sempre valido.
+
+### English
+
+Release focused on macOS Apple Silicon stability, lower audio/UI stalls, and stronger GPU paths for the panadapter, waterfall, and LiveMap.
+
+#### Added
+
+- Added a debounced Qt audio-device cache to avoid repeated device enumeration during startup, wake, and device changes.
+- Added clearer timeline instrumentation for audio/TX, main-thread stalls, and QSG frame phases.
+- Added a 1x1 fallback texture for LiveMap layers while the real map texture is not ready.
+
+#### Changed
+
+- `SoundInput` now runs start, stop, suspend, resume, reset, and gain changes on its owner thread.
+- macOS TX audio now reuses the CoreAudio sink where possible and keeps it warm/muted between transmit cycles.
+- The GPU panadapter/waterfall path now retires QRhi textures defensively and releases GPU resources in the render-thread stage.
+- Waterfall pop-out activation is deferred to the next Qt turn to avoid QSG synchronization collisions.
+- Local version metadata, Windows installers, and the legacy macOS workflow are aligned to `1.0.332`.
+
+#### Fixed
+
+- Mitigated the CoreAudio crash in `AudioObjectRemovePropertyListenerBlock` / `QCoreAudioSinkStream::stopAudioUnit()` after TX finish or audio state changes.
+- Mitigated the QSG render-thread crash in `WorldMapGpuItem::updatePaintNode()` caused by `QSGSimpleTextureNode::setTexture(nullptr)`.
+- Fixed native decode-label handling on the waterfall while the C++/GPU overlay is active, keeping labels readable and DX spot clicks available.
+- Improved panadapter overlay readability and ensured sampled shader textures always have a valid fallback.
+
 ## [1.6.0] - 2026-04-03
 
 ### English

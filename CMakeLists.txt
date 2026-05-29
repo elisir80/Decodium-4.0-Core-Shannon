@@ -1632,7 +1632,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread -Wno-error=array-bounds")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
-target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND)
+target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
 target_compile_options (decodium_qml PRIVATE -Wno-deprecated-declarations)
 target_include_directories (decodium_qml PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -1740,12 +1740,24 @@ if (Qt6ShaderTools_FOUND)
       shaders/livemap_path.vert
       shaders/livemap_path.frag
   )
+	  qt_add_shaders(decodium_qml decodium_livemap_arrow_shader
+	    PREFIX
+	      "/shaders"
+	    BASE
+	      "shaders"
+	    GLSL
+	      "120,150,310 es,330,440"
+    FILES
+      shaders/livemap_arrow.vert
+      shaders/livemap_arrow.frag
+  )
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_WATERFALL_SHADER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_FFT_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_SPECTRUM_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_GREYLINE_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_MARKER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_PATH_QSB=1)
+  target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_ARROW_QSB=1)
   file (WRITE "${CMAKE_BINARY_DIR}/decodium_qsb_shaders.enabled" "1\n")
 else ()
   file (WRITE "${CMAKE_BINARY_DIR}/decodium_qsb_shaders.enabled" "0\n")

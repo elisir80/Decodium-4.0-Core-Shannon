@@ -276,7 +276,7 @@ Item {
             })
         }
         waterfallPanel.spectrumDecodeLabels = labels
-        waterfallDisplay.setDecodeLabels(labels)
+        waterfallDisplay.setDecodeLabels([])
     }
 
     Timer {
@@ -952,6 +952,7 @@ Item {
                 clip: true
                 visible: waterfallDisplay.spectrumGpuOverlayAvailable && height > 0
                 readonly property bool cppOverlayEnabled: waterfallDisplay.spectrumGpuOverlayAvailable
+                readonly property bool nativeDecodeLabelsEnabled: true
 
                 readonly property string fixedFontFamily: decodiumMonoFontFamily
                 readonly property real viewStartHz: waterfallDisplay.viewStartHz
@@ -1060,7 +1061,7 @@ Item {
                     interval: 250
                     repeat: false
                     onTriggered: {
-                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                        if (spectrumGpuOverlay.cppOverlayEnabled && !spectrumGpuOverlay.nativeDecodeLabelsEnabled)
                             return
                         spectrumGpuOverlay.cachedDecodeLabelModel =
                             spectrumGpuOverlay.decodeLabelModel()
@@ -1070,7 +1071,7 @@ Item {
                 Connections {
                     target: waterfallPanel
                     function onSpectrumDecodeLabelsChanged() {
-                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                        if (spectrumGpuOverlay.cppOverlayEnabled && !spectrumGpuOverlay.nativeDecodeLabelsEnabled)
                             return
                         if (!waterfallPanel.showDecodeCallsigns) {
                             decodeLabelRefreshTimer.stop()
@@ -1081,7 +1082,7 @@ Item {
                             decodeLabelRefreshTimer.start()
                     }
                     function onShowDecodeCallsignsChanged() {
-                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                        if (spectrumGpuOverlay.cppOverlayEnabled && !spectrumGpuOverlay.nativeDecodeLabelsEnabled)
                             return
                         if (!waterfallPanel.showDecodeCallsigns) {
                             decodeLabelRefreshTimer.stop()
@@ -1094,14 +1095,18 @@ Item {
                 }
 
                 onWidthChanged:  {
-                    if (!cppOverlayEnabled) {
+                    if (!cppOverlayEnabled || nativeDecodeLabelsEnabled) {
                         if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start()
+                    }
+                    if (!cppOverlayEnabled) {
                         scheduleStaticOverlayRefresh()
                     }
                 }
                 onHeightChanged: {
-                    if (!cppOverlayEnabled) {
+                    if (!cppOverlayEnabled || nativeDecodeLabelsEnabled) {
                         if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start()
+                    }
+                    if (!cppOverlayEnabled) {
                         scheduleStaticOverlayRefresh()
                     }
                 }
@@ -1112,7 +1117,7 @@ Item {
                     if (cppOverlayEnabled) {
                         cachedFrequencyGridModel = []
                         cachedTickModel = []
-                        cachedDecodeLabelModel = []
+                        cachedDecodeLabelModel = nativeDecodeLabelsEnabled ? decodeLabelModel() : []
                     } else {
                         cachedFrequencyGridModel = frequencyGridModel()
                         cachedTickModel = tickModel()
@@ -1137,17 +1142,20 @@ Item {
                         if (x < 0 || x >= width)
                             continue
                         var text = call + " " + Number(d.snr || 0)
+                        var effectiveLabelFontSize = Math.max(10, waterfallDisplay.labelFontSize)
                         items.push({
                             x: Math.round(x),
                             text: text,
                             color: decodeColor(d),
-                            widthHint: Math.max(24, text.length * Math.max(5, waterfallDisplay.labelFontSize * 0.66))
+                            call: call,
+                            freq: freq,
+                            widthHint: Math.max(24, text.length * Math.max(6, effectiveLabelFontSize * 0.68))
                         })
                     }
 
                     items.sort(function(a, b) { return a.x - b.x })
 
-                    var rowHeight = Math.max(10, waterfallDisplay.labelFontSize + 5)
+                    var rowHeight = Math.max(12, Math.max(10, waterfallDisplay.labelFontSize) + 5)
                     var maxRows = Math.max(1, Math.floor(Math.max(1, height - 24) / rowHeight))
                     var rowRight = []
                     for (i = 0; i < maxRows; ++i)
@@ -1171,7 +1179,11 @@ Item {
                             textX: textX,
                             y: 2 + row * rowHeight,
                             text: it.text,
-                            color: it.color
+                            color: it.color,
+                            call: it.call,
+                            freq: it.freq,
+                            widthHint: it.widthHint,
+                            rowHeight: rowHeight
                         })
                         rowRight[row] = textX + it.widthHint
                     }
@@ -1261,7 +1273,9 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedDecodeLabelModel
+                    model: spectrumGpuOverlay.nativeDecodeLabelsEnabled
+                           ? spectrumGpuOverlay.cachedDecodeLabelModel
+                           : (spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedDecodeLabelModel)
                     Item {
                         width: spectrumGpuOverlay.width
                         height: spectrumGpuOverlay.height
@@ -1273,14 +1287,33 @@ Item {
                             color: modelData.color
                             opacity: 0.52
                         }
+                        Rectangle {
+                            x: Math.round(modelData.textX - 2)
+                            y: Math.round(modelData.y - 1)
+                            width: Math.round(modelData.widthHint + 4)
+                            height: Math.round(modelData.rowHeight)
+                            color: "#000000"
+                            opacity: 0.48
+                            radius: 0
+                        }
                         Text {
-                            x: modelData.textX
-                            y: modelData.y
+                            x: Math.round(modelData.textX)
+                            y: Math.round(modelData.y)
                             text: modelData.text
                             color: modelData.color
                             font.family: spectrumGpuOverlay.fixedFontFamily
-                            font.pixelSize: waterfallDisplay.labelFontSize
+                            font.pixelSize: Math.max(10, waterfallDisplay.labelFontSize)
                             font.bold: waterfallDisplay.labelBold
+                            font.hintingPreference: Font.PreferFullHinting
+                            renderType: Text.NativeRendering
+                        }
+                        MouseArea {
+                            x: Math.round(modelData.textX - 3)
+                            y: Math.round(modelData.y - 2)
+                            width: Math.round(modelData.widthHint + 6)
+                            height: Math.round(modelData.rowHeight + 2)
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: bridge.engageDxClusterSpot(modelData.call, modelData.freq)
                         }
                     }
                 }

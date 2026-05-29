@@ -24630,6 +24630,19 @@ void MainWindow::rigFailure (QString const& reason, bool allowAutoRetry)
 void MainWindow::transmit (double snr)
 {
   double toneSpacing=0.0;
+#if defined(Q_OS_MAC)
+  bool const suppressLegacyModulatorAudio =
+      m_embeddedShellMode
+      && m_embeddedBridgeMutesLegacyTxAudio
+      && !m_embeddedRigControlEnabled
+      && !m_tci_audio
+      && !m_tune
+      && SpecOp::FOX != m_specOp
+      && SpecOp::HOUND != m_specOp
+      && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2");
+#else
+  bool constexpr suppressLegacyModulatorAudio = false;
+#endif
   if (m_mode == "JT65") {
     if(m_nSubMode==0) toneSpacing=11025.0/4096.0;
     if(m_nSubMode==1) toneSpacing=2*11025.0/4096.0;
@@ -24728,13 +24741,22 @@ void MainWindow::transmit (double snr)
 	                }
 	            }
 	          Q_EMIT sendPrecomputedWave (m_mode, wave);
-	          Q_EMIT sendMessage (m_mode, NUM_FT8_SYMBOLS,
-	              1920.0, ui->TxFreqSpinBox->value () - m_XIT,
-	              toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
-              true, false, snr, m_TRperiod);
-        }
-    }
-  }
+	          if (suppressLegacyModulatorAudio)
+	            {
+	              debugToFile (QString {"txEmbeddedAudioMute skip legacy modulator mode:%1 msg:%2"}
+	                             .arg (m_mode)
+	                             .arg (m_currentMessage.trimmed ()));
+	            }
+	          else
+	            {
+	              Q_EMIT sendMessage (m_mode, NUM_FT8_SYMBOLS,
+	                  1920.0, ui->TxFreqSpinBox->value () - m_XIT,
+	                  toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
+	                  true, false, snr, m_TRperiod);
+	            }
+	        }
+	    }
+	  }
 
   if (m_mode == "FT2") {
     m_dateTimeSentTx3=QDateTime::currentDateTimeUtc();
@@ -24779,12 +24801,21 @@ void MainWindow::transmit (double snr)
                        .arg (m_TRperiod, 0, 'f', 2)
                        .arg (m_ntx)
                        .arg (m_currentMessage.trimmed ()));
-      Q_EMIT sendMessage (m_mode, NUM_FT2_SYMBOLS,
-             288.0, ui->TxFreqSpinBox->value() - m_XIT,
-             toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
-             true, false, snr, m_TRperiod);
-    }
-  }
+	      if (suppressLegacyModulatorAudio)
+	        {
+	          debugToFile (QString {"txEmbeddedAudioMute skip legacy modulator mode:%1 msg:%2"}
+	                         .arg (m_mode)
+	                         .arg (m_currentMessage.trimmed ()));
+	        }
+	      else
+	        {
+	          Q_EMIT sendMessage (m_mode, NUM_FT2_SYMBOLS,
+	                 288.0, ui->TxFreqSpinBox->value() - m_XIT,
+	                 toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
+	                 true, false, snr, m_TRperiod);
+	        }
+	    }
+	  }
 
   if (m_mode == "FT4") {
     m_dateTimeSentTx3=QDateTime::currentDateTimeUtc();
@@ -24827,12 +24858,21 @@ void MainWindow::transmit (double snr)
                        .arg (m_TRperiod, 0, 'f', 2)
                        .arg (m_ntx)
                        .arg (m_currentMessage.trimmed ()));
-      Q_EMIT sendMessage (m_mode, NUM_FT4_SYMBOLS,
-             576.0, ui->TxFreqSpinBox->value() - m_XIT,
-             toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
-             true, false, snr, m_TRperiod);
-    }
-  }
+	      if (suppressLegacyModulatorAudio)
+	        {
+	          debugToFile (QString {"txEmbeddedAudioMute skip legacy modulator mode:%1 msg:%2"}
+	                         .arg (m_mode)
+	                         .arg (m_currentMessage.trimmed ()));
+	        }
+	      else
+	        {
+	          Q_EMIT sendMessage (m_mode, NUM_FT4_SYMBOLS,
+	                 576.0, ui->TxFreqSpinBox->value() - m_XIT,
+	                 toneSpacing, m_soundOutput, legacy_tx_output_channel (m_config.audio_output_channel ()),
+	                 true, false, snr, m_TRperiod);
+	        }
+	    }
+	  }
 
   if (m_mode == "FST4" or m_mode == "FST4W") {
     m_dateTimeSentTx3=QDateTime::currentDateTimeUtc();

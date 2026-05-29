@@ -1904,6 +1904,8 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
 
 void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
 {
+    QElapsedTimer totalTimer;
+    totalTimer.start();
     double const rxHz = d->desired.frequency() > 0
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
@@ -1929,7 +1931,56 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
         << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
         << "txHz=" << QString::number(hz, 'f', 0);
     d->desired.ptt(on);
+    QElapsedTimer sendTimer;
+    sendTimer.start();
     sendStateSync(d.get());
+    qInfo().noquote()
+        << "[TX-TL] hamlib_set_tx_frequency_ptt"
+        << "total_ms=" << totalTimer.elapsed()
+        << "send_state_ms=" << sendTimer.elapsed()
+        << "splitMode=" << m_splitMode
+        << "on=" << on
+        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
+        << "txHz=" << QString::number(hz, 'f', 0);
+}
+
+void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on)
+{
+    QElapsedTimer totalTimer;
+    totalTimer.start();
+    double const rxHz = d->desired.frequency() > 0
+        ? static_cast<double>(d->desired.frequency())
+        : m_frequency;
+    hz = sanitizedCatTxFrequencyHz(hz, rxHz, m_splitMode, QStringLiteral("setRigTxFrequencyAndPttAsync"));
+    if (hz > 0.0 && d->desired.frequency() == 0 && m_frequency > 0.0) {
+        d->desired.frequency(static_cast<Transceiver::Frequency>(m_frequency));
+    }
+    if (hz > 0.0) {
+        if (!qFuzzyCompare(m_txFrequency + 1.0, hz + 1.0)) {
+            m_txFrequency = hz;
+            emit txFrequencyChanged();
+        }
+        d->desired.split(true);
+        d->desired.tx_frequency(static_cast<Transceiver::Frequency>(hz));
+    } else {
+        d->desired.split(false);
+        d->desired.tx_frequency(0);
+    }
+    qDebug().noquote()
+        << "[CATDBG] Hamlib async set TX frequency + PTT"
+        << "splitMode=" << m_splitMode
+        << "on=" << on
+        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
+        << "txHz=" << QString::number(hz, 'f', 0);
+    d->desired.ptt(on);
+    sendState(d.get());
+    qInfo().noquote()
+        << "[TX-TL] hamlib_set_tx_frequency_ptt_async"
+        << "schedule_ms=" << totalTimer.elapsed()
+        << "splitMode=" << m_splitMode
+        << "on=" << on
+        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
+        << "txHz=" << QString::number(hz, 'f', 0);
 }
 
 void DecodiumTransceiverManager::setRigPtt(bool on)

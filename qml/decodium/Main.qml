@@ -951,9 +951,13 @@ ApplicationWindow {
 	        mainWindow.waterfallDetached = true
 	        mainWindow.waterfallMinimized = false
 	        waterfallPanel.isDockHighlighted = false
-	        waterfallWindow.show()
-	        waterfallWindow.raise()
-	        waterfallWindow.requestActivate()
+	        Qt.callLater(function() {
+	            if (!mainWindow.waterfallDetached || mainWindow.waterfallMinimized)
+	                return
+	            waterfallWindow.show()
+	            waterfallWindow.raise()
+	            waterfallWindow.requestActivate()
+	        })
 	    }
 	    function dockWaterfallPanel() {
 	        waterfallPanel.isDockHighlighted = false

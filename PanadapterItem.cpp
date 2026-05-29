@@ -23,6 +23,7 @@
 #include <QMutexLocker>
 #include <QPointer>
 #include <QDebug>
+#include <QRunnable>
 #include <QVariant>
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
 #if __has_include(<rhi/qrhi.h>)
@@ -93,6 +94,20 @@ qint64 monotonicUs()
 {
     return std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+QString metricMs(qint64 us)
+{
+    if (us < 0)
+        return QStringLiteral("n/a");
+    return QString::number(static_cast<double>(us) / 1000.0, 'f', 2);
+}
+
+DecodiumBridge* diagnosticBridge()
+{
+    QCoreApplication* app = QCoreApplication::instance();
+    QObject* bridgeObject = app ? app->property("decodiumBridge").value<QObject*>() : nullptr;
+    return qobject_cast<DecodiumBridge*>(bridgeObject);
 }
 
 class ScopeExit
@@ -245,6 +260,42 @@ QFont panadapterMonoFont(int pointSize, QFont::Weight weight = QFont::Normal)
     font.setPointSize(pointSize);
     font.setWeight(weight);
     return font;
+}
+
+qreal panadapterOverlayDevicePixelRatio(QQuickWindow* window)
+{
+    qreal dpr = window ? window->devicePixelRatio() : 1.0;
+    if (!std::isfinite(dpr) || dpr < 1.0)
+        dpr = 1.0;
+    return qBound<qreal>(1.0, dpr, 3.0);
+}
+
+QSize panadapterOverlayTextureSize(int logicalWidth, int logicalHeight, qreal dpr)
+{
+    return QSize(qMax(1, qRound(static_cast<qreal>(logicalWidth) * dpr)),
+                 qMax(1, qRound(static_cast<qreal>(logicalHeight) * dpr)));
+}
+
+void drawCrispOverlayText(QPainter& painter, int x, int y, const QString& text, const QColor& color)
+{
+    painter.setPen(QColor(0, 0, 0, 220));
+    painter.drawText(x - 1, y, text);
+    painter.drawText(x + 1, y, text);
+    painter.drawText(x, y - 1, text);
+    painter.drawText(x, y + 1, text);
+    painter.setPen(color);
+    painter.drawText(x, y, text);
+}
+
+void drawCrispOverlayText(QPainter& painter, const QRect& rect, int flags, const QString& text, const QColor& color)
+{
+    painter.setPen(QColor(0, 0, 0, 220));
+    painter.drawText(rect.translated(-1, 0), flags, text);
+    painter.drawText(rect.translated(1, 0), flags, text);
+    painter.drawText(rect.translated(0, -1), flags, text);
+    painter.drawText(rect.translated(0, 1), flags, text);
+    painter.setPen(color);
+    painter.drawText(rect, flags, text);
 }
 
 QSGNode* sceneGraphChildAt(QSGNode* parent, int index)
@@ -784,10 +835,21 @@ struct PanadapterItem::GpuFftState
     quint64 readbackSerial = 0;
     bool loggedActive = false;
     bool loggedReadbackStats = false;
+    QVector<QRhiTexture*> retiredDirectTextures;
 
     ~GpuFftState()
     {
         reset();
+    }
+
+    void retireDirectTexture(QRhiTexture*& texture)
+    {
+        if (!texture)
+            return;
+        retiredDirectTextures.append(texture);
+        texture = nullptr;
+        while (retiredDirectTextures.size() > 16)
+            delete retiredDirectTextures.takeFirst();
     }
 
     void reset()
@@ -804,6 +866,9 @@ struct PanadapterItem::GpuFftState
         delete directWaterfallTexture;
         delete directRowParamsTexture;
         delete directPeakTexture;
+        for (QRhiTexture* texture : retiredDirectTextures)
+            delete texture;
+        retiredDirectTextures.clear();
         pipeline = nullptr;
         directPipeline = nullptr;
         srb = nullptr;
@@ -851,6 +916,9 @@ public:
         delete intensityTexture;
         delete paletteTexture;
         delete rowParamsTexture;
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        delete fallbackTexture;
+#endif
         for (QSGTexture* texture : retiredTextures)
             delete texture;
     }
@@ -893,6 +961,22 @@ public:
             delete retiredTextures.takeFirst();
     }
 
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    QSGTexture* fallbackSampledTexture()
+    {
+        if (!fallbackTexture) {
+            auto* texture = new DecodiumRhiImageTexture(false);
+            texture->setFiltering(QSGTexture::Nearest);
+            QImage image(1, 1, QImage::Format_RGBA8888);
+            image.fill(Qt::black);
+            texture->uploadFullRgbaImage(image, false);
+            fallbackTexture = texture;
+        }
+        return fallbackTexture;
+    }
+
+    QSGTexture* fallbackTexture = nullptr;
+#endif
     QVector<QSGTexture*> retiredTextures;
 };
 
@@ -936,15 +1020,32 @@ public:
                 << "[GPUDBG] Panadapter waterfall shader sampled-image binding"
                 << binding;
         }
+        QSGTexture* selected = nullptr;
         if (binding == 1)
-            *texture = material->intensityTexture;
+            selected = material->intensityTexture;
         else if (binding == 2)
-            *texture = material->paletteTexture;
+            selected = material->paletteTexture;
         else if (binding == 3)
-            *texture = material->rowParamsTexture;
+            selected = material->rowParamsTexture;
 
-        if (*texture) {
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        auto commitReadyTexture = [&state](QSGTexture* candidate) -> QSGTexture* {
+            if (!candidate)
+                return nullptr;
+            candidate->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+            return candidate->rhiTexture() ? candidate : nullptr;
+        };
+
+        QSGTexture* ready = commitReadyTexture(selected);
+        if (!ready)
+            ready = commitReadyTexture(material->fallbackSampledTexture());
+        *texture = ready;
+#else
+        *texture = selected;
+        if (*texture)
             (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+#endif
+        if (*texture) {
             static std::atomic_bool loggedTextureCommit {false};
             if (!loggedTextureCommit.exchange(true, std::memory_order_relaxed)) {
                 qInfo().noquote()
@@ -974,6 +1075,9 @@ public:
     {
         delete spectrumTexture;
         delete peakTexture;
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        delete fallbackTexture;
+#endif
     }
 
     QSGMaterialType* type() const override
@@ -1003,6 +1107,22 @@ public:
     float glow[4] = {0.2f, 0.9f, 1.0f, 0.45f};
     float trace[4] = {0.8f, 1.0f, 1.0f, 1.0f};
     float peak[4] = {1.0f, 1.0f, 1.0f, 0.65f};
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    QSGTexture* fallbackSampledTexture()
+    {
+        if (!fallbackTexture) {
+            auto* texture = new DecodiumRhiImageTexture(false);
+            texture->setFiltering(QSGTexture::Nearest);
+            QImage image(1, 1, QImage::Format_RGBA8888);
+            image.fill(Qt::black);
+            texture->uploadFullRgbaImage(image, false);
+            fallbackTexture = texture;
+        }
+        return fallbackTexture;
+    }
+
+    QSGTexture* fallbackTexture = nullptr;
+#endif
 };
 
 class PanadapterSpectrumShader final : public QSGMaterialShader
@@ -1040,13 +1160,29 @@ public:
                             QSGMaterial* newMaterial, QSGMaterial*) override
     {
         auto* material = static_cast<PanadapterSpectrumMaterial*>(newMaterial);
+        QSGTexture* selected = nullptr;
         if (binding == 1)
-            *texture = material->spectrumTexture;
+            selected = material->spectrumTexture;
         else if (binding == 2)
-            *texture = material->peakTexture;
+            selected = material->peakTexture;
 
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        auto commitReadyTexture = [&state](QSGTexture* candidate) -> QSGTexture* {
+            if (!candidate)
+                return nullptr;
+            candidate->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+            return candidate->rhiTexture() ? candidate : nullptr;
+        };
+
+        QSGTexture* ready = commitReadyTexture(selected);
+        if (!ready)
+            ready = commitReadyTexture(material->fallbackSampledTexture());
+        *texture = ready;
+#else
+        *texture = selected;
         if (*texture)
             (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+#endif
     }
 };
 
@@ -1143,17 +1279,48 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
     connect(this, &QQuickItem::windowChanged, this, [this](QQuickWindow* win) {
         if (m_qsgMetricWindow == win)
             return;
-        if (m_qsgFrameConnection)
-            QObject::disconnect(m_qsgFrameConnection);
+        auto disconnectMetricSignal = [](QMetaObject::Connection& connection) {
+            if (connection) {
+                QObject::disconnect(connection);
+                connection = QMetaObject::Connection();
+            }
+        };
+        disconnectMetricSignal(m_qsgFrameConnection);
+        disconnectMetricSignal(m_qsgBeforeSyncConnection);
+        disconnectMetricSignal(m_qsgBeforeRenderConnection);
+        disconnectMetricSignal(m_qsgAfterRenderConnection);
         m_qsgMetricWindow = win;
-        m_qsgFrameConnection = QMetaObject::Connection();
         m_qsgFrameLastSwapUs = 0;
+        m_qsgBeforeSyncUs.store(0, std::memory_order_relaxed);
+        m_qsgBeforeRenderUs.store(0, std::memory_order_relaxed);
+        m_qsgAfterRenderUs.store(0, std::memory_order_relaxed);
+        m_qsgBeforeSyncCount.store(0, std::memory_order_relaxed);
+        m_qsgBeforeRenderCount.store(0, std::memory_order_relaxed);
+        m_qsgAfterRenderCount.store(0, std::memory_order_relaxed);
+        m_qsgLastBeforeSyncCount = 0;
+        m_qsgLastBeforeRenderCount = 0;
+        m_qsgLastAfterRenderCount = 0;
+        m_qsgLastSwapCount = 0;
+        m_qsgSwapCount = 0;
         if (!win)
             return;
+        m_qsgBeforeSyncConnection = connect(win, &QQuickWindow::beforeSynchronizing, this, [this]() {
+            m_qsgBeforeSyncUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgBeforeSyncCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
+        m_qsgBeforeRenderConnection = connect(win, &QQuickWindow::beforeRendering, this, [this]() {
+            m_qsgBeforeRenderUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgBeforeRenderCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
+        m_qsgAfterRenderConnection = connect(win, &QQuickWindow::afterRendering, this, [this]() {
+            m_qsgAfterRenderUs.store(monotonicUs(), std::memory_order_relaxed);
+            m_qsgAfterRenderCount.fetch_add(1, std::memory_order_relaxed);
+        }, Qt::DirectConnection);
         m_qsgFrameConnection = connect(win, &QQuickWindow::frameSwapped, this, [this]() {
             qint64 const nowUs = monotonicUs();
+            ++m_qsgSwapCount;
             if (m_qsgFrameLastSwapUs > 0)
-                recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs);
+                recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs, nowUs);
             m_qsgFrameLastSwapUs = nowUs;
         });
     });
@@ -1163,6 +1330,12 @@ PanadapterItem::~PanadapterItem()
 {
     if (m_qsgFrameConnection)
         QObject::disconnect(m_qsgFrameConnection);
+    if (m_qsgBeforeSyncConnection)
+        QObject::disconnect(m_qsgBeforeSyncConnection);
+    if (m_qsgBeforeRenderConnection)
+        QObject::disconnect(m_qsgBeforeRenderConnection);
+    if (m_qsgAfterRenderConnection)
+        QObject::disconnect(m_qsgAfterRenderConnection);
     releaseGpuFftResources();
 }
 
@@ -1171,9 +1344,11 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
                                          int clusterLabels,
                                          const QSize& size)
 {
-    m_overlayMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    m_overlayMetricLastUs = safeElapsedUs;
+    m_overlayMetricAccumUs += safeElapsedUs;
     ++m_overlayMetricSamples;
-    m_overlayMetricMaxUs = qMax(m_overlayMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+    m_overlayMetricMaxUs = qMax(m_overlayMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
     m_overlayMetricDecodeLabels = decodeLabels;
     m_overlayMetricClusterLabels = clusterLabels;
     m_overlayMetricSize = size;
@@ -1200,9 +1375,11 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
 
 void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
 {
-    m_paintMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    m_paintMetricLastUs = safeElapsedUs;
+    m_paintMetricAccumUs += safeElapsedUs;
     ++m_paintMetricSamples;
-    m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+    m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
 
     qint64 const nowMs = monotonicMs();
     if (m_paintMetricLastLogMs == 0)
@@ -1223,15 +1400,100 @@ void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
     m_paintMetricMaxUs = 0;
 }
 
-void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
+void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
 {
+    constexpr qint64 kSpikeThresholdUs = 80000;
+
     if (frameUs <= 0)
         return;
     m_qsgFrameMetricAccumUs += frameUs;
     ++m_qsgFrameMetricSamples;
     m_qsgFrameMetricMaxUs = qMax(m_qsgFrameMetricMaxUs, static_cast<int>(qMin<qint64>(frameUs, std::numeric_limits<int>::max())));
 
+    int const beforeSyncCount = m_qsgBeforeSyncCount.load(std::memory_order_relaxed);
+    int const beforeRenderCount = m_qsgBeforeRenderCount.load(std::memory_order_relaxed);
+    int const afterRenderCount = m_qsgAfterRenderCount.load(std::memory_order_relaxed);
+    int const swapCount = m_qsgSwapCount;
+    int const beforeSyncDelta = beforeSyncCount - m_qsgLastBeforeSyncCount;
+    int const beforeRenderDelta = beforeRenderCount - m_qsgLastBeforeRenderCount;
+    int const afterRenderDelta = afterRenderCount - m_qsgLastAfterRenderCount;
+    int const swapDelta = swapCount - m_qsgLastSwapCount;
+    m_qsgLastBeforeSyncCount = beforeSyncCount;
+    m_qsgLastBeforeRenderCount = beforeRenderCount;
+    m_qsgLastAfterRenderCount = afterRenderCount;
+    m_qsgLastSwapCount = swapCount;
+
+    qint64 const previousSwapUs = swapUs - frameUs;
+    qint64 const beforeSyncUs = m_qsgBeforeSyncUs.load(std::memory_order_relaxed);
+    qint64 const beforeRenderUs = m_qsgBeforeRenderUs.load(std::memory_order_relaxed);
+    qint64 const afterRenderUs = m_qsgAfterRenderUs.load(std::memory_order_relaxed);
+    qint64 const idleUs = (beforeSyncUs >= previousSwapUs && beforeSyncUs <= swapUs)
+        ? beforeSyncUs - previousSwapUs : -1;
+    qint64 const syncUs = (beforeSyncUs > 0 && beforeRenderUs >= beforeSyncUs && beforeRenderUs <= swapUs)
+        ? beforeRenderUs - beforeSyncUs : -1;
+    qint64 const renderUs = (beforeRenderUs > 0 && afterRenderUs >= beforeRenderUs && afterRenderUs <= swapUs)
+        ? afterRenderUs - beforeRenderUs : -1;
+    qint64 const presentUs = (afterRenderUs > 0 && afterRenderUs <= swapUs)
+        ? swapUs - afterRenderUs : -1;
+    if (idleUs >= 0 && syncUs >= 0 && renderUs >= 0 && presentUs >= 0) {
+        ++m_qsgPhaseSamples;
+        m_qsgPhaseIdleAccumUs += idleUs;
+        m_qsgPhaseSyncAccumUs += syncUs;
+        m_qsgPhaseRenderAccumUs += renderUs;
+        m_qsgPhasePresentAccumUs += presentUs;
+        m_qsgPhaseIdleMaxUs = qMax(m_qsgPhaseIdleMaxUs, static_cast<int>(qMin<qint64>(idleUs, std::numeric_limits<int>::max())));
+        m_qsgPhaseSyncMaxUs = qMax(m_qsgPhaseSyncMaxUs, static_cast<int>(qMin<qint64>(syncUs, std::numeric_limits<int>::max())));
+        m_qsgPhaseRenderMaxUs = qMax(m_qsgPhaseRenderMaxUs, static_cast<int>(qMin<qint64>(renderUs, std::numeric_limits<int>::max())));
+        m_qsgPhasePresentMaxUs = qMax(m_qsgPhasePresentMaxUs, static_cast<int>(qMin<qint64>(presentUs, std::numeric_limits<int>::max())));
+    }
+
     qint64 const nowMs = monotonicMs();
+    if (frameUs >= kSpikeThresholdUs) {
+        ++m_qsgFrameSpikeCount;
+        DecodiumBridge* bridge = diagnosticBridge();
+        qint64 const paintAvgUs = m_paintMetricSamples > 0 ? (m_paintMetricAccumUs / m_paintMetricSamples) : 0;
+        qint64 const overlayAvgUs = m_overlayMetricSamples > 0 ? (m_overlayMetricAccumUs / m_overlayMetricSamples) : 0;
+        qInfo().noquote()
+            << "[PANMETRIC] qsg_frame_spike"
+            << "frame_ms=" << QString::number(static_cast<double>(frameUs) / 1000.0, 'f', 2)
+            << "threshold_ms=" << QString::number(static_cast<double>(kSpikeThresholdUs) / 1000.0, 'f', 0)
+            << "spikes=" << m_qsgFrameSpikeCount
+            << "window_samples=" << m_qsgFrameMetricSamples
+            << "window_max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
+            << "phase_idle_ms=" << metricMs(idleUs)
+            << "phase_sync_ms=" << metricMs(syncUs)
+            << "phase_render_ms=" << metricMs(renderUs)
+            << "phase_present_ms=" << metricMs(presentUs)
+            << "phase_counts="
+            << QStringLiteral("%1/%2/%3/%4").arg(beforeSyncDelta).arg(beforeRenderDelta).arg(afterRenderDelta).arg(swapDelta)
+            << "paint_last_us=" << m_paintMetricLastUs
+            << "paint_avg_us=" << paintAvgUs
+            << "paint_max_us=" << m_paintMetricMaxUs
+            << "paint_samples=" << m_paintMetricSamples
+            << "overlay_last_us=" << m_overlayMetricLastUs
+            << "overlay_avg_us=" << overlayAvgUs
+            << "overlay_max_us=" << m_overlayMetricMaxUs
+            << "overlay_samples=" << m_overlayMetricSamples
+            << "decode_labels=" << m_overlayMetricDecodeLabels
+            << "cluster_labels=" << m_overlayMetricClusterLabels
+            << "overlay_size=" << QStringLiteral("%1x%2").arg(m_overlayMetricSize.width()).arg(m_overlayMetricSize.height())
+            << "running=" << (m_running ? 1 : 0)
+            << "throttle=" << (m_throttleActive ? 1 : 0)
+            << "throttle_ms=" << m_throttleIntervalMs
+            << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
+            << "waterfall_rows=" << m_renderWaterfallHistoryRows
+            << "pending_rows=" << m_pendingWaterfallRows.size()
+            << "spectrum_dirty=" << (m_spectrumDirty ? 1 : 0)
+            << "overlay_dirty=" << (m_spectrumOverlayDirty ? 1 : 0)
+            << "geometry_dirty=" << (m_geometryDirty ? 1 : 0)
+            << "item_size=" << QStringLiteral("%1x%2").arg(qRound(width())).arg(qRound(height()))
+            << "bridge_monitoring=" << (bridge && bridge->monitoring() ? 1 : 0)
+            << "bridge_tx=" << (bridge && bridge->transmitting() ? 1 : 0)
+            << "bridge_tune=" << (bridge && bridge->tuning() ? 1 : 0)
+            << "bridge_spectrum_visible=" << (bridge && bridge->spectrumVisible() ? 1 : 0)
+            << "bridge_fps_cap=" << (bridge ? bridge->spectrumFpsCap() : -1);
+    }
+
     if (m_qsgFrameMetricLastLogMs == 0)
         m_qsgFrameMetricLastLogMs = nowMs;
     if (nowMs - m_qsgFrameMetricLastLogMs < 10000 || m_qsgFrameMetricSamples <= 0)
@@ -1242,10 +1504,32 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
         << "avg_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricAccumUs) / m_qsgFrameMetricSamples / 1000.0, 'f', 2)
         << "max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
         << "samples=" << m_qsgFrameMetricSamples;
+    if (m_qsgPhaseSamples > 0) {
+        qInfo().noquote()
+            << "[PANMETRIC] qsg_phase"
+            << "samples=" << m_qsgPhaseSamples
+            << "idle_avg_ms=" << metricMs(m_qsgPhaseIdleAccumUs / m_qsgPhaseSamples)
+            << "idle_max_ms=" << metricMs(m_qsgPhaseIdleMaxUs)
+            << "sync_avg_ms=" << metricMs(m_qsgPhaseSyncAccumUs / m_qsgPhaseSamples)
+            << "sync_max_ms=" << metricMs(m_qsgPhaseSyncMaxUs)
+            << "render_avg_ms=" << metricMs(m_qsgPhaseRenderAccumUs / m_qsgPhaseSamples)
+            << "render_max_ms=" << metricMs(m_qsgPhaseRenderMaxUs)
+            << "present_avg_ms=" << metricMs(m_qsgPhasePresentAccumUs / m_qsgPhaseSamples)
+            << "present_max_ms=" << metricMs(m_qsgPhasePresentMaxUs);
+    }
     m_qsgFrameMetricLastLogMs = nowMs;
     m_qsgFrameMetricAccumUs = 0;
     m_qsgFrameMetricSamples = 0;
     m_qsgFrameMetricMaxUs = 0;
+    m_qsgPhaseIdleAccumUs = 0;
+    m_qsgPhaseSyncAccumUs = 0;
+    m_qsgPhaseRenderAccumUs = 0;
+    m_qsgPhasePresentAccumUs = 0;
+    m_qsgPhaseSamples = 0;
+    m_qsgPhaseIdleMaxUs = 0;
+    m_qsgPhaseSyncMaxUs = 0;
+    m_qsgPhaseRenderMaxUs = 0;
+    m_qsgPhasePresentMaxUs = 0;
 }
 
 bool PanadapterItem::shaderWaterfallSupported()
@@ -2405,17 +2689,21 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     qint64 const overlayStartUs = monotonicUs();
     int renderedDecodeLabels = 0;
     int renderedClusterLabels = 0;
+    qreal const dpr = panadapterOverlayDevicePixelRatio(window());
+    QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
 
-    if (m_spectrumOverlayImage.size() != QSize(w, h)
+    if (m_spectrumOverlayImage.size() != textureSize
         || m_spectrumOverlayImage.format() != QImage::Format_ARGB32_Premultiplied) {
-        m_spectrumOverlayImage = QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+        m_spectrumOverlayImage = QImage(textureSize, QImage::Format_ARGB32_Premultiplied);
     }
     m_spectrumOverlayImage.fill(Qt::transparent);
     m_decodeHitRects.clear();
     m_clusterHitRects.clear();
 
     QPainter p(&m_spectrumOverlayImage);
+    p.scale(dpr, dpr);
     p.setRenderHint(QPainter::Antialiasing, false);
+    p.setRenderHint(QPainter::TextAntialiasing, false);
 
     float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
     float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
@@ -2454,8 +2742,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         int const gy = h - 1 - static_cast<int>(norm * static_cast<float>(qMax(1, h - 16)));
         p.setPen(QPen(QColor(38, 38, 38), 1));
         p.drawLine(0, gy, w, gy);
-        p.setPen(QColor(160, 160, 160));
-        p.drawText(2, qMax(8, gy - 1), QString::number(static_cast<int>(std::round(displayMinDb + norm * range))));
+        drawCrispOverlayText(p,
+                             2,
+                             qMax(8, gy - 1),
+                             QString::number(static_cast<int>(std::round(displayMinDb + norm * range))),
+                             QColor(190, 190, 190));
     }
 
     int const freqStep = viewRange > 3000.0f ? 500 : (viewRange > 1000.0f ? 200 : 100);
@@ -2467,13 +2758,12 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             continue;
         p.setPen(QPen(QColor(40, 40, 40), 1));
         p.drawLine(x, 0, x, qMax(0, h - 16));
-        p.setPen(QColor(220, 220, 220));
         QString const label = f >= 1000
             ? QStringLiteral("%1k").arg(static_cast<double>(f) / 1000.0, 0, 'f', 1)
             : QString::number(f);
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
-        p.drawText(tx, h - 3, label);
+        drawCrispOverlayText(p, tx, h - 3, label, QColor(235, 235, 235));
     }
 
     for (int f = (static_cast<int>(viewStart / 500.0f) * 500) + 500;
@@ -2484,11 +2774,10 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             continue;
         p.setPen(QPen(QColor(255, 230, 0, 180), 1));
         p.drawLine(x, qMax(0, h - 18), x, qMax(0, h - 6));
-        p.setPen(QColor(220, 210, 0));
         QString const label = QString::number(f);
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
-        p.drawText(tx, qMax(10, h - 20), label);
+        drawCrispOverlayText(p, tx, qMax(10, h - 20), label, QColor(255, 240, 0));
     }
 
     if (rxX >= 0 && rxX < w) {
@@ -2565,8 +2854,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             int const textY = topPad + rowH * (chosenRow + 1) - fm.descent();
             p.setPen(QPen(it.color, 1, Qt::DotLine));
             p.drawLine(it.x, 0, it.x, qMax(0, h - bottomKeepOut));
-            p.setPen(it.color);
-            p.drawText(textX, textY, it.text);
+            drawCrispOverlayText(p, textX, textY, it.text, it.color);
             rowRight[chosenRow] = textX + it.textW;
             QRect const hitRect(textX - 2, textY - rowH + fm.descent(), it.textW + 4, rowH);
             m_decodeHitRects.push_back({hitRect, it.call, it.freq});
@@ -2610,7 +2898,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             p.fillRect(labelRect, QColor(0, 0, 0, 180));
             p.setPen(QPen(m_dxClusterSpotColor, 1));
             p.drawRect(labelRect);
-            p.drawText(textX, clusterBaseline, call);
+            drawCrispOverlayText(p, textX, clusterBaseline, call, m_dxClusterSpotColor);
             m_clusterHitRects.push_back({labelRect.adjusted(-2, -2, 2, 2), call, freq});
             ++renderedClusterLabels;
         }
@@ -2644,10 +2932,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         p.setPen(QPen(border, 1));
         p.drawPath(box);
         p.setRenderHint(QPainter::Antialiasing, false);
-        p.setPen(accent);
-        p.drawText(QRect(boxX + padX, boxY + padY, boxW - padX * 2, boxH - padY * 2),
-                   Qt::AlignCenter,
-                   text);
+        drawCrispOverlayText(p,
+                             QRect(boxX + padX, boxY + padY, boxW - padX * 2, boxH - padY * 2),
+                             Qt::AlignCenter,
+                             text,
+                             accent);
     };
 
     int const txX = fToX(static_cast<float>(m_txFreq));
@@ -2657,8 +2946,11 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
 
     if (m_autoRange) {
         p.setFont(panadapterMonoFont(8));
-        p.setPen(QColor(100, 100, 100));
-        p.drawText(w - 100, h - 3, QStringLiteral("NF:%1dB").arg(static_cast<int>(m_measuredFloor)));
+        drawCrispOverlayText(p,
+                             w - 100,
+                             h - 3,
+                             QStringLiteral("NF:%1dB").arg(static_cast<int>(m_measuredFloor)),
+                             QColor(130, 130, 130));
     }
 
     m_spectrumOverlayDirty = false;
@@ -2705,14 +2997,17 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
     float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
     bool const sizeChanged = m_spectrumOverlaySize != QSize(w, h);
+    qreal const dpr = panadapterOverlayDevicePixelRatio(window());
+    QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
+    bool const textureSizeChanged = m_spectrumOverlayImage.size() != textureSize;
     bool const rangeChanged = std::abs(displayMinDb - m_spectrumOverlayDisplayMinDb) > 0.75f
         || std::abs(displayMaxDb - m_spectrumOverlayDisplayMaxDb) > 0.75f;
     bool const rangeRefreshDue = monotonicMs() - m_lastSpectrumOverlayRebuildMs >= 250;
-    if (sizeChanged || (rangeChanged && rangeRefreshDue)) {
+    if (sizeChanged || textureSizeChanged || (rangeChanged && rangeRefreshDue)) {
         m_spectrumOverlayDirty = true;
     }
 
-    bool const needsUpload = m_spectrumOverlayDirty || m_spectrumOverlayImage.size() != QSize(w, h);
+    bool const needsUpload = m_spectrumOverlayDirty || textureSizeChanged;
     if (needsUpload)
         rebuildSpectrumOverlayImage(w, h, gpuDirectReady);
     if (m_spectrumOverlayImage.isNull()) {
@@ -2736,20 +3031,20 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
         || !tex->hasAlphaChannel() || tex->failed()) {
         tex = new DecodiumRhiImageTexture(true);
-        tex->setFiltering(QSGTexture::Linear);
+        tex->setFiltering(QSGTexture::Nearest);
         overlay->setTexture(tex);
         uploadTexture = true;
     }
     if (uploadTexture)
         tex->uploadFullImage(m_spectrumOverlayImage, true);
-    overlay->setFiltering(QSGTexture::Linear);
+    overlay->setFiltering(QSGTexture::Nearest);
 #else
     if (needsUpload || !overlay->texture()) {
         auto* tex = window()->createTextureFromImage(
             m_spectrumOverlayImage,
             QQuickWindow::CreateTextureOptions(QQuickWindow::TextureHasAlphaChannel));
         if (tex) {
-            tex->setFiltering(QSGTexture::Linear);
+            tex->setFiltering(QSGTexture::Nearest);
             overlay->setTexture(tex);
         }
     }
@@ -2764,6 +3059,9 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
             << "api=" << (window() && window()->rendererInterface()
                               ? waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
                               : "Unknown")
+            << "dpr=" << dpr
+            << "logical=" << QStringLiteral("%1x%2").arg(w).arg(h)
+            << "texture=" << QStringLiteral("%1x%2").arg(m_spectrumOverlayImage.width()).arg(m_spectrumOverlayImage.height())
             << "reason= grid/labels/markers batched into one QSG texture; QML repeaters bypassed";
     }
 }
@@ -3169,8 +3467,22 @@ void PanadapterItem::releaseResources()
 void PanadapterItem::releaseGpuFftResources()
 {
 #if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
-    delete m_gpuFft;
+    GpuFftState* state = m_gpuFft;
     m_gpuFft = nullptr;
+    m_gpuDirectTextureReady = false;
+    m_gpuFftUiBinsExpected = 0;
+    m_hasPendingPcmFrame = false;
+    if (!state)
+        return;
+
+    if (QQuickWindow* win = window()) {
+        auto* cleanup = QRunnable::create([state]() {
+            delete state;
+        });
+        win->scheduleRenderJob(cleanup, QQuickWindow::AfterSynchronizingStage);
+    } else {
+        delete state;
+    }
 #else
     m_gpuFft = nullptr;
 #endif
@@ -3468,7 +3780,7 @@ void PanadapterItem::recordGpuFftCompute()
                 return false;
             if (texture && currentSize == desiredSize && texture->pixelSize() == desiredSize)
                 return false;
-            delete texture;
+            m_gpuFft->retireDirectTexture(texture);
             texture = rhi->newTexture(QRhiTexture::R32F,
                                       desiredSize,
                                       1,
@@ -4481,10 +4793,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                                 << "rows=" << rows
                                 << "qimage_dependency=0";
                         }
-                        bool const shouldLogStats =
-                            !m_loggedWaterfallGpuUploadStats
-                            || (m_lastWaterfallGpuStatsRow >= 0
-                                && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows);
+                        bool const shouldLogStats = m_wfWriteRow > 0
+                            && (!m_loggedWaterfallGpuUploadStats
+                                || (m_lastWaterfallGpuStatsRow >= 0
+                                    && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
                         if (shouldLogStats) {
                             m_loggedWaterfallGpuUploadStats = true;
                             m_lastWaterfallGpuStatsRow = m_wfWriteRow;
@@ -4584,10 +4896,11 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 if (!m_shaderWaterfallBlocked && material->intensityTexture && material->paletteTexture && material->rowParamsTexture) {
                     wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
                     bool const shouldLogStats = uploadedTextureData
+                        && m_wfWriteRow > 0
                         && (!m_loggedWaterfallGpuUploadStats
-                        || uploadedFullTexture
-                        || (m_lastWaterfallGpuStatsRow >= 0
-                            && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
+                            || uploadedFullTexture
+                            || (m_lastWaterfallGpuStatsRow >= 0
+                                && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
                     if (shouldLogStats) {
                         m_loggedWaterfallGpuUploadStats = true;
                         m_lastWaterfallGpuStatsRow = m_wfWriteRow;

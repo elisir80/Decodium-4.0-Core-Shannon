@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QColor>
 #include <QMetaObject>
+#include <atomic>
 
 class QSGNode;
 class QSGSimpleTextureNode;
@@ -255,7 +256,7 @@ private:
     void connectBridgePcmFrameFeed();
     void recordOverlayMetric(qint64 elapsedUs, int decodeLabels, int clusterLabels, const QSize& size);
     void recordPaintMetric(qint64 elapsedUs);
-    void recordQsgFrameMetric(qint64 frameUs);
+    void recordQsgFrameMetric(qint64 frameUs, qint64 swapUs);
 
     // Conversioni frequenza ↔ pixel (rispetta zoom/pan)
     int   freqToX(int freq) const;
@@ -399,15 +400,40 @@ private:
     bool  m_loggedGpuWaterfallDetached = false;
     QQuickWindow* m_qsgMetricWindow = nullptr;
     QMetaObject::Connection m_qsgFrameConnection;
+    QMetaObject::Connection m_qsgBeforeSyncConnection;
+    QMetaObject::Connection m_qsgBeforeRenderConnection;
+    QMetaObject::Connection m_qsgAfterRenderConnection;
     qint64 m_qsgFrameLastSwapUs = 0;
     qint64 m_qsgFrameMetricLastLogMs = 0;
     qint64 m_qsgFrameMetricAccumUs = 0;
     int    m_qsgFrameMetricSamples = 0;
     int    m_qsgFrameMetricMaxUs = 0;
+    int    m_qsgFrameSpikeCount = 0;
+    std::atomic<qint64> m_qsgBeforeSyncUs {0};
+    std::atomic<qint64> m_qsgBeforeRenderUs {0};
+    std::atomic<qint64> m_qsgAfterRenderUs {0};
+    std::atomic<int> m_qsgBeforeSyncCount {0};
+    std::atomic<int> m_qsgBeforeRenderCount {0};
+    std::atomic<int> m_qsgAfterRenderCount {0};
+    int    m_qsgLastBeforeSyncCount = 0;
+    int    m_qsgLastBeforeRenderCount = 0;
+    int    m_qsgLastAfterRenderCount = 0;
+    int    m_qsgLastSwapCount = 0;
+    int    m_qsgSwapCount = 0;
+    qint64 m_qsgPhaseIdleAccumUs = 0;
+    qint64 m_qsgPhaseSyncAccumUs = 0;
+    qint64 m_qsgPhaseRenderAccumUs = 0;
+    qint64 m_qsgPhasePresentAccumUs = 0;
+    int    m_qsgPhaseSamples = 0;
+    int    m_qsgPhaseIdleMaxUs = 0;
+    int    m_qsgPhaseSyncMaxUs = 0;
+    int    m_qsgPhaseRenderMaxUs = 0;
+    int    m_qsgPhasePresentMaxUs = 0;
     qint64 m_overlayMetricLastLogMs = 0;
     qint64 m_overlayMetricAccumUs = 0;
     int    m_overlayMetricSamples = 0;
     int    m_overlayMetricMaxUs = 0;
+    qint64 m_overlayMetricLastUs = 0;
     int    m_overlayMetricDecodeLabels = 0;
     int    m_overlayMetricClusterLabels = 0;
     QSize  m_overlayMetricSize;
@@ -415,6 +441,7 @@ private:
     qint64 m_paintMetricAccumUs = 0;
     int    m_paintMetricSamples = 0;
     int    m_paintMetricMaxUs = 0;
+    qint64 m_paintMetricLastUs = 0;
     qint64 m_decodeLabelMetricLastLogMs = 0;
     struct GpuFftState;
     GpuFftState* m_gpuFft = nullptr;

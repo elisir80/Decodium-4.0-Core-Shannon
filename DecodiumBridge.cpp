@@ -62,6 +62,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QElapsedTimer>
 #include <QFormLayout>
 #include <QFontDatabase>
 #include <QLabel>
@@ -156,10 +157,82 @@ static QString extractRightCallsign(const QString& msg);
 
 static constexpr int kDefaultTxWatchdogMinutes = 6;
 static constexpr int kDefaultTxWatchdogCount = 3;
+static constexpr int kLegacyBridgeAudioAfterAsyncPttDelayMs = 125;
 
 static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
 }
+
+static void txTimelineLog(const QString& msg) {
+    bridgeLog(msg);
+    qInfo().noquote() << msg;
+}
+
+static constexpr qint64 kMainThreadTraceDefaultThresholdMs = 40;
+
+static void mainThreadTimelineLog(const QString& label,
+                                  qint64 elapsedMs,
+                                  const QString& details = {})
+{
+    QString msg = QStringLiteral("[MAIN-TL] %1 elapsed_ms=%2")
+        .arg(label)
+        .arg(elapsedMs);
+    if (!details.trimmed().isEmpty()) {
+        msg += QLatin1Char(' ');
+        msg += details.trimmed();
+    }
+    bridgeLog(msg);
+    qInfo().noquote() << msg;
+}
+
+class MainThreadTraceScope
+{
+public:
+    explicit MainThreadTraceScope(QString label,
+                                  QString details = {},
+                                  qint64 thresholdMs = kMainThreadTraceDefaultThresholdMs)
+        : m_label(std::move(label)),
+          m_details(std::move(details)),
+          m_thresholdMs(thresholdMs)
+    {
+        m_timer.start();
+    }
+
+    ~MainThreadTraceScope()
+    {
+        if (m_cancelled) {
+            return;
+        }
+        qint64 const elapsedMs = m_timer.elapsed();
+        if (elapsedMs >= m_thresholdMs) {
+            mainThreadTimelineLog(m_label, elapsedMs, m_details);
+        }
+    }
+
+    void addDetail(const QString& detail)
+    {
+        QString const trimmed = detail.trimmed();
+        if (trimmed.isEmpty()) {
+            return;
+        }
+        if (!m_details.isEmpty()) {
+            m_details += QLatin1Char(' ');
+        }
+        m_details += trimmed;
+    }
+
+    void cancel()
+    {
+        m_cancelled = true;
+    }
+
+private:
+    QElapsedTimer m_timer;
+    QString m_label;
+    QString m_details;
+    qint64 m_thresholdMs;
+    bool m_cancelled = false;
+};
 
 static QStringList ctyDatDownloadUrls()
 {
@@ -295,20 +368,18 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
     sink->disconnect();
 
     if (deferCoreAudioSinkDelete()) {
+#if defined(Q_OS_MAC)
+        sink->setParent(nullptr);
+        if (buffer) {
+            buffer->setParent(nullptr);
+        }
+        sink->setVolume(0.0f);
+        bridgeLog(QStringLiteral("TX CoreAudio sink parked without delayed Qt/CoreAudio callbacks: reason=%1").arg(reason));
+        txTimelineLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=indefinite_mac").arg(reason));
+        return;
+#endif
         QObject *context = QCoreApplication::instance();
         if (!context) {
-#if defined(Q_OS_MAC)
-            sink->setVolume(0.0f);
-            if (buffer) {
-                buffer->close();
-                delete buffer;
-            }
-            bridgeLog(QStringLiteral("TX CoreAudio sink parked without app context: reason=%1 state=%2 err=%3")
-                          .arg(reason)
-                          .arg(audioStateToString(sink->state()))
-                          .arg(audioErrorToString(sink->error())));
-            return;
-#else
             if (sink->state() != QAudio::StoppedState) {
                 sink->stop();
             }
@@ -318,7 +389,6 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                 delete buffer;
             }
             return;
-#endif
         }
         QPointer<QAudioSink> sinkGuard(sink);
         QPointer<QBuffer> bufferGuard(buffer);
@@ -343,7 +413,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
         // park e delayed-delete release. Aiuta a distinguere stutter da
         // sink-create dal stutter da park-delete-overlap.
         qint64 const parkEntryMs = QDateTime::currentMSecsSinceEpoch();
-        bridgeLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=%2")
+        txTimelineLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=%2")
                       .arg(reason).arg(kRetireAudioSinkParkMs));
         QTimer::singleShot(kRetireAudioSinkParkMs, context, [sinkGuard, bufferGuard, reason, parkEntryMs]() {
             if (sinkGuard) {
@@ -352,7 +422,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 #if defined(Q_OS_MAC)
                     qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
                     bridgeLog(QStringLiteral("TX CoreAudio sink left parked stopped after lifetime: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
-                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
+                    txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_stopped_no_delete").arg(reason).arg(parkSpanMs));
                     return;
 #else
                     sinkGuard->deleteLater();
@@ -361,7 +431,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                     }
                     qint64 const parkSpanMs = QDateTime::currentMSecsSinceEpoch() - parkEntryMs;
                     bridgeLog(QStringLiteral("TX audio sink deferred delete released: reason=%1 park_span_ms=%2").arg(reason).arg(parkSpanMs));
-                    bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
+                    txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=stopped").arg(reason).arg(parkSpanMs));
                     return;
 #endif
                 }
@@ -381,7 +451,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                 bridgeLog(QStringLiteral("TX audio sink parked stop+delete after lifetime: reason=%1 state=%2")
                               .arg(reason)
                               .arg(parkedState));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_win").arg(reason).arg(parkSpanMsForcedWin));
+                txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=forced_stop_win").arg(reason).arg(parkSpanMsForcedWin));
                 return;
 #elif defined(Q_OS_MAC)
                 QString const parkedState = audioStateToString(sinkGuard->state());
@@ -391,7 +461,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
                               .arg(reason)
                               .arg(parkedState)
                               .arg(parkedError));
-                bridgeLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
+                txTimelineLog(QStringLiteral("[TX-TL] park_release reason=%1 span_ms=%2 state=parked_mac_no_stop").arg(reason).arg(parkSpanMsForcedMac));
                 return;
 #else
                 bridgeLog(QStringLiteral("TX CoreAudio sink parked to avoid Qt stopAudioUnit crash: reason=%1 state=%2 err=%3")
@@ -971,7 +1041,10 @@ static constexpr int kSpecialOpNone = 0;
 static constexpr int kSpecialOpFox = 6;
 static constexpr int kSpecialOpHound = 7;
 static constexpr int kSpecialOpMax = 9;
-static QAudioDevice findOutputDevice(const QString& name, bool* requestedDeviceFound = nullptr);
+static QAudioDevice findOutputDevice(const QString& name,
+                                     QList<QAudioDevice> const& outputs,
+                                     QAudioDevice const& defaultOutput,
+                                     bool* requestedDeviceFound = nullptr);
 
 static void storeBridgePrecomputedTxWave(QString const& mode, QVector<float> const& wave)
 {
@@ -4235,6 +4308,60 @@ static inline void activeCatSetTxPtt(DecodiumCatManager* n, DecodiumTransceiverM
     activeCatSetPtt(n, h, b, on, o, legacy);
 }
 
+static inline bool activeCatSetTxPttAsync(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
+                                          bool on, double txDialHz,
+                                          DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+{
+    if (on && txDialHz > 0.0 && isHamlibFamilyBackend(b) && h
+        && !useLegacyRigControlFallback(legacy, b)) {
+        qDebug().noquote()
+            << "[CATDBG] Hamlib async Fake-It/Split PTT"
+            << "backend=" << b.trimmed().toLower()
+            << "on=" << on
+            << "txDialHz=" << QString::number(txDialHz, 'f', 0);
+        h->setRigTxFrequencyAndPttAsync(txDialHz, true);
+        return true;
+    }
+
+    Q_UNUSED(n)
+    Q_UNUSED(o)
+    Q_UNUSED(legacy)
+    return false;
+}
+
+static QStringList audioDeviceDescriptions(QList<QAudioDevice> const& devices)
+{
+    QStringList descriptions;
+    descriptions.reserve(devices.size());
+    for (QAudioDevice const& device : devices) {
+        QString const description = device.description().trimmed();
+        if (!description.isEmpty() && !descriptions.contains(description, Qt::CaseInsensitive)) {
+            descriptions.append(description);
+        }
+    }
+    return descriptions;
+}
+
+static QString audioDeviceCacheSignature(QList<QAudioDevice> const& inputs,
+                                         QList<QAudioDevice> const& outputs,
+                                         QAudioDevice const& defaultInput,
+                                         QAudioDevice const& defaultOutput)
+{
+    QStringList tokens;
+    tokens.reserve(inputs.size() + outputs.size() + 2);
+    tokens << QStringLiteral("di=%1").arg(audioDeviceIdForLog(defaultInput));
+    tokens << QStringLiteral("do=%1").arg(audioDeviceIdForLog(defaultOutput));
+    for (QAudioDevice const& device : inputs) {
+        tokens << QStringLiteral("i=%1|%2")
+                      .arg(device.description().trimmed(), audioDeviceIdForLog(device));
+    }
+    for (QAudioDevice const& device : outputs) {
+        tokens << QStringLiteral("o=%1|%2")
+                      .arg(device.description().trimmed(), audioDeviceIdForLog(device));
+    }
+    return tokens.join(QLatin1Char('\n'));
+}
+
 static inline void activeCatSetFreq(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b, double hz,
                                     DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
 {
@@ -5784,13 +5911,20 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
 void DecodiumBridge::rebuildBandActivityModel()
 {
     if (!m_bandActivityModel) return;
+    MainThreadTraceScope trace(QStringLiteral("rebuild_band_activity_model"),
+                               QStringLiteral("decode_rows=%1").arg(m_decodeList.size()));
     QVariantList const filtered = filterEntriesForBandActivity(m_decodeList);
     m_bandActivityModel->setEntries(filtered);
+    trace.addDetail(QStringLiteral("filtered_rows=%1").arg(filtered.size()));
 }
 
 void DecodiumBridge::rebuildRxDecodeModel()
 {
     if (!m_rxDecodeModel) return;
+    MainThreadTraceScope trace(QStringLiteral("rebuild_rx_decode_model"),
+                               QStringLiteral("rx_rows=%1 decode_rows=%2")
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_decodeList.size()));
     QVariantList merged;
     merged.reserve(m_rxDecodeList.size() + m_decodeList.size());
     QSet<QString> seen;
@@ -5807,6 +5941,9 @@ void DecodiumBridge::rebuildRxDecodeModel()
     for (QVariant const& value : std::as_const(m_decodeList)) appendUnique(value);
     QVariantList const filtered = filterEntriesForRxDecode(merged);
     m_rxDecodeModel->setEntries(filtered);
+    trace.addDetail(QStringLiteral("merged_rows=%1 filtered_rows=%2")
+                        .arg(merged.size())
+                        .arg(filtered.size()));
 }
 
 // 1.0.233 — DevOverlay metrics (Sprint 2 Phase 7).
@@ -5938,6 +6075,11 @@ void DecodiumBridge::setDevOverlayActive(bool v)
 
 void DecodiumBridge::emitDecodeListChangedThrottled()
 {
+    MainThreadTraceScope trace(QStringLiteral("emit_decode_list_changed_throttled"),
+                               QStringLiteral("decode_rows=%1 rx_rows=%2 timer_active=%3")
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_decodeListEmitTimer && m_decodeListEmitTimer->isActive() ? 1 : 0));
     // Lazy-init del timer al primo uso (after construction OK perché
     // siamo nel thread principale).
     if (m_decodeListEmitTimer == nullptr) {
@@ -5951,6 +6093,10 @@ void DecodiumBridge::emitDecodeListChangedThrottled()
         m_decodeListEmitTimer->setInterval(500);
         connect(m_decodeListEmitTimer, &QTimer::timeout, this, [this]() {
             if (m_decodeListEmitPending) {
+                MainThreadTraceScope timeoutTrace(QStringLiteral("emit_decode_list_changed_timer"),
+                                                  QStringLiteral("decode_rows=%1 rx_rows=%2")
+                                                      .arg(m_decodeList.size())
+                                                      .arg(m_rxDecodeList.size()));
                 m_decodeListEmitPending = false;
                 emit decodeListChanged();
                 // Restart per coalescere ulteriori burst
@@ -6059,6 +6205,24 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                           .arg(bridgeDiagnosticOneLine(msg)));
         }
     }, Qt::DirectConnection);
+
+    m_mediaDevices = new QMediaDevices(this);
+    m_audioDeviceRefreshTimer = new QTimer(this);
+    m_audioDeviceRefreshTimer->setSingleShot(true);
+    connect(m_audioDeviceRefreshTimer, &QTimer::timeout, this, [this]() {
+        bool const verboseLog = m_pendingAudioDeviceRefreshVerbose;
+        m_pendingAudioDeviceRefreshVerbose = false;
+        refreshAudioDeviceCache(QStringLiteral("debounced device refresh"), verboseLog, true);
+    });
+    auto queueAudioDeviceCacheRefresh = [this]() {
+        m_audioDeviceCacheDirty = true;
+        m_cachedTxOutputDeviceValid = false;
+        scheduleAudioDeviceRefresh(750, false);
+    };
+    connect(m_mediaDevices, &QMediaDevices::audioInputsChanged,
+            this, queueAudioDeviceCacheRefresh);
+    connect(m_mediaDevices, &QMediaDevices::audioOutputsChanged,
+            this, queueAudioDeviceCacheRefresh);
 
     m_themeManager    = new DecodiumThemeManager(this);
     m_propagationManager = new DecodiumPropagationManager(this);
@@ -7140,6 +7304,7 @@ DecodiumBridge::~DecodiumBridge()
     safeQuitThread(m_workerThreadWspr,   "wspr");
     safeQuitThread(m_workerThreadLegacyJt, "legacyJt");
     safeQuitThread(m_workerThreadFst4,   "fst4");
+    safeQuitThread(m_soundInputThread,   "soundInput");
 }
 
 QObject * DecodiumBridge::propagationManager() const
@@ -7180,19 +7345,10 @@ void DecodiumBridge::runPostQmlStartupServices()
     m_startupServicesStarted = true;
     bridgeLog(QStringLiteral("startup services: starting after Main.qml ready"));
 
-    QTimer::singleShot(100, this, [this]() {
-        if (!m_shuttingDown) {
-            enumerateAudioDevices();
-        }
-    });
-    QTimer::singleShot(1800, this, [this]() {
-        if (!m_shuttingDown) {
-            enumerateAudioDevices();
-        }
-    });
-    QTimer::singleShot(4500, this, [this]() {
-        if (!m_shuttingDown) {
-            enumerateAudioDevices();
+    scheduleAudioDeviceRefresh(1800, false);
+    QTimer::singleShot(8000, this, [this]() {
+        if (!m_shuttingDown && !m_audioDeviceCacheValid) {
+            scheduleAudioDeviceRefresh(0, false);
         }
     });
 
@@ -7457,20 +7613,48 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                     }
 #endif
                     if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+                        QElapsedTimer pttTimer;
+                        pttTimer.start();
                         double txDialHz = 0.0;
+                        qint64 syncMs = 0;
                         if (enabled) {
+                            QElapsedTimer syncTimer;
+                            syncTimer.start();
                             syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-on"));
+                            syncMs = syncTimer.elapsed();
                             txDialHz = catSplitTxDialFrequencyHz();
                         }
-                        activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
-                                          enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        QElapsedTimer catTimer;
+                        catTimer.start();
+                        bool const useAsyncPtt =
+                            enabled && shouldUseBridgeAudioForLegacyDigitalTx();
+                        bool const asyncPtt = useAsyncPtt
+                            && activeCatSetTxPttAsync(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                      enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        if (!asyncPtt) {
+                            activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                              enabled, txDialHz, m_omniRigCat, m_legacyBackend);
+                        }
+                        qint64 const catMs = catTimer.elapsed();
+                        int const audioDelayMs = asyncPtt ? kLegacyBridgeAudioAfterAsyncPttDelayMs : 0;
+                        txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-on on=%1 total_ms=%2 sync_ms=%3 cat_ms=%4 backend=%5 txDialHz=%6 async=%7 audio_delay_ms=%8")
+                                      .arg(enabled ? 1 : 0)
+                                      .arg(pttTimer.elapsed())
+                                      .arg(syncMs)
+                                      .arg(catMs)
+                                      .arg(m_catBackend)
+                                      .arg(txDialHz, 0, 'f', 0)
+                                      .arg(asyncPtt ? 1 : 0)
+                                      .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                         if (enabled && shouldUseBridgeAudioForLegacyDigitalTx()) {
-                            syncLegacyBackendState();
-                            if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-on"))) {
-                                bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed, stopping legacy TX"));
-                                abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-on-audio-failed"));
-                            }
+                            QTimer::singleShot(audioDelayMs, this, [this]() {
+                                syncLegacyBackendState();
+                                if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-on"))) {
+                                    bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed, stopping legacy TX"));
+                                    abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-on-audio-failed"));
+                                }
+                            });
                         }
 #endif
                     } else {
@@ -7490,17 +7674,44 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                         return;
                                     }
 #endif
+                                    QElapsedTimer pttTimer;
+                                    pttTimer.start();
+                                    QElapsedTimer syncTimer;
+                                    syncTimer.start();
                                     syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-delayed"));
-                                    activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
-                                                      true, catSplitTxDialFrequencyHz(),
-                                                      m_omniRigCat, m_legacyBackend);
+                                    qint64 const syncMs = syncTimer.elapsed();
+                                    double const txDialHz = catSplitTxDialFrequencyHz();
+                                    QElapsedTimer catTimer;
+                                    catTimer.start();
+                                    bool const useAsyncPtt = shouldUseBridgeAudioForLegacyDigitalTx();
+                                    bool const asyncPtt = useAsyncPtt
+                                        && activeCatSetTxPttAsync(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                                  true, txDialHz,
+                                                                  m_omniRigCat, m_legacyBackend);
+                                    if (!asyncPtt) {
+                                        activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                          true, txDialHz,
+                                                          m_omniRigCat, m_legacyBackend);
+                                    }
+                                    qint64 const catMs = catTimer.elapsed();
+                                    int const audioDelayMs = asyncPtt ? kLegacyBridgeAudioAfterAsyncPttDelayMs : 0;
+                                    txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt reason=legacy-ptt-delayed on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 txDialHz=%5 async=%6 audio_delay_ms=%7")
+                                                  .arg(pttTimer.elapsed())
+                                                  .arg(syncMs)
+                                                  .arg(catMs)
+                                                  .arg(m_catBackend)
+                                                  .arg(txDialHz, 0, 'f', 0)
+                                                  .arg(asyncPtt ? 1 : 0)
+                                                  .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                                     if (shouldUseBridgeAudioForLegacyDigitalTx()) {
-                                        syncLegacyBackendState();
-                                        if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-delayed"))) {
-                                            bridgeLog(QStringLiteral("legacyPttRequested: delayed bridge TX audio failed, stopping legacy TX"));
-                                            abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-delayed-audio-failed"));
-                                        }
+                                        QTimer::singleShot(audioDelayMs, this, [this]() {
+                                            syncLegacyBackendState();
+                                            if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-delayed"))) {
+                                                bridgeLog(QStringLiteral("legacyPttRequested: delayed bridge TX audio failed, stopping legacy TX"));
+                                                abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-delayed-audio-failed"));
+                                            }
+                                        });
                                     }
 #endif
                                 } else {
@@ -7903,6 +8114,13 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
+    MainThreadTraceScope trace(QStringLiteral("sync_legacy_backend_state"),
+                               QStringLiteral("mode=%1 monitoring=%2 tx=%3 tune=%4 bridge_audio=%5")
+                                   .arg(m_mode)
+                                   .arg(m_monitoring ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0)
+                                   .arg((m_bridgeAudioLegacyTxActive || m_bridgeAudioTuneActive) ? 1 : 0));
 
     auto updateBool = [] (bool& target, bool value, auto signal) {
         if (target != value) {
@@ -8195,10 +8413,12 @@ void DecodiumBridge::syncLegacyBackendState()
                 updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
             }
         } else {
+            QList<QAudioDevice> const inputs =
+                cachedAudioInputs(QStringLiteral("syncLegacyBackendState input probe"), false);
             bool const bridgeInputAvailable =
-                hasAudioDeviceNamed(QMediaDevices::audioInputs(), m_audioInputDevice);
+                hasAudioDeviceNamed(inputs, m_audioInputDevice);
             bool const legacyInputAvailable =
-                hasAudioDeviceNamed(QMediaDevices::audioInputs(), legacyAudioInput);
+                hasAudioDeviceNamed(inputs, legacyAudioInput);
             if (!m_audioInputDevice.trimmed().isEmpty()
                 && bridgeInputAvailable
                 && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
@@ -8224,10 +8444,12 @@ void DecodiumBridge::syncLegacyBackendState()
                 updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
             }
         } else {
+            QList<QAudioDevice> const outputs =
+                cachedAudioOutputs(QStringLiteral("syncLegacyBackendState output probe"), false);
             bool const bridgeOutputAvailable =
-                hasAudioDeviceNamed(QMediaDevices::audioOutputs(), m_audioOutputDevice);
+                hasAudioDeviceNamed(outputs, m_audioOutputDevice);
             bool const legacyOutputAvailable =
-                hasAudioDeviceNamed(QMediaDevices::audioOutputs(), legacyAudioOutput);
+                hasAudioDeviceNamed(outputs, legacyAudioOutput);
             if (!m_audioOutputDevice.trimmed().isEmpty()
                 && bridgeOutputAvailable
                 && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
@@ -8250,6 +8472,10 @@ void DecodiumBridge::syncLegacyBackendState()
         m_legacyBackend->setWaterfallPalette(legacyPaletteNameForUiIndex(m_uiPaletteIndex));
     }
 
+    trace.addDetail(QStringLiteral("after monitoring=%1 tx=%2 tune=%3")
+                        .arg(m_monitoring ? 1 : 0)
+                        .arg(m_transmitting ? 1 : 0)
+                        .arg(m_tuning ? 1 : 0));
     syncLegacyBackendDecodeList();
 }
 
@@ -8514,6 +8740,15 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
     if (!bandChanged && !rxChanged && !allTxtChanged) {
         return;
     }
+    MainThreadTraceScope trace(QStringLiteral("sync_legacy_backend_decode_list"),
+                               QStringLiteral("band_changed=%1 rx_changed=%2 alltxt_changed=%3 band_rev=%4 rx_rev=%5 decode_rows=%6 rx_rows=%7")
+                                   .arg(bandChanged ? 1 : 0)
+                                   .arg(rxChanged ? 1 : 0)
+                                   .arg(allTxtChanged ? 1 : 0)
+                                   .arg(bandRevision)
+                                   .arg(rxRevision)
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size()));
 
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
         QString loadedPath;
@@ -8886,6 +9121,9 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
     }
 
+    trace.addDetail(QStringLiteral("new_decode_rows=%1 new_rx_rows=%2")
+                        .arg(m_decodeList.size())
+                        .arg(m_rxDecodeList.size()));
     m_legacyAllTxtRevisionKey = allTxtRevisionKey;
 }
 
@@ -9188,6 +9426,11 @@ void DecodiumBridge::appendTxDecodeEntry(const QString& message)
 
 void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
 {
+    MainThreadTraceScope trace(QStringLiteral("append_rx_decode_entry"),
+                               QStringLiteral("rx_rows=%1 msg=[%2]")
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(entry.value(QStringLiteral("message")).toString().trimmed()),
+                               30);
     bool const isTx = entry.value(QStringLiteral("isTx")).toBool();
     if ((usingLegacyBackendForTx() && !isTx) || !shouldMirrorToRxPane(entry)) {
         return;
@@ -9215,6 +9458,7 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
     coalesceRxPaneTxRows(m_rxDecodeList, m_mode);
     normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
     emit rxDecodeListChanged();
+    trace.addDetail(QStringLiteral("new_rx_rows=%1").arg(m_rxDecodeList.size()));
 }
 
 void DecodiumBridge::rebuildRxDecodeList()
@@ -11930,6 +12174,13 @@ bool DecodiumBridge::legacyBridgeAudioTxInFlight() const
 bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_tx_preflight_main"),
+                               QStringLiteral("reason=%1 mode=%2 tx=%3")
+                                   .arg(reason, m_mode)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
+    QElapsedTimer totalTimer;
+    totalTimer.start();
     if (!shouldUseBridgeAudioForLegacyDigitalTx()) {
         return true;
     }
@@ -11938,25 +12189,42 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
         return true;
     }
 
+    QElapsedTimer phaseTimer;
+    phaseTimer.start();
     syncLegacyBackendState();
+    qint64 const syncMs = phaseTimer.elapsed();
+    phaseTimer.restart();
     if (!checkSwrAllowsTransmission(QStringLiteral("legacyBridgeTxPreflight"))) {
         return false;
     }
+    qint64 const swrMs = phaseTimer.elapsed();
 
+    phaseTimer.restart();
     QString msg = buildCurrentTxMessage();
     forceRecentRogerReportSignoffIfNeeded(msg,
                                           QStringLiteral("legacyBridgeTxPreflight:%1").arg(reason));
+    qint64 const msgMs = phaseTimer.elapsed();
     if (msg.trimmed().isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight blocked empty TX message (%1)")
                       .arg(reason));
         emit errorMessage(QStringLiteral("Nessun messaggio TX selezionato"));
         return false;
     }
+    phaseTimer.restart();
     if (!repairOrRejectStalePartnerTxMessage(msg,
                                              QStringLiteral("legacyBridgeTxPreflight:%1").arg(reason))) {
         emit statusMessage(QStringLiteral("TX bloccato: messaggio non coerente con il QSO attivo"));
         return false;
     }
+    qint64 const repairMs = phaseTimer.elapsed();
+    txTimelineLog(QStringLiteral("[TX-TL] legacy_preflight reason=%1 total_ms=%2 sync_ms=%3 swr_ms=%4 msg_ms=%5 repair_ms=%6 msg=[%7]")
+                  .arg(reason)
+                  .arg(totalTimer.elapsed())
+                  .arg(syncMs)
+                  .arg(swrMs)
+                  .arg(msgMs)
+                  .arg(repairMs)
+                  .arg(msg.trimmed()));
     return true;
 #else
     Q_UNUSED(reason);
@@ -12010,6 +12278,22 @@ void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
 bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_audio_start_main"),
+                               QStringLiteral("reason=%1 mode=%2 tx=%3 active=%4")
+                                   .arg(reason, m_mode)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0),
+                               25);
+    QElapsedTimer totalTimer;
+    totalTimer.start();
+    qint64 msgMs = 0;
+    qint64 ensureMs = 0;
+    qint64 outputMs = 0;
+    qint64 modStopMs = 0;
+    qint64 syncMs = 0;
+    qint64 bufferMs = 0;
+    qint64 scheduleMs = 0;
+
     if (!shouldUseBridgeAudioForLegacyDigitalTx()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio start skipped (%1): mode=%2 legacy=%3")
                       .arg(reason, m_mode)
@@ -12047,8 +12331,11 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         return false;
     }
 
+    QElapsedTimer phaseTimer;
+    phaseTimer.start();
     QString msg = buildCurrentTxMessage();
     forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("legacyBridgeTxAudio:%1").arg(reason));
+    msgMs = phaseTimer.elapsed();
     if (msg.trimmed().isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio: empty TX message"));
         emit errorMessage(QStringLiteral("Nessun messaggio TX selezionato"));
@@ -12065,9 +12352,11 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     QAudioDevice preparedDev;
     QString prepareError;
     int const txAudioFrequency = effectiveTxAudioFrequencyHz();
-    if (!ensureTxAudioPrepared(msg, txAudioFrequency, false,
+    phaseTimer.restart();
+    if (!ensureTxAudioPrepared(msg, txAudioFrequency, true,
                                &wave, &preparedPcm, &preparedFmt, &preparedDev,
                                &prepareError)) {
+        ensureMs = phaseTimer.elapsed();
         QString const errorText = prepareError.isEmpty()
             ? QStringLiteral("Audio TX: generazione waveform fallita")
             : prepareError;
@@ -12079,6 +12368,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                                 .arg(errorText, m_mode, QString::number(txAudioFrequency), msg.trimmed()));
         return false;
     }
+    ensureMs = phaseTimer.elapsed();
     if (wave.isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio refused empty wave (%1) msg=[%2]")
                       .arg(reason, msg.trimmed()));
@@ -12087,17 +12377,11 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         return false;
     }
 
-    bool requestedDeviceFound = false;
-    QAudioDevice outDev = resolveTxOutputDevice(&requestedDeviceFound);
-    if (!requestedDeviceFound) {
-        bridgeLog(QStringLiteral("legacyBridgeTxAudio: requested output device not found, fallback to default: %1 requested=[%2]")
-                      .arg(outDev.description(), m_audioOutputDevice));
-        emit statusMessage(QStringLiteral("Audio TX non trovato, uso default: ") + outDev.description());
-    }
-    QAudioFormat const outFmt = chooseTxAudioFormat(outDev);
+    QAudioDevice const outDev = preparedDev;
+    QAudioFormat const outFmt = preparedFmt;
     qreal const attenuationDb = txAttenuationFromSlider(m_txOutputLevel);
-    QAudioFormat const pcmFmt = makeAudioFormat(48000, qMax(1, outFmt.channelCount()), QAudioFormat::Int16);
-    QByteArray pcm = buildTxPcmBuffer(wave, pcmFmt, boundedAudioChannel(m_audioOutputChannel));
+    QAudioFormat const pcmFmt = outFmt;
+    QByteArray pcm = std::move(preparedPcm);
     if (pcm.isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio PCM build failed (%1): fmt=%2 msg=[%3]")
                       .arg(reason, audioFormatToString(pcmFmt), msg.trimmed()));
@@ -12108,10 +12392,14 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                                    msg.trimmed()));
         return false;
     }
-    updateSoundOutputDevice();
+    phaseTimer.restart();
+    m_soundOutput->setFormat(outDev, static_cast<unsigned>(qMax(1, outFmt.channelCount())), 16384);
     m_soundOutput->setAttenuation(attenuationDb);
+    outputMs = phaseTimer.elapsed();
     if (m_modulator->isActive()) {
+        phaseTimer.restart();
         m_modulator->stop(true);
+        modStopMs = phaseTimer.elapsed();
     }
 
     if (m_currentTx == m_lastNtx) {
@@ -12144,7 +12432,9 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
     m_activeTxNumber = m_currentTx;
     m_activeTxMessage = msg.trimmed();
+    phaseTimer.restart();
     syncActiveCatTxSplitFrequency(QStringLiteral("legacyBridgeTxAudio"));
+    syncMs = phaseTimer.elapsed();
 
     if (!m_transmitting) {
         m_transmitting = true;
@@ -12174,6 +12464,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_txPlaybackReleasePending = false;
     m_txAudioRestartPending = false;
 
+    phaseTimer.restart();
     if (m_txPcmBuffer) {
         m_txPcmBuffer->close();
         delete m_txPcmBuffer;
@@ -12184,6 +12475,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_txPcmBuffer->setData(m_txPcmData);
     m_txPcmBuffer->open(QIODevice::ReadOnly);
     m_txPcmBuffer->seek(0);
+    bufferMs = phaseTimer.elapsed();
     QPointer<QBuffer> const bufferGuard(m_txPcmBuffer);
     qInfo().noquote() << "TX legacy bridge payload"
                       << "reason=" << reason
@@ -12191,17 +12483,53 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                       << "waveSamples=" << wave.size()
                       << "pcmBytes=" << m_txPcmData.size()
                       << "bufferSize=" << m_txPcmBuffer->size();
-    m_soundOutput->restart(m_txPcmBuffer);
-    QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
-        if (!m_bridgeAudioLegacyTxActive || !m_transmitting || bufferGuard != m_txPcmBuffer) {
+    phaseTimer.restart();
+    m_txAudioRestartPending = true;
+    QPointer<SoundOutput> const soundOutputGuard(m_soundOutput);
+    qint64 const audioLaunchScheduledAtMs = QDateTime::currentMSecsSinceEpoch();
+    QString const launchReason = reason;
+    QString const launchMessage = msg.trimmed();
+    QTimer::singleShot(0, this, [this, bufferGuard, soundOutputGuard, audioLaunchScheduledAtMs,
+                                 txPlaybackMs, launchReason, launchMessage]() {
+        QElapsedTimer launchTimer;
+        launchTimer.start();
+        qint64 const queueDelayMs = QDateTime::currentMSecsSinceEpoch() - audioLaunchScheduledAtMs;
+        if (!m_bridgeAudioLegacyTxActive || !m_transmitting || bufferGuard != m_txPcmBuffer || !soundOutputGuard) {
+            m_txAudioRestartPending = false;
+            txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch skipped reason=%1 queue_delay_ms=%2 active=%3 transmitting=%4 buffer_ok=%5 sound_ok=%6 msg=[%7]")
+                          .arg(launchReason)
+                          .arg(queueDelayMs)
+                          .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
+                          .arg(m_transmitting ? 1 : 0)
+                          .arg(bufferGuard == m_txPcmBuffer ? 1 : 0)
+                          .arg(soundOutputGuard ? 1 : 0)
+                          .arg(launchMessage));
             return;
         }
-        bridgeLog(QStringLiteral("legacyBridgeTxAudio completion timer: playback_ms=%1 bufPos=%2/%3")
-                      .arg(txPlaybackMs)
+
+        soundOutputGuard->restart(m_txPcmBuffer);
+        qint64 const restartMs = launchTimer.elapsed();
+        m_txAudioRestartPending = false;
+        txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_launch reason=%1 queue_delay_ms=%2 restart_ms=%3 bufPos=%4/%5 msg=[%6]")
+                      .arg(launchReason)
+                      .arg(queueDelayMs)
+                      .arg(restartMs)
                       .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
-                      .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1));
-        finishModulatorIdlePlayback(QStringLiteral("legacy-bridge-pcm"));
+                      .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1)
+                      .arg(launchMessage));
+
+        QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
+            if (!m_bridgeAudioLegacyTxActive || !m_transmitting || bufferGuard != m_txPcmBuffer) {
+                return;
+            }
+            bridgeLog(QStringLiteral("legacyBridgeTxAudio completion timer: playback_ms=%1 bufPos=%2/%3")
+                          .arg(txPlaybackMs)
+                          .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
+                          .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1));
+            finishModulatorIdlePlayback(QStringLiteral("legacy-bridge-pcm"));
+        });
     });
+    scheduleMs = phaseTimer.elapsed();
 
     bridgeLog(QStringLiteral("legacyBridgeTxAudio start: reason=%1 mode=%2 msg=[%3] dev=%4 fmt=%5 pcm_fmt=%6 channels=%7 attn=%8 gain=%9 payload=%10 pcm_bytes=%11 hold_ms=%12")
                   .arg(reason, m_mode, msg.trimmed(), outDev.description(),
@@ -12212,6 +12540,22 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                   .arg(txWaveMetricsSummary(wave))
                   .arg(m_txPcmData.size())
                   .arg(txPlaybackMs + 300));
+    txTimelineLog(QStringLiteral("[TX-TL] legacy_bridge_audio_prepare reason=%1 total_ms=%2 msg_ms=%3 ensure_ms=%4 output_ms=%5 mod_stop_ms=%6 sync_ms=%7 buffer_ms=%8 schedule_ms=%9 wave_samples=%10 pcm_bytes=%11 msg=[%12]")
+                  .arg(reason)
+                  .arg(totalTimer.elapsed())
+                  .arg(msgMs)
+                  .arg(ensureMs)
+                  .arg(outputMs)
+                  .arg(modStopMs)
+                  .arg(syncMs)
+                  .arg(bufferMs)
+                  .arg(scheduleMs)
+                  .arg(wave.size())
+                  .arg(m_txPcmData.size())
+                  .arg(msg.trimmed()));
+    trace.addDetail(QStringLiteral("msg=[%1] pcm_bytes=%2")
+                        .arg(msg.trimmed())
+                        .arg(m_txPcmData.size()));
     emit statusMessage(QStringLiteral("TX: ") + msg.trimmed());
     return true;
 #else
@@ -12223,6 +12567,12 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 void DecodiumBridge::stopBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_audio_stop_main"),
+                               QStringLiteral("reason=%1 active=%2 tx=%3")
+                                   .arg(reason)
+                                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
     if (!m_bridgeAudioLegacyTxActive
         && !(m_transmitting && m_modulator && m_modulator->isActive())) {
         return;
@@ -12683,6 +13033,12 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
 
 void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 {
+    QElapsedTimer totalTimer;
+    totalTimer.start();
+    qint64 pttOffMs = 0;
+    qint64 soundFinishMs = 0;
+    qint64 cleanupMs = 0;
+    qint64 resumeMs = 0;
     bridgeLog("finishModulatorIdlePlayback: reason=" + reason +
               " transmitting=" + QString::number(m_transmitting) +
               " tuning=" + QString::number(m_tuning));
@@ -12709,10 +13065,19 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     bool const wasBridgeLegacyTx = m_bridgeAudioLegacyTxActive;
     m_bridgeAudioLegacyTxActive = false;
 
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
+    QElapsedTimer phaseTimer;
+    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+        phaseTimer.start();
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+        pttOffMs = phaseTimer.elapsed();
+    }
 
-    if (m_soundOutput) m_soundOutput->finishPlayback();
+    if (m_soundOutput) {
+        phaseTimer.start();
+        m_soundOutput->finishPlayback();
+        soundFinishMs = phaseTimer.elapsed();
+    }
+    phaseTimer.start();
     if (m_txPcmBuffer) {
         m_txPcmBuffer->close();
         delete m_txPcmBuffer;
@@ -12733,9 +13098,21 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
         emit transmittingChanged();
         emit statusMessage("TX terminato");
     }
+    cleanupMs = phaseTimer.elapsed();
 
+    phaseTimer.start();
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    resumeMs = phaseTimer.elapsed();
+    txTimelineLog(QStringLiteral("[TX-TL] tx_finish reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 bridge_legacy=%7 was_transmitting=%8")
+                  .arg(reason)
+                  .arg(totalTimer.elapsed())
+                  .arg(pttOffMs)
+                  .arg(soundFinishMs)
+                  .arg(cleanupMs)
+                  .arg(resumeMs)
+                  .arg(wasBridgeLegacyTx ? 1 : 0)
+                  .arg(wasTransmitting ? 1 : 0));
     bool const appliedDeferredAutoSeqAfterActiveTx =
         wasTransmitting && applyPendingAutoSeqTxAfterCompletedTx(finishedTx);
     if (wasTransmitting && !appliedDeferredAutoSeqAfterActiveTx) {
@@ -12746,10 +13123,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 // ===========================================================================
 
 // Restituisce QAudioDevice corrispondente a m_audioOutputDevice (o il default)
-static QAudioDevice findOutputDevice(const QString& name, bool* requestedDeviceFound)
+static QAudioDevice findOutputDevice(const QString& name,
+                                     QList<QAudioDevice> const& outputs,
+                                     QAudioDevice const& defaultOutput,
+                                     bool* requestedDeviceFound)
 {
-    auto const outputs = QMediaDevices::audioOutputs();
-
     QString const requestedName = name.trimmed();
 #ifdef Q_OS_LINUX
     const QString pulseSinkName = linuxPulseSinkNameFromDisplay(requestedName);
@@ -12787,7 +13165,7 @@ static QAudioDevice findOutputDevice(const QString& name, bool* requestedDeviceF
     }
 
     if (requestedDeviceFound) *requestedDeviceFound = requestedName.isEmpty();
-    return QMediaDevices::defaultAudioOutput();
+    return defaultOutput;
 }
 
 void DecodiumBridge::invalidateTxAudioCache()
@@ -12805,7 +13183,10 @@ QAudioDevice DecodiumBridge::resolveTxOutputDevice(bool* requestedDeviceFound)
     }
 
     bool found = false;
-    QAudioDevice device = findOutputDevice(m_audioOutputDevice, &found);
+    QAudioDevice device = findOutputDevice(m_audioOutputDevice,
+                                           cachedAudioOutputs(QStringLiteral("resolveTxOutputDevice"), false),
+                                           cachedDefaultAudioOutput(QStringLiteral("resolveTxOutputDevice"), false),
+                                           &found);
     m_cachedTxOutputDeviceName = m_audioOutputDevice;
     m_cachedTxOutputDeviceFound = found;
     m_cachedTxOutputDevice = device;
@@ -12860,7 +13241,7 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
 
     bool needPcm = !usingTciAudioInput();
 #if defined(Q_OS_MAC)
-    needPcm = false;
+    needPcm = shouldUseBridgeAudioForLegacyDigitalTx();
 #endif
 
     QVector<float> wave;
@@ -12887,9 +13268,34 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                                            QAudioFormat* formatOut, QAudioDevice* deviceOut,
                                            QString* errorOut)
 {
+    QElapsedTimer totalTimer;
+    totalTimer.start();
     QString const mode = m_mode.trimmed().toUpper();
     QString const message = msg.trimmed();
     bool const tciAudio = usingTciAudioInput();
+    auto logResult = [&](bool cacheHit,
+                         qint64 waveMs,
+                         qint64 resolveMs,
+                         qint64 formatMs,
+                         qint64 pcmMs,
+                         int waveSamples,
+                         int pcmBytes,
+                         const QAudioFormat& format,
+                         const QAudioDevice& device) {
+        txTimelineLog(QStringLiteral("[TX-TL] ensure_tx_audio mode=%1 msg=[%2] need_pcm=%3 cache=%4 total_ms=%5 wave_ms=%6 resolve_ms=%7 format_ms=%8 pcm_ms=%9 wave_samples=%10 pcm_bytes=%11 fmt=%12 dev=%13")
+                      .arg(mode, message)
+                      .arg(needPcm ? 1 : 0)
+                      .arg(cacheHit ? 1 : 0)
+                      .arg(totalTimer.elapsed())
+                      .arg(waveMs)
+                      .arg(resolveMs)
+                      .arg(formatMs)
+                      .arg(pcmMs)
+                      .arg(waveSamples)
+                      .arg(pcmBytes)
+                      .arg(format.isValid() ? audioFormatToString(format) : QStringLiteral("not-required"),
+                           device.description().isEmpty() ? QStringLiteral("not-required") : device.description()));
+    };
 
     auto cacheMatchesBase = [&]() {
         return !m_txAudioCache.wave.isEmpty()
@@ -12911,11 +13317,21 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                 if (pcmOut) *pcmOut = m_txAudioCache.pcm;
                 if (formatOut) *formatOut = m_txAudioCache.outputFormat;
                 if (deviceOut) *deviceOut = m_cachedTxOutputDevice;
+                logResult(true, 0, 0, 0, 0,
+                          m_txAudioCache.wave.size(),
+                          m_txAudioCache.pcm.size(),
+                          m_txAudioCache.outputFormat,
+                          m_cachedTxOutputDevice);
                 return true;
             }
+            QElapsedTimer phaseTimer;
+            phaseTimer.start();
             bool found = false;
             QAudioDevice const device = resolveTxOutputDevice(&found);
+            qint64 const resolveMs = phaseTimer.elapsed();
+            phaseTimer.restart();
             QAudioFormat const format = chooseTxAudioFormat(device);
+            qint64 const formatMs = phaseTimer.elapsed();
             if (m_txAudioCache.outputDeviceName == m_audioOutputDevice
                 && m_txAudioCache.outputDeviceDescription == device.description()
                 && m_txAudioCache.outputChannel == m_audioOutputChannel
@@ -12925,6 +13341,11 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                 if (formatOut) *formatOut = m_txAudioCache.outputFormat;
                 if (deviceOut) *deviceOut = device;
                 Q_UNUSED(found)
+                logResult(true, 0, resolveMs, formatMs, 0,
+                          m_txAudioCache.wave.size(),
+                          m_txAudioCache.pcm.size(),
+                          m_txAudioCache.outputFormat,
+                          device);
                 return true;
             }
         } else {
@@ -12932,12 +13353,20 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
             if (pcmOut) pcmOut->clear();
             if (formatOut) *formatOut = QAudioFormat {};
             if (deviceOut) *deviceOut = QAudioDevice {};
+            logResult(true, 0, 0, 0, 0,
+                      m_txAudioCache.wave.size(),
+                      0,
+                      QAudioFormat {},
+                      QAudioDevice {});
             return true;
         }
     }
 
     QString buildError;
+    QElapsedTimer phaseTimer;
+    phaseTimer.start();
     QVector<float> wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
+    qint64 const waveMs = phaseTimer.elapsed();
     if (wave.isEmpty()) {
         if (errorOut) {
             *errorOut = buildError.isEmpty() ? QStringLiteral("Generazione onda TX fallita") : buildError;
@@ -12949,15 +13378,24 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     QByteArray pcm;
     QAudioFormat format;
     QAudioDevice device;
+    qint64 resolveMs = 0;
+    qint64 formatMs = 0;
+    qint64 pcmMs = 0;
     if (needPcm) {
         bool found = false;
+        phaseTimer.restart();
         device = resolveTxOutputDevice(&found);
+        resolveMs = phaseTimer.elapsed();
         if (!found && !m_audioOutputDevice.trimmed().isEmpty()) {
             bridgeLog("TX audio cache: requested output device not found, fallback to default: " +
                       device.description() + " requested=[" + m_audioOutputDevice + "]");
         }
+        phaseTimer.restart();
         format = chooseTxAudioFormat(device);
+        formatMs = phaseTimer.elapsed();
+        phaseTimer.restart();
         pcm = buildTxPcmBuffer(wave, format, boundedAudioChannel(m_audioOutputChannel));
+        pcmMs = phaseTimer.elapsed();
         if (pcm.isEmpty()) {
             if (errorOut) {
                 *errorOut = QStringLiteral(
@@ -12991,6 +13429,11 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     if (pcmOut) *pcmOut = m_txAudioCache.pcm;
     if (formatOut) *formatOut = m_txAudioCache.outputFormat;
     if (deviceOut) *deviceOut = device;
+    logResult(false, waveMs, resolveMs, formatMs, pcmMs,
+              m_txAudioCache.wave.size(),
+              m_txAudioCache.pcm.size(),
+              m_txAudioCache.outputFormat,
+              device);
     return true;
 }
 
@@ -13641,7 +14084,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     qint64 const bufRemaining = m_txPcmBuffer
         ? qMax<qint64>(0, m_txPcmBuffer->size() - m_txPcmBuffer->pos())
         : -1;
-    bridgeLog(QStringLiteral("[TX-TL] complete_entry reason=%1 err=%2 tx=%3 hold_ms=%4 buf_rem=%5")
+    txTimelineLog(QStringLiteral("[TX-TL] complete_entry reason=%1 err=%2 tx=%3 hold_ms=%4 buf_rem=%5")
                   .arg(reason).arg(error ? 1 : 0).arg(m_transmitting ? 1 : 0)
                   .arg(holdRemaining).arg(bufRemaining));
 
@@ -14429,7 +14872,7 @@ void DecodiumBridge::startTx()
         qint64 const sinkCreateStartMs = QDateTime::currentMSecsSinceEpoch();
         m_txAudioSink = new QAudioSink(outDev, outFmt, this);
         qint64 const sinkCreateEndMs = QDateTime::currentMSecsSinceEpoch();
-        bridgeLog(QStringLiteral("[TX-TL] sink_create dt=%1ms dev=%2")
+        txTimelineLog(QStringLiteral("[TX-TL] sink_create dt=%1ms dev=%2")
                       .arg(sinkCreateEndMs - sinkCreateStartMs)
                       .arg(outDev.description().isEmpty()
                            ? QStringLiteral("<default>")
@@ -14472,7 +14915,7 @@ void DecodiumBridge::startTx()
                 + "/" + QString::number(m_txPcmBuffer->size());
             bridgeLog("TX QAudioSink stateChanged: " + QString::number(static_cast<int>(st)) + extra);
             // 1.0.218 — [TX-TL] state transition con timestamp ms
-            bridgeLog(QStringLiteral("[TX-TL] sink_state st=%1%2")
+            txTimelineLog(QStringLiteral("[TX-TL] sink_state st=%1%2")
                           .arg(static_cast<int>(st)).arg(extra));
             if (st == QAudio::IdleState) {
                 bool const bufferIncomplete = m_txPcmBuffer && !m_txPcmBuffer->atEnd();
@@ -15023,7 +15466,7 @@ bool DecodiumBridge::launchTuneAudio()
     qint64 const tuneSinkCreateStartMs = QDateTime::currentMSecsSinceEpoch();
     m_txAudioSink = new QAudioSink(outDev, outFmt, this);
     qint64 const tuneSinkCreateEndMs = QDateTime::currentMSecsSinceEpoch();
-    bridgeLog(QStringLiteral("[TX-TL] tune_sink_create dt=%1ms dev=%2")
+    txTimelineLog(QStringLiteral("[TX-TL] tune_sink_create dt=%1ms dev=%2")
                   .arg(tuneSinkCreateEndMs - tuneSinkCreateStartMs)
                   .arg(outDev.description().isEmpty()
                        ? QStringLiteral("<default>")
@@ -15174,11 +15617,16 @@ void DecodiumBridge::startAlcCalibration()
         return;
     }
 
-    // 1.0.326 — A3: guard TX/tune/hold: non avviare calibrazione se già in TX o hold
-    if (m_transmitting || m_tuning || m_manualTxHold) {
-        m_alcCalStatus = QStringLiteral("Cannot calibrate while transmitting/tuning/on hold");
+    // Guard active RF only. ManualTxHold is a latched "do not resume normal TX"
+    // state after HALT; an explicit one-shot ALC tune carrier may run while it
+    // remains set, and the hold continues to block normal auto-TX afterwards.
+    if (m_transmitting || m_tuning) {
+        m_alcCalStatus = QStringLiteral("Cannot calibrate while transmitting/tuning");
         emit alcCalibrationStatusChanged();
         return;
+    }
+    if (m_manualTxHold) {
+        bridgeLog(QStringLiteral("[ALC] calibration allowed while manualTxHold is engaged"));
     }
 
     m_alcCalStartLevel  = m_txOutputLevel;
@@ -15383,7 +15831,7 @@ void DecodiumBridge::haltWithReason(const QString& reason)
 
 void DecodiumBridge::refreshAudioDevices()
 {
-    enumerateAudioDevices();
+    refreshAudioDeviceCache(QStringLiteral("manual refreshAudioDevices"), true, true);
 
     auto preferredDeviceName = [](QAudioDevice const& preferred,
                                   QList<QAudioDevice> const& devices) -> QString {
@@ -15395,7 +15843,7 @@ void DecodiumBridge::refreshAudioDevices()
     };
 
     bool const tciAudio = usingTciAudioInput();
-    QList<QAudioDevice> const inputs = QMediaDevices::audioInputs();
+    QList<QAudioDevice> const inputs = m_cachedAudioInputs;
 #ifdef Q_OS_LINUX
     const bool linuxPulseInputSelected =
         !linuxPulseSourceNameFromDisplay(m_audioInputDevice).isEmpty();
@@ -15415,14 +15863,14 @@ void DecodiumBridge::refreshAudioDevices()
             applyAudioInputRuntimeChange(QStringLiteral("refresh: rebind selected input"));
         } else {
             QString const fallbackInput =
-                preferredDeviceName(QMediaDevices::defaultAudioInput(), inputs);
+                preferredDeviceName(m_cachedDefaultAudioInput, inputs);
             if (!fallbackInput.isEmpty()) {
                 setAudioInputDevice(fallbackInput);
             }
         }
     }
 
-    QList<QAudioDevice> const outputs = QMediaDevices::audioOutputs();
+    QList<QAudioDevice> const outputs = m_cachedAudioOutputs;
 #ifdef Q_OS_LINUX
     const bool linuxPulseOutputSelected =
         !linuxPulseSinkNameFromDisplay(m_audioOutputDevice).isEmpty();
@@ -15442,7 +15890,7 @@ void DecodiumBridge::refreshAudioDevices()
             applyAudioOutputRuntimeChange(QStringLiteral("refresh: rebind selected output"));
         } else {
             QString const fallbackOutput =
-                preferredDeviceName(QMediaDevices::defaultAudioOutput(), outputs);
+                preferredDeviceName(m_cachedDefaultAudioOutput, outputs);
             if (!fallbackOutput.isEmpty()) {
                 setAudioOutputDevice(fallbackOutput);
             }
@@ -18545,6 +18993,12 @@ void DecodiumBridge::setUdpInterfaceName(const QString& name)
 
 void DecodiumBridge::saveSettings()
 {
+    MainThreadTraceScope trace(QStringLiteral("save_settings"),
+                               QStringLiteral("mode=%1 cat=%2 monitoring=%3 tx=%4")
+                                   .arg(m_mode, m_catBackend)
+                                   .arg(m_monitoring ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
     QSettings s("Decodium", "Decodium3");
     s.setValue("callsign", m_callsign);
     s.setValue("grid", m_grid);
@@ -18718,6 +19172,7 @@ void DecodiumBridge::saveSettings()
     s.setValue("uiDecodeWinWidth",  m_uiDecodeWinWidth);
     s.setValue("uiDecodeWinHeight", m_uiDecodeWinHeight);
     s.sync();
+    trace.addDetail(QStringLiteral("path=[%1]").arg(s.fileName()));
     emit statusMessage("Impostazioni salvate");
 }
 
@@ -23243,7 +23698,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
         m_bandManager->updateFromFrequency(m_frequency);
     }
 
-    enumerateAudioDevices();
+    scheduleAudioDeviceRefresh(250, false);
 
     if (m_nativeCat) {
         m_nativeCat->loadSettings();
@@ -26436,6 +26891,13 @@ void DecodiumBridge::scheduleDeferredWorldMapFeedFlush(int delayMs)
 
 void DecodiumBridge::flushDeferredWorldMapFeed()
 {
+    MainThreadTraceScope trace(QStringLiteral("flush_deferred_world_map_feed"),
+                               QStringLiteral("queued=%1 full_replay=%2 tx=%3 tune=%4")
+                                   .arg(m_deferredWorldMapFeedQueue.size())
+                                   .arg(m_worldMapFullReplayDeferred ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0),
+                               25);
     if (!m_worldMapFullReplayDeferred && m_deferredWorldMapFeedQueue.isEmpty()) {
         return;
     }
@@ -26550,6 +27012,11 @@ void DecodiumBridge::resetWorldMapDisplayFromCurrentDecodes()
 
 void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClearedFeedEntry)
 {
+    MainThreadTraceScope trace(QStringLiteral("replay_world_map_entry"),
+                               QStringLiteral("skip_cleared=%1 msg=[%2]")
+                                   .arg(skipClearedFeedEntry ? 1 : 0)
+                                   .arg(entry.value(QStringLiteral("message")).toString().trimmed()),
+                               30);
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -26836,6 +27303,12 @@ void DecodiumBridge::emitCurrentWorldMapQsoPath()
 
 void DecodiumBridge::replayWorldMapFeed()
 {
+    MainThreadTraceScope trace(QStringLiteral("replay_world_map_feed"),
+                               QStringLiteral("decode_rows=%1 rx_rows=%2 tx=%3 tune=%4")
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0));
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -27267,6 +27740,12 @@ void DecodiumBridge::refreshDecodeListDxcc()
 
 void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 {
+    MainThreadTraceScope trace(QStringLiteral("on_ft8_decode_ready"),
+                               QStringLiteral("serial=%1 rows=%2 mode=%3 tx=%4")
+                                   .arg(serial)
+                                   .arg(rows.size())
+                                   .arg(m_mode)
+                                   .arg(m_transmitting ? 1 : 0));
     if (shouldIgnoreDecodeCallbacks()) {
         bridgeLog("onFt8DecodeReady: ignored during shutdown");
         return;
@@ -27694,6 +28173,14 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                   .arg(cqOnlyFiltered)
                   .arg(myCallOnlyFiltered)
                   .arg(duplicatesSkipped));
+    trace.addDetail(QStringLiteral("accepted=%1 parse_fail=%2 semantic=%3 user_filtered=%4 ui_filtered=%5 dupes=%6 changed=%7")
+                        .arg(accepted)
+                        .arg(parseFailures)
+                        .arg(semanticFiltered)
+                        .arg(userFiltered)
+                        .arg(uiFiltered)
+                        .arg(duplicatesSkipped)
+                        .arg(changed ? 1 : 0));
     if (rows.isEmpty()) {
         ++m_zeroRawDecodeStreak;
         const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -27789,6 +28276,11 @@ void DecodiumBridge::onFt2DecodeReady(quint64 serial, QStringList rows)
 
 void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
 {
+    MainThreadTraceScope trace(QStringLiteral("on_ft2_async_decode_ready"),
+                               QStringLiteral("rows=%1 mode=%2 tx=%3")
+                                   .arg(rows.size())
+                                   .arg(m_mode)
+                                   .arg(m_transmitting ? 1 : 0));
     // Path turbo async: stessa logica di onFt8DecodeReady ma senza serial.
     // Deduplica per messaggio: non aggiunge righe già presenti nella lista.
     m_asyncDecodePending = false;
@@ -28080,6 +28572,14 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                   .arg(userFiltered)
                   .arg(uiFiltered)
                   .arg(duplicatesSkipped));
+    trace.addDetail(QStringLiteral("accepted=%1 parse_fail=%2 semantic=%3 user_filtered=%4 ui_filtered=%5 dupes=%6 changed=%7")
+                        .arg(accepted)
+                        .arg(parseFailures)
+                        .arg(semanticFiltered)
+                        .arg(userFiltered)
+                        .arg(uiFiltered)
+                        .arg(duplicatesSkipped)
+                        .arg(changed ? 1 : 0));
 
     // Shannon cbAsyncDecode legacy: quando arriva un decode con il nostro
     // callsign, elabora auto-seq e avvia TX IMMEDIATAMENTE senza aspettare
@@ -28721,6 +29221,7 @@ void DecodiumBridge::onSpectrumTimer()
                 }
 
                 m_lastPanadapterFrameMs = nowMs;
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
                 if (m_panadapterItem) {
                     bool const accepted = m_panadapterItem->addPcmFrameI16(m_wfRing,
                                                                            WF_RING_SIZE,
@@ -28743,6 +29244,7 @@ void DecodiumBridge::onSpectrumTimer()
                     }
                     return;
                 }
+#endif
 
                 QVector<float> pcmFrame(fftLen, 0.0f);
                 for (int i = 0; i < firstChunk; ++i)
@@ -29219,6 +29721,11 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
 
 void DecodiumBridge::startAudioCapture()
 {
+    MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
+                               QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
+                                   .arg(m_audioInputDevice, m_mode)
+                                   .arg(usingLegacyBackendForTx() ? 1 : 0),
+                               25);
     bridgeLog("startAudioCapture() called");
     if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
@@ -29243,38 +29750,14 @@ void DecodiumBridge::startAudioCapture()
         return;
     }
 
-    // Qt6: use QMediaDevices::audioInputs() and QAudioDevice
-    QAudioDevice selectedDevice = QMediaDevices::defaultAudioInput();
-    bool requestedDeviceFound = m_audioInputDevice.isEmpty();
+    // Qt6: use the debounced audio-device cache here; RX start stays off the
+    // expensive QMediaDevices::audioInputs() hot path.
 #ifdef Q_OS_LINUX
     const QString pulseSourceName = linuxPulseSourceNameFromDisplay(m_audioInputDevice);
-    if (!pulseSourceName.isEmpty()) {
-        QString pulseError;
-        if (linuxSetDefaultPulseSource(pulseSourceName, &pulseError)) {
-            bridgeLog(QStringLiteral("startAudioCapture: selected Linux Pulse/PipeWire source [%1], using Qt default input after pactl default-source")
-                          .arg(pulseSourceName));
-            qInfo().noquote() << "[AUDIODEV] selected Pulse/PipeWire source:" << pulseSourceName;
-            selectedDevice = QMediaDevices::defaultAudioInput();
-            requestedDeviceFound = true;
-        } else {
-            bridgeLog(QStringLiteral("startAudioCapture: failed to select Linux Pulse/PipeWire source [%1]: %2")
-                          .arg(pulseSourceName, pulseError));
-            qWarning().noquote() << "[AUDIODEV] failed to select Pulse/PipeWire source:"
-                                 << pulseSourceName << pulseError;
-        }
-    } else
 #endif
-    if (!m_audioInputDevice.isEmpty()) {
-        for (const QAudioDevice& dev : QMediaDevices::audioInputs()) {
-            if (dev.description() == m_audioInputDevice ||
-                dev.description().contains(m_audioInputDevice, Qt::CaseInsensitive) ||
-                m_audioInputDevice.contains(dev.description(), Qt::CaseInsensitive)) {
-                selectedDevice = dev;
-                requestedDeviceFound = true;
-                break;
-            }
-        }
-    }
+    bool requestedDeviceFound = false;
+    QAudioDevice selectedDevice =
+        resolveRxInputDevice(m_audioInputDevice, &requestedDeviceFound);
     if (!requestedDeviceFound) {
         bridgeLog("startAudioCapture: requested input device not found, fallback to default: " +
                   selectedDevice.description());
@@ -29324,7 +29807,15 @@ void DecodiumBridge::startAudioCapture()
 
     // Create SoundInput (once).
     if (!m_soundInput) {
-        m_soundInput = new SoundInput(this);
+        if (!m_soundInputThread) {
+            m_soundInputThread = new QThread(this);
+            m_soundInputThread->setObjectName(QStringLiteral("SoundInputThread"));
+            m_soundInputThread->start(QThread::HighPriority);
+        }
+        m_soundInput = new SoundInput();
+        m_soundInput->moveToThread(m_soundInputThread);
+        connect(m_soundInputThread, &QThread::finished,
+                m_soundInput, &QObject::deleteLater);
         connect(m_soundInput, &SoundInput::error, this, [this](const QString& msg) {
             QString text = msg.trimmed();
             if (!text.startsWith(QStringLiteral("Audio "), Qt::CaseInsensitive)) {
@@ -29368,16 +29859,19 @@ void DecodiumBridge::startAudioCapture()
         .arg(static_cast<int>(channel))
         .arg(rxFramesPerBuffer);
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    if (m_soundInput && m_soundInput->isActiveFor(selectedDevice, downSampleFactor, channel)) {
+    bool const recentAudioStart =
+        m_soundInput
+        && m_lastAudioCaptureStartMs > 0
+        && nowMs - m_lastAudioCaptureStartMs < 5000;
+    if (recentAudioStart && m_lastAudioCaptureStartKey == startKey) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: identical stream start already pending age=%1ms")
+                      .arg(nowMs - m_lastAudioCaptureStartMs));
         m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         return;
     }
-    if (m_soundInput
-        && m_lastAudioCaptureStartKey == startKey
-        && m_lastAudioCaptureStartMs > 0
-        && nowMs - m_lastAudioCaptureStartMs < 750) {
-        bridgeLog(QStringLiteral("startAudioCapture skipped: identical stream start already pending age=%1ms")
-                      .arg(nowMs - m_lastAudioCaptureStartMs));
+    if (!recentAudioStart
+        && m_soundInput
+        && m_soundInput->isActiveFor(selectedDevice, downSampleFactor, channel)) {
         m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         return;
     }
@@ -29395,6 +29889,10 @@ void DecodiumBridge::startAudioCapture()
     }
     m_soundInput->start(selectedDevice, rxFramesPerBuffer, m_audioSink, downSampleFactor, channel);
     m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
+    trace.addDetail(QStringLiteral("selected=[%1] frames=%2 channel=%3")
+                        .arg(selectedDevice.description())
+                        .arg(rxFramesPerBuffer)
+                        .arg(static_cast<int>(channel)));
 
     emit statusMessage("Audio capture avviato: " + selectedDevice.description());
 
@@ -29422,7 +29920,8 @@ void DecodiumBridge::startAudioCapture()
             deviceId = inputDesc.mid(paren1 + 1, paren2 - paren1 - 1).trimmed();
 
         if (!deviceId.isEmpty()) {
-            for (const QAudioDevice& d : QMediaDevices::audioOutputs()) {
+            for (const QAudioDevice& d :
+                 cachedAudioOutputs(QStringLiteral("startAudioCapture auto-match output"), false)) {
                 if (d.description().contains(deviceId, Qt::CaseInsensitive)) {
                     setAudioOutputDevice(d.description());
                     bridgeLog("auto-matched TX output device: " + d.description() +
@@ -29840,10 +30339,18 @@ void DecodiumBridge::teardownAudioCapture()
     m_lastAudioCaptureStartMs = 0;
     if (m_soundInput) {
         bridgeLog(QStringLiteral("teardownAudioCapture: stopping and destroying SoundInput"));
-        QObject::disconnect(m_soundInput, nullptr, this, nullptr);
-        m_soundInput->stop();
-        delete m_soundInput;
+        SoundInput *input = m_soundInput;
         m_soundInput = nullptr;
+        QObject::disconnect(input, nullptr, this, nullptr);
+        if (input->thread()
+            && input->thread()->isRunning()
+            && input->thread() != QThread::currentThread()) {
+            QMetaObject::invokeMethod(input, &SoundInput::stop, Qt::BlockingQueuedConnection);
+            input->deleteLater();
+        } else {
+            input->stop();
+            delete input;
+        }
     }
     m_rxAudioSuspendedForTx = false;
     m_audioUnhealthyStartMs = 0;
@@ -31297,124 +31804,314 @@ bool DecodiumBridge::prepareHoundTxSelectionForStart(const QString& reason)
     return false;
 }
 
-void DecodiumBridge::enumerateAudioDevices()
+void DecodiumBridge::scheduleAudioDeviceRefresh(int delayMs, bool verboseLog)
 {
-    m_audioInputDevices.clear();
-    m_audioOutputDevices.clear();
+    if (m_shuttingDown || QCoreApplication::closingDown()) {
+        return;
+    }
+
+    m_pendingAudioDeviceRefreshVerbose =
+        m_pendingAudioDeviceRefreshVerbose || verboseLog;
+    int const boundedDelayMs = qMax(0, delayMs);
+    if (m_audioDeviceRefreshTimer) {
+        m_audioDeviceRefreshTimer->start(boundedDelayMs);
+        return;
+    }
+
+    QTimer::singleShot(boundedDelayMs, this, [this]() {
+        bool const verbose = m_pendingAudioDeviceRefreshVerbose;
+        m_pendingAudioDeviceRefreshVerbose = false;
+        refreshAudioDeviceCache(QStringLiteral("single-shot device refresh"), verbose, true);
+    });
+}
+
+void DecodiumBridge::refreshAudioDeviceCache(const QString& reason,
+                                             bool verboseLog,
+                                             bool emitSignals)
+{
+    MainThreadTraceScope trace(QStringLiteral("audio_device_cache_refresh"),
+                               QStringLiteral("reason=%1 current_in=[%2] current_out=[%3] verbose=%4")
+                                   .arg(reason, m_audioInputDevice, m_audioOutputDevice)
+                                   .arg(verboseLog ? 1 : 0),
+                               verboseLog ? 25 : 90);
 
     const QList<QAudioDevice> inputs = QMediaDevices::audioInputs();
     const QList<QAudioDevice> outputs = QMediaDevices::audioOutputs();
     const QAudioDevice defaultInput = QMediaDevices::defaultAudioInput();
     const QAudioDevice defaultOutput = QMediaDevices::defaultAudioOutput();
+    QStringList inputNames = audioDeviceDescriptions(inputs);
+    QStringList outputNames = audioDeviceDescriptions(outputs);
+    QString const signature =
+        audioDeviceCacheSignature(inputs, outputs, defaultInput, defaultOutput);
 
-    bridgeLog(QStringLiteral("=== enumerateAudioDevices INPUT count=%1 default=[%2] id=%3 ===")
-                  .arg(inputs.size())
-                  .arg(defaultInput.description())
-                  .arg(audioDeviceIdForLog(defaultInput)));
-    qInfo().noquote() << QStringLiteral("[AUDIODEV] Qt inputs count=%1 default=[%2] id=%3")
-                             .arg(inputs.size())
-                             .arg(defaultInput.description())
-                             .arg(audioDeviceIdForLog(defaultInput));
 #ifdef Q_OS_LINUX
     bool qtExposesLikelyUsbInput = false;
+    bool qtExposesLikelyUsbOutput = false;
 #endif
+
+    if (verboseLog) {
+        bridgeLog(QStringLiteral("=== enumerateAudioDevices INPUT count=%1 default=[%2] id=%3 ===")
+                      .arg(inputs.size())
+                      .arg(defaultInput.description())
+                      .arg(audioDeviceIdForLog(defaultInput)));
+        qInfo().noquote() << QStringLiteral("[AUDIODEV] Qt inputs count=%1 default=[%2] id=%3")
+                                 .arg(inputs.size())
+                                 .arg(defaultInput.description())
+                                 .arg(audioDeviceIdForLog(defaultInput));
+    }
+
     for (const QAudioDevice& dev : inputs) {
         const QString description = dev.description().trimmed();
 #ifdef Q_OS_LINUX
         qtExposesLikelyUsbInput = qtExposesLikelyUsbInput || audioDeviceLooksUsb(description);
 #endif
-        bridgeLog(QStringLiteral("  IN: [%1] id=%2 preferred={%3}")
-                      .arg(description)
-                      .arg(audioDeviceIdForLog(dev))
-                      .arg(audioFormatForLog(dev.preferredFormat())));
-        qInfo().noquote() << QStringLiteral("[AUDIODEV] IN [%1] id=%2 preferred={%3}")
-                                 .arg(description)
-                                 .arg(audioDeviceIdForLog(dev))
-                                 .arg(audioFormatForLog(dev.preferredFormat()));
-        m_audioInputDevices.append(dev.description());
+        if (verboseLog) {
+            bridgeLog(QStringLiteral("  IN: [%1] id=%2 preferred={%3}")
+                          .arg(description)
+                          .arg(audioDeviceIdForLog(dev))
+                          .arg(audioFormatForLog(dev.preferredFormat())));
+            qInfo().noquote() << QStringLiteral("[AUDIODEV] IN [%1] id=%2 preferred={%3}")
+                                     .arg(description)
+                                     .arg(audioDeviceIdForLog(dev))
+                                     .arg(audioFormatForLog(dev.preferredFormat()));
+        }
     }
-    bridgeLog(QStringLiteral("=== enumerateAudioDevices OUTPUT count=%1 default=[%2] id=%3 ===")
-                  .arg(outputs.size())
-                  .arg(defaultOutput.description())
-                  .arg(audioDeviceIdForLog(defaultOutput)));
-#ifdef Q_OS_LINUX
-    bool qtExposesLikelyUsbOutput = false;
-#endif
-    qInfo().noquote() << QStringLiteral("[AUDIODEV] Qt outputs count=%1 default=[%2] id=%3")
-                             .arg(outputs.size())
-                             .arg(defaultOutput.description())
-                             .arg(audioDeviceIdForLog(defaultOutput));
+
+    if (verboseLog) {
+        bridgeLog(QStringLiteral("=== enumerateAudioDevices OUTPUT count=%1 default=[%2] id=%3 ===")
+                      .arg(outputs.size())
+                      .arg(defaultOutput.description())
+                      .arg(audioDeviceIdForLog(defaultOutput)));
+        qInfo().noquote() << QStringLiteral("[AUDIODEV] Qt outputs count=%1 default=[%2] id=%3")
+                                 .arg(outputs.size())
+                                 .arg(defaultOutput.description())
+                                 .arg(audioDeviceIdForLog(defaultOutput));
+    }
+
     for (const QAudioDevice& dev : outputs) {
         const QString description = dev.description().trimmed();
 #ifdef Q_OS_LINUX
         qtExposesLikelyUsbOutput = qtExposesLikelyUsbOutput || audioDeviceLooksUsb(description);
 #endif
-        bridgeLog(QStringLiteral("  OUT: [%1] id=%2 preferred={%3}")
-                      .arg(description)
-                      .arg(audioDeviceIdForLog(dev))
-                      .arg(audioFormatForLog(dev.preferredFormat())));
-        qInfo().noquote() << QStringLiteral("[AUDIODEV] OUT [%1] id=%2 preferred={%3}")
-                                 .arg(description)
-                                 .arg(audioDeviceIdForLog(dev))
-                                 .arg(audioFormatForLog(dev.preferredFormat()));
-        m_audioOutputDevices.append(dev.description());
+        if (verboseLog) {
+            bridgeLog(QStringLiteral("  OUT: [%1] id=%2 preferred={%3}")
+                          .arg(description)
+                          .arg(audioDeviceIdForLog(dev))
+                          .arg(audioFormatForLog(dev.preferredFormat())));
+            qInfo().noquote() << QStringLiteral("[AUDIODEV] OUT [%1] id=%2 preferred={%3}")
+                                     .arg(description)
+                                     .arg(audioDeviceIdForLog(dev))
+                                     .arg(audioFormatForLog(dev.preferredFormat()));
+        }
     }
+
 #ifdef Q_OS_LINUX
-    const QStringList alsaCards = linuxAlsaCardsForLog();
-    if (!alsaCards.isEmpty()) {
-        bridgeLog(QStringLiteral("=== Linux ALSA cards visible to process (%1 lines) ===")
-                      .arg(alsaCards.size()));
-        for (const QString& line : alsaCards) {
-            bridgeLog(QStringLiteral("  ALSA: %1").arg(line));
+    if (verboseLog) {
+        const QStringList alsaCards = linuxAlsaCardsForLog();
+        if (!alsaCards.isEmpty()) {
+            bridgeLog(QStringLiteral("=== Linux ALSA cards visible to process (%1 lines) ===")
+                          .arg(alsaCards.size()));
+            for (const QString& line : alsaCards) {
+                bridgeLog(QStringLiteral("  ALSA: %1").arg(line));
+            }
+            if (!qtExposesLikelyUsbInput) {
+                bridgeLog(QStringLiteral("Audio Linux warning: ALSA sees devices but Qt Multimedia did not expose a USB/radio-like input. "
+                                         "Check PipeWire/PulseAudio input profiles, application permissions, and AppImage Qt audio plugins."));
+            }
+        } else {
+            bridgeLog(QStringLiteral("Linux ALSA cards: /proc/asound/cards unavailable or empty"));
         }
-        if (!qtExposesLikelyUsbInput) {
-            bridgeLog(QStringLiteral("Audio Linux warning: ALSA sees devices but Qt Multimedia did not expose a USB/radio-like input. "
-                                     "Check PipeWire/PulseAudio input profiles, application permissions, and AppImage Qt audio plugins."));
-        }
-    } else {
-        bridgeLog(QStringLiteral("Linux ALSA cards: /proc/asound/cards unavailable or empty"));
-    }
-    const QStringList pulseSources = linuxPulseSourcesForLog();
-    bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sources via pactl (%1 lines) ===")
-                  .arg(pulseSources.size()));
-    for (const QString& line : pulseSources) {
-        bridgeLog(QStringLiteral("  PULSE: %1").arg(line));
-        qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SOURCE %1").arg(line);
-        const QString pulseSourceName = linuxPulseSourceNameFromShortLine(line);
-        if (!pulseSourceName.isEmpty()) {
-            const QString displayName = QString::fromLatin1(kLinuxPulseSourcePrefix) + pulseSourceName;
-            if (!m_audioInputDevices.contains(displayName, Qt::CaseInsensitive)) {
-                m_audioInputDevices.append(displayName);
+        const QStringList pulseSources = linuxPulseSourcesForLog();
+        bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sources via pactl (%1 lines) ===")
+                      .arg(pulseSources.size()));
+        for (const QString& line : pulseSources) {
+            bridgeLog(QStringLiteral("  PULSE: %1").arg(line));
+            qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SOURCE %1").arg(line);
+            const QString pulseSourceName = linuxPulseSourceNameFromShortLine(line);
+            if (!pulseSourceName.isEmpty()) {
+                const QString displayName =
+                    QString::fromLatin1(kLinuxPulseSourcePrefix) + pulseSourceName;
+                if (!inputNames.contains(displayName, Qt::CaseInsensitive)) {
+                    inputNames.append(displayName);
+                }
             }
         }
-    }
-    const QStringList pulseSinks = linuxPulseSinksForLog();
-    bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sinks via pactl (%1 lines) ===")
-                  .arg(pulseSinks.size()));
-    for (const QString& line : pulseSinks) {
-        bridgeLog(QStringLiteral("  PULSE OUT: %1").arg(line));
-        qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SINK %1").arg(line);
-        const QString pulseSinkName = linuxPulseSinkNameFromShortLine(line);
-        if (!pulseSinkName.isEmpty()) {
-            const QString displayName = QString::fromLatin1(kLinuxPulseSinkPrefix) + pulseSinkName;
-            if (!m_audioOutputDevices.contains(displayName, Qt::CaseInsensitive)) {
-                m_audioOutputDevices.append(displayName);
-            }
-        }
-    }
-    if (!qtExposesLikelyUsbOutput) {
+        const QStringList pulseSinks = linuxPulseSinksForLog();
+        bridgeLog(QStringLiteral("=== Linux PulseAudio/PipeWire sinks via pactl (%1 lines) ===")
+                      .arg(pulseSinks.size()));
         for (const QString& line : pulseSinks) {
-            if (line.contains(QStringLiteral("usb-"), Qt::CaseInsensitive)) {
-                bridgeLog(QStringLiteral("Audio Linux note: Qt Multimedia did not expose a USB/radio-like output directly; added Pulse/PipeWire sinks as selectable TX outputs."));
-                break;
+            bridgeLog(QStringLiteral("  PULSE OUT: %1").arg(line));
+            qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SINK %1").arg(line);
+            const QString pulseSinkName = linuxPulseSinkNameFromShortLine(line);
+            if (!pulseSinkName.isEmpty()) {
+                const QString displayName =
+                    QString::fromLatin1(kLinuxPulseSinkPrefix) + pulseSinkName;
+                if (!outputNames.contains(displayName, Qt::CaseInsensitive)) {
+                    outputNames.append(displayName);
+                }
+            }
+        }
+        if (!qtExposesLikelyUsbOutput) {
+            for (const QString& line : pulseSinks) {
+                if (line.contains(QStringLiteral("usb-"), Qt::CaseInsensitive)) {
+                    bridgeLog(QStringLiteral("Audio Linux note: Qt Multimedia did not expose a USB/radio-like output directly; added Pulse/PipeWire sinks as selectable TX outputs."));
+                    break;
+                }
             }
         }
     }
 #endif
-    bridgeLog("=== enumerateAudioDevices END ===");
 
-    emit audioInputDevicesChanged();
-    emit audioOutputDevicesChanged();
+    bool const signatureChanged =
+        !m_audioDeviceCacheValid || signature != m_audioDeviceCacheSignature;
+    bool const inputListChanged = inputNames != m_audioInputDevices;
+    bool const outputListChanged = outputNames != m_audioOutputDevices;
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+
+    m_cachedAudioInputs = inputs;
+    m_cachedAudioOutputs = outputs;
+    m_cachedDefaultAudioInput = defaultInput;
+    m_cachedDefaultAudioOutput = defaultOutput;
+    m_audioInputDevices = inputNames;
+    m_audioOutputDevices = outputNames;
+    m_audioDeviceCacheSignature = signature;
+    m_audioDeviceCacheRefreshMs = nowMs;
+    m_audioDeviceCacheDirty = false;
+    m_audioDeviceCacheValid = true;
+    if (signatureChanged) {
+        m_cachedTxOutputDeviceValid = false;
+    }
+
+    if (verboseLog) {
+        bridgeLog("=== enumerateAudioDevices END ===");
+    }
+    if (verboseLog || signatureChanged || nowMs - m_lastAudioDeviceCacheLogMs > 60000) {
+        m_lastAudioDeviceCacheLogMs = nowMs;
+        qInfo().noquote() << QStringLiteral("[AUDIODEV] cache reason=%1 changed=%2 inputs=%3 outputs=%4 default_in=[%5] default_out=[%6]")
+                                 .arg(reason)
+                                 .arg(signatureChanged ? 1 : 0)
+                                 .arg(inputNames.size())
+                                 .arg(outputNames.size())
+                                 .arg(defaultInput.description())
+                                 .arg(defaultOutput.description());
+    }
+
+    trace.addDetail(QStringLiteral("inputs=%1 outputs=%2 changed=%3")
+                        .arg(inputs.size())
+                        .arg(outputs.size())
+                        .arg(signatureChanged ? 1 : 0));
+
+    if (emitSignals && inputListChanged) {
+        emit audioInputDevicesChanged();
+    }
+    if (emitSignals && outputListChanged) {
+        emit audioOutputDevicesChanged();
+    }
+}
+
+QList<QAudioDevice> DecodiumBridge::cachedAudioInputs(const QString& reason,
+                                                      bool refreshIfStale)
+{
+    if ((!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) && refreshIfStale) {
+        refreshAudioDeviceCache(reason, false, true);
+    } else if (!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) {
+        scheduleAudioDeviceRefresh(750, false);
+    }
+    return m_cachedAudioInputs;
+}
+
+QList<QAudioDevice> DecodiumBridge::cachedAudioOutputs(const QString& reason,
+                                                       bool refreshIfStale)
+{
+    if ((!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) && refreshIfStale) {
+        refreshAudioDeviceCache(reason, false, true);
+    } else if (!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) {
+        scheduleAudioDeviceRefresh(750, false);
+    }
+    return m_cachedAudioOutputs;
+}
+
+QAudioDevice DecodiumBridge::cachedDefaultAudioInput(const QString& reason,
+                                                     bool refreshIfStale)
+{
+    if ((!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) && refreshIfStale) {
+        refreshAudioDeviceCache(reason, false, true);
+    } else if (!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) {
+        scheduleAudioDeviceRefresh(750, false);
+    }
+    if (!m_cachedDefaultAudioInput.description().trimmed().isEmpty()) {
+        return m_cachedDefaultAudioInput;
+    }
+    return QMediaDevices::defaultAudioInput();
+}
+
+QAudioDevice DecodiumBridge::cachedDefaultAudioOutput(const QString& reason,
+                                                      bool refreshIfStale)
+{
+    if ((!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) && refreshIfStale) {
+        refreshAudioDeviceCache(reason, false, true);
+    } else if (!m_audioDeviceCacheValid || m_audioDeviceCacheDirty) {
+        scheduleAudioDeviceRefresh(750, false);
+    }
+    if (!m_cachedDefaultAudioOutput.description().trimmed().isEmpty()) {
+        return m_cachedDefaultAudioOutput;
+    }
+    return QMediaDevices::defaultAudioOutput();
+}
+
+QAudioDevice DecodiumBridge::resolveRxInputDevice(const QString& requestedName,
+                                                  bool* requestedDeviceFound)
+{
+    QString const requested = requestedName.trimmed();
+    QList<QAudioDevice> const inputs =
+        cachedAudioInputs(QStringLiteral("resolveRxInputDevice"), false);
+    QAudioDevice selectedDevice =
+        cachedDefaultAudioInput(QStringLiteral("resolveRxInputDevice"), false);
+    if (selectedDevice.description().trimmed().isEmpty() && !inputs.isEmpty()) {
+        selectedDevice = inputs.constFirst();
+    }
+
+#ifdef Q_OS_LINUX
+    const QString pulseSourceName = linuxPulseSourceNameFromDisplay(requested);
+    if (!pulseSourceName.isEmpty()) {
+        QString pulseError;
+        if (linuxSetDefaultPulseSource(pulseSourceName, &pulseError)) {
+            bridgeLog(QStringLiteral("startAudioCapture: selected Linux Pulse/PipeWire source [%1], using Qt default input after pactl default-source")
+                          .arg(pulseSourceName));
+            qInfo().noquote() << "[AUDIODEV] selected Pulse/PipeWire source:" << pulseSourceName;
+            if (requestedDeviceFound) {
+                *requestedDeviceFound = true;
+            }
+            return QMediaDevices::defaultAudioInput();
+        }
+
+        bridgeLog(QStringLiteral("startAudioCapture: failed to select Linux Pulse/PipeWire source [%1]: %2")
+                      .arg(pulseSourceName, pulseError));
+        qWarning().noquote() << "[AUDIODEV] failed to select Pulse/PipeWire source:"
+                             << pulseSourceName << pulseError;
+    }
+#endif
+
+    if (!requested.isEmpty()) {
+        for (const QAudioDevice& dev : inputs) {
+            if (audioDeviceNameMatches(dev.description(), requested)) {
+                if (requestedDeviceFound) {
+                    *requestedDeviceFound = true;
+                }
+                return dev;
+            }
+        }
+    }
+
+    if (requestedDeviceFound) {
+        *requestedDeviceFound = requested.isEmpty();
+    }
+    return selectedDevice;
+}
+
+void DecodiumBridge::enumerateAudioDevices()
+{
+    refreshAudioDeviceCache(QStringLiteral("enumerateAudioDevices"), true, true);
 }
 
 // ============================================================
