@@ -117,6 +117,36 @@ stash_optional_qt_plugin() {
   fi
 }
 
+ensure_linuxdeploy_qt_plugin_dirs() {
+  local plugin_subdir
+
+  if [[ -z "${QT_PLUGIN_DIR_FOR_BUILD}" ]]; then
+    echo "Skipping Qt plugin directory normalization: qmake did not report QT_INSTALL_PLUGINS"
+    return
+  fi
+  if [[ ! -d "${QT_PLUGIN_DIR_FOR_BUILD}" || ! -w "${QT_PLUGIN_DIR_FOR_BUILD}" ]]; then
+    echo "Skipping Qt plugin directory normalization: ${QT_PLUGIN_DIR_FOR_BUILD} is not writable"
+    return
+  fi
+
+  # linuxdeploy-plugin-qt iterates optional plugin category directories
+  # unconditionally for linked Qt modules. Source-built/minimal Qt prefixes can
+  # omit empty categories such as printsupport, which aborts the deploy.
+  for plugin_subdir in \
+    printsupport \
+    platformthemes \
+    styles \
+    sqldrivers \
+    tls \
+    imageformats \
+    iconengines \
+    platforminputcontexts \
+    xcbglintegrations \
+    platforms; do
+    mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}"
+  done
+}
+
 log "Build context"
 echo "Root:           ${ROOT_DIR}"
 echo "Version:        ${VERSION}"
@@ -251,6 +281,7 @@ DESKTOP
 log "Prepare linuxdeploy"
 mkdir -p "${TOOLS_DIR}"
 stash_optional_qt_plugin imageformats libqtiff.so
+ensure_linuxdeploy_qt_plugin_dirs
 if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers" ]]; then
   if qt_plugin_subdir_writable sqldrivers; then
     mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers-disabled"
