@@ -15174,11 +15174,16 @@ void DecodiumBridge::startAlcCalibration()
         return;
     }
 
-    // 1.0.326 — A3: guard TX/tune/hold: non avviare calibrazione se già in TX o hold
-    if (m_transmitting || m_tuning || m_manualTxHold) {
-        m_alcCalStatus = QStringLiteral("Cannot calibrate while transmitting/tuning/on hold");
+    // Guard active RF only. ManualTxHold is a latched "do not resume normal TX"
+    // state after HALT; an explicit one-shot ALC tune carrier may run while it
+    // remains set, and the hold continues to block normal auto-TX afterwards.
+    if (m_transmitting || m_tuning) {
+        m_alcCalStatus = QStringLiteral("Cannot calibrate while transmitting/tuning");
         emit alcCalibrationStatusChanged();
         return;
+    }
+    if (m_manualTxHold) {
+        bridgeLog(QStringLiteral("[ALC] calibration allowed while manualTxHold is engaged"));
     }
 
     m_alcCalStartLevel  = m_txOutputLevel;
