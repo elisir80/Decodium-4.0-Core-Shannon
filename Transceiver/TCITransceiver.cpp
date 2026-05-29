@@ -785,7 +785,7 @@ void TCITransceiver::process_pending_tci_frames()
 
 int TCITransceiver::do_start ()
 {
-  if (tci_audio_) QThread::currentThread()->setPriority(QThread::HighPriority);
+  // 1.0.326 B3: removed QThread::HighPriority - on Windows it preempts the main thread (audio watchdog restart)
   CAT_TRACE ("TCITransceiver entered TCI do_start and tci_Ready is " + QString::number(tci_Ready) + '\n');
   qDebug () << "qDebug says do_start tci_Ready is: " << tci_Ready;
   if (wrapped_) wrapped_->start (0);

@@ -15109,7 +15109,7 @@ void DecodiumBridge::stopTune()
 
 void DecodiumBridge::setAlcTarget(int v)
 {
-    int const clamped = qBound(20, v, 60);
+    int const clamped = qBound(5, v, 60);
     if (m_alcTarget == clamped)
         return;
     m_alcTarget = clamped;
@@ -15126,6 +15126,13 @@ void DecodiumBridge::startAlcCalibration()
     // Backend guard: solo hamlib connesso legge l'ALC
     if (m_catBackend != QStringLiteral("hamlib") || !m_hamlibCat || !m_hamlibCat->connected()) {
         m_alcCalStatus = QStringLiteral("ALC not available (Hamlib CAT must be connected)");
+        emit alcCalibrationStatusChanged();
+        return;
+    }
+
+    // 1.0.326 — A3: guard TX/tune/hold: non avviare calibrazione se già in TX o hold
+    if (m_transmitting || m_tuning || m_manualTxHold) {
+        m_alcCalStatus = QStringLiteral("Cannot calibrate while transmitting/tuning/on hold");
         emit alcCalibrationStatusChanged();
         return;
     }
@@ -15156,6 +15163,8 @@ void DecodiumBridge::startAlcCalibration()
 
 void DecodiumBridge::onAlcCalibrationTick()
 {
+    if (!m_alcCalibrating) return; // 1.0.326 — A3: guard re-entry (tick accodato dopo finish/cancel)
+
     qint64 const now = QDateTime::currentMSecsSinceEpoch();
 
     // Timeout assoluto 12s (ridotto da 20s in 1.0.325 — saturazione viene rilevata in ~1.5s)
@@ -20894,7 +20903,8 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
     int const periodMs = periodMsForMode(normalizedMode);
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs, m_ftxImmediateClickTx);
+    // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs, effectiveRelaxLatestCap());
     if (periodMs <= 0 || latestStartMs <= 0) {
         return;
     }
@@ -21322,13 +21332,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         if (!isOurPeriod) return;
 
         int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
-        // 1.0.318 — P2 fix: questo call site (auto-seq period-check) era l'unico che NON
-        // riceveva m_ftxImmediateClickTx → cap stretto bloccava la fast-sequence anche con
-        // toggle ON. Ora rilassa quando ftxImmediateClickTx ON (qualunque modo) OPPURE
-        // ft8FastSequence ON in modo FT8.
-        bool const relaxLatestCap = m_ftxImmediateClickTx
-                                 || (m_ft8FastSequence && m_mode == QStringLiteral("FT8"));
-        int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, relaxLatestCap);
+        // 1.0.318 — P2 fix: questo call site usa effectiveRelaxLatestCap() (helper 1.0.326 B4)
+        int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, effectiveRelaxLatestCap());
         if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: too late in %1 slot, defer TX%2 elapsed=%3ms latest=%4ms")
                           .arg(m_mode)
@@ -22689,8 +22694,10 @@ void DecodiumBridge::loadSettings()
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
-    // 1.0.324 — ALC calibration target (default 45, range 20-60)
-    m_alcTarget = qBound(20, s.value(QStringLiteral("AlcTarget"), 45).toInt(), 60);
+    // 1.0.326 — ALC calibration target (default 20, range 5-60; FT8/data tipicamente 15-25)
+    m_alcTarget = qBound(5, s.value(QStringLiteral("AlcTarget"), 20).toInt(), 60);
+    // 1.0.326 B2 — MaxCallerRetries persist (default 10, range 1-99)
+    m_maxCallerRetries = qBound(1, s.value(QStringLiteral("MaxCallerRetries"), 10).toInt(), 99);
     // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
     m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G

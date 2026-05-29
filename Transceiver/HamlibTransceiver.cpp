@@ -724,7 +724,7 @@ int HamlibTransceiver::do_start ()
   m_->set_vfo_works_ = true;
   bool const requestedPowerSwrPolling = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
   bool const hasGetLevelFunction = !m_->is_dummy_ && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_LEVEL);
-  int const getLevelCaps = !m_->is_dummy_ ? rig_get_caps_int (m_->model_, RIG_CAPS_HAS_GET_LEVEL) : 0;
+  setting_t const getLevelCaps = !m_->is_dummy_ ? static_cast<setting_t>(rig_get_caps_int (m_->model_, RIG_CAPS_HAS_GET_LEVEL)) : 0; // 1.0.326 B1: was int (32-bit truncation; RIG_LEVEL_RFPOWER_METER_WATTS is bit 39)
   bool const hasRfPowerMeterWatts = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_RFPOWER_METER_WATTS) == RIG_LEVEL_RFPOWER_METER_WATTS;
   bool const hasRfPower = hasGetLevelFunction

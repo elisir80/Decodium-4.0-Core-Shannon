@@ -455,12 +455,13 @@ Rectangle {
                     font.bold: rigAlc > 60
                     color: rigAlc > 60 ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : alcStatusColor
 
-                    ToolTip.visible: parent.parent.containsMouse
+                    ToolTip.visible: alcMouseArea.containsMouse
                     ToolTip.delay: 500
-                    ToolTip.text: "ALC meter 0..100\n>60 = over-ALC (TX potenza troppo alta)"
+                    ToolTip.text: qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
                 }
 
                 MouseArea {
+                    id: alcMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
                 }

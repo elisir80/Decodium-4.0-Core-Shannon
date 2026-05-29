@@ -2431,12 +2431,12 @@ Dialog {
                             Layout.preferredWidth: 100
                             ToolTip.visible: alcTargetHover.containsMouse
                             ToolTip.delay: 600
-                            ToolTip.text: qsTr("ALC scale 0-100. Values >60 risk overdriving the PA. 45 is a conservative starting point.")
+                            ToolTip.text: qsTr("ALC scale 0-100. FT8/data: typically 15-25. Values >60 risk overdriving the PA.")
                             HoverHandler { id: alcTargetHover }
                         }
                         SpinBox {
                             id: alcTargetSpinBox
-                            from: 20
+                            from: 5
                             to: 60
                             value: bridge.alcTarget
                             Layout.fillWidth: true
