@@ -1,5 +1,39 @@
 # Changelog / Registro Modifiche
 
+## [1.0.333] - 2026-05-30
+
+### Italiano
+
+Release di stabilizzazione UI per evitare il blocco osservato riaprendo Decodium in modalita' DX-Pedition e per riportare l'avvio su un profilo grafico sicuro.
+
+#### Modificato
+
+- L'avvio forza `Ocean Blue` come tema runtime e riscrive la preferenza `theme/current` se era rimasta su un tema diverso.
+- Il workspace DX-Pedition non viene piu' ripristinato automaticamente allo startup; se `uiDxPeditionMode` era salvato attivo, viene disattivato prima di caricare il layout principale.
+- `DX-Pedition` e' stato rimosso dall'elenco temi visibile nelle impostazioni, lasciando intatta la palette interna per eventuali test futuri o percorsi codice esistenti.
+- Metadati locali, installer Windows Inno Setup/NSIS e workflow macOS legacy sono allineati alla versione `1.0.333`.
+
+#### Corretto
+
+- Evitato il rientro automatico nel layout DX-Pedition dopo un avvio precedente in quella modalita', riducendo il rischio di blocco UI allo startup.
+- Riallineate le preferenze locali di test su `Ocean Blue` e `uiDxPeditionMode=false`.
+
+### English
+
+UI stabilization release to avoid the lock-up seen after reopening Decodium in DX-Pedition mode and to return startup to a safe graphics profile.
+
+#### Changed
+
+- Startup now forces `Ocean Blue` as the runtime theme and rewrites the stored `theme/current` preference when it contains a different theme.
+- The DX-Pedition workspace is no longer restored automatically at startup; if `uiDxPeditionMode` was saved as enabled, it is disabled before the main layout loads.
+- `DX-Pedition` was removed from the visible theme list in settings, while the internal palette remains available for future testing or existing code paths.
+- Local version metadata, Windows Inno Setup/NSIS installers, and the legacy macOS workflow are aligned to `1.0.333`.
+
+#### Fixed
+
+- Prevented automatic re-entry into the DX-Pedition layout after a previous run in that mode, reducing startup UI lock-up risk.
+- Local test preferences were realigned to `Ocean Blue` and `uiDxPeditionMode=false`.
+
 ## [1.0.332] - 2026-05-29
 
 ### Italiano

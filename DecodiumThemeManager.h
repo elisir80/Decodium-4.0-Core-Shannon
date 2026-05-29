@@ -83,7 +83,7 @@ public:
     QColor txColor()        const;
     QColor rxColor()        const;
 
-    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "DX-Pedition"}; }
+    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light"}; }
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;
