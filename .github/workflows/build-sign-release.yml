@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    timeout-minutes: 60
+    runs-on: windows-2022
+    timeout-minutes: 120
 
     defaults:
       run:
@@ -32,10 +32,14 @@ jobs:
         with:
           msystem: MINGW64
           update: true
+          cache: true
           install: >-
+            git
+            make
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-qt6-base
             mingw-w64-x86_64-qt6-multimedia
             mingw-w64-x86_64-qt6-serialport
@@ -45,8 +49,11 @@ jobs:
             mingw-w64-x86_64-qt6-declarative
             mingw-w64-x86_64-qt6-shadertools
             mingw-w64-x86_64-qt6-5compat
+            mingw-w64-x86_64-qt6-activeqt
+            mingw-w64-x86_64-qt6-translations
             mingw-w64-x86_64-fftw
             mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-portaudio
             mingw-w64-x86_64-boost
             unzip
 
@@ -102,14 +109,34 @@ jobs:
 
       - name: Configure CMake
         run: |
-          which cmake || echo "cmake not found in PATH"
-          which ninja || echo "ninja not found in PATH"
-          echo "PATH=$PATH"
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=MinSizeRel
+          set -euo pipefail
+          cmake --version
+          ninja --version
+          g++ --version
+          HAMLIB_LIBRARY="$(find /mingw64/lib -maxdepth 1 \( -name 'libhamlib*.dll.a' -o -name 'libhamlib*.a' \) | sort | head -n1)"
+          RIGCTL_EXE="$(command -v rigctl.exe || command -v rigctl)"
+          RIGCTLD_EXE="$(command -v rigctld.exe || command -v rigctld)"
+          RIGCTLCOM_EXE="$(command -v rigctlcom.exe || command -v rigctlcom)"
+          test -f /mingw64/include/hamlib/rig.h
+          test -n "${HAMLIB_LIBRARY}"
+          test -x "${RIGCTL_EXE}"
+          cmake -S . -B build-windows -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="/mingw64" \
+            -DHamlib_INCLUDE_DIR="/mingw64/include" \
+            -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
+            -DRIGCTL_EXE="${RIGCTL_EXE}" \
+            -DRIGCTLD_EXE="${RIGCTLD_EXE}" \
+            -DRIGCTLCOM_EXE="${RIGCTLCOM_EXE}" \
+            -DBUILD_TESTING=OFF \
+            -DWSJT_GENERATE_DOCS=OFF \
+            -DWSJT_SKIP_MANPAGES=ON \
+            -DWSJT_BUILD_UTILS=OFF
 
       - name: Build application
-        run: ninja -C build decodium_app
+        run: |
+          set -euo pipefail
+          cmake --build build-windows --target decodium_app --parallel "$(nproc)"
 
       - name: Prepare distribution
         run: |
@@ -117,10 +144,10 @@ jobs:
           mkdir -p "$DIST"
 
           # Copy main executable
-          cp build/decodium.exe "$DIST/"
+          cp build-windows/decodium.exe "$DIST/"
 
           # Copy QML files
-          cp -R build/qml "$DIST/"
+          cp -R build-windows/qml "$DIST/"
 
           # Qt6 and MinGW DLLs
           QTDIR="/mingw64"
