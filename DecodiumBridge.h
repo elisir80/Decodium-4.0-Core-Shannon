@@ -55,6 +55,7 @@ class QBuffer;
 class NtpClient;
 class DecoSyncTime;
 class DecodiumWebServer;
+class PanadapterItem;
 Q_DECLARE_OPAQUE_POINTER(DecoSyncTime*)
 class QDialog;
 namespace decodium {
@@ -1170,6 +1171,8 @@ public:
     Q_INVOKABLE bool editQso(const QString& call, const QString& dateTime, const QVariantMap& newData);
     Q_INVOKABLE QStringList workedCallsigns() const;
     Q_INVOKABLE void setGpuPanadapterFftAvailable(bool available, const QString& reason = QString());
+    void registerPanadapterItem(PanadapterItem* item);
+    void unregisterPanadapterItem(PanadapterItem* item);
     int workedCount() const;
 
     // LotW lite
@@ -1655,6 +1658,7 @@ private:
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
     bool ft2AutoCqAwaitingPartnerDecode() const;
+    bool isDirectedActivePartnerSignoffDecode(const QStringList& fields) const;
     void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
     void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
     void armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason);
@@ -2121,6 +2125,8 @@ private:
     SoundOutput*       m_soundOutput {nullptr};
     Modulator*         m_modulator   {nullptr};
     DecodiumAudioSink* m_audioSink   {nullptr};
+    QString            m_lastAudioCaptureStartKey;
+    qint64             m_lastAudioCaptureStartMs {0};
     QAudioSink*        m_txAudioSink  {nullptr};
     bool               m_rxAudioSuspendedForTx {false};
     bool               m_spectrumTimerPausedForTx {false};
@@ -2529,6 +2535,9 @@ private:
     std::atomic_bool m_panadapterComputeBusy {false};
     std::atomic<uint64_t> m_panadapterComputeSerial {0};
     std::atomic_bool m_gpuPanadapterFftAvailable {true};
+    std::atomic_bool m_forceGpuPanadapterFft {true};
+    qint64 m_lastGpuPanadapterProbeMs {0};
+    QPointer<PanadapterItem> m_panadapterItem;
 
     struct PanadapterFrameResult
     {
@@ -2798,6 +2807,7 @@ private:
     void scheduleTxAudioTelemetryProbe(quint64 txSerial);
     void logTxAudioTelemetrySummary(const QString& reason);
     QString buildCurrentTxMessage() const;
+    bool forceRecentRogerReportSignoffIfNeeded(QString& message, const QString& reason);
     bool repairOrRejectStalePartnerTxMessage(QString& message, const QString& reason);
     bool prepareHoundTxSelectionForStart(const QString& reason);
     QString defaultLogCommentForQso(const QString& mode,
@@ -2815,6 +2825,7 @@ private:
     bool startBridgeAudioForLegacyDigitalTx(const QString& reason);
     void stopBridgeAudioForLegacyDigitalTx(const QString& reason);
     bool useModernSpectrumFeedWithLegacy() const;
+    bool useDedicatedModernAudioCaptureWithLegacy() const;
     void syncSpecialOperationToLegacyBackend();
     void updateSpecialOperationFromLegacy(int activity);
     void syncLegacyBackendDialogState();

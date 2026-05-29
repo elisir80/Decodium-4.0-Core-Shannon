@@ -1,5 +1,6 @@
 #include "DecodiumBridge.h"
 #include "DecodeListModel.h"
+#include "PanadapterItem.hpp"
 #include "lib/persistence/DecodeHistoryWorker.h"  // 1.0.238 Phase 5.2 perf roadmap
 #include "DecodiumLogging.hpp"
 #include "DecodiumAlertManager.h"
@@ -3249,21 +3250,6 @@ static QString legacyPaletteNameForUiIndex(int index)
     }
 }
 
-static int uiPaletteIndexForLegacyName(QString const& palette)
-{
-    QString const normalized = palette.trimmed().toCaseFolded();
-    if (normalized == QStringLiteral("raptor")) return 1;
-    if (normalized.startsWith(QStringLiteral("gray"))) return 2;
-    if (normalized == QStringLiteral("blue1") || normalized == QStringLiteral("blue2")
-        || normalized == QStringLiteral("blue3") || normalized == QStringLiteral("default")) {
-        return normalized == QStringLiteral("default") ? 0 : 3;
-    }
-    if (normalized == QStringLiteral("sunburst") || normalized == QStringLiteral("banana")
-        || normalized == QStringLiteral("orange")) return 4;
-    if (normalized == QStringLiteral("linrad") || normalized == QStringLiteral("scope")) return 5;
-    return 0;
-}
-
 namespace
 {
 constexpr int kRecentDuplicateLogWindowSeconds {90};
@@ -6024,9 +6010,18 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     if (qEnvironmentVariableIsSet("DECODIUM_DISABLE_GPU_PANADAPTER_FFT")) {
         m_gpuPanadapterFftAvailable.store(false);
+        m_forceGpuPanadapterFft.store(false);
         qWarning().noquote()
             << "[PANDBG] Panadapter visual FFT GPU path disabled"
             << "reason=DECODIUM_DISABLE_GPU_PANADAPTER_FFT";
+    } else {
+        if (qEnvironmentVariableIsSet("DECODIUM_DISABLE_GPU_PANADAPTER_FORCE"))
+            m_forceGpuPanadapterFft.store(false);
+
+        qInfo().noquote()
+            << "[PANDBG] Panadapter visual FFT GPU-first path"
+            << "force=" << (m_forceGpuPanadapterFft.load() ? 1 : 0)
+            << "fallback=FFTW_CPU_on_failure";
     }
 
     // FT2 async smart TX scheduler: ascolta il livello audio per mantenere
@@ -7312,6 +7307,17 @@ bool DecodiumBridge::useModernSpectrumFeedWithLegacy() const
     return m_directVisualAudioCaptureUnsafe;
 }
 
+bool DecodiumBridge::useDedicatedModernAudioCaptureWithLegacy() const
+{
+    // Direct Visual no longer opens a second QAudioSource by default when the
+    // embedded legacy decoder is active. The legacy detector already exposes a
+    // PCM tap; use that as the single RX source and keep the GPU-direct
+    // panadapter path downstream. The old dual-capture path remains available
+    // only for explicit diagnostics.
+    return useModernSpectrumFeedWithLegacy()
+        && qEnvironmentVariableIntValue("DECODIUM_DUAL_AUDIO_PANADAPTER", 0) != 0;
+}
+
 bool DecodiumBridge::legacyBackendAvailable() const
 {
     return m_legacyBackend && m_legacyBackend->available();
@@ -7691,7 +7697,8 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
     }
 
     if (useModernSpectrumFeedWithLegacy()) {
-        m_legacyPcmSpectrumFeed = false;
+        bool const dedicatedModernCapture = useDedicatedModernAudioCaptureWithLegacy();
+        m_legacyPcmSpectrumFeed = !dedicatedModernCapture;
         updatePeriodTicksMax();
         {
             QMutexLocker locker(&m_audioBufferMutex);
@@ -7706,11 +7713,19 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
         m_driftFrameCount = 0;
         m_driftExpectedFrames = 0;
         m_driftClock.restart();
-        startAudioCapture();
+        if (dedicatedModernCapture) {
+            startAudioCapture();
+        } else {
+            stopAudioCapture();
+            m_lastLegacyPcmSampleMs = 0;
+        }
         if (m_spectrumTimer) {
             m_spectrumTimer->start();
         }
-        bridgeLog(QStringLiteral("Legacy monitor migration keeps modern FFT panadapter feed active"));
+        bridgeLog(QStringLiteral("Legacy monitor migration keeps modern FFT panadapter feed active source=%1")
+                      .arg(dedicatedModernCapture
+                           ? QStringLiteral("dedicated_modern_qaudio")
+                           : QStringLiteral("legacy_pcm_tap_single_capture")));
     } else {
         resetRxPeriodAccumulation(false);
         m_spectrumBuf.clear();
@@ -7736,7 +7751,7 @@ void DecodiumBridge::applyDirectVisualAudioCaptureMode(const QString& reason)
         }
         bridgeLog(QStringLiteral("[PANDBG] Direct Visual %1 source=modern_audio interval_ms=%2 legacy_decoder=off reason=%3")
                       .arg(directVisual ? QStringLiteral("active") : QStringLiteral("inactive"))
-                      .arg(directVisual ? 33 : 125)
+                      .arg(m_spectrumTimer ? m_spectrumTimer->interval() : effectiveSpectrumTimerIntervalMs())
                       .arg(reason));
         emit statusMessage(directVisual
                            ? QStringLiteral("Direct Visual attivo: panadapter moderno veloce")
@@ -7790,13 +7805,25 @@ void DecodiumBridge::applyDirectVisualAudioCaptureMode(const QString& reason)
     m_audioWatchdogIgnoreUntilMs = nowMs + 5000;
 
     if (directVisual) {
-        m_legacyPcmSpectrumFeed = false;
-        startAudioCapture();
+        bool const dedicatedModernCapture = useDedicatedModernAudioCaptureWithLegacy();
+        m_legacyPcmSpectrumFeed = !dedicatedModernCapture;
+        if (dedicatedModernCapture) {
+            startAudioCapture();
+        } else {
+            stopAudioCapture();
+            m_lastLegacyPcmSampleMs = 0;
+        }
         if (m_spectrumTimer && !m_spectrumTimer->isActive()) {
             m_spectrumTimer->start();
         }
-        bridgeLog(QStringLiteral("[PANDBG] Direct Visual active source=modern_qaudio interval_ms=33 legacy_decoder=on"));
-        emit statusMessage(QStringLiteral("Direct Visual attivo: panadapter da cattura audio dedicata"));
+        bridgeLog(QStringLiteral("[PANDBG] Direct Visual active source=%1 interval_ms=%2 legacy_decoder=on")
+                      .arg(dedicatedModernCapture
+                           ? QStringLiteral("modern_qaudio_dual_capture")
+                           : QStringLiteral("legacy_pcm_tap_single_capture"))
+                      .arg(m_spectrumTimer ? m_spectrumTimer->interval() : effectiveSpectrumTimerIntervalMs()));
+        emit statusMessage(dedicatedModernCapture
+                           ? QStringLiteral("Direct Visual attivo: panadapter da cattura audio dedicata")
+                           : QStringLiteral("Direct Visual attivo: panadapter dal tap PCM legacy"));
     } else {
         m_legacyPcmSpectrumFeed = true;
         rearmLegacyPcmSpectrumFeed(QStringLiteral("direct visual disabled: %1").arg(reason));
@@ -7810,7 +7837,10 @@ void DecodiumBridge::applyDirectVisualAudioCaptureMode(const QString& reason)
 
 void DecodiumBridge::rearmLegacyPcmSpectrumFeed(const QString& reason)
 {
-    if (!usingLegacyBackendForTx() || useModernSpectrumFeedWithLegacy()) {
+    if (!usingLegacyBackendForTx()) {
+        return;
+    }
+    if (useModernSpectrumFeedWithLegacy() && useDedicatedModernAudioCaptureWithLegacy()) {
         return;
     }
 
@@ -8216,8 +8246,9 @@ void DecodiumBridge::syncLegacyBackendState()
               [this]() { emit audioOutputChannelChanged(); });
     updateDouble(m_rxInputLevel, qBound(0.0, static_cast<double>(m_legacyBackend->rxInputLevel()), 100.0),
                  [this]() { emit rxInputLevelChanged(); });
-    updateInt(m_uiPaletteIndex, uiPaletteIndexForLegacyName(m_legacyBackend->waterfallPalette()),
-              [this]() { emit uiPaletteIndexChanged(); });
+    if (m_uiPaletteIndex <= 5) {
+        m_legacyBackend->setWaterfallPalette(legacyPaletteNameForUiIndex(m_uiPaletteIndex));
+    }
 
     syncLegacyBackendDecodeList();
 }
@@ -10837,13 +10868,13 @@ void DecodiumBridge::setAudioOutputChannel(int v) {
 
 void DecodiumBridge::setUiPaletteIndex(int v)
 {
-    v = qBound(0, v, 5);
+    v = qBound(0, v, 10);
     if (m_uiPaletteIndex == v) {
         return;
     }
 
     m_uiPaletteIndex = v;
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForTx() && v <= 5) {
         m_legacyBackend->setWaterfallPalette(legacyPaletteNameForUiIndex(v));
     }
     emit uiPaletteIndexChanged();
@@ -11913,6 +11944,8 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
     }
 
     QString msg = buildCurrentTxMessage();
+    forceRecentRogerReportSignoffIfNeeded(msg,
+                                          QStringLiteral("legacyBridgeTxPreflight:%1").arg(reason));
     if (msg.trimmed().isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight blocked empty TX message (%1)")
                       .arg(reason));
@@ -12015,6 +12048,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     }
 
     QString msg = buildCurrentTxMessage();
+    forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("legacyBridgeTxAudio:%1").arg(reason));
     if (msg.trimmed().isEmpty()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio: empty TX message"));
         emit errorMessage(QStringLiteral("Nessun messaggio TX selezionato"));
@@ -12408,7 +12442,8 @@ void DecodiumBridge::startRx()
         m_legacyBackend->setMonitoring(true);
         syncLegacyBackendState();
         if (useModernSpectrumFeedWithLegacy()) {
-            m_legacyPcmSpectrumFeed = false;
+            bool const dedicatedModernCapture = useDedicatedModernAudioCaptureWithLegacy();
+            m_legacyPcmSpectrumFeed = !dedicatedModernCapture;
             updatePeriodTicksMax();
             resetRxPeriodAccumulation(true);
             m_spectrumBuf.clear();
@@ -12417,9 +12452,17 @@ void DecodiumBridge::startRx()
             m_driftFrameCount = 0;
             m_driftExpectedFrames = 0;
             m_driftClock.restart();
-            startAudioCapture();
+            if (dedicatedModernCapture) {
+                startAudioCapture();
+            } else {
+                stopAudioCapture();
+                m_lastLegacyPcmSampleMs = 0;
+            }
             m_spectrumTimer->start();
-            bridgeLog("startRx: modern FFT panadapter feed active alongside legacy RX");
+            bridgeLog(QStringLiteral("startRx: modern FFT panadapter feed active source=%1 alongside legacy RX")
+                          .arg(dedicatedModernCapture
+                               ? QStringLiteral("dedicated_modern_qaudio")
+                               : QStringLiteral("legacy_pcm_tap_single_capture")));
         } else {
             stopAudioCapture();
             resetRxPeriodAccumulation(false);
@@ -13837,6 +13880,7 @@ void DecodiumBridge::startTx()
     }
 
     QString msg = buildCurrentTxMessage();
+    forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     bridgeLog("startTx: msg=[" + msg + "]");
     if (msg.trimmed().isEmpty()) {
         emit errorMessage("Nessun messaggio TX selezionato");
@@ -20551,6 +20595,75 @@ bool DecodiumBridge::ft2AutoCqAwaitingPartnerDecode() const
         && activeBase == m_ft2AutoCqAwaitingPartnerBase;
 }
 
+bool DecodiumBridge::isDirectedActivePartnerSignoffDecode(const QStringList& fields) const
+{
+    if (fields.size() < 5) {
+        return false;
+    }
+
+    QString const msg = fields.value(4).trimmed();
+    if (msg.isEmpty()) {
+        return false;
+    }
+
+    QStringList const parts = msg.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+    if (parts.size() < 2) {
+        return false;
+    }
+
+    QString const last = parts.last().trimmed().toUpper();
+    bool const signoff =
+        last == QStringLiteral("73")
+        || last == QStringLiteral("RR73")
+        || last == QStringLiteral("RRR");
+    if (!signoff) {
+        return false;
+    }
+
+    QString const myCallUpper = m_callsign.trimmed().toUpper();
+    QString const myBaseUpper = normalizedBaseCall(myCallUpper);
+    if (myCallUpper.isEmpty()
+        || !messageContainsCallToken(msg, myCallUpper, myBaseUpper)) {
+        return false;
+    }
+
+    QString const peerToken = directedPeerTokenFromMessage(msg, myCallUpper, myBaseUpper);
+    QString const peer = normalizedUsableCallToken(peerToken);
+    QString const peerBase = normalizedBaseCall(peer);
+    if (peer.isEmpty() || peerBase.isEmpty() || peerBase == myBaseUpper) {
+        return false;
+    }
+
+    auto const peerMatchesCall = [&peer, &peerBase](QString const& call) {
+        QString const normalized = normalizeCallToken(call).trimmed().toUpper();
+        QString const callBase = normalizedBaseCall(normalized);
+        return (!normalized.isEmpty() && normalized == peer)
+            || (!callBase.isEmpty() && callBase == peerBase);
+    };
+
+    bool const matchesAwaitingFt2Partner =
+        !m_ft2AutoCqAwaitingPartnerBase.isEmpty()
+        && peerBase == m_ft2AutoCqAwaitingPartnerBase;
+    bool const knownExchangePartner =
+        peerMatchesCall(m_dxCall)
+        || peerMatchesCall(m_autoCqLockedCall)
+        || peerMatchesCall(m_resumeTargetCall)
+        || peerMatchesCall(m_pendingAutoSeqPartnerBase)
+        || peerMatchesCall(inferredPartnerForAutolog())
+        || matchesAwaitingFt2Partner
+        || messageContainsCallToken(buildCurrentTxMessage(), peer, peerBase)
+        || messageContainsCallToken(m_lastTransmittedMessage, peer, peerBase)
+        || messageContainsCallToken(m_pendingAutoSeqMessage, peer, peerBase);
+    if (!knownExchangePartner) {
+        return false;
+    }
+
+    return m_qsoProgress > 1
+        || m_currentTx != 6
+        || m_pendingAutoSeqTxAfterActiveTx > 0
+        || matchesAwaitingFt2Partner;
+}
+
 void DecodiumBridge::armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason)
 {
     if (m_mode != QStringLiteral("FT2")
@@ -21408,6 +21521,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             return;
         }
     }
+    forceRecentRogerReportSignoffIfNeeded(selectedTxPayload, QStringLiteral("checkAndStartPeriodicTx"));
     if (m_txEnabled && !selectedTxPayload.isEmpty()) {
         if (m_logAfterOwn73 && m_currentTx != 5 && !m_tx5.isEmpty()) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: own 73 pending -> force TX5 (current TX%1)")
@@ -21710,6 +21824,16 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     bool const lastPayloadMentionsMessagePartner =
         !messagePartnerBase.isEmpty()
         && messageContainsCallToken(m_lastTransmittedMessage, messagePartner, messagePartnerBase);
+    bool const pendingPayloadMentionsMessagePartner =
+        !messagePartnerBase.isEmpty()
+        && messageContainsCallToken(m_pendingAutoSeqMessage, messagePartner, messagePartnerBase);
+    bool const messagePartnerMatchesCurrentQso =
+        !messagePartnerBase.isEmpty()
+        && (currentPayloadMentionsMessagePartner
+            || lastPayloadMentionsMessagePartner
+            || pendingPayloadMentionsMessagePartner
+            || (!m_ft2AutoCqAwaitingPartnerBase.isEmpty()
+                && messagePartnerBase == m_ft2AutoCqAwaitingPartnerBase));
     auto const currentPayloadMentionsMessagePartnerNow = [&]() {
         return messagePartnerBase.isEmpty()
             || messageContainsCallToken(buildCurrentTxMessage(), messagePartner, messagePartnerBase);
@@ -21762,6 +21886,14 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         && !messagePartnerBase.isEmpty()
         && messagePartnerBase != myBaseUpper
         && isGridTokenStrict(last_word);
+    bool const ft2AutoCqKnownExchangeSignoff =
+        m_autoCqRepeat
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && directedResponseToMe
+        && is_73
+        && (messagePartnerMatchesCurrentQso
+            || isDirectedActivePartnerSignoffDecode(f));
     QString const cooldownKey = !messagePartnerBase.isEmpty()
         ? messagePartnerBase
         : Radio::base_callsign(from).trimmed().toUpper();
@@ -21894,7 +22026,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     // re-arm TX by hand and still expect directed callers to start a new QSO.
     bool const manualCqArmed = m_txEnabled && m_currentTx == 6;
     bool inCqMode = (m_autoCqRepeat || manualCqArmed)
-                    && (m_currentTx == 6 || m_dxCall.isEmpty() || m_qsoProgress <= 1);
+                    && (m_currentTx == 6 || m_dxCall.isEmpty() || m_qsoProgress <= 1)
+                    && !ft2AutoCqKnownExchangeSignoff;
     bool cqModeAcceptedFreshCaller = false;
     if (inCqMode) {
         // Rispondo solo a messaggi che coinvolgono il mio call. Alcuni decoder
@@ -21951,14 +22084,6 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         }
     } else {
         // Non in CQ mode: nessun dxCall → non rispondere automaticamente (Shannon: clearDX)
-        bool const pendingPayloadMentionsMessagePartner =
-            !messagePartnerBase.isEmpty()
-            && messageContainsCallToken(m_pendingAutoSeqMessage, messagePartner, messagePartnerBase);
-        bool const messagePartnerMatchesCurrentQso =
-            !messagePartnerBase.isEmpty()
-            && (currentPayloadMentionsMessagePartner
-                || lastPayloadMentionsMessagePartner
-                || pendingPayloadMentionsMessagePartner);
         if (m_dxCall.isEmpty()) {
             restoreAutoCqPartnerLock();
         }
@@ -22938,7 +23063,7 @@ void DecodiumBridge::loadSettings()
     }
     // UI state
     m_uiSpectrumHeight  = s.value("uiSpectrumHeight",  150).toInt();
-    m_uiPaletteIndex    = s.value("uiPaletteIndex",    3).toInt();
+    m_uiPaletteIndex    = qBound(0, s.value("uiPaletteIndex", 3).toInt(), 10);
     m_uiZoomFactor      = s.value("uiZoomFactor",      1.0).toDouble();
     m_uiWaterfallHeight = s.value("uiWaterfallHeight", 350).toInt();
     m_uiDecodeWinX      = s.value("uiDecodeWinX",      0).toInt();
@@ -23839,7 +23964,7 @@ int DecodiumBridge::effectiveSpectrumTimerIntervalMs() const
         return qMax(configured, 500);
     }
     if (useModernSpectrumFeedWithLegacy()) {
-        return qMin(configured, 33);
+        return configured;
     }
     return configured;
 }
@@ -26702,9 +26827,6 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     if (fromCall.isEmpty())
         fromCall = extractDecodedCallsign(msg, isCQ);
 
-    bool const isWorkedEver = !fromCall.isEmpty() && m_workedCalls.contains(fromCall);
-    bool isLotw = m_lotwEnabled && !fromCall.isEmpty() && m_lotwUsers.contains(fromCall);
-
     QString const myBase = normalizedBaseCall(m_callsign);
     auto sameBaseCall = [&myBase](QString const& call) {
         QString const base = normalizedBaseCall(call);
@@ -26723,6 +26845,13 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     }
     if (rightCall.isEmpty()) rightCall = fromCall;
 
+    // Keep worked-before/LotW state aligned with the DX call shown in the row.
+    // For third-party traffic like "YC1FMV 7Q9PTP RR73", fromCall may be the
+    // addressee/other station while dxCallsign/rightCall is the visible DX.
+    QString const dxStatusCall = !rightCall.isEmpty() ? rightCall.toUpper() : fromCall;
+    bool const isWorkedEver = !dxStatusCall.isEmpty() && m_workedCalls.contains(dxStatusCall);
+    bool isLotw = m_lotwEnabled && !dxStatusCall.isEmpty() && m_lotwUsers.contains(dxStatusCall);
+
     QString firstCall;
     QStringList const tokens = normalizedMessageTokens(msg);
     for (QString const& token : tokens) {
@@ -26740,9 +26869,9 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     bool const selfEntry = localTxEntry || sameBaseCall(fromCall) || sameBaseCall(firstCall);
     QString const curBand = freqHzToBandToken(m_frequency);
     bool isB4 = false;
-    if (!selfEntry && !fromCall.isEmpty()) {
+    if (!selfEntry && !dxStatusCall.isEmpty()) {
         isB4 = !curBand.isEmpty()
-            ? m_worked.callByBand.contains(curBand + QLatin1Char('|') + fromCall)
+            ? m_worked.callByBand.contains(curBand + QLatin1Char('|') + dxStatusCall)
             : isWorkedEver;
     }
 
@@ -26837,7 +26966,7 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     entry["dxIsNewItuZoneBand"]   = dxIsNewItuZoneBand;
     entry["dxIsNewGrid"]          = dxIsNewGrid;
     entry["dxIsNewGridBand"]      = dxIsNewGridBand;
-    entry["dxIsNewCall"]          = !isWorkedEver && !selfEntry && !rightCall.isEmpty();
+    entry["dxIsNewCall"]          = !isWorkedEver && !selfEntry && !dxStatusCall.isEmpty();
     entry["dxIsNewCallBand"]      = dxIsNewCallBand;
     entry["dxIsMostWanted"] = entry.value("dxIsMostWanted", false);
     entry["dxBearing"] = bearing;
@@ -27360,6 +27489,12 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // per non ri-triggerare advanceQsoState/checkAndStartPeriodicTx sul partner (la decisione
     // TX l'ha gia' presa il fast pass depth-2). .remove() pulisce anche il set.
     bool const ft8DeepInTxListOnly = m_ft8DeepInTxSerials.remove(serial) > 0;
+    bool const ft2SignoffRescueScan =
+        !resumedQso
+        && m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && !m_callsign.isEmpty()
+        && (m_autoSeq || m_autoCqRepeat);
     bool autoSeqActive =
         !ft8DeepInTxListOnly
         && !resumedQso  // 1.0.304 (#9): il resume ha già re-ingaggiato su questo decode
@@ -27367,12 +27502,19 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
             || m_autoCqRepeat);
     bool autoSeqGotResponse = false;
-    if (autoSeqActive) {
+    if (autoSeqActive || ft2SignoffRescueScan) {
         for (const auto& row : rows) {
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;
             QString msgText = f[4];
             if (!shouldAcceptDecodedMessage(msgText)) continue;
+            bool const signoffRescue =
+                !autoSeqActive
+                && ft2SignoffRescueScan
+                && isDirectedActivePartnerSignoffDecode(f);
+            if (!autoSeqActive && !signoffRescue) {
+                continue;
+            }
             QString localTxEchoReason;
             if (shouldSuppressRecentLocalTxEchoDecode(msgText,
                                                       QStringLiteral("ft-sync-autoseq"),
@@ -27383,6 +27525,10 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                                          normalizedBaseCall(m_callsign.trimmed().toUpper()))) {
                 if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("ft-sync-autoseq"))) {
                     continue;
+                }
+                if (signoffRescue) {
+                    bridgeLog(QStringLiteral("FT2 signoff rescue: feed list-only/deferred decode to auto-seq: %1")
+                                  .arg(msgText));
                 }
                 autoSequenceStep(f);
                 autoSeqGotResponse = true;
@@ -27541,7 +27687,12 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         !m_callsign.isEmpty() &&
         ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
          || m_autoCqRepeat);
-    if (earlyAutoSeqActive) {
+    bool const earlyFt2SignoffRescueScan =
+        !resumedQso
+        && !m_callsign.isEmpty()
+        && m_asyncTxEnabled
+        && (m_autoSeq || m_autoCqRepeat);
+    if (earlyAutoSeqActive || earlyFt2SignoffRescueScan) {
         bool gotResponse = false;
         QString const myCallUpper = m_callsign.trimmed().toUpper();
         QString const myBaseUpper = normalizedBaseCall(myCallUpper);
@@ -27549,6 +27700,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;
             if (!shouldAcceptDecodedMessage(f[4])) continue;
+            bool const signoffRescue =
+                !earlyAutoSeqActive
+                && earlyFt2SignoffRescueScan
+                && isDirectedActivePartnerSignoffDecode(f);
+            if (!earlyAutoSeqActive && !signoffRescue) {
+                continue;
+            }
             QString localTxEchoReason;
             if (shouldSuppressRecentLocalTxEchoDecode(f[4],
                                                       QStringLiteral("ft2-autoseq"),
@@ -27558,6 +27716,10 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             if (messageContainsCallToken(f[4], myCallUpper, myBaseUpper)) {
                 if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("ft2-autoseq"))) {
                     continue;
+                }
+                if (signoffRescue) {
+                    bridgeLog(QStringLiteral("FT2 signoff rescue: feed async decode to auto-seq: %1")
+                                  .arg(f[4]));
                 }
                 autoSequenceStep(f);
                 gotResponse = true;
@@ -28201,6 +28363,71 @@ void DecodiumBridge::onPeriodTimer()
 
 void DecodiumBridge::onSpectrumTimer()
 {
+    auto const spectrumTimerStart = std::chrono::steady_clock::now();
+    bool metricDelivered = false;
+    bool metricHighRes = false;
+    bool metricGpu = false;
+    int metricUsable = 0;
+    int metricWfAvail = 0;
+    int metricIntervalMs = m_spectrumTimer ? m_spectrumTimer->interval() : -1;
+    auto spectrumTimerMetricGuard = qScopeGuard([&]() {
+        qint64 const elapsedUs = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now() - spectrumTimerStart).count();
+        static qint64 lastLogMs = 0;
+        static qint64 accumUs = 0;
+        static int samples = 0;
+        static int maxUs = 0;
+        static int deliveredFrames = 0;
+        static int highResFrames = 0;
+        static int gpuFrames = 0;
+        static int lastUsable = 0;
+        static int lastWfAvail = 0;
+        static int lastIntervalMs = -1;
+        accumUs += qMax<qint64>(0, elapsedUs);
+        ++samples;
+        maxUs = qMax(maxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+        if (metricDelivered)
+            ++deliveredFrames;
+        if (metricHighRes)
+            ++highResFrames;
+        if (metricGpu)
+            ++gpuFrames;
+        lastUsable = metricUsable;
+        lastWfAvail = metricWfAvail;
+        lastIntervalMs = metricIntervalMs;
+        qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (lastLogMs == 0)
+            lastLogMs = logNowMs;
+        if (logNowMs - lastLogMs < 10000 || samples <= 0)
+            return;
+        double const deliveryPct = samples > 0
+            ? (100.0 * static_cast<double>(deliveredFrames) / static_cast<double>(samples))
+            : 0.0;
+        qInfo().noquote()
+            << "[PANMETRIC] spectrum_timer"
+            << "avg_us=" << (accumUs / samples)
+            << "max_us=" << maxUs
+            << "ticks=" << samples
+            << "delivered_frames=" << deliveredFrames
+            << "highres_frames=" << highResFrames
+            << "gpu_frames=" << gpuFrames
+            << "delivery_pct=" << QString::number(deliveryPct, 'f', 1)
+            << "last_usable=" << lastUsable
+            << "last_wf_avail=" << lastWfAvail
+            << "monitoring=" << (m_monitoring ? 1 : 0)
+            << "interval_ms=" << lastIntervalMs;
+        lastLogMs = logNowMs;
+        accumUs = 0;
+        samples = 0;
+        maxUs = 0;
+        deliveredFrames = 0;
+        highResFrames = 0;
+        gpuFrames = 0;
+        lastUsable = 0;
+        lastWfAvail = 0;
+        lastIntervalMs = -1;
+    });
+
     if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy() && !m_legacyPcmSpectrumFeed) return;
     if (!m_monitoring) return;
     if (m_transmitting || m_tuning) return;
@@ -28242,11 +28469,12 @@ void DecodiumBridge::onSpectrumTimer()
 
     // Usa il ring buffer waterfall per la FFT (sempre pieno, indipendente dal decoder)
     int wfAvail = qMin(m_wfRingPos, (int)WF_RING_SIZE);
+    metricWfAvail = wfAvail;
     if (wfAvail < 512) {
         if (nowMs - m_lastPanadapterFrameMs > 6000
             && nowMs - m_lastSpectrumRecoveryMs > 12000) {
             m_lastSpectrumRecoveryMs = nowMs;
-            if (m_legacyPcmSpectrumFeed && usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+            if (m_legacyPcmSpectrumFeed && usingLegacyBackendForTx()) {
                 rearmLegacyPcmSpectrumFeed(QStringLiteral("waterfall stalled: no legacy PCM samples"));
             } else {
                 restartAudioCaptureFromWatchdog(QStringLiteral("waterfall stalled: no spectrum samples"));
@@ -28267,15 +28495,15 @@ void DecodiumBridge::onSpectrumTimer()
             // It is delivered through the embedded legacy pipeline on the UI
             // thread, so 66ms can contend with FT8/FT4 period decode bursts.
             // Direct Visual is opt-in, so let modern audio feeds target ~30 fps.
-            bool const directVisualFastFeed =
-                useModernSpectrumFeedWithLegacy()
-                && (!usingLegacyBackendForTx() || !m_legacyPcmSpectrumFeed);
+            bool const directVisualFastFeed = useModernSpectrumFeedWithLegacy();
             // 1.0.186 — FPS cap configurabile (15/20/30 fps). Default 20 fps
             // (50ms interval) bilancia fluidita' UI con frame budget main thread.
             // Era hardcoded 33ms (~30 fps) → su PC modesti causava stall.
             int const fpsCap = qBound(15, m_spectrumFpsCap, 30);
             qint64 const cappedIntervalMs = 1000 / fpsCap;
-            qint64 minPanadapterIntervalMs = directVisualFastFeed ? cappedIntervalMs : 125;
+            qint64 minPanadapterIntervalMs = directVisualFastFeed
+                ? (m_legacyPcmSpectrumFeed ? qMax<qint64>(cappedIntervalMs, 66) : cappedIntervalMs)
+                : 125;
             if (m_lowCpuModeEnabled) {
                 minPanadapterIntervalMs = qMax<qint64>(
                     minPanadapterIntervalMs,
@@ -28299,19 +28527,11 @@ void DecodiumBridge::onSpectrumTimer()
                 && nowMs - m_lastPanadapterFrameMs < minPanadapterIntervalMs) {
                 return;
             }
-
-            QVector<short> panadapterSamples(fftLen);
-            panadapterSamples.fill(0);
+            metricIntervalMs = static_cast<int>(minPanadapterIntervalMs);
             int ringStart = (m_wfRingPos - usable) % WF_RING_SIZE;
             if (ringStart < 0)
                 ringStart += WF_RING_SIZE;
             int const firstChunk = qMin(usable, WF_RING_SIZE - ringStart);
-            std::memcpy(panadapterSamples.data(), m_wfRing + ringStart,
-                        static_cast<size_t>(firstChunk) * sizeof(short));
-            if (firstChunk < usable) {
-                std::memcpy(panadapterSamples.data() + firstChunk, m_wfRing,
-                            static_cast<size_t>(usable - firstChunk) * sizeof(short));
-            }
 
             int const nfaSnapshot = m_nfa;
             int const nfbSnapshot = m_nfb;
@@ -28324,14 +28544,24 @@ void DecodiumBridge::onSpectrumTimer()
                 m_remoteServer
                 && m_remoteServer->isRunning()
                 && m_remoteServer->waterfallEnabled();
+            bool const forceGpuPanadapterFft = m_forceGpuPanadapterFft.load();
+            bool gpuPanadapterFftAvailable = m_gpuPanadapterFftAvailable.load();
+            if (!gpuPanadapterFftAvailable
+                && forceGpuPanadapterFft
+                && !remoteWaterfallNeedsCpu
+                && nowMs - m_lastGpuPanadapterProbeMs > 30000) {
+                m_lastGpuPanadapterProbeMs = nowMs;
+                gpuPanadapterFftAvailable = true;
+                m_gpuPanadapterFftAvailable.store(true);
+                qInfo().noquote()
+                    << "[PANDBG] Panadapter visual FFT GPU retry probe"
+                    << "reason=force_gpu_first_reprobe"
+                    << "fallback=FFTW_CPU_on_failure";
+            }
             bool const gpuPanadapterFft =
-                m_gpuPanadapterFftAvailable.load()
+                gpuPanadapterFftAvailable
                 && !remoteWaterfallNeedsCpu;
             if (gpuPanadapterFft) {
-                QVector<float> pcmFrame(fftLen);
-                for (int i = 0; i < fftLen; ++i)
-                    pcmFrame[i] = static_cast<float>(panadapterSamples[i]);
-
                 static std::atomic_bool loggedGpuPath {false};
                 bool expectedGpuLog = false;
                 if (loggedGpuPath.compare_exchange_strong(expectedGpuLog, true)) {
@@ -28339,10 +28569,42 @@ void DecodiumBridge::onSpectrumTimer()
                         << "[PANDBG] Panadapter visual FFT scheduling active"
                         << "thread=QSG_render_thread"
                         << "mode=RHI_compute_gpu"
+                        << "force=" << (forceGpuPanadapterFft ? 1 : 0)
                         << "fallback=FFTW_CPU_on_failure";
                 }
 
                 m_lastPanadapterFrameMs = nowMs;
+                if (m_panadapterItem) {
+                    bool const accepted = m_panadapterItem->addPcmFrameI16(m_wfRing,
+                                                                           WF_RING_SIZE,
+                                                                           ringStart,
+                                                                           firstChunk,
+                                                                           usable,
+                                                                           nfaSnapshot,
+                                                                           nfbSnapshot,
+                                                                           freqMinHz,
+                                                                           freqMaxHz,
+                                                                           static_cast<qulonglong>(serial));
+                    metricDelivered = accepted;
+                    metricHighRes = true;
+                    metricGpu = true;
+                    metricUsable = usable;
+                    if (!accepted) {
+                        setGpuPanadapterFftAvailable(
+                            false,
+                            QStringLiteral("PanadapterItem rejected GPU FFT I16 frame"));
+                    }
+                    return;
+                }
+
+                QVector<float> pcmFrame(fftLen, 0.0f);
+                for (int i = 0; i < firstChunk; ++i)
+                    pcmFrame[i] = static_cast<float>(m_wfRing[ringStart + i]);
+                if (firstChunk < usable) {
+                    int const remaining = usable - firstChunk;
+                    for (int i = 0; i < remaining; ++i)
+                        pcmFrame[firstChunk + i] = static_cast<float>(m_wfRing[i]);
+                }
                 emit panadapterPcmFrameReady(std::move(pcmFrame),
                                              usable,
                                              nfaSnapshot,
@@ -28350,7 +28612,20 @@ void DecodiumBridge::onSpectrumTimer()
                                              freqMinHz,
                                              freqMaxHz,
                                              static_cast<qulonglong>(serial));
+                metricDelivered = true;
+                metricHighRes = true;
+                metricGpu = true;
+                metricUsable = usable;
                 return;
+            }
+
+            QVector<short> panadapterSamples(fftLen);
+            panadapterSamples.fill(0);
+            std::memcpy(panadapterSamples.data(), m_wfRing + ringStart,
+                        static_cast<size_t>(firstChunk) * sizeof(short));
+            if (firstChunk < usable) {
+                std::memcpy(panadapterSamples.data() + firstChunk, m_wfRing,
+                            static_cast<size_t>(usable - firstChunk) * sizeof(short));
             }
 
             static std::atomic_bool loggedRemoteCpu {false};
@@ -28368,6 +28643,10 @@ void DecodiumBridge::onSpectrumTimer()
                 return;
             }
             m_lastPanadapterFrameMs = nowMs;
+            metricDelivered = true;
+            metricHighRes = true;
+            metricGpu = false;
+            metricUsable = usable;
 
             static std::atomic_bool loggedAsyncPath {false};
             bool expectedLog = false;
@@ -28439,6 +28718,10 @@ void DecodiumBridge::onSpectrumTimer()
         if (!spectrum.isEmpty()) {
             m_lastPanadapterFrameMs = nowMs;
             emit spectrumDataReady(spectrum);
+            metricDelivered = true;
+            metricHighRes = false;
+            metricGpu = false;
+            metricUsable = SPECTRUM_FFT_SIZE;
         }
     }
 }
@@ -28797,6 +29080,16 @@ void DecodiumBridge::startAudioCapture()
         }
         return;
     }
+    if (usingLegacyBackendForTx()
+        && useModernSpectrumFeedWithLegacy()
+        && !useDedicatedModernAudioCaptureWithLegacy()) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: legacy PCM tap is the single RX source for Direct Visual"));
+        m_legacyPcmSpectrumFeed = true;
+        if (m_soundInput || m_tciAudioCaptureActive) {
+            stopAudioCapture();
+        }
+        return;
+    }
     if (usingTciAudioInput()) {
         bridgeLog(QStringLiteral("startAudioCapture: using TCI audio stream"));
         startTciAudioCapture();
@@ -28922,7 +29215,22 @@ void DecodiumBridge::startAudioCapture()
     // Rolling back a 8192 (~170ms) — buffer sufficiente per FT4/FT8 final
     // windows ma sotto la soglia di breakage di Qt-WASAPI.
     const int rxFramesPerBuffer = 8192; // ~170 ms at 48 kHz, before decimation.
+    QString const startKey = QStringLiteral("%1|%2|%3|%4")
+        .arg(selectedDevice.description())
+        .arg(downSampleFactor)
+        .arg(static_cast<int>(channel))
+        .arg(rxFramesPerBuffer);
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (m_soundInput && m_soundInput->isActiveFor(selectedDevice, downSampleFactor, channel)) {
+        m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
+        return;
+    }
+    if (m_soundInput
+        && m_lastAudioCaptureStartKey == startKey
+        && m_lastAudioCaptureStartMs > 0
+        && nowMs - m_lastAudioCaptureStartMs < 750) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: identical stream start already pending age=%1ms")
+                      .arg(nowMs - m_lastAudioCaptureStartMs));
         m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         return;
     }
@@ -28931,6 +29239,8 @@ void DecodiumBridge::startAudioCapture()
               " channel=" + QString::number((int)channel) +
               " dsf=" + QString::number(downSampleFactor) +
               " frames=" + QString::number(rxFramesPerBuffer));
+    m_lastAudioCaptureStartKey = startKey;
+    m_lastAudioCaptureStartMs = nowMs;
     m_audioUnhealthyStartMs = 0;
     m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 5000;
     if (m_audioSink) {
@@ -29311,6 +29621,25 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
+    if (usingLegacyBackendForTx()
+        && useModernSpectrumFeedWithLegacy()
+        && !useDedicatedModernAudioCaptureWithLegacy()) {
+        bridgeLog(QStringLiteral("Audio watchdog: rearming legacy PCM tap for Direct Visual (%1)").arg(reason));
+        m_legacyPcmSpectrumFeed = true;
+        m_lastLegacyPcmSampleMs = 0;
+        if (m_soundInput || m_tciAudioCaptureActive) {
+            stopAudioCapture();
+        }
+        if (m_legacyBackend) {
+            syncLegacyBackendTxState();
+            m_legacyBackend->setMonitoring(true);
+            m_legacyBackend->rearmMonitoring(QStringLiteral("direct visual watchdog %1").arg(reason));
+        }
+        m_audioUnhealthyStartMs = 0;
+        m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 5000;
+        return;
+    }
+
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     m_lastAudioWatchdogRestartMs = now;
     m_lastAudioWatchdogLogMs = now;
@@ -29340,6 +29669,8 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
 
 void DecodiumBridge::stopAudioCapture()
 {
+    m_lastAudioCaptureStartKey.clear();
+    m_lastAudioCaptureStartMs = 0;
     if (m_tciAudioCaptureActive) {
         stopTciAudioCapture();
         return;
@@ -29358,6 +29689,8 @@ void DecodiumBridge::stopAudioCapture()
 
 void DecodiumBridge::teardownAudioCapture()
 {
+    m_lastAudioCaptureStartKey.clear();
+    m_lastAudioCaptureStartMs = 0;
     if (m_soundInput) {
         bridgeLog(QStringLiteral("teardownAudioCapture: stopping and destroying SoundInput"));
         QObject::disconnect(m_soundInput, nullptr, this, nullptr);
@@ -30543,6 +30876,129 @@ QString DecodiumBridge::buildCurrentTxMessage() const
     }
 
     return selectedMessage;
+}
+
+bool DecodiumBridge::forceRecentRogerReportSignoffIfNeeded(QString& message, const QString& reason)
+{
+    if (m_specialOperationActivity == kSpecialOpHound
+        || m_currentTx < 1
+        || m_currentTx > 5
+        || m_currentTx == 4
+        || m_currentTx == 5
+        || isTxDisabled(4)) {
+        return false;
+    }
+    if (!m_autoSeq && !m_autoCqRepeat) {
+        return false;
+    }
+
+    QString const activeCall = m_dxCall.trimmed();
+    QString const activeBase = normalizedBaseCall(activeCall);
+    QString const myCall = normalizeCallToken(m_callsign).trimmed().toUpper();
+    QString const myBase = normalizedBaseCall(myCall);
+    if (activeBase.isEmpty() || myCall.isEmpty()) {
+        return false;
+    }
+
+    QString const payload = message.trimmed();
+    QStringList const payloadTokens = normalizedMessageTokens(payload);
+    bool const selectedReportPayload =
+        m_currentTx == 2
+        || m_currentTx == 3
+        || (!payloadTokens.isEmpty()
+            && (isPlainSignalReportToken(payloadTokens.constLast())
+                || isRogerSignalReportToken(payloadTokens.constLast())));
+    if (!selectedReportPayload
+        || !messageContainsCallToken(payload, activeCall, activeBase)) {
+        return false;
+    }
+
+    bool const priorReportSentToActivePartner =
+        (m_lastNtx == 2 || m_lastNtx == 3)
+        && messageContainsCallToken(m_lastTransmittedMessage, activeCall, activeBase);
+    bool const autoSeqAlreadySawRogerReport =
+        !m_autoSeqRogerReportBase.trimmed().isEmpty()
+        && m_autoSeqRogerReportBase.trimmed().compare(activeBase, Qt::CaseInsensitive) == 0;
+    if (!priorReportSentToActivePartner && !autoSeqAlreadySawRogerReport) {
+        return false;
+    }
+
+    QStringList toCandidates;
+    QStringList fromCandidates;
+    auto addUnique = [](QStringList& list, QString value) {
+        value = normalizeCallToken(value).trimmed().toUpper();
+        if (!value.isEmpty() && !list.contains(value)) {
+            list.append(value);
+        }
+    };
+    addUnique(toCandidates, myCall);
+    addUnique(toCandidates, myBase);
+    addUnique(fromCandidates, activeCall);
+    addUnique(fromCandidates, activeBase);
+
+    QString const modeKey = m_mode.trimmed().toUpper();
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const periodMs = qMax<qint64>(1, periodMsForMode(m_mode));
+    qint64 const validWindowMs = qMax<qint64>(6000, periodMs + 2500);
+    qint64 bestAgeMs = std::numeric_limits<qint64>::max();
+    QString bestMessage;
+    QString bestKey;
+    for (const QString& toCall : toCandidates) {
+        for (const QString& fromCall : fromCandidates) {
+            QString const key = modeKey
+                + QLatin1Char('|') + toCall
+                + QLatin1Char('|') + fromCall
+                + QStringLiteral("|R_REPORT");
+            auto const it = m_recentDirectedReportDecodeMs.constFind(key);
+            if (it == m_recentDirectedReportDecodeMs.cend()) {
+                continue;
+            }
+            qint64 const ageMs = nowMs - it.value();
+            if (ageMs >= 0 && ageMs <= validWindowMs && ageMs < bestAgeMs) {
+                bestAgeMs = ageMs;
+                bestMessage = m_recentDirectedReportDecodeMessage.value(key);
+                bestKey = key;
+            }
+        }
+    }
+    if (bestMessage.isEmpty()) {
+        return false;
+    }
+
+    genStdMsgs(activeCall, m_dxGrid.trimmed());
+    QString const forcedMessage = m_tx4.trimmed();
+    if (forcedMessage.isEmpty()
+        || !messageContainsCallToken(forcedMessage, activeCall, activeBase)) {
+        bridgeLog(QStringLiteral("TX late R+report guard could not force TX4 (%1): active=%2 tx4=[%3] decode=[%4]")
+                      .arg(reason,
+                           activeBase,
+                           forcedMessage,
+                           bestMessage));
+        return false;
+    }
+
+    QString const oldMessage = payload;
+    m_autoSeqRogerReportBase = activeBase;
+    m_logAfterOwn73 = false;
+    m_ft2DeferredLogPending = false;
+    m_txRetryCount = 0;
+    m_txWatchdogTicks = 0;
+    m_autoCQPeriodsMissed = 0;
+    advanceQsoState(4);
+    updateAutoCqPartnerLock();
+    invalidateTxAudioCache();
+    scheduleTxAudioPrecompute();
+    message = buildCurrentTxMessage().trimmed();
+
+    bridgeLog(QStringLiteral("TX late R+report guard forced TX4/RR73 (%1): active=%2 age=%3ms key=%4 old=[%5] new=[%6] decode=[%7]")
+                  .arg(reason,
+                       activeBase,
+                       QString::number(bestAgeMs),
+                       bestKey,
+                       oldMessage,
+                       message,
+                       bestMessage));
+    return true;
 }
 
 bool DecodiumBridge::repairOrRejectStalePartnerTxMessage(QString& message, const QString& reason)
@@ -32190,6 +32646,25 @@ void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString&
             << "reason=" << (reason.isEmpty() ? QStringLiteral("PanadapterItem rejected GPU compute") : reason)
             << "fallback=FFTW_CPU";
     }
+}
+
+void DecodiumBridge::registerPanadapterItem(PanadapterItem* item)
+{
+    if (!item || m_panadapterItem == item)
+        return;
+
+    m_panadapterItem = item;
+    qInfo().noquote()
+        << "[PANDBG] Panadapter PCM frame feed registered"
+        << "route=C++_I16_ring"
+        << "qml_bypass=1"
+        << "bridge_vector_float=0";
+}
+
+void DecodiumBridge::unregisterPanadapterItem(PanadapterItem* item)
+{
+    if (item && m_panadapterItem == item)
+        m_panadapterItem.clear();
 }
 
 int         DecodiumBridge::qsoCount()         const

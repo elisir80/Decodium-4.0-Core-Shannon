@@ -69,6 +69,9 @@ private:
   int m_channelSelector {static_cast<int>(AudioDevice::Mono)};
   QString m_lastStatusMessage;
   QString m_lastDuplicateStartKey;
+  QString m_currentStartKey;
+  qint64 m_currentStartRequestedMs {-1};
+  QPointer<AudioDevice> m_currentStartSink;
   QAudio::State m_lastReportedState {QAudio::StoppedState};
   qint64 m_lastDebugStateLogMs {-1};
   qint64 m_lastDuplicateStartLogMs {-1};

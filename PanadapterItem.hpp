@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QStringList>
 #include <QColor>
+#include <QMetaObject>
 
 class QSGNode;
 class QSGSimpleTextureNode;
@@ -48,6 +49,7 @@ class PanadapterItem : public QQuickItem
     Q_PROPERTY(bool  showTxBrackets READ showTxBrackets WRITE setShowTxBrackets NOTIFY showTxBracketsChanged)
     Q_PROPERTY(int   colorGain   READ colorGain   WRITE setColorGain   NOTIFY colorGainChanged)
     Q_PROPERTY(int   blackLevel  READ blackLevel  WRITE setBlackLevel  NOTIFY blackLevelChanged)
+    Q_PROPERTY(int   contrastLevel READ contrastLevel WRITE setContrastLevel NOTIFY contrastLevelChanged)
 
     // ── Render throttle (paint cap durante carico CPU elevato, es. FT2 attivo)
     Q_PROPERTY(bool  throttleActive READ throttleActive WRITE setThrottleActive NOTIFY throttleActiveChanged)
@@ -105,6 +107,7 @@ public:
     }
     int   colorGain()      const { return m_colorGain; }
     int   blackLevel()     const { return m_blackLevel; }
+    int   contrastLevel()  const { return m_contrastLevel; }
     int   labelFontSize()  const { return m_labelFontSize; }
     int   labelSpacing()   const { return m_labelSpacing; }
     bool  labelBold()      const { return m_labelBold; }
@@ -118,7 +121,7 @@ public:
     // ── Setters ─────────────────────────────────────────────────────────────
     void setMinDb(float v)         { if (m_minDb!=v){m_minDb=v;emit minDbChanged();markDirty();} }
     void setMaxDb(float v)         { if (m_maxDb!=v){m_maxDb=v;emit maxDbChanged();markDirty();} }
-    void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();} }
+    void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();markDirty();} }
     void setPeakHold(bool v)       { if (m_peakHold!=v){m_peakHold=v;if(!v)m_peakBins.clear();emit peakHoldChanged();} }
     void setPeakDecay(float v)     { if (m_peakDecay!=v){m_peakDecay=v;emit peakDecayChanged();} }
     void setAvgFrames(int v)       { if (m_avgFrames!=v){m_avgFrames=qBound(1,v,32);emit avgFramesChanged();} }
@@ -134,6 +137,7 @@ public:
     void setShowTxBrackets(bool v) { if (m_showTxBrackets!=v){m_showTxBrackets=v;emit showTxBracketsChanged();markDirty();} }
     void setColorGain(int v)       { v=qBound(0,v,100); if(m_colorGain!=v){m_colorGain=v;m_waterfallRgbValid=false;emit colorGainChanged();markDirty();} }
     void setBlackLevel(int v)      { v=qBound(0,v,100); if(m_blackLevel!=v){m_blackLevel=v;m_waterfallRgbValid=false;emit blackLevelChanged();markDirty();} }
+    void setContrastLevel(int v)   { v=qBound(10,v,150); if(m_contrastLevel!=v){m_contrastLevel=v;m_waterfallRgbValid=false;emit contrastLevelChanged();markDirty();} }
     void setLabelFontSize(int v)   { v=qBound(6,v,24); if(m_labelFontSize!=v){m_labelFontSize=v;emit labelFontSizeChanged();markDirty();} }
     void setLabelSpacing(int v)    { v=qBound(0,v,20); if(m_labelSpacing!=v){m_labelSpacing=v;emit labelSpacingChanged();markDirty();} }
     void setLabelBold(bool v)      { if(m_labelBold!=v){m_labelBold=v;emit labelBoldChanged();markDirty();} }
@@ -158,6 +162,16 @@ public:
                                  float freqMinHz,
                                  float freqMaxHz,
                                  quint64 serial);
+    bool addPcmFrameI16(const short* ring,
+                        int ringSize,
+                        int ringStart,
+                        int firstChunk,
+                        int usableSamples,
+                        int nfa,
+                        int nfb,
+                        float freqMinHz,
+                        float freqMaxHz,
+                        quint64 serial);
 
     Q_INVOKABLE void resetPeakHold()  { m_peakBins.clear(); markDirty(); }
     Q_INVOKABLE void resetWaterfall();
@@ -189,6 +203,7 @@ signals:
     void txFrequencySelected(int freq);
     void colorGainChanged();
     void blackLevelChanged();
+    void contrastLevelChanged();
     void labelFontSizeChanged();
     void labelSpacingChanged();
     void labelBoldChanged();
@@ -215,8 +230,8 @@ protected:
     void wheelEvent(QWheelEvent* ev)      override;
 
 private:
-    void markDirty()     { m_spectrumDirty = true; update(); }
-    void markGeomDirty() { m_geometryDirty = true; m_spectrumDirty = true; update(); }
+    void markDirty()     { m_spectrumDirty = true; m_spectrumOverlayDirty = true; update(); }
+    void markGeomDirty() { m_geometryDirty = true; m_spectrumDirty = true; m_spectrumOverlayDirty = true; update(); }
 
     void rebuildImages(int w, int h);
     void renderSpectrum();
@@ -231,10 +246,16 @@ private:
     bool spectrumGraphSupported() const;
     void updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int h);
     void removeSpectrumGraphNodes(QSGNode* spectrumRoot);
+    void rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectReady);
+    void updateSpectrumOverlayNode(QSGNode* spectrumRoot, int w, int h, bool gpuDirectReady, bool gpuSpectrumGraph);
     bool gpuFftSupported(QString* reason = nullptr) const;
     void recordGpuFftCompute();
     void releaseGpuFftResources();
     void failGpuFft(const QString& reason);
+    void connectBridgePcmFrameFeed();
+    void recordOverlayMetric(qint64 elapsedUs, int decodeLabels, int clusterLabels, const QSize& size);
+    void recordPaintMetric(qint64 elapsedUs);
+    void recordQsgFrameMetric(qint64 frameUs);
 
     // Conversioni frequenza ↔ pixel (rispetta zoom/pan)
     int   freqToX(int freq) const;
@@ -279,11 +300,15 @@ private:
 
     // ── Immagini ────────────────────────────────────────────────────────────
     QImage m_spectrumImage;  // spectrum (larghezza × spectrumH)
+    QImage m_spectrumOverlayImage; // griglia/label/marker batched per QSG
     QImage m_waterfallImage; // waterfall (larghezza × waterfallH)
     QImage m_waterfallDisplayImage; // waterfall lineare pronta per upload GPU
     QImage m_waterfallIntensityImage; // fallback CPU: intensità 0..255 per shader palette
     QImage m_waterfallIntensityDisplayImage; // intensità lineare pronta per upload GPU
     QImage m_waterfallIntensityTextureImage; // atlas RGBA: palette + intensità per shader GPU
+    QSize m_renderSpectrumSize; // dimensioni logiche QSG, indipendenti dalle QImage fallback
+    QSize m_renderWaterfallSize;
+    int   m_renderWaterfallHistoryRows = 0;
     QVector<float> m_waterfallDbRows; // GPU shader path: dB grezzi per bin/riga
     QVector<float> m_waterfallDbRowParams; // minDb, inverseRange per riga
     int    m_waterfallRawBinsWidth = 0;
@@ -310,6 +335,7 @@ private:
 
     int   m_colorGain    = 50;
     int   m_blackLevel   = 15;
+    int   m_contrastLevel = 80;
     QVariantList m_decodeLabels;  // [{call:"IU8LMC",freq:1500,snr:-5,isCQ:true}, ...]
 
     // ── Stile label callsign (overlay spettro) ──────────────────────────────
@@ -330,6 +356,7 @@ private:
 
     // ── Stato rendering ─────────────────────────────────────────────────────
     bool  m_spectrumDirty = true;
+    bool  m_spectrumOverlayDirty = true;
     bool  m_geometryDirty = true;
     bool  m_useShaderWaterfall = false;
     bool  m_shaderWaterfallBlocked = false;
@@ -345,10 +372,12 @@ private:
     int   m_paletteGeneration = 0;
     bool  m_gpuFftFailed = false;
     QString m_gpuFftFailureReason;
+    bool  m_bridgePcmFrameFeedRegistered = false;
     bool  m_loggedGpuFftRejected = false;
     bool  m_loggedGpuFftAccepted = false;
     bool  m_loggedGpuFftInputStats = false;
     bool  m_loggedGpuFftWarmupSkip = false;
+    bool  m_loggedGpuFftI16Accepted = false;
     int   m_gpuFftInvalidReadbacks = 0;
     int   m_gpuFftReadbackTimeouts = 0;
     int   m_gpuFftSlowReadbacks = 0;
@@ -359,6 +388,34 @@ private:
     qint64 m_lastGpuFftReadbackMs = 0;
     qint64 m_lastGpuFftTimeoutLogMs = 0;
     int   m_gpuFftUiBinsExpected = 0;
+    bool  m_gpuDirectTextureReady = false;
+    float m_gpuDirectDisplayMinDb = -70.0f;
+    float m_gpuDirectDisplayMaxDb = 35.0f;
+    float m_spectrumOverlayDisplayMinDb = -9999.0f;
+    float m_spectrumOverlayDisplayMaxDb = -9999.0f;
+    QSize m_spectrumOverlaySize;
+    qint64 m_lastSpectrumOverlayRebuildMs = 0;
+    bool  m_loggedSpectrumCppOverlay = false;
+    bool  m_loggedGpuWaterfallDetached = false;
+    QQuickWindow* m_qsgMetricWindow = nullptr;
+    QMetaObject::Connection m_qsgFrameConnection;
+    qint64 m_qsgFrameLastSwapUs = 0;
+    qint64 m_qsgFrameMetricLastLogMs = 0;
+    qint64 m_qsgFrameMetricAccumUs = 0;
+    int    m_qsgFrameMetricSamples = 0;
+    int    m_qsgFrameMetricMaxUs = 0;
+    qint64 m_overlayMetricLastLogMs = 0;
+    qint64 m_overlayMetricAccumUs = 0;
+    int    m_overlayMetricSamples = 0;
+    int    m_overlayMetricMaxUs = 0;
+    int    m_overlayMetricDecodeLabels = 0;
+    int    m_overlayMetricClusterLabels = 0;
+    QSize  m_overlayMetricSize;
+    qint64 m_paintMetricLastLogMs = 0;
+    qint64 m_paintMetricAccumUs = 0;
+    int    m_paintMetricSamples = 0;
+    int    m_paintMetricMaxUs = 0;
+    qint64 m_decodeLabelMetricLastLogMs = 0;
     struct GpuFftState;
     GpuFftState* m_gpuFft = nullptr;
     QMutex m_mutex;

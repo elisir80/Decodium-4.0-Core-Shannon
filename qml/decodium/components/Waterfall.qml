@@ -20,6 +20,7 @@ Item {
     property int  maxFreq: 3200
     property int  spectrumHeight: 150
     property bool restoringSettings: false
+    property bool syncingPaletteChoice: false
     property bool showDecodeCallsigns: true
     property var spectrumDecodeLabels: []
     property bool dxClusterRefreshPending: false
@@ -84,11 +85,62 @@ Item {
         return coerceBool(bridge.getSetting(key, fallback), fallback)
     }
 
+    function clampNumber(value, minValue, maxValue, fallback) {
+        var n = Number(value)
+        if (!isFinite(n))
+            n = fallback
+        return Math.max(minValue, Math.min(maxValue, n))
+    }
+
+    function clampIndex(value, count, fallback) {
+        return Math.round(clampNumber(value, 0, Math.max(0, count - 1), fallback))
+    }
+
+    function clampPaletteIndex(value) {
+        var count = 0
+        if (paletteCombo && paletteCombo.count !== undefined)
+            count = paletteCombo.count
+        if ((!count || count < 1) && waterfallDisplay && waterfallDisplay.paletteNames)
+            count = waterfallDisplay.paletteNames.length
+        return clampIndex(value, Math.max(1, count), 0)
+    }
+
+    function scheduleGraphSave() {
+        if (mainWindow && mainWindow.scheduleSave)
+            mainWindow.scheduleSave()
+    }
+
+    function persistGraphSetting(key, value) {
+        bridge.setSetting(key, value)
+        scheduleGraphSave()
+    }
+
+    function setPaletteIndex(index, persist) {
+        if (syncingPaletteChoice)
+            return
+        syncingPaletteChoice = true
+
+        var next = clampPaletteIndex(index)
+        if (paletteCombo.currentIndex !== next)
+            paletteCombo.currentIndex = next
+        if (!bridge.themeManager.isLightTheme && waterfallDisplay.paletteIndex !== next)
+            waterfallDisplay.paletteIndex = next
+        if (bridge.uiPaletteIndex !== next)
+            bridge.uiPaletteIndex = next
+
+        if (persist === undefined)
+            persist = !waterfallPanel.restoringSettings
+        if (persist)
+            persistGraphSetting("uiPaletteIndex", next)
+
+        syncingPaletteChoice = false
+    }
+
     function loadPanadapterSettings() {
         restoringSettings = true
         waterfallPanel.controlsExpanded = boolSetting("uiWaterfallControlsExpanded", true)
         if (bridge.uiSpectrumHeight > 0) waterfallPanel.spectrumHeight = bridge.uiSpectrumHeight
-        paletteCombo.currentIndex = Math.max(0, bridge.getSetting("uiPaletteIndex", bridge.uiPaletteIndex))
+        waterfallPanel.setPaletteIndex(bridge.getSetting("uiPaletteIndex", bridge.uiPaletteIndex), false)
         autoRangeCheck.checked = boolSetting("uiWaterfallAutoRange", true)
         txBracketsCheck.checked = boolSetting("uiWaterfallShowTxBrackets", true)
         peakHoldCheck.checked = boolSetting("uiWaterfallPeakHold", true)
@@ -107,13 +159,12 @@ Item {
         waterfallDisplay.showDxClusterSpots = dxClusterCheck.checked
 
         // In light theme la palette è forzata a 11 (mockup pastello). Non sovrascrivere col valore Settings.
-        if (!bridge.themeManager.isLightTheme)
-            waterfallDisplay.paletteIndex = paletteCombo.currentIndex
         waterfallDisplay.autoRange = autoRangeCheck.checked
         waterfallDisplay.showTxBrackets = txBracketsCheck.checked
         waterfallDisplay.peakHold = peakHoldCheck.checked
         waterfallDisplay.blackLevel = blackSlider.value
         waterfallDisplay.colorGain = gainSlider.value
+        waterfallDisplay.contrastLevel = contrastSlider.value
         waterfallDisplay.zoomFactor = zoomSlider.value
         waterfallDisplay.labelFontSize = labelFontSlider.value
         waterfallDisplay.labelSpacing = labelSpacingSlider.value
@@ -129,11 +180,11 @@ Item {
         if (waterfallPanel.controlsExpanded === expanded)
             return
         waterfallPanel.controlsExpanded = expanded
-        bridge.setSetting("uiWaterfallControlsExpanded", expanded)
-        mainWindow.scheduleSave()
+        waterfallPanel.persistGraphSetting("uiWaterfallControlsExpanded", expanded)
     }
 
     function clearDecodeLabels() {
+        decodeLabelSourceRefreshTimer.stop()
         spectrumDecodeLabels = []
         waterfallDisplay.setDecodeLabels([])
     }
@@ -150,8 +201,7 @@ Item {
         if (persist === undefined)
             persist = !waterfallPanel.restoringSettings
         if (persist) {
-            bridge.setSetting("uiWaterfallShowCallsigns", next)
-            mainWindow.scheduleSave()
+            waterfallPanel.persistGraphSetting("uiWaterfallShowCallsigns", next)
         }
     }
 
@@ -164,7 +214,28 @@ Item {
         return 0
     }
 
-    function refreshDecodeLabels() {
+    Timer {
+        id: decodeLabelSourceRefreshTimer
+        interval: 160
+        repeat: false
+        onTriggered: waterfallPanel.refreshDecodeLabelsNow()
+    }
+
+    function refreshDecodeLabels(delayMs) {
+        if (!waterfallPanel.visible)
+            return
+        if (!waterfallPanel.showDecodeCallsigns) {
+            clearDecodeLabels()
+            return
+        }
+        decodeLabelSourceRefreshTimer.interval = delayMs === undefined ? 160 : Math.max(0, delayMs)
+        if (!decodeLabelSourceRefreshTimer.running)
+            decodeLabelSourceRefreshTimer.start()
+        else if (decodeLabelSourceRefreshTimer.interval === 0)
+            decodeLabelSourceRefreshTimer.restart()
+    }
+
+    function refreshDecodeLabelsNow() {
         if (!waterfallPanel.visible)
             return
         if (!waterfallPanel.showDecodeCallsigns) {
@@ -374,7 +445,7 @@ Item {
                     onValueChanged: {
                         waterfallDisplay.labelFontSize = value
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiLabelFontSize", value)
+                            waterfallPanel.persistGraphSetting("uiLabelFontSize", value)
                         }
                     }
                     background: Rectangle { x:labelFontSlider.leftPadding; y:labelFontSlider.topPadding+labelFontSlider.availableHeight/2-2; width:labelFontSlider.availableWidth; height:4; radius:2; color:wfTrack
@@ -395,7 +466,7 @@ Item {
                     onValueChanged: {
                         waterfallDisplay.labelSpacing = value
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiLabelSpacing", value)
+                            waterfallPanel.persistGraphSetting("uiLabelSpacing", value)
                         }
                     }
                     background: Rectangle { x:labelSpacingSlider.leftPadding; y:labelSpacingSlider.topPadding+labelSpacingSlider.availableHeight/2-2; width:labelSpacingSlider.availableWidth; height:4; radius:2; color:wfTrack
@@ -413,7 +484,7 @@ Item {
                     onCheckedChanged: {
                         waterfallDisplay.labelBold = checked
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiLabelBold", checked)
+                            waterfallPanel.persistGraphSetting("uiLabelBold", checked)
                         }
                     }
                     indicator: Rectangle {
@@ -440,7 +511,7 @@ Item {
                         waterfallDisplay.labelUseCustomColor = preset.custom
                         waterfallDisplay.labelColor = preset.color
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiLabelColorPreset", currentIndex)
+                            waterfallPanel.persistGraphSetting("uiLabelColorPreset", currentIndex)
                         }
                     }
                     background: Rectangle { color: wfToolbarBg; border.color: borderColor; radius: 2 }
@@ -470,13 +541,10 @@ Item {
                     id: paletteCombo
                     Layout.preferredWidth: 106
                     model: waterfallDisplay.paletteNames
-                    currentIndex: Math.max(0, bridge.uiPaletteIndex)
+                    currentIndex: 0
                     font.pixelSize: 10
                     onActivated: {
-                        waterfallDisplay.paletteIndex = currentIndex
-                        bridge.uiPaletteIndex = currentIndex
-                        bridge.setSetting("uiPaletteIndex", currentIndex)
-                        mainWindow.scheduleSave()
+                        waterfallPanel.setPaletteIndex(currentIndex, true)
                     }
                     background: Rectangle { color: wfToolbarBg; border.color: borderColor; radius: 2 }
                     contentItem: Text { text: paletteCombo.displayText; font.pixelSize: 10; color: textPrimary; verticalAlignment: Text.AlignVCenter; leftPadding: 4 }
@@ -488,13 +556,11 @@ Item {
                     checked: true
                     onCheckedChanged: {
                         waterfallDisplay.autoRange = checked
-                        if (checked) {
-                            waterfallDisplay.maxDb = waterfallDisplay.measuredFloor + 20
-                        } else {
+                        if (!checked) {
                             waterfallPanel.applyManualContrast()
                         }
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallAutoRange", checked)
+                            waterfallPanel.persistGraphSetting("uiWaterfallAutoRange", checked)
                         }
                     }
                     ToolTip.text: "Auto noise floor (IIR)"
@@ -517,7 +583,7 @@ Item {
                     onCheckedChanged: {
                         waterfallDisplay.showTxBrackets = checked
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallShowTxBrackets", checked)
+                            waterfallPanel.persistGraphSetting("uiWaterfallShowTxBrackets", checked)
                         }
                     }
                     indicator: Rectangle {
@@ -535,7 +601,7 @@ Item {
                     onCheckedChanged: {
                         waterfallDisplay.showDxClusterSpots = checked
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallShowDxCluster", checked)
+                            waterfallPanel.persistGraphSetting("uiWaterfallShowDxCluster", checked)
                         }
                         if (checked) {
                             waterfallPanel.scheduleDxClusterRefresh(0)
@@ -604,7 +670,7 @@ Item {
                     onCheckedChanged: {
                         waterfallDisplay.peakHold = checked
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallPeakHold", checked)
+                            waterfallPanel.persistGraphSetting("uiWaterfallPeakHold", checked)
                         }
                     }
                     ToolTip.text: "Peak Hold"
@@ -629,8 +695,7 @@ Item {
                         waterfallDisplay.zoomFactor = value
                         if (!waterfallPanel.restoringSettings) {
                             bridge.uiZoomFactor = value
-                            bridge.setSetting("uiZoomFactor", value)
-                            mainWindow.scheduleSave()
+                            waterfallPanel.persistGraphSetting("uiZoomFactor", value)
                         }
                     }
                     background: Rectangle {
@@ -672,7 +737,7 @@ Item {
                     onValueChanged: {
                         waterfallDisplay.blackLevel = value
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallBlackLevel", value)
+                            waterfallPanel.persistGraphSetting("uiWaterfallBlackLevel", value)
                         }
                     }
                     background: Rectangle { x:blackSlider.leftPadding;y:blackSlider.topPadding+blackSlider.availableHeight/2-2;width:blackSlider.availableWidth;height:4;radius:2;color:wfTrack }
@@ -685,7 +750,7 @@ Item {
                     onValueChanged: {
                         waterfallDisplay.colorGain = value
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallColorGain", value)
+                            waterfallPanel.persistGraphSetting("uiWaterfallColorGain", value)
                         }
                     }
                     background: Rectangle { x:gainSlider.leftPadding;y:gainSlider.topPadding+gainSlider.availableHeight/2-2;width:gainSlider.availableWidth;height:4;radius:2;color:wfTrack }
@@ -698,9 +763,10 @@ Item {
                 Text { text: "Contrasto:"; color: wfPurple; font.pixelSize: 10 }
                 Slider { id: contrastSlider; Layout.preferredWidth: 70; from: 10; to: 150; value: 80; stepSize: 1
                     onValueChanged: {
+                        waterfallDisplay.contrastLevel = value
                         waterfallPanel.applyManualContrast()
                         if (!waterfallPanel.restoringSettings) {
-                            bridge.setSetting("uiWaterfallContrast", value)
+                            waterfallPanel.persistGraphSetting("uiWaterfallContrast", value)
                         }
                     }
                     background: Rectangle { x:contrastSlider.leftPadding;y:contrastSlider.topPadding+contrastSlider.availableHeight/2-2;width:contrastSlider.availableWidth;height:4;radius:2;color:wfTrack }
@@ -712,7 +778,7 @@ Item {
 
                 Text { text: "Vel:"; color: "#DD8866"; font.pixelSize: 10 }
                 Slider { id: speedSlider; Layout.preferredWidth: 60; from: 10; to: 500; value: 20; stepSize: 5
-                    onValueChanged: if (!waterfallPanel.restoringSettings) bridge.setSetting("spectrumInterval", value)
+                    onValueChanged: if (!waterfallPanel.restoringSettings) waterfallPanel.persistGraphSetting("spectrumInterval", value)
                     background: Rectangle { x:speedSlider.leftPadding;y:speedSlider.topPadding+speedSlider.availableHeight/2-2;width:speedSlider.availableWidth;height:4;radius:2;color:wfTrack }
                     handle: Rectangle { x:speedSlider.leftPadding+speedSlider.visualPosition*(speedSlider.availableWidth-width);y:speedSlider.topPadding+speedSlider.availableHeight/2-height/2;width:10;height:10;radius:5;color:"#DD8866" }
                 }
@@ -768,6 +834,9 @@ Item {
                         mainWindow.scheduleSave()
                     }
                 }
+                onReleased: {
+                    waterfallPanel.persistGraphSetting("uiSpectrumHeight", waterfallPanel.spectrumHeight)
+                }
             }
 
             Behavior on color { ColorAnimation { duration: bridge.lowCpuModeEnabled ? 0 : 100 } }
@@ -794,7 +863,8 @@ Item {
             throttleActive: bridge.lowCpuModeEnabled
             throttleIntervalMs: bridge.lowCpuModeEnabled ? 250 : 100
             // Carica valori da Settings al primo avvio.
-            paletteIndex:   Math.max(0, bridge.uiPaletteIndex)
+            paletteIndex:   0
+            contrastLevel:  contrastSlider.value
 
             // In light theme forza la palette pastello chiara (indice 11) per coerenza visiva col mockup.
             // Binding esplicito: ha priorità sopra qualsiasi assegnazione procedurale finché when=true.
@@ -841,15 +911,16 @@ Item {
 
             // Salva al bridge con debounce (2s dopo l'ultimo cambio)
             // Non persistere la palette light auto-attivata col tema (resta una scelta del tema, non utente).
-            onPaletteIndexChanged: if (!waterfallPanel.restoringSettings && paletteIndex !== 11) {
-                bridge.uiPaletteIndex = paletteIndex
-                bridge.setSetting("uiPaletteIndex", paletteIndex)
-                mainWindow.scheduleSave()
+            onPaletteIndexChanged: {
+                if (!waterfallPanel.restoringSettings
+                    && !waterfallPanel.syncingPaletteChoice
+                    && !bridge.themeManager.isLightTheme) {
+                    waterfallPanel.setPaletteIndex(paletteIndex, true)
+                }
             }
             onZoomFactorChanged: if (!waterfallPanel.restoringSettings) {
                 bridge.uiZoomFactor = zoomFactor
-                bridge.setSetting("uiZoomFactor", zoomFactor)
-                mainWindow.scheduleSave()
+                waterfallPanel.persistGraphSetting("uiZoomFactor", zoomFactor)
             }
             onMeasuredFloorChanged: waterfallPanel.applyManualContrast()
             onGpuFftUnavailable: function(reason) {
@@ -880,6 +951,7 @@ Item {
                 z: 10
                 clip: true
                 visible: waterfallDisplay.spectrumGpuOverlayAvailable && height > 0
+                readonly property bool cppOverlayEnabled: waterfallDisplay.spectrumGpuOverlayAvailable
 
                 readonly property string fixedFontFamily: decodiumMonoFontFamily
                 readonly property real viewStartHz: waterfallDisplay.viewStartHz
@@ -951,6 +1023,30 @@ Item {
                     return "#00c8ff"
                 }
 
+                property var cachedFrequencyGridModel: []
+                property var cachedTickModel: []
+
+                Timer {
+                    id: staticOverlayRefreshTimer
+                    interval: 120
+                    repeat: false
+                    onTriggered: {
+                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                            return
+                        spectrumGpuOverlay.cachedFrequencyGridModel =
+                            spectrumGpuOverlay.frequencyGridModel()
+                        spectrumGpuOverlay.cachedTickModel =
+                            spectrumGpuOverlay.tickModel()
+                    }
+                }
+
+                function scheduleStaticOverlayRefresh() {
+                    if (cppOverlayEnabled)
+                        return
+                    if (!staticOverlayRefreshTimer.running)
+                        staticOverlayRefreshTimer.start()
+                }
+
                 // 1.0.175 — Cache del label model con throttle 4 Hz.
                 // Su banda affollata (FT2 async 5-10 decode/sec) il sort+pack
                 // di decodeLabelModel() veniva chiamato troppo spesso, in
@@ -964,6 +1060,8 @@ Item {
                     interval: 250
                     repeat: false
                     onTriggered: {
+                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                            return
                         spectrumGpuOverlay.cachedDecodeLabelModel =
                             spectrumGpuOverlay.decodeLabelModel()
                     }
@@ -972,6 +1070,8 @@ Item {
                 Connections {
                     target: waterfallPanel
                     function onSpectrumDecodeLabelsChanged() {
+                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                            return
                         if (!waterfallPanel.showDecodeCallsigns) {
                             decodeLabelRefreshTimer.stop()
                             spectrumGpuOverlay.cachedDecodeLabelModel = []
@@ -981,6 +1081,8 @@ Item {
                             decodeLabelRefreshTimer.start()
                     }
                     function onShowDecodeCallsignsChanged() {
+                        if (spectrumGpuOverlay.cppOverlayEnabled)
+                            return
                         if (!waterfallPanel.showDecodeCallsigns) {
                             decodeLabelRefreshTimer.stop()
                             spectrumGpuOverlay.cachedDecodeLabelModel = []
@@ -991,11 +1093,31 @@ Item {
                     }
                 }
 
-                onWidthChanged:  { if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start() }
-                onHeightChanged: { if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start() }
+                onWidthChanged:  {
+                    if (!cppOverlayEnabled) {
+                        if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start()
+                        scheduleStaticOverlayRefresh()
+                    }
+                }
+                onHeightChanged: {
+                    if (!cppOverlayEnabled) {
+                        if (!decodeLabelRefreshTimer.running) decodeLabelRefreshTimer.start()
+                        scheduleStaticOverlayRefresh()
+                    }
+                }
+                onViewStartHzChanged: scheduleStaticOverlayRefresh()
+                onViewRangeHzChanged: scheduleStaticOverlayRefresh()
 
                 Component.onCompleted: {
-                    cachedDecodeLabelModel = decodeLabelModel()
+                    if (cppOverlayEnabled) {
+                        cachedFrequencyGridModel = []
+                        cachedTickModel = []
+                        cachedDecodeLabelModel = []
+                    } else {
+                        cachedFrequencyGridModel = frequencyGridModel()
+                        cachedTickModel = tickModel()
+                        cachedDecodeLabelModel = decodeLabelModel()
+                    }
                 }
 
                 function decodeLabelModel() {
@@ -1061,12 +1183,12 @@ Item {
                     y: 0
                     width: Math.max(0, waterfallDisplay.rxFilterRightX - waterfallDisplay.rxFilterLeftX)
                     height: parent.height
-                    visible: width > 0
-                    color: Qt.rgba(0.74, 0.74, 0.74, 0.13)
+                    visible: !spectrumGpuOverlay.cppOverlayEnabled && width > 0
+                    color: Qt.rgba(0.31, 0.43, 0.47, 0.09)
                 }
 
                 Repeater {
-                    model: 6
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? 0 : 6
                     Rectangle {
                         width: spectrumGpuOverlay.width
                         height: 1
@@ -1077,7 +1199,7 @@ Item {
                 }
 
                 Repeater {
-                    model: 6
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? 0 : 6
                     Text {
                         readonly property real norm: index / 5
                         x: 2
@@ -1090,7 +1212,7 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.frequencyGridModel()
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedFrequencyGridModel
                     Rectangle {
                         x: modelData.x
                         y: 0
@@ -1101,7 +1223,7 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.frequencyGridModel()
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedFrequencyGridModel
                     Text {
                         x: spectrumGpuOverlay.clamp(modelData.x - 18, 2, Math.max(2, spectrumGpuOverlay.width - width - 2))
                         y: Math.max(0, spectrumGpuOverlay.height - height - 1)
@@ -1114,7 +1236,7 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.tickModel()
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedTickModel
                     Rectangle {
                         x: modelData.x
                         y: Math.max(0, spectrumGpuOverlay.height - 18)
@@ -1126,7 +1248,7 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.tickModel()
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedTickModel
                     Text {
                         x: spectrumGpuOverlay.clamp(modelData.x - 20, 2, Math.max(2, spectrumGpuOverlay.width - width - 2))
                         y: Math.max(0, spectrumGpuOverlay.height - 36)
@@ -1139,7 +1261,7 @@ Item {
                 }
 
                 Repeater {
-                    model: spectrumGpuOverlay.cachedDecodeLabelModel
+                    model: spectrumGpuOverlay.cppOverlayEnabled ? [] : spectrumGpuOverlay.cachedDecodeLabelModel
                     Item {
                         width: spectrumGpuOverlay.width
                         height: spectrumGpuOverlay.height
@@ -1170,7 +1292,7 @@ Item {
                     y: 0
                     width: 1
                     height: parent.height
-                    visible: markerX >= 0 && markerX < spectrumGpuOverlay.width
+                    visible: !spectrumGpuOverlay.cppOverlayEnabled && markerX >= 0 && markerX < spectrumGpuOverlay.width
                     Rectangle { x: -3; width: 7; height: parent.height; color: "#00e5ff"; opacity: 0.27 }
                     Rectangle { x: -1; width: 3; height: parent.height; color: "#00e5ff"; opacity: 0.94 }
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#b4ffff" }
@@ -1293,7 +1415,7 @@ Item {
                     height: rxMarkerText.implicitHeight + 6
                     x: spectrumGpuOverlay.markerBoxX(markerX, width)
                     y: spectrumGpuOverlay.markerBoxY(centerY, height)
-                    visible: markerX >= 0 && markerX < spectrumGpuOverlay.width
+                    visible: !spectrumGpuOverlay.cppOverlayEnabled && markerX >= 0 && markerX < spectrumGpuOverlay.width
                     Rectangle {
                         anchors.fill: parent
                         radius: 4
@@ -1343,7 +1465,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.rightMargin: 4
                     anchors.bottomMargin: 2
-                    visible: waterfallDisplay.autoRange
+                    visible: !spectrumGpuOverlay.cppOverlayEnabled && waterfallDisplay.autoRange
                     text: "NF:" + Math.round(waterfallDisplay.measuredFloor) + "dB"
                     color: "#646464"
                     font.family: spectrumGpuOverlay.fixedFontFamily
@@ -1359,8 +1481,8 @@ Item {
                 width: Math.max(0, waterfallDisplay.rxFilterRightX - waterfallDisplay.rxFilterLeftX)
                 height: Math.max(0, waterfallDisplay.height - waterfallDisplay.spectrumHeight)
                 visible: (bridge.monitoring || bridge.transmitting || bridge.tuning) && width > 0 && height > 0
-                color: Qt.rgba(0.74, 0.74, 0.74, 0.16)
-                border.color: Qt.rgba(1, 1, 1, 0.20)
+                color: Qt.rgba(0.31, 0.43, 0.47, 0.10)
+                border.color: Qt.rgba(0.55, 0.80, 0.90, 0.16)
                 border.width: 1
             }
 
@@ -1497,11 +1619,6 @@ Item {
             if (!waterfallPanel.visible) return
             waterfallDisplay.addSpectrumData(dbValues, minDb, maxDb, freqMinHz, freqMaxHz)
         }
-        function onPanadapterPcmFrameReady(samples, usableSamples, nfa, nfb, freqMinHz, freqMaxHz, serial) {
-            if (!waterfallPanel.visible) return
-            if (!waterfallDisplay.addPcmFrame(samples, usableSamples, nfa, nfb, freqMinHz, freqMaxHz, serial))
-                bridge.setGpuPanadapterFftAvailable(false, "PanadapterItem rejected GPU FFT frame")
-        }
         // Fallback: valori normalizzati 0-1 dal legacy timer
         function onSpectrumDataReady(data) {
             if (!waterfallPanel.visible) return
@@ -1511,29 +1628,59 @@ Item {
         function onRxFrequencyChanged() { waterfallDisplay.rxFreq = bridge.rxFrequency }
         function onTxFrequencyChanged() { waterfallDisplay.txFreq = bridge.txFrequency }
         function onSettingValueChanged(key, value) {
-            if (key !== "uiPaletteIndex"
-                && key !== "uiWaterfallBlackLevel"
-                && key !== "uiWaterfallColorGain"
-                && key !== "uiWaterfallContrast"
-                && key !== "uiWaterfallShowCallsigns")
-                return
-
             waterfallPanel.restoringSettings = true
             if (key === "uiPaletteIndex") {
-                paletteCombo.currentIndex = Math.max(0, Number(value))
-                if (!bridge.themeManager.isLightTheme)
-                    waterfallDisplay.paletteIndex = paletteCombo.currentIndex
+                waterfallPanel.setPaletteIndex(value, false)
+            } else if (key === "uiWaterfallControlsExpanded") {
+                waterfallPanel.controlsExpanded = waterfallPanel.coerceBool(value, true)
+            } else if (key === "uiSpectrumHeight") {
+                waterfallPanel.spectrumHeight = Math.round(waterfallPanel.clampNumber(value, waterfallPanel.spectrumMinHeight, waterfallPanel.spectrumMaxHeight, waterfallPanel.spectrumHeight))
+            } else if (key === "uiWaterfallAutoRange") {
+                autoRangeCheck.checked = waterfallPanel.coerceBool(value, true)
+                waterfallDisplay.autoRange = autoRangeCheck.checked
+            } else if (key === "uiWaterfallShowTxBrackets") {
+                txBracketsCheck.checked = waterfallPanel.coerceBool(value, true)
+                waterfallDisplay.showTxBrackets = txBracketsCheck.checked
+            } else if (key === "uiWaterfallShowDxCluster") {
+                dxClusterCheck.checked = waterfallPanel.coerceBool(value, false)
+                waterfallDisplay.showDxClusterSpots = dxClusterCheck.checked
+            } else if (key === "uiWaterfallPeakHold") {
+                peakHoldCheck.checked = waterfallPanel.coerceBool(value, true)
+                waterfallDisplay.peakHold = peakHoldCheck.checked
             } else if (key === "uiWaterfallBlackLevel") {
-                blackSlider.value = Number(value)
+                blackSlider.value = waterfallPanel.clampNumber(value, blackSlider.from, blackSlider.to, blackSlider.value)
                 waterfallDisplay.blackLevel = blackSlider.value
             } else if (key === "uiWaterfallColorGain") {
-                gainSlider.value = Number(value)
+                gainSlider.value = waterfallPanel.clampNumber(value, gainSlider.from, gainSlider.to, gainSlider.value)
                 waterfallDisplay.colorGain = gainSlider.value
             } else if (key === "uiWaterfallContrast") {
-                contrastSlider.value = Number(value)
+                contrastSlider.value = waterfallPanel.clampNumber(value, contrastSlider.from, contrastSlider.to, contrastSlider.value)
+                waterfallDisplay.contrastLevel = contrastSlider.value
                 waterfallPanel.applyManualContrast()
+            } else if (key === "spectrumInterval") {
+                speedSlider.value = waterfallPanel.clampNumber(value, speedSlider.from, speedSlider.to, speedSlider.value)
+            } else if (key === "uiZoomFactor") {
+                zoomSlider.value = waterfallPanel.clampNumber(value, zoomSlider.from, zoomSlider.to, zoomSlider.value)
+                waterfallDisplay.zoomFactor = zoomSlider.value
+            } else if (key === "uiLabelFontSize") {
+                labelFontSlider.value = waterfallPanel.clampNumber(value, labelFontSlider.from, labelFontSlider.to, labelFontSlider.value)
+                waterfallDisplay.labelFontSize = labelFontSlider.value
+            } else if (key === "uiLabelSpacing") {
+                labelSpacingSlider.value = waterfallPanel.clampNumber(value, labelSpacingSlider.from, labelSpacingSlider.to, labelSpacingSlider.value)
+                waterfallDisplay.labelSpacing = labelSpacingSlider.value
+            } else if (key === "uiLabelBold") {
+                labelBoldCheck.checked = waterfallPanel.coerceBool(value, true)
+                waterfallDisplay.labelBold = labelBoldCheck.checked
+            } else if (key === "uiLabelColorPreset") {
+                labelColorCombo.currentIndex = waterfallPanel.clampIndex(value, waterfallPanel.labelColorPresets.length, labelColorCombo.currentIndex)
+                var preset = waterfallPanel.labelColorPresets[labelColorCombo.currentIndex]
+                waterfallDisplay.labelUseCustomColor = preset.custom
+                waterfallDisplay.labelColor = preset.color
             } else if (key === "uiWaterfallShowCallsigns") {
                 waterfallPanel.setShowDecodeCallsigns(waterfallPanel.coerceBool(value, true), false)
+            } else {
+                waterfallPanel.restoringSettings = false
+                return
             }
             waterfallPanel.restoringSettings = false
         }

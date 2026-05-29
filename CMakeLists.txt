@@ -908,6 +908,9 @@ find_package (Qt6 COMPONENTS Widgets SerialPort Multimedia PrintSupport Sql Ling
 find_package (Qt6 COMPONENTS Qml Quick QuickControls2 REQUIRED)
 find_package (Qt6 COMPONENTS ShaderTools QUIET)
 find_package (Qt6 COMPONENTS GuiPrivate QUIET)
+if (APPLE)
+  find_package (Qt6 COMPONENTS DBus REQUIRED)
+endif ()
 
 if (WIN32)
   add_definitions (-DQT_NEEDS_QTMAIN)
@@ -1461,6 +1464,9 @@ if (${OPENMP_FOUND} AND NOT APPLE)
     endif ()
 endif ()
 target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::Sql Qt6::WebSockets wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+if (APPLE)
+  target_link_libraries (wsjtx Qt6::DBus)
+endif ()
 if (WIN32)
   target_link_libraries (wsjtx Pdh Qt6::AxContainer)
 endif ()
@@ -1652,6 +1658,9 @@ target_link_libraries (decodium_qml
   ${FFTW3_LIBRARIES}
   ${LIBM_LIBRARIES}
 )
+if (APPLE)
+  target_link_libraries (decodium_qml Qt6::DBus)
+endif ()
 if (TARGET Qt6::GuiPrivate)
   target_link_libraries (decodium_qml Qt6::GuiPrivate)
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_QT_RHI_TEXTURE_UPLOAD=1)
@@ -1685,6 +1694,18 @@ if (Qt6ShaderTools_FOUND)
 	      "310 es,420,430,440"
     FILES
       shaders/panadapter_fft.comp
+      shaders/panadapter_fft_direct.comp
+  )
+	  qt_add_shaders(decodium_qml decodium_panadapter_spectrum_shader
+	    PREFIX
+	      "/shaders"
+	    BASE
+	      "shaders"
+	    GLSL
+	      "120,150,310 es,330,440"
+    FILES
+      shaders/panadapter_spectrum.vert
+      shaders/panadapter_spectrum.frag
   )
 	  qt_add_shaders(decodium_qml decodium_livemap_greyline_shader
 	    PREFIX
@@ -1721,6 +1742,7 @@ if (Qt6ShaderTools_FOUND)
   )
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_WATERFALL_SHADER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_FFT_QSB=1)
+  target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_SPECTRUM_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_GREYLINE_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_MARKER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_PATH_QSB=1)

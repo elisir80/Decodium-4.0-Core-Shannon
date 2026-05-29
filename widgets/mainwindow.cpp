@@ -8040,7 +8040,11 @@ void MainWindow::armAudioInputHealthChecks (qint64 baseline_ms)
                  .arg (baseline_ms)
                  .arg (m_monitoring));
 
-  static int const delays_ms[] = {3500, 7000, 11000};
+  int const delays_ms[] = {
+    m_embeddedShellMode ? 5500 : 3500,
+    m_embeddedShellMode ? 9000 : 7000,
+    m_embeddedShellMode ? 13000 : 11000
+  };
   for (auto const delay_ms : delays_ms)
     {
       bool const first_probe = delay_ms == delays_ms[0];

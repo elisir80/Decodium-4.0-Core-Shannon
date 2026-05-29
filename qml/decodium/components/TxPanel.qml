@@ -846,16 +846,16 @@ Item {
                             topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
                             background: Rectangle {
                                 radius: 5
-                                color: haltButton.hovered || (engine && engine.transmitting)
-                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.92)
-                                       : Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.78)
-                                border.color: Qt.lighter(errorRed, 1.2)
-                                border.width: engine && engine.transmitting ? 2 : 1
+                                color: txPanel.txVisualActive
+                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, haltButton.hovered ? 0.96 : 0.88)
+                                       : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, haltButton.hovered ? 0.28 : 0.16)
+                                border.color: txPanel.txVisualActive ? Qt.lighter(errorRed, 1.2) : accentGreen
+                                border.width: txPanel.txVisualActive ? 2 : 1
                             }
                             contentItem: ToolbarButtonContent {
                                 label: "HALT"
                                 glyph: "\u25A0"
-                                foreground: "#FFF8F6"
+                                foreground: txPanel.txVisualActive ? "#FFF8F6" : accentGreen
                                 glyphSize: txPanel.toolbarGlyphSize
                                 labelSize: txPanel.toolbarLabelSize
                                 boldLabel: true

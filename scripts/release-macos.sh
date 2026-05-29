@@ -152,6 +152,8 @@ verify_app_identity() {
   local bundle_name=""
   local display_name=""
   local required_qml_path=""
+  local qt_gui=""
+  local qt_dbus=""
 
   main_exec="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
   bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${app_bundle}/Contents/Info.plist" 2>/dev/null || true)"
@@ -227,6 +229,14 @@ verify_app_identity() {
   if [[ -d "${app_bundle}/Contents/Frameworks/QtMultimedia.framework" ]] \
     && ! find "${app_bundle}/Contents/PlugIns/multimedia" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
     echo "warning: missing Qt multimedia plugins in app bundle"
+  fi
+  qt_gui="${app_bundle}/Contents/Frameworks/QtGui.framework/Versions/A/QtGui"
+  qt_dbus="${app_bundle}/Contents/Frameworks/QtDBus.framework/Versions/A/QtDBus"
+  if [[ -f "${qt_gui}" ]] \
+    && otool -L "${qt_gui}" | awk 'NR>1 {print $1}' | grep -Fxq '@rpath/QtDBus.framework/Versions/A/QtDBus' \
+    && [[ ! -f "${qt_dbus}" ]]; then
+    echo "error: missing QtDBus.framework required by bundled QtGui"
+    return 1
   fi
 }
 

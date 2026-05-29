@@ -113,8 +113,18 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
                               AudioDevice::Channel channel) const
 {
   QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel);
+  QString const startKey = QStringLiteral("%1|%2|%3|%4")
+      .arg(device.description())
+      .arg(format.sampleRate())
+      .arg(format.channelCount())
+      .arg(static_cast<int>(channel));
+  qint64 const now_ms = QDateTime::currentMSecsSinceEpoch ();
   return m_stream
-      && isReusableInputStream(m_stream.data())
+      && (isReusableInputStream(m_stream.data())
+          || (m_stream->error () == QAudio::NoError
+              && m_currentStartKey == startKey
+              && m_currentStartRequestedMs > 0
+              && now_ms - m_currentStartRequestedMs < 5000))
       && m_deviceDescription == device.description()
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
@@ -189,22 +199,27 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
   bool usingStereoForMono = false;
   QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel, &usingStereoForMono);
+  QString const currentStartKey = QStringLiteral("%1|%2|%3|%4")
+      .arg(device.description())
+      .arg(format.sampleRate())
+      .arg(format.channelCount())
+      .arg(static_cast<int>(channel));
+  qint64 const now_ms = QDateTime::currentMSecsSinceEpoch ();
 
   if (m_stream
-      && isReusableInputStream(m_stream.data())
+      && (isReusableInputStream(m_stream.data())
+          || (m_stream->error () == QAudio::NoError
+              && m_currentStartKey == currentStartKey
+              && m_currentStartSink == sink
+              && m_currentStartRequestedMs > 0
+              && now_ms - m_currentStartRequestedMs < 5000))
       && m_sink == sink
       && m_deviceDescription == device.description()
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
       && m_channelSelector == static_cast<int>(channel))
     {
-      qint64 const now_ms = QDateTime::currentMSecsSinceEpoch ();
-      QString const duplicateKey = QStringLiteral("%1|%2|%3|%4")
-          .arg(m_deviceDescription)
-          .arg(m_sampleRate)
-          .arg(m_channelCount)
-          .arg(m_channelSelector);
-      bool const keyChanged = duplicateKey != m_lastDuplicateStartKey;
+      bool const keyChanged = currentStartKey != m_lastDuplicateStartKey;
       bool const shouldLogDuplicate =
           keyChanged
           || m_lastDuplicateStartLogMs < 0
@@ -221,7 +236,7 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
                    << "rate=" << m_sampleRate
                    << "channels=" << m_channelCount
                    << suffix;
-          m_lastDuplicateStartKey = duplicateKey;
+          m_lastDuplicateStartKey = currentStartKey;
           m_lastDuplicateStartLogMs = now_ms;
           m_suppressedDuplicateStartLogs = 0;
         }
@@ -239,6 +254,9 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
   m_sampleRate = format.sampleRate();
   m_channelCount = format.channelCount();
   m_channelSelector = static_cast<int>(channel);
+  m_currentStartKey = currentStartKey;
+  m_currentStartRequestedMs = QDateTime::currentMSecsSinceEpoch ();
+  m_currentStartSink = sink;
   m_lastDuplicateStartKey.clear ();
   m_lastDuplicateStartLogMs = -1;
   m_suppressedDuplicateStartLogs = 0;
@@ -512,6 +530,9 @@ void SoundInput::stop()
   m_lastDuplicateStartKey.clear ();
   m_lastDuplicateStartLogMs = -1;
   m_suppressedDuplicateStartLogs = 0;
+  m_currentStartKey.clear ();
+  m_currentStartRequestedMs = -1;
+  m_currentStartSink.clear ();
 }
 
 SoundInput::~SoundInput ()

@@ -33,6 +33,7 @@ FRAMEWORKS_DIR="${CONTENTS_DIR}/Frameworks"
 PLUGINS_DIR="${CONTENTS_DIR}/PlugIns"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 QT_QML_BUNDLE_DIR="${RESOURCES_DIR}/qml"
+QTDBUS_RPATH_DEP="@rpath/QtDBus.framework/Versions/A/QtDBus"
 
 is_macho() {
   file "$1" | grep -q "Mach-O"
@@ -760,6 +761,41 @@ copy_missing_rpath_dependency_into_bundle() {
   copy_absolute_dependency_into_bundle "${resolved}"
 }
 
+qtgui_requires_qtdbus() {
+  local qt_gui="$1"
+
+  [[ -f "${qt_gui}" ]] || return 1
+  otool -L "${qt_gui}" | awk 'NR>1 {print $1}' | grep -Fxq "${QTDBUS_RPATH_DEP}"
+}
+
+ensure_qtgui_dbus_dependency() {
+  local qt_gui="${FRAMEWORKS_DIR}/QtGui.framework/Versions/A/QtGui"
+  local qt_dbus="${FRAMEWORKS_DIR}/QtDBus.framework/Versions/A/QtDBus"
+  local copied=""
+
+  qtgui_requires_qtdbus "${qt_gui}" || return 0
+  [[ -f "${qt_dbus}" ]] && return 0
+
+  copied="$(copy_missing_rpath_dependency_into_bundle "${qt_gui}" "${QTDBUS_RPATH_DEP}")" || {
+    echo "error: QtGui requires QtDBus, but QtDBus.framework could not be bundled"
+    echo "error: missing dependency: ${QTDBUS_RPATH_DEP}"
+    exit 1
+  }
+
+  echo "Bundled QtDBus dependency for QtGui: ${copied}"
+}
+
+validate_qt_runtime_frameworks() {
+  local qt_gui="${FRAMEWORKS_DIR}/QtGui.framework/Versions/A/QtGui"
+  local qt_dbus="${FRAMEWORKS_DIR}/QtDBus.framework/Versions/A/QtDBus"
+
+  if qtgui_requires_qtdbus "${qt_gui}" && [[ ! -f "${qt_dbus}" ]]; then
+    echo "error: missing QtDBus.framework required by bundled QtGui"
+    echo "error: expected ${qt_dbus}"
+    exit 1
+  fi
+}
+
 install_id_of() {
   otool -D "$1" 2>/dev/null | awk 'NR==2 {print $1; exit}'
 }
@@ -994,9 +1030,11 @@ move_app_qml_into_resources
 prune_qml_type_metadata
 normalize_qml_resource_permissions
 copy_qt_plugins_into_bundle
+ensure_qtgui_dbus_dependency
 normalize_bundle_macho_paths
 validate_qt_qml_imports
 validate_qt_runtime_plugins
+validate_qt_runtime_frameworks
 validate_bundle
 
 echo "Normalized macOS bundle: ${APP_BUNDLE}"

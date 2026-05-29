@@ -3,7 +3,9 @@
 // Waterfall palette ported from deskHPSDR waterfall.c (GPL G0ORX/DL1BZ)
 
 #include "PanadapterItem.hpp"
+#include "DecodiumBridge.h"
 
+#include <QCoreApplication>
 #include <QPainter>
 #include <QPainterPath>
 #include <QSGFlatColorMaterial>
@@ -21,6 +23,7 @@
 #include <QMutexLocker>
 #include <QPointer>
 #include <QDebug>
+#include <QVariant>
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
 #if __has_include(<rhi/qrhi.h>)
 #include <rhi/qrhi.h>
@@ -41,6 +44,7 @@ using DecodiumRhiBufferReadbackResult = QRhiReadbackResult;
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <limits>
 
 namespace
@@ -85,6 +89,33 @@ qint64 monotonicMs()
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+qint64 monotonicUs()
+{
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+class ScopeExit
+{
+public:
+    explicit ScopeExit(std::function<void()> fn)
+        : m_fn(std::move(fn))
+    {
+    }
+
+    ~ScopeExit()
+    {
+        if (m_fn)
+            m_fn();
+    }
+
+    ScopeExit(const ScopeExit&) = delete;
+    ScopeExit& operator=(const ScopeExit&) = delete;
+
+private:
+    std::function<void()> m_fn;
+};
+
 bool panadapterDebugLoggingEnabled()
 {
     static bool const enabled = qEnvironmentVariableIsSet("DECODIUM_PANADAPTER_DEBUG");
@@ -122,6 +153,79 @@ int gpuFftTimeoutLimit()
 {
     int const envValue = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_TIMEOUT_LIMIT");
     return envValue > 0 ? qBound(1, envValue, 20) : 2;
+}
+
+bool gpuDirectPanadapterEnabled()
+{
+    if (!qEnvironmentVariableIsSet("DECODIUM_GPU_PANADAPTER_DIRECT"))
+        return true;
+    return qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT") != 0;
+}
+
+bool gpuDirectDebugReadbackEnabled()
+{
+    return qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DEBUG_READBACK") != 0;
+}
+
+float gpuDirectAutoRangeFloorOffsetDb()
+{
+    return static_cast<float>(qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT_FLOOR_OFFSET_DB"));
+}
+
+float gpuDirectAutoRangeFloorMarginDb()
+{
+    int const env = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT_FLOOR_MARGIN_DB");
+    return env > 0 ? static_cast<float>(qBound(0, env, 40)) : 6.0f;
+}
+
+float gpuDirectAutoRangeSpanDb(int contrastLevel)
+{
+    int const env = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT_SPAN_DB");
+    if (env > 0)
+        return static_cast<float>(qBound(20, env, 100));
+
+    // QML contrast 10..150: higher contrast means a narrower visible dB span.
+    float const t = static_cast<float>(qBound(10, contrastLevel, 150) - 10) / 140.0f;
+    return 70.0f - t * 50.0f;
+}
+
+float waterfallBlackThresholdForLevel(int blackLevel, bool gpuDirect)
+{
+    float const blackScale = gpuDirect ? 0.0022f : 0.006f;
+    float const blackCap = gpuDirect ? 0.30f : 0.95f;
+    return qBound(0.0f, static_cast<float>(blackLevel) * blackScale, blackCap);
+}
+
+float estimateGpuDirectNoiseFloorDb(float sampleRms, int n)
+{
+    if (n <= 0 || !std::isfinite(sampleRms) || sampleRms <= 0.0f)
+        return -130.0f;
+
+    static const float windowPowerSum = [] {
+        constexpr int kN = 4096;
+        constexpr float a0 = 0.35875f;
+        constexpr float a1 = 0.48829f;
+        constexpr float a2 = 0.14128f;
+        constexpr float a3 = 0.01168f;
+        constexpr float twoPi = 6.2831853071795864769f;
+        float sum = 0.0f;
+        for (int i = 0; i < kN; ++i) {
+            float const phase = twoPi * static_cast<float>(i) / static_cast<float>(kN - 1);
+            float const w = a0
+                          - a1 * std::cos(phase)
+                          + a2 * std::cos(2.0f * phase)
+                          - a3 * std::cos(3.0f * phase);
+            sum += w * w;
+        }
+        return sum;
+    }();
+
+    float const fftNorm = static_cast<float>(n) / 2.0f;
+    float const normalizedPower =
+        (sampleRms * sampleRms * windowPowerSum) / qMax(1.0f, fftNorm * fftNorm);
+    return normalizedPower > 1e-24f
+        ? 10.0f * std::log10(normalizedPower)
+        : -200.0f;
 }
 
 int waterfallHistoryRowsForVisibleHeight(int visibleRows)
@@ -228,6 +332,10 @@ void writeRectGeometry(QSGGeometry::Point2D* vertices, QRectF const& rect)
     vertices[4].set(right, top);
     vertices[5].set(right, bottom);
 }
+
+class PanadapterSpectrumOverlayNode final : public QSGSimpleTextureNode
+{
+};
 
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
 QImage rgba8888TextureImage(const QImage& image)
@@ -554,6 +662,47 @@ private:
     QByteArray m_pendingFullData;
     QVector<PendingFloatUpload> m_pendingUploads;
 };
+
+class DecodiumExternalRhiTexture final : public QSGTexture
+{
+public:
+    DecodiumExternalRhiTexture(QRhiTexture* texture, QSize size, bool alpha = false)
+        : m_texture(texture)
+        , m_size(size)
+        , m_hasAlpha(alpha)
+    {
+    }
+
+    qint64 comparisonKey() const override
+    {
+        return static_cast<qint64>(reinterpret_cast<quintptr>(m_texture));
+    }
+
+    QRhiTexture* rhiTexture() const override
+    {
+        return m_texture;
+    }
+
+    QSize textureSize() const override
+    {
+        return m_size;
+    }
+
+    bool hasAlphaChannel() const override
+    {
+        return m_hasAlpha;
+    }
+
+    bool hasMipmaps() const override
+    {
+        return false;
+    }
+
+private:
+    QRhiTexture* m_texture = nullptr; // not owned; lifetime belongs to GpuFftState
+    QSize m_size;
+    bool m_hasAlpha = false;
+};
 #endif
 
 #if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
@@ -574,6 +723,28 @@ struct GpuFftParams
 };
 
 static_assert(sizeof(GpuFftParams) == 48);
+
+struct GpuFftDirectParams
+{
+    qint32 n = 4096;
+    qint32 binStart = 0;
+    qint32 nBins = 0;
+    qint32 waterfallRows = 0;
+    qint32 waterfallWriteRow = 0;
+    qint32 peakHold = 0;
+    qint32 resetPeak = 0;
+    qint32 reserved0 = 0;
+    float inverseNormSquared = 1.0f;
+    float powerFloor = 1e-24f;
+    float binStep = 1.0f;
+    float displayMinDb = -70.0f;
+    float displayInvRange = 1.0f / 100.0f;
+    float peakDecay = 0.97f;
+    float reserved1 = 0.0f;
+    float reserved2 = 0.0f;
+};
+
+static_assert(sizeof(GpuFftDirectParams) == 64);
 #endif
 }
 
@@ -584,11 +755,30 @@ struct PanadapterItem::GpuFftState
     QRhiBuffer* sampleBuffer = nullptr;
     QRhiBuffer* outputBuffer = nullptr;
     QRhiBuffer* paramsBuffer = nullptr;
+    QRhiBuffer* directParamsBuffer = nullptr;
     QRhiShaderResourceBindings* srb = nullptr;
+    QRhiShaderResourceBindings* directSrb = nullptr;
     QRhiComputePipeline* pipeline = nullptr;
+    QRhiComputePipeline* directPipeline = nullptr;
+    QRhiTexture* directSpectrumTexture = nullptr;
+    QRhiTexture* directWaterfallTexture = nullptr;
+    QRhiTexture* directRowParamsTexture = nullptr;
+    QRhiTexture* directPeakTexture = nullptr;
     QShader shader;
+    QShader directShader;
     int sampleCapacity = 0;
     int outputCapacity = 0;
+    QSize directSpectrumSize;
+    QSize directWaterfallSize;
+    QSize directRowParamsSize;
+    QSize directPeakSize;
+    int directBins = 0;
+    int directRows = 0;
+    int directWriteRow = 0;
+    bool directTexturePathActive = false;
+    bool loggedDirectActive = false;
+    bool loggedDirectDebugReadback = false;
+    bool loggedDirectAutoRange = false;
     bool readbackPending = false;
     qint64 readbackPendingSinceMs = 0;
     quint64 readbackSerial = 0;
@@ -603,18 +793,40 @@ struct PanadapterItem::GpuFftState
     void reset()
     {
         delete pipeline;
+        delete directPipeline;
         delete srb;
+        delete directSrb;
         delete paramsBuffer;
+        delete directParamsBuffer;
         delete outputBuffer;
         delete sampleBuffer;
+        delete directSpectrumTexture;
+        delete directWaterfallTexture;
+        delete directRowParamsTexture;
+        delete directPeakTexture;
         pipeline = nullptr;
+        directPipeline = nullptr;
         srb = nullptr;
+        directSrb = nullptr;
         paramsBuffer = nullptr;
+        directParamsBuffer = nullptr;
         outputBuffer = nullptr;
         sampleBuffer = nullptr;
+        directSpectrumTexture = nullptr;
+        directWaterfallTexture = nullptr;
+        directRowParamsTexture = nullptr;
+        directPeakTexture = nullptr;
         rhi = nullptr;
         sampleCapacity = 0;
         outputCapacity = 0;
+        directSpectrumSize = QSize();
+        directWaterfallSize = QSize();
+        directRowParamsSize = QSize();
+        directPeakSize = QSize();
+        directBins = 0;
+        directRows = 0;
+        directWriteRow = 0;
+        directTexturePathActive = false;
         readbackPending = false;
         readbackPendingSinceMs = 0;
         ++readbackSerial;
@@ -748,6 +960,102 @@ QSGMaterialShader* WaterfallPaletteMaterial::createShader(QSGRendererInterface::
 }
 #endif
 
+#if defined(DECODIUM_GPU_PANADAPTER_SPECTRUM_QSB)
+class PanadapterSpectrumMaterial final : public QSGMaterial
+{
+public:
+    PanadapterSpectrumMaterial()
+    {
+        setFlag(QSGMaterial::NoBatching);
+        setFlag(QSGMaterial::RequiresFullMatrix);
+    }
+
+    ~PanadapterSpectrumMaterial() override
+    {
+        delete spectrumTexture;
+        delete peakTexture;
+    }
+
+    QSGMaterialType* type() const override
+    {
+        static QSGMaterialType type;
+        return &type;
+    }
+
+    QSGMaterialShader* createShader(QSGRendererInterface::RenderMode) const override;
+
+    int compare(const QSGMaterial* other) const override
+    {
+        auto const* rhs = static_cast<const PanadapterSpectrumMaterial*>(other);
+        if (spectrumTexture != rhs->spectrumTexture)
+            return spectrumTexture < rhs->spectrumTexture ? -1 : 1;
+        if (peakTexture != rhs->peakTexture)
+            return peakTexture < rhs->peakTexture ? -1 : 1;
+        return 0;
+    }
+
+    QSGTexture* spectrumTexture = nullptr;
+    QSGTexture* peakTexture = nullptr;
+    float params[4] = {-70.0f, 1.0f / 100.0f, 0.006f, 1.0f};
+    float xParams[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+    float background[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    float fill[4] = {0.0f, 0.75f, 0.95f, 0.35f};
+    float glow[4] = {0.2f, 0.9f, 1.0f, 0.45f};
+    float trace[4] = {0.8f, 1.0f, 1.0f, 1.0f};
+    float peak[4] = {1.0f, 1.0f, 1.0f, 0.65f};
+};
+
+class PanadapterSpectrumShader final : public QSGMaterialShader
+{
+public:
+    PanadapterSpectrumShader()
+    {
+        setShaderFileName(VertexStage, QStringLiteral(":/shaders/panadapter_spectrum.vert.qsb"));
+        setShaderFileName(FragmentStage, QStringLiteral(":/shaders/panadapter_spectrum.frag.qsb"));
+    }
+
+    bool updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial*) override
+    {
+        QByteArray* uniformData = state.uniformData();
+        if (uniformData->size() < 192) {
+            uniformData->resize(192);
+            std::memset(uniformData->data(), 0, static_cast<size_t>(uniformData->size()));
+        }
+        auto* material = static_cast<PanadapterSpectrumMaterial*>(newMaterial);
+        const QMatrix4x4 matrix = state.combinedMatrix();
+        std::memcpy(uniformData->data(), matrix.constData(), 64);
+        float const opacity = state.opacity();
+        std::memcpy(uniformData->data() + 64, &opacity, 4);
+        std::memcpy(uniformData->data() + 80, material->params, sizeof(material->params));
+        std::memcpy(uniformData->data() + 96, material->xParams, sizeof(material->xParams));
+        std::memcpy(uniformData->data() + 112, material->background, sizeof(material->background));
+        std::memcpy(uniformData->data() + 128, material->fill, sizeof(material->fill));
+        std::memcpy(uniformData->data() + 144, material->glow, sizeof(material->glow));
+        std::memcpy(uniformData->data() + 160, material->trace, sizeof(material->trace));
+        std::memcpy(uniformData->data() + 176, material->peak, sizeof(material->peak));
+        return true;
+    }
+
+    void updateSampledImage(RenderState& state, int binding, QSGTexture** texture,
+                            QSGMaterial* newMaterial, QSGMaterial*) override
+    {
+        auto* material = static_cast<PanadapterSpectrumMaterial*>(newMaterial);
+        if (binding == 1)
+            *texture = material->spectrumTexture;
+        else if (binding == 2)
+            *texture = material->peakTexture;
+
+        if (*texture)
+            (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+    }
+};
+
+QSGMaterialShader* PanadapterSpectrumMaterial::createShader(QSGRendererInterface::RenderMode) const
+{
+    return new PanadapterSpectrumShader;
+}
+#endif
+
 // ─── FlexRadio SmartSDR waterfall palette ────────────────────────────────────
 // Nero → blu scuro → blu → ciano → verde → giallo → arancio → rosso
 // Riprodotto dalle descrizioni della community FlexRadio
@@ -831,11 +1139,113 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
     setAcceptHoverEvents(false);
     setAcceptTouchEvents(false);
     buildPalette(m_paletteIndex);
+    connectBridgePcmFrameFeed();
+    connect(this, &QQuickItem::windowChanged, this, [this](QQuickWindow* win) {
+        if (m_qsgMetricWindow == win)
+            return;
+        if (m_qsgFrameConnection)
+            QObject::disconnect(m_qsgFrameConnection);
+        m_qsgMetricWindow = win;
+        m_qsgFrameConnection = QMetaObject::Connection();
+        m_qsgFrameLastSwapUs = 0;
+        if (!win)
+            return;
+        m_qsgFrameConnection = connect(win, &QQuickWindow::frameSwapped, this, [this]() {
+            qint64 const nowUs = monotonicUs();
+            if (m_qsgFrameLastSwapUs > 0)
+                recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs);
+            m_qsgFrameLastSwapUs = nowUs;
+        });
+    });
 }
 
 PanadapterItem::~PanadapterItem()
 {
+    if (m_qsgFrameConnection)
+        QObject::disconnect(m_qsgFrameConnection);
     releaseGpuFftResources();
+}
+
+void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
+                                         int decodeLabels,
+                                         int clusterLabels,
+                                         const QSize& size)
+{
+    m_overlayMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    ++m_overlayMetricSamples;
+    m_overlayMetricMaxUs = qMax(m_overlayMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+    m_overlayMetricDecodeLabels = decodeLabels;
+    m_overlayMetricClusterLabels = clusterLabels;
+    m_overlayMetricSize = size;
+
+    qint64 const nowMs = monotonicMs();
+    if (m_overlayMetricLastLogMs == 0)
+        m_overlayMetricLastLogMs = nowMs;
+    if (nowMs - m_overlayMetricLastLogMs < 10000 || m_overlayMetricSamples <= 0)
+        return;
+
+    qInfo().noquote()
+        << "[PANMETRIC] overlay"
+        << "avg_us=" << (m_overlayMetricAccumUs / m_overlayMetricSamples)
+        << "max_us=" << m_overlayMetricMaxUs
+        << "samples=" << m_overlayMetricSamples
+        << "decode_labels=" << m_overlayMetricDecodeLabels
+        << "cluster_labels=" << m_overlayMetricClusterLabels
+        << "size=" << QStringLiteral("%1x%2").arg(m_overlayMetricSize.width()).arg(m_overlayMetricSize.height());
+    m_overlayMetricLastLogMs = nowMs;
+    m_overlayMetricAccumUs = 0;
+    m_overlayMetricSamples = 0;
+    m_overlayMetricMaxUs = 0;
+}
+
+void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
+{
+    m_paintMetricAccumUs += qMax<qint64>(0, elapsedUs);
+    ++m_paintMetricSamples;
+    m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(elapsedUs, std::numeric_limits<int>::max())));
+
+    qint64 const nowMs = monotonicMs();
+    if (m_paintMetricLastLogMs == 0)
+        m_paintMetricLastLogMs = nowMs;
+    if (nowMs - m_paintMetricLastLogMs < 10000 || m_paintMetricSamples <= 0)
+        return;
+
+    qInfo().noquote()
+        << "[PANMETRIC] paint"
+        << "avg_us=" << (m_paintMetricAccumUs / m_paintMetricSamples)
+        << "max_us=" << m_paintMetricMaxUs
+        << "samples=" << m_paintMetricSamples
+        << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
+        << "waterfall_rows=" << m_renderWaterfallHistoryRows;
+    m_paintMetricLastLogMs = nowMs;
+    m_paintMetricAccumUs = 0;
+    m_paintMetricSamples = 0;
+    m_paintMetricMaxUs = 0;
+}
+
+void PanadapterItem::recordQsgFrameMetric(qint64 frameUs)
+{
+    if (frameUs <= 0)
+        return;
+    m_qsgFrameMetricAccumUs += frameUs;
+    ++m_qsgFrameMetricSamples;
+    m_qsgFrameMetricMaxUs = qMax(m_qsgFrameMetricMaxUs, static_cast<int>(qMin<qint64>(frameUs, std::numeric_limits<int>::max())));
+
+    qint64 const nowMs = monotonicMs();
+    if (m_qsgFrameMetricLastLogMs == 0)
+        m_qsgFrameMetricLastLogMs = nowMs;
+    if (nowMs - m_qsgFrameMetricLastLogMs < 10000 || m_qsgFrameMetricSamples <= 0)
+        return;
+
+    qInfo().noquote()
+        << "[PANMETRIC] qsg_frame"
+        << "avg_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricAccumUs) / m_qsgFrameMetricSamples / 1000.0, 'f', 2)
+        << "max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
+        << "samples=" << m_qsgFrameMetricSamples;
+    m_qsgFrameMetricLastLogMs = nowMs;
+    m_qsgFrameMetricAccumUs = 0;
+    m_qsgFrameMetricSamples = 0;
+    m_qsgFrameMetricMaxUs = 0;
 }
 
 bool PanadapterItem::shaderWaterfallSupported()
@@ -913,8 +1323,6 @@ bool PanadapterItem::spectrumGraphSupported() const
 {
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
     if (qEnvironmentVariableIsSet("DECODIUM_DISABLE_SPECTRUM_GPU_GRAPH"))
-        return false;
-    if (!qEnvironmentVariableIsSet("DECODIUM_ENABLE_SPECTRUM_GPU_GRAPH"))
         return false;
     if (!window() || !window()->rendererInterface())
         return false;
@@ -1064,6 +1472,9 @@ void PanadapterItem::rebuildImages(int w, int h)
     int specH = qMin(m_spectrumH, qMax(1, h - 1));
     int wfH   = qMax(0, h - specH);
     int const wfHistoryH = waterfallHistoryRowsForVisibleHeight(wfH);
+    m_renderSpectrumSize = QSize(w, qMax(1, specH));
+    m_renderWaterfallSize = QSize(w, wfH);
+    m_renderWaterfallHistoryRows = wfHistoryH;
 
     // Crea sempre lo spectrum image (richiede solo w > 0)
     if (m_spectrumImage.isNull() ||
@@ -1427,6 +1838,135 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
     return true;
 }
 
+bool PanadapterItem::addPcmFrameI16(const short* ring,
+                                    int ringSize,
+                                    int ringStart,
+                                    int firstChunk,
+                                    int usableSamples,
+                                    int nfa,
+                                    int nfb,
+                                    float freqMinHz,
+                                    float freqMaxHz,
+                                    quint64 serial)
+{
+    if (!isVisible() || !window() || width() <= 0.0 || height() <= 0.0)
+        return true;
+
+    QString reason;
+    if (!gpuFftSupported(&reason)) {
+        if (!m_loggedGpuFftRejected) {
+            qWarning().noquote()
+                << "[PANDBG] Panadapter visual FFT GPU path rejected"
+                << "reason=" << reason;
+            m_loggedGpuFftRejected = true;
+        }
+        if (reason == QStringLiteral("no QQuickWindow yet")
+            || reason == QStringLiteral("no QSGRendererInterface")) {
+            return true;
+        }
+        return false;
+    }
+
+    constexpr int N = 4096;
+    if (!ring
+        || ringSize <= 0
+        || ringStart < 0
+        || ringStart >= ringSize
+        || usableSamples <= 0
+        || firstChunk < 0
+        || firstChunk > usableSamples
+        || nfb <= nfa
+        || freqMaxHz <= freqMinHz) {
+        return false;
+    }
+    if (usableSamples < 1024) {
+        if (!m_loggedGpuFftWarmupSkip) {
+            qInfo().noquote()
+                << "[PANDBG] Panadapter visual FFT GPU warmup skipped"
+                << "reason=not enough usable PCM samples yet"
+                << "usable=" << usableSamples
+                << "required=" << 1024;
+            m_loggedGpuFftWarmupSkip = true;
+        }
+        return true;
+    }
+
+    int const copySamples = qMin(usableSamples, N);
+    int const chunk0 = qMin(firstChunk, copySamples);
+    int const chunk1 = copySamples - chunk0;
+    if (ringStart + chunk0 > ringSize || chunk1 > ringSize)
+        return false;
+
+    double sumSq = 0.0;
+    float samplePeak = 0.0f;
+    auto accumulateStats = [&](const short* src, int count) {
+        for (int i = 0; i < count; ++i) {
+            float const v = static_cast<float>(src[i]);
+            samplePeak = qMax(samplePeak, static_cast<float>(std::abs(static_cast<int>(src[i]))));
+            sumSq += static_cast<double>(v) * static_cast<double>(v);
+        }
+    };
+    accumulateStats(ring + ringStart, chunk0);
+    if (chunk1 > 0)
+        accumulateStats(ring, chunk1);
+    float const sampleRms = static_cast<float>(std::sqrt(sumSq / static_cast<double>(N)));
+    if (!m_loggedGpuFftInputStats) {
+        qInfo().noquote()
+            << "[GPUDBG] Panadapter visual FFT input stats"
+            << "samples=" << N
+            << "usable=" << usableSamples
+            << "peak=" << samplePeak
+            << "rms=" << sampleRms;
+        m_loggedGpuFftInputStats = true;
+    }
+
+    QMutexLocker lock(&m_mutex);
+    m_pendingPcmFrame.samples.resize(N);
+    float* dst = m_pendingPcmFrame.samples.data();
+    for (int i = 0; i < chunk0; ++i)
+        dst[i] = static_cast<float>(ring[ringStart + i]);
+    for (int i = 0; i < chunk1; ++i)
+        dst[chunk0 + i] = static_cast<float>(ring[i]);
+    if (copySamples < N)
+        std::fill(dst + copySamples, dst + N, 0.0f);
+    m_pendingPcmFrame.usableSamples = usableSamples;
+    m_pendingPcmFrame.nfa = nfa;
+    m_pendingPcmFrame.nfb = nfb;
+    m_pendingPcmFrame.freqMinHz = freqMinHz;
+    m_pendingPcmFrame.freqMaxHz = freqMaxHz;
+    m_pendingPcmFrame.samplePeak = samplePeak;
+    m_pendingPcmFrame.sampleRms = sampleRms;
+    m_pendingPcmFrame.serial = serial;
+    m_hasPendingPcmFrame = true;
+    constexpr int kGpuFftN = 4096;
+    float const gpuFreqPerBin = 12000.0f / static_cast<float>(kGpuFftN);
+    int const gpuBinStart = qBound(0, static_cast<int>(nfa / gpuFreqPerBin), kGpuFftN / 2);
+    int const gpuBinEnd = qBound(gpuBinStart, static_cast<int>(nfb / gpuFreqPerBin), kGpuFftN / 2);
+    m_gpuFftUiBinsExpected = qMax(0, gpuBinEnd - gpuBinStart);
+    m_lastGpuFftFrameMs = monotonicMs();
+    lock.unlock();
+
+    if (!m_loggedGpuFftAccepted) {
+        qInfo().noquote()
+            << "[PANDBG] Panadapter visual FFT path active"
+            << "engine=RHI_compute_gpu"
+            << "algorithm=single_pass_dft_recurrence_4096"
+            << "fallback=FFTW_CPU_on_failure";
+        m_loggedGpuFftAccepted = true;
+    }
+    if (!m_loggedGpuFftI16Accepted) {
+        qInfo().noquote()
+            << "[PANDBG] Panadapter PCM frame path active"
+            << "route=C++_I16_ring"
+            << "qml_bypass=1"
+            << "bridge_vector_float=0"
+            << "staging=float_reused";
+        m_loggedGpuFftI16Accepted = true;
+    }
+    update();
+    return true;
+}
+
 
 void PanadapterItem::resetWaterfall()
 {
@@ -1536,7 +2076,7 @@ void PanadapterItem::renderSpectrum()
     int pRight = fToX(m_rxFreq + narrowPassHz/2);
     if (pLeft < 0) pLeft = 0;
     if (pRight > w) pRight = w;
-    if (pRight > pLeft) { p.fillRect(pLeft, 0, pRight - pLeft, h, QColor(190, 190, 190, 32)); }
+    if (pRight > pLeft) { p.fillRect(pLeft, 0, pRight - pLeft, h, QColor(80, 110, 120, 22)); }
 
     if (!gpuSpectrumGraph) {
         // ── Path spettro ───────────────────────────────────────────────────────
@@ -1858,6 +2398,376 @@ void PanadapterItem::removeSpectrumGraphNodes(QSGNode* spectrumRoot)
     removeSceneGraphChildrenFrom(spectrumRoot, firstGraphChild);
 }
 
+void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectReady)
+{
+    if (w <= 1 || h <= 1)
+        return;
+    qint64 const overlayStartUs = monotonicUs();
+    int renderedDecodeLabels = 0;
+    int renderedClusterLabels = 0;
+
+    if (m_spectrumOverlayImage.size() != QSize(w, h)
+        || m_spectrumOverlayImage.format() != QImage::Format_ARGB32_Premultiplied) {
+        m_spectrumOverlayImage = QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+    }
+    m_spectrumOverlayImage.fill(Qt::transparent);
+    m_decodeHitRects.clear();
+    m_clusterHitRects.clear();
+
+    QPainter p(&m_spectrumOverlayImage);
+    p.setRenderHint(QPainter::Antialiasing, false);
+
+    float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
+    float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
+    float range = displayMaxDb - displayMinDb;
+    if (range < 1.0f)
+        range = 1.0f;
+
+    float const baseStart = (m_bandwidth > 0) ? static_cast<float>(m_startFreq) : m_dataFreqMin;
+    float const baseEnd = (m_bandwidth > 0) ? static_cast<float>(m_startFreq + m_bandwidth) : m_dataFreqMax;
+    float viewportRange = baseEnd - baseStart;
+    if (viewportRange <= 0.0f)
+        viewportRange = 1.0f;
+    float const viewRange = viewportRange / qMax(1.0f, m_zoomFactor);
+    float const viewCenter = baseStart + viewportRange * 0.5f + m_panHz;
+    float const viewStart = viewCenter - viewRange * 0.5f;
+    auto fToX = [&](float f) -> int {
+        return static_cast<int>((f - viewStart) * static_cast<float>(w) / viewRange);
+    };
+    auto clampInt = [](int value, int lo, int hi) -> int {
+        return qBound(lo, value, qMax(lo, hi));
+    };
+
+    int const rxX = fToX(static_cast<float>(m_rxFreq));
+    int const rxFilterHz = 300;
+    int pLeft = fToX(static_cast<float>(m_rxFreq - rxFilterHz / 2));
+    int pRight = fToX(static_cast<float>(m_rxFreq + rxFilterHz / 2));
+    pLeft = qBound(0, pLeft, w);
+    pRight = qBound(0, pRight, w);
+    if (pRight > pLeft)
+        p.fillRect(pLeft, 0, pRight - pLeft, h, QColor(80, 110, 120, 22));
+
+    p.setFont(panadapterMonoFont(8));
+    constexpr int kDbSteps = 5;
+    for (int step = 0; step <= kDbSteps; ++step) {
+        float const norm = static_cast<float>(step) / static_cast<float>(kDbSteps);
+        int const gy = h - 1 - static_cast<int>(norm * static_cast<float>(qMax(1, h - 16)));
+        p.setPen(QPen(QColor(38, 38, 38), 1));
+        p.drawLine(0, gy, w, gy);
+        p.setPen(QColor(160, 160, 160));
+        p.drawText(2, qMax(8, gy - 1), QString::number(static_cast<int>(std::round(displayMinDb + norm * range))));
+    }
+
+    int const freqStep = viewRange > 3000.0f ? 500 : (viewRange > 1000.0f ? 200 : 100);
+    p.setFont(panadapterMonoFont(9, QFont::Bold));
+    int const firstGrid = (static_cast<int>(std::floor(viewStart / static_cast<float>(freqStep))) + 1) * freqStep;
+    for (int f = firstGrid; f < static_cast<int>(viewStart + viewRange); f += freqStep) {
+        int const x = fToX(static_cast<float>(f));
+        if (x < 0 || x >= w)
+            continue;
+        p.setPen(QPen(QColor(40, 40, 40), 1));
+        p.drawLine(x, 0, x, qMax(0, h - 16));
+        p.setPen(QColor(220, 220, 220));
+        QString const label = f >= 1000
+            ? QStringLiteral("%1k").arg(static_cast<double>(f) / 1000.0, 0, 'f', 1)
+            : QString::number(f);
+        QFontMetrics const fm(p.font());
+        int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
+        p.drawText(tx, h - 3, label);
+    }
+
+    for (int f = (static_cast<int>(viewStart / 500.0f) * 500) + 500;
+         f < static_cast<int>(viewStart + viewRange);
+         f += 500) {
+        int const x = fToX(static_cast<float>(f));
+        if (x < 0 || x >= w)
+            continue;
+        p.setPen(QPen(QColor(255, 230, 0, 180), 1));
+        p.drawLine(x, qMax(0, h - 18), x, qMax(0, h - 6));
+        p.setPen(QColor(220, 210, 0));
+        QString const label = QString::number(f);
+        QFontMetrics const fm(p.font());
+        int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
+        p.drawText(tx, qMax(10, h - 20), label);
+    }
+
+    if (rxX >= 0 && rxX < w) {
+        p.setPen(QPen(QColor(0, 229, 255, 70), 7.0));
+        p.drawLine(rxX, 0, rxX, h);
+        p.setPen(QPen(QColor(0, 229, 255, 240), 3.0));
+        p.drawLine(rxX, 0, rxX, h);
+        p.setPen(QPen(QColor(180, 255, 255, 255), 1.0));
+        p.drawLine(rxX, 0, rxX, h);
+    }
+
+    struct OverlayLabel {
+        int x = 0;
+        int textW = 0;
+        QString text;
+        QColor color;
+        QString call;
+        int freq = 0;
+    };
+
+    if (!m_decodeLabels.isEmpty()) {
+        QFont labelFont = panadapterMonoFont(m_labelFontSize, m_labelBold ? QFont::Bold : QFont::Normal);
+        p.setFont(labelFont);
+        QFontMetrics const fm(labelFont);
+        int const rowH = qMax(10, fm.height());
+        int const topPad = 2;
+        int const bottomKeepOut = 20;
+        int const gap = m_labelSpacing;
+        int const maxRows = qMax(1, (h - bottomKeepOut - topPad) / rowH);
+
+        QVector<OverlayLabel> items;
+        items.reserve(m_decodeLabels.size());
+        for (const QVariant& v : std::as_const(m_decodeLabels)) {
+            QVariantMap const d = v.toMap();
+            QString const call = d.value(QStringLiteral("call")).toString();
+            int const freq = d.value(QStringLiteral("freq")).toInt();
+            if (call.isEmpty() || freq <= 0)
+                continue;
+            int const x = fToX(static_cast<float>(freq));
+            if (x < 0 || x >= w)
+                continue;
+
+            QString const text = call + QLatin1Char(' ') + QString::number(d.value(QStringLiteral("snr")).toInt());
+            QColor color(d.value(QStringLiteral("color")).toString());
+            if (!color.isValid()) {
+                if (m_labelUseCustomColor)
+                    color = m_labelColor;
+                else if (d.value(QStringLiteral("isMyCall")).toBool())
+                    color = QColor(255, 80, 80);
+                else if (d.value(QStringLiteral("isCQ")).toBool())
+                    color = QColor(0, 230, 100);
+                else
+                    color = QColor(0, 200, 255);
+            }
+            items.push_back({x, fm.horizontalAdvance(text), text, color, call, freq});
+        }
+        std::sort(items.begin(), items.end(), [](const OverlayLabel& a, const OverlayLabel& b) {
+            return a.x < b.x;
+        });
+
+        QVector<int> rowRight(maxRows, -1000000);
+        m_decodeHitRects.reserve(items.size());
+        for (const OverlayLabel& it : std::as_const(items)) {
+            int const textX = clampInt(it.x + 2, 2, w - it.textW - 2);
+            int chosenRow = -1;
+            for (int r = 0; r < maxRows; ++r) {
+                if (textX > rowRight[r] + gap) {
+                    chosenRow = r;
+                    break;
+                }
+            }
+            if (chosenRow < 0)
+                continue;
+            int const textY = topPad + rowH * (chosenRow + 1) - fm.descent();
+            p.setPen(QPen(it.color, 1, Qt::DotLine));
+            p.drawLine(it.x, 0, it.x, qMax(0, h - bottomKeepOut));
+            p.setPen(it.color);
+            p.drawText(textX, textY, it.text);
+            rowRight[chosenRow] = textX + it.textW;
+            QRect const hitRect(textX - 2, textY - rowH + fm.descent(), it.textW + 4, rowH);
+            m_decodeHitRects.push_back({hitRect, it.call, it.freq});
+            ++renderedDecodeLabels;
+        }
+    }
+
+    if (m_showDxClusterSpots && !m_dxClusterSpots.isEmpty()) {
+        QFont clusterFont = panadapterMonoFont(m_labelFontSize, QFont::Bold);
+        p.setFont(clusterFont);
+        QFontMetrics const fm(clusterFont);
+        int const rowH = qMax(10, fm.height());
+        int const clusterBaseline = h - 24;
+        QVector<int> takenLeft;
+        takenLeft.reserve(m_dxClusterSpots.size());
+        for (const QVariant& v : std::as_const(m_dxClusterSpots)) {
+            QVariantMap const d = v.toMap();
+            QString const call = d.value(QStringLiteral("call")).toString();
+            int const freq = d.value(QStringLiteral("freq")).toInt();
+            if (call.isEmpty() || freq <= 0)
+                continue;
+            int const x = fToX(static_cast<float>(freq));
+            if (x < 0 || x >= w)
+                continue;
+            int const textW = fm.horizontalAdvance(call);
+            int const textX = clampInt(x + 2, 2, w - textW - 2);
+            bool conflict = false;
+            for (int taken : std::as_const(takenLeft)) {
+                if (qAbs(textX - taken) < textW + m_labelSpacing + 4) {
+                    conflict = true;
+                    break;
+                }
+            }
+            if (conflict)
+                continue;
+            takenLeft.push_back(textX);
+
+            p.setPen(QPen(m_dxClusterSpotColor, 1, Qt::DashDotLine));
+            p.drawLine(x, 0, x, qMax(0, clusterBaseline - rowH));
+            QRect const labelRect(textX - 2, clusterBaseline - rowH + fm.descent(), textW + 4, rowH);
+            p.fillRect(labelRect, QColor(0, 0, 0, 180));
+            p.setPen(QPen(m_dxClusterSpotColor, 1));
+            p.drawRect(labelRect);
+            p.drawText(textX, clusterBaseline, call);
+            m_clusterHitRects.push_back({labelRect.adjusted(-2, -2, 2, 2), call, freq});
+            ++renderedClusterLabels;
+        }
+    }
+
+    auto drawMarkerLabel = [&](int markerX, int preferredCenterY, const QString& text, const QColor& accent) {
+        QFont labelFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+        labelFont.setPointSize(9);
+        labelFont.setBold(true);
+        p.setFont(labelFont);
+        QFontMetrics const fm(labelFont);
+        int constexpr padX = 6;
+        int constexpr padY = 3;
+        int const boxW = fm.horizontalAdvance(text) + padX * 2;
+        int const boxH = fm.height() + padY * 2;
+        int const minY = boxH / 2 + 3;
+        int const maxY = qMax(minY, h - boxH / 2 - 22);
+        int const centerY = qBound(minY, preferredCenterY, maxY);
+        int boxX = markerX + 8;
+        if (boxX + boxW > w - 2)
+            boxX = markerX - boxW - 8;
+        boxX = clampInt(boxX, 2, w - boxW - 2);
+        int const boxY = clampInt(centerY - boxH / 2, 2, h - boxH - 22);
+
+        QPainterPath box;
+        box.addRoundedRect(QRectF(boxX, boxY, boxW, boxH), 4, 4);
+        QColor border = accent;
+        border.setAlpha(210);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.fillPath(box, QColor(0, 0, 0, 180));
+        p.setPen(QPen(border, 1));
+        p.drawPath(box);
+        p.setRenderHint(QPainter::Antialiasing, false);
+        p.setPen(accent);
+        p.drawText(QRect(boxX + padX, boxY + padY, boxW - padX * 2, boxH - padY * 2),
+                   Qt::AlignCenter,
+                   text);
+    };
+
+    int const txX = fToX(static_cast<float>(m_txFreq));
+    bool const txVisible = txX >= 0 && txX < w && m_txFreq != m_rxFreq;
+    if (rxX >= 0 && rxX < w)
+        drawMarkerLabel(rxX, h / 2 - (txVisible ? 12 : 0), QStringLiteral("RX %1").arg(m_rxFreq), QColor(0, 229, 255));
+
+    if (m_autoRange) {
+        p.setFont(panadapterMonoFont(8));
+        p.setPen(QColor(100, 100, 100));
+        p.drawText(w - 100, h - 3, QStringLiteral("NF:%1dB").arg(static_cast<int>(m_measuredFloor)));
+    }
+
+    m_spectrumOverlayDirty = false;
+    m_spectrumOverlaySize = QSize(w, h);
+    m_spectrumOverlayDisplayMinDb = displayMinDb;
+    m_spectrumOverlayDisplayMaxDb = displayMaxDb;
+    m_lastSpectrumOverlayRebuildMs = monotonicMs();
+    recordOverlayMetric(monotonicUs() - overlayStartUs,
+                        renderedDecodeLabels,
+                        renderedClusterLabels,
+                        QSize(w, h));
+}
+
+void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
+                                               int w,
+                                               int h,
+                                               bool gpuDirectReady,
+                                               bool gpuSpectrumGraph)
+{
+    if (!spectrumRoot)
+        return;
+
+    auto findOverlayNode = [&]() -> PanadapterSpectrumOverlayNode* {
+        for (QSGNode* child = spectrumRoot->firstChild(); child; child = child->nextSibling()) {
+            if (auto* overlay = dynamic_cast<PanadapterSpectrumOverlayNode*>(child))
+                return overlay;
+        }
+        return nullptr;
+    };
+
+    auto removeOverlayNode = [&]() {
+        if (auto* overlay = findOverlayNode()) {
+            spectrumRoot->removeChildNode(overlay);
+            delete overlay;
+        }
+    };
+
+    bool const enabled = (gpuDirectReady || gpuSpectrumGraph) && w > 1 && h > 1;
+    if (!enabled) {
+        removeOverlayNode();
+        return;
+    }
+
+    float const displayMinDb = gpuDirectReady ? m_gpuDirectDisplayMinDb : m_minDb;
+    float const displayMaxDb = gpuDirectReady ? m_gpuDirectDisplayMaxDb : m_maxDb;
+    bool const sizeChanged = m_spectrumOverlaySize != QSize(w, h);
+    bool const rangeChanged = std::abs(displayMinDb - m_spectrumOverlayDisplayMinDb) > 0.75f
+        || std::abs(displayMaxDb - m_spectrumOverlayDisplayMaxDb) > 0.75f;
+    bool const rangeRefreshDue = monotonicMs() - m_lastSpectrumOverlayRebuildMs >= 250;
+    if (sizeChanged || (rangeChanged && rangeRefreshDue)) {
+        m_spectrumOverlayDirty = true;
+    }
+
+    bool const needsUpload = m_spectrumOverlayDirty || m_spectrumOverlayImage.size() != QSize(w, h);
+    if (needsUpload)
+        rebuildSpectrumOverlayImage(w, h, gpuDirectReady);
+    if (m_spectrumOverlayImage.isNull()) {
+        removeOverlayNode();
+        return;
+    }
+
+    auto* overlay = findOverlayNode();
+    if (!overlay) {
+        overlay = new PanadapterSpectrumOverlayNode();
+        overlay->setOwnsTexture(true);
+        spectrumRoot->appendChildNode(overlay);
+    } else if (overlay->nextSibling()) {
+        spectrumRoot->removeChildNode(overlay);
+        spectrumRoot->appendChildNode(overlay);
+    }
+
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(overlay->texture());
+    bool uploadTexture = needsUpload;
+    if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
+        || !tex->hasAlphaChannel() || tex->failed()) {
+        tex = new DecodiumRhiImageTexture(true);
+        tex->setFiltering(QSGTexture::Linear);
+        overlay->setTexture(tex);
+        uploadTexture = true;
+    }
+    if (uploadTexture)
+        tex->uploadFullImage(m_spectrumOverlayImage, true);
+    overlay->setFiltering(QSGTexture::Linear);
+#else
+    if (needsUpload || !overlay->texture()) {
+        auto* tex = window()->createTextureFromImage(
+            m_spectrumOverlayImage,
+            QQuickWindow::CreateTextureOptions(QQuickWindow::TextureHasAlphaChannel));
+        if (tex) {
+            tex->setFiltering(QSGTexture::Linear);
+            overlay->setTexture(tex);
+        }
+    }
+#endif
+    overlay->setRect(QRectF(0, 0, w, h));
+    overlay->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+
+    if (!m_loggedSpectrumCppOverlay) {
+        m_loggedSpectrumCppOverlay = true;
+        qInfo().noquote()
+            << "[GPUDBG] Panadapter spectrum C++ overlay path active"
+            << "api=" << (window() && window()->rendererInterface()
+                              ? waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
+                              : "Unknown")
+            << "reason= grid/labels/markers batched into one QSG texture; QML repeaters bypassed";
+    }
+}
+
 void PanadapterItem::updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int h)
 {
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
@@ -1957,12 +2867,13 @@ void PanadapterItem::updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int 
     static std::atomic_bool loggedSpectrumGraph {false};
     if (!loggedSpectrumGraph.exchange(true, std::memory_order_relaxed)) {
         char const* apiName = "Unknown";
-        if (window() && window()->rendererInterface())
+        if (window() && window()->rendererInterface()) {
             apiName = waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi());
+        }
         qInfo().noquote()
             << "[GPUDBG] Panadapter spectrum GPU geometry path active"
             << "api=" << apiName
-            << "reason= scene graph line/fill/peak nodes; overlay grid/text/markers rendered by Qt Quick scene graph";
+            << "reason= scene graph line/fill/peak nodes; overlay grid/text/markers batched by PanadapterItem QSG texture";
     }
 #else
     Q_UNUSED(spectrumRoot)
@@ -1973,12 +2884,28 @@ void PanadapterItem::updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int 
 
 void PanadapterItem::setDecodeLabels(const QVariantList& labels)
 {
+    qint64 const startUs = monotonicUs();
+    if (m_decodeLabels == labels)
+        return;
     m_decodeLabels = labels;
     markDirty();
+    qint64 const elapsedUs = monotonicUs() - startUs;
+    qint64 const nowMs = monotonicMs();
+    if (m_decodeLabelMetricLastLogMs == 0)
+        m_decodeLabelMetricLastLogMs = nowMs;
+    if (nowMs - m_decodeLabelMetricLastLogMs >= 10000) {
+        m_decodeLabelMetricLastLogMs = nowMs;
+        qInfo().noquote()
+            << "[PANMETRIC] decode_labels"
+            << "update_us=" << elapsedUs
+            << "count=" << m_decodeLabels.size();
+    }
 }
 
 void PanadapterItem::setDxClusterSpots(const QVariantList& spots)
 {
+    if (m_dxClusterSpots == spots)
+        return;
     m_dxClusterSpots = spots;
     markDirty();
 }
@@ -2028,6 +2955,16 @@ void PanadapterItem::addWaterfallRow(const QVector<float>& bins,
         false;
 #endif
 
+    if (gpuRawRowPath) {
+        static std::atomic_bool loggedRawOnlyWaterfall {false};
+        if (!loggedRawOnlyWaterfall.exchange(true, std::memory_order_relaxed)) {
+            qInfo().noquote()
+                << "[GPUDBG] Panadapter waterfall CPU backing image updates suppressed"
+                << "path=RHI_R32F_raw_db_rows"
+                << "fallback=CPU_images_on_shader_failure";
+        }
+    }
+
     if (m_waterfallRawBinsWidth != nBins
         || m_waterfallDbRows.size() != nBins * h
         || m_waterfallDbRowParams.size() != h * 2) {
@@ -2045,19 +2982,18 @@ void PanadapterItem::addWaterfallRow(const QVector<float>& bins,
         m_lastWaterfallGpuStatsRow = -1;
     }
 
-    if (m_waterfallIntensityImage.isNull()
-        || m_waterfallIntensityImage.width() != nBins
-        || m_waterfallIntensityImage.height() != h) {
+    if (!gpuRawRowPath
+        && (m_waterfallIntensityImage.isNull()
+            || m_waterfallIntensityImage.width() != nBins
+            || m_waterfallIntensityImage.height() != h)) {
         m_waterfallIntensityImage = QImage(nBins, h, QImage::Format_Grayscale8);
         m_waterfallIntensityImage.fill(0);
-        if (!gpuRawRowPath) {
-            m_waterfallImage.fill(QColor::fromRgb(wfBg));
-            m_wfWriteRow = 0;
-            m_waterfallGpuUploadedWriteRow = 0;
-            m_waterfallGpuUploadedSize = QSize();
-            m_loggedWaterfallGpuUploadStats = false;
-            m_lastWaterfallGpuStatsRow = -1;
-        }
+        m_waterfallImage.fill(QColor::fromRgb(wfBg));
+        m_wfWriteRow = 0;
+        m_waterfallGpuUploadedWriteRow = 0;
+        m_waterfallGpuUploadedSize = QSize();
+        m_loggedWaterfallGpuUploadStats = false;
+        m_lastWaterfallGpuStatsRow = -1;
         m_waterfallRgbValid = false;
     }
 
@@ -2072,16 +3008,24 @@ void PanadapterItem::addWaterfallRow(const QVector<float>& bins,
         m_waterfallDbRowParams[row * 2 + 1] = 1.0f / range;
     }
 
-    QRgb* line = reinterpret_cast<QRgb*>(m_waterfallImage.scanLine(row));
-    uchar* intensityLine = m_waterfallIntensityImage.scanLine(row);
-    if (!gpuRawRowPath && intensityLine) {
+    QRgb* line = nullptr;
+    uchar* intensityLine = nullptr;
+    if (!gpuRawRowPath) {
+        line = reinterpret_cast<QRgb*>(m_waterfallImage.scanLine(row));
+        intensityLine = m_waterfallIntensityImage.scanLine(row);
+    }
+
+    if (intensityLine) {
         for (int bin = 0; bin < nBins; ++bin) {
             float const rawNorm = qBound(0.0f, (bins[bin] - minDb) / range, 1.0f);
             intensityLine[bin] = static_cast<uchar>(qBound(0, static_cast<int>(rawNorm * 255.f + 0.5f), 255));
         }
     }
 
-    bool const prepareCpuPixels = !gpuRawRowPath && (!m_useShaderWaterfall || m_wfWriteRow < h || m_shaderWaterfallBlocked);
+    bool const prepareCpuPixels =
+        !gpuRawRowPath
+        && intensityLine
+        && (!m_useShaderWaterfall || m_wfWriteRow < h || m_shaderWaterfallBlocked);
     if (prepareCpuPixels && line) {
         for (int x = 0; x < w; ++x) {
             float pixFreq = viewStart + (float)x * viewRange / w;
@@ -2170,9 +3114,42 @@ void PanadapterItem::rebuildRgbWaterfallFromIntensity()
     m_waterfallRgbValid = true;
 }
 
+void PanadapterItem::connectBridgePcmFrameFeed()
+{
+    if (m_bridgePcmFrameFeedRegistered) {
+        return;
+    }
+
+    QCoreApplication* app = QCoreApplication::instance();
+    QObject* bridgeObject = app
+        ? app->property("decodiumBridge").value<QObject*>()
+        : nullptr;
+    auto* bridge = qobject_cast<DecodiumBridge*>(bridgeObject);
+    if (!bridge) {
+        return;
+    }
+
+    bridge->registerPanadapterItem(this);
+    connect(this,
+            &QObject::destroyed,
+            bridge,
+            [bridge, this]() {
+                bridge->unregisterPanadapterItem(this);
+            },
+            Qt::AutoConnection);
+    m_bridgePcmFrameFeedRegistered = true;
+
+    qInfo().noquote()
+        << "[PANDBG] Panadapter PCM frame feed connected"
+        << "route=C++_I16_ring"
+        << "qml_bypass=1"
+        << "bridge_vector_float=0";
+}
+
 void PanadapterItem::itemChange(ItemChange change, const ItemChangeData& value)
 {
     if (change == ItemSceneChange && value.window) {
+        connectBridgePcmFrameFeed();
         connect(value.window,
                 &QQuickWindow::beforeRendering,
                 this,
@@ -2209,6 +3186,7 @@ void PanadapterItem::failGpuFft(const QString& reason)
         m_lastGpuFftFrameMs = 0;
         m_lastGpuFftReadbackMs = 0;
         m_gpuFftUiBinsExpected = 0;
+        m_gpuDirectTextureReady = false;
         m_gpuFftInvalidReadbacks = 0;
         m_gpuFftReadbackTimeouts = 0;
         m_gpuFftSlowReadbacks = 0;
@@ -2317,6 +3295,7 @@ void PanadapterItem::recordGpuFftCompute()
         failGpuFft(QStringLiteral("invalid PCM frame for GPU compute"));
         return;
     }
+    const float* uploadSampleData = frame.samples.constData();
 
     const float freqPerBin = 12000.0f / static_cast<float>(N);
     const int binStart = qBound(0, static_cast<int>(frame.nfa / freqPerBin), N / 2);
@@ -2326,9 +3305,11 @@ void PanadapterItem::recordGpuFftCompute()
         failGpuFft(QStringLiteral("empty GPU FFT bin range"));
         return;
     }
-    const int nBins = qMin(sourceBins, qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DFT_BINS") > 0
-        ? qBound(64, qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DFT_BINS"), sourceBins)
-        : qMin(512, sourceBins));
+    bool const wantsDirectTexturePath = gpuDirectPanadapterEnabled();
+    int const requestedGpuBins = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DFT_BINS");
+    int const defaultGpuBins = wantsDirectTexturePath ? sourceBins : qMin(512, sourceBins);
+    const int nBins = qMin(sourceBins,
+        requestedGpuBins > 0 ? qBound(64, requestedGpuBins, sourceBins) : defaultGpuBins);
 
     if (!m_gpuFft)
         m_gpuFft = new GpuFftState;
@@ -2351,6 +3332,425 @@ void PanadapterItem::recordGpuFftCompute()
 
     const int sampleBytes = N * static_cast<int>(sizeof(float));
     const int outputBytes = nBins * static_cast<int>(sizeof(float));
+
+    bool const directTexturePath =
+        wantsDirectTexturePath
+        && rhi->isTextureFormatSupported(QRhiTexture::R32F, QRhiTexture::UsedWithLoadStore);
+
+    if (directTexturePath) {
+        if (!m_gpuFft->directShader.isValid()) {
+            QFile shaderFile(QStringLiteral(":/shaders/panadapter_fft_direct.comp.qsb"));
+            if (!shaderFile.open(QIODevice::ReadOnly)) {
+                failGpuFft(QStringLiteral("missing :/shaders/panadapter_fft_direct.comp.qsb"));
+                return;
+            }
+            m_gpuFft->directShader = QShader::fromSerialized(shaderFile.readAll());
+            if (!m_gpuFft->directShader.isValid()) {
+                failGpuFft(QStringLiteral("invalid panadapter_fft_direct compute shader"));
+                return;
+            }
+        }
+
+        int waterfallRows = 0;
+        int waterfallWriteRow = 0;
+        bool peakHold = false;
+        float peakDecay = 0.97f;
+        float displayMinDb = -70.0f;
+        float displayMaxDb = 35.0f;
+        float estimatedFloorDb = estimateGpuDirectNoiseFloorDb(frame.sampleRms, N)
+            + gpuDirectAutoRangeFloorOffsetDb();
+        bool rangePropertiesChanged = false;
+        {
+            QMutexLocker lock(&m_mutex);
+            waterfallRows = !m_waterfallImage.isNull() ? m_waterfallImage.height() : 0;
+            if (waterfallRows <= 0)
+                waterfallRows = 256;
+            waterfallWriteRow = m_wfWriteRow % waterfallRows;
+            peakHold = m_peakHold;
+            peakDecay = m_peakDecay;
+            if (m_autoRange) {
+                if (!std::isfinite(estimatedFloorDb))
+                    estimatedFloorDb = std::isfinite(m_measuredFloor) ? m_measuredFloor : -70.0f;
+                bool const resetFloor =
+                    m_lastGpuFftFrameMs <= 0
+                    || !std::isfinite(m_measuredFloor)
+                    || m_measuredFloor < -120.0f
+                    || std::abs(m_measuredFloor - estimatedFloorDb) > 60.0f;
+                float const measuredFloorDb = resetFloor
+                    ? estimatedFloorDb
+                    : (0.18f * estimatedFloorDb + 0.82f * m_measuredFloor);
+                float const displayRangeDb = gpuDirectAutoRangeSpanDb(m_contrastLevel);
+                float const directBlackThresh = waterfallBlackThresholdForLevel(m_blackLevel, true);
+                displayMinDb = measuredFloorDb
+                    - directBlackThresh * displayRangeDb
+                    - gpuDirectAutoRangeFloorMarginDb();
+                displayMaxDb = displayMinDb + displayRangeDb;
+                if (std::abs(m_minDb - displayMinDb) > 0.25f
+                    || std::abs(m_maxDb - displayMaxDb) > 0.25f) {
+                    m_measuredFloor = measuredFloorDb;
+                    m_measuredPeak = measuredFloorDb + displayRangeDb;
+                    m_minDb = displayMinDb;
+                    m_maxDb = displayMaxDb;
+                    rangePropertiesChanged = true;
+                }
+            } else if (m_maxDb > m_minDb) {
+                displayMinDb = m_minDb;
+                displayMaxDb = m_maxDb;
+            }
+        }
+        if (rangePropertiesChanged) {
+            QPointer<PanadapterItem> guard(this);
+            QMetaObject::invokeMethod(this, [guard]() {
+                if (!guard)
+                    return;
+                emit guard->measuredFloorChanged();
+                emit guard->measuredPeakChanged();
+                emit guard->minDbChanged();
+                emit guard->maxDbChanged();
+            }, Qt::QueuedConnection);
+        }
+        float const displayRange = qMax(1.0f, displayMaxDb - displayMinDb);
+
+        bool reallocatedStorage = false;
+        bool const needsSampleOutputBuffers =
+            !m_gpuFft->sampleBuffer
+            || !m_gpuFft->outputBuffer
+            || m_gpuFft->sampleCapacity < sampleBytes
+            || m_gpuFft->outputCapacity < outputBytes;
+        if (needsSampleOutputBuffers) {
+            delete m_gpuFft->pipeline;
+            delete m_gpuFft->directPipeline;
+            delete m_gpuFft->srb;
+            delete m_gpuFft->directSrb;
+            delete m_gpuFft->outputBuffer;
+            delete m_gpuFft->sampleBuffer;
+            m_gpuFft->pipeline = nullptr;
+            m_gpuFft->directPipeline = nullptr;
+            m_gpuFft->srb = nullptr;
+            m_gpuFft->directSrb = nullptr;
+            m_gpuFft->outputBuffer = nullptr;
+            m_gpuFft->sampleBuffer = nullptr;
+
+            m_gpuFft->sampleBuffer = rhi->newBuffer(QRhiBuffer::Static,
+                                                    QRhiBuffer::StorageBuffer,
+                                                    sampleBytes);
+            m_gpuFft->outputBuffer = rhi->newBuffer(QRhiBuffer::Static,
+                                                    QRhiBuffer::StorageBuffer,
+                                                    outputBytes);
+            if (!m_gpuFft->sampleBuffer
+                || !m_gpuFft->outputBuffer
+                || !m_gpuFft->sampleBuffer->create()
+                || !m_gpuFft->outputBuffer->create()) {
+                failGpuFft(QStringLiteral("failed to create GPU direct FFT buffers"));
+                return;
+            }
+            m_gpuFft->sampleCapacity = sampleBytes;
+            m_gpuFft->outputCapacity = outputBytes;
+            reallocatedStorage = true;
+        }
+
+        if (!m_gpuFft->directParamsBuffer) {
+            m_gpuFft->directParamsBuffer = rhi->newBuffer(QRhiBuffer::Static,
+                                                          QRhiBuffer::StorageBuffer,
+                                                          sizeof(GpuFftDirectParams));
+            if (!m_gpuFft->directParamsBuffer || !m_gpuFft->directParamsBuffer->create()) {
+                failGpuFft(QStringLiteral("failed to create GPU direct params buffer"));
+                return;
+            }
+            delete m_gpuFft->directSrb;
+            delete m_gpuFft->directPipeline;
+            m_gpuFft->directSrb = nullptr;
+            m_gpuFft->directPipeline = nullptr;
+        }
+
+        auto recreateTexture = [&](QRhiTexture*& texture, QSize& currentSize, QSize const& desiredSize) -> bool {
+            if (desiredSize.isEmpty())
+                return false;
+            if (texture && currentSize == desiredSize && texture->pixelSize() == desiredSize)
+                return false;
+            delete texture;
+            texture = rhi->newTexture(QRhiTexture::R32F,
+                                      desiredSize,
+                                      1,
+                                      QRhiTexture::Flags(QRhiTexture::UsedWithLoadStore
+                                                         | QRhiTexture::UsedAsTransferSource));
+            if (!texture || !texture->create()) {
+                delete texture;
+                texture = nullptr;
+                currentSize = QSize();
+                return false;
+            }
+            currentSize = desiredSize;
+            delete m_gpuFft->directSrb;
+            delete m_gpuFft->directPipeline;
+            m_gpuFft->directSrb = nullptr;
+            m_gpuFft->directPipeline = nullptr;
+            return true;
+        };
+
+        QSize const spectrumSize(nBins, 1);
+        QSize const waterfallSize(nBins, waterfallRows);
+        QSize const rowParamsSize(2, waterfallRows);
+        bool const spectrumRecreated = recreateTexture(m_gpuFft->directSpectrumTexture,
+                                                       m_gpuFft->directSpectrumSize,
+                                                       spectrumSize);
+        bool const waterfallRecreated = recreateTexture(m_gpuFft->directWaterfallTexture,
+                                                        m_gpuFft->directWaterfallSize,
+                                                        waterfallSize);
+        bool const rowParamsRecreated = recreateTexture(m_gpuFft->directRowParamsTexture,
+                                                        m_gpuFft->directRowParamsSize,
+                                                        rowParamsSize);
+        bool const peakRecreated = recreateTexture(m_gpuFft->directPeakTexture,
+                                                   m_gpuFft->directPeakSize,
+                                                   spectrumSize);
+        if (!m_gpuFft->directSpectrumTexture
+            || !m_gpuFft->directWaterfallTexture
+            || !m_gpuFft->directRowParamsTexture
+            || !m_gpuFft->directPeakTexture) {
+            failGpuFft(QStringLiteral("failed to create GPU direct R32F textures"));
+            return;
+        }
+
+        if (reallocatedStorage || !m_gpuFft->directSrb || !m_gpuFft->directPipeline) {
+            delete m_gpuFft->directSrb;
+            delete m_gpuFft->directPipeline;
+            m_gpuFft->directSrb = nullptr;
+            m_gpuFft->directPipeline = nullptr;
+
+            m_gpuFft->directSrb = rhi->newShaderResourceBindings();
+            m_gpuFft->directSrb->setBindings({
+                QRhiShaderResourceBinding::bufferLoad(0,
+                                                      QRhiShaderResourceBinding::ComputeStage,
+                                                      m_gpuFft->directParamsBuffer),
+                QRhiShaderResourceBinding::bufferLoad(1,
+                                                      QRhiShaderResourceBinding::ComputeStage,
+                                                      m_gpuFft->sampleBuffer),
+                QRhiShaderResourceBinding::bufferStore(2,
+                                                       QRhiShaderResourceBinding::ComputeStage,
+                                                       m_gpuFft->outputBuffer),
+                QRhiShaderResourceBinding::imageStore(3,
+                                                      QRhiShaderResourceBinding::ComputeStage,
+                                                      m_gpuFft->directSpectrumTexture,
+                                                      0),
+                QRhiShaderResourceBinding::imageStore(4,
+                                                      QRhiShaderResourceBinding::ComputeStage,
+                                                      m_gpuFft->directWaterfallTexture,
+                                                      0),
+                QRhiShaderResourceBinding::imageStore(5,
+                                                      QRhiShaderResourceBinding::ComputeStage,
+                                                      m_gpuFft->directRowParamsTexture,
+                                                      0),
+                QRhiShaderResourceBinding::imageLoadStore(6,
+                                                          QRhiShaderResourceBinding::ComputeStage,
+                                                          m_gpuFft->directPeakTexture,
+                                                          0)
+            });
+            if (!m_gpuFft->directSrb->create()) {
+                failGpuFft(QStringLiteral("failed to create GPU direct shader bindings"));
+                return;
+            }
+
+            m_gpuFft->directPipeline = rhi->newComputePipeline();
+            m_gpuFft->directPipeline->setShaderStage(QRhiShaderStage(QRhiShaderStage::Compute,
+                                                                     m_gpuFft->directShader));
+            m_gpuFft->directPipeline->setShaderResourceBindings(m_gpuFft->directSrb);
+            if (!m_gpuFft->directPipeline->create()) {
+                failGpuFft(QStringLiteral("failed to create GPU direct compute pipeline"));
+                return;
+            }
+        }
+
+        GpuFftDirectParams directParams;
+        directParams.n = N;
+        directParams.binStart = binStart;
+        directParams.nBins = nBins;
+        directParams.waterfallRows = waterfallRows;
+        directParams.waterfallWriteRow = waterfallWriteRow;
+        directParams.peakHold = peakHold ? 1 : 0;
+        directParams.resetPeak = peakRecreated || !peakHold ? 1 : 0;
+        float const fftNorm = static_cast<float>(N) / 2.0f;
+        directParams.inverseNormSquared = 1.0f / (fftNorm * fftNorm);
+        directParams.powerFloor = 1e-24f;
+        directParams.binStep = sourceBins > 1 && nBins > 1
+            ? static_cast<float>(sourceBins - 1) / static_cast<float>(nBins - 1)
+            : 1.0f;
+        directParams.displayMinDb = displayMinDb;
+        directParams.displayInvRange = 1.0f / displayRange;
+        directParams.peakDecay = peakDecay;
+
+        QRhiResourceUpdateBatch* uploads = rhi->nextResourceUpdateBatch();
+        uploads->uploadStaticBuffer(m_gpuFft->sampleBuffer,
+                                    0,
+                                    sampleBytes,
+                                    uploadSampleData);
+        uploads->uploadStaticBuffer(m_gpuFft->directParamsBuffer,
+                                    0,
+                                    sizeof(GpuFftDirectParams),
+                                    &directParams);
+
+        auto uploadFullR32F = [&](QRhiTexture* texture, QSize const& size, QByteArray const& bytes) {
+            if (!texture || size.isEmpty() || bytes.isEmpty())
+                return;
+            QRhiTextureSubresourceUploadDescription desc(bytes);
+            desc.setSourceSize(size);
+            desc.setDataStride(size.width() * static_cast<quint32>(sizeof(float)));
+            QRhiTextureUploadDescription uploadDescription;
+            QRhiTextureUploadEntry entry(0, 0, desc);
+            uploadDescription.setEntries(&entry, &entry + 1);
+            uploads->uploadTexture(texture, uploadDescription);
+        };
+        if (spectrumRecreated) {
+            QVector<float> clear(spectrumSize.width(), -200.0f);
+            uploadFullR32F(m_gpuFft->directSpectrumTexture,
+                           spectrumSize,
+                           QByteArray(reinterpret_cast<char const*>(clear.constData()),
+                                      clear.size() * static_cast<int>(sizeof(float))));
+        }
+        if (peakRecreated) {
+            QVector<float> clear(spectrumSize.width(), -200.0f);
+            uploadFullR32F(m_gpuFft->directPeakTexture,
+                           spectrumSize,
+                           QByteArray(reinterpret_cast<char const*>(clear.constData()),
+                                      clear.size() * static_cast<int>(sizeof(float))));
+        }
+        if (waterfallRecreated) {
+            QVector<float> clear(waterfallSize.width() * waterfallSize.height(), -200.0f);
+            uploadFullR32F(m_gpuFft->directWaterfallTexture,
+                           waterfallSize,
+                           QByteArray(reinterpret_cast<char const*>(clear.constData()),
+                                      clear.size() * static_cast<int>(sizeof(float))));
+        }
+        if (rowParamsRecreated) {
+            QVector<float> paramsRows(rowParamsSize.width() * rowParamsSize.height(), 0.0f);
+            for (int row = 0; row < rowParamsSize.height(); ++row) {
+                paramsRows[row * 2] = displayMinDb;
+                paramsRows[row * 2 + 1] = 1.0f / displayRange;
+            }
+            uploadFullR32F(m_gpuFft->directRowParamsTexture,
+                           rowParamsSize,
+                           QByteArray(reinterpret_cast<char const*>(paramsRows.constData()),
+                                      paramsRows.size() * static_cast<int>(sizeof(float))));
+        }
+
+        QRhiResourceUpdateBatch* debugReadbackBatch = nullptr;
+        DecodiumRhiBufferReadbackResult* debugReadback = nullptr;
+        bool const debugReadbackEnabled = gpuDirectDebugReadbackEnabled();
+        quint64 debugReadbackSerial = 0;
+        qint64 debugReadbackSubmitMs = 0;
+        if (debugReadbackEnabled) {
+            debugReadbackBatch = rhi->nextResourceUpdateBatch();
+            debugReadback = new DecodiumRhiBufferReadbackResult;
+            debugReadbackSerial = ++m_gpuFft->readbackSerial;
+            debugReadbackSubmitMs = monotonicMs();
+            QPointer<PanadapterItem> guard(this);
+            debugReadback->completed = [guard,
+                                        debugReadback,
+                                        debugReadbackSerial,
+                                        debugReadbackSubmitMs,
+                                        nBins]() mutable {
+                QByteArray const data = debugReadback->data;
+                delete debugReadback;
+                if (!guard)
+                    return;
+                {
+                    QMutexLocker lock(&guard->m_mutex);
+                    if (!guard->m_gpuFft || guard->m_gpuFft->readbackSerial != debugReadbackSerial)
+                        return;
+                    guard->m_gpuFft->readbackPending = false;
+                    guard->m_gpuFft->readbackPendingSinceMs = 0;
+                }
+                if (data.size() < nBins * static_cast<int>(sizeof(float)))
+                    return;
+                QVector<float> values(nBins);
+                std::memcpy(values.data(), data.constData(), static_cast<size_t>(nBins) * sizeof(float));
+                float minDb = 200.0f;
+                float maxDb = -200.0f;
+                int finite = 0;
+                for (float db : values) {
+                    if (!std::isfinite(db))
+                        continue;
+                    ++finite;
+                    minDb = qMin(minDb, db);
+                    maxDb = qMax(maxDb, db);
+                }
+                qInfo().noquote()
+                    << "[GPUDBG] Panadapter direct FFT debug readback"
+                    << "age_ms=" << (monotonicMs() - debugReadbackSubmitMs)
+                    << "bins=" << nBins
+                    << "finite=" << finite
+                    << "minDb=" << (finite ? minDb : 0.0f)
+                    << "maxDb=" << (finite ? maxDb : 0.0f);
+            };
+            debugReadbackBatch->readBackBuffer(m_gpuFft->outputBuffer,
+                                               0,
+                                               outputBytes,
+                                               debugReadback);
+        }
+
+        cb->beginComputePass(uploads);
+        cb->setComputePipeline(m_gpuFft->directPipeline);
+        cb->setShaderResources(m_gpuFft->directSrb);
+        cb->dispatch((nBins + 63) / 64, 1, 1);
+        cb->endComputePass(debugReadbackBatch);
+
+        {
+            QMutexLocker lock(&m_mutex);
+            m_dataFreqMin = frame.freqMinHz;
+            m_dataFreqMax = frame.freqMaxHz;
+            m_waterfallRawBinsWidth = nBins;
+            m_wfWriteRow += 1;
+            m_gpuDirectTextureReady = true;
+            m_gpuDirectDisplayMinDb = displayMinDb;
+            m_gpuDirectDisplayMaxDb = displayMaxDb;
+            m_lastGpuFftFrameMs = monotonicMs();
+            m_lastGpuFftReadbackMs = debugReadbackEnabled ? 0 : m_lastGpuFftFrameMs;
+            m_gpuFftUiBinsExpected = nBins;
+            m_gpuFft->directTexturePathActive = true;
+            m_gpuFft->directBins = nBins;
+            m_gpuFft->directRows = waterfallRows;
+            m_gpuFft->directWriteRow = m_wfWriteRow;
+            m_gpuFft->readbackPending = debugReadbackEnabled;
+            m_gpuFft->readbackPendingSinceMs = debugReadbackEnabled ? monotonicMs() : 0;
+        }
+
+        if (!m_gpuFft->loggedDirectActive) {
+            qInfo().noquote()
+                << "[GPUDBG] Panadapter visual FFT GPU direct texture path active"
+                << "api=" << waterfallGraphicsApiName(rif->graphicsApi())
+                << "shader=panadapter_fft_direct.comp.qsb"
+                << "algorithm=single_pass_dft_recurrence_4096"
+                << "source_bins=" << sourceBins
+                << "gpu_bins=" << nBins
+                << "waterfall=" << QStringLiteral("%1x%2").arg(nBins).arg(waterfallRows)
+                << "window=shader_blackman_harris"
+                << "readback=" << (debugReadbackEnabled ? "debug_async" : "off")
+                << "direct_texture=1"
+                << "fallback=FFTW_CPU";
+            m_gpuFft->loggedDirectActive = true;
+        }
+        if (m_autoRange && !m_gpuFft->loggedDirectAutoRange) {
+            qInfo().noquote()
+                << "[GPUDBG] Panadapter direct auto-range active"
+                << "input_rms=" << frame.sampleRms
+                << "estimated_floor_db=" << estimatedFloorDb
+                << "display_min_db=" << displayMinDb
+                << "display_max_db=" << displayMaxDb
+                << "span_db=" << (displayMaxDb - displayMinDb)
+                << "contrast=" << m_contrastLevel
+                << "floor_margin_db=" << gpuDirectAutoRangeFloorMarginDb()
+                << "black_threshold=" << waterfallBlackThresholdForLevel(m_blackLevel, true)
+                << "readback=off";
+            m_gpuFft->loggedDirectAutoRange = true;
+        }
+        if (debugReadbackEnabled && !m_gpuFft->loggedDirectDebugReadback) {
+            qInfo().noquote()
+                << "[GPUDBG] Panadapter direct debug readback enabled"
+                << "env=DECODIUM_GPU_PANADAPTER_DEBUG_READBACK";
+            m_gpuFft->loggedDirectDebugReadback = true;
+        }
+        return;
+    }
+
     if (!m_gpuFft->sampleBuffer
         || !m_gpuFft->outputBuffer
         || !m_gpuFft->paramsBuffer
@@ -2450,7 +3850,7 @@ void PanadapterItem::recordGpuFftCompute()
     }();
     QVector<float> windowedSamples(N);
     for (int i = 0; i < N; ++i)
-        windowedSamples[i] = frame.samples.at(i) * blackmanHarrisWindow.at(i);
+        windowedSamples[i] = uploadSampleData[i] * blackmanHarrisWindow.at(i);
 
     QRhiResourceUpdateBatch* uploads = rhi->nextResourceUpdateBatch();
     uploads->uploadStaticBuffer(m_gpuFft->sampleBuffer,
@@ -2711,17 +4111,37 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     if (w <= 0 || h <= 0) { delete oldNode; return nullptr; }
 
     QMutexLocker lock(&m_mutex);
+    qint64 const paintStartUs = monotonicUs();
+    ScopeExit paintMetric([this, paintStartUs]() {
+        recordPaintMetric(monotonicUs() - paintStartUs);
+    });
 
 
     if (m_geometryDirty) {
         rebuildImages(w, h);
         m_geometryDirty = false;
     }
+    int const specH = !m_renderSpectrumSize.isEmpty()
+        ? qBound(1, m_renderSpectrumSize.height(), h)
+        : qMin(m_spectrumH, h);
 
     bool const shaderSupported = shaderWaterfallSupported();
     bool const gpuSpectrumGraph = spectrumGraphSupported();
-    m_useShaderWaterfall = shaderSupported && m_wfWriteRow > 0;
-    if (m_spectrumDirty && !m_bins.isEmpty()) {
+    bool const gpuDirectReady =
+#if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
+        m_gpuDirectTextureReady
+        && !m_gpuFftFailed
+        && m_gpuFft
+        && m_gpuFft->directTexturePathActive
+        && m_gpuFft->directSpectrumTexture
+        && m_gpuFft->directWaterfallTexture
+        && m_gpuFft->directRowParamsTexture
+        && m_gpuFft->directPeakTexture;
+#else
+        false;
+#endif
+    m_useShaderWaterfall = shaderSupported && (m_wfWriteRow > 0 || gpuDirectReady);
+    if (!gpuDirectReady && m_spectrumDirty && !m_bins.isEmpty()) {
         // Drain UNA riga alla volta per paint = scroll fluido, niente "jump"
         // di N righe quando il backlog cresce. Se restano altre righe in coda
         // (m_pendingWaterfallRows), richiediamo un altro update() così il
@@ -2750,7 +4170,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         if (m_pendingWaterfallRows.isEmpty())
             m_spectrumDirty = false;
     }
-    m_useShaderWaterfall = shaderSupported && m_wfWriteRow > 0;
+    m_useShaderWaterfall = shaderSupported && (m_wfWriteRow > 0 || gpuDirectReady);
 
     // ── Crea/aggiorna due zone: spectrum root + waterfall node ─────────────
     // Node structure: root → spectrumRoot(background/legacy texture + GPU graph), waterfall node
@@ -2768,8 +4188,113 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     }
 
     // Spectrum node (top)
-    if (!m_spectrumImage.isNull() || gpuSpectrumGraph) {
-        int const specH = m_spectrumImage.isNull() ? qMin(m_spectrumH, h) : m_spectrumImage.height();
+    if (gpuDirectReady) {
+#if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_SPECTRUM_QSB)
+        QRectF specRect(0, 0, w, specH);
+        QColor const bg = (m_paletteIndex == 11) ? QColor(255, 255, 255) : QColor(0, 0, 0);
+        if (auto* bgNode = ensureFlatColorNode(spectrumRoot,
+                                               0,
+                                               6,
+                                               QSGGeometry::DrawTriangles,
+                                               bg)) {
+            writeRectGeometry(bgNode->geometry()->vertexDataAsPoint2D(), specRect);
+        }
+
+        QSGNode* child = sceneGraphChildAt(spectrumRoot, 1);
+        auto* directNode = dynamic_cast<QSGGeometryNode*>(child);
+        auto* material = directNode ? dynamic_cast<PanadapterSpectrumMaterial*>(directNode->material()) : nullptr;
+        if (child && (!directNode || !material)) {
+            removeSceneGraphChildrenFrom(spectrumRoot, child);
+            child = nullptr;
+            directNode = nullptr;
+            material = nullptr;
+        }
+        if (!directNode) {
+            directNode = new QSGGeometryNode();
+            auto* geometry = new QSGGeometry(waterfallTexturedPoint2DAttributes(), 4);
+            geometry->setDrawingMode(QSGGeometry::DrawTriangleStrip);
+            geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
+            directNode->setGeometry(geometry);
+            directNode->setFlag(QSGNode::OwnsGeometry);
+            material = new PanadapterSpectrumMaterial();
+            directNode->setMaterial(material);
+            directNode->setFlag(QSGNode::OwnsMaterial);
+            spectrumRoot->appendChildNode(directNode);
+        }
+
+        QSGGeometry::updateTexturedRectGeometry(directNode->geometry(),
+                                                specRect,
+                                                QRectF(0, 0, 1, 1));
+
+        auto replaceExternalTexture = [](QSGTexture*& slot,
+                                         QRhiTexture* texture,
+                                         QSize const& size,
+                                         QSGTexture::Filtering filtering) {
+            auto* ext = dynamic_cast<DecodiumExternalRhiTexture*>(slot);
+            if (!ext || ext->rhiTexture() != texture || ext->textureSize() != size) {
+                delete slot;
+                slot = new DecodiumExternalRhiTexture(texture, size, false);
+            }
+            slot->setFiltering(filtering);
+        };
+        replaceExternalTexture(material->spectrumTexture,
+                               m_gpuFft->directSpectrumTexture,
+                               m_gpuFft->directSpectrumSize,
+                               QSGTexture::Linear);
+        replaceExternalTexture(material->peakTexture,
+                               m_gpuFft->directPeakTexture,
+                               m_gpuFft->directPeakSize,
+                               QSGTexture::Linear);
+
+        float const range = qMax(1.0f, m_gpuDirectDisplayMaxDb - m_gpuDirectDisplayMinDb);
+        material->params[0] = m_gpuDirectDisplayMinDb;
+        material->params[1] = 1.0f / range;
+        material->params[2] = 1.5f / qMax(1.0f, static_cast<float>(specH));
+        material->params[3] = m_peakHold ? 1.0f : 0.0f;
+        float const baseStart = (m_bandwidth > 0) ? static_cast<float>(m_startFreq) : m_dataFreqMin;
+        float const baseEnd = (m_bandwidth > 0) ? static_cast<float>(m_startFreq + m_bandwidth) : m_dataFreqMax;
+        float viewportRange = baseEnd - baseStart;
+        if (viewportRange <= 0.0f)
+            viewportRange = 1.0f;
+        float dataRange = m_dataFreqMax - m_dataFreqMin;
+        if (dataRange <= 0.0f)
+            dataRange = 1.0f;
+        float const viewRange = viewportRange / m_zoomFactor;
+        float const viewCenter = baseStart + viewportRange * 0.5f + m_panHz;
+        float const viewStart = viewCenter - viewRange * 0.5f;
+        material->xParams[0] = viewRange / dataRange;
+        material->xParams[1] = (viewStart - m_dataFreqMin) / dataRange;
+        material->xParams[2] = 0.0f;
+        material->xParams[3] = 1.0f;
+
+        auto writeColor = [](float* dst, QColor color, float alpha) {
+            dst[0] = color.redF();
+            dst[1] = color.greenF();
+            dst[2] = color.blueF();
+            dst[3] = alpha;
+        };
+        QColor const fillColor = QColor::fromRgb(wfColor(0.82f));
+        QColor const glowColor = QColor::fromRgb(wfColor(0.92f)).lighter(145);
+        QColor const traceColor = QColor::fromRgb(wfColor(0.98f));
+        writeColor(material->background, bg, 1.0f);
+        writeColor(material->fill, fillColor, 0.42f);
+        writeColor(material->glow, glowColor, 0.45f);
+        writeColor(material->trace, traceColor, 1.0f);
+        writeColor(material->peak, QColor(255, 255, 255), 0.65f);
+
+        directNode->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+        QSGNode* extra = directNode->nextSibling();
+        if (extra && !dynamic_cast<PanadapterSpectrumOverlayNode*>(extra))
+            removeSceneGraphChildrenFrom(spectrumRoot, extra);
+        static std::atomic_bool loggedDirectSpectrum {false};
+        if (!loggedDirectSpectrum.exchange(true, std::memory_order_relaxed)) {
+            qInfo().noquote()
+                << "[GPUDBG] Panadapter spectrum GPU direct texture path active"
+                << "api=" << waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
+                << "reason= QSG shader samples FFT R32F texture; no CPU vertices/readback";
+        }
+#endif
+    } else if (!m_spectrumImage.isNull() || gpuSpectrumGraph) {
         QRectF specRect(0, 0, w, specH);
         if (gpuSpectrumGraph) {
             QColor const bg = (m_paletteIndex == 11) ? QColor(255, 255, 255) : QColor(0, 0, 0);
@@ -2811,14 +4336,20 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         }
     }
 
+    updateSpectrumOverlayNode(spectrumRoot, w, specH, gpuDirectReady, gpuSpectrumGraph);
+
     // Waterfall node (bottom) — ring buffer: due draw calls per wrap-around
-    if (!m_waterfallImage.isNull()) {
-        int const specH = m_spectrumImage.isNull() ? qMin(m_spectrumH, h) : m_spectrumImage.height();
-        int wfH = h - specH;
-        int wfW = m_waterfallImage.width();
-        int rows = m_waterfallImage.height();
-        if (wfH <= 0 || wfW <= 0 || rows <= 0)
-            return root;
+    int wfH = !m_renderWaterfallSize.isEmpty() ? m_renderWaterfallSize.height() : h - specH;
+    int wfW = !m_renderWaterfallSize.isEmpty() ? m_renderWaterfallSize.width() : w;
+    int rows = m_renderWaterfallHistoryRows;
+    if (gpuDirectReady && m_gpuFft && m_gpuFft->directRows > 0 && !m_gpuFft->directWaterfallSize.isEmpty()) {
+        rows = m_gpuFft->directRows;
+        wfW = m_gpuFft->directWaterfallSize.width();
+    } else if (!m_waterfallImage.isNull()) {
+        rows = m_waterfallImage.height();
+        wfW = m_waterfallImage.width();
+    }
+    if (wfH > 0 && wfW > 0 && rows > 0) {
 
         QSGNode* waterfallChild = nullptr;
         if (root->childCount() > 1 && root->firstChild())
@@ -2826,7 +4357,8 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 
 #ifdef DECODIUM_WATERFALL_SHADER_QSB
         if (m_useShaderWaterfall
-            && ((m_waterfallRawBinsWidth > 0 && !m_waterfallDbRows.isEmpty() && !m_waterfallDbRowParams.isEmpty())
+            && (gpuDirectReady
+                || (m_waterfallRawBinsWidth > 0 && !m_waterfallDbRows.isEmpty() && !m_waterfallDbRowParams.isEmpty())
                 || !m_waterfallIntensityImage.isNull())) {
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
             if (!m_shaderWaterfallBlocked) {
@@ -2863,7 +4395,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 material->params[1] = 0.5f / 256.0f;
                 material->params[2] = static_cast<float>(m_wfWriteRow % rows);
                 material->params[3] = static_cast<float>(rows);
-                float const blackThresh = qBound(0.0f, m_blackLevel * 0.006f, 0.95f);
+                float const blackThresh = waterfallBlackThresholdForLevel(m_blackLevel, gpuDirectReady);
                 float gamma = 2.5f - m_colorGain * 0.02f;
                 if (gamma < 0.3f)
                     gamma = 0.3f;
@@ -2910,6 +4442,68 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     paletteTexture && paletteTexture->failed()) {
                     m_shaderWaterfallBlocked = true;
                     qWarning().noquote() << "[GPUDBG] Panadapter waterfall GPU palette texture failed; falling back to CPU";
+                }
+
+                if (gpuDirectReady) {
+                    auto replaceExternalTexture = [](QSGTexture*& slot,
+                                                     QRhiTexture* texture,
+                                                     QSize const& size,
+                                                     QSGTexture::Filtering filtering) {
+                        auto* ext = dynamic_cast<DecodiumExternalRhiTexture*>(slot);
+                        if (!ext || ext->rhiTexture() != texture || ext->textureSize() != size) {
+                            delete slot;
+                            slot = new DecodiumExternalRhiTexture(texture, size, false);
+                        }
+                        slot->setFiltering(filtering);
+                    };
+
+                    replaceExternalTexture(material->intensityTexture,
+                                           m_gpuFft->directWaterfallTexture,
+                                           m_gpuFft->directWaterfallSize,
+                                           QSGTexture::Nearest);
+                    replaceExternalTexture(material->rowParamsTexture,
+                                           m_gpuFft->directRowParamsTexture,
+                                           m_gpuFft->directRowParamsSize,
+                                           QSGTexture::Nearest);
+
+                    if (!m_shaderWaterfallBlocked
+                        && material->intensityTexture
+                        && material->paletteTexture
+                        && material->rowParamsTexture) {
+                        wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+                        if (!m_loggedGpuWaterfallDetached) {
+                            m_loggedGpuWaterfallDetached = true;
+                            qInfo().noquote()
+                                << "[GPUDBG] Panadapter waterfall GPU direct node detached from QImage fallback"
+                                << "texture=" << QStringLiteral("%1x%2")
+                                    .arg(m_gpuFft->directWaterfallSize.width())
+                                    .arg(m_gpuFft->directWaterfallSize.height())
+                                << "rows=" << rows
+                                << "qimage_dependency=0";
+                        }
+                        bool const shouldLogStats =
+                            !m_loggedWaterfallGpuUploadStats
+                            || (m_lastWaterfallGpuStatsRow >= 0
+                                && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows);
+                        if (shouldLogStats) {
+                            m_loggedWaterfallGpuUploadStats = true;
+                            m_lastWaterfallGpuStatsRow = m_wfWriteRow;
+                            qInfo().noquote()
+                                << "[GPUDBG] Panadapter waterfall GPU direct texture"
+                                << "texture=RHI_R32F"
+                                << "update=compute_shader"
+                                << "level=raw_db_gpu_fft_gpu_norm_freqmap_black_gain_gamma"
+                                << "intensity=" << QStringLiteral("%1x%2")
+                                    .arg(m_gpuFft->directWaterfallSize.width())
+                                    .arg(m_gpuFft->directWaterfallSize.height())
+                                << "row_params=2x" << m_gpuFft->directRowParamsSize.height()
+                                << "palette=256x1"
+                                << "rows_written=" << m_wfWriteRow
+                                << "readback=off";
+                        }
+                        logWaterfallRenderPath(true, "shader samples GPU-direct FFT ring texture; no CPU row upload/readback");
+                        return root;
+                    }
                 }
 
                 RawDbUploadStats uploadStats;
@@ -3161,9 +4755,16 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         waterfallFallbackReason = QStringLiteral("qsb shaders not compiled");
 #endif
         logWaterfallRenderPath(false, waterfallFallbackReason);
+        if (m_waterfallImage.isNull()) {
+	            if (waterfallChild) {
+	                root->removeChildNode(waterfallChild);
+	                delete waterfallChild;
+	            }
+	            return root;
+	        }
 
-        if (auto* oldGeometry = dynamic_cast<QSGGeometryNode*>(waterfallChild)) {
-            if (!dynamic_cast<QSGSimpleTextureNode*>(oldGeometry)) {
+	        if (auto* oldGeometry = dynamic_cast<QSGGeometryNode*>(waterfallChild)) {
+	            if (!dynamic_cast<QSGSimpleTextureNode*>(oldGeometry)) {
                 root->removeChildNode(oldGeometry);
                 delete oldGeometry;
                 waterfallChild = nullptr;
@@ -3205,11 +4806,19 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         tex->setFiltering(QSGTexture::Nearest);
         wn->setTexture(tex);
 #endif
-        wn->setRect(QRectF(0, specH, w, wfH));
-        wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
-    }
+	        wn->setRect(QRectF(0, specH, w, wfH));
+	        wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+	    } else {
+	        QSGNode* waterfallChild = nullptr;
+	        if (root->childCount() > 1 && root->firstChild())
+	            waterfallChild = root->firstChild()->nextSibling();
+	        if (waterfallChild) {
+	            root->removeChildNode(waterfallChild);
+	            delete waterfallChild;
+	        }
+	    }
 
-    return root;
+	    return root;
 }
 
 // ─── Geometry change ─────────────────────────────────────────────────────────

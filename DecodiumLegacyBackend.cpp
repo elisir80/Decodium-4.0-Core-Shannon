@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
 #include <QPalette>
 #include <QProcessEnvironment>
@@ -18,6 +19,14 @@
 
 namespace
 {
+#if defined(Q_OS_MAC)
+constexpr bool kDefaultEmbeddedLegacyFt8Multithreaded = true;
+constexpr int kDefaultEmbeddedLegacyFt8DecoderStart = 1;
+#else
+constexpr bool kDefaultEmbeddedLegacyFt8Multithreaded = false;
+constexpr int kDefaultEmbeddedLegacyFt8DecoderStart = 3;
+#endif
+
 QString embeddedLegacyConfigPath()
 {
     QString configRoot = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
@@ -89,12 +98,12 @@ void seedEmbeddedLegacyConfigDefaults(QSettings& settings)
 
     setSettingIfMissing(settings, QStringLiteral("Common/Mode"), QStringLiteral("FT8"));
     setSettingIfMissing(settings, QStringLiteral("Common/NDepth"), 51);
-    setSettingIfMissing(settings, QStringLiteral("Common/MultithreadedFT8decoder"), false);
+    setSettingIfMissing(settings, QStringLiteral("Common/MultithreadedFT8decoder"), kDefaultEmbeddedLegacyFt8Multithreaded);
     setSettingIfMissing(settings, QStringLiteral("Common/NFT8Cycles"), 3);
     setSettingIfMissing(settings, QStringLiteral("Common/NFT8QSORXfreqSensitivity"), 3);
     setSettingIfMissing(settings, QStringLiteral("Common/FT8threads"), 0);
     setSettingIfMissing(settings, QStringLiteral("Common/FT8Sensitivity"), 3);
-    setSettingIfMissing(settings, QStringLiteral("Common/FT8DecoderStart"), 3);
+    setSettingIfMissing(settings, QStringLiteral("Common/FT8DecoderStart"), kDefaultEmbeddedLegacyFt8DecoderStart);
     setSettingIfMissing(settings, QStringLiteral("Common/FT8WideDXCallSearch"), true);
     setSettingIfMissing(settings, QStringLiteral("Common/FT8AP"), false);
     setSettingIfMissing(settings, QStringLiteral("Common/CQonly"), false);
@@ -133,6 +142,47 @@ void repairEmbeddedLegacyFt8TimingMigration(QSettings& settings)
     settings.setValue(repairMarker, true);
 }
 
+bool embeddedLegacyFastFt8TimingDisabled()
+{
+    return qEnvironmentVariableIntValue("DECODIUM_LEGACY_FT8_NORMAL_TIMING") != 0;
+}
+
+void applyEmbeddedLegacyFt8FastTimingMigration(QSettings& settings)
+{
+#if defined(Q_OS_MAC)
+    if (embeddedLegacyFastFt8TimingDisabled()) {
+        return;
+    }
+
+    QString const marker = QStringLiteral("Decodium4/FastFT8TimingV2Applied");
+    if (settings.value(marker, false).toBool()) {
+        return;
+    }
+
+    bool const multithreadedFt8 = settings
+        .value(QStringLiteral("Common/MultithreadedFT8decoder"), kDefaultEmbeddedLegacyFt8Multithreaded)
+        .toBool();
+    int const decoderStart =
+        settings.value(QStringLiteral("Common/FT8DecoderStart"), kDefaultEmbeddedLegacyFt8DecoderStart).toInt();
+
+    if (!multithreadedFt8 && decoderStart == 3) {
+        settings.setValue(QStringLiteral("Common/MultithreadedFT8decoder"), true);
+        settings.setValue(QStringLiteral("Common/FT8DecoderStart"), 1);
+        settings.setValue(QStringLiteral("Common/FT8threads"), 0);
+        qInfo() << "[LegacyFT8] fast timing applied for embedded macOS backend:"
+                << "multithreaded=1 decoderStart=1 three-stage";
+    } else {
+        qInfo() << "[LegacyFT8] preserving custom embedded timing:"
+                << "multithreaded=" << multithreadedFt8
+                << "decoderStart=" << decoderStart;
+    }
+
+    settings.setValue(marker, true);
+#else
+    Q_UNUSED(settings);
+#endif
+}
+
 void bootstrapEmbeddedLegacyConfig()
 {
     QString const targetPath = embeddedLegacyConfigPath();
@@ -144,6 +194,7 @@ void bootstrapEmbeddedLegacyConfig()
     mergeMissingSettings(target, legacyPath);
     seedEmbeddedLegacyConfigDefaults(target);
     repairEmbeddedLegacyFt8TimingMigration(target);
+    applyEmbeddedLegacyFt8FastTimingMigration(target);
     target.sync();
 }
 
