@@ -3,9 +3,11 @@
 #include <cstdlib>
 #include <cmath>
 #include <iomanip>
+#include <utility>
 #include <QAudioDevice>
 #include <QAudioFormat>
 #include <QAudioSource>
+#include <QElapsedTimer>
 #include <QMediaDevices>
 #include <QSysInfo>
 #include <QDebug>
@@ -17,6 +19,8 @@
 
 namespace
 {
+constexpr qint64 kSoundInputTraceDefaultThresholdMs = 20;
+
 QString audioStateName(QAudio::State state)
 {
   switch (state)
@@ -59,6 +63,64 @@ QString inputFormatSummary(QAudioFormat const& format)
       .arg(static_cast<int>(format.sampleFormat()))
       .arg(format.bytesPerFrame());
 }
+
+void soundInputTimelineLog(QString const& label,
+                           qint64 elapsedMs,
+                           QString const& details = {})
+{
+  QString msg = QStringLiteral("[MAIN-TL] %1 elapsed_ms=%2")
+      .arg(label)
+      .arg(elapsedMs);
+  if (!details.trimmed().isEmpty())
+    {
+      msg += QLatin1Char(' ');
+      msg += details.trimmed();
+    }
+  qInfo().noquote() << msg;
+}
+
+class SoundInputTraceScope
+{
+public:
+  SoundInputTraceScope(QString label,
+                       QString details = {},
+                       qint64 thresholdMs = kSoundInputTraceDefaultThresholdMs)
+    : m_label(std::move(label)),
+      m_details(std::move(details)),
+      m_thresholdMs(thresholdMs)
+  {
+    m_timer.start();
+  }
+
+  ~SoundInputTraceScope()
+  {
+    qint64 const elapsedMs = m_timer.elapsed();
+    if (elapsedMs >= m_thresholdMs)
+      {
+        soundInputTimelineLog(m_label, elapsedMs, m_details);
+      }
+  }
+
+  void addDetail(QString const& detail)
+  {
+    QString const trimmed = detail.trimmed();
+    if (trimmed.isEmpty())
+      {
+        return;
+      }
+    if (!m_details.isEmpty())
+      {
+        m_details += QLatin1Char(' ');
+      }
+    m_details += trimmed;
+  }
+
+private:
+  QElapsedTimer m_timer;
+  QString m_label;
+  QString m_details;
+  qint64 m_thresholdMs;
+};
 
 QAudioFormat makeInputFormat(QAudioDevice const& device,
                              unsigned downSampleFactor,
@@ -201,6 +263,13 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
   bool usingStereoForMono = false;
   QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel, &usingStereoForMono);
+  SoundInputTraceScope trace(QStringLiteral("sound_input_start"),
+                             QStringLiteral("dev=[%1] frames=%2 dsf=%3 channel=%4 format=[%5]")
+                                 .arg(device.description())
+                                 .arg(framesPerBuffer)
+                                 .arg(downSampleFactor)
+                                 .arg(static_cast<int>(channel))
+                                 .arg(inputFormatSummary(format)));
   QString const currentStartKey = QStringLiteral("%1|%2|%3|%4")
       .arg(device.description())
       .arg(format.sampleRate())
@@ -306,6 +375,9 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       m_stream->start (sink);
       checkStream ();
       cummulative_lost_usec_ = -1;
+      trace.addDetail(QStringLiteral("state=%1 error=%2")
+                          .arg(audioStateName(m_stream->state()),
+                               audioErrorName(m_stream->error())));
     }
   else
     {
@@ -360,6 +432,13 @@ void SoundInput::resume ()
 
 void SoundInput::handleStateChanged (QAudio::State newState)
 {
+  QAudio::Error const initialError = m_stream ? m_stream->error () : QAudio::NoError;
+  SoundInputTraceScope trace(QStringLiteral("sound_input_state_changed"),
+                             QStringLiteral("state=%1 error=%2 dev=[%3]")
+                                 .arg(audioStateName(newState),
+                                      audioErrorName(initialError),
+                                      m_deviceDescription),
+                             15);
   auto *stream = qobject_cast<QAudioSource *> (sender ());
   if (stream && stream != m_stream.data ())
     {

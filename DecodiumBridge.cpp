@@ -168,6 +168,72 @@ static void txTimelineLog(const QString& msg) {
     qInfo().noquote() << msg;
 }
 
+static constexpr qint64 kMainThreadTraceDefaultThresholdMs = 40;
+
+static void mainThreadTimelineLog(const QString& label,
+                                  qint64 elapsedMs,
+                                  const QString& details = {})
+{
+    QString msg = QStringLiteral("[MAIN-TL] %1 elapsed_ms=%2")
+        .arg(label)
+        .arg(elapsedMs);
+    if (!details.trimmed().isEmpty()) {
+        msg += QLatin1Char(' ');
+        msg += details.trimmed();
+    }
+    bridgeLog(msg);
+    qInfo().noquote() << msg;
+}
+
+class MainThreadTraceScope
+{
+public:
+    explicit MainThreadTraceScope(QString label,
+                                  QString details = {},
+                                  qint64 thresholdMs = kMainThreadTraceDefaultThresholdMs)
+        : m_label(std::move(label)),
+          m_details(std::move(details)),
+          m_thresholdMs(thresholdMs)
+    {
+        m_timer.start();
+    }
+
+    ~MainThreadTraceScope()
+    {
+        if (m_cancelled) {
+            return;
+        }
+        qint64 const elapsedMs = m_timer.elapsed();
+        if (elapsedMs >= m_thresholdMs) {
+            mainThreadTimelineLog(m_label, elapsedMs, m_details);
+        }
+    }
+
+    void addDetail(const QString& detail)
+    {
+        QString const trimmed = detail.trimmed();
+        if (trimmed.isEmpty()) {
+            return;
+        }
+        if (!m_details.isEmpty()) {
+            m_details += QLatin1Char(' ');
+        }
+        m_details += trimmed;
+    }
+
+    void cancel()
+    {
+        m_cancelled = true;
+    }
+
+private:
+    QElapsedTimer m_timer;
+    QString m_label;
+    QString m_details;
+    qint64 m_thresholdMs;
+    bool m_cancelled = false;
+};
+
 static QStringList ctyDatDownloadUrls()
 {
     return {
@@ -5812,13 +5878,20 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
 void DecodiumBridge::rebuildBandActivityModel()
 {
     if (!m_bandActivityModel) return;
+    MainThreadTraceScope trace(QStringLiteral("rebuild_band_activity_model"),
+                               QStringLiteral("decode_rows=%1").arg(m_decodeList.size()));
     QVariantList const filtered = filterEntriesForBandActivity(m_decodeList);
     m_bandActivityModel->setEntries(filtered);
+    trace.addDetail(QStringLiteral("filtered_rows=%1").arg(filtered.size()));
 }
 
 void DecodiumBridge::rebuildRxDecodeModel()
 {
     if (!m_rxDecodeModel) return;
+    MainThreadTraceScope trace(QStringLiteral("rebuild_rx_decode_model"),
+                               QStringLiteral("rx_rows=%1 decode_rows=%2")
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_decodeList.size()));
     QVariantList merged;
     merged.reserve(m_rxDecodeList.size() + m_decodeList.size());
     QSet<QString> seen;
@@ -5835,6 +5908,9 @@ void DecodiumBridge::rebuildRxDecodeModel()
     for (QVariant const& value : std::as_const(m_decodeList)) appendUnique(value);
     QVariantList const filtered = filterEntriesForRxDecode(merged);
     m_rxDecodeModel->setEntries(filtered);
+    trace.addDetail(QStringLiteral("merged_rows=%1 filtered_rows=%2")
+                        .arg(merged.size())
+                        .arg(filtered.size()));
 }
 
 // 1.0.233 — DevOverlay metrics (Sprint 2 Phase 7).
@@ -5966,6 +6042,11 @@ void DecodiumBridge::setDevOverlayActive(bool v)
 
 void DecodiumBridge::emitDecodeListChangedThrottled()
 {
+    MainThreadTraceScope trace(QStringLiteral("emit_decode_list_changed_throttled"),
+                               QStringLiteral("decode_rows=%1 rx_rows=%2 timer_active=%3")
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_decodeListEmitTimer && m_decodeListEmitTimer->isActive() ? 1 : 0));
     // Lazy-init del timer al primo uso (after construction OK perché
     // siamo nel thread principale).
     if (m_decodeListEmitTimer == nullptr) {
@@ -5979,6 +6060,10 @@ void DecodiumBridge::emitDecodeListChangedThrottled()
         m_decodeListEmitTimer->setInterval(500);
         connect(m_decodeListEmitTimer, &QTimer::timeout, this, [this]() {
             if (m_decodeListEmitPending) {
+                MainThreadTraceScope timeoutTrace(QStringLiteral("emit_decode_list_changed_timer"),
+                                                  QStringLiteral("decode_rows=%1 rx_rows=%2")
+                                                      .arg(m_decodeList.size())
+                                                      .arg(m_rxDecodeList.size()));
                 m_decodeListEmitPending = false;
                 emit decodeListChanged();
                 // Restart per coalescere ulteriori burst
@@ -7986,6 +8071,13 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
+    MainThreadTraceScope trace(QStringLiteral("sync_legacy_backend_state"),
+                               QStringLiteral("mode=%1 monitoring=%2 tx=%3 tune=%4 bridge_audio=%5")
+                                   .arg(m_mode)
+                                   .arg(m_monitoring ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0)
+                                   .arg((m_bridgeAudioLegacyTxActive || m_bridgeAudioTuneActive) ? 1 : 0));
 
     auto updateBool = [] (bool& target, bool value, auto signal) {
         if (target != value) {
@@ -8333,6 +8425,10 @@ void DecodiumBridge::syncLegacyBackendState()
         m_legacyBackend->setWaterfallPalette(legacyPaletteNameForUiIndex(m_uiPaletteIndex));
     }
 
+    trace.addDetail(QStringLiteral("after monitoring=%1 tx=%2 tune=%3")
+                        .arg(m_monitoring ? 1 : 0)
+                        .arg(m_transmitting ? 1 : 0)
+                        .arg(m_tuning ? 1 : 0));
     syncLegacyBackendDecodeList();
 }
 
@@ -8597,6 +8693,15 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
     if (!bandChanged && !rxChanged && !allTxtChanged) {
         return;
     }
+    MainThreadTraceScope trace(QStringLiteral("sync_legacy_backend_decode_list"),
+                               QStringLiteral("band_changed=%1 rx_changed=%2 alltxt_changed=%3 band_rev=%4 rx_rev=%5 decode_rows=%6 rx_rows=%7")
+                                   .arg(bandChanged ? 1 : 0)
+                                   .arg(rxChanged ? 1 : 0)
+                                   .arg(allTxtChanged ? 1 : 0)
+                                   .arg(bandRevision)
+                                   .arg(rxRevision)
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size()));
 
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
         QString loadedPath;
@@ -8969,6 +9074,9 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
     }
 
+    trace.addDetail(QStringLiteral("new_decode_rows=%1 new_rx_rows=%2")
+                        .arg(m_decodeList.size())
+                        .arg(m_rxDecodeList.size()));
     m_legacyAllTxtRevisionKey = allTxtRevisionKey;
 }
 
@@ -9271,6 +9379,11 @@ void DecodiumBridge::appendTxDecodeEntry(const QString& message)
 
 void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
 {
+    MainThreadTraceScope trace(QStringLiteral("append_rx_decode_entry"),
+                               QStringLiteral("rx_rows=%1 msg=[%2]")
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(entry.value(QStringLiteral("message")).toString().trimmed()),
+                               30);
     bool const isTx = entry.value(QStringLiteral("isTx")).toBool();
     if ((usingLegacyBackendForTx() && !isTx) || !shouldMirrorToRxPane(entry)) {
         return;
@@ -9298,6 +9411,7 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
     coalesceRxPaneTxRows(m_rxDecodeList, m_mode);
     normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
     emit rxDecodeListChanged();
+    trace.addDetail(QStringLiteral("new_rx_rows=%1").arg(m_rxDecodeList.size()));
 }
 
 void DecodiumBridge::rebuildRxDecodeList()
@@ -12013,6 +12127,11 @@ bool DecodiumBridge::legacyBridgeAudioTxInFlight() const
 bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_tx_preflight_main"),
+                               QStringLiteral("reason=%1 mode=%2 tx=%3")
+                                   .arg(reason, m_mode)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
     QElapsedTimer totalTimer;
     totalTimer.start();
     if (!shouldUseBridgeAudioForLegacyDigitalTx()) {
@@ -12112,6 +12231,12 @@ void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
 bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_audio_start_main"),
+                               QStringLiteral("reason=%1 mode=%2 tx=%3 active=%4")
+                                   .arg(reason, m_mode)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0),
+                               25);
     QElapsedTimer totalTimer;
     totalTimer.start();
     qint64 msgMs = 0;
@@ -12381,6 +12506,9 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
                   .arg(wave.size())
                   .arg(m_txPcmData.size())
                   .arg(msg.trimmed()));
+    trace.addDetail(QStringLiteral("msg=[%1] pcm_bytes=%2")
+                        .arg(msg.trimmed())
+                        .arg(m_txPcmData.size()));
     emit statusMessage(QStringLiteral("TX: ") + msg.trimmed());
     return true;
 #else
@@ -12392,6 +12520,12 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 void DecodiumBridge::stopBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    MainThreadTraceScope trace(QStringLiteral("legacy_bridge_audio_stop_main"),
+                               QStringLiteral("reason=%1 active=%2 tx=%3")
+                                   .arg(reason)
+                                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
     if (!m_bridgeAudioLegacyTxActive
         && !(m_transmitting && m_modulator && m_modulator->isActive())) {
         return;
@@ -18808,6 +18942,12 @@ void DecodiumBridge::setUdpInterfaceName(const QString& name)
 
 void DecodiumBridge::saveSettings()
 {
+    MainThreadTraceScope trace(QStringLiteral("save_settings"),
+                               QStringLiteral("mode=%1 cat=%2 monitoring=%3 tx=%4")
+                                   .arg(m_mode, m_catBackend)
+                                   .arg(m_monitoring ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0),
+                               25);
     QSettings s("Decodium", "Decodium3");
     s.setValue("callsign", m_callsign);
     s.setValue("grid", m_grid);
@@ -18981,6 +19121,7 @@ void DecodiumBridge::saveSettings()
     s.setValue("uiDecodeWinWidth",  m_uiDecodeWinWidth);
     s.setValue("uiDecodeWinHeight", m_uiDecodeWinHeight);
     s.sync();
+    trace.addDetail(QStringLiteral("path=[%1]").arg(s.fileName()));
     emit statusMessage("Impostazioni salvate");
 }
 
@@ -26552,6 +26693,13 @@ void DecodiumBridge::scheduleDeferredWorldMapFeedFlush(int delayMs)
 
 void DecodiumBridge::flushDeferredWorldMapFeed()
 {
+    MainThreadTraceScope trace(QStringLiteral("flush_deferred_world_map_feed"),
+                               QStringLiteral("queued=%1 full_replay=%2 tx=%3 tune=%4")
+                                   .arg(m_deferredWorldMapFeedQueue.size())
+                                   .arg(m_worldMapFullReplayDeferred ? 1 : 0)
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0),
+                               25);
     if (!m_worldMapFullReplayDeferred && m_deferredWorldMapFeedQueue.isEmpty()) {
         return;
     }
@@ -26666,6 +26814,11 @@ void DecodiumBridge::resetWorldMapDisplayFromCurrentDecodes()
 
 void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry, bool skipClearedFeedEntry)
 {
+    MainThreadTraceScope trace(QStringLiteral("replay_world_map_entry"),
+                               QStringLiteral("skip_cleared=%1 msg=[%2]")
+                                   .arg(skipClearedFeedEntry ? 1 : 0)
+                                   .arg(entry.value(QStringLiteral("message")).toString().trimmed()),
+                               30);
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -26952,6 +27105,12 @@ void DecodiumBridge::emitCurrentWorldMapQsoPath()
 
 void DecodiumBridge::replayWorldMapFeed()
 {
+    MainThreadTraceScope trace(QStringLiteral("replay_world_map_feed"),
+                               QStringLiteral("decode_rows=%1 rx_rows=%2 tx=%3 tune=%4")
+                                   .arg(m_decodeList.size())
+                                   .arg(m_rxDecodeList.size())
+                                   .arg(m_transmitting ? 1 : 0)
+                                   .arg(m_tuning ? 1 : 0));
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -27383,6 +27542,12 @@ void DecodiumBridge::refreshDecodeListDxcc()
 
 void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 {
+    MainThreadTraceScope trace(QStringLiteral("on_ft8_decode_ready"),
+                               QStringLiteral("serial=%1 rows=%2 mode=%3 tx=%4")
+                                   .arg(serial)
+                                   .arg(rows.size())
+                                   .arg(m_mode)
+                                   .arg(m_transmitting ? 1 : 0));
     if (shouldIgnoreDecodeCallbacks()) {
         bridgeLog("onFt8DecodeReady: ignored during shutdown");
         return;
@@ -27810,6 +27975,14 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                   .arg(cqOnlyFiltered)
                   .arg(myCallOnlyFiltered)
                   .arg(duplicatesSkipped));
+    trace.addDetail(QStringLiteral("accepted=%1 parse_fail=%2 semantic=%3 user_filtered=%4 ui_filtered=%5 dupes=%6 changed=%7")
+                        .arg(accepted)
+                        .arg(parseFailures)
+                        .arg(semanticFiltered)
+                        .arg(userFiltered)
+                        .arg(uiFiltered)
+                        .arg(duplicatesSkipped)
+                        .arg(changed ? 1 : 0));
     if (rows.isEmpty()) {
         ++m_zeroRawDecodeStreak;
         const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -27905,6 +28078,11 @@ void DecodiumBridge::onFt2DecodeReady(quint64 serial, QStringList rows)
 
 void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
 {
+    MainThreadTraceScope trace(QStringLiteral("on_ft2_async_decode_ready"),
+                               QStringLiteral("rows=%1 mode=%2 tx=%3")
+                                   .arg(rows.size())
+                                   .arg(m_mode)
+                                   .arg(m_transmitting ? 1 : 0));
     // Path turbo async: stessa logica di onFt8DecodeReady ma senza serial.
     // Deduplica per messaggio: non aggiunge righe già presenti nella lista.
     m_asyncDecodePending = false;
@@ -28196,6 +28374,14 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                   .arg(userFiltered)
                   .arg(uiFiltered)
                   .arg(duplicatesSkipped));
+    trace.addDetail(QStringLiteral("accepted=%1 parse_fail=%2 semantic=%3 user_filtered=%4 ui_filtered=%5 dupes=%6 changed=%7")
+                        .arg(accepted)
+                        .arg(parseFailures)
+                        .arg(semanticFiltered)
+                        .arg(userFiltered)
+                        .arg(uiFiltered)
+                        .arg(duplicatesSkipped)
+                        .arg(changed ? 1 : 0));
 
     // Shannon cbAsyncDecode legacy: quando arriva un decode con il nostro
     // callsign, elabora auto-seq e avvia TX IMMEDIATAMENTE senza aspettare
@@ -29337,6 +29523,11 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
 
 void DecodiumBridge::startAudioCapture()
 {
+    MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
+                               QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
+                                   .arg(m_audioInputDevice, m_mode)
+                                   .arg(usingLegacyBackendForTx() ? 1 : 0),
+                               25);
     bridgeLog("startAudioCapture() called");
     if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
@@ -29513,6 +29704,10 @@ void DecodiumBridge::startAudioCapture()
     }
     m_soundInput->start(selectedDevice, rxFramesPerBuffer, m_audioSink, downSampleFactor, channel);
     m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
+    trace.addDetail(QStringLiteral("selected=[%1] frames=%2 channel=%3")
+                        .arg(selectedDevice.description())
+                        .arg(rxFramesPerBuffer)
+                        .arg(static_cast<int>(channel)));
 
     emit statusMessage("Audio capture avviato: " + selectedDevice.description());
 
@@ -31417,6 +31612,10 @@ bool DecodiumBridge::prepareHoundTxSelectionForStart(const QString& reason)
 
 void DecodiumBridge::enumerateAudioDevices()
 {
+    MainThreadTraceScope trace(QStringLiteral("enumerate_audio_devices"),
+                               QStringLiteral("current_in=[%1] current_out=[%2]")
+                                   .arg(m_audioInputDevice, m_audioOutputDevice),
+                               25);
     m_audioInputDevices.clear();
     m_audioOutputDevices.clear();
 
@@ -31530,6 +31729,9 @@ void DecodiumBridge::enumerateAudioDevices()
     }
 #endif
     bridgeLog("=== enumerateAudioDevices END ===");
+    trace.addDetail(QStringLiteral("inputs=%1 outputs=%2")
+                        .arg(inputs.size())
+                        .arg(outputs.size()));
 
     emit audioInputDevicesChanged();
     emit audioOutputDevicesChanged();
