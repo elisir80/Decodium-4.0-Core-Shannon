@@ -101,12 +101,14 @@ public:
         clearNode(this);
         qDeleteAll(textureCache);
         qDeleteAll(transientTextures);
+        delete blankTexture;
     }
 
     QHash<QString, QSGTexture*> textureCache;
     QHash<QString, qint64> textureLastUsedMs;
     QVector<QSGSimpleTextureNode*> labelNodes;
     QVector<QSGTexture*> transientTextures;
+    QSGTexture* blankTexture {nullptr};
 };
 
 class AnimationLayerNode final : public QSGNode
@@ -560,6 +562,22 @@ QSGTexture* createLabelTexture(QQuickWindow* window, const QString& text, const 
     }
     texture->setFiltering(QSGTexture::Linear);
     return texture;
+}
+
+QSGTexture* labelBlankTexture(LabelLayerNode* layer, QQuickWindow* window)
+{
+    if (!layer || !window) {
+        return nullptr;
+    }
+    if (!layer->blankTexture) {
+        QImage image(1, 1, QImage::Format_RGBA8888_Premultiplied);
+        image.fill(QColor(0, 0, 0, 0));
+        layer->blankTexture = window->createTextureFromImage(image);
+        if (layer->blankTexture) {
+            layer->blankTexture->setFiltering(QSGTexture::Nearest);
+        }
+    }
+    return layer->blankTexture;
 }
 
 QSGTexture* cachedLabelTexture(LabelLayerNode* layer, QQuickWindow* window, const QString& text, const QColor& color)
@@ -1691,6 +1709,10 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         auto* node = new QSGSimpleTextureNode;
         node->setOwnsTexture(false);
         node->setFiltering(QSGTexture::Linear);
+        if (QSGTexture* blankTexture = labelBlankTexture(labelLayer, window())) {
+            node->setTexture(blankTexture);
+        }
+        node->setRect(QRectF());
         labelLayer->appendChildNode(node);
         labelLayer->labelNodes.push_back(node);
         labelLayer->transientTextures.push_back(nullptr);
@@ -1698,7 +1720,6 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     while (labelLayer->labelNodes.size() > displayLabels.size()) {
         auto* node = labelLayer->labelNodes.takeLast();
         QSGTexture* transientTexture = labelLayer->transientTextures.takeLast();
-        node->setTexture(nullptr);
         labelLayer->removeChildNode(node);
         delete node;
         delete transientTexture;
@@ -1711,15 +1732,21 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             ? cachedLabelTexture(labelLayer, window(), label.text, label.color)
             : createLabelTexture(window(), label.text, label.color);
         QSGTexture* oldTransientTexture = labelLayer->transientTextures[i];
+        QSGTexture* replacementTexture = texture ? texture : labelBlankTexture(labelLayer, window());
         if (texture) {
-            node->setTexture(texture);
+            node->setTexture(replacementTexture);
             node->setRect(label.rect);
+            labelLayer->transientTextures[i] = label.persistentCache ? nullptr : texture;
+            delete oldTransientTexture;
+        } else if (replacementTexture) {
+            node->setTexture(replacementTexture);
+            node->setRect(QRectF());
+            labelLayer->transientTextures[i] = nullptr;
+            delete oldTransientTexture;
         } else {
-            node->setTexture(nullptr);
+            labelLayer->transientTextures[i] = oldTransientTexture;
             node->setRect(QRectF());
         }
-        labelLayer->transientTextures[i] = label.persistentCache ? nullptr : texture;
-        delete oldTransientTexture;
     }
     pruneLabelTextureCache(labelLayer);
 
