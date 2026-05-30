@@ -50,6 +50,8 @@ using DecodiumRhiBufferReadbackResult = QRhiReadbackResult;
 
 namespace
 {
+constexpr qint64 kPanMetricLogIntervalMs = 60000;
+
 const char* waterfallGraphicsApiName(QSGRendererInterface::GraphicsApi api)
 {
     switch (api) {
@@ -101,13 +103,6 @@ QString metricMs(qint64 us)
     if (us < 0)
         return QStringLiteral("n/a");
     return QString::number(static_cast<double>(us) / 1000.0, 'f', 2);
-}
-
-DecodiumBridge* diagnosticBridge()
-{
-    QCoreApplication* app = QCoreApplication::instance();
-    QObject* bridgeObject = app ? app->property("decodiumBridge").value<QObject*>() : nullptr;
-    return qobject_cast<DecodiumBridge*>(bridgeObject);
 }
 
 class ScopeExit
@@ -393,8 +388,9 @@ QImage rgba8888TextureImage(const QImage& image)
 {
     if (image.isNull())
         return {};
-    if (image.format() == QImage::Format_RGBA8888)
-        return image.copy();
+    if (image.format() == QImage::Format_RGBA8888
+        || image.format() == QImage::Format_RGBA8888_Premultiplied)
+        return image;
     return image.convertToFormat(QImage::Format_RGBA8888);
 }
 
@@ -1356,7 +1352,7 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
     qint64 const nowMs = monotonicMs();
     if (m_overlayMetricLastLogMs == 0)
         m_overlayMetricLastLogMs = nowMs;
-    if (nowMs - m_overlayMetricLastLogMs < 10000 || m_overlayMetricSamples <= 0)
+    if (nowMs - m_overlayMetricLastLogMs < kPanMetricLogIntervalMs || m_overlayMetricSamples <= 0)
         return;
 
     qInfo().noquote()
@@ -1373,18 +1369,136 @@ void PanadapterItem::recordOverlayMetric(qint64 elapsedUs,
     m_overlayMetricMaxUs = 0;
 }
 
-void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
+void PanadapterItem::recordOverlayNodeMetric(qint64 elapsedUs,
+                                             qint64 rebuildUs,
+                                             qint64 textureUs,
+                                             qint64 nodeUs,
+                                             bool needsUpload)
 {
     qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    qint64 const safeRebuildUs = qMax<qint64>(0, rebuildUs);
+    qint64 const safeTextureUs = qMax<qint64>(0, textureUs);
+    qint64 const safeNodeUs = qMax<qint64>(0, nodeUs);
+    m_overlayNodeMetricAccumUs += safeElapsedUs;
+    m_overlayNodeMetricRebuildAccumUs += safeRebuildUs;
+    m_overlayNodeMetricTextureAccumUs += safeTextureUs;
+    m_overlayNodeMetricNodeAccumUs += safeNodeUs;
+    ++m_overlayNodeMetricSamples;
+    if (needsUpload)
+        ++m_overlayNodeMetricUploadSamples;
+    m_overlayNodeMetricMaxUs = qMax(m_overlayNodeMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
+    m_overlayNodeMetricRebuildMaxUs = qMax(m_overlayNodeMetricRebuildMaxUs, static_cast<int>(qMin<qint64>(safeRebuildUs, std::numeric_limits<int>::max())));
+    m_overlayNodeMetricTextureMaxUs = qMax(m_overlayNodeMetricTextureMaxUs, static_cast<int>(qMin<qint64>(safeTextureUs, std::numeric_limits<int>::max())));
+    m_overlayNodeMetricNodeMaxUs = qMax(m_overlayNodeMetricNodeMaxUs, static_cast<int>(qMin<qint64>(safeNodeUs, std::numeric_limits<int>::max())));
+
+    qint64 const nowMs = monotonicMs();
+    if (m_overlayNodeMetricLastLogMs == 0)
+        m_overlayNodeMetricLastLogMs = nowMs;
+    if (nowMs - m_overlayNodeMetricLastLogMs < kPanMetricLogIntervalMs || m_overlayNodeMetricSamples <= 0)
+        return;
+
+    qInfo().noquote()
+        << "[PANMETRIC] overlay_node"
+        << "avg_us=" << (m_overlayNodeMetricAccumUs / m_overlayNodeMetricSamples)
+        << "max_us=" << m_overlayNodeMetricMaxUs
+        << "samples=" << m_overlayNodeMetricSamples
+        << "upload_samples=" << m_overlayNodeMetricUploadSamples
+        << "rebuild_avg_us=" << (m_overlayNodeMetricRebuildAccumUs / m_overlayNodeMetricSamples)
+        << "rebuild_max_us=" << m_overlayNodeMetricRebuildMaxUs
+        << "texture_avg_us=" << (m_overlayNodeMetricTextureAccumUs / m_overlayNodeMetricSamples)
+        << "texture_max_us=" << m_overlayNodeMetricTextureMaxUs
+        << "node_avg_us=" << (m_overlayNodeMetricNodeAccumUs / m_overlayNodeMetricSamples)
+        << "node_max_us=" << m_overlayNodeMetricNodeMaxUs;
+    m_overlayNodeMetricLastLogMs = nowMs;
+    m_overlayNodeMetricAccumUs = 0;
+    m_overlayNodeMetricRebuildAccumUs = 0;
+    m_overlayNodeMetricTextureAccumUs = 0;
+    m_overlayNodeMetricNodeAccumUs = 0;
+    m_overlayNodeMetricSamples = 0;
+    m_overlayNodeMetricUploadSamples = 0;
+    m_overlayNodeMetricMaxUs = 0;
+    m_overlayNodeMetricRebuildMaxUs = 0;
+    m_overlayNodeMetricTextureMaxUs = 0;
+    m_overlayNodeMetricNodeMaxUs = 0;
+}
+
+void PanadapterItem::recordPaintMetric(qint64 elapsedUs,
+                                       qint64 lockWaitUs,
+                                       qint64 geometryUs,
+                                       qint64 drainUs,
+                                       qint64 overlayUs,
+                                       qint64 nodesUs,
+                                       qint64 spectrumNodeUs,
+                                       qint64 waterfallNodeUs,
+                                       qint64 waterfallTextureUs,
+                                       qint64 waterfallDisplayUs,
+                                       qint64 waterfallSetupUs,
+                                       qint64 waterfallMarkUs,
+                                       qint64 waterfallLogUs,
+                                       int waterfallPath,
+                                       int textureCreateCount,
+                                       int textureUploadRows,
+                                       int textureFullUploads,
+                                       bool gpuDirectReady,
+                                       int pendingRows)
+{
+    qint64 const safeElapsedUs = qMax<qint64>(0, elapsedUs);
+    qint64 const safeLockWaitUs = qMax<qint64>(0, lockWaitUs);
+    qint64 const safeGeometryUs = qMax<qint64>(0, geometryUs);
+    qint64 const safeDrainUs = qMax<qint64>(0, drainUs);
+    qint64 const safeOverlayUs = qMax<qint64>(0, overlayUs);
+    qint64 const safeNodesUs = qMax<qint64>(0, nodesUs);
+    qint64 const safeSpectrumNodeUs = qMax<qint64>(0, spectrumNodeUs);
+    qint64 const safeWaterfallNodeUs = qMax<qint64>(0, waterfallNodeUs);
+    qint64 const safeWaterfallTextureUs = qMax<qint64>(0, waterfallTextureUs);
+    qint64 const safeWaterfallDisplayUs = qMax<qint64>(0, waterfallDisplayUs);
+    qint64 const safeWaterfallSetupUs = qMax<qint64>(0, waterfallSetupUs);
+    qint64 const safeWaterfallMarkUs = qMax<qint64>(0, waterfallMarkUs);
+    qint64 const safeWaterfallLogUs = qMax<qint64>(0, waterfallLogUs);
     m_paintMetricLastUs = safeElapsedUs;
     m_paintMetricAccumUs += safeElapsedUs;
+    m_paintMetricLockWaitAccumUs += safeLockWaitUs;
+    m_paintMetricGeometryAccumUs += safeGeometryUs;
+    m_paintMetricDrainAccumUs += safeDrainUs;
+    m_paintMetricOverlayAccumUs += safeOverlayUs;
+    m_paintMetricNodesAccumUs += safeNodesUs;
+    m_paintMetricSpectrumNodeAccumUs += safeSpectrumNodeUs;
+    m_paintMetricWaterfallNodeAccumUs += safeWaterfallNodeUs;
+    m_paintMetricWaterfallTextureAccumUs += safeWaterfallTextureUs;
+    m_paintMetricWaterfallDisplayAccumUs += safeWaterfallDisplayUs;
+    m_paintMetricWaterfallSetupAccumUs += safeWaterfallSetupUs;
+    m_paintMetricWaterfallMarkAccumUs += safeWaterfallMarkUs;
+    m_paintMetricWaterfallLogAccumUs += safeWaterfallLogUs;
     ++m_paintMetricSamples;
     m_paintMetricMaxUs = qMax(m_paintMetricMaxUs, static_cast<int>(qMin<qint64>(safeElapsedUs, std::numeric_limits<int>::max())));
+    m_paintMetricLockWaitMaxUs = qMax(m_paintMetricLockWaitMaxUs, static_cast<int>(qMin<qint64>(safeLockWaitUs, std::numeric_limits<int>::max())));
+    m_paintMetricGeometryMaxUs = qMax(m_paintMetricGeometryMaxUs, static_cast<int>(qMin<qint64>(safeGeometryUs, std::numeric_limits<int>::max())));
+    m_paintMetricDrainMaxUs = qMax(m_paintMetricDrainMaxUs, static_cast<int>(qMin<qint64>(safeDrainUs, std::numeric_limits<int>::max())));
+    m_paintMetricOverlayMaxUs = qMax(m_paintMetricOverlayMaxUs, static_cast<int>(qMin<qint64>(safeOverlayUs, std::numeric_limits<int>::max())));
+    m_paintMetricNodesMaxUs = qMax(m_paintMetricNodesMaxUs, static_cast<int>(qMin<qint64>(safeNodesUs, std::numeric_limits<int>::max())));
+    m_paintMetricSpectrumNodeMaxUs = qMax(m_paintMetricSpectrumNodeMaxUs, static_cast<int>(qMin<qint64>(safeSpectrumNodeUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallNodeMaxUs = qMax(m_paintMetricWaterfallNodeMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallNodeUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallTextureMaxUs = qMax(m_paintMetricWaterfallTextureMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallTextureUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallDisplayMaxUs = qMax(m_paintMetricWaterfallDisplayMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallDisplayUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallSetupMaxUs = qMax(m_paintMetricWaterfallSetupMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallSetupUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallMarkMaxUs = qMax(m_paintMetricWaterfallMarkMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallMarkUs, std::numeric_limits<int>::max())));
+    m_paintMetricWaterfallLogMaxUs = qMax(m_paintMetricWaterfallLogMaxUs, static_cast<int>(qMin<qint64>(safeWaterfallLogUs, std::numeric_limits<int>::max())));
+    switch (waterfallPath) {
+    case 1: ++m_paintMetricWaterfallPathDirectSamples; break;
+    case 2: ++m_paintMetricWaterfallPathShaderSamples; break;
+    case 3: ++m_paintMetricWaterfallPathCpuSamples; break;
+    default: ++m_paintMetricWaterfallPathNoneSamples; break;
+    }
+    m_paintMetricTextureCreateCount += qMax(0, textureCreateCount);
+    m_paintMetricTextureUploadRows += qMax(0, textureUploadRows);
+    m_paintMetricTextureFullUploads += qMax(0, textureFullUploads);
+    m_paintMetricGpuDirectReady = gpuDirectReady;
+    m_paintMetricPendingRows = pendingRows;
 
     qint64 const nowMs = monotonicMs();
     if (m_paintMetricLastLogMs == 0)
         m_paintMetricLastLogMs = nowMs;
-    if (nowMs - m_paintMetricLastLogMs < 10000 || m_paintMetricSamples <= 0)
+    if (nowMs - m_paintMetricLastLogMs < kPanMetricLogIntervalMs || m_paintMetricSamples <= 0)
         return;
 
     qInfo().noquote()
@@ -1392,12 +1506,77 @@ void PanadapterItem::recordPaintMetric(qint64 elapsedUs)
         << "avg_us=" << (m_paintMetricAccumUs / m_paintMetricSamples)
         << "max_us=" << m_paintMetricMaxUs
         << "samples=" << m_paintMetricSamples
-        << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
+        << "lock_wait_avg_us=" << (m_paintMetricLockWaitAccumUs / m_paintMetricSamples)
+        << "lock_wait_max_us=" << m_paintMetricLockWaitMaxUs
+        << "geometry_avg_us=" << (m_paintMetricGeometryAccumUs / m_paintMetricSamples)
+        << "geometry_max_us=" << m_paintMetricGeometryMaxUs
+        << "drain_avg_us=" << (m_paintMetricDrainAccumUs / m_paintMetricSamples)
+        << "drain_max_us=" << m_paintMetricDrainMaxUs
+        << "overlay_avg_us=" << (m_paintMetricOverlayAccumUs / m_paintMetricSamples)
+        << "overlay_max_us=" << m_paintMetricOverlayMaxUs
+        << "nodes_avg_us=" << (m_paintMetricNodesAccumUs / m_paintMetricSamples)
+        << "nodes_max_us=" << m_paintMetricNodesMaxUs
+        << "spectrum_node_avg_us=" << (m_paintMetricSpectrumNodeAccumUs / m_paintMetricSamples)
+        << "spectrum_node_max_us=" << m_paintMetricSpectrumNodeMaxUs
+        << "waterfall_node_avg_us=" << (m_paintMetricWaterfallNodeAccumUs / m_paintMetricSamples)
+        << "waterfall_node_max_us=" << m_paintMetricWaterfallNodeMaxUs
+        << "waterfall_texture_avg_us=" << (m_paintMetricWaterfallTextureAccumUs / m_paintMetricSamples)
+        << "waterfall_texture_max_us=" << m_paintMetricWaterfallTextureMaxUs
+        << "waterfall_display_avg_us=" << (m_paintMetricWaterfallDisplayAccumUs / m_paintMetricSamples)
+        << "waterfall_display_max_us=" << m_paintMetricWaterfallDisplayMaxUs
+        << "waterfall_setup_avg_us=" << (m_paintMetricWaterfallSetupAccumUs / m_paintMetricSamples)
+        << "waterfall_setup_max_us=" << m_paintMetricWaterfallSetupMaxUs
+        << "waterfall_mark_avg_us=" << (m_paintMetricWaterfallMarkAccumUs / m_paintMetricSamples)
+        << "waterfall_mark_max_us=" << m_paintMetricWaterfallMarkMaxUs
+        << "waterfall_log_avg_us=" << (m_paintMetricWaterfallLogAccumUs / m_paintMetricSamples)
+        << "waterfall_log_max_us=" << m_paintMetricWaterfallLogMaxUs
+        << "waterfall_paths_none_direct_shader_cpu="
+        << QStringLiteral("%1/%2/%3/%4")
+            .arg(m_paintMetricWaterfallPathNoneSamples)
+            .arg(m_paintMetricWaterfallPathDirectSamples)
+            .arg(m_paintMetricWaterfallPathShaderSamples)
+            .arg(m_paintMetricWaterfallPathCpuSamples)
+        << "texture_creates=" << m_paintMetricTextureCreateCount
+        << "texture_upload_rows=" << m_paintMetricTextureUploadRows
+        << "texture_full_uploads=" << m_paintMetricTextureFullUploads
+        << "gpu_direct=" << (m_paintMetricGpuDirectReady ? 1 : 0)
+        << "pending_rows=" << m_paintMetricPendingRows
         << "waterfall_rows=" << m_renderWaterfallHistoryRows;
     m_paintMetricLastLogMs = nowMs;
     m_paintMetricAccumUs = 0;
+    m_paintMetricLockWaitAccumUs = 0;
+    m_paintMetricGeometryAccumUs = 0;
+    m_paintMetricDrainAccumUs = 0;
+    m_paintMetricOverlayAccumUs = 0;
+    m_paintMetricNodesAccumUs = 0;
+    m_paintMetricSpectrumNodeAccumUs = 0;
+    m_paintMetricWaterfallNodeAccumUs = 0;
+    m_paintMetricWaterfallTextureAccumUs = 0;
+    m_paintMetricWaterfallDisplayAccumUs = 0;
+    m_paintMetricWaterfallSetupAccumUs = 0;
+    m_paintMetricWaterfallMarkAccumUs = 0;
+    m_paintMetricWaterfallLogAccumUs = 0;
     m_paintMetricSamples = 0;
     m_paintMetricMaxUs = 0;
+    m_paintMetricLockWaitMaxUs = 0;
+    m_paintMetricGeometryMaxUs = 0;
+    m_paintMetricDrainMaxUs = 0;
+    m_paintMetricOverlayMaxUs = 0;
+    m_paintMetricNodesMaxUs = 0;
+    m_paintMetricSpectrumNodeMaxUs = 0;
+    m_paintMetricWaterfallNodeMaxUs = 0;
+    m_paintMetricWaterfallTextureMaxUs = 0;
+    m_paintMetricWaterfallDisplayMaxUs = 0;
+    m_paintMetricWaterfallSetupMaxUs = 0;
+    m_paintMetricWaterfallMarkMaxUs = 0;
+    m_paintMetricWaterfallLogMaxUs = 0;
+    m_paintMetricWaterfallPathNoneSamples = 0;
+    m_paintMetricWaterfallPathDirectSamples = 0;
+    m_paintMetricWaterfallPathShaderSamples = 0;
+    m_paintMetricWaterfallPathCpuSamples = 0;
+    m_paintMetricTextureCreateCount = 0;
+    m_paintMetricTextureUploadRows = 0;
+    m_paintMetricTextureFullUploads = 0;
 }
 
 void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
@@ -1442,7 +1621,13 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
         m_qsgPhaseRenderAccumUs += renderUs;
         m_qsgPhasePresentAccumUs += presentUs;
         m_qsgPhaseIdleMaxUs = qMax(m_qsgPhaseIdleMaxUs, static_cast<int>(qMin<qint64>(idleUs, std::numeric_limits<int>::max())));
-        m_qsgPhaseSyncMaxUs = qMax(m_qsgPhaseSyncMaxUs, static_cast<int>(qMin<qint64>(syncUs, std::numeric_limits<int>::max())));
+        if (syncUs > m_qsgPhaseSyncMaxUs) {
+            m_qsgPhaseSyncMaxUs = static_cast<int>(qMin<qint64>(syncUs, std::numeric_limits<int>::max()));
+            m_qsgPhaseSyncMaxDecodeReadyStartAgoMs = DecodiumBridge::msSinceLastDecodeReadySlotStart();
+            m_qsgPhaseSyncMaxDecodeReadyEndAgoMs = DecodiumBridge::msSinceLastDecodeReadySlotEnd();
+            m_qsgPhaseSyncMaxDecodeModelEmitStartAgoMs = DecodiumBridge::msSinceLastDecodeModelEmitStart();
+            m_qsgPhaseSyncMaxDecodeModelEmitEndAgoMs = DecodiumBridge::msSinceLastDecodeModelEmitEnd();
+        }
         m_qsgPhaseRenderMaxUs = qMax(m_qsgPhaseRenderMaxUs, static_cast<int>(qMin<qint64>(renderUs, std::numeric_limits<int>::max())));
         m_qsgPhasePresentMaxUs = qMax(m_qsgPhasePresentMaxUs, static_cast<int>(qMin<qint64>(presentUs, std::numeric_limits<int>::max())));
     }
@@ -1450,60 +1635,31 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
     qint64 const nowMs = monotonicMs();
     if (frameUs >= kSpikeThresholdUs) {
         ++m_qsgFrameSpikeCount;
-        DecodiumBridge* bridge = diagnosticBridge();
-        qint64 const paintAvgUs = m_paintMetricSamples > 0 ? (m_paintMetricAccumUs / m_paintMetricSamples) : 0;
-        qint64 const overlayAvgUs = m_overlayMetricSamples > 0 ? (m_overlayMetricAccumUs / m_overlayMetricSamples) : 0;
-        qInfo().noquote()
-            << "[PANMETRIC] qsg_frame_spike"
-            << "frame_ms=" << QString::number(static_cast<double>(frameUs) / 1000.0, 'f', 2)
-            << "threshold_ms=" << QString::number(static_cast<double>(kSpikeThresholdUs) / 1000.0, 'f', 0)
-            << "spikes=" << m_qsgFrameSpikeCount
-            << "window_samples=" << m_qsgFrameMetricSamples
-            << "window_max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
-            << "phase_idle_ms=" << metricMs(idleUs)
-            << "phase_sync_ms=" << metricMs(syncUs)
-            << "phase_render_ms=" << metricMs(renderUs)
-            << "phase_present_ms=" << metricMs(presentUs)
-            << "phase_counts="
-            << QStringLiteral("%1/%2/%3/%4").arg(beforeSyncDelta).arg(beforeRenderDelta).arg(afterRenderDelta).arg(swapDelta)
-            << "paint_last_us=" << m_paintMetricLastUs
-            << "paint_avg_us=" << paintAvgUs
-            << "paint_max_us=" << m_paintMetricMaxUs
-            << "paint_samples=" << m_paintMetricSamples
-            << "overlay_last_us=" << m_overlayMetricLastUs
-            << "overlay_avg_us=" << overlayAvgUs
-            << "overlay_max_us=" << m_overlayMetricMaxUs
-            << "overlay_samples=" << m_overlayMetricSamples
-            << "decode_labels=" << m_overlayMetricDecodeLabels
-            << "cluster_labels=" << m_overlayMetricClusterLabels
-            << "overlay_size=" << QStringLiteral("%1x%2").arg(m_overlayMetricSize.width()).arg(m_overlayMetricSize.height())
-            << "running=" << (m_running ? 1 : 0)
-            << "throttle=" << (m_throttleActive ? 1 : 0)
-            << "throttle_ms=" << m_throttleIntervalMs
-            << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
-            << "waterfall_rows=" << m_renderWaterfallHistoryRows
-            << "pending_rows=" << m_pendingWaterfallRows.size()
-            << "spectrum_dirty=" << (m_spectrumDirty ? 1 : 0)
-            << "overlay_dirty=" << (m_spectrumOverlayDirty ? 1 : 0)
-            << "geometry_dirty=" << (m_geometryDirty ? 1 : 0)
-            << "item_size=" << QStringLiteral("%1x%2").arg(qRound(width())).arg(qRound(height()))
-            << "bridge_monitoring=" << (bridge && bridge->monitoring() ? 1 : 0)
-            << "bridge_tx=" << (bridge && bridge->transmitting() ? 1 : 0)
-            << "bridge_tune=" << (bridge && bridge->tuning() ? 1 : 0)
-            << "bridge_spectrum_visible=" << (bridge && bridge->spectrumVisible() ? 1 : 0)
-            << "bridge_fps_cap=" << (bridge ? bridge->spectrumFpsCap() : -1);
+        ++m_qsgFrameMetricSpikeSamples;
+        m_qsgFrameMetricSpikeMaxUs = qMax(
+            m_qsgFrameMetricSpikeMaxUs,
+            static_cast<int>(qMin<qint64>(frameUs, std::numeric_limits<int>::max())));
     }
 
     if (m_qsgFrameMetricLastLogMs == 0)
         m_qsgFrameMetricLastLogMs = nowMs;
-    if (nowMs - m_qsgFrameMetricLastLogMs < 10000 || m_qsgFrameMetricSamples <= 0)
+    if (nowMs - m_qsgFrameMetricLastLogMs < kPanMetricLogIntervalMs || m_qsgFrameMetricSamples <= 0)
         return;
 
     qInfo().noquote()
         << "[PANMETRIC] qsg_frame"
         << "avg_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricAccumUs) / m_qsgFrameMetricSamples / 1000.0, 'f', 2)
         << "max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricMaxUs) / 1000.0, 'f', 2)
-        << "samples=" << m_qsgFrameMetricSamples;
+        << "samples=" << m_qsgFrameMetricSamples
+        << "spikes=" << m_qsgFrameMetricSpikeSamples
+        << "spike_max_ms=" << QString::number(static_cast<double>(m_qsgFrameMetricSpikeMaxUs) / 1000.0, 'f', 2)
+        << "spikes_total=" << m_qsgFrameSpikeCount
+        << "phase_counts_last="
+        << QStringLiteral("%1/%2/%3/%4").arg(beforeSyncDelta).arg(beforeRenderDelta).arg(afterRenderDelta).arg(swapDelta)
+        << "gpu_direct=" << (m_gpuDirectTextureReady ? 1 : 0)
+        << "running=" << (m_running ? 1 : 0)
+        << "pending_rows=" << m_pendingWaterfallRows.size()
+        << "item_size=" << QStringLiteral("%1x%2").arg(qRound(width())).arg(qRound(height()));
     if (m_qsgPhaseSamples > 0) {
         qInfo().noquote()
             << "[PANMETRIC] qsg_phase"
@@ -1515,12 +1671,18 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
             << "render_avg_ms=" << metricMs(m_qsgPhaseRenderAccumUs / m_qsgPhaseSamples)
             << "render_max_ms=" << metricMs(m_qsgPhaseRenderMaxUs)
             << "present_avg_ms=" << metricMs(m_qsgPhasePresentAccumUs / m_qsgPhaseSamples)
-            << "present_max_ms=" << metricMs(m_qsgPhasePresentMaxUs);
+            << "present_max_ms=" << metricMs(m_qsgPhasePresentMaxUs)
+            << "syncmax_decode_ready_start_ago_ms=" << m_qsgPhaseSyncMaxDecodeReadyStartAgoMs
+            << "syncmax_decode_ready_end_ago_ms=" << m_qsgPhaseSyncMaxDecodeReadyEndAgoMs
+            << "syncmax_model_emit_start_ago_ms=" << m_qsgPhaseSyncMaxDecodeModelEmitStartAgoMs
+            << "syncmax_model_emit_end_ago_ms=" << m_qsgPhaseSyncMaxDecodeModelEmitEndAgoMs;
     }
     m_qsgFrameMetricLastLogMs = nowMs;
     m_qsgFrameMetricAccumUs = 0;
     m_qsgFrameMetricSamples = 0;
     m_qsgFrameMetricMaxUs = 0;
+    m_qsgFrameMetricSpikeSamples = 0;
+    m_qsgFrameMetricSpikeMaxUs = 0;
     m_qsgPhaseIdleAccumUs = 0;
     m_qsgPhaseSyncAccumUs = 0;
     m_qsgPhaseRenderAccumUs = 0;
@@ -1530,6 +1692,10 @@ void PanadapterItem::recordQsgFrameMetric(qint64 frameUs, qint64 swapUs)
     m_qsgPhaseSyncMaxUs = 0;
     m_qsgPhaseRenderMaxUs = 0;
     m_qsgPhasePresentMaxUs = 0;
+    m_qsgPhaseSyncMaxDecodeReadyStartAgoMs = -1;
+    m_qsgPhaseSyncMaxDecodeReadyEndAgoMs = -1;
+    m_qsgPhaseSyncMaxDecodeModelEmitStartAgoMs = -1;
+    m_qsgPhaseSyncMaxDecodeModelEmitEndAgoMs = -1;
 }
 
 bool PanadapterItem::shaderWaterfallSupported()
@@ -1720,7 +1886,7 @@ void PanadapterItem::setPaletteIndex(int v)
     m_waterfallGpuUploadedWriteRow = 0;
     m_waterfallGpuUploadedSize = QSize();
     emit paletteIndexChanged();
-    markDirty();
+    markAllDirty();
 }
 
 // ─── Frequency ↔ Pixel ───────────────────────────────────────────────────────
@@ -2696,8 +2862,8 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
 
     if (m_spectrumOverlayImage.size() != textureSize
-        || m_spectrumOverlayImage.format() != QImage::Format_ARGB32_Premultiplied) {
-        m_spectrumOverlayImage = QImage(textureSize, QImage::Format_ARGB32_Premultiplied);
+        || m_spectrumOverlayImage.format() != QImage::Format_RGBA8888_Premultiplied) {
+        m_spectrumOverlayImage = QImage(textureSize, QImage::Format_RGBA8888_Premultiplied);
     }
     m_spectrumOverlayImage.fill(Qt::transparent);
     m_decodeHitRects.clear();
@@ -2990,6 +3156,24 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
                                                bool gpuDirectReady,
                                                bool gpuSpectrumGraph)
 {
+    qint64 const overlayNodeStartUs = monotonicUs();
+    qint64 overlayRebuildUs = 0;
+    qint64 overlayTextureUs = 0;
+    qint64 overlayNodeUs = 0;
+    bool overlayNeedsUpload = false;
+    ScopeExit overlayNodeMetric([this,
+                                 overlayNodeStartUs,
+                                 &overlayRebuildUs,
+                                 &overlayTextureUs,
+                                 &overlayNodeUs,
+                                 &overlayNeedsUpload]() {
+        recordOverlayNodeMetric(monotonicUs() - overlayNodeStartUs,
+                                overlayRebuildUs,
+                                overlayTextureUs,
+                                overlayNodeUs,
+                                overlayNeedsUpload);
+    });
+
     if (!spectrumRoot)
         return;
 
@@ -3020,22 +3204,30 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     qreal const dpr = panadapterOverlayDevicePixelRatio(window());
     QSize const textureSize = panadapterOverlayTextureSize(w, h, dpr);
     bool const textureSizeChanged = m_spectrumOverlayImage.size() != textureSize;
-    bool const rangeChanged = std::abs(displayMinDb - m_spectrumOverlayDisplayMinDb) > 0.75f
-        || std::abs(displayMaxDb - m_spectrumOverlayDisplayMaxDb) > 0.75f;
-    bool const rangeRefreshDue = monotonicMs() - m_lastSpectrumOverlayRebuildMs >= 250;
-    if (sizeChanged || textureSizeChanged || (rangeChanged && rangeRefreshDue)) {
+    float const rangeThresholdDb = gpuDirectReady ? 8.0f : 2.0f;
+    bool const rangeChanged = std::abs(displayMinDb - m_spectrumOverlayDisplayMinDb) > rangeThresholdDb
+        || std::abs(displayMaxDb - m_spectrumOverlayDisplayMaxDb) > rangeThresholdDb;
+    qint64 const rangeRefreshMs = gpuDirectReady ? 10000 : 5000;
+    bool const rangeRefreshDue = monotonicMs() - m_lastSpectrumOverlayRebuildMs >= rangeRefreshMs;
+    bool const autoRangeOverlayRefresh = !gpuDirectReady && rangeChanged && rangeRefreshDue;
+    if (sizeChanged || textureSizeChanged || autoRangeOverlayRefresh) {
         m_spectrumOverlayDirty = true;
     }
 
     bool const needsUpload = m_spectrumOverlayDirty || textureSizeChanged;
-    if (needsUpload)
+    overlayNeedsUpload = needsUpload;
+    if (needsUpload) {
+        qint64 const rebuildStartUs = monotonicUs();
         rebuildSpectrumOverlayImage(w, h, gpuDirectReady);
+        overlayRebuildUs += monotonicUs() - rebuildStartUs;
+    }
     if (m_spectrumOverlayImage.isNull()) {
         removeOverlayNode();
         return;
     }
 
     auto* overlay = findOverlayNode();
+    qint64 const nodeStartUs = monotonicUs();
     if (!overlay) {
         overlay = new PanadapterSpectrumOverlayNode();
         overlay->setOwnsTexture(true);
@@ -3044,8 +3236,10 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
         spectrumRoot->removeChildNode(overlay);
         spectrumRoot->appendChildNode(overlay);
     }
+    overlayNodeUs += monotonicUs() - nodeStartUs;
 
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    qint64 const textureStartUs = monotonicUs();
     auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(overlay->texture());
     bool uploadTexture = needsUpload;
     if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
@@ -3058,7 +3252,9 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
     if (uploadTexture)
         tex->uploadFullImage(m_spectrumOverlayImage, true);
     overlay->setFiltering(QSGTexture::Nearest);
+    overlayTextureUs += monotonicUs() - textureStartUs;
 #else
+    qint64 const textureStartUs = monotonicUs();
     if (needsUpload || !overlay->texture()) {
         auto* tex = window()->createTextureFromImage(
             m_spectrumOverlayImage,
@@ -3068,9 +3264,20 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
             overlay->setTexture(tex);
         }
     }
+    overlayTextureUs += monotonicUs() - textureStartUs;
 #endif
-    overlay->setRect(QRectF(0, 0, w, h));
-    overlay->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+    qint64 const nodeFinishStartUs = monotonicUs();
+    QRectF const overlayRect(0, 0, w, h);
+    bool const rectChanged = overlay->rect() != overlayRect;
+    if (rectChanged)
+        overlay->setRect(overlayRect);
+    if (rectChanged && uploadTexture)
+        overlay->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+    else if (rectChanged)
+        overlay->markDirty(QSGNode::DirtyGeometry);
+    else if (uploadTexture)
+        overlay->markDirty(QSGNode::DirtyMaterial);
+    overlayNodeUs += monotonicUs() - nodeFinishStartUs;
 
     if (!m_loggedSpectrumCppOverlay) {
         m_loggedSpectrumCppOverlay = true;
@@ -3206,12 +3413,12 @@ void PanadapterItem::setDecodeLabels(const QVariantList& labels)
     if (m_decodeLabels == labels)
         return;
     m_decodeLabels = labels;
-    markDirty();
+    markOverlayDirty();
     qint64 const elapsedUs = monotonicUs() - startUs;
     qint64 const nowMs = monotonicMs();
     if (m_decodeLabelMetricLastLogMs == 0)
         m_decodeLabelMetricLastLogMs = nowMs;
-    if (nowMs - m_decodeLabelMetricLastLogMs >= 10000) {
+    if (nowMs - m_decodeLabelMetricLastLogMs >= kPanMetricLogIntervalMs) {
         m_decodeLabelMetricLastLogMs = nowMs;
         qInfo().noquote()
             << "[PANMETRIC] decode_labels"
@@ -3225,7 +3432,7 @@ void PanadapterItem::setDxClusterSpots(const QVariantList& spots)
     if (m_dxClusterSpots == spots)
         return;
     m_dxClusterSpots = spots;
-    markDirty();
+    markOverlayDirty();
 }
 
 // ─── Add waterfall row ────────────────────────────────────────────────────────
@@ -4442,15 +4649,74 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     int h = (int)height();
     if (w <= 0 || h <= 0) { delete oldNode; return nullptr; }
 
+    qint64 const lockRequestUs = monotonicUs();
     QMutexLocker lock(&m_mutex);
     qint64 const paintStartUs = monotonicUs();
-    ScopeExit paintMetric([this, paintStartUs]() {
-        recordPaintMetric(monotonicUs() - paintStartUs);
+    qint64 paintGeometryUs = 0;
+    qint64 paintDrainUs = 0;
+    qint64 paintOverlayUs = 0;
+    qint64 paintNodesStartUs = 0;
+    qint64 paintSpectrumNodeUs = 0;
+    qint64 paintWaterfallNodeUs = 0;
+    qint64 paintWaterfallTextureUs = 0;
+    qint64 paintWaterfallDisplayUs = 0;
+    qint64 paintWaterfallSetupUs = 0;
+    qint64 paintWaterfallMarkUs = 0;
+    qint64 paintWaterfallLogUs = 0;
+    int paintWaterfallPath = 0;
+    int paintTextureCreateCount = 0;
+    int paintTextureUploadRows = 0;
+    int paintTextureFullUploads = 0;
+    bool paintGpuDirectReady = false;
+    int paintPendingRows = 0;
+    ScopeExit paintMetric([this,
+                           lockRequestUs,
+                           paintStartUs,
+                           &paintGeometryUs,
+                           &paintDrainUs,
+                           &paintOverlayUs,
+                           &paintNodesStartUs,
+                           &paintSpectrumNodeUs,
+                           &paintWaterfallNodeUs,
+                           &paintWaterfallTextureUs,
+                           &paintWaterfallDisplayUs,
+                           &paintWaterfallSetupUs,
+                           &paintWaterfallMarkUs,
+                           &paintWaterfallLogUs,
+                           &paintWaterfallPath,
+                           &paintTextureCreateCount,
+                           &paintTextureUploadRows,
+                           &paintTextureFullUploads,
+                           &paintGpuDirectReady,
+                           &paintPendingRows]() {
+        qint64 const nowUs = monotonicUs();
+        qint64 const nodesUs = paintNodesStartUs > 0 ? nowUs - paintNodesStartUs : 0;
+        recordPaintMetric(nowUs - paintStartUs,
+                          paintStartUs - lockRequestUs,
+                          paintGeometryUs,
+                          paintDrainUs,
+                          paintOverlayUs,
+                          nodesUs,
+                          paintSpectrumNodeUs,
+                          paintWaterfallNodeUs,
+                          paintWaterfallTextureUs,
+                          paintWaterfallDisplayUs,
+                          paintWaterfallSetupUs,
+                          paintWaterfallMarkUs,
+                          paintWaterfallLogUs,
+                          paintWaterfallPath,
+                          paintTextureCreateCount,
+                          paintTextureUploadRows,
+                          paintTextureFullUploads,
+                          paintGpuDirectReady,
+                          paintPendingRows);
     });
 
 
     if (m_geometryDirty) {
+        qint64 const geometryStartUs = monotonicUs();
         rebuildImages(w, h);
+        paintGeometryUs += monotonicUs() - geometryStartUs;
         m_geometryDirty = false;
     }
     int const specH = !m_renderSpectrumSize.isEmpty()
@@ -4472,8 +4738,11 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 #else
         false;
 #endif
+    paintGpuDirectReady = gpuDirectReady;
+    paintPendingRows = m_pendingWaterfallRows.size();
     m_useShaderWaterfall = shaderSupported && (m_wfWriteRow > 0 || gpuDirectReady);
     if (!gpuDirectReady && m_spectrumDirty && !m_bins.isEmpty()) {
+        qint64 const drainStartUs = monotonicUs();
         // Drain UNA riga alla volta per paint = scroll fluido, niente "jump"
         // di N righe quando il backlog cresce. Se restano altre righe in coda
         // (m_pendingWaterfallRows), richiediamo un altro update() così il
@@ -4501,8 +4770,12 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         // prossimo paint le draina anche senza altre addSpectrumData.
         if (m_pendingWaterfallRows.isEmpty())
             m_spectrumDirty = false;
+        paintDrainUs += monotonicUs() - drainStartUs;
+        paintPendingRows = m_pendingWaterfallRows.size();
     }
     m_useShaderWaterfall = shaderSupported && (m_wfWriteRow > 0 || gpuDirectReady);
+    paintNodesStartUs = monotonicUs();
+    qint64 const spectrumNodeStartUs = monotonicUs();
 
     // ── Crea/aggiorna due zone: spectrum root + waterfall node ─────────────
     // Node structure: root → spectrumRoot(background/legacy texture + GPU graph), waterfall node
@@ -4668,9 +4941,19 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         }
     }
 
-    updateSpectrumOverlayNode(spectrumRoot, w, specH, gpuDirectReady, gpuSpectrumGraph);
+    paintSpectrumNodeUs += monotonicUs() - spectrumNodeStartUs;
+
+    {
+        qint64 const overlayStartUs = monotonicUs();
+        updateSpectrumOverlayNode(spectrumRoot, w, specH, gpuDirectReady, gpuSpectrumGraph);
+        paintOverlayUs += monotonicUs() - overlayStartUs;
+    }
 
     // Waterfall node (bottom) — ring buffer: due draw calls per wrap-around
+    qint64 const waterfallNodeStartUs = monotonicUs();
+    ScopeExit waterfallMetric([&paintWaterfallNodeUs, waterfallNodeStartUs]() {
+        paintWaterfallNodeUs += monotonicUs() - waterfallNodeStartUs;
+    });
     int wfH = !m_renderWaterfallSize.isEmpty() ? m_renderWaterfallSize.height() : h - specH;
     int wfW = !m_renderWaterfallSize.isEmpty() ? m_renderWaterfallSize.width() : w;
     int rows = m_renderWaterfallHistoryRows;
@@ -4694,6 +4977,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 || !m_waterfallIntensityImage.isNull())) {
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
             if (!m_shaderWaterfallBlocked) {
+                qint64 const waterfallSetupStartUs = monotonicUs();
                 if (auto* oldSimple = dynamic_cast<QSGSimpleTextureNode*>(waterfallChild)) {
                     root->removeChildNode(oldSimple);
                     delete oldSimple;
@@ -4750,8 +5034,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 material->xParams[1] = (viewStart - m_dataFreqMin) / dataRange;
                 material->xParams[2] = 0.0f;
                 material->xParams[3] = 1.0f;
+                paintWaterfallSetupUs += monotonicUs() - waterfallSetupStartUs;
 
                 if (material->paletteGeneration != m_paletteGeneration || !material->paletteTexture) {
+                    qint64 const textureStartUs = monotonicUs();
                     QImage paletteImage(256, 1, QImage::Format_RGBA8888);
                     uchar* dst = paletteImage.scanLine(0);
                     for (int x = 0; x < 256; ++x) {
@@ -4768,6 +5054,9 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     paletteTexture->uploadFullRgbaImage(paletteImage, false);
                     material->paletteTexture = paletteTexture;
                     material->paletteGeneration = m_paletteGeneration;
+                    paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+                    ++paintTextureCreateCount;
+                    ++paintTextureFullUploads;
                 }
 
                 if (auto* paletteTexture = dynamic_cast<DecodiumRhiImageTexture*>(material->paletteTexture);
@@ -4777,18 +5066,21 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 }
 
                 if (gpuDirectReady) {
-                    auto replaceExternalTexture = [](QSGTexture*& slot,
-                                                     QRhiTexture* texture,
-                                                     QSize const& size,
-                                                     QSGTexture::Filtering filtering) {
+                    paintWaterfallPath = 1;
+                    auto replaceExternalTexture = [&paintTextureCreateCount](QSGTexture*& slot,
+                                                                             QRhiTexture* texture,
+                                                                             QSize const& size,
+                                                                             QSGTexture::Filtering filtering) {
                         auto* ext = dynamic_cast<DecodiumExternalRhiTexture*>(slot);
                         if (!ext || ext->rhiTexture() != texture || ext->textureSize() != size) {
                             delete slot;
                             slot = new DecodiumExternalRhiTexture(texture, size, false);
+                            ++paintTextureCreateCount;
                         }
                         slot->setFiltering(filtering);
                     };
 
+                    qint64 const textureStartUs = monotonicUs();
                     replaceExternalTexture(material->intensityTexture,
                                            m_gpuFft->directWaterfallTexture,
                                            m_gpuFft->directWaterfallSize,
@@ -4797,12 +5089,16 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                                            m_gpuFft->directRowParamsTexture,
                                            m_gpuFft->directRowParamsSize,
                                            QSGTexture::Nearest);
+                    paintWaterfallTextureUs += monotonicUs() - textureStartUs;
 
                     if (!m_shaderWaterfallBlocked
                         && material->intensityTexture
                         && material->paletteTexture
                         && material->rowParamsTexture) {
+                        qint64 const markStartUs = monotonicUs();
                         wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+                        paintWaterfallMarkUs += monotonicUs() - markStartUs;
+                        qint64 const logStartUs = monotonicUs();
                         if (!m_loggedGpuWaterfallDetached) {
                             m_loggedGpuWaterfallDetached = true;
                             qInfo().noquote()
@@ -4813,27 +5109,12 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                                 << "rows=" << rows
                                 << "qimage_dependency=0";
                         }
-                        bool const shouldLogStats = m_wfWriteRow > 0
-                            && (!m_loggedWaterfallGpuUploadStats
-                                || (m_lastWaterfallGpuStatsRow >= 0
-                                    && m_wfWriteRow - m_lastWaterfallGpuStatsRow >= rows));
-                        if (shouldLogStats) {
+                        if (!m_loggedWaterfallGpuUploadStats && m_wfWriteRow > 0) {
                             m_loggedWaterfallGpuUploadStats = true;
                             m_lastWaterfallGpuStatsRow = m_wfWriteRow;
-                            qInfo().noquote()
-                                << "[GPUDBG] Panadapter waterfall GPU direct texture"
-                                << "texture=RHI_R32F"
-                                << "update=compute_shader"
-                                << "level=raw_db_gpu_fft_gpu_norm_freqmap_black_gain_gamma"
-                                << "intensity=" << QStringLiteral("%1x%2")
-                                    .arg(m_gpuFft->directWaterfallSize.width())
-                                    .arg(m_gpuFft->directWaterfallSize.height())
-                                << "row_params=2x" << m_gpuFft->directRowParamsSize.height()
-                                << "palette=256x1"
-                                << "rows_written=" << m_wfWriteRow
-                                << "readback=off";
                         }
                         logWaterfallRenderPath(true, "shader samples GPU-direct FFT ring texture; no CPU row upload/readback");
+                        paintWaterfallLogUs += monotonicUs() - logStartUs;
                         return root;
                     }
                 }
@@ -4841,6 +5122,8 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 RawDbUploadStats uploadStats;
                 bool uploadedFullTexture = false;
                 bool uploadedTextureData = false;
+                if (!gpuDirectReady)
+                    paintWaterfallPath = 2;
                 auto* intensityTexture = dynamic_cast<DecodiumRhiFloatTexture*>(material->intensityTexture);
                 auto* rowParamsTexture = dynamic_cast<DecodiumRhiFloatTexture*>(material->rowParamsTexture);
                 QSize const intensitySize(m_waterfallRawBinsWidth, rows);
@@ -4856,6 +5139,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     || m_waterfallGpuUploadedWriteRow > m_wfWriteRow;
 
                 if (needsFullUpload) {
+                    qint64 const textureStartUs = monotonicUs();
                     material->retireTexture(material->intensityTexture);
                     material->retireTexture(material->rowParamsTexture);
                     intensityTexture = new DecodiumRhiFloatTexture();
@@ -4871,16 +5155,25 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     uploadStats = rawDbImageStats(m_waterfallDbRows, intensityW, rows);
                     uploadedFullTexture = true;
                     uploadedTextureData = true;
+                    paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+                    paintTextureCreateCount += 2;
+                    paintTextureUploadRows += rows;
+                    paintTextureFullUploads += 2;
                 } else {
                     int rowsToUpload = m_wfWriteRow - m_waterfallGpuUploadedWriteRow;
                     if (rowsToUpload >= rows) {
+                        qint64 const textureStartUs = monotonicUs();
                         intensityTexture->uploadFullFloats(intensitySize, m_waterfallDbRows.constData());
                         rowParamsTexture->uploadFullFloats(rowParamsSize, m_waterfallDbRowParams.constData());
                         m_waterfallGpuUploadedWriteRow = m_wfWriteRow;
                         uploadStats = rawDbImageStats(m_waterfallDbRows, intensityW, rows);
                         uploadedFullTexture = true;
                         uploadedTextureData = true;
+                        paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+                        paintTextureUploadRows += rows;
+                        paintTextureFullUploads += 2;
                     } else if (rowsToUpload > 0) {
+                        qint64 const textureStartUs = monotonicUs();
                         for (int i = 0; i < rowsToUpload; ++i) {
                             int const row = (m_waterfallGpuUploadedWriteRow + i) % rows;
                             float const* rawSrc = m_waterfallDbRows.constData() + row * intensityW;
@@ -4890,6 +5183,8 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                         }
                         m_waterfallGpuUploadedWriteRow += rowsToUpload;
                         uploadedTextureData = true;
+                        paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+                        paintTextureUploadRows += rowsToUpload;
                     }
                 }
 
@@ -4914,7 +5209,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 }
 
                 if (!m_shaderWaterfallBlocked && material->intensityTexture && material->paletteTexture && material->rowParamsTexture) {
+                    qint64 const markStartUs = monotonicUs();
                     wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+                    paintWaterfallMarkUs += monotonicUs() - markStartUs;
+                    qint64 const logStartUs = monotonicUs();
                     bool const shouldLogStats = uploadedTextureData
                         && m_wfWriteRow > 0
                         && (!m_loggedWaterfallGpuUploadStats
@@ -4938,10 +5236,12 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                             << "finite_samples=" << uploadStats.finiteSamples;
                     }
                     logWaterfallRenderPath(true, "shader persistent raw dB texture + row params + palette texture; dB normalization + frequency mapping + black/gain/gamma in shader");
+                    paintWaterfallLogUs += monotonicUs() - logStartUs;
                     return root;
                 }
             }
 	#else
+	            paintWaterfallPath = 2;
 	            int const intensityW = m_waterfallIntensityImage.width();
 	            if (m_waterfallIntensityTextureImage.isNull() ||
 	                m_waterfallIntensityTextureImage.width() != intensityW ||
@@ -4952,6 +5252,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 	                m_lastWaterfallGpuStatsRow = -1;
             }
 
+            qint64 const displayStartUs = monotonicUs();
             int maxUploadedLevel = 0;
             qsizetype nonZeroUploaded = 0;
             for (int y = 0; y < wfH; ++y) {
@@ -4967,6 +5268,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     }
                 }
             }
+            paintWaterfallDisplayUs += monotonicUs() - displayStartUs;
 
             if (m_wfWriteRow >= rows && nonZeroUploaded == 0) {
                 m_shaderWaterfallBlocked = true;
@@ -5052,6 +5354,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     }
                 }
 
+                qint64 const textureStartUs = monotonicUs();
                 auto* newIntensityTexture = window()->createTextureFromImage(
                     m_waterfallIntensityTextureImage,
                     QQuickWindow::CreateTextureOptions(QQuickWindow::TextureIsOpaque));
@@ -5062,11 +5365,18 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                     newIntensityTexture->setFiltering(QSGTexture::Nearest);
                     material->retireTexture(material->intensityTexture);
                     material->intensityTexture = newIntensityTexture;
+                    ++paintTextureCreateCount;
+                    ++paintTextureFullUploads;
                 }
+                paintWaterfallTextureUs += monotonicUs() - textureStartUs;
 
                 if (!m_shaderWaterfallBlocked && material->intensityTexture && material->paletteTexture) {
+                    qint64 const markStartUs = monotonicUs();
                     wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+                    paintWaterfallMarkUs += monotonicUs() - markStartUs;
+                    qint64 const logStartUs = monotonicUs();
                     logWaterfallRenderPath(true, "shader raw-bin intensity + palette textures; frequency mapping + black/gain/gamma in shader");
+                    paintWaterfallLogUs += monotonicUs() - logStartUs;
                     return root;
                 }
             }
@@ -5087,7 +5397,11 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 #else
         waterfallFallbackReason = QStringLiteral("qsb shaders not compiled");
 #endif
-        logWaterfallRenderPath(false, waterfallFallbackReason);
+        {
+            qint64 const logStartUs = monotonicUs();
+            logWaterfallRenderPath(false, waterfallFallbackReason);
+            paintWaterfallLogUs += monotonicUs() - logStartUs;
+        }
         if (m_waterfallImage.isNull()) {
 	            if (waterfallChild) {
 	                root->removeChildNode(waterfallChild);
@@ -5095,6 +5409,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 	            }
 	            return root;
 	        }
+        paintWaterfallPath = 3;
 
 	        if (auto* oldGeometry = dynamic_cast<QSGGeometryNode*>(waterfallChild)) {
 	            if (!dynamic_cast<QSGSimpleTextureNode*>(oldGeometry)) {
@@ -5104,9 +5419,13 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             }
         }
 
-        if (!m_waterfallRgbValid)
+        if (!m_waterfallRgbValid) {
+            qint64 const displayStartUs = monotonicUs();
             rebuildRgbWaterfallFromIntensity();
+            paintWaterfallDisplayUs += monotonicUs() - displayStartUs;
+        }
 
+        qint64 const displayStartUs = monotonicUs();
         if (m_waterfallDisplayImage.isNull() ||
             m_waterfallDisplayImage.width() != wfW ||
             m_waterfallDisplayImage.height() != wfH) {
@@ -5121,26 +5440,48 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             int srcRow = ((m_wfWriteRow - 1 - y) % rows + rows) % rows;
             memcpy(m_waterfallDisplayImage.scanLine(y), m_waterfallImage.scanLine(srcRow), wfW * 4);
         }
+        paintWaterfallDisplayUs += monotonicUs() - displayStartUs;
 
+        qint64 const setupStartUs = monotonicUs();
         QSGSimpleTextureNode* wn = dynamic_cast<QSGSimpleTextureNode*>(waterfallChild);
         if (!wn) { wn = new QSGSimpleTextureNode(); wn->setOwnsTexture(true); root->appendChildNode(wn); }
+        paintWaterfallSetupUs += monotonicUs() - setupStartUs;
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        qint64 const textureStartUs = monotonicUs();
+        bool createdTexture = false;
         auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(wn->texture());
         if (!tex || tex->textureSize() != m_waterfallDisplayImage.size()
             || tex->hasAlphaChannel() || tex->failed()) {
             tex = new DecodiumRhiImageTexture(false);
             tex->setFiltering(QSGTexture::Nearest);
             wn->setTexture(tex);
+            createdTexture = true;
         }
         tex->uploadFullImage(m_waterfallDisplayImage, false);
         wn->setFiltering(QSGTexture::Nearest);
+        paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+        if (createdTexture)
+            ++paintTextureCreateCount;
+        paintTextureUploadRows += wfH;
+        ++paintTextureFullUploads;
 #else
+        qint64 const textureStartUs = monotonicUs();
         auto* tex = window()->createTextureFromImage(m_waterfallDisplayImage, QQuickWindow::CreateTextureOptions(QQuickWindow::TextureIsOpaque));
         tex->setFiltering(QSGTexture::Nearest);
         wn->setTexture(tex);
+        paintWaterfallTextureUs += monotonicUs() - textureStartUs;
+        ++paintTextureCreateCount;
+        paintTextureUploadRows += wfH;
+        ++paintTextureFullUploads;
 #endif
+        {
+            qint64 const setupRectStartUs = monotonicUs();
 	        wn->setRect(QRectF(0, specH, w, wfH));
+            paintWaterfallSetupUs += monotonicUs() - setupRectStartUs;
+            qint64 const markStartUs = monotonicUs();
 	        wn->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+            paintWaterfallMarkUs += monotonicUs() - markStartUs;
+        }
 	    } else {
 	        QSGNode* waterfallChild = nullptr;
 	        if (root->childCount() > 1 && root->firstChild())

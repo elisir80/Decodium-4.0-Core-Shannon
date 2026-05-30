@@ -120,34 +120,34 @@ public:
     QColor dxClusterSpotColor() const { return m_dxClusterSpotColor; }
 
     // ── Setters ─────────────────────────────────────────────────────────────
-    void setMinDb(float v)         { if (m_minDb!=v){m_minDb=v;emit minDbChanged();markDirty();} }
-    void setMaxDb(float v)         { if (m_maxDb!=v){m_maxDb=v;emit maxDbChanged();markDirty();} }
-    void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();markDirty();} }
+    void setMinDb(float v)         { if (m_minDb!=v){m_minDb=v;emit minDbChanged();markAllDirty();} }
+    void setMaxDb(float v)         { if (m_maxDb!=v){m_maxDb=v;emit maxDbChanged();markAllDirty();} }
+    void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();markAllDirty();} }
     void setPeakHold(bool v)       { if (m_peakHold!=v){m_peakHold=v;if(!v)m_peakBins.clear();emit peakHoldChanged();} }
     void setPeakDecay(float v)     { if (m_peakDecay!=v){m_peakDecay=v;emit peakDecayChanged();} }
     void setAvgFrames(int v)       { if (m_avgFrames!=v){m_avgFrames=qBound(1,v,32);emit avgFramesChanged();} }
     void setSpectrumHeight(int v)  { if (m_spectrumH!=v){m_spectrumH=v;emit spectrumHeightChanged();markGeomDirty();} }
-    void setRxFreq(int v)          { if (m_rxFreq!=v){m_rxFreq=v;emit rxFreqChanged();markDirty();} }
-    void setTxFreq(int v)          { if (m_txFreq!=v){m_txFreq=v;emit txFreqChanged();markDirty();} }
-    void setStartFreq(int v)       { if (m_startFreq!=v){m_startFreq=v;emit startFreqChanged();markDirty();} }
-    void setBandwidth(int v)       { if (m_bandwidth!=v){m_bandwidth=v;emit bandwidthChanged();markDirty();} }
-    void setZoomFactor(float v)    { if (m_zoomFactor!=v){m_zoomFactor=qBound(1.0f,v,16.0f);emit zoomFactorChanged();markDirty();} }
-    void setPanHz(int v)           { if (m_panHz!=v){m_panHz=v;emit panHzChanged();markDirty();} }
+    void setRxFreq(int v)          { if (m_rxFreq!=v){m_rxFreq=v;emit rxFreqChanged();markAllDirty();} }
+    void setTxFreq(int v)          { if (m_txFreq!=v){m_txFreq=v;emit txFreqChanged();markAllDirty();} }
+    void setStartFreq(int v)       { if (m_startFreq!=v){m_startFreq=v;emit startFreqChanged();markAllDirty();} }
+    void setBandwidth(int v)       { if (m_bandwidth!=v){m_bandwidth=v;emit bandwidthChanged();markAllDirty();} }
+    void setZoomFactor(float v)    { if (m_zoomFactor!=v){m_zoomFactor=qBound(1.0f,v,16.0f);emit zoomFactorChanged();markAllDirty();} }
+    void setPanHz(int v)           { if (m_panHz!=v){m_panHz=v;emit panHzChanged();markAllDirty();} }
     void setPaletteIndex(int v);
     void setRunning(bool v)        { if (m_running!=v){m_running=v;emit runningChanged();} }
-    void setShowTxBrackets(bool v) { if (m_showTxBrackets!=v){m_showTxBrackets=v;emit showTxBracketsChanged();markDirty();} }
+    void setShowTxBrackets(bool v) { if (m_showTxBrackets!=v){m_showTxBrackets=v;emit showTxBracketsChanged();markAllDirty();} }
     void setColorGain(int v)       { v=qBound(0,v,100); if(m_colorGain!=v){m_colorGain=v;m_waterfallRgbValid=false;emit colorGainChanged();markDirty();} }
     void setBlackLevel(int v)      { v=qBound(0,v,100); if(m_blackLevel!=v){m_blackLevel=v;m_waterfallRgbValid=false;emit blackLevelChanged();markDirty();} }
     void setContrastLevel(int v)   { v=qBound(10,v,150); if(m_contrastLevel!=v){m_contrastLevel=v;m_waterfallRgbValid=false;emit contrastLevelChanged();markDirty();} }
-    void setLabelFontSize(int v)   { v=qBound(6,v,24); if(m_labelFontSize!=v){m_labelFontSize=v;emit labelFontSizeChanged();markDirty();} }
-    void setLabelSpacing(int v)    { v=qBound(0,v,20); if(m_labelSpacing!=v){m_labelSpacing=v;emit labelSpacingChanged();markDirty();} }
-    void setLabelBold(bool v)      { if(m_labelBold!=v){m_labelBold=v;emit labelBoldChanged();markDirty();} }
-    void setLabelColor(QColor v)   { if(m_labelColor!=v){m_labelColor=v;emit labelColorChanged();markDirty();} }
-    void setLabelUseCustomColor(bool v) { if(m_labelUseCustomColor!=v){m_labelUseCustomColor=v;emit labelUseCustomColorChanged();markDirty();} }
+    void setLabelFontSize(int v)   { v=qBound(6,v,24); if(m_labelFontSize!=v){m_labelFontSize=v;emit labelFontSizeChanged();markOverlayDirty();} }
+    void setLabelSpacing(int v)    { v=qBound(0,v,20); if(m_labelSpacing!=v){m_labelSpacing=v;emit labelSpacingChanged();markOverlayDirty();} }
+    void setLabelBold(bool v)      { if(m_labelBold!=v){m_labelBold=v;emit labelBoldChanged();markOverlayDirty();} }
+    void setLabelColor(QColor v)   { if(m_labelColor!=v){m_labelColor=v;emit labelColorChanged();markOverlayDirty();} }
+    void setLabelUseCustomColor(bool v) { if(m_labelUseCustomColor!=v){m_labelUseCustomColor=v;emit labelUseCustomColorChanged();markOverlayDirty();} }
     void setThrottleActive(bool v)      { if(m_throttleActive!=v){m_throttleActive=v;emit throttleActiveChanged(); if(!v) update();} }
     void setThrottleIntervalMs(int v)   { v=qBound(20,v,1000); if(m_throttleIntervalMs!=v){m_throttleIntervalMs=v;emit throttleIntervalMsChanged();} }
-    void setShowDxClusterSpots(bool v)  { if(m_showDxClusterSpots!=v){m_showDxClusterSpots=v;emit showDxClusterSpotsChanged();markDirty();} }
-    void setDxClusterSpotColor(QColor v){ if(m_dxClusterSpotColor!=v){m_dxClusterSpotColor=v;emit dxClusterSpotColorChanged();markDirty();} }
+    void setShowDxClusterSpots(bool v)  { if(m_showDxClusterSpots!=v){m_showDxClusterSpots=v;emit showDxClusterSpotsChanged();markOverlayDirty();} }
+    void setDxClusterSpotColor(QColor v){ if(m_dxClusterSpotColor!=v){m_dxClusterSpotColor=v;emit dxClusterSpotColorChanged();markOverlayDirty();} }
 
     // ── Invokable methods ───────────────────────────────────────────────────
     // Chiamato dal bridge: dB raw + range dB + range frequenze exact
@@ -231,7 +231,9 @@ protected:
     void wheelEvent(QWheelEvent* ev)      override;
 
 private:
-    void markDirty()     { m_spectrumDirty = true; m_spectrumOverlayDirty = true; update(); }
+    void markDirty()     { m_spectrumDirty = true; update(); }
+    void markOverlayDirty() { m_spectrumOverlayDirty = true; update(); }
+    void markAllDirty()  { m_spectrumDirty = true; m_spectrumOverlayDirty = true; update(); }
     void markGeomDirty() { m_geometryDirty = true; m_spectrumDirty = true; m_spectrumOverlayDirty = true; update(); }
 
     void rebuildImages(int w, int h);
@@ -255,7 +257,30 @@ private:
     void failGpuFft(const QString& reason);
     void connectBridgePcmFrameFeed();
     void recordOverlayMetric(qint64 elapsedUs, int decodeLabels, int clusterLabels, const QSize& size);
-    void recordPaintMetric(qint64 elapsedUs);
+    void recordOverlayNodeMetric(qint64 elapsedUs,
+                                 qint64 rebuildUs,
+                                 qint64 textureUs,
+                                 qint64 nodeUs,
+                                 bool needsUpload);
+    void recordPaintMetric(qint64 elapsedUs,
+                           qint64 lockWaitUs,
+                           qint64 geometryUs,
+                           qint64 drainUs,
+                           qint64 overlayUs,
+                           qint64 nodesUs,
+                           qint64 spectrumNodeUs,
+                           qint64 waterfallNodeUs,
+                           qint64 waterfallTextureUs,
+                           qint64 waterfallDisplayUs,
+                           qint64 waterfallSetupUs,
+                           qint64 waterfallMarkUs,
+                           qint64 waterfallLogUs,
+                           int waterfallPath,
+                           int textureCreateCount,
+                           int textureUploadRows,
+                           int textureFullUploads,
+                           bool gpuDirectReady,
+                           int pendingRows);
     void recordQsgFrameMetric(qint64 frameUs, qint64 swapUs);
 
     // Conversioni frequenza ↔ pixel (rispetta zoom/pan)
@@ -409,6 +434,8 @@ private:
     int    m_qsgFrameMetricSamples = 0;
     int    m_qsgFrameMetricMaxUs = 0;
     int    m_qsgFrameSpikeCount = 0;
+    int    m_qsgFrameMetricSpikeSamples = 0;
+    int    m_qsgFrameMetricSpikeMaxUs = 0;
     std::atomic<qint64> m_qsgBeforeSyncUs {0};
     std::atomic<qint64> m_qsgBeforeRenderUs {0};
     std::atomic<qint64> m_qsgAfterRenderUs {0};
@@ -429,6 +456,10 @@ private:
     int    m_qsgPhaseSyncMaxUs = 0;
     int    m_qsgPhaseRenderMaxUs = 0;
     int    m_qsgPhasePresentMaxUs = 0;
+    qint64 m_qsgPhaseSyncMaxDecodeReadyStartAgoMs = -1;
+    qint64 m_qsgPhaseSyncMaxDecodeReadyEndAgoMs = -1;
+    qint64 m_qsgPhaseSyncMaxDecodeModelEmitStartAgoMs = -1;
+    qint64 m_qsgPhaseSyncMaxDecodeModelEmitEndAgoMs = -1;
     qint64 m_overlayMetricLastLogMs = 0;
     qint64 m_overlayMetricAccumUs = 0;
     int    m_overlayMetricSamples = 0;
@@ -437,11 +468,55 @@ private:
     int    m_overlayMetricDecodeLabels = 0;
     int    m_overlayMetricClusterLabels = 0;
     QSize  m_overlayMetricSize;
+    qint64 m_overlayNodeMetricLastLogMs = 0;
+    qint64 m_overlayNodeMetricAccumUs = 0;
+    qint64 m_overlayNodeMetricRebuildAccumUs = 0;
+    qint64 m_overlayNodeMetricTextureAccumUs = 0;
+    qint64 m_overlayNodeMetricNodeAccumUs = 0;
+    int    m_overlayNodeMetricSamples = 0;
+    int    m_overlayNodeMetricUploadSamples = 0;
+    int    m_overlayNodeMetricMaxUs = 0;
+    int    m_overlayNodeMetricRebuildMaxUs = 0;
+    int    m_overlayNodeMetricTextureMaxUs = 0;
+    int    m_overlayNodeMetricNodeMaxUs = 0;
     qint64 m_paintMetricLastLogMs = 0;
     qint64 m_paintMetricAccumUs = 0;
+    qint64 m_paintMetricLockWaitAccumUs = 0;
+    qint64 m_paintMetricGeometryAccumUs = 0;
+    qint64 m_paintMetricDrainAccumUs = 0;
+    qint64 m_paintMetricOverlayAccumUs = 0;
+    qint64 m_paintMetricNodesAccumUs = 0;
+    qint64 m_paintMetricSpectrumNodeAccumUs = 0;
+    qint64 m_paintMetricWaterfallNodeAccumUs = 0;
+    qint64 m_paintMetricWaterfallTextureAccumUs = 0;
+    qint64 m_paintMetricWaterfallDisplayAccumUs = 0;
+    qint64 m_paintMetricWaterfallSetupAccumUs = 0;
+    qint64 m_paintMetricWaterfallMarkAccumUs = 0;
+    qint64 m_paintMetricWaterfallLogAccumUs = 0;
     int    m_paintMetricSamples = 0;
     int    m_paintMetricMaxUs = 0;
+    int    m_paintMetricLockWaitMaxUs = 0;
+    int    m_paintMetricGeometryMaxUs = 0;
+    int    m_paintMetricDrainMaxUs = 0;
+    int    m_paintMetricOverlayMaxUs = 0;
+    int    m_paintMetricNodesMaxUs = 0;
+    int    m_paintMetricSpectrumNodeMaxUs = 0;
+    int    m_paintMetricWaterfallNodeMaxUs = 0;
+    int    m_paintMetricWaterfallTextureMaxUs = 0;
+    int    m_paintMetricWaterfallDisplayMaxUs = 0;
+    int    m_paintMetricWaterfallSetupMaxUs = 0;
+    int    m_paintMetricWaterfallMarkMaxUs = 0;
+    int    m_paintMetricWaterfallLogMaxUs = 0;
+    int    m_paintMetricWaterfallPathNoneSamples = 0;
+    int    m_paintMetricWaterfallPathDirectSamples = 0;
+    int    m_paintMetricWaterfallPathShaderSamples = 0;
+    int    m_paintMetricWaterfallPathCpuSamples = 0;
+    int    m_paintMetricTextureCreateCount = 0;
+    int    m_paintMetricTextureUploadRows = 0;
+    int    m_paintMetricTextureFullUploads = 0;
     qint64 m_paintMetricLastUs = 0;
+    bool   m_paintMetricGpuDirectReady = false;
+    int    m_paintMetricPendingRows = 0;
     qint64 m_decodeLabelMetricLastLogMs = 0;
     struct GpuFftState;
     GpuFftState* m_gpuFft = nullptr;

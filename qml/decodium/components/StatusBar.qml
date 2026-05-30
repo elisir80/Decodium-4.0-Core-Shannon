@@ -296,6 +296,7 @@ Rectangle {
                 radius: 9
 
                 property int threadCount: bridge ? bridge.ftThreads : 1
+                property bool autoMode: bridge ? bridge.ftThreadsAuto : false
                 property bool isActive: threadCount > 1
 
                 color: isActive ? Qt.rgba(255/255, 152/255, 0/255, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -324,7 +325,8 @@ Rectangle {
                     }
 
                     Text {
-                        text: ftThreadsLed.threadCount.toString()
+                        text: ftThreadsLed.autoMode ? "A" + ftThreadsLed.threadCount.toString()
+                                                    : ftThreadsLed.threadCount.toString()
                         font.pixelSize: 9
                         font.bold: true
                         font.family: decodiumMonoFontFamily
@@ -341,7 +343,7 @@ Rectangle {
                     onClicked: function(mouse) {
                         if (!bridge) return
                         if (mouse.button === Qt.RightButton) {
-                            bridge.ftThreads = 3
+                            bridge.ftThreadsAuto = true
                         } else {
                             bridge.cycleFtThreads()
                         }
@@ -350,8 +352,10 @@ Rectangle {
                     ToolTip {
                         visible: parent.containsMouse
                         delay: 500
-                        text: "FT Decoder Threads: " + ftThreadsLed.threadCount
-                              + "\nClick: cycle 1-8 · Right-click: reset to 3"
+                        text: "FT Decoder Threads: "
+                              + (ftThreadsLed.autoMode ? "AUTO " : "")
+                              + ftThreadsLed.threadCount
+                              + "\nClick: cycle 1-8 - Right-click: AUTO"
                     }
                 }
             }

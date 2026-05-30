@@ -216,27 +216,51 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
     clock->start();
     auto lastNs = std::make_shared<qint64>(clock->nsecsElapsed());
     auto stallCount = std::make_shared<int>(0);
+    auto metricLastLogMs = std::make_shared<qint64>(clock->elapsed());
+    auto metricSamples = std::make_shared<int>(0);
+    auto metricAccumMs = std::make_shared<qint64>(0);
+    auto metricMaxMs = std::make_shared<qint64>(0);
 
     QObject::connect(timer, &QTimer::timeout, parent,
-                     [clock, lastNs, stallCount, bridge]() {
+                     [clock,
+                      lastNs,
+                      stallCount,
+                      metricLastLogMs,
+                      metricSamples,
+                      metricAccumMs,
+                      metricMaxMs,
+                      bridge]() {
         qint64 const nowNs = clock->nsecsElapsed();
+        qint64 const nowMs = clock->elapsed();
         qint64 const deltaMs = (nowNs - *lastNs) / 1000000;
         *lastNs = nowNs;
         if (deltaMs < kStallThresholdMs)
             return;
 
         ++(*stallCount);
+        ++(*metricSamples);
+        *metricAccumMs += deltaMs;
+        *metricMaxMs = qMax(*metricMaxMs, deltaMs);
+
+        if (nowMs - *metricLastLogMs < 10000)
+            return;
+
         qInfo().noquote()
-            << "[MAINWATCH] event_loop_stall"
-            << "loop_ms=" << deltaMs
-            << "overrun_ms=" << qMax<qint64>(0, deltaMs - kIntervalMs)
+            << "[MAINWATCH] event_loop_stalls"
+            << "samples=" << *metricSamples
+            << "avg_ms=" << (*metricSamples > 0 ? *metricAccumMs / *metricSamples : 0)
+            << "max_ms=" << *metricMaxMs
             << "threshold_ms=" << kStallThresholdMs
-            << "stalls=" << *stallCount
+            << "stalls_total=" << *stallCount
             << "monitoring=" << (bridge && bridge->monitoring() ? 1 : 0)
             << "tx=" << (bridge && bridge->transmitting() ? 1 : 0)
             << "tune=" << (bridge && bridge->tuning() ? 1 : 0)
             << "spectrum_visible=" << (bridge && bridge->spectrumVisible() ? 1 : 0)
             << "fps_cap=" << (bridge ? bridge->spectrumFpsCap() : -1);
+        *metricLastLogMs = nowMs;
+        *metricSamples = 0;
+        *metricAccumMs = 0;
+        *metricMaxMs = 0;
     });
 
     timer->start();
@@ -954,6 +978,7 @@ int main(int argc, char* argv[])
         && !explicitGraphicsBackend;
     bool const autoSafeGraphics =
         !commandLineResetSafeGraphics
+        && !explicitGraphicsBackend
         && !automaticD3d11Fallback
         && (slowQmlStartupMarker
             || (pendingGraphicsStartupMarker && pendingGraphicsWasD3d11)

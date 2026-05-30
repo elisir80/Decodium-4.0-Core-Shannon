@@ -4,7 +4,10 @@
 #include <algorithm>
 #include <mutex>
 
+#include <QDebug>
+#include <QElapsedTimer>
 #include <QMutexLocker>
+#include <QThread>
 
 #include "Logger.hpp"
 #include "commons.h"
@@ -41,6 +44,20 @@ namespace
 #else
     (void) threads;
 #endif
+  }
+
+  int active_decode_thread_limit ()
+  {
+#ifdef _OPENMP
+    return omp_get_max_threads ();
+#else
+    return 1;
+#endif
+  }
+
+  QString current_thread_id_hex ()
+  {
+    return QString::number (reinterpret_cast<quintptr> (QThread::currentThreadId ()), 16);
   }
 
   QString format_decode_utc (int nutc)
@@ -171,9 +188,15 @@ FT4DecodeWorker::FT4DecodeWorker (QObject * parent)
 
 void FT4DecodeWorker::decode (DecodeRequest const& request)
 {
+  QElapsedTimer totalTimer;
+  totalTimer.start ();
   apply_decode_thread_limit (request.threadCount);
+  int const activeThreads = active_decode_thread_limit ();
   log_ft4_dsp_rollout_once ();
+  QElapsedTimer waitTimer;
+  waitTimer.start ();
   QMutexLocker runtime_lock {&decodium::fortran::runtime_mutex ()};
+  qint64 const waitMs = waitTimer.elapsed ();
 
   short int iwave[kFt4SampleCount] {};
   int const copyCount = std::min (static_cast<int>(request.audio.size ()), static_cast<int>(kFt4SampleCount));
@@ -203,6 +226,8 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
   auto mycall = to_fortran_field (request.mycall, 12);
   auto hiscall = to_fortran_field (request.hiscall, 12);
 
+  QElapsedTimer decodeTimer;
+  decodeTimer.start ();
   ftx_ft4_decode_c (iwave, &nqsoprogress, &nfqso, &nfa, &nfb,
                     &ndepth, &lapcqonly, &ncontest, mycall.data (), hiscall.data (),
                     &syncs[0], &snrs[0], &dts[0], &freqs[0], &naps[0], &quals[0],
@@ -210,10 +235,24 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
                     static_cast<fortran_charlen_t> (12),
                     static_cast<fortran_charlen_t> (12),
                     static_cast<fortran_charlen_t> (kFt4MaxLines * kDecodedChars));
+  qint64 const decodeMs = decodeTimer.elapsed ();
 
   LOG_DEBUG ("FT4 decode completed: stage=" << ft4_dsp_rollout_stage ()
              << " nout=" << nout);
   QString const utcPrefix = format_decode_utc (request.nutc);
+  qInfo().noquote()
+      << QStringLiteral ("[DECODEMETRIC] mode=FT4 wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 thread=0x%11")
+             .arg (waitMs)
+             .arg (decodeMs)
+             .arg (totalTimer.elapsed ())
+             .arg (request.threadCount)
+             .arg (activeThreads)
+             .arg (request.audio.size ())
+             .arg (nout)
+             .arg (ndepth)
+             .arg (nfa)
+             .arg (nfb)
+             .arg (current_thread_id_hex ());
   Q_EMIT decodeReady (request.serial, build_rows (utcPrefix, nout, snrs, dts, freqs, naps, quals,
                                                   decodeds));
 }

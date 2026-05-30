@@ -314,6 +314,7 @@ Rectangle {
                 id: worldMapLoader
                 anchors.fill: parent
                 anchors.margins: 2
+                active: root.visible
                 sourceComponent: root.gpuLiveMapEnabled ? gpuWorldMapComponent : painterWorldMapComponent
                 onLoaded: root.initializeMap()
                 onStatusChanged: {

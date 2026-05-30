@@ -1,5 +1,53 @@
 # Changelog / Registro Modifiche
 
+## [1.0.342] - 2026-05-30
+
+### Italiano
+
+Release di stabilizzazione per allineare il ramo locale alla 1.0.342 dopo la 1.0.341, ridurre la verbosita' dei log diagnostici e mantenere compilabile il codice anche su macOS.
+
+#### Aggiunto
+
+- Metriche `DECODEMETRIC` per i worker FT8, FT4 e FT2 con tempi di attesa, decode e totale, thread attivi/richiesti, dimensione audio e dettagli di profondita'.
+- Hook diagnostici sul main thread per misurare le fasi di consegna decode-ready e aggiornamento modello, utili a correlare eventuali stall UI.
+- Indicatori runtime aggiuntivi in status bar per monitor GPU e thread FT, coerenti con le diagnostiche gia' presenti nel backend.
+
+#### Modificato
+
+- Log `PANMETRIC` ridotti da intervalli brevi a circa 60 secondi per abbassare il rumore nei log ordinari.
+- Log profilo `MAPGPU` ridotti a circa 60 secondi ed evitato il profilo immediato duplicato subito dopo il primo frame.
+- Log `DEPTHDBG` nascosti di default e abilitabili solo impostando `DECODIUM_DEPTHDBG`.
+- Metadati locali, Inno Setup, NSIS e workflow macOS legacy allineati alla versione `1.0.342`.
+
+#### Corretto
+
+- Corretto il build macOS con Clang: la funzione di affinita' OpenMP dei thread FT viene compilata solo su Windows quando OpenMP e' disponibile.
+- Ripulite anomalie di fine riga nel worker FT2 che causavano controlli whitespace sporchi.
+- Mantenuti gli aggiornamenti locali al path GPU del panadapter/waterfall e alle finestre QML senza introdurre regressioni nel build macOS.
+
+### English
+
+Stabilization release to align the local branch to 1.0.342 after 1.0.341, reduce diagnostic log noise, and keep the code building cleanly on macOS.
+
+#### Added
+
+- `DECODEMETRIC` timing for FT8, FT4, and FT2 workers, including wait/decode/total time, active/requested thread counts, audio size, and depth details.
+- Main-thread diagnostic hooks for decode-ready delivery and model-update phases, useful for correlating UI stalls.
+- Additional runtime status indicators for GPU monitoring and FT thread activity.
+
+#### Changed
+
+- `PANMETRIC` logs are throttled to roughly 60-second intervals.
+- `MAPGPU` profile logs are throttled to roughly 60-second intervals and no longer emit an immediate duplicate right after the first-frame log.
+- `DEPTHDBG` logs are disabled by default and can be enabled with `DECODIUM_DEPTHDBG`.
+- Local version metadata, Inno Setup, NSIS installer metadata, and the legacy macOS workflow are aligned to `1.0.342`.
+
+#### Fixed
+
+- Fixed the macOS Clang build by compiling the FT OpenMP affinity helper only on Windows when OpenMP is available.
+- Cleaned FT2 worker line-ending anomalies that made whitespace checks fail.
+- Preserved the local GPU panadapter/waterfall and QML window updates while restoring a clean macOS build.
+
 ## [1.0.335] - 2026-05-30
 
 ### Italiano
