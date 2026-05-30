@@ -400,27 +400,43 @@ Item {
             }
         }
 
-        // -------- ROW 3 — MAIN 3 COLUMNS (fill) --------------------------------
-        RowLayout {
+        // -------- ROW 3 — MAIN 3 COLUMNS (resizable) ---------------------------
+        // 1.0.342 — SplitView annidati: orizzontale per le 3 colonne (resize larghezza),
+        // verticale dentro ogni colonna (resize altezza pannelli). Maniglie trascinabili.
+        SplitView {
+            id: mainSplit
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 12
+            orientation: Qt.Horizontal
 
-            // ---- COL LEFT (340) : Cluster 1.4 / PSK 1 -------------------------
-            ColumnLayout {
-                Layout.preferredWidth: 340
-                Layout.minimumWidth: 340
-                Layout.fillHeight: true
-                spacing: 12
+            handle: Rectangle {
+                implicitWidth: 8
+                implicitHeight: 8
+                color: SplitHandle.pressed ? workspace.cAccent
+                     : (SplitHandle.hovered ? workspace.cAccentDim : "transparent")
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 2; height: 28; radius: 1
+                    color: workspace.cBorder
+                }
+            }
 
-                // Cluster MAM — REAL component (DxClusterPanel uses global bridge).
-                // It sets its own width/height + has a header drag MouseArea, so it
-                // lives inside a clipping panel and is sized via anchors override.
+            // ---- COL LEFT : Cluster 1.4 / PSK 1 -------------------------------
+            SplitView {
+                id: colLeftSplit
+                orientation: Qt.Vertical
+                SplitView.preferredWidth: 340
+                SplitView.minimumWidth: 240
+                handle: Rectangle {
+                    implicitWidth: 8; implicitHeight: 8
+                    color: SplitHandle.pressed ? workspace.cAccent
+                         : (SplitHandle.hovered ? workspace.cAccentDim : "transparent")
+                    Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
+                }
+
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 1
-                    Layout.verticalStretchFactor: 14   // 1.4fr
+                    SplitView.preferredHeight: 360
+                    SplitView.minimumHeight: 120
                     title: "Cluster · MAM"
                     meta: "live feed"
                     live: true
@@ -432,8 +448,9 @@ Item {
                     Component {
                         id: clusterComp
                         DxClusterPanel {
-                            // Override intrinsic sizing to fill the panel body.
-                            anchors.fill: parent
+                            minPanelWidth: 0
+                            minPanelHeight: 0
+                            x: 0; y: 0
                             width: parent ? parent.width : 320
                             height: parent ? parent.height : 280
                             radius: 0
@@ -442,14 +459,9 @@ Item {
                     }
                 }
 
-                // PSK Reporter — REAL "heard-by" feed (Fase 3).
-                // PSKReporterPanel reads the GLOBAL bridge; it self-fetches on
-                // activation + auto-refreshes (300s) only while visible.
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 1
-                    Layout.verticalStretchFactor: 10  // 1fr
+                    SplitView.fillHeight: true
+                    SplitView.minimumHeight: 100
                     title: "PSK Reporter"
                     meta: "heard-by"
                     live: true
@@ -465,17 +477,22 @@ Item {
                 }
             }
 
-            // ---- COL CENTER (fill) : Waterfall 340 / Full Spectrum 1 ----------
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: 12
+            // ---- COL CENTER : Waterfall / Full Spectrum ----------------------
+            SplitView {
+                id: colCenterSplit
+                orientation: Qt.Vertical
+                SplitView.fillWidth: true
+                SplitView.minimumWidth: 360
+                handle: Rectangle {
+                    implicitWidth: 8; implicitHeight: 8
+                    color: SplitHandle.pressed ? workspace.cAccent
+                         : (SplitHandle.hovered ? workspace.cAccentDim : "transparent")
+                    Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
+                }
 
-                // Waterfall — REAL component (Item, uses global bridge).
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 340
-                    Layout.minimumHeight: 200
+                    SplitView.preferredHeight: 340
+                    SplitView.minimumHeight: 160
                     title: "Waterfall"
                     meta: "panadapter"
                     Loader {
@@ -492,10 +509,9 @@ Item {
                     }
                 }
 
-                // Full Spectrum · Decode — REAL (FullSpectrumPanel, global bridge).
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    SplitView.fillHeight: true
+                    SplitView.minimumHeight: 120
                     title: "Full Spectrum · Decode"
                     meta: "live"
                     live: true
@@ -511,18 +527,22 @@ Item {
                 }
             }
 
-            // ---- COL RIGHT (452) : Signal RX 350 / TX 250 / Log 1 -------------
-            ColumnLayout {
-                Layout.preferredWidth: 452
-                Layout.minimumWidth: 452
-                Layout.fillHeight: true
-                spacing: 12
+            // ---- COL RIGHT : Signal RX / TX / Log ----------------------------
+            SplitView {
+                id: colRightSplit
+                orientation: Qt.Vertical
+                SplitView.preferredWidth: 520
+                SplitView.minimumWidth: 380
+                handle: Rectangle {
+                    implicitWidth: 8; implicitHeight: 8
+                    color: SplitHandle.pressed ? workspace.cAccent
+                         : (SplitHandle.hovered ? workspace.cAccentDim : "transparent")
+                    Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
+                }
 
-                // Signal RX · QSO Lock — REAL (SignalRxPanel, global bridge).
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 350
-                    Layout.minimumHeight: 180
+                    SplitView.preferredHeight: 350
+                    SplitView.minimumHeight: 160
                     title: "Signal RX · QSO Lock"
                     meta: "live"
                     live: true
@@ -537,11 +557,9 @@ Item {
                     }
                 }
 
-                // TX Macros — REAL TxPanel (requires `engine`).
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 250
-                    Layout.minimumHeight: 160
+                    SplitView.preferredHeight: 250
+                    SplitView.minimumHeight: 150
                     title: "TX Macros"
                     meta: "live"
                     Loader {
@@ -554,16 +572,16 @@ Item {
                         TxPanel {
                             anchors.fill: parent
                             engine: workspace.engine
-                            handleLogPrompt: false   // classic workspace owns the log prompt
+                            handleLogPrompt: false
                             showAsyncIcon: false
+                            showBandBar: false
                         }
                     }
                 }
 
-                // Log · QSO Entry — REAL compact form (LogQsoPanel, global bridge).
                 DxPanel {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    SplitView.fillHeight: true
+                    SplitView.minimumHeight: 100
                     title: "Log · QSO Entry"
                     meta: "live"
                     Loader {

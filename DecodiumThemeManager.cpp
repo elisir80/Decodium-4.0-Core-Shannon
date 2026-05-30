@@ -122,15 +122,13 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
             bridgeStore.setValue("uiPaletteIndex", 0);
         s.setValue("theme/migrated_v2", true);
     }
-    // Startup guard for testing: never restore DX-Pedition automatically.
-    QString const stored = s.value("theme/current", startupTheme).toString().trimmed();
-    if (stored != startupTheme) {
-        s.setValue("theme/current", startupTheme);
-        QSettings bridgeStore("Decodium", "Decodium3");
-        if (bridgeStore.value("uiPaletteIndex", 0).toInt() == 11)
-            bridgeStore.setValue("uiPaletteIndex", 0);
-    }
-    m_currentTheme = startupTheme;
+    // 1.0.342 — tema persistente: rimosso il guard che forzava 'Ocean Blue' ad
+    // ogni avvio (rendeva DX-Pedition non selezionabile in modo permanente). Ora
+    // ripristina il tema salvato dall'utente, validandolo contro i temi noti.
+    QString stored = s.value("theme/current", startupTheme).toString().trimmed();
+    if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "DX-Pedition")
+        stored = startupTheme;
+    m_currentTheme = stored;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
     {
         QSettings ds("Decodium", "Decodium3");

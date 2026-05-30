@@ -15,6 +15,8 @@ Item {
     required property var engine
     property bool handleLogPrompt: true
     property bool showAsyncIcon: true
+    // 1.0.342 — nascondi la band-bar interna quando un'altra (es. DX-Pedition ROW2) e' gia' presente.
+    property bool showBandBar: true
 
     // 1.0.308 (#4 fix) — filtro "bande operative" nel band-bar REALE. BandSelector.qml era
     // codice morto (non istanziato): il selettore effettivo è questo (bandSelectorBar).
@@ -179,11 +181,11 @@ Item {
     property color bgDeep: bridge.themeManager.bgDeep
     readonly property var supportedModes: engine ? engine.availableModes() : ["FT8", "FT2", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"]
     readonly property real toolbarScale: Math.max(0.9, Math.min(1.12, bridge ? bridge.fontScale : 1.0))
-    readonly property int toolbarSpacing: 3
+    readonly property int toolbarSpacing: showBandBar ? 3 : 2
     readonly property int toolbarButtonHeight: 32
     readonly property int toolbarButtonHPad: Math.max(11, Math.round(12 * toolbarScale))
-    readonly property int toolbarMinButtonWidth: Math.max(54, Math.round(56 * toolbarScale))
-    readonly property int toolbarMaxButtonWidth: Math.max(98, Math.round(104 * toolbarScale))
+    readonly property int toolbarMinButtonWidth: showBandBar ? Math.max(54, Math.round(56 * toolbarScale)) : 44
+    readonly property int toolbarMaxButtonWidth: showBandBar ? Math.max(98, Math.round(104 * toolbarScale)) : 86
     readonly property int toolbarButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
     readonly property int toolbarHoldButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
     readonly property int toolbarWideButtonWidth: toolbarActionWidth("CLEAR", "")
@@ -308,10 +310,11 @@ Item {
 
                 Rectangle {
                     id: bandSelectorBar
+                    visible: txPanel.showBandBar
                     Layout.fillWidth: true
-                    Layout.rightMargin: 36
-                    Layout.preferredHeight: 28
-                    Layout.minimumHeight: 28
+                    Layout.rightMargin: txPanel.showAsyncIcon ? 36 : 0
+                    Layout.preferredHeight: visible ? 28 : 0
+                    Layout.minimumHeight: visible ? 28 : 0
                     radius: 4
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
                     border.color: glassBorder
@@ -402,7 +405,7 @@ Item {
 
                 Item {
                     Layout.fillWidth: true
-                    Layout.rightMargin: 36
+                    Layout.rightMargin: txPanel.showAsyncIcon ? 36 : 0
                     Layout.preferredHeight: topControlsFlow.implicitHeight
                     Layout.minimumHeight: topControlsFlow.implicitHeight
                     implicitHeight: topControlsFlow.implicitHeight
@@ -545,37 +548,7 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("SWL", "\u2609")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: swlBtn.checked ? Qt.rgba(156/255, 39/255, 176/255, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: swlBtn.checked ? "#9c27b0" : glassBorder
-                            border.width: swlBtn.checked ? 2 : 1
-
-                            Button {
-                                id: swlBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: engine ? engine.swlMode : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onCheckedChanged: if (engine) engine.swlMode = checked
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
-                                    label: "SWL"
-                                    glyph: "\u2609"
-                                    foreground: swlBtn.checked ? "#9c27b0" : textSecondary
-                                    glyphSize: txPanel.toolbarGlyphSize
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: swlBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("SWL Mode (Listen Only)")
-                                ToolTip.delay: 500
-                            }
-                        }
-
+                        // 1.0.342 - SWL rimosso (piu spazio TX Macros DX-Pedition)
                         // 1.0.182 \u2014 Button QQC2-native restyle
                         Button {
                             id: autoSeqBtn2
