@@ -2428,7 +2428,10 @@ void PanadapterItem::renderSpectrum()
     }
 
     int txX = fToX(m_txFreq);
-    bool const txVisible = txX >= 0 && txX < w && m_txFreq != m_rxFreq;
+    // 1.0.340: marker TX sempre visibile quando in range (rimosso il gate
+    // m_txFreq!=m_rxFreq che lo nascondeva quando TX coincideva con RX -> dava
+    // l'impressione che il click sinistro non impostasse la freq TX).
+    bool const txVisible = txX >= 0 && txX < w;
     auto drawMarkerLabel = [&](int markerX, int preferredCenterY, const QString& text, const QColor& accent) {
         QFont labelFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
         labelFont.setPointSize(9);
@@ -2940,7 +2943,10 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     };
 
     int const txX = fToX(static_cast<float>(m_txFreq));
-    bool const txVisible = txX >= 0 && txX < w && m_txFreq != m_rxFreq;
+    // 1.0.340: marker TX sempre visibile quando in range (rimosso il gate
+    // m_txFreq!=m_rxFreq che lo nascondeva quando TX coincideva con RX -> dava
+    // l'impressione che il click sinistro non impostasse la freq TX).
+    bool const txVisible = txX >= 0 && txX < w;
     if (rxX >= 0 && rxX < w)
         drawMarkerLabel(rxX, h / 2 - (txVisible ? 12 : 0), QStringLiteral("RX %1").arg(m_rxFreq), QColor(0, 229, 255));
 
