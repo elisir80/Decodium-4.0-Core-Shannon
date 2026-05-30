@@ -1386,7 +1386,6 @@ void DecodiumDxCluster::saveSettings()
     if (!m_callsign.trimmed().isEmpty()) {
         s.setValue("DXClusterViewLogin", loginCallForCluster(m_callsign));
     }
-    s.sync();
 }
 
 void DecodiumDxCluster::loadSettings()

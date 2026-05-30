@@ -236,6 +236,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool   advTurboFeedbackActive READ advTurboFeedbackActive NOTIFY advTurboFeedbackActiveChanged)
     Q_PROPERTY(bool   advCoherentAvgActive READ advCoherentAvgActive NOTIFY advCoherentAvgActiveChanged)
     Q_PROPERTY(int    ftThreads            READ ftThreads            WRITE setFtThreads NOTIFY ftThreadsChanged)
+    Q_PROPERTY(bool   ftThreadsAuto        READ ftThreadsAuto        WRITE setFtThreadsAuto NOTIFY ftThreadsChanged)
     Q_PROPERTY(bool   lowCpuModeEnabled    READ lowCpuModeEnabled    WRITE setLowCpuModeEnabled NOTIFY lowCpuModeEnabledChanged)
 
     // === PSK REPORTER ===
@@ -455,6 +456,15 @@ public:
     explicit DecodiumBridge(QObject* parent = nullptr);
     ~DecodiumBridge();
 
+    static void noteDecodeReadySlotStart();
+    static void noteDecodeReadySlotEnd();
+    static void noteDecodeModelEmitStart();
+    static void noteDecodeModelEmitEnd();
+    static qint64 msSinceLastDecodeReadySlotStart();
+    static qint64 msSinceLastDecodeReadySlotEnd();
+    static qint64 msSinceLastDecodeModelEmitStart();
+    static qint64 msSinceLastDecodeModelEmitEnd();
+
     // Station
     QString callsign() const;
     void setCallsign(const QString&);
@@ -659,7 +669,9 @@ public:
     // Hook chiamato dopo ogni slot FT8 per aggiornare la rolling window.
     Q_INVOKABLE void recordFt8DecodeCount(int count);
     int    ftThreads()            const { return m_ftThreads; }
+    bool   ftThreadsAuto()        const { return m_ftThreadsAuto; }
     Q_INVOKABLE void setFtThreads(int v);
+    Q_INVOKABLE void setFtThreadsAuto(bool enabled);
     Q_INVOKABLE void cycleFtThreads();
     bool   lowCpuModeEnabled()    const { return m_lowCpuModeEnabled; }
     Q_INVOKABLE void setLowCpuModeEnabled(bool enabled);
@@ -773,7 +785,7 @@ public:
     double spectrumDynRange()    const { return m_spectrumDynRange; }
     void   setSpectrumDynRange(double v) { if (m_spectrumDynRange!=v){m_spectrumDynRange=v;emit spectrumDynRangeChanged();} }
     bool   spectrumVisible()     const { return m_spectrumVisible; }
-    void   setSpectrumVisible(bool v) { if (m_spectrumVisible!=v){m_spectrumVisible=v;emit spectrumVisibleChanged();} }
+    void   setSpectrumVisible(bool v);
 
     // B6 — cty.dat
     bool ctyDatUpdating() const { return m_ctyDatUpdating; }
@@ -1923,6 +1935,7 @@ private:
     bool m_worldMapFullReplayDeferred {false};
     bool m_worldMapDeferredLogActive {false};
     bool m_worldMapCall3Loaded {false};
+    bool m_worldMapCall3Loading {false};
     bool m_worldMapDisplayed {true};
     QString m_mapLastClickCall;
     qint64 m_mapLastClickMs {0};
@@ -2032,6 +2045,7 @@ private:
     qint64       m_pskHeardByLastFetchMs {0};   // rate-limit guard (QDateTime msecs)
     bool        m_pskReporterEnabled {false};
     int         m_ftThreads {3};
+    bool        m_ftThreadsAuto {true};
     bool        m_lowCpuModeEnabled {false};
     double m_fontScale {1.08};
     int m_nfa {200}, m_nfb {4000}, m_ndepth {3}, m_ncontest {0};
@@ -2915,6 +2929,10 @@ private:
     QString worldMapFeedEntryKey(const QVariantMap& entry) const;
     bool worldMapEntryFreshEnough(const QVariantMap& entry, QString* reason = nullptr) const;
     bool visualFeedsDeferredForTx() const;
+    void queueWorldMapEntryForReplay(const QVariantMap& entry,
+                                     bool skipClearedFeedEntry,
+                                     int delayMs = 250,
+                                     bool logTxDeferral = false);
     void deferWorldMapEntryForTx(const QVariantMap& entry, bool skipClearedFeedEntry);
     void scheduleDeferredWorldMapFeedFlush(int delayMs = 600);
     void flushDeferredWorldMapFeed();

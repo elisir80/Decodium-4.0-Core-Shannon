@@ -5,7 +5,10 @@
 #include <chrono>
 #include <mutex>
 
+#include <QDebug>
+#include <QElapsedTimer>
 #include <QMutexLocker>
+#include <QThread>
 
 #include "Logger.hpp"
 #include "commons.h"
@@ -47,6 +50,20 @@ namespace
 #else
     (void) threads;
 #endif
+  }
+
+  int active_decode_thread_limit ()
+  {
+#ifdef _OPENMP
+    return omp_get_max_threads ();
+#else
+    return 1;
+#endif
+  }
+
+  QString current_thread_id_hex ()
+  {
+    return QString::number (reinterpret_cast<quintptr> (QThread::currentThreadId ()), 16);
   }
 
   void set_ft8_stage4_cancel (bool cancel)
@@ -180,14 +197,20 @@ void FT8DecodeWorker::beginShutdown ()
 
 void FT8DecodeWorker::decode (DecodeRequest const& request)
 {
+  QElapsedTimer totalTimer;
+  totalTimer.start ();
   if (m_shuttingDown.load (std::memory_order_relaxed))
     {
       return;
     }
   apply_decode_thread_limit (request.threadCount);
+  int const activeThreads = active_decode_thread_limit ();
   set_ft8_stage4_cancel (false);
   log_ft8_dsp_rollout_once ();
+  QElapsedTimer waitTimer;
+  waitTimer.start ();
   QMutexLocker runtime_lock {&decodium::fortran::runtime_mutex ()};
+  qint64 const waitMs = waitTimer.elapsed ();
 
   if (m_shuttingDown.load (std::memory_order_relaxed))
     {
@@ -249,6 +272,8 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   auto hiscall = to_fortran_field (request.hiscall, 12);
   auto hisgrid = to_fortran_field (request.hisgrid, 6);
 
+  QElapsedTimer decodeTimer;
+  decodeTimer.start ();
   ftx_ft8_async_decode_stage4_c (iwave, &nqsoprogress, &nfqso, &nftx, &nutc, &nfa, &nfb,
                                  &nzhsym, &ndepth, &emedelay, &ncontest, &nagain,
                                  &lft8apon, &ltry_a8, &lapcqonly, &napwid, mycall.constData (),
@@ -256,6 +281,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                                  nullptr,
                                  &snrs[0], &dts[0], &freqs[0], &naps[0], &quals[0],
                                  &bits77[0], &decodeds[0], &nout);
+  qint64 const decodeMs = decodeTimer.elapsed ();
   ftx_ft8_stage4_set_deadline_ms_c (0);
   ftx_ft8_stage4_set_ldpc_osd_c (-1, 0);
   ftx_ft8_stage4_set_supplemental_c (0);
@@ -281,6 +307,20 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       // Triggera LED Turbo Feedback (soglia >8 in DecodiumBridge::notifyTurboIterations).
       Q_EMIT turboIterations (rows.isEmpty () ? 0 : 50);
     }
+  qInfo().noquote()
+      << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+             .arg (request.serial)
+             .arg (waitMs)
+             .arg (decodeMs)
+             .arg (totalTimer.elapsed ())
+             .arg (request.threadCount)
+             .arg (activeThreads)
+             .arg (request.audio.size ())
+             .arg (nout)
+             .arg (ndepth)
+             .arg (nfa)
+             .arg (nfb)
+             .arg (current_thread_id_hex ());
   Q_EMIT decodeReady (request.serial, rows);
 }
 

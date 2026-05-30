@@ -69,7 +69,7 @@ Window {
     readonly property int rxDistanceWidth: compactRxColumns ? 0 : 50
     property int decodeListVersion: 0
     property int rxDecodeListVersion: 0
-    property var bandActivityModel: filteredDecodeEntries(appEngine.decodeList)
+    property var bandActivityModel: (bridge && bridge.bandActivityModel) ? [] : filteredDecodeEntries(appEngine.decodeList)
     property bool highlight73: bridge.getSetting("Highlight73", true)
     property bool highlightOrange: bridge.getSetting("HighlightOrange", false)
     property bool highlightBlue: bridge.getSetting("HighlightBlue", false)
@@ -77,12 +77,16 @@ Window {
     property bool decodeShowPeriodSeparator: bridge.getSetting("decodeShowPeriodSeparator", true)
     property bool decodeNewestFirst: bridge.getSetting("decodeNewestFirst", false)
     onDecodeShowPeriodSeparatorChanged: {
-        bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
-        rxDecodeModel = currentRxDecodes()
+        if (!decodeWindow.hasNativeBandActivityModel())
+            bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
+        if (!decodeWindow.hasNativeRxDecodeModel())
+            rxDecodeModel = currentRxDecodes()
     }
     onDecodeNewestFirstChanged: {
-        bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
-        rxDecodeModel = currentRxDecodes()
+        if (!decodeWindow.hasNativeBandActivityModel())
+            bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
+        if (!decodeWindow.hasNativeRxDecodeModel())
+            rxDecodeModel = currentRxDecodes()
     }
 	    Connections {
 	        target: bridge
@@ -101,19 +105,27 @@ Window {
     // Signal RX model: property-backed come bandActivityModel — evita il
     // reset del layout ListView che si verifica con function-call model
     // (new array reference ad ogni invocazione → contentY azzerato).
-    property var rxDecodeModel: []
+    property var rxDecodeModel: (bridge && bridge.rxDecodeModel) ? [] : currentRxDecodes()
     property var clearedRxDecodeKeys: ({})
+
+    function hasNativeBandActivityModel() {
+        return bridge && bridge.bandActivityModel
+    }
+
+    function hasNativeRxDecodeModel() {
+        return bridge && bridge.rxDecodeModel
+    }
 
     function bandActivityCount() {
         void(decodeWindow.decodeListVersion)
-        if (bridge && bridge.bandActivityModel)
+        if (decodeWindow.hasNativeBandActivityModel())
             return bridge.bandActivityModel.count()
         return decodeWindow.bandActivityModel.length
     }
 
     function signalRxCount() {
         void(decodeWindow.rxDecodeListVersion)
-        if (bridge && bridge.rxDecodeModel)
+        if (decodeWindow.hasNativeRxDecodeModel())
             return bridge.rxDecodeModel.count()
         return decodeWindow.rxDecodeModel.length
     }
@@ -121,9 +133,11 @@ Window {
 	    Connections {
 	        target: appEngine
 	        function onDecodeListChanged() {
-            decodeWindow.bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
+            if (!decodeWindow.hasNativeBandActivityModel())
+                decodeWindow.bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
             decodeWindow.decodeListVersion++
-            decodeWindow.rxDecodeModel = currentRxDecodes()
+            if (!decodeWindow.hasNativeRxDecodeModel())
+                decodeWindow.rxDecodeModel = currentRxDecodes()
             decodeWindow.rxDecodeListVersion++
             if (bandActivityList)
                 bandActivityList.followTailAfterModelUpdate()
@@ -131,21 +145,24 @@ Window {
                 rxFrequencyList.followTailAfterModelUpdate()
         }
         function onRxDecodeListChanged() {
-            decodeWindow.rxDecodeModel = currentRxDecodes()
+            if (!decodeWindow.hasNativeRxDecodeModel())
+                decodeWindow.rxDecodeModel = currentRxDecodes()
             decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
 	                rxFrequencyList.followTailAfterModelUpdate()
 	        }
 	        function onDxCallChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
-	            decodeWindow.rxDecodeModel = currentRxDecodes()
+	            if (!decodeWindow.hasNativeRxDecodeModel())
+	                decodeWindow.rxDecodeModel = currentRxDecodes()
 	            decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
 	                rxFrequencyList.followTailAfterModelUpdate()
 	        }
 	        function onRxFrequencyChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
-	            decodeWindow.rxDecodeModel = currentRxDecodes()
+	            if (!decodeWindow.hasNativeRxDecodeModel())
+	                decodeWindow.rxDecodeModel = currentRxDecodes()
 	            decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
 	                rxFrequencyList.followTailAfterModelUpdate()
@@ -154,13 +171,15 @@ Window {
 
     // Refresh rxDecodeModel anche quando cambia il filtro Tx2QSO/TXMessagesToRX
     onShowTxMessagesInRxChanged: {
-        rxDecodeModel = currentRxDecodes()
+        if (!decodeWindow.hasNativeRxDecodeModel())
+            rxDecodeModel = currentRxDecodes()
         rxDecodeListVersion++
         if (rxFrequencyList)
             rxFrequencyList.followTailAfterModelUpdate()
     }
     Component.onCompleted: {
-        rxDecodeModel = currentRxDecodes()
+        if (!decodeWindow.hasNativeRxDecodeModel())
+            rxDecodeModel = currentRxDecodes()
     }
 
     Connections {
@@ -617,15 +636,19 @@ Window {
 	    }
 
 	    function clearSignalRxDecodes() {
-	        var hidden = {}
-	        for (var i = 0; i < decodeWindow.rxDecodeModel.length; ++i) {
-	            var item = decodeWindow.rxDecodeModel[i]
-	            if (!item || item.isSeparator === true)
-	                continue
-	            hidden[decodeWindow.rxEntryKey(item)] = true
+	        if (decodeWindow.hasNativeRxDecodeModel()) {
+	            decodeWindow.clearedRxDecodeKeys = ({})
+	        } else {
+	            var hidden = {}
+	            for (var i = 0; i < decodeWindow.rxDecodeModel.length; ++i) {
+	                var item = decodeWindow.rxDecodeModel[i]
+	                if (!item || item.isSeparator === true)
+	                    continue
+	                hidden[decodeWindow.rxEntryKey(item)] = true
+	            }
+	            decodeWindow.clearedRxDecodeKeys = hidden
+	            decodeWindow.rxDecodeModel = []
 	        }
-	        decodeWindow.clearedRxDecodeKeys = hidden
-	        decodeWindow.rxDecodeModel = []
 	        decodeWindow.rxDecodeListVersion++
 	        appEngine.clearRxDecodes()
 	        if (rxFrequencyList)

@@ -42,7 +42,7 @@ constexpr int kMaxVisibleContacts = 28;
 constexpr int kMaxVisibleContactLabels = 20;
 constexpr int kRoleDowngradeHoldSeconds = 75;
 constexpr int kGreatCircleSteps = 56;
-constexpr qint64 kGpuProfileLogMs = 5000;
+constexpr qint64 kGpuProfileLogMs = 60000;
 constexpr int kMaxLabelImageCache = 192;
 constexpr qint64 kLabelImageTtlMs = 5 * 60 * 1000;
 constexpr int kLabelAtlasMaxWidth = 2048;
@@ -2304,8 +2304,11 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     }
 
     qint64 const nowMs = monotonicNowMs();
-    if (!m_loggedFirstProfile || nowMs - m_lastProfileLogMs >= kGpuProfileLogMs) {
+    if (!m_loggedFirstProfile) {
         m_loggedFirstProfile = true;
+        m_lastProfileLogMs = nowMs;
+    }
+    if (nowMs - m_lastProfileLogMs >= kGpuProfileLogMs) {
         m_lastProfileLogMs = nowMs;
         qInfo().noquote().nospace()
             << "[MAPGPU] LiveMap QSG profile contacts=" << m_lastContactCount

@@ -262,6 +262,7 @@ ApplicationWindow {
     Component.onCompleted: {
         startupCompletedStartedMs = Date.now()
         startupLog("Component.onCompleted begin")
+        syncSpectrumVisibility()
         callerQueuePanelVisible = settingBool("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
         startupLog("fox/caller queue state restored")
         decodePanelLayoutSaved = settingBool("uiDecodePanelsLayoutSaved", false)
@@ -728,6 +729,7 @@ ApplicationWindow {
     }
 
     // Waterfall detached state
+    property bool waterfallPanelVisible: settingBool("uiWaterfallPanelVisible", true)
     property bool waterfallDetached: false
     property bool waterfallMinimized: false
 
@@ -798,6 +800,25 @@ ApplicationWindow {
     property bool dxClusterDetached: true   // default detached (era sempre floating)
     property bool dxClusterMinimized: false
     property bool applicationClosing: false
+    function syncSpectrumVisibility() {
+        if (bridge)
+            bridge.spectrumVisible = waterfallPanelVisible
+    }
+    onWaterfallPanelVisibleChanged: {
+        persistUiSetting("uiWaterfallPanelVisible", waterfallPanelVisible)
+        syncSpectrumVisibility()
+        if (!waterfallPanelVisible) {
+            waterfallDetached = false
+            waterfallMinimized = false
+            if (typeof waterfallWindow !== "undefined" && waterfallWindow)
+                waterfallWindow.hide()
+        } else {
+            Qt.callLater(function() {
+                if (typeof waterfallPanel !== "undefined" && waterfallPanel)
+                    waterfallPanel.SplitView.preferredHeight = mainWindow.waterfallPanelHeight
+            })
+        }
+    }
     onWaterfallDetachedChanged: scheduleWindowStateSave()
     onWaterfallMinimizedChanged: scheduleWindowStateSave()
     onLogWindowDetachedChanged: scheduleWindowStateSave()
@@ -953,6 +974,7 @@ ApplicationWindow {
         }
     }
 	    function detachWaterfallPanel() {
+            mainWindow.waterfallPanelVisible = true
 	        mainWindow.waterfallDetached = true
 	        mainWindow.waterfallMinimized = false
 	        waterfallPanel.isDockHighlighted = false
@@ -965,6 +987,7 @@ ApplicationWindow {
 	        })
 	    }
 	    function dockWaterfallPanel() {
+            mainWindow.waterfallPanelVisible = true
 	        waterfallPanel.isDockHighlighted = false
 	        mainWindow.waterfallDetached = false
 	        mainWindow.waterfallMinimized = false
@@ -4623,7 +4646,8 @@ ApplicationWindow {
                     // e impediva di restringere il waterfall ("superiore bloccata"). Ora è
                     // gestito imperativamente: init one-shot in Component.onCompleted, drag/snap
                     // liberi; un Binding dedicato forza 40px solo quando è staccato (placeholder).
-                    SplitView.minimumHeight: waterfallDetached ? 40 : 0  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
+                    visible: mainWindow.waterfallPanelVisible || waterfallDetached
+                    SplitView.minimumHeight: !mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0)  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                     radius: 8
                     border.color: isDockHighlighted ? secondaryCyan : glassBorder
@@ -4642,7 +4666,7 @@ ApplicationWindow {
                     Component.onCompleted: {
                         updateDockZone()
                         // 1.0.288 — init one-shot (no binding reattivo che combatte il drag)
-                        if (!waterfallDetached)
+                        if (mainWindow.waterfallPanelVisible && !waterfallDetached)
                             SplitView.preferredHeight = mainWindow.waterfallPanelHeight
                     }
                     onWidthChanged: updateDockZone()
@@ -4651,7 +4675,7 @@ ApplicationWindow {
                         // 1.0.288 — persisti SOLO su bridge.uiWaterfallHeight (per il save).
                         // NON riscrivere mainWindow.waterfallPanelHeight: romperebbe il binding
                         // di riga 310 e rialimenterebbe il loop che bloccava il resize.
-                        if (!waterfallDetached && height > 40) {
+                        if (mainWindow.waterfallPanelVisible && !waterfallDetached && height > 40) {
                             bridge.uiWaterfallHeight = height
                             mainWindow.scheduleSave()
                         }
@@ -4663,7 +4687,15 @@ ApplicationWindow {
                         target: waterfallPanel
                         property: "SplitView.preferredHeight"
                         value: 40
-                        when: waterfallDetached
+                        when: mainWindow.waterfallPanelVisible && waterfallDetached
+                        restoreMode: Binding.RestoreBindingOrValue
+                    }
+
+                    Binding {
+                        target: waterfallPanel
+                        property: "SplitView.preferredHeight"
+                        value: 0
+                        when: !mainWindow.waterfallPanelVisible
                         restoreMode: Binding.RestoreBindingOrValue
                     }
 
@@ -4721,7 +4753,7 @@ ApplicationWindow {
                     // Embedded waterfall content
                     Rectangle {
                         anchors.fill: parent
-                        visible: !waterfallDetached
+                        visible: mainWindow.waterfallPanelVisible && !waterfallDetached
                         color: "transparent"
 
 
@@ -4732,8 +4764,8 @@ ApplicationWindow {
                             anchors.top: parent.top
                             anchors.bottom: parent.bottom
                             anchors.margins: 4
-                            visible: !waterfallDetached
-                            active: !waterfallDetached
+                            visible: mainWindow.waterfallPanelVisible && !waterfallDetached
+                            active: mainWindow.waterfallPanelVisible && !waterfallDetached
                             // 1.0.175 — Carica off-thread come gia' fa il
                             // detached (Loader asynchronous:true a r.8304),
                             // per evitare stallo del main thread sul mount
@@ -4748,7 +4780,7 @@ ApplicationWindow {
                             Waterfall {
                                 id: waterfallDisplayEmbedded
                                 anchors.fill: parent
-                                visible: !waterfallDetached
+                                visible: mainWindow.waterfallPanelVisible && !waterfallDetached
                                 showControls: true
                                 minFreq: 0
                                 maxFreq: 3200
@@ -4844,8 +4876,8 @@ ApplicationWindow {
                     // IU8LMC: Reactive property for all decodes (Band Activity)
                     property bool showTxMessagesInRx: mainWindow.showTxMessagesInRx
                     property bool hideTelemetryOnlyDecodes: Qt.platform.os === "windows"
-                    property var allDecodes: visibleDecodeEntries(bridge.decodeList)
-                    property var rxDecodes: currentRxDecodes()
+                    property var allDecodes: (bridge && bridge.bandActivityModel) ? [] : visibleDecodeEntries(bridge.decodeList)
+                    property var rxDecodes: (bridge && bridge.rxDecodeModel) ? [] : currentRxDecodes()
                     property var clearedRxDecodeKeys: ({})
                     property int decodeListVersion: 0
                     property int rxDecodeListVersion: 0
@@ -4870,16 +4902,24 @@ ApplicationWindow {
 
                     function fullSpectrumModelCount() {
                         void(decodePanel.decodeListVersion)
-                        if (bridge && bridge.bandActivityModel)
+                        if (decodePanel.hasNativeBandActivityModel())
                             return bridge.bandActivityModel.count()
                         return decodePanel.allDecodes ? decodePanel.allDecodes.length : 0
                     }
 
                     function signalRxModelCount() {
                         void(decodePanel.rxDecodeListVersion)
-                        if (bridge && bridge.rxDecodeModel)
+                        if (decodePanel.hasNativeRxDecodeModel())
                             return bridge.rxDecodeModel.count()
                         return decodePanel.rxDecodes ? decodePanel.rxDecodes.length : 0
+                    }
+
+                    function hasNativeBandActivityModel() {
+                        return bridge && bridge.bandActivityModel
+                    }
+
+                    function hasNativeRxDecodeModel() {
+                        return bridge && bridge.rxDecodeModel
                     }
 
                     function updatePeriodState() {
@@ -4902,8 +4942,7 @@ ApplicationWindow {
                         }
                     }
 
-                    function updateCurrentPeriodDecodeCount(src) {
-                        var newCount = src ? src.length : 0
+                    function updateCurrentPeriodDecodeCountFromCount(newCount) {
                         if (newCount >= decodePanel.lastSyncCount) {
                             decodePanel.currentPeriodDecodeCount += newCount - decodePanel.lastSyncCount
                         } else {
@@ -4914,15 +4953,22 @@ ApplicationWindow {
                         decodePanel.lastSyncCount = newCount
                     }
 
+                    function updateCurrentPeriodDecodeCount(src) {
+                        updateCurrentPeriodDecodeCountFromCount(src ? src.length : 0)
+                    }
+
 	                    Component.onCompleted: {
 	                        updatePeriodState()
-	                        lastSyncCount = decodePanel.visibleDecodeEntries(bridge.decodeList).length
+	                        lastSyncCount = decodePanel.hasNativeBandActivityModel()
+	                            ? bridge.bandActivityModel.count()
+	                            : decodePanel.visibleDecodeEntries(bridge.decodeList).length
 	                    }
 
 	                    function refreshRxDecodeModel(resetCleared) {
 	                        if (resetCleared)
 	                            decodePanel.clearedRxDecodeKeys = ({})
-	                        decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+	                        if (!decodePanel.hasNativeRxDecodeModel())
+	                            decodePanel.rxDecodes = decodePanel.currentRxDecodes()
 	                        decodePanel.rxDecodeListVersion++
 	                        if (rxFrequencyList)
 	                            rxFrequencyList.forceTailFollow()
@@ -4945,15 +4991,19 @@ ApplicationWindow {
 	                    }
 
 	                    function clearSignalRxDecodes() {
-	                        var hidden = {}
-	                        for (var i = 0; i < decodePanel.rxDecodes.length; ++i) {
-	                            var item = decodePanel.rxDecodes[i]
-	                            if (!item || item.isSeparator === true)
-	                                continue
-	                            hidden[decodePanel.rxEntryKey(item)] = true
+	                        if (decodePanel.hasNativeRxDecodeModel()) {
+	                            decodePanel.clearedRxDecodeKeys = ({})
+	                        } else {
+	                            var hidden = {}
+	                            for (var i = 0; i < decodePanel.rxDecodes.length; ++i) {
+	                                var item = decodePanel.rxDecodes[i]
+	                                if (!item || item.isSeparator === true)
+	                                    continue
+	                                hidden[decodePanel.rxEntryKey(item)] = true
+	                            }
+	                            decodePanel.clearedRxDecodeKeys = hidden
+	                            decodePanel.rxDecodes = []
 	                        }
-	                        decodePanel.clearedRxDecodeKeys = hidden
-	                        decodePanel.rxDecodes = []
 	                        decodePanel.rxDecodeListVersion++
 	                        bridge.clearRxDecodes()
 	                        if (rxFrequencyList)
@@ -4967,10 +5017,15 @@ ApplicationWindow {
                         target: bridge
                         function onDecodeListChanged() {
                             decodePanel.decodeListVersion++
-                            var src = decodePanel.visibleDecodeEntries(bridge.decodeList)
-                            decodePanel.updateCurrentPeriodDecodeCount(src)
-                            decodePanel.allDecodes = src
-                            decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+                            if (decodePanel.hasNativeBandActivityModel()) {
+                                decodePanel.updateCurrentPeriodDecodeCountFromCount(bridge.bandActivityModel.count())
+                            } else {
+                                var src = decodePanel.visibleDecodeEntries(bridge.decodeList)
+                                decodePanel.updateCurrentPeriodDecodeCount(src)
+                                decodePanel.allDecodes = src
+                            }
+                            if (!decodePanel.hasNativeRxDecodeModel())
+                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
                             decodePanel.rxDecodeListVersion++
                             // 1.0.227 — forceTailFollow solo sulla ListView attiva
                             // (embedded VS floating in base a period1Detached).
@@ -4991,7 +5046,8 @@ ApplicationWindow {
                         }
                         function onRxDecodeListChanged() {
                             decodePanel.rxDecodeListVersion++
-                            decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+                            if (!decodePanel.hasNativeRxDecodeModel())
+                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
                             if (rxFrequencyList)
                                 rxFrequencyList.forceTailFollow()
 	                            if (rxFrequencyFloatingList)
@@ -5006,7 +5062,8 @@ ApplicationWindow {
 	                    }
 
                     onShowTxMessagesInRxChanged: {
-                        decodePanel.rxDecodes = currentRxDecodes()
+                        if (!decodePanel.hasNativeRxDecodeModel())
+                            decodePanel.rxDecodes = currentRxDecodes()
                         decodePanel.rxDecodeListVersion++
                         if (rxFrequencyList)
                             rxFrequencyList.forceTailFollow()
@@ -6703,13 +6760,23 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 }
                             }
 
-                            LiveMapPanel {
+                            Loader {
+                                id: liveMapEmbeddedLoader
                                 anchors.fill: parent
-                                engine: bridge
-                                detachable: true
-                                detached: false
-                                visible: parent.visible
-                                onDetachRequested: mainWindow.detachLiveMapPanel()
+                                active: liveMapPanelHost.visible
+                                asynchronous: true
+                                sourceComponent: liveMapEmbeddedComponent
+                            }
+
+                            Component {
+                                id: liveMapEmbeddedComponent
+
+                                LiveMapPanel {
+                                    engine: bridge
+                                    detachable: true
+                                    detached: false
+                                    onDetachRequested: mainWindow.detachLiveMapPanel()
+                                }
                             }
                         }
                     }
@@ -8447,6 +8514,21 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         }
 
         MenuItem {
+            text: (waterfallPanelVisible ? "✓ " : "☐ ") + qsTr("Waterfall / Panadapter")
+            onTriggered: waterfallPanelVisible = !waterfallPanelVisible
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: waterfallPanelVisible ? successGreen : textSecondary
+                leftPadding: 10
+            }
+        }
+
+        MenuItem {
             text: (liveMapPanelVisible ? "✓ " : "☐ ") + qsTr("Live Map")
             onTriggered: liveMapPanelVisible = !liveMapPanelVisible
             background: Rectangle {
@@ -8849,7 +8931,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
 	        // Handle window close
 	        onClosing: function(close) {
-	            mainWindow.dockWaterfallPanel()
+                mainWindow.waterfallPanelVisible = false
+                mainWindow.waterfallDetached = false
+                mainWindow.waterfallMinimized = false
 	            close.accepted = true
 	        }
 
@@ -9127,7 +9211,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     id: waterfallDetachedLoader
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    active: waterfallWindow.visible
+                    active: waterfallWindow.visible && mainWindow.waterfallPanelVisible
                     asynchronous: true
                     sourceComponent: waterfallDetachedComponent
                 }
@@ -9137,7 +9221,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
                     Waterfall {
                         id: waterfallDisplayDetached
-                        visible: waterfallDetached
+                        visible: mainWindow.waterfallPanelVisible && waterfallDetached
                         showControls: true
                         minFreq: 0
                         maxFreq: 3200
@@ -9656,7 +9740,10 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         onHeightChanged: mainWindow.scheduleWindowStateSave()
 
         onClosing: function(close) {
-            mainWindow.dockLiveMapPanel()
+            mainWindow.liveMapPanelVisible = false
+            mainWindow.liveMapDetached = false
+            mainWindow.liveMapMinimized = false
+            mainWindow.syncLiveMapFloatingVisibility(false)
             close.accepted = true
         }
 
