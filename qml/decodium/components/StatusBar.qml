@@ -111,6 +111,10 @@ Rectangle {
     }
 
     height: 36
+    // 1.0.339: un Rectangle root ha implicitHeight=0; Main.qml lega
+    // Layout.preferredHeight/minimumHeight a implicitHeight -> senza questo il
+    // footer collassa a 0 in classico (qualsiasi tema). Ripristino fix.
+    implicitHeight: 36
     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
 
     // Top border line
