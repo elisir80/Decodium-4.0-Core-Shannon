@@ -106,11 +106,12 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     : QObject(parent)
 {
     QSettings s("Decodium", "Decodium");
+    QString const startupTheme = QStringLiteral("Ocean Blue");
     // One-shot migration: from 1.0.70 the dark Ocean Blue theme is the
     // canonical default. Reset any persisted choice once so the upgrade
     // lands on dark; the user can re-select Stellar Light afterwards.
     if (!s.value("theme/migrated_v2", false).toBool()) {
-        s.setValue("theme/current", "Ocean Blue");
+        s.setValue("theme/current", startupTheme);
         // Stellar Light forces palette index 11 (pastel light) on the
         // panadapter. Reset any residual 11 so the dark default lands on
         // a sensible spectrum palette instead of an all-white waterfall.
@@ -121,12 +122,15 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
             bridgeStore.setValue("uiPaletteIndex", 0);
         s.setValue("theme/migrated_v2", true);
     }
-    QString const stored = s.value("theme/current", "Ocean Blue").toString();
-    if (stored == "Stellar Light" || stored == "Ocean Blue" || stored == "DX-Pedition") {
-        m_currentTheme = stored;
-    } else {
-        m_currentTheme = "Ocean Blue";
+    // Startup guard for testing: never restore DX-Pedition automatically.
+    QString const stored = s.value("theme/current", startupTheme).toString().trimmed();
+    if (stored != startupTheme) {
+        s.setValue("theme/current", startupTheme);
+        QSettings bridgeStore("Decodium", "Decodium3");
+        if (bridgeStore.value("uiPaletteIndex", 0).toInt() == 11)
+            bridgeStore.setValue("uiPaletteIndex", 0);
     }
+    m_currentTheme = startupTheme;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
     {
         QSettings ds("Decodium", "Decodium3");

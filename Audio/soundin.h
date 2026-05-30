@@ -59,6 +59,7 @@ private:
   qint64 last_dropped_warning_ms_ {-1};
   float m_inputGain {1.0f};
   QString m_deviceDescription;
+  QString m_deviceId;
   int m_sampleRate {0};
   int m_channelCount {0};
   int m_channelSelector {static_cast<int>(AudioDevice::Mono)};

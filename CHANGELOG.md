@@ -1,5 +1,89 @@
 # Changelog / Registro Modifiche
 
+## [1.0.335] - 2026-05-30
+
+### Italiano
+
+Release di stabilizzazione per la selezione delle periferiche audio Qt/Windows e per l'autosequenza con nominativi speciali.
+
+#### Aggiunto
+
+- Persistenza degli ID stabili Qt delle periferiche audio in `audioInputDeviceId` e `audioOutputDeviceId`, oltre ai nomi visibili gia' salvati.
+- Log diagnostici piu' espliciti per periferica salvata, ID salvato, periferica scelta, ID scelto, motivo del match e default disponibile.
+- Log di salute audio RX subito dopo l'avvio, con RMS, picco, range e clipping, per capire rapidamente se l'audio reale arriva dal dispositivo corretto.
+- Copertura test per messaggi FT speciali con nominativo locale non standard, incluso il caso `II9MESC` verso `KQ5I`.
+
+#### Modificato
+
+- La risoluzione audio preferisce l'ID stabile del dispositivo e usa il nome visibile solo come fallback esatto e univoco.
+- Quando piu' dispositivi hanno lo stesso nome, ad esempio piu' `USB Audio CODEC`, Decodium non riscrive piu' silenziosamente la scelta salvata sul default.
+- La cache TX e il riuso dello stream RX distinguono ora dispositivi con stesso nome ma ID diverso.
+- Metadati locali e installer NSIS sono allineati alla versione `1.0.335`.
+
+#### Corretto
+
+- Corretto il caso in cui l'utente con piu' periferiche audio omonime vedeva Decodium scegliere o salvare il default sbagliato dopo l'enumerazione Qt.
+- Corretta la sequenza FT per nominativo locale speciale e corrispondente standard: il report viene indirizzato al DX (`KQ5I <II9MESC> -15`) e non alla chiamata locale hashata in posizione errata, evitando che il corrispondente continui a rimandare il locator e blocchi l'autosequenza.
+- Migliorata la diagnosi di fallback audio: quando un dispositivo salvato non viene trovato o non e' univoco, il log conserva nome e ID richiesti invece di nascondere il problema dietro il default.
+
+### English
+
+Stabilization release for Qt/Windows audio-device selection and special-callsign autosequencing.
+
+#### Added
+
+- Stable Qt audio device IDs are now persisted as `audioInputDeviceId` and `audioOutputDeviceId` alongside the existing visible device names.
+- Clearer diagnostics for saved device, saved ID, selected device, selected ID, match reason, and available default.
+- RX startup audio-health logging with RMS, peak, range, and clipping to confirm that real audio arrives from the selected device.
+- Test coverage for FT special-call messages, including local non-standard call `II9MESC` with standard peer `KQ5I`.
+
+#### Changed
+
+- Audio resolution now prefers the stable device ID and uses the visible name only as an exact, unique fallback.
+- When multiple devices share the same visible name, such as multiple `USB Audio CODEC` entries, Decodium no longer silently rewrites the saved selection to the default.
+- TX audio caching and RX stream reuse now distinguish devices with the same visible name but different IDs.
+- Local metadata and NSIS installer metadata are aligned to version `1.0.335`.
+
+#### Fixed
+
+- Fixed the case where users with multiple same-name audio devices could have Decodium select or save the wrong default device after Qt enumeration.
+- Fixed FT sequencing for a non-standard local special call and a standard peer: the report is now addressed to the DX (`KQ5I <II9MESC> -15`), preventing the peer from repeatedly sending its locator and stalling autosequence.
+- Improved audio fallback diagnostics by preserving requested name and ID in the log when the saved device is missing or ambiguous.
+
+## [1.0.333] - 2026-05-30
+
+### Italiano
+
+Release di stabilizzazione UI per evitare il blocco osservato riaprendo Decodium in modalita' DX-Pedition e per riportare l'avvio su un profilo grafico sicuro.
+
+#### Modificato
+
+- L'avvio forza `Ocean Blue` come tema runtime e riscrive la preferenza `theme/current` se era rimasta su un tema diverso.
+- Il workspace DX-Pedition non viene piu' ripristinato automaticamente allo startup; se `uiDxPeditionMode` era salvato attivo, viene disattivato prima di caricare il layout principale.
+- `DX-Pedition` e' stato rimosso dall'elenco temi visibile nelle impostazioni, lasciando intatta la palette interna per eventuali test futuri o percorsi codice esistenti.
+- Metadati locali, installer Windows Inno Setup/NSIS e workflow macOS legacy sono allineati alla versione `1.0.333`.
+
+#### Corretto
+
+- Evitato il rientro automatico nel layout DX-Pedition dopo un avvio precedente in quella modalita', riducendo il rischio di blocco UI allo startup.
+- Riallineate le preferenze locali di test su `Ocean Blue` e `uiDxPeditionMode=false`.
+
+### English
+
+UI stabilization release to avoid the lock-up seen after reopening Decodium in DX-Pedition mode and to return startup to a safe graphics profile.
+
+#### Changed
+
+- Startup now forces `Ocean Blue` as the runtime theme and rewrites the stored `theme/current` preference when it contains a different theme.
+- The DX-Pedition workspace is no longer restored automatically at startup; if `uiDxPeditionMode` was saved as enabled, it is disabled before the main layout loads.
+- `DX-Pedition` was removed from the visible theme list in settings, while the internal palette remains available for future testing or existing code paths.
+- Local version metadata, Windows Inno Setup/NSIS installers, and the legacy macOS workflow are aligned to `1.0.333`.
+
+#### Fixed
+
+- Prevented automatic re-entry into the DX-Pedition layout after a previous run in that mode, reducing startup UI lock-up risk.
+- Local test preferences were realigned to `Ocean Blue` and `uiDxPeditionMode=false`.
+
 ## [1.0.332] - 2026-05-29
 
 ### Italiano

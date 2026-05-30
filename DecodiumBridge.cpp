@@ -307,6 +307,27 @@ static QString audioDeviceIdForLog(const QAudioDevice& device)
     return id.isEmpty() ? QStringLiteral("<empty>") : QString::fromLatin1(id.toHex());
 }
 
+static QString audioDeviceIdForSettings(const QAudioDevice& device)
+{
+    const QByteArray id = device.id();
+    return id.isEmpty() ? QString() : QString::fromLatin1(id.toHex());
+}
+
+static QString audioDeviceIdSettingForLog(QString id)
+{
+    id = id.trimmed();
+    return id.isEmpty() ? QStringLiteral("<unset>") : id;
+}
+
+static bool audioDeviceIdMatches(const QAudioDevice& device, QString const& savedId)
+{
+    QString const candidate = audioDeviceIdForSettings(device);
+    QString const requested = savedId.trimmed();
+    return !candidate.isEmpty()
+        && !requested.isEmpty()
+        && candidate.compare(requested, Qt::CaseInsensitive) == 0;
+}
+
 static QString audioFormatForLog(const QAudioFormat& format)
 {
     return QStringLiteral("rate=%1 channels=%2 sampleFormat=%3")
@@ -1042,9 +1063,11 @@ static constexpr int kSpecialOpFox = 6;
 static constexpr int kSpecialOpHound = 7;
 static constexpr int kSpecialOpMax = 9;
 static QAudioDevice findOutputDevice(const QString& name,
+                                     const QString& id,
                                      QList<QAudioDevice> const& outputs,
                                      QAudioDevice const& defaultOutput,
-                                     bool* requestedDeviceFound = nullptr);
+                                     bool* requestedDeviceFound = nullptr,
+                                     QString* matchReason = nullptr);
 
 static void storeBridgePrecomputedTxWave(QString const& mode, QVector<float> const& wave)
 {
@@ -1084,19 +1107,86 @@ static bool audioDeviceNameExactMatches(QString const& lhs, QString const& rhs)
         && lhs.trimmed().compare(rhs.trimmed(), Qt::CaseInsensitive) == 0;
 }
 
-static bool audioDeviceNameMatches(QString const& lhs, QString const& rhs)
+static bool tryResolveAudioDeviceByIdentity(QList<QAudioDevice> const& devices,
+                                            QString const& requestedName,
+                                            QString const& requestedId,
+                                            QAudioDevice* resolvedDevice,
+                                            QString* matchReason)
 {
-    QString const rawA = lhs.trimmed();
-    QString const rawB = rhs.trimmed();
-    QString const a = normalizedAudioDeviceNameForMatch(lhs);
-    QString const b = normalizedAudioDeviceNameForMatch(rhs);
-    if (a.isEmpty() || b.isEmpty()) {
+    if (resolvedDevice) {
+        *resolvedDevice = QAudioDevice {};
+    }
+    auto setReason = [matchReason](QString const& reason) {
+        if (matchReason) {
+            *matchReason = reason;
+        }
+    };
+
+    QString const requested = requestedName.trimmed();
+    QString const id = requestedId.trimmed();
+    if (!id.isEmpty()) {
+        for (QAudioDevice const& device : devices) {
+            if (audioDeviceIdMatches(device, id)) {
+                if (resolvedDevice) {
+                    *resolvedDevice = device;
+                }
+                setReason(QStringLiteral("id"));
+                return true;
+            }
+        }
+    }
+
+    if (requested.isEmpty()) {
+        setReason(QStringLiteral("default"));
         return false;
     }
-    return rawA.compare(rawB, Qt::CaseInsensitive) == 0
-        || a.compare(b, Qt::CaseInsensitive) == 0
-        || a.contains(b, Qt::CaseInsensitive)
-        || b.contains(a, Qt::CaseInsensitive);
+
+    QList<QAudioDevice> exactMatches;
+    for (QAudioDevice const& device : devices) {
+        if (audioDeviceNameExactMatches(device.description(), requested)) {
+            exactMatches.append(device);
+        }
+    }
+    if (exactMatches.size() == 1) {
+        if (resolvedDevice) {
+            *resolvedDevice = exactMatches.constFirst();
+        }
+        setReason(id.isEmpty() ? QStringLiteral("exact-name")
+                               : QStringLiteral("exact-name-id-missing"));
+        return true;
+    }
+    if (exactMatches.size() > 1) {
+        setReason(QStringLiteral("ambiguous-exact-name count=%1").arg(exactMatches.size()));
+        return false;
+    }
+
+    QString const normalizedRequested = normalizedAudioDeviceNameForMatch(requested);
+    QList<QAudioDevice> normalizedMatches;
+    if (!normalizedRequested.isEmpty()) {
+        for (QAudioDevice const& device : devices) {
+            QString const normalizedDevice =
+                normalizedAudioDeviceNameForMatch(device.description());
+            if (normalizedDevice.compare(normalizedRequested, Qt::CaseInsensitive) == 0) {
+                normalizedMatches.append(device);
+            }
+        }
+    }
+    if (normalizedMatches.size() == 1) {
+        if (resolvedDevice) {
+            *resolvedDevice = normalizedMatches.constFirst();
+        }
+        setReason(id.isEmpty() ? QStringLiteral("normalized-name")
+                               : QStringLiteral("normalized-name-id-missing"));
+        return true;
+    }
+    if (normalizedMatches.size() > 1) {
+        setReason(QStringLiteral("ambiguous-normalized-name count=%1").arg(normalizedMatches.size()));
+        return false;
+    }
+
+    setReason(id.isEmpty() ? QStringLiteral("not-found")
+                           : QStringLiteral("id-and-name-not-found"));
+    return false;
 }
 
 static bool hasAudioDeviceNamed(QList<QAudioDevice> const& devices, QString const& name)
@@ -1104,12 +1194,41 @@ static bool hasAudioDeviceNamed(QList<QAudioDevice> const& devices, QString cons
     if (name.trimmed().isEmpty()) {
         return false;
     }
-    for (QAudioDevice const& device : devices) {
-        if (audioDeviceNameMatches(device.description(), name)) {
-            return true;
+    QAudioDevice ignored;
+    QString reason;
+    return tryResolveAudioDeviceByIdentity(devices, name, QString(), &ignored, &reason);
+}
+
+static QString audioDeviceSelectionForLog(QString const& name, QString const& id)
+{
+    QString const trimmedName = name.trimmed();
+    QString const trimmedId = id.trimmed();
+    return QStringLiteral("[%1] id=%2")
+        .arg(trimmedName.isEmpty() ? QStringLiteral("<default>") : trimmedName,
+             audioDeviceIdSettingForLog(trimmedId));
+}
+
+static void persistSingleAudioIdentity(bool input, QString const& name, QString const& id)
+{
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (input) {
+        s.setValue(QStringLiteral("audioInputDevice"), name);
+        s.setValue(QStringLiteral("SoundInName"), name);
+        if (id.trimmed().isEmpty()) {
+            s.remove(QStringLiteral("audioInputDeviceId"));
+        } else {
+            s.setValue(QStringLiteral("audioInputDeviceId"), id.trimmed());
+        }
+    } else {
+        s.setValue(QStringLiteral("audioOutputDevice"), name);
+        s.setValue(QStringLiteral("SoundOutName"), name);
+        if (id.trimmed().isEmpty()) {
+            s.remove(QStringLiteral("audioOutputDeviceId"));
+        } else {
+            s.setValue(QStringLiteral("audioOutputDeviceId"), id.trimmed());
         }
     }
-    return false;
+    s.sync();
 }
 
 static QString audioChannelSettingValue(int channel)
@@ -2539,11 +2658,19 @@ static QString standardFtxQsoMessage(int txNumber,
 
     if (!myStandard && dxStandard) {
         switch (txNumber) {
-        case 1: return withGrid(myHash + QLatin1Char(' ') + dx);
-        case 2: return myHash + QLatin1Char(' ') + dx + QLatin1Char(' ') + report;
+        case 1:
+            // Type-4 compound exchange for a non-standard local callsign. This
+            // follows the FT compound sequence: start with the peer hash plus
+            // our full call, then keep reports addressed to the peer.
+            return dxHash + QLatin1Char(' ') + my;
+        case 2:
+            // Report from a non-standard local call must still be addressed to
+            // the peer. "<MYHASH> DX -15" is valid type-4 text, but peers read
+            // it as their own transmission and keep resending their grid.
+            return dx + QLatin1Char(' ') + myHash + QLatin1Char(' ') + report;
         case 3: return withQuick(dx + QLatin1Char(' ') + myHash + QStringLiteral(" R") + report);
-        case 4: return my + QLatin1Char(' ') + dxHash + QLatin1Char(' ') + endMessage;
-        case 5: return my + QLatin1Char(' ') + dxHash + QStringLiteral(" 73");
+        case 4: return dxHash + QLatin1Char(' ') + my + QLatin1Char(' ') + endMessage;
+        case 5: return dxHash + QLatin1Char(' ') + my + QStringLiteral(" 73");
         default: return {};
         }
     }
@@ -8404,29 +8531,39 @@ void DecodiumBridge::syncLegacyBackendState()
     if (!legacyAudioInput.isEmpty()) {
         if (!allowAudioDeviceProbe) {
             if (!m_audioInputDevice.trimmed().isEmpty()
-                && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
+                && !audioDeviceNameExactMatches(legacyAudioInput, m_audioInputDevice)) {
                 bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio input [%1] over legacy [%2] without startup device probe")
                               .arg(m_audioInputDevice, legacyAudioInput));
                 m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
                 m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
             } else if (m_audioInputDevice.trimmed().isEmpty()) {
+                m_audioInputDeviceId.clear();
                 updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
             }
         } else {
             QList<QAudioDevice> const inputs =
                 cachedAudioInputs(QStringLiteral("syncLegacyBackendState input probe"), false);
+            QAudioDevice bridgeInputDevice;
+            QString bridgeInputReason;
             bool const bridgeInputAvailable =
-                hasAudioDeviceNamed(inputs, m_audioInputDevice);
+                tryResolveAudioDeviceByIdentity(inputs,
+                                                m_audioInputDevice,
+                                                m_audioInputDeviceId,
+                                                &bridgeInputDevice,
+                                                &bridgeInputReason);
             bool const legacyInputAvailable =
                 hasAudioDeviceNamed(inputs, legacyAudioInput);
             if (!m_audioInputDevice.trimmed().isEmpty()
                 && bridgeInputAvailable
-                && !audioDeviceNameMatches(legacyAudioInput, m_audioInputDevice)) {
+                && !audioDeviceNameExactMatches(legacyAudioInput, m_audioInputDevice)) {
                 bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio input [%1] over legacy [%2]")
                               .arg(m_audioInputDevice, legacyAudioInput));
                 m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
                 m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
             } else if (legacyInputAvailable || m_audioInputDevice.trimmed().isEmpty()) {
+                if (!audioDeviceNameExactMatches(m_audioInputDevice, legacyAudioInput)) {
+                    m_audioInputDeviceId.clear();
+                }
                 updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
             }
         }
@@ -8435,29 +8572,39 @@ void DecodiumBridge::syncLegacyBackendState()
     if (!legacyAudioOutput.isEmpty()) {
         if (!allowAudioDeviceProbe) {
             if (!m_audioOutputDevice.trimmed().isEmpty()
-                && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
+                && !audioDeviceNameExactMatches(legacyAudioOutput, m_audioOutputDevice)) {
                 bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio output [%1] over legacy [%2] without startup device probe")
                               .arg(m_audioOutputDevice, legacyAudioOutput));
                 m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
                 m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
             } else if (m_audioOutputDevice.trimmed().isEmpty()) {
+                m_audioOutputDeviceId.clear();
                 updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
             }
         } else {
             QList<QAudioDevice> const outputs =
                 cachedAudioOutputs(QStringLiteral("syncLegacyBackendState output probe"), false);
+            QAudioDevice bridgeOutputDevice;
+            QString bridgeOutputReason;
             bool const bridgeOutputAvailable =
-                hasAudioDeviceNamed(outputs, m_audioOutputDevice);
+                tryResolveAudioDeviceByIdentity(outputs,
+                                                m_audioOutputDevice,
+                                                m_audioOutputDeviceId,
+                                                &bridgeOutputDevice,
+                                                &bridgeOutputReason);
             bool const legacyOutputAvailable =
                 hasAudioDeviceNamed(outputs, legacyAudioOutput);
             if (!m_audioOutputDevice.trimmed().isEmpty()
                 && bridgeOutputAvailable
-                && !audioDeviceNameMatches(legacyAudioOutput, m_audioOutputDevice)) {
+                && !audioDeviceNameExactMatches(legacyAudioOutput, m_audioOutputDevice)) {
                 bridgeLog(QStringLiteral("syncLegacyBackendState: preserving bridge audio output [%1] over legacy [%2]")
                               .arg(m_audioOutputDevice, legacyAudioOutput));
                 m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
                 m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
             } else if (legacyOutputAvailable || m_audioOutputDevice.trimmed().isEmpty()) {
+                if (!audioDeviceNameExactMatches(m_audioOutputDevice, legacyAudioOutput)) {
+                    m_audioOutputDeviceId.clear();
+                }
                 updateString(m_audioOutputDevice, legacyAudioOutput, [this]() { emit audioOutputDeviceChanged(); });
             }
         }
@@ -10959,6 +11106,102 @@ QStringList DecodiumBridge::audioInputDevices() const { return m_audioInputDevic
 QStringList DecodiumBridge::audioOutputDevices() const { return m_audioOutputDevices; }
 QString DecodiumBridge::audioInputDevice() const { return m_audioInputDevice; }
 
+void DecodiumBridge::rememberAudioInputDeviceIdentity(QAudioDevice const& device,
+                                                      const QString& reason,
+                                                      bool updateDisplayName)
+{
+    if (!updateDisplayName && m_audioInputDevice.trimmed().isEmpty()) {
+        if (!m_audioInputDeviceId.isEmpty()) {
+            m_audioInputDeviceId.clear();
+            persistSingleAudioIdentity(true, m_audioInputDevice, m_audioInputDeviceId);
+        }
+        return;
+    }
+
+    QString const deviceName = device.description().trimmed();
+    QString const deviceId = audioDeviceIdForSettings(device);
+    bool changed = false;
+    bool nameChanged = false;
+
+    if (updateDisplayName
+        && !deviceName.isEmpty()
+        && !audioDeviceNameExactMatches(m_audioInputDevice, deviceName)) {
+        m_audioInputDevice = deviceName;
+        nameChanged = true;
+        changed = true;
+    }
+    if (!deviceId.isEmpty()
+        && m_audioInputDeviceId.compare(deviceId, Qt::CaseInsensitive) != 0) {
+        m_audioInputDeviceId = deviceId;
+        changed = true;
+    }
+
+    if (!changed) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("audio input identity remembered (%1): %2")
+                  .arg(reason.trimmed().isEmpty() ? QStringLiteral("resolved") : reason.trimmed(),
+                       audioDeviceSelectionForLog(m_audioInputDevice, m_audioInputDeviceId)));
+    persistSingleAudioIdentity(true, m_audioInputDevice, m_audioInputDeviceId);
+    if (nameChanged) {
+        syncAudioDeviceSettingsToLegacyIni();
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
+        }
+        emit audioInputDeviceChanged();
+    }
+}
+
+void DecodiumBridge::rememberAudioOutputDeviceIdentity(QAudioDevice const& device,
+                                                       const QString& reason,
+                                                       bool updateDisplayName)
+{
+    if (!updateDisplayName && m_audioOutputDevice.trimmed().isEmpty()) {
+        if (!m_audioOutputDeviceId.isEmpty()) {
+            m_audioOutputDeviceId.clear();
+            persistSingleAudioIdentity(false, m_audioOutputDevice, m_audioOutputDeviceId);
+        }
+        return;
+    }
+
+    QString const deviceName = device.description().trimmed();
+    QString const deviceId = audioDeviceIdForSettings(device);
+    bool changed = false;
+    bool nameChanged = false;
+
+    if (updateDisplayName
+        && !deviceName.isEmpty()
+        && !audioDeviceNameExactMatches(m_audioOutputDevice, deviceName)) {
+        m_audioOutputDevice = deviceName;
+        nameChanged = true;
+        changed = true;
+    }
+    if (!deviceId.isEmpty()
+        && m_audioOutputDeviceId.compare(deviceId, Qt::CaseInsensitive) != 0) {
+        m_audioOutputDeviceId = deviceId;
+        changed = true;
+    }
+
+    if (!changed) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("audio output identity remembered (%1): %2")
+                  .arg(reason.trimmed().isEmpty() ? QStringLiteral("resolved") : reason.trimmed(),
+                       audioDeviceSelectionForLog(m_audioOutputDevice, m_audioOutputDeviceId)));
+    persistSingleAudioIdentity(false, m_audioOutputDevice, m_audioOutputDeviceId);
+    m_cachedTxOutputDeviceValid = false;
+    invalidateTxAudioCache();
+    if (nameChanged) {
+        syncAudioDeviceSettingsToLegacyIni();
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
+        }
+        emit audioOutputDeviceChanged();
+    }
+}
+
 void DecodiumBridge::syncAudioDeviceSettingsToLegacyIni()
 {
     syncSettingToLegacyIni(QStringLiteral("SoundInName"), m_audioInputDevice);
@@ -11040,14 +11283,41 @@ void DecodiumBridge::setAudioInputDevice(const QString& v) {
     QString const value = v.trimmed();
     if (m_audioInputDevice != value) {
         QString const previous = m_audioInputDevice;
+        QString const previousId = m_audioInputDeviceId;
         m_audioInputDevice = value;
-        bridgeLog(QStringLiteral("audioInputDevice set to: %1").arg(m_audioInputDevice));
+        QAudioDevice matchedDevice;
+        QString matchReason;
+        if (tryResolveAudioDeviceByIdentity(cachedAudioInputs(QStringLiteral("setAudioInputDevice"), false),
+                                            value,
+                                            QString(),
+                                            &matchedDevice,
+                                            &matchReason)) {
+            m_audioInputDeviceId = audioDeviceIdForSettings(matchedDevice);
+        } else {
+            m_audioInputDeviceId.clear();
+        }
+        bridgeLog(QStringLiteral("audioInputDevice set to: %1 id=%2 match=%3 previous_id=%4")
+                      .arg(m_audioInputDevice,
+                           audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                           matchReason,
+                           audioDeviceIdSettingForLog(previousId)));
         syncAudioDeviceSettingsToLegacyIni();
         if (legacyBackendAvailable()) {
             m_legacyBackend->setAudioInputDeviceName(value);
         }
+        QSettings s("Decodium", "Decodium3");
+        s.setValue(QStringLiteral("audioInputDevice"), m_audioInputDevice);
+        s.setValue(QStringLiteral("SoundInName"), m_audioInputDevice);
+        if (m_audioInputDeviceId.isEmpty()) {
+            s.remove(QStringLiteral("audioInputDeviceId"));
+        } else {
+            s.setValue(QStringLiteral("audioInputDeviceId"), m_audioInputDeviceId);
+        }
+        s.sync();
         emit audioInputDeviceChanged();
-        applyAudioInputRuntimeChange(QStringLiteral("device %1 -> %2").arg(previous, m_audioInputDevice));
+        applyAudioInputRuntimeChange(QStringLiteral("device %1 -> %2")
+                                         .arg(audioDeviceSelectionForLog(previous, previousId),
+                                              audioDeviceSelectionForLog(m_audioInputDevice, m_audioInputDeviceId)));
     }
 }
 QString DecodiumBridge::audioOutputDevice() const { return m_audioOutputDevice; }
@@ -11055,8 +11325,24 @@ void DecodiumBridge::setAudioOutputDevice(const QString& v) {
     QString const value = v.trimmed();
     if (m_audioOutputDevice != value) {
         QString const previous = m_audioOutputDevice;
+        QString const previousId = m_audioOutputDeviceId;
         m_audioOutputDevice = value;
-        bridgeLog("audioOutputDevice set to: " + m_audioOutputDevice);
+        QAudioDevice matchedDevice;
+        QString matchReason;
+        if (tryResolveAudioDeviceByIdentity(cachedAudioOutputs(QStringLiteral("setAudioOutputDevice"), false),
+                                            value,
+                                            QString(),
+                                            &matchedDevice,
+                                            &matchReason)) {
+            m_audioOutputDeviceId = audioDeviceIdForSettings(matchedDevice);
+        } else {
+            m_audioOutputDeviceId.clear();
+        }
+        bridgeLog(QStringLiteral("audioOutputDevice set to: %1 id=%2 match=%3 previous_id=%4")
+                      .arg(m_audioOutputDevice,
+                           audioDeviceIdSettingForLog(m_audioOutputDeviceId),
+                           matchReason,
+                           audioDeviceIdSettingForLog(previousId)));
 #ifdef Q_OS_LINUX
         const QString pulseSinkName = linuxPulseSinkNameFromDisplay(m_audioOutputDevice);
         if (!pulseSinkName.isEmpty()) {
@@ -11077,8 +11363,19 @@ void DecodiumBridge::setAudioOutputDevice(const QString& v) {
         if (legacyBackendAvailable()) {
             m_legacyBackend->setAudioOutputDeviceName(value);
         }
+        QSettings s("Decodium", "Decodium3");
+        s.setValue(QStringLiteral("audioOutputDevice"), m_audioOutputDevice);
+        s.setValue(QStringLiteral("SoundOutName"), m_audioOutputDevice);
+        if (m_audioOutputDeviceId.isEmpty()) {
+            s.remove(QStringLiteral("audioOutputDeviceId"));
+        } else {
+            s.setValue(QStringLiteral("audioOutputDeviceId"), m_audioOutputDeviceId);
+        }
+        s.sync();
         emit audioOutputDeviceChanged();
-        applyAudioOutputRuntimeChange(QStringLiteral("device %1 -> %2").arg(previous, m_audioOutputDevice));
+        applyAudioOutputRuntimeChange(QStringLiteral("device %1 -> %2")
+                                          .arg(audioDeviceSelectionForLog(previous, previousId),
+                                               audioDeviceSelectionForLog(m_audioOutputDevice, m_audioOutputDeviceId)));
     }
 }
 int DecodiumBridge::audioInputChannel() const { return m_audioInputChannel; }
@@ -12770,7 +13067,8 @@ void DecodiumBridge::clearTxMessages()
 void DecodiumBridge::startRx()
 {
     bridgeLog("startRx() called, m_monitoring=" + QString::number(m_monitoring) +
-              " m_audioInputDevice=" + m_audioInputDevice);
+              " m_audioInputDevice=" + m_audioInputDevice +
+              " m_audioInputDeviceId=" + audioDeviceIdSettingForLog(m_audioInputDeviceId));
     m_monitorRequested = true;
     if (m_monitoring) { bridgeLog("startRx: already monitoring, skip"); return; }
     ++m_decodeSessionId;
@@ -13124,9 +13422,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 
 // Restituisce QAudioDevice corrispondente a m_audioOutputDevice (o il default)
 static QAudioDevice findOutputDevice(const QString& name,
+                                     const QString& id,
                                      QList<QAudioDevice> const& outputs,
                                      QAudioDevice const& defaultOutput,
-                                     bool* requestedDeviceFound)
+                                     bool* requestedDeviceFound,
+                                     QString* matchReason)
 {
     QString const requestedName = name.trimmed();
 #ifdef Q_OS_LINUX
@@ -13138,6 +13438,7 @@ static QAudioDevice findOutputDevice(const QString& name,
                           .arg(pulseSinkName));
             qInfo().noquote() << "[AUDIODEV] selected Pulse/PipeWire sink:" << pulseSinkName;
             if (requestedDeviceFound) *requestedDeviceFound = true;
+            if (matchReason) *matchReason = QStringLiteral("linux-pulse-sink");
             return QMediaDevices::defaultAudioOutput();
         }
 
@@ -13147,24 +13448,24 @@ static QAudioDevice findOutputDevice(const QString& name,
                              << pulseSinkName << pulseError;
     }
 #endif
-    if (!requestedName.isEmpty()) {
-        for (const QAudioDevice& d : outputs) {
-            if (audioDeviceNameExactMatches(d.description(), requestedName)) {
-                if (requestedDeviceFound) *requestedDeviceFound = true;
-                return d;
-            }
+    QAudioDevice matchedDevice;
+    QString reason;
+    if (tryResolveAudioDeviceByIdentity(outputs, requestedName, id, &matchedDevice, &reason)) {
+        if (requestedDeviceFound) *requestedDeviceFound = true;
+        if (matchReason) *matchReason = reason;
+        if (reason.contains(QStringLiteral("normalized"), Qt::CaseInsensitive)) {
+            bridgeLog(QStringLiteral("findOutputDevice: normalized match requested=[%1] requested_id=%2 actual=[%3] actual_id=%4 reason=%5")
+                          .arg(requestedName,
+                               audioDeviceIdSettingForLog(id),
+                               matchedDevice.description(),
+                               audioDeviceIdSettingForLog(audioDeviceIdForSettings(matchedDevice)),
+                               reason));
         }
-        for (const QAudioDevice& d : outputs) {
-            if (audioDeviceNameMatches(d.description(), requestedName)) {
-                bridgeLog(QStringLiteral("findOutputDevice: normalized match requested=[%1] actual=[%2]")
-                              .arg(requestedName, d.description()));
-                if (requestedDeviceFound) *requestedDeviceFound = true;
-                return d;
-            }
-        }
+        return matchedDevice;
     }
 
     if (requestedDeviceFound) *requestedDeviceFound = requestedName.isEmpty();
+    if (matchReason) *matchReason = requestedName.isEmpty() ? QStringLiteral("default") : reason;
     return defaultOutput;
 }
 
@@ -13175,7 +13476,9 @@ void DecodiumBridge::invalidateTxAudioCache()
 
 QAudioDevice DecodiumBridge::resolveTxOutputDevice(bool* requestedDeviceFound)
 {
-    if (m_cachedTxOutputDeviceValid && m_cachedTxOutputDeviceName == m_audioOutputDevice) {
+    if (m_cachedTxOutputDeviceValid
+        && m_cachedTxOutputDeviceName == m_audioOutputDevice
+        && m_cachedTxOutputDeviceId == m_audioOutputDeviceId) {
         if (requestedDeviceFound) {
             *requestedDeviceFound = m_cachedTxOutputDeviceFound;
         }
@@ -13183,11 +13486,27 @@ QAudioDevice DecodiumBridge::resolveTxOutputDevice(bool* requestedDeviceFound)
     }
 
     bool found = false;
+    QString matchReason;
     QAudioDevice device = findOutputDevice(m_audioOutputDevice,
+                                           m_audioOutputDeviceId,
                                            cachedAudioOutputs(QStringLiteral("resolveTxOutputDevice"), false),
                                            cachedDefaultAudioOutput(QStringLiteral("resolveTxOutputDevice"), false),
-                                           &found);
+                                           &found,
+                                           &matchReason);
+    bridgeLog(QStringLiteral("resolveTxOutputDevice: saved=[%1] saved_id=%2 match=%3 found=%4 selected=[%5] selected_id=%6")
+                  .arg(m_audioOutputDevice,
+                       audioDeviceIdSettingForLog(m_audioOutputDeviceId),
+                       matchReason,
+                       found ? QStringLiteral("1") : QStringLiteral("0"),
+                       device.description(),
+                       audioDeviceIdSettingForLog(audioDeviceIdForSettings(device))));
+    if (found) {
+        rememberAudioOutputDeviceIdentity(device,
+                                          QStringLiteral("resolveTxOutputDevice %1").arg(matchReason),
+                                          !m_audioOutputDevice.trimmed().isEmpty());
+    }
     m_cachedTxOutputDeviceName = m_audioOutputDevice;
+    m_cachedTxOutputDeviceId = m_audioOutputDeviceId;
     m_cachedTxOutputDeviceFound = found;
     m_cachedTxOutputDevice = device;
     m_cachedTxOutputDeviceValid = true;
@@ -13309,6 +13628,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
                 && m_cachedTxOutputDeviceName == m_audioOutputDevice
+                && m_cachedTxOutputDeviceId == m_audioOutputDeviceId
                 && m_txAudioCache.outputDeviceName == m_audioOutputDevice
                 && m_txAudioCache.outputDeviceDescription == m_cachedTxOutputDevice.description()
                 && m_txAudioCache.outputChannel == m_audioOutputChannel
@@ -13388,7 +13708,10 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
         resolveMs = phaseTimer.elapsed();
         if (!found && !m_audioOutputDevice.trimmed().isEmpty()) {
             bridgeLog("TX audio cache: requested output device not found, fallback to default: " +
-                      device.description() + " requested=[" + m_audioOutputDevice + "]");
+                      device.description() +
+                      " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(device)) +
+                      " requested=[" + m_audioOutputDevice + "] requested_id=" +
+                      audioDeviceIdSettingForLog(m_audioOutputDeviceId));
         }
         phaseTimer.restart();
         format = chooseTxAudioFormat(device);
@@ -14441,7 +14764,10 @@ void DecodiumBridge::startTx()
 
         if (!requestedDeviceFound) {
             bridgeLog("startTx(mac): requested output device not found, fallback to default: " +
-                      outDev.description() + " requested=[" + m_audioOutputDevice + "]");
+                      outDev.description() +
+                      " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
+                      " requested=[" + m_audioOutputDevice + "] requested_id=" +
+                      audioDeviceIdSettingForLog(m_audioOutputDeviceId));
             emit statusMessage("Audio TX non trovato, uso default: " + outDev.description());
         }
         const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
@@ -14631,7 +14957,10 @@ void DecodiumBridge::startTx()
         m_txPcmData = preparedPcm;
         if (!m_cachedTxOutputDeviceFound && !m_audioOutputDevice.trimmed().isEmpty()) {
             bridgeLog("startTx: requested output device not found, fallback to default: " +
-                      outDev.description() + " requested=[" + m_audioOutputDevice + "]");
+                      outDev.description() +
+                      " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
+                      " requested=[" + m_audioOutputDevice + "] requested_id=" +
+                      audioDeviceIdSettingForLog(m_audioOutputDeviceId));
             emit statusMessage("Audio TX non trovato, uso default: " + outDev.description());
         }
         if (!outFmt.isValid() || m_txPcmData.isEmpty()) {
@@ -15327,7 +15656,10 @@ void DecodiumBridge::startTune()
 
         if (!requestedDeviceFound) {
             bridgeLog("startTune(mac): requested output device not found, fallback to default: " +
-                      outDev.description() + " requested=[" + m_audioOutputDevice + "]");
+                      outDev.description() +
+                      " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
+                      " requested=[" + m_audioOutputDevice + "] requested_id=" +
+                      audioDeviceIdSettingForLog(m_audioOutputDeviceId));
             emit statusMessage("Audio TUNE non trovato, uso default: " + outDev.description());
         }
         const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
@@ -15444,7 +15776,10 @@ bool DecodiumBridge::launchTuneAudio()
 
     if (!requestedDeviceFound) {
         bridgeLog("launchTuneAudio: requested output device not found, fallback to default: " +
-                  outDev.description() + " requested=[" + m_audioOutputDevice + "]");
+                  outDev.description() +
+                  " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
+                  " requested=[" + m_audioOutputDevice + "] requested_id=" +
+                  audioDeviceIdSettingForLog(m_audioOutputDeviceId));
     }
     const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
     m_txPcmData = buildTxPcmBuffer(wave, outFmt, boundedAudioChannel(m_audioOutputChannel));
@@ -15855,18 +16190,36 @@ void DecodiumBridge::refreshAudioDevices()
     } else if (linuxPulseInputSelected) {
         applyAudioInputRuntimeChange(QStringLiteral("refresh: Linux Pulse/PipeWire source selected"));
     } else if (!inputs.isEmpty()) {
-        if (hasAudioDeviceNamed(inputs, m_audioInputDevice)) {
+        QAudioDevice matchedInput;
+        QString inputMatchReason;
+        bool const inputResolved =
+            tryResolveAudioDeviceByIdentity(inputs,
+                                            m_audioInputDevice,
+                                            m_audioInputDeviceId,
+                                            &matchedInput,
+                                            &inputMatchReason);
+        if (inputResolved) {
+            rememberAudioInputDeviceIdentity(matchedInput,
+                                             QStringLiteral("refreshAudioDevices %1").arg(inputMatchReason),
+                                             !m_audioInputDevice.trimmed().isEmpty());
             if (legacyBackendAvailable()) {
                 m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
                 m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
             }
             applyAudioInputRuntimeChange(QStringLiteral("refresh: rebind selected input"));
-        } else {
+        } else if (m_audioInputDevice.trimmed().isEmpty()) {
             QString const fallbackInput =
                 preferredDeviceName(m_cachedDefaultAudioInput, inputs);
             if (!fallbackInput.isEmpty()) {
                 setAudioInputDevice(fallbackInput);
             }
+        } else {
+            bridgeLog(QStringLiteral("refreshAudioDevices: keeping unresolved saved input=[%1] id=%2 reason=%3; no silent default rewrite")
+                          .arg(m_audioInputDevice,
+                               audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                               inputMatchReason));
+            emit statusMessage(QStringLiteral("Audio input salvato non ritrovato o non univoco: %1")
+                                   .arg(m_audioInputDevice));
         }
     }
 
@@ -15882,18 +16235,36 @@ void DecodiumBridge::refreshAudioDevices()
     } else if (linuxPulseOutputSelected) {
         applyAudioOutputRuntimeChange(QStringLiteral("refresh: Linux Pulse/PipeWire sink selected"));
     } else if (!outputs.isEmpty()) {
-        if (hasAudioDeviceNamed(outputs, m_audioOutputDevice)) {
+        QAudioDevice matchedOutput;
+        QString outputMatchReason;
+        bool const outputResolved =
+            tryResolveAudioDeviceByIdentity(outputs,
+                                            m_audioOutputDevice,
+                                            m_audioOutputDeviceId,
+                                            &matchedOutput,
+                                            &outputMatchReason);
+        if (outputResolved) {
+            rememberAudioOutputDeviceIdentity(matchedOutput,
+                                              QStringLiteral("refreshAudioDevices %1").arg(outputMatchReason),
+                                              !m_audioOutputDevice.trimmed().isEmpty());
             if (legacyBackendAvailable()) {
                 m_legacyBackend->setAudioOutputDeviceName(m_audioOutputDevice);
                 m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
             }
             applyAudioOutputRuntimeChange(QStringLiteral("refresh: rebind selected output"));
-        } else {
+        } else if (m_audioOutputDevice.trimmed().isEmpty()) {
             QString const fallbackOutput =
                 preferredDeviceName(m_cachedDefaultAudioOutput, outputs);
             if (!fallbackOutput.isEmpty()) {
                 setAudioOutputDevice(fallbackOutput);
             }
+        } else {
+            bridgeLog(QStringLiteral("refreshAudioDevices: keeping unresolved saved output=[%1] id=%2 reason=%3; no silent default rewrite")
+                          .arg(m_audioOutputDevice,
+                               audioDeviceIdSettingForLog(m_audioOutputDeviceId),
+                               outputMatchReason));
+            emit statusMessage(QStringLiteral("Audio output salvato non ritrovato o non univoco: %1")
+                                   .arg(m_audioOutputDevice));
         }
     }
 
@@ -19012,6 +19383,8 @@ void DecodiumBridge::saveSettings()
     s.setValue("mode", saveMode);
     s.setValue("audioInputDevice", m_audioInputDevice);
     s.setValue("audioOutputDevice", m_audioOutputDevice);
+    s.setValue("audioInputDeviceId", m_audioInputDeviceId);
+    s.setValue("audioOutputDeviceId", m_audioOutputDeviceId);
     s.setValue("audioInputChannel", m_audioInputChannel);
     s.setValue("audioOutputChannel", m_audioOutputChannel);
     s.setValue("SoundInName", m_audioInputDevice);
@@ -23396,6 +23769,13 @@ void DecodiumBridge::loadSettings()
     }
     m_audioInputDevice  = s.value("audioInputDevice", s.value("SoundInName", "")).toString();
     m_audioOutputDevice = s.value("audioOutputDevice", s.value("SoundOutName", "")).toString();
+    m_audioInputDeviceId = s.value(QStringLiteral("audioInputDeviceId")).toString().trimmed();
+    m_audioOutputDeviceId = s.value(QStringLiteral("audioOutputDeviceId")).toString().trimmed();
+    bridgeLog(QStringLiteral("loadSettings: audio saved input=[%1] input_id=%2 output=[%3] output_id=%4")
+                  .arg(m_audioInputDevice,
+                       audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                       m_audioOutputDevice,
+                       audioDeviceIdSettingForLog(m_audioOutputDeviceId)));
     m_audioInputChannel = s.contains("audioInputChannel")
         ? s.value("audioInputChannel", 0).toInt()
         : static_cast<int>(AudioDevice::fromString(s.value("AudioInputChannel", "Mono").toString()));
@@ -29756,12 +30136,36 @@ void DecodiumBridge::startAudioCapture()
     const QString pulseSourceName = linuxPulseSourceNameFromDisplay(m_audioInputDevice);
 #endif
     bool requestedDeviceFound = false;
+    QString inputMatchReason;
     QAudioDevice selectedDevice =
-        resolveRxInputDevice(m_audioInputDevice, &requestedDeviceFound);
-    if (!requestedDeviceFound) {
-        bridgeLog("startAudioCapture: requested input device not found, fallback to default: " +
-                  selectedDevice.description());
-        emit statusMessage("Audio input non trovato, uso default: " + selectedDevice.description());
+        resolveRxInputDevice(m_audioInputDevice, m_audioInputDeviceId,
+                             &requestedDeviceFound, &inputMatchReason);
+    QString const selectedDeviceId = audioDeviceIdForSettings(selectedDevice);
+    bridgeLog(QStringLiteral("startAudioCapture: RX device resolve saved=[%1] saved_id=%2 match=%3 found=%4 selected=[%5] selected_id=%6 default=[%7] default_id=%8 input_count=%9")
+                  .arg(m_audioInputDevice,
+                       audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                       inputMatchReason,
+                       requestedDeviceFound ? QStringLiteral("1") : QStringLiteral("0"),
+                       selectedDevice.description(),
+                       audioDeviceIdSettingForLog(selectedDeviceId),
+                       cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false).description(),
+                       audioDeviceIdForLog(cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false)))
+                  .arg(cachedAudioInputs(QStringLiteral("startAudioCapture log input count"), false).size()));
+    if (requestedDeviceFound) {
+        rememberAudioInputDeviceIdentity(selectedDevice,
+                                         QStringLiteral("startAudioCapture %1").arg(inputMatchReason),
+                                         !m_audioInputDevice.trimmed().isEmpty());
+    } else if (!m_audioInputDevice.trimmed().isEmpty()) {
+        QString const warning = inputMatchReason.startsWith(QStringLiteral("ambiguous"))
+            ? QStringLiteral("Audio input non univoco, uso default: %1")
+            : QStringLiteral("Audio input non trovato, uso default: %1");
+        bridgeLog(QStringLiteral("startAudioCapture: requested input unresolved; fallback default selected=[%1] selected_id=%2 requested=[%3] requested_id=%4 reason=%5")
+                      .arg(selectedDevice.description(),
+                           audioDeviceIdSettingForLog(selectedDeviceId),
+                           m_audioInputDevice,
+                           audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                           inputMatchReason));
+        emit statusMessage(warning.arg(selectedDevice.description()));
     }
 
     // Create the audio sink (once, reused across start/stop cycles).
@@ -29853,8 +30257,9 @@ void DecodiumBridge::startAudioCapture()
     // Rolling back a 8192 (~170ms) — buffer sufficiente per FT4/FT8 final
     // windows ma sotto la soglia di breakage di Qt-WASAPI.
     const int rxFramesPerBuffer = 8192; // ~170 ms at 48 kHz, before decimation.
-    QString const startKey = QStringLiteral("%1|%2|%3|%4")
+    QString const startKey = QStringLiteral("%1|%2|%3|%4|%5")
         .arg(selectedDevice.description())
+        .arg(selectedDeviceId)
         .arg(downSampleFactor)
         .arg(static_cast<int>(channel))
         .arg(rxFramesPerBuffer);
@@ -29877,11 +30282,16 @@ void DecodiumBridge::startAudioCapture()
     }
 
     bridgeLog("SoundInput::start device=" + selectedDevice.description() +
+              " id=" + audioDeviceIdSettingForLog(selectedDeviceId) +
               " channel=" + QString::number((int)channel) +
               " dsf=" + QString::number(downSampleFactor) +
               " frames=" + QString::number(rxFramesPerBuffer));
     m_lastAudioCaptureStartKey = startKey;
     m_lastAudioCaptureStartMs = nowMs;
+    m_activeRxInputDeviceName = selectedDevice.description().trimmed();
+    m_activeRxInputDeviceId = selectedDeviceId;
+    m_rxAudioStartupStartMs = nowMs;
+    m_pendingRxAudioStartupHealthLog = true;
     m_audioUnhealthyStartMs = 0;
     m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 5000;
     if (m_audioSink) {
@@ -29889,8 +30299,9 @@ void DecodiumBridge::startAudioCapture()
     }
     m_soundInput->start(selectedDevice, rxFramesPerBuffer, m_audioSink, downSampleFactor, channel);
     m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
-    trace.addDetail(QStringLiteral("selected=[%1] frames=%2 channel=%3")
-                        .arg(selectedDevice.description())
+    trace.addDetail(QStringLiteral("selected=[%1] selected_id=%2 frames=%3 channel=%4")
+                        .arg(selectedDevice.description(),
+                             audioDeviceIdSettingForLog(selectedDeviceId))
                         .arg(rxFramesPerBuffer)
                         .arg(static_cast<int>(channel)));
 
@@ -30057,6 +30468,26 @@ void DecodiumBridge::handleAudioHealth(double rms,
     m_lastAudioHealthPeak = peak;
     m_lastAudioHealthClippedSamples = clippedSamples;
     m_lastAudioHealthSamples = samples;
+
+    if (m_pendingRxAudioStartupHealthLog) {
+        qint64 const startupAgeMs = m_rxAudioStartupStartMs > 0
+            ? now - m_rxAudioStartupStartMs
+            : 0;
+        if (startupAgeMs >= 1000) {
+            bridgeLog(QStringLiteral("Audio RX startup health: selected=[%1] id=%2 age_ms=%3 rms=%4 peak=%5 range=%6 clipped=%7/%8")
+                          .arg(m_activeRxInputDeviceName.isEmpty()
+                                   ? QStringLiteral("<unknown>")
+                                   : m_activeRxInputDeviceName,
+                               audioDeviceIdSettingForLog(m_activeRxInputDeviceId),
+                               QString::number(startupAgeMs),
+                               QString::number(rms, 'g', 4),
+                               QString::number(peak, 'g', 4),
+                               QString::number(dynamicRange),
+                               QString::number(clippedSamples),
+                               QString::number(samples)));
+            m_pendingRxAudioStartupHealthLog = false;
+        }
+    }
 
     if (now < m_audioWatchdogIgnoreUntilMs
         || m_transmitting
@@ -32060,7 +32491,9 @@ QAudioDevice DecodiumBridge::cachedDefaultAudioOutput(const QString& reason,
 }
 
 QAudioDevice DecodiumBridge::resolveRxInputDevice(const QString& requestedName,
-                                                  bool* requestedDeviceFound)
+                                                  const QString& requestedId,
+                                                  bool* requestedDeviceFound,
+                                                  QString* matchReason)
 {
     QString const requested = requestedName.trimmed();
     QList<QAudioDevice> const inputs =
@@ -32082,6 +32515,9 @@ QAudioDevice DecodiumBridge::resolveRxInputDevice(const QString& requestedName,
             if (requestedDeviceFound) {
                 *requestedDeviceFound = true;
             }
+            if (matchReason) {
+                *matchReason = QStringLiteral("linux-pulse-source");
+            }
             return QMediaDevices::defaultAudioInput();
         }
 
@@ -32092,19 +32528,23 @@ QAudioDevice DecodiumBridge::resolveRxInputDevice(const QString& requestedName,
     }
 #endif
 
-    if (!requested.isEmpty()) {
-        for (const QAudioDevice& dev : inputs) {
-            if (audioDeviceNameMatches(dev.description(), requested)) {
-                if (requestedDeviceFound) {
-                    *requestedDeviceFound = true;
-                }
-                return dev;
-            }
+    QAudioDevice matchedDevice;
+    QString reason;
+    if (tryResolveAudioDeviceByIdentity(inputs, requested, requestedId, &matchedDevice, &reason)) {
+        if (requestedDeviceFound) {
+            *requestedDeviceFound = true;
         }
+        if (matchReason) {
+            *matchReason = reason;
+        }
+        return matchedDevice;
     }
 
     if (requestedDeviceFound) {
         *requestedDeviceFound = requested.isEmpty();
+    }
+    if (matchReason) {
+        *matchReason = requested.isEmpty() ? QStringLiteral("default") : reason;
     }
     return selectedDevice;
 }

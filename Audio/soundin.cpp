@@ -179,6 +179,12 @@ bool isReusableInputStream(QAudioSource const* stream)
       || state == QAudio::IdleState
       || state == QAudio::SuspendedState;
 }
+
+QString audioDeviceIdForKey(QAudioDevice const& device)
+{
+  QByteArray const id = device.id();
+  return id.isEmpty() ? QString() : QString::fromLatin1(id.toHex());
+}
 }
 
 bool SoundInput::isActiveFor (QAudioDevice const& device,
@@ -197,8 +203,10 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
     }
 
   QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel);
-  QString const startKey = QStringLiteral("%1|%2|%3|%4")
+  QString const deviceId = audioDeviceIdForKey(device);
+  QString const startKey = QStringLiteral("%1|%2|%3|%4|%5")
       .arg(device.description())
+      .arg(deviceId)
       .arg(format.sampleRate())
       .arg(format.channelCount())
       .arg(static_cast<int>(channel));
@@ -210,6 +218,7 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
               && m_currentStartRequestedMs > 0
               && now_ms - m_currentStartRequestedMs < 5000))
       && m_deviceDescription == device.description()
+      && m_deviceId == deviceId
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
       && m_channelSelector == static_cast<int>(channel);
@@ -339,8 +348,10 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
                                  .arg(downSampleFactor)
                                  .arg(static_cast<int>(channel))
                                  .arg(inputFormatSummary(format)));
-  QString const currentStartKey = QStringLiteral("%1|%2|%3|%4")
+  QString const deviceId = audioDeviceIdForKey(device);
+  QString const currentStartKey = QStringLiteral("%1|%2|%3|%4|%5")
       .arg(device.description())
+      .arg(deviceId)
       .arg(format.sampleRate())
       .arg(format.channelCount())
       .arg(static_cast<int>(channel));
@@ -355,6 +366,7 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
               && now_ms - m_currentStartRequestedMs < 5000))
       && m_sink == sink
       && m_deviceDescription == device.description()
+      && m_deviceId == deviceId
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
       && m_channelSelector == static_cast<int>(channel))
@@ -391,6 +403,7 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
   stop ();
   m_deviceDescription = device.description();
+  m_deviceId = deviceId;
   m_sampleRate = format.sampleRate();
   m_channelCount = format.channelCount();
   m_channelSelector = static_cast<int>(channel);
@@ -716,6 +729,7 @@ void SoundInput::stop()
 
   retireCurrentStream ();
   m_deviceDescription.clear ();
+  m_deviceId.clear ();
   m_sampleRate = 0;
   m_channelCount = 0;
   m_channelSelector = static_cast<int>(AudioDevice::Mono);
