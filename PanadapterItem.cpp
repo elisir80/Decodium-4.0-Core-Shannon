@@ -2950,6 +2950,20 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
     if (rxX >= 0 && rxX < w)
         drawMarkerLabel(rxX, h / 2 - (txVisible ? 12 : 0), QStringLiteral("RX %1").arg(m_rxFreq), QColor(0, 229, 255));
 
+    // 1.0.341 — Marker TX magenta nel path GPU-direct overlay. Mancava: era
+    // disegnato SOLO in renderSpectrum() (path CPU morto quando gpuDirectReady),
+    // percio' col GPU-direct attivo il click sinistro impostava la freq TX ma il
+    // marker non compariva. Replica 1:1 del blocco TX di renderSpectrum.
+    if (txVisible) {
+        p.setPen(QPen(QColor(255, 0, 255, 70), 7.0));    // glow esterno
+        p.drawLine(txX, 0, txX, h);
+        p.setPen(QPen(QColor(255, 0, 255, 240), 3.0));   // linea principale
+        p.drawLine(txX, 0, txX, h);
+        p.setPen(QPen(QColor(255, 200, 255, 255), 1.0)); // core brillante
+        p.drawLine(txX, 0, txX, h);
+        drawMarkerLabel(txX, h / 2 + 12, QStringLiteral("TX %1").arg(m_txFreq), QColor(255, 0, 255));
+    }
+
     if (m_autoRange) {
         p.setFont(panadapterMonoFont(8));
         drawCrispOverlayText(p,
