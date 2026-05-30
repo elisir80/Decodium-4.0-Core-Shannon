@@ -448,6 +448,7 @@ Item {
                     Component {
                         id: clusterComp
                         DxClusterPanel {
+                            embedded: true   // 1.0.343 — no drag/resize interni nel workspace
                             minPanelWidth: 0
                             minPanelHeight: 0
                             x: 0; y: 0

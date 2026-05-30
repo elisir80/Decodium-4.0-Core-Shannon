@@ -12,6 +12,11 @@ Rectangle {
     signal closeRequested()
     signal positionCommitted()
 
+    // 1.0.343 — se incassato in un layout (DX-Pedition SplitView): disabilita
+    // drag header + resize grip (il grip scriveva saveGeometry corrompendo il
+    // pannello Cluster floating classico). La cella SplitView lo dimensiona.
+    property bool embedded: false
+
     property color bgDeep:        bridge.themeManager.bgDeep
     property color secondaryCyan: bridge.themeManager.secondaryColor
     property color accentGreen:   bridge.themeManager.accentColor
@@ -46,6 +51,7 @@ Rectangle {
 
         MouseArea {
             anchors.fill: parent
+            enabled: !root.embedded
             drag.target: root
             drag.axis: Drag.XAndYAxis
             drag.minimumX: 0
@@ -338,6 +344,8 @@ Rectangle {
 
     Rectangle {
         id: resizeHandle
+        visible: !root.embedded
+        enabled: !root.embedded
         width: 18
         height: 18
         anchors.right: parent.right
