@@ -265,8 +265,13 @@ ApplicationWindow {
         callerQueuePanelVisible = settingBool("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
         startupLog("fox/caller queue state restored")
         decodePanelLayoutSaved = settingBool("uiDecodePanelsLayoutSaved", false)
-        dxPeditionMode = settingBool("uiDxPeditionMode", false)
-        startupLog("dx-pedition mode restored = " + dxPeditionMode)
+        // 1.0.338: l'app parte SEMPRE in classico (footer+waterfall+TX). La
+        // DX-Pedition si attiva solo a mano da Impostazioni e NON si auto-ripristina
+        // all'avvio (scelta utente). Azzero anche il setting per coerenza col checkbox.
+        if (settingBool("uiDxPeditionMode", false))
+            bridge.setSetting("uiDxPeditionMode", false)
+        dxPeditionMode = false
+        startupLog("dx-pedition mode: always start classic (restore disabled by user)")
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
         savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
