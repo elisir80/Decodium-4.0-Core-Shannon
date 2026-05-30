@@ -5147,7 +5147,10 @@ void PanadapterItem::mousePressEvent(QMouseEvent* ev)
 {
     // Hit-test sulle label callsign (decode + cluster) prima del normale
     // freq-selection: click sinistro su una label = chiama la stazione.
-    if (ev->button() == Qt::LeftButton) {
+    // Fix 1.0.337: SOLO Ctrl+click sinistro su una label = chiama la stazione.
+    // Il click sinistro semplice imposta SEMPRE la freq TX (comportamento classico);
+    // i decode-label QML coprivano lo spettro e rubavano il click TX in FT8/FT4.
+    if (ev->button() == Qt::LeftButton && (ev->modifiers() & Qt::ControlModifier)) {
         QPoint pos((int)ev->position().x(), (int)ev->position().y());
         // Cluster prima (sono in basso, più visibili) se attivi
         if (m_showDxClusterSpots) {

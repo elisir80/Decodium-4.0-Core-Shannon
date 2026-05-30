@@ -1312,8 +1312,16 @@ Item {
                             y: Math.round(modelData.y - 2)
                             width: Math.round(modelData.widthHint + 6)
                             height: Math.round(modelData.rowHeight + 2)
+                            acceptedButtons: Qt.LeftButton
+                            propagateComposedEvents: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: bridge.engageDxClusterSpot(modelData.call, modelData.freq)
+                            // 1.0.337: il left-click SEMPLICE passa all'item C++ (imposta TX);
+                            // solo Ctrl+click chiama la stazione (engage).
+                            onPressed: function(mouse) { mouse.accepted = !!(mouse.modifiers & Qt.ControlModifier) }
+                            onClicked: function(mouse) {
+                                if (mouse.modifiers & Qt.ControlModifier)
+                                    bridge.engageDxClusterSpot(modelData.call, modelData.freq)
+                            }
                         }
                     }
                 }

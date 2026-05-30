@@ -265,11 +265,8 @@ ApplicationWindow {
         callerQueuePanelVisible = settingBool("uiCallerQueuePanelVisible", !!(bridge && bridge.foxMode))
         startupLog("fox/caller queue state restored")
         decodePanelLayoutSaved = settingBool("uiDecodePanelsLayoutSaved", false)
-        // Startup guard for testing: avoid restoring the DX-Pedition workspace automatically.
-        if (settingBool("uiDxPeditionMode", false))
-            bridge.setSetting("uiDxPeditionMode", false)
-        dxPeditionMode = false
-        startupLog("dx-pedition mode forced off for startup test")
+        dxPeditionMode = settingBool("uiDxPeditionMode", false)
+        startupLog("dx-pedition mode restored = " + dxPeditionMode)
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
         savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
