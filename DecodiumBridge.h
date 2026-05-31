@@ -2595,7 +2595,7 @@ private:
     std::atomic_bool m_gpuPanadapterFftAvailable {true};
     std::atomic_bool m_forceGpuPanadapterFft {true};
     qint64 m_lastGpuPanadapterProbeMs {0};
-    QPointer<PanadapterItem> m_panadapterItem;
+    QList<QPointer<PanadapterItem>> m_panadapterItems;
 
     struct PanadapterFrameResult
     {

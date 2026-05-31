@@ -348,7 +348,7 @@ Rectangle {
                         Text { text: "\uD83D\uDD0D"; font.pixelSize: 10; color: textSecondary }
                         TextField {
                             id: searchField; Layout.fillWidth: true
-                            placeholderText: "Search..."
+                            placeholderText: "Cerca..."
                             font.pixelSize: 10; font.family: decodiumMonoFontFamily
                             color: textPrimary; placeholderTextColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             onTextChanged: { clearSelection(); refreshLog() }
@@ -402,7 +402,7 @@ Rectangle {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Remove filters"
+                    ToolTip.text: "Rimuovi i filtri"
                     ToolTip.delay: 500
                 }
 

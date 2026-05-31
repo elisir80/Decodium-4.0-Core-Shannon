@@ -475,7 +475,7 @@ Item {
                                     boldLabel: mamBtn.checked
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Multi-Answer Mode (right-click=window)")
+                                ToolTip.text: qsTr("Multi-Answer Mode (MAM) — clic destro = apri finestra (default OFF)")
                                 ToolTip.delay: 500
                             }
 
@@ -512,7 +512,7 @@ Item {
                                     boldLabel: deepBtn.checked
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Deep Search")
+                                ToolTip.text: qsTr("Deep Search: ricerca profonda dei segnali deboli tramite i callsign noti (default OFF)")
                                 ToolTip.delay: 500
                             }
                         }
@@ -543,7 +543,7 @@ Item {
                                     boldLabel: apBtn.checked
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("A priori decoding")
+                                ToolTip.text: qsTr("Decodifica a priori (AP): usa informazioni note per recuperare i segnali deboli (default OFF)")
                                 ToolTip.delay: 500
                             }
                         }
@@ -574,7 +574,7 @@ Item {
                                 boldLabel: autoSeqBtn2.checked
                             }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Auto Sequence")
+                            ToolTip.text: qsTr("Sequenza automatica del QSO (default OFF)")
                             ToolTip.delay: 500
                         }
 
@@ -604,7 +604,7 @@ Item {
                                     boldLabel: qqBtn.checked
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Quick QSO - skip TX1 and start from TX2 (direct report)")
+                                ToolTip.text: qsTr("Quick QSO: salta TX1 e parte da TX2 (rapporto diretto) (default OFF)")
                                 ToolTip.delay: 500
                             }
                         }
@@ -644,7 +644,7 @@ Item {
                                 boldLabel: true
                             }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Enable TX")
+                            ToolTip.text: qsTr("Abilita la TX")
                             ToolTip.delay: 500
                         }
 
@@ -678,7 +678,7 @@ Item {
                                     boldLabel: holdTxFreqBtn.checked
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Lock TX frequency\n(Hold Tx Freq)")
+                                ToolTip.text: qsTr("Blocca la frequenza TX\n(Hold Tx Freq)")
                                 ToolTip.delay: 500
                             }
                         }
@@ -705,7 +705,7 @@ Item {
                                 boldLabel: engine && engine.autoCqRepeat
                             }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Auto CQ Repeat\nCall CQ automatically until a reply is received")
+                            ToolTip.text: qsTr("Auto CQ ripetuto\nChiama CQ automaticamente finché non arriva una risposta (default OFF)")
                             ToolTip.delay: 500
 
                             onClicked: {
@@ -740,10 +740,10 @@ Item {
                             }
                             ToolTip.visible: hovered
                             ToolTip.text: engine && engine.targetCallActive
-                                          ? qsTr("Active call: %1 (attempt %2/%3)\nClick to open the panel").arg(engine.targetCallSign)
+                                          ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire il pannello").arg(engine.targetCallSign)
                                                 .arg(engine.targetCallRetryCount)
                                                 .arg(engine.targetCallMaxRetries === 0 ? "\u221e" : engine.targetCallMaxRetries)
-                                          : qsTr("Calls (CALL)\nOpen the direct-call panel for a callsign\nwith attempts, timeout and period control")
+                                          : qsTr("Chiamata diretta (CALL)\nApri il pannello di chiamata diretta di un callsign\ncon controllo di tentativi, timeout e periodo")
                             ToolTip.delay: 500
 
                             onClicked: txPanel.callRequested()
@@ -774,7 +774,7 @@ Item {
                                 boldLabel: true
                             }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("TX slot\n1st: :00/:30\n2nd: :15/:45")
+                            ToolTip.text: qsTr("Slot TX\n1º: :00/:30\n2º: :15/:45")
                             ToolTip.delay: 500
                             onClicked: if (engine) engine.txPeriod = engine.txPeriod === 1 ? 0 : 1
                         }
@@ -804,7 +804,7 @@ Item {
                                     boldLabel: engine && engine.alt12Enabled
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Auto CQ: alternate TX/RX phases after repeated CQ without reply")
+                                ToolTip.text: qsTr("Auto CQ: alterna le fasi TX/RX dopo CQ ripetuti senza risposta (default OFF)")
                                 ToolTip.delay: 500
                                 onClicked: if (engine) engine.alt12Enabled = !engine.alt12Enabled
                             }
@@ -835,7 +835,7 @@ Item {
                             }
                             onClicked: if (engine) engine.haltWithReason("qml-halt-button")
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Halt TX")
+                            ToolTip.text: qsTr("Interrompi la TX")
                             ToolTip.delay: 500
                         }
 
@@ -863,7 +863,7 @@ Item {
                                     boldLabel: true
                                 }
                                 ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Clear DX, reports and TX1-TX5")
+                                ToolTip.text: qsTr("Cancella DX, rapporti e TX1-TX5")
                                 ToolTip.delay: 500
                             }
                         }
@@ -897,7 +897,7 @@ Item {
                                 }
                             }
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Tune")
+                            ToolTip.text: qsTr("Tune (emette la portante di accordo)")
                             ToolTip.delay: 500
                         }
 
@@ -910,7 +910,7 @@ Item {
                             transmitting: engine ? engine.transmitting : false
                             snr: engine ? engine.asyncSnrDb : -99
                             ToolTip.visible: hovered
-                            ToolTip.text: qsTr("FT2 Async Mode - sine wave: green=RX, red=TX")
+                            ToolTip.text: qsTr("Modalità Async FT2 — onda sinusoidale: verde=RX, rosso=TX (default OFF)")
                             ToolTip.delay: 400
                         }
 
@@ -941,7 +941,7 @@ Item {
                             }
 
                             ToolTip.visible: houndModeBadgeHover.containsMouse
-                            ToolTip.text: qsTr("Hound mode active")
+                            ToolTip.text: qsTr("Modalità Hound attiva")
                             ToolTip.delay: 400
                         }
 
@@ -972,7 +972,7 @@ Item {
                             }
 
                             ToolTip.visible: waitPounceBadgeHover.containsMouse
-                            ToolTip.text: qsTr("Wait & Pounce active")
+                            ToolTip.text: qsTr("Wait & Pounce attivo")
                             ToolTip.delay: 400
                         }
 

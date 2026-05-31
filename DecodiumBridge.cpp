@@ -24720,7 +24720,7 @@ void DecodiumBridge::saveWindowState(const QString& key,
 // su un monitor disconnesso o fuori dall'area visibile.
 void DecodiumBridge::resetWindowLayout()
 {
-    QSettings s;
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     s.remove(QStringLiteral("WindowState"));
     s.sync();
     bridgeLog(QStringLiteral("resetWindowLayout: tutte le WindowState/* cancellate, signal emesso"));
@@ -30056,22 +30056,33 @@ void DecodiumBridge::onSpectrumTimer()
 
                 m_lastPanadapterFrameMs = nowMs;
 #if defined(DECODIUM_QML_PANADAPTER_DIRECT)
-                if (m_panadapterItem) {
-                    bool const accepted = m_panadapterItem->addPcmFrameI16(m_wfRing,
-                                                                           WF_RING_SIZE,
-                                                                           ringStart,
-                                                                           firstChunk,
-                                                                           usable,
-                                                                           nfaSnapshot,
-                                                                           nfbSnapshot,
-                                                                           freqMinHz,
-                                                                           freqMaxHz,
-                                                                           static_cast<qulonglong>(serial));
-                    metricDelivered = accepted;
+                bool anyAlive = false;
+                bool anyAccepted = false;
+                m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+                for (const QPointer<PanadapterItem>& ref : m_panadapterItems) {
+                    PanadapterItem* it = ref.data();
+                    if (!it)
+                        continue;
+                    anyAlive = true;
+                    bool const accepted = it->addPcmFrameI16(m_wfRing,
+                                                             WF_RING_SIZE,
+                                                             ringStart,
+                                                             firstChunk,
+                                                             usable,
+                                                             nfaSnapshot,
+                                                             nfbSnapshot,
+                                                             freqMinHz,
+                                                             freqMaxHz,
+                                                             static_cast<qulonglong>(serial));
+                    if (accepted)
+                        anyAccepted = true;
+                }
+                if (anyAlive) {
+                    metricDelivered = anyAccepted;
                     metricHighRes = true;
                     metricGpu = true;
                     metricUsable = usable;
-                    if (!accepted) {
+                    if (!anyAccepted) {
                         setGpuPanadapterFftAvailable(
                             false,
                             QStringLiteral("PanadapterItem rejected GPU FFT I16 frame"));
@@ -34391,21 +34402,33 @@ void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString&
 
 void DecodiumBridge::registerPanadapterItem(PanadapterItem* item)
 {
-    if (!item || m_panadapterItem == item)
+    if (!item)
         return;
 
-    m_panadapterItem = item;
+    // 1.0.347 - lista di target PCM (non piu' puntatore singolo): in DX-Pedition
+    // coesistono 2 PanadapterItem (classico + tactical). Con un solo slot, la
+    // distruzione del waterfall tactical all'uscita azzerava il feed lasciando il
+    // classico congelato. Con la lista ogni item vivo registrato riceve il PCM.
+    m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+    if (m_panadapterItems.contains(QPointer<PanadapterItem>(item)))
+        return;
+
+    m_panadapterItems.append(QPointer<PanadapterItem>(item));
     qInfo().noquote()
         << "[PANDBG] Panadapter PCM frame feed registered"
         << "route=C++_I16_ring"
         << "qml_bypass=1"
-        << "bridge_vector_float=0";
+        << "bridge_vector_float=0"
+        << "targets=" << m_panadapterItems.size();
 }
 
 void DecodiumBridge::unregisterPanadapterItem(PanadapterItem* item)
 {
-    if (item && m_panadapterItem == item)
-        m_panadapterItem.clear();
+    m_panadapterItems.removeAll(QPointer<PanadapterItem>(item));
+    m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+    qInfo().noquote()
+        << "[PANDBG] Panadapter PCM frame feed unregistered"
+        << "targets=" << m_panadapterItems.size();
 }
 
 int         DecodiumBridge::qsoCount()         const

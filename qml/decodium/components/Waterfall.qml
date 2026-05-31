@@ -425,7 +425,7 @@ Item {
                     id: showCallsCheck
                     checked: waterfallPanel.showDecodeCallsigns
                     onClicked: waterfallPanel.setShowDecodeCallsigns(checked)
-                    ToolTip.text: "Show decoded callsigns on the waterfall"
+                    ToolTip.text: "Mostra i callsign decodificati sulla cascata"
                     ToolTip.visible: showCallsCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -563,7 +563,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallAutoRange", checked)
                         }
                     }
-                    ToolTip.text: "Auto noise floor (IIR)"
+                    ToolTip.text: "Soglia di rumore automatica (IIR)"
                     ToolTip.visible: autoRangeCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -607,7 +607,7 @@ Item {
                             waterfallPanel.scheduleDxClusterRefresh(0)
                         }
                     }
-                    ToolTip.text: "Show DX Cluster spots on the waterfall (click to call)"
+                    ToolTip.text: "Mostra gli spot del DX Cluster sulla cascata (clicca per chiamare)"
                     ToolTip.visible: dxClusterCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -660,7 +660,7 @@ Item {
 
                     ToolTip.visible: collapseControlsMA.containsMouse
                     ToolTip.delay: 450
-                    ToolTip.text: qsTr("Hide waterfall controls")
+                    ToolTip.text: qsTr("Nascondi i controlli della cascata")
                 }
 
                 // Peak Hold toggle
@@ -673,7 +673,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallPeakHold", checked)
                         }
                     }
-                    ToolTip.text: "Peak Hold"
+                    ToolTip.text: "Peak Hold: mantiene visibili i picchi dello spettro"
                     ToolTip.visible: peakHoldCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -718,7 +718,7 @@ Item {
                     text: waterfallDisplay.measuredFloor.toFixed(0) + "dBm"
                     color: accentGreen
                     font.pixelSize: 10
-                    ToolTip.text: "Noise floor misurato"
+                    ToolTip.text: "Soglia di rumore misurata"
                     ToolTip.visible: nfLabel.containsMouse
                     ToolTip.delay: 400
                     MouseArea { id: nfLabel; anchors.fill: parent; hoverEnabled: true }
@@ -1648,7 +1648,7 @@ Item {
 
         ToolTip.visible: toggleMouse.containsMouse
         ToolTip.delay: 450
-        ToolTip.text: qsTr("Show waterfall controls")
+        ToolTip.text: qsTr("Mostra i controlli della cascata")
     }
 
     // Sync Bridge → PanadapterItem

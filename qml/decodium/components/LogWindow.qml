@@ -514,7 +514,7 @@ Popup {
                         TextField {
                             id: searchField
                             Layout.fillWidth: true
-                            placeholderText: "Search call, grid..."
+                            placeholderText: "Cerca call, locatore..."
                             font.pixelSize: 11; font.family: decodiumMonoFontFamily
                             color: textPrimary
                             placeholderTextColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
@@ -572,7 +572,7 @@ Popup {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Remove search, band and mode filters"
+                    ToolTip.text: "Rimuovi i filtri di ricerca, banda e modo"
                     ToolTip.delay: 500
                 }
 

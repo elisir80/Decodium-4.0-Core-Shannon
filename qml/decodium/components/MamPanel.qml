@@ -155,6 +155,7 @@ Item {
 
         ToolTip.visible: moveMouse.containsMouse && queueMoveButton.active
         ToolTip.text: queueMoveButton.tip
+        ToolTip.delay: 500
     }
 
     RowLayout {

@@ -355,7 +355,7 @@ Rectangle {
                         text: "FT Decoder Threads: "
                               + (ftThreadsLed.autoMode ? "AUTO " : "")
                               + ftThreadsLed.threadCount
-                              + "\nClick: cycle 1-8 - Right-click: AUTO"
+                              + "\nClic: cicla 1-8 - Clic destro: AUTO"
                     }
                 }
             }
@@ -434,8 +434,8 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: checkSwrEnabled
-                            ? "Check SWR active: TX is blocked/stopped when SWR > 2.5"
-                            : "Power/SWR telemetry from CAT"
+                            ? "Controllo SWR attivo: la TX viene bloccata/interrotta quando SWR > 2,5"
+                            : "Telemetria potenza/SWR dal CAT"
                     }
                 }
             }
@@ -465,7 +465,7 @@ Rectangle {
 
                     ToolTip.visible: alcMouseArea.containsMouse
                     ToolTip.delay: 500
-                    ToolTip.text: qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
+                    ToolTip.text: qsTr("Misuratore ALC 0..100\n>60 = ALC eccessivo (potenza TX troppo alta)")
                 }
 
                 MouseArea {
@@ -489,7 +489,7 @@ Rectangle {
             implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Reset Layout (Ctrl+Shift+L)\nMove all floating windows back into the main window\nand recenter Decodium on the primary monitor.")
+            ToolTip.text: qsTr("Reset layout (Ctrl+Shift+L)\nRiporta tutte le finestre mobili nella finestra principale\ne ricentra Decodium sul monitor primario.")
             ToolTip.delay: 300
             onClicked: footerResetLayoutConfirm.open()
             background: Rectangle {
@@ -529,7 +529,7 @@ Rectangle {
             implicitHeight: footerButtonHeight
             padding: 0
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Decode History (Ctrl+Shift+H)\nOpen the persisted decode history browser\nstored in the SQLite database. Filters + ADIF export.")
+            ToolTip.text: qsTr("Cronologia decodifiche (Ctrl+Shift+H)\nApre lo storico delle decodifiche salvate\nnel database SQLite. Filtri ed esportazione ADIF.")
             ToolTip.delay: 300
             onClicked: {
                 if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
@@ -576,7 +576,7 @@ Rectangle {
             readonly property bool clusterOn: typeof mainWindow !== 'undefined'
                                               && mainWindow.dxClusterPanelVisible
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("DX Cluster (toggle)\nOpen or close the floating DX Cluster window.\nThe window can be moved to any monitor.")
+            ToolTip.text: qsTr("Cluster (toggle)\nApre o chiude la finestra mobile del DX Cluster.\nLa finestra può essere spostata su qualsiasi monitor.")
             ToolTip.delay: 300
             onClicked: {
                 if (typeof mainWindow !== 'undefined') {
@@ -632,7 +632,7 @@ Rectangle {
             implicitWidth: width
             onAccepted: { if (bridge) bridge.resetWindowLayout() }
             contentItem: Text {
-                text: qsTr("Move all floating windows back into the main window\nand recenter Decodium on the primary monitor?\n\nSaved window coordinates will be cleared.")
+                text: qsTr("Riportare tutte le finestre mobili nella finestra principale\ne ricentrare Decodium sul monitor primario?\n\nLe coordinate salvate delle finestre verranno cancellate.")
                 color: textPrimary
                 wrapMode: Text.WordWrap
                 width: footerResetLayoutConfirm.width - footerResetLayoutConfirm.leftPadding - footerResetLayoutConfirm.rightPadding
@@ -670,10 +670,10 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: !pskStatusRow.pskEnabled
-                              ? "PSK Reporter: disabled"
+                              ? "PSK Reporter: disattivato"
                               : (pskStatusRow.pskConnected
-                                 ? "PSK Reporter: connected to report.pskreporter.info"
-                                 : "PSK Reporter: recent HTTP errors")
+                                 ? "PSK Reporter: connesso a report.pskreporter.info"
+                                 : "PSK Reporter: errori HTTP recenti")
                     }
                 }
             }
@@ -781,12 +781,12 @@ Rectangle {
                     visible: gpuMonitorMouse.containsMouse
                     delay: 500
                     text: realGpuUsageAvailable
-                          ? "Real Decodium GPU process usage\n"
-                            + gpuLoadText + " from OS GPU counters\n"
-                            + gpuFps + " rendered frames/s"
-                          : "GPU process counter unavailable\n"
-                            + "Estimated render activity\n"
-                            + gpuFps + " rendered frames/s"
+                          ? "Uso reale della GPU del processo Decodium\n"
+                            + gpuLoadText + " dai contatori GPU del sistema\n"
+                            + gpuFps + " frame renderizzati/s"
+                          : "Contatore GPU del processo non disponibile\n"
+                            + "Attività di rendering stimata\n"
+                            + gpuFps + " frame renderizzati/s"
                 }
             }
         }
