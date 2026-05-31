@@ -1,5 +1,61 @@
 # Changelog / Registro Modifiche
 
+## [1.0.348] - 2026-05-31
+
+### Italiano
+
+Release finale dopo la 1.0.347, centrata su stabilita' TX/Tune Linux, autosequenza, worked-before corretto per banda/modo, refresh audio all'avvio e opzioni display richieste dagli utenti.
+
+#### Aggiunto
+
+- Refresh automatico delle periferiche audio durante l'avvio, prima dell'auto-monitor, per evitare che RX parta con una cache audio non aggiornata.
+- Opzioni in Setup > Display > Decodes per mostrare/nascondere `Dist` e `Az` in Full Spectrum e Signal RX.
+- Colonna `Freq` configurabile nella finestra Signal RX.
+- Riconoscimento worked-before piu' preciso per chiamata, banda e modo.
+- Gestione autosequenza piu' permissiva per CPU lente nei passaggi TX1/TX2/TX3.
+
+#### Modificato
+
+- `Check SWR` non blocca piu' il Tune: la protezione resta attiva solo per TX reale e AutoCQ, cosi' l'utente puo' misurare e correggere SWR alto con strumenti esterni.
+- Il decoder FT2 su CPU lente evita lavoro asincrono non utile durante TX, riducendo ritardi nei casi limite di slot/timing.
+- Il panadapter non disegna piu' i marker gialli duplicati a 500/1000/1500/2000/2500/3000 Hz, lasciando la scala inferiore come riferimento unico.
+- La risoluzione audio TX/Tune usa callback QAudioSink piu' difensivi, con guardie su oggetti e seriale playback.
+- Metadati locali, Inno Setup e NSIS allineati alla versione `1.0.348`.
+
+#### Corretto
+
+- Fix del crash Linux dopo errori audio TX/Tune (`QSocketNotifier` da thread errato e successivo `SIGNAL 11`).
+- Corretto il falso worked-before tra modi o bande diverse: un QSO in 20m FT2 non marca piu' come gia' lavorato 20m FT8 o 40m FT2.
+- Migliorata l'autosequenza con nominativi lunghi/speciali e hash locali diretti al partner attivo.
+- Evitati fallback silenziosi in startup monitor quando la periferica audio salvata esiste ma Qt non ha ancora completato l'enumerazione.
+
+### English
+
+Final release after 1.0.347, focused on Linux TX/Tune stability, autosequence reliability, exact band/mode worked-before checks, startup audio refresh, and requested decode display options.
+
+#### Added
+
+- Automatic audio-device refresh during startup before auto-monitor starts, avoiding RX startup with stale audio cache.
+- Setup > Display > Decodes options to show/hide `Dist` and `Az` in Full Spectrum and Signal RX.
+- Configurable `Freq` column in Signal RX.
+- More precise worked-before tracking by call, band, and mode.
+- More tolerant autosequence retry budget for slow CPUs during TX1/TX2/TX3 transitions.
+
+#### Changed
+
+- `Check SWR` no longer blocks Tune: protection remains active only for real TX and AutoCQ, so users can measure high SWR and correct it externally.
+- FT2 decoding on slow CPUs avoids non-useful async decode work during TX, reducing slot/timing edge cases.
+- The panadapter no longer draws duplicate yellow 500/1000/1500/2000/2500/3000 Hz labels, leaving the bottom scale as the single reference.
+- TX/Tune audio handling now uses more defensive QAudioSink callbacks guarded by object lifetime and playback serial.
+- Local metadata, Inno Setup, and NSIS are aligned to `1.0.348`.
+
+#### Fixed
+
+- Fixed the Linux crash after TX/Tune audio errors (`QSocketNotifier` from the wrong thread followed by `SIGNAL 11`).
+- Fixed false worked-before matches across different modes or bands: 20m FT2 no longer marks 20m FT8 or 40m FT2 as worked.
+- Improved autosequence handling for long/special callsigns and local hashes directed to the active partner.
+- Avoided silent startup-monitor fallback when the saved audio device exists but Qt has not completed enumeration yet.
+
 ## [1.0.347] - 2026-05-31
 
 ### Italiano

@@ -435,7 +435,7 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: checkSwrEnabled
-                            ? "Check SWR active: TX is blocked/stopped when SWR > 2.5"
+                            ? "Check SWR active: TX/AutoCQ is blocked when SWR > 2.5; Tune remains available for measurement"
                             : "Power/SWR telemetry from CAT"
                     }
                 }

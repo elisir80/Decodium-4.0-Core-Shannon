@@ -2647,17 +2647,6 @@ void PanadapterItem::renderSpectrum()
         p.drawLine(rxX, 0, rxX, h);
     }
 
-    // ── Frequency ticks ogni 500Hz ────────────────────────────────────────
-    p.setFont(panadapterMonoFont(9, QFont::Bold));
-    for (int calFreq = (int)(viewStart/500)*500 + 500; calFreq < (int)(viewStart+viewRange); calFreq += 500) {
-        int cx = fToX(calFreq);
-        if (cx < 0 || cx >= w) continue;
-        p.setPen(QPen(QColor(255, 230, 0, 180), 1));
-        p.drawLine(cx, h-18, cx, h-6);
-        p.setPen(QColor(220, 210, 0));
-        p.drawText(cx - 20, h-20, QString::number(calFreq));
-    }
-
     // ── Marker TX: magenta (Slice B SmartSDR) — spessa + glow ───────────
     if (txVisible) {
         // Glow esterno
@@ -2933,20 +2922,6 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
         drawCrispOverlayText(p, tx, h - 3, label, QColor(235, 235, 235));
-    }
-
-    for (int f = (static_cast<int>(viewStart / 500.0f) * 500) + 500;
-         f < static_cast<int>(viewStart + viewRange);
-         f += 500) {
-        int const x = fToX(static_cast<float>(f));
-        if (x < 0 || x >= w)
-            continue;
-        p.setPen(QPen(QColor(255, 230, 0, 180), 1));
-        p.drawLine(x, qMax(0, h - 18), x, qMax(0, h - 6));
-        QString const label = QString::number(f);
-        QFontMetrics const fm(p.font());
-        int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
-        drawCrispOverlayText(p, tx, qMax(10, h - 20), label, QColor(255, 240, 0));
     }
 
     if (rxX >= 0 && rxX < w) {

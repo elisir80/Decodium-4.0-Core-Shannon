@@ -1139,6 +1139,11 @@ ApplicationWindow {
     // DX-Pedition Fase 2a — opt-in 3-column tactical workspace (default OFF)
     property bool dxPeditionMode: false
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
+    property bool fullSpectrumShowDistColumn: settingBool("uiFullSpectrumShowDistColumn", true)
+    property bool fullSpectrumShowAzColumn: settingBool("uiFullSpectrumShowAzColumn", true)
+    property bool signalRxShowFreqColumn: settingBool("uiSignalRxShowFreqColumn", true)
+    property bool signalRxShowDistColumn: settingBool("uiSignalRxShowDistColumn", true)
+    property bool signalRxShowAzColumn: settingBool("uiSignalRxShowAzColumn", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     property bool highlight73: bridge.getSetting("Highlight73", true)
     property bool highlightOrange: bridge.getSetting("HighlightOrange", false)
@@ -1231,6 +1236,16 @@ ApplicationWindow {
                 mainWindow.compactFullSpectrum = mainWindow.coerceBool(value, false)
             else if (key === "CompactSignalRx")
                 mainWindow.compactSignalRx = mainWindow.coerceBool(value, false)
+            else if (key === "uiFullSpectrumShowDistColumn")
+                mainWindow.fullSpectrumShowDistColumn = mainWindow.coerceBool(value, true)
+            else if (key === "uiFullSpectrumShowAzColumn")
+                mainWindow.fullSpectrumShowAzColumn = mainWindow.coerceBool(value, true)
+            else if (key === "uiSignalRxShowFreqColumn")
+                mainWindow.signalRxShowFreqColumn = mainWindow.coerceBool(value, true)
+            else if (key === "uiSignalRxShowDistColumn")
+                mainWindow.signalRxShowDistColumn = mainWindow.coerceBool(value, true)
+            else if (key === "uiSignalRxShowAzColumn")
+                mainWindow.signalRxShowAzColumn = mainWindow.coerceBool(value, true)
             else if (key === "UILanguage")
                 mainWindow.uiLanguage = mainWindow.normalizeUiLanguage(String(value || "en"))
             else if (key === "uiDecodePanelsLayoutSaved")
@@ -5548,9 +5563,9 @@ ApplicationWindow {
                             readonly property int dtFreqGapWidth: compactColumns ? 6 : 8
                             readonly property int freqColumnWidth: compactColumns ? 42 : 45
                             readonly property int gapColumnWidth: compactColumns ? 8 : 12
-                            readonly property int distanceColumnWidth: compactColumns ? 0 : 58
+                            readonly property int distanceColumnWidth: mainWindow.fullSpectrumShowDistColumn && !compactColumns ? 58 : 0
                             readonly property int dxccColumnWidth: mainWindow.showDxccInfo ? (compactColumns ? 108 : Math.min(300, Math.max(190, Math.round(width * 0.24)))) : 0
-                            readonly property int azColumnWidth: mainWindow.showDxccInfo ? (compactColumns ? 42 : 52) : 0
+                            readonly property int azColumnWidth: mainWindow.showDxccInfo && mainWindow.fullSpectrumShowAzColumn ? (compactColumns ? 42 : 52) : 0
                             readonly property int messageMinWidth: compactColumns ? 72 : 140
                             // Divisore Full Spectrum / Signal RX: 50/50 affidabile.
                             // Se `parent.width==0` al momento del callback (timing race),
@@ -5853,7 +5868,7 @@ ApplicationWindow {
                                         Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.fillWidth: true }
                                         Text { visible: period1Panel.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
                                         Item {
-                                            visible: mainWindow.showDxccInfo
+                                            visible: period1Panel.dxccColumnWidth > 0
                                             Layout.preferredWidth: period1Panel.dxccColumnWidth
                                             Layout.fillHeight: true
                                             Text {
@@ -5868,7 +5883,7 @@ ApplicationWindow {
                                             }
                                         }
                                         Item {
-                                            visible: mainWindow.showDxccInfo
+                                            visible: period1Panel.azColumnWidth > 0
                                             Layout.preferredWidth: period1Panel.azColumnWidth
                                             Layout.fillHeight: true
                                             Text {
@@ -6158,7 +6173,7 @@ NumberAnimation {
 	                                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; Layout.minimumWidth: period1Panel.messageMinWidth; elide: messageElideMode(entry.displayMessage || entry.message) }
 		                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
                                                 Item {
-                                                    visible: mainWindow.showDxccInfo
+                                                    visible: period1Panel.dxccColumnWidth > 0
                                                     Layout.preferredWidth: period1Panel.dxccColumnWidth
                                                     Layout.fillHeight: true
                                                     clip: true
@@ -6177,7 +6192,7 @@ NumberAnimation {
                                                     }
                                                 }
                                                 Item {
-                                                    visible: mainWindow.showDxccInfo
+                                                    visible: period1Panel.azColumnWidth > 0
                                                     Layout.preferredWidth: period1Panel.azColumnWidth
                                                     Layout.fillHeight: true
                                                     Text {
@@ -6264,8 +6279,11 @@ NumberAnimation {
                             readonly property int dbColumnWidth: compactColumns ? 34 : 38
                             readonly property int dbDtGapWidth: compactColumns ? 4 : 6
                             readonly property int dtColumnWidth: compactColumns ? 42 : 48
+                            readonly property int dtFreqGapWidth: mainWindow.signalRxShowFreqColumn ? (compactColumns ? 4 : 6) : 0
+                            readonly property int freqColumnWidth: mainWindow.signalRxShowFreqColumn ? (compactColumns ? 42 : 46) : 0
                             readonly property int gapColumnWidth: compactColumns ? 8 : 12
-                            readonly property int distanceColumnWidth: compactColumns ? 0 : 56
+                            readonly property int distanceColumnWidth: mainWindow.signalRxShowDistColumn && !compactColumns ? 56 : 0
+                            readonly property int azColumnWidth: mainWindow.signalRxShowAzColumn && !compactColumns ? 42 : 0
                             color: "transparent"
                             onWidthChanged: {
                                 if (width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
@@ -6495,9 +6513,12 @@ NumberAnimation {
                                         Text { text: "dB"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dbColumnWidth }
                                         Item { Layout.preferredWidth: rxFreqPanel.dbDtGapWidth }
                                         Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
+                                        Item { visible: rxFreqPanel.freqColumnWidth > 0; Layout.preferredWidth: rxFreqPanel.dtFreqGapWidth }
+                                        Text { visible: rxFreqPanel.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
                                         Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
                                         Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true }
                                         Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
+                                        Text { visible: rxFreqPanel.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
                                     }
                                 }
 
@@ -6736,9 +6757,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		                                                Text { text: rxFrequencyDelegate.entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.snrColor || (rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary)); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dbColumnWidth }
 	                                                Item { Layout.preferredWidth: rxFreqPanel.dbDtGapWidth }
 		                                                Text { text: rxFrequencyDelegate.entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
+	                                                Item { visible: rxFreqPanel.freqColumnWidth > 0; Layout.preferredWidth: rxFreqPanel.dtFreqGapWidth }
+		                                                Text { visible: rxFreqPanel.freqColumnWidth > 0; text: rxFrequencyDelegate.entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
 	                                                Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
 	                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
 		                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
+		                                                Text { visible: rxFreqPanel.azColumnWidth > 0; text: formatBearingDegrees(rxFrequencyDelegate.entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
 	                                            }
 	                                        }
 
@@ -9836,9 +9860,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	        readonly property int dtFreqGapWidth: compactColumns ? 6 : 8
 	        readonly property int freqColumnWidth: compactColumns ? 42 : 46
 	        readonly property int gapColumnWidth: compactColumns ? 8 : 12
-	        readonly property int distanceColumnWidth: compactColumns ? 0 : 56
+	        readonly property int distanceColumnWidth: mainWindow.fullSpectrumShowDistColumn && !compactColumns ? 56 : 0
 	        readonly property int dxccColumnWidth: compactColumns ? 108 : Math.min(300, Math.max(190, Math.round(width * 0.24)))
-	        readonly property int azColumnWidth: compactColumns ? 38 : 48
+	        readonly property int azColumnWidth: mainWindow.fullSpectrumShowAzColumn ? (compactColumns ? 38 : 48) : 0
 
 	        x: mainWindow.x + 100
         y: mainWindow.y + 150
@@ -10106,7 +10130,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.fillWidth: true }
 	                        Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
 	                        Text { visible: mainWindow.showDxccInfo; text: "DXCC"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth }
-	                        Text { visible: mainWindow.showDxccInfo; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
+	                        Text { visible: mainWindow.showDxccInfo && period1FloatingWindow.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
 	                    }
 	                }
 
@@ -10331,7 +10355,7 @@ NumberAnimation {
 	                                        elide: Text.ElideRight
 	                                    }
 	                                }
-			                                Text { visible: mainWindow.showDxccInfo; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
+			                                Text { visible: mainWindow.showDxccInfo && period1FloatingWindow.azColumnWidth > 0; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
                             }
 
 	                            MouseArea {
@@ -10432,8 +10456,11 @@ NumberAnimation {
 	        readonly property int dbColumnWidth: compactColumns ? 34 : 38
 	        readonly property int dbDtGapWidth: compactColumns ? 4 : 6
 	        readonly property int dtColumnWidth: compactColumns ? 42 : 48
+	        readonly property int dtFreqGapWidth: mainWindow.signalRxShowFreqColumn ? (compactColumns ? 4 : 6) : 0
+	        readonly property int freqColumnWidth: mainWindow.signalRxShowFreqColumn ? (compactColumns ? 42 : 46) : 0
 	        readonly property int gapColumnWidth: compactColumns ? 8 : 12
-	        readonly property int distanceColumnWidth: compactColumns ? 0 : 56
+	        readonly property int distanceColumnWidth: mainWindow.signalRxShowDistColumn && !compactColumns ? 56 : 0
+	        readonly property int azColumnWidth: mainWindow.signalRxShowAzColumn && !compactColumns ? 42 : 0
 
 	        x: mainWindow.x + 300
         y: mainWindow.y + 250
@@ -10673,9 +10700,12 @@ NumberAnimation {
 	                        Text { text: "dB"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dbColumnWidth }
 	                        Item { Layout.preferredWidth: rxFreqFloatingWindow.dbDtGapWidth }
 	                        Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
+	                        Item { visible: rxFreqFloatingWindow.freqColumnWidth > 0; Layout.preferredWidth: rxFreqFloatingWindow.dtFreqGapWidth }
+	                        Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
 	                        Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
 	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true }
 	                        Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
+	                        Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
 	                    }
 	                }
 
@@ -10857,9 +10887,12 @@ NumberAnimation {
 		                                Text { text: modelData.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.snrColor || (modelData.isTx ? "#f1c40f" : textSecondary)); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dbColumnWidth }
 	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.dbDtGapWidth }
 		                                Text { text: modelData.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
+	                                Item { visible: rxFreqFloatingWindow.freqColumnWidth > 0; Layout.preferredWidth: rxFreqFloatingWindow.dtFreqGapWidth }
+		                                Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: modelData.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(modelData.isTx ? "#f1c40f" : secondaryCyan); font.bold: modelData.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
 	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
 	                                Text { text: modelData.displayMessage || modelData.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(modelData); font.strikeout: decodePanel.decodeEntryStrikeout(modelData); color: getDxccColor(modelData); Layout.fillWidth: true; elide: messageElideMode(modelData.displayMessage || modelData.message) }
 		                                Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(modelData); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
+		                                Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: formatBearingDegrees(modelData.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
                             }
 
 	                            MouseArea {

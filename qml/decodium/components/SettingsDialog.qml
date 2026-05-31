@@ -3979,6 +3979,46 @@ Dialog {
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
+
+                        Text { text: qsTr("FS Dist:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("uiFullSpectrumShowDistColumn", true)
+                            onCheckedChanged: bridge.setSetting("uiFullSpectrumShowDistColumn", checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+
+                        Text { text: qsTr("FS Az:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("uiFullSpectrumShowAzColumn", true)
+                            onCheckedChanged: bridge.setSetting("uiFullSpectrumShowAzColumn", checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+
+                        Text { text: qsTr("RX Freq:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("uiSignalRxShowFreqColumn", true)
+                            onCheckedChanged: bridge.setSetting("uiSignalRxShowFreqColumn", checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+
+                        Text { text: qsTr("RX Dist:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("uiSignalRxShowDistColumn", true)
+                            onCheckedChanged: bridge.setSetting("uiSignalRxShowDistColumn", checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+
+                        Text { text: qsTr("RX Az:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("uiSignalRxShowAzColumn", true)
+                            onCheckedChanged: bridge.setSetting("uiSignalRxShowAzColumn", checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // ── Mappa e Distanza ──

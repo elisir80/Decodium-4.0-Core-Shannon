@@ -1689,6 +1689,8 @@ private:
     void ensureSyncTxSchedulerActive(const QString& reason);
     void clearAutoCqPartnerLock();
     bool ft2AutoCqAwaitingPartnerDecode() const;
+    bool isDirectedToLocalHashFromActivePartner(const QString& message,
+                                                QString* partnerOut = nullptr) const;
     bool isDirectedActivePartnerSignoffDecode(const QStringList& fields) const;
     void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
     void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
@@ -2437,6 +2439,7 @@ private:
         QSet<QString> gridEver;          // 4-char Maidenhead grid
         QSet<QString> gridByBand;
         QSet<QString> callByBand;        // call already in m_workedCalls (ever)
+        QSet<QString> callByBandMode;    // B4 for the exact call + band + mode
         void clear() {
             dxccEver.clear(); dxccByBand.clear();
             continentEver.clear(); continentByBand.clear();
@@ -2444,6 +2447,7 @@ private:
             ituZoneEver.clear(); ituZoneByBand.clear();
             gridEver.clear(); gridByBand.clear();
             callByBand.clear();
+            callByBandMode.clear();
         }
     };
     WorkedSets m_worked;
@@ -2453,7 +2457,7 @@ private:
     // to call after each import (a few hundred lookups for typical logbooks).
     void rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> const& records);
     // Append a single QSO to m_worked. Called from logQsoNow().
-    void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz);
+    void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz, const QString& mode);
 
     // B8 — Alert sounds
     bool                 m_alertSoundsEnabled {false};
@@ -2777,6 +2781,9 @@ private:
     QList<QAudioDevice> cachedAudioOutputs(const QString& reason, bool refreshIfStale);
     QAudioDevice cachedDefaultAudioInput(const QString& reason, bool refreshIfStale);
     QAudioDevice cachedDefaultAudioOutput(const QString& reason, bool refreshIfStale);
+    void refreshAudioDevicesInternal(const QString& reason,
+                                     bool forceEnumeration,
+                                     bool emitStatus);
     QAudioDevice resolveRxInputDevice(const QString& requestedName,
                                       const QString& requestedId,
                                       bool* requestedDeviceFound,
