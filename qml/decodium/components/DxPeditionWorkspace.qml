@@ -448,14 +448,54 @@ Item {
                 }
 
                 DxPanel {
+                    id: clusterMamPanel
                     SplitView.preferredHeight: 360
                     SplitView.minimumHeight: 120
-                    title: "Cluster · MAM"
+                    title: clusterMamPanel.leftTab === 0 ? "Cluster" : "MAM"
                     meta: "live feed"
                     live: true
+                    // 1.0.345 — tab Cluster|MAM: 0=DX Cluster, 1=Multi-Answer Mode.
+                    property int leftTab: 0
+
+                    // Selettore tab in cima al body del pannello.
+                    Row {
+                        id: clusterMamTabs
+                        anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: 2 }
+                        height: 26
+                        spacing: 6
+                        Repeater {
+                            model: ["CLUSTER", "MAM"]
+                            delegate: Rectangle {
+                                required property int index
+                                required property string modelData
+                                width: (clusterMamTabs.width - 6) / 2
+                                height: 24
+                                radius: 4
+                                readonly property bool sel: clusterMamPanel.leftTab === index
+                                color: sel ? workspace.cAccentDeep
+                                           : (tabMA.containsMouse ? workspace.cPanelHdr : "transparent")
+                                border.color: sel ? workspace.cAccentDim : workspace.cBorder
+                                border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: parent.modelData
+                                    color: parent.sel ? workspace.cAccent : workspace.cTextDim
+                                    font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.2
+                                }
+                                MouseArea {
+                                    id: tabMA; anchors.fill: parent; hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: clusterMamPanel.leftTab = index
+                                }
+                            }
+                        }
+                    }
+
+                    // Cluster (tab 0)
                     Loader {
-                        anchors.fill: parent
+                        anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
                         active: workspace.visible
+                        visible: clusterMamPanel.leftTab === 0
                         sourceComponent: clusterComp
                     }
                     Component {
@@ -469,6 +509,21 @@ Item {
                             height: parent ? parent.height : 280
                             radius: 0
                             border.width: 0
+                        }
+                    }
+
+                    // MAM (tab 1) — 1.0.345 contenuto MAM incassato (MamPanel).
+                    Loader {
+                        anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
+                        active: workspace.visible && clusterMamPanel.leftTab === 1
+                        visible: clusterMamPanel.leftTab === 1
+                        sourceComponent: mamPanelComp
+                    }
+                    Component {
+                        id: mamPanelComp
+                        MamPanel {
+                            anchors.fill: parent
+                            engine: workspace.engine
                         }
                     }
                 }
