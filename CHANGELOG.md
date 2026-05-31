@@ -1,5 +1,51 @@
 # Changelog / Registro Modifiche
 
+## [1.0.345] - 2026-05-31
+
+### Italiano
+
+Release di stabilizzazione dopo la 1.0.344, centrata sulla resa dei font su Windows, sulla pulizia dei warning DirectWrite e sulla persistenza corretta dei pannelli flottanti durante la chiusura dell'applicazione.
+
+#### Aggiunto
+
+- Font UI Windows esplicito su `Segoe UI` per il percorso Qt Widgets e per il percorso QML.
+- Sostituzioni Qt per famiglie legacy Windows come `MS Sans Serif`, `MS Serif`, `System` e `Small Fonts`, oltre ai gia' gestiti `MS Shell Dlg` e `MS Shell Dlg 2`.
+- Impostazione font dedicata su `BootLoader.qml` e `Main.qml` per partire con la famiglia corretta anche prima del caricamento completo della UI.
+
+#### Modificato
+
+- Il resolver font del bridge tratta le famiglie Windows legacy come alias del font sans-serif di piattaforma.
+- Il message handler ignora il warning DirectWrite noto `CreateFontFaceFromHDC()` legato a `MS Sans Serif`, evitando rumore non utile nel log.
+- Alla chiusura dell'app, le finestre flottanti Waterfall e Live Map non riscrivono piu' lo stato salvato come se l'utente le avesse chiuse manualmente.
+- Metadati locali, Inno Setup, NSIS e workflow macOS legacy allineati alla versione `1.0.345`.
+
+#### Corretto
+
+- Ridotto il rischio di fallback font errato su Windows quando Qt o QML incontrano nomi storici non piu' adatti al rendering moderno.
+- Evitata la perdita indesiderata dello stato detached/minimized di Waterfall e Live Map durante lo shutdown.
+
+### English
+
+Stabilization release after 1.0.344, focused on Windows font rendering, DirectWrite warning cleanup, and correct floating-panel persistence during application shutdown.
+
+#### Added
+
+- Explicit Windows UI font selection to `Segoe UI` for both the Qt Widgets and QML startup paths.
+- Qt substitutions for legacy Windows families such as `MS Sans Serif`, `MS Serif`, `System`, and `Small Fonts`, in addition to `MS Shell Dlg` and `MS Shell Dlg 2`.
+- Dedicated font family assignment in `BootLoader.qml` and `Main.qml` so the correct UI font is active from early startup.
+
+#### Changed
+
+- The bridge font resolver now maps legacy Windows families to the platform sans-serif candidates.
+- The message handler filters the known DirectWrite `CreateFontFaceFromHDC()` warning for `MS Sans Serif`.
+- During application shutdown, detached Waterfall and Live Map windows no longer rewrite saved layout state as if the user had manually closed them.
+- Local version metadata, Inno Setup, NSIS, and the legacy macOS workflow are aligned to `1.0.345`.
+
+#### Fixed
+
+- Reduced the chance of bad Windows font fallback when Qt or QML see old Windows font names.
+- Prevented detached/minimized Waterfall and Live Map state from being lost during shutdown.
+
 ## [1.0.342] - 2026-05-30
 
 ### Italiano

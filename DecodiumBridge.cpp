@@ -1608,6 +1608,12 @@ static QString resolveBridgeFontFamily(QString const& requestedFamily,
             addCandidate(QStringLiteral("Monospace"));
         } else if (clean.compare(QStringLiteral("MS Shell Dlg 2"), Qt::CaseInsensitive) == 0
                    || clean.compare(QStringLiteral("MS Shell Dlg"), Qt::CaseInsensitive) == 0
+#if defined(Q_OS_WIN)
+                   || clean.compare(QStringLiteral("MS Sans Serif"), Qt::CaseInsensitive) == 0
+                   || clean.compare(QStringLiteral("MS Serif"), Qt::CaseInsensitive) == 0
+                   || clean.compare(QStringLiteral("System"), Qt::CaseInsensitive) == 0
+                   || clean.compare(QStringLiteral("Small Fonts"), Qt::CaseInsensitive) == 0
+#endif
 #if !defined(Q_OS_WIN)
                    || clean.compare(QStringLiteral("Segoe UI"), Qt::CaseInsensitive) == 0
 #endif

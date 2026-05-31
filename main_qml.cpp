@@ -670,6 +670,10 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
         g_shuttingDown.store(true, std::memory_order_relaxed);
     }
 #ifdef Q_OS_WIN
+    if (msg.startsWith(QStringLiteral("DirectWrite: CreateFontFaceFromHDC() failed"))
+        && msg.contains(QStringLiteral("MS Sans Serif"), Qt::CaseInsensitive)) {
+        return;
+    }
     if (msg.contains(QStringLiteral("Failed to create D3D12 device"), Qt::CaseInsensitive)
         || (msg.contains(QStringLiteral("D3D12"), Qt::CaseInsensitive)
             && msg.contains(QStringLiteral("0x887a0004"), Qt::CaseInsensitive))) {
@@ -1105,6 +1109,12 @@ int main(int argc, char* argv[])
     if (!uiFontFamily.isEmpty()) {
         QFont::insertSubstitution(QStringLiteral("MS Shell Dlg 2"), uiFontFamily);
         QFont::insertSubstitution(QStringLiteral("MS Shell Dlg"), uiFontFamily);
+#if defined(Q_OS_WIN)
+        QFont::insertSubstitution(QStringLiteral("MS Sans Serif"), uiFontFamily);
+        QFont::insertSubstitution(QStringLiteral("MS Serif"), uiFontFamily);
+        QFont::insertSubstitution(QStringLiteral("System"), uiFontFamily);
+        QFont::insertSubstitution(QStringLiteral("Small Fonts"), uiFontFamily);
+#endif
 #if !defined(Q_OS_WIN)
         QFont::insertSubstitution(QStringLiteral("Segoe UI"), uiFontFamily);
 #endif
@@ -1116,6 +1126,14 @@ int main(int argc, char* argv[])
     setlocale(LC_NUMERIC, "C");
 
     QApplication::setStyle(QStyleFactory::create("Fusion"));
+    if (!uiFontFamily.isEmpty()) {
+        QFont uiFont {uiFontFamily};
+        uiFont.setPointSize(10);
+        uiFont.setStyleHint(QFont::SansSerif);
+        uiFont.setStyleStrategy(QFont::PreferAntialias);
+        QGuiApplication::setFont(uiFont);
+        QApplication::setFont(uiFont);
+    }
     app.setApplicationName("Decodium");
     app.setApplicationVersion(QStringLiteral(FORK_RELEASE_VERSION));
     app.setOrganizationName("IU8LMC");
