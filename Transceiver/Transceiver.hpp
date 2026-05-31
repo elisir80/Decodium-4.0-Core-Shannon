@@ -108,6 +108,7 @@ public:
       , power_ {0}
       , swr_ {0}
       , alc_ {0}
+      , alc_valid_ {false}
       , jtmode_ {"FT8"}  //w3sz tci
       , fastmode_ {false}  //w3sz tci
     {
@@ -140,6 +141,7 @@ public:
     unsigned int power () const {return power_;}
     unsigned int swr () const {return swr_;}
     unsigned int alc () const {return alc_;}
+    bool alc_valid () const {return alc_valid_;}
     QString jtmode () const {return jtmode_;}  //w3sz tci
     bool fastmode () const {return fastmode_;}  //w3sz tci
 
@@ -170,6 +172,7 @@ public:
     void power (unsigned int mwpower) {power_ = mwpower;}
     void swr (unsigned int mswr) {swr_ = mswr;}
     void alc (unsigned int malc) {alc_ = malc;}
+    void alc_valid (bool valid) {alc_valid_ = valid;}
     void jtmode(QString jtmode) {jtmode_ = jtmode;}  //w3sz tci
     void fastmode(bool fastmode) {fastmode_ = fastmode;}  //w3sz tci
 
@@ -201,6 +204,7 @@ public:
     unsigned int power_;
     unsigned int swr_;
     unsigned int alc_;  // 1.0.323 — ALC meter 0..100 (TX)
+    bool alc_valid_ {false};
     QString jtmode_;  //w3sz tci
     bool fastmode_;  //w3sz tci
 

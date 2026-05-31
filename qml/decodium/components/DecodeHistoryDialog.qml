@@ -143,7 +143,7 @@ Window {
                 Text { text: qsTr("To (UTC)"); color: historyDialog.cMuted; font.pixelSize: 11 }
                 Text { text: qsTr("Limit");    color: historyDialog.cMuted; font.pixelSize: 11 }
 
-                TextField {
+                DecoTextField {
                     id: callsignField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -160,7 +160,7 @@ Window {
                     }
                     onAccepted: historyDialog.runQuery()
                 }
-                ComboBox {
+                DecoComboBox {
                     id: bandCombo
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -216,7 +216,7 @@ Window {
                         }
                     }
                 }
-                ComboBox {
+                DecoComboBox {
                     id: modeCombo
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -272,7 +272,7 @@ Window {
                         }
                     }
                 }
-                TextField {
+                DecoTextField {
                     id: fromDateField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -288,7 +288,7 @@ Window {
                     }
                     onAccepted: historyDialog.runQuery()
                 }
-                TextField {
+                DecoTextField {
                     id: toDateField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34

@@ -662,9 +662,10 @@ Dialog {
         var controller = activeCatController()
         if (!controller || controller.civAddress === undefined || controller.civAddress === null)
             return ""
-        var v = parseInt(controller.civAddress)
-        if (!v)
+        var v = Number(controller.civAddress)
+        if (!isFinite(v) || v <= 0)
             return ""
+        v = Math.max(0, Math.min(255, Math.round(v)))
         return "0x" + v.toString(16).toUpperCase().padStart(2, "0")
     }
 
@@ -1113,7 +1114,7 @@ Dialog {
                 font.pixelSize: 11
             }
 
-            TextField {
+            DecoTextField {
                 id: fontSearchField
                 Layout.fillWidth: true
                 implicitHeight: controlHeight
@@ -1457,7 +1458,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("My Call:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.callsign; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1465,7 +1466,7 @@ Dialog {
                             onTextChanged: bridge.callsign = text
                         }
                         Text { text: qsTr("My Grid:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.grid; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1481,7 +1482,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("IARU Region:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             model: ["1","2","3"]; Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: Number(bridge.getSetting("Region", 0))
                             onActivated: bridge.setSetting("Region", currentIndex)
@@ -1492,7 +1493,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Type 2 Msg Gen:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             model: [qsTr("Full"),qsTr("Type 1 prefix"),qsTr("Type 2 prefix")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: Number(bridge.getSetting("Type2MsgGen", 0))
                             onActivated: bridge.setSetting("Type2MsgGen", currentIndex)
@@ -1502,7 +1503,7 @@ Dialog {
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                         }
                         Text { text: qsTr("Op Call:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("OpCall", ""); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1515,7 +1516,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Station Name:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.stationName; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1523,7 +1524,7 @@ Dialog {
                             onTextChanged: bridge.stationName = text
                         }
                         Text { text: qsTr("QTH:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.stationQth; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1532,7 +1533,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Rig Info:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.stationRigInfo; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1540,7 +1541,7 @@ Dialog {
                             onTextChanged: bridge.stationRigInfo = text
                         }
                         Text { text: qsTr("Antenna:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             text: bridge.stationAntenna; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
@@ -1656,7 +1657,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Rig:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: rigCombo
                             model: bridge.catBackend === "tci" ? ["TCI Client RX1", "TCI Client RX2"] : (bridge.catManager ? bridge.catManager.rigList : []); Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
                             Layout.minimumWidth: wideFieldMinWidth
@@ -1749,7 +1750,7 @@ Dialog {
                                     width: rigComboPopup.width
                                     spacing: 6
 
-                                    TextField {
+                                    DecoTextField {
                                         id: rigSearchField
                                         x: 8
                                         width: parent.width - 16
@@ -1818,7 +1819,7 @@ Dialog {
                             Layout.minimumWidth: wideFieldMinWidth
                             spacing: 8
 
-                            ComboBox {
+                            DecoComboBox {
                                 id: serialPortCombo
                                 visible: settingsDialog.usesSerialControls()
                                 model: bridge.catManager ? bridge.catManager.portList : []
@@ -1886,7 +1887,7 @@ Dialog {
                             font.pixelSize: 12
                             Layout.preferredWidth: 100
                         }
-                        ComboBox {
+                        DecoComboBox {
                             id: baudCombo
                             visible: settingsDialog.usesSerialControls()
                             model: bridge.catManager && bridge.catManager.baudList ? bridge.catManager.baudList : ["4800","9600","19200","38400","57600","115200"]
@@ -1920,21 +1921,32 @@ Dialog {
                             font.pixelSize: 12
                             Layout.preferredWidth: 100
                         }
-                        TextField {
+                        Rectangle {
                             id: civAddrField
                             visible: settingsDialog.usesSerialControls() && settingsDialog.rigIsIcom()
                             Layout.fillWidth: true
                             Layout.columnSpan: 3
                             Layout.minimumWidth: wideFieldMinWidth
                             implicitHeight: controlHeight
-                            leftPadding: 8
-                            color: textPrimary
-                            font.pixelSize: controlFontSize
-                            placeholderText: settingsDialog.civAddressPlaceholderText()
-                            readOnly: true
-                            selectByMouse: true
-                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            text: settingsDialog.civAddressText()
+                            color: bgMedium
+                            border.color: glassBorder
+                            radius: 4
+                            clip: true
+
+                            readonly property string valueText: settingsDialog.civAddressText()
+
+                            Text {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                text: civAddrField.valueText.length > 0
+                                      ? civAddrField.valueText
+                                      : settingsDialog.civAddressPlaceholderText()
+                                color: civAddrField.valueText.length > 0 ? textPrimary : textSecondary
+                                font.pixelSize: controlFontSize
+                                elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
+                            }
                         }
 
                         Text {
@@ -1944,7 +1956,7 @@ Dialog {
                             font.pixelSize: 12
                             Layout.preferredWidth: 100
                         }
-                        TextField {
+                        DecoTextField {
                             visible: settingsDialog.usesNetworkControls()
                             text: bridge.catManager ? bridge.catManager.networkPort : ""
                             Layout.fillWidth: true
@@ -1999,7 +2011,7 @@ Dialog {
                             font.pixelSize: 12
                             Layout.preferredWidth: 100
                         }
-                        TextField {
+                        DecoTextField {
                             visible: settingsDialog.usesTciControls()
                             text: bridge.catManager ? bridge.catManager.tciPort : ""
                             Layout.fillWidth: true
@@ -2045,7 +2057,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("PTT Method:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: pttCombo
                             enabled: !settingsDialog.usesTciControls()
                             model: settingsDialog.usesTciControls()
@@ -2096,7 +2108,7 @@ Dialog {
                             font.pixelSize: 12
                             Layout.preferredWidth: labelWidth
                         }
-                        ComboBox {
+                        DecoComboBox {
                             id: pttPortCombo
                             visible: settingsDialog.usesSeparatePttPort()
                             model: settingsDialog.pttPortOptions()
@@ -2154,7 +2166,7 @@ Dialog {
                         }
 
                         Text { visible: settingsDialog.usesSerialControls(); text: qsTr("Data Bits:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: dataBitsCombo
                             visible: settingsDialog.usesSerialControls()
                             model: ["Default","8","7"]; Layout.fillWidth: true; implicitHeight: controlHeight
@@ -2174,7 +2186,7 @@ Dialog {
                             popup: SettingsComboPopup { combo: dataBitsCombo }
                         }
                         Text { visible: settingsDialog.usesSerialControls(); text: qsTr("Stop Bits:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: stopBitsCombo
                             visible: settingsDialog.usesSerialControls()
                             model: ["Default","1","2"]; Layout.fillWidth: true; implicitHeight: controlHeight
@@ -2193,7 +2205,7 @@ Dialog {
                         }
 
                         Text { visible: settingsDialog.usesSerialControls(); text: qsTr("Handshake:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: handshakeCombo
                             visible: settingsDialog.usesSerialControls()
                             model: ["Default","none","xonxoff","hardware"]; Layout.fillWidth: true; implicitHeight: controlHeight
@@ -2218,7 +2230,7 @@ Dialog {
                         Item { visible: settingsDialog.usesSerialControls(); Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         Text { visible: settingsDialog.usesSerialControls(); enabled: settingsDialog.forceDtrControlEnabled(); text: qsTr("Force DTR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: forceDtrCombo
                             visible: settingsDialog.usesSerialControls()
                             enabled: settingsDialog.forceDtrControlEnabled()
@@ -2240,7 +2252,7 @@ Dialog {
                             popup: SettingsComboPopup { combo: forceDtrCombo }
                         }
                         Text { visible: settingsDialog.usesSerialControls(); enabled: settingsDialog.forceRtsControlEnabled(); text: qsTr("Force RTS:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: forceRtsCombo
                             visible: settingsDialog.usesSerialControls()
                             enabled: settingsDialog.forceRtsControlEnabled()
@@ -2265,7 +2277,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Split:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: splitCombo
                             model: settingsDialog.splitModeOptions(); Layout.fillWidth: true; implicitHeight: controlHeight
                             textRole: "label"
@@ -2289,7 +2301,7 @@ Dialog {
                             popup: SettingsComboPopup { combo: splitCombo }
                         }
                         Text { text: qsTr("Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: modeCombo
                             model: ["USB","Data/Pkt","None"]; Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: settingsDialog.settingChoiceIndex("CATMode", model, 0)
@@ -2302,7 +2314,7 @@ Dialog {
                         }
 
                         Text { visible: !settingsDialog.usesTciControls(); text: qsTr("TX Audio Src:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: txAudioSrcCombo
                             visible: !settingsDialog.usesTciControls()
                             model: ["Rear/Data","Front/Mic"]; Layout.fillWidth: true; implicitHeight: controlHeight
@@ -2315,7 +2327,7 @@ Dialog {
                             popup: SettingsComboPopup { combo: txAudioSrcCombo }
                         }
                         Text { visible: settingsDialog.usesTciControls(); text: qsTr("TX Audio:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             visible: settingsDialog.usesTciControls()
                             text: qsTr("TCI Audio")
                             readOnly: true
@@ -2566,7 +2578,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Input Device:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: audioInDevCombo
                             model: bridge.audioInputDevices
                             Layout.fillWidth: true
@@ -2583,7 +2595,7 @@ Dialog {
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Input Channel:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: audioInChCombo
                             model: [qsTr("Mono"),qsTr("Left"),qsTr("Right"),qsTr("Both")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             Layout.minimumWidth: fieldMinWidth
@@ -2598,7 +2610,7 @@ Dialog {
                         Item { Layout.columnSpan: 2 }
 
                         Text { text: qsTr("Output Device:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: audioOutDevCombo
                             model: bridge.audioOutputDevices
                             Layout.fillWidth: true
@@ -2615,7 +2627,7 @@ Dialog {
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Output Channel:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: audioOutChCombo
                             model: [qsTr("Mono"),qsTr("Left"),qsTr("Right"),qsTr("Both")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             Layout.minimumWidth: fieldMinWidth
@@ -2702,7 +2714,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Save Directory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             id: saveDirectoryField
                             text: bridge.getSetting("SaveDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize
@@ -2718,7 +2730,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("AzEl Directory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        TextField {
+                        DecoTextField {
                             id: azElDirectoryField
                             text: bridge.getSetting("AzElDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize
@@ -2782,7 +2794,7 @@ Dialog {
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("TX Slot:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: txSlotCombo
                             model: [qsTr("Second (:15/:45)"), qsTr("First (:00/:30)")]
                             currentIndex: bridge.txPeriod === 1 ? 1 : 0
@@ -3507,7 +3519,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Theme:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: themeCombo
                             Layout.fillWidth: true
                             implicitHeight: controlHeight
@@ -3632,7 +3644,7 @@ Dialog {
 
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
                         Text { text: qsTr("UI Scale:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        ComboBox {
+                        DecoComboBox {
                             id: uiScaleCombo
                             Layout.fillWidth: true
                             implicitHeight: controlHeight
@@ -3716,7 +3728,7 @@ Dialog {
 
                         // 1.0.180 — Quality preset: gate per effetti visivi pesanti.
                         Text { text: qsTr("UI Quality preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
-                        ComboBox {
+                        DecoComboBox {
                             id: uiQualityCombo
                             Layout.preferredWidth: 180
                             Layout.columnSpan: 1
@@ -3738,7 +3750,7 @@ Dialog {
 
                         // 1.0.180 — Style (richiede restart)
                         Text { text: qsTr("UI Style (restart):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
-                        ComboBox {
+                        DecoComboBox {
                             id: uiStyleCombo
                             Layout.preferredWidth: 180
                             Layout.columnSpan: 1
@@ -3806,7 +3818,7 @@ Dialog {
 
                         // 1.0.186 — Spectrum FPS cap (15/20/30)
                         Text { text: qsTr("Spectrum FPS cap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
-                        ComboBox {
+                        DecoComboBox {
                             id: spectrumFpsCombo
                             Layout.preferredWidth: 120
                             model: ["15 fps", "20 fps", "30 fps"]
@@ -4074,7 +4086,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Porta TCP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 160 }
-                        TextField {
+                        DecoTextField {
                             id: webServerPortField
                             text: String(bridge.getSetting("WebServerPort", 8080))
                             Layout.preferredWidth: 80
@@ -4152,7 +4164,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Decode Depth:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: decodeDepthCombo
                             model: [qsTr("Fast"),qsTr("Normal"),qsTr("Deep")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: Math.max(0, Math.min(count - 1, bridge.ndepth - 1))
@@ -4247,7 +4259,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Sidelobe Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: sidelobeCombo
                             model: [qsTr("Low Sidelobes"),qsTr("Max Sensitivity")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: Number(bridge.getSetting("SidelobeMode", 0))
@@ -4367,7 +4379,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             id: dxClusterHostField
                             text: bridge.dxCluster && bridge.dxCluster.host !== undefined ? String(bridge.dxCluster.host) : ""
                             Layout.fillWidth: true
@@ -4468,7 +4480,7 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         Text { text: qsTr("API URL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.cloudlogUrl; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4476,7 +4488,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("API Key:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.cloudlogApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4515,7 +4527,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("API Key:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.qrzLogbookApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4577,7 +4589,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Password:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("LoTWPassword", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4728,7 +4740,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("WS socket port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             readOnly: true
                             text: String(bridge.remoteWebSocketPort())
                             Layout.fillWidth: true
@@ -4741,14 +4753,14 @@ Dialog {
                         }
 
                         Text { text: qsTr("WS bind:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("RemoteWsBind", "0.0.0.0"); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("RemoteWsBind", text)
                         }
                         Text { text: qsTr("Username:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("RemoteUser", "admin"); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4756,7 +4768,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Access token:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("RemoteToken", ""); Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             placeholderText: qsTr("Required for LAN/WAN")
@@ -4777,7 +4789,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             id: udpClientIdField
                             text: bridge.getSetting("UDPClientId", "WSJTX")
                             Layout.fillWidth: true
@@ -4799,7 +4811,7 @@ Dialog {
                             }
                         }
                         Text { text: qsTr("Preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        ComboBox {
+                        DecoComboBox {
                             id: udpClientIdPreset
                             model: ["WSJTX", "Decodium"]
                             Layout.fillWidth: true
@@ -4818,7 +4830,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Server Name:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("UDPServer", "127.0.0.1"); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4854,7 +4866,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Interface Used:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        ComboBox {
+                        DecoComboBox {
                             id: udpInterfaceCombo
                             model: [qsTr("All interfaces")].concat(bridge.networkInterfaceNames())
                             Layout.fillWidth: true
@@ -4889,7 +4901,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Secondary Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("UDPSecondaryServer", bridge.getSetting("UDPServer", "127.0.0.1")); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -4916,7 +4928,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Secondary Interface:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        ComboBox {
+                        DecoComboBox {
                             id: udpSecondaryInterfaceCombo
                             model: [qsTr("All interfaces")].concat(bridge.networkInterfaceNames())
                             Layout.fillWidth: true
@@ -4951,7 +4963,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Tertiary Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("UDPTertiaryServer", "127.0.0.1"); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             enabled: udpTertiaryCheck.checked
                             opacity: enabled ? 1.0 : 0.5
@@ -4984,7 +4996,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Tertiary Interface:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        ComboBox {
+                        DecoComboBox {
                             id: udpTertiaryInterfaceCombo
                             model: [qsTr("All interfaces")].concat(bridge.networkInterfaceNames())
                             enabled: udpTertiaryCheck.checked
@@ -5041,7 +5053,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("N1MM Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("N1MMServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: 3; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             enabled: n1mmEnableCheck.checked
                             opacity: enabled ? 1.0 : 0.5
@@ -5103,7 +5115,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("TCP Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("ADIFTcpServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: 3; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             enabled: adifTcpCheck.checked
                             opacity: enabled ? 1.0 : 0.5
@@ -5173,7 +5185,7 @@ Dialog {
                             rowSpacing: 8
 
                             Text { text: qsTr("Slope:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 80; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                            TextField {
+                            DecoTextField {
                                 id: frequencySlopeField
                                 text: Number(bridge.frequencyCalibrationSlopePpm()).toFixed(5)
                                 Layout.preferredWidth: 130
@@ -5193,7 +5205,7 @@ Dialog {
                             Text { text: qsTr("ppm"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 44; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
 
                             Text { text: qsTr("Intercept:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 88; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                            TextField {
+                            DecoTextField {
                                 id: frequencyInterceptField
                                 text: Number(bridge.frequencyCalibrationInterceptHz()).toFixed(2)
                                 Layout.preferredWidth: 130
@@ -5333,14 +5345,14 @@ Dialog {
                                     Layout.fillWidth: true
                                     spacing: 8
                                     Text { text: qsTr("Region:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 58; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    ComboBox {
+                                    DecoComboBox {
                                         id: frequencyRegionCombo
                                         model: settingsDialog.frequencyRegionOptions
                                         Layout.preferredWidth: 132
                                         implicitHeight: controlHeight
                                     }
                                     Text { text: qsTr("Mode:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 44; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    ComboBox {
+                                    DecoComboBox {
                                         id: frequencyModeCombo
                                         model: settingsDialog.frequencyModeOptions
                                         Layout.preferredWidth: 124
@@ -5348,7 +5360,7 @@ Dialog {
                                         Component.onCompleted: settingsDialog.setComboText(frequencyModeCombo, bridge.mode || "FT8")
                                     }
                                     Text { text: qsTr("Freq MHz:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 68; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: frequencyMHzField
                                         placeholderText: "14.074000"
                                         color: textPrimary
@@ -5377,7 +5389,7 @@ Dialog {
                                     Layout.fillWidth: true
                                     spacing: 8
                                     Text { text: qsTr("Description:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 94; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: frequencyDescriptionField
                                         color: textPrimary
                                         font.pixelSize: controlFontSize
@@ -5391,7 +5403,7 @@ Dialog {
                                     Layout.fillWidth: true
                                     spacing: 8
                                     Text { text: qsTr("Start:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 46; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: frequencyStartField
                                         placeholderText: "yyyy-MM-dd HH:mm"
                                         color: textPrimary
@@ -5402,7 +5414,7 @@ Dialog {
                                         background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                                     }
                                     Text { text: qsTr("End:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 38; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: frequencyEndField
                                         placeholderText: "yyyy-MM-dd HH:mm"
                                         color: textPrimary
@@ -5583,7 +5595,7 @@ Dialog {
                                     Layout.fillWidth: true
                                     spacing: 8
                                     Text { text: qsTr("Band:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 46; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    ComboBox {
+                                    DecoComboBox {
                                         id: stationBandCombo
                                         model: settingsDialog.frequencyBandOptions
                                         Layout.preferredWidth: 132
@@ -5591,7 +5603,7 @@ Dialog {
                                         Component.onCompleted: settingsDialog.setComboText(stationBandCombo, "20m")
                                     }
                                     Text { text: qsTr("Offset MHz:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 82; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: stationOffsetField
                                         text: "0.000000"
                                         color: textPrimary
@@ -5603,7 +5615,7 @@ Dialog {
                                         background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                                     }
                                     Text { text: qsTr("Antenna:"); color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 70; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                                    TextField {
+                                    DecoTextField {
                                         id: stationAntennaField
                                         color: textPrimary
                                         font.pixelSize: controlFontSize
@@ -5797,7 +5809,7 @@ Dialog {
                                     }
                                 }
 
-                                TextField {
+                                DecoTextField {
                                     id: decodeColorInput
                                     text: decodeColorRow.currentColor
                                     selectByMouse: true
@@ -5901,7 +5913,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Orange Calls:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("HighlightOrangeCallsigns", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -5916,7 +5928,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Blue Calls:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("HighlightBlueCallsigns", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -5946,7 +5958,7 @@ Dialog {
                             Text { text: qsTr("Background:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
                             Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
                                 color: settingsDialog.validHexColor(bridge.themeManager.customBgColor) ? bridge.themeManager.customBgColor : bgDeep }
-                            TextField {
+                            DecoTextField {
                                 id: customBgField
                                 Layout.preferredWidth: 120; implicitHeight: 28; leftPadding: 8
                                 text: bridge.themeManager.customBgColor
@@ -5966,7 +5978,7 @@ Dialog {
                             Text { text: qsTr("Text:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
                             Rectangle { width: 60; height: 24; radius: 4; border.color: glassBorder
                                 color: settingsDialog.validHexColor(bridge.themeManager.customTextColor) ? bridge.themeManager.customTextColor : textPrimary }
-                            TextField {
+                            DecoTextField {
                                 id: customTextField
                                 Layout.preferredWidth: 120; implicitHeight: 28; leftPadding: 8
                                 text: bridge.themeManager.customTextColor
@@ -5984,7 +5996,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Palette:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: paletteCombo
                             model: ["SDR Classic","Raptor Green","Grayscale","SmartSDR","Hot (SDR#)","deskHPSDR","Aether Default","Aether BlueGreen","Aether Fire","Aether Plasma","FlexRadio"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
                             currentIndex: Math.max(0, bridge.uiPaletteIndex)
@@ -6370,7 +6382,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Activity:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        ComboBox {
+                        DecoComboBox {
                             id: contestCombo
                             model: [qsTr("None"),"NA VHF","EU VHF",qsTr("Field Day"),"RTTY Roundup","WW DIGI",qsTr("Fox"),qsTr("Hound"),"ARRL Digi","Q65 Pileup"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
                             currentIndex: Math.max(0, Math.min(model.length - 1, bridge.specialOperationActivity))
@@ -6385,14 +6397,14 @@ Dialog {
                         }
 
                         Text { text: qsTr("FD Exchange:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("Field_Day_Exchange", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Field_Day_Exchange", text.toUpperCase())
                         }
                         Text { text: qsTr("RTTY Exchange:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("RTTY_Exchange", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -6400,7 +6412,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Contest Name:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("Contest_Name", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -6445,7 +6457,7 @@ Dialog {
                         }
 
                         Text { text: qsTr("Custom Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             id: ntpServerField
                             text: bridge.getSetting("NTPCustomServer", "")
                             Layout.fillWidth: true
@@ -6609,7 +6621,7 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("OTP Seed:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("OTPSeed", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -6626,7 +6638,7 @@ Dialog {
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("OTP URL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField {
+                        DecoTextField {
                             text: bridge.getSetting("OTPUrl", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -6812,45 +6824,45 @@ Dialog {
 
                         // Blacklist 1-12 (2 per row)
                         Text { text: qsTr("Blacklist 1:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist1", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 2:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist2", text.toUpperCase()) }
 
                         Text { text: qsTr("Blacklist 3:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist3", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 4:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist4", text.toUpperCase()) }
 
                         Text { text: qsTr("Blacklist 5:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist5", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 6:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist6", text.toUpperCase()) }
 
                         Text { text: qsTr("Blacklist 7:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist7", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 8:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist8", text.toUpperCase()) }
 
                         Text { text: qsTr("Blacklist 9:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist9", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 10:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist10", text.toUpperCase()) }
 
                         Text { text: qsTr("Blacklist 11:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist11", text.toUpperCase()) }
                         Text { text: qsTr("Blacklist 12:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Blacklist12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Blacklist12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Blacklist12", text.toUpperCase()) }
 
                         // ── Whitelist ──
@@ -6867,45 +6879,45 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         Text { text: qsTr("Whitelist 1:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist1", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 2:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist2", text.toUpperCase()) }
 
                         Text { text: qsTr("Whitelist 3:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist3", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 4:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist4", text.toUpperCase()) }
 
                         Text { text: qsTr("Whitelist 5:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist5", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 6:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist6", text.toUpperCase()) }
 
                         Text { text: qsTr("Whitelist 7:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist7", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 8:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist8", text.toUpperCase()) }
 
                         Text { text: qsTr("Whitelist 9:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist9", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 10:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist10", text.toUpperCase()) }
 
                         Text { text: qsTr("Whitelist 11:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist11", text.toUpperCase()) }
                         Text { text: qsTr("Whitelist 12:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Whitelist12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Whitelist12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Whitelist12", text.toUpperCase()) }
 
                         // ── Always Pass ──
@@ -6922,45 +6934,45 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         Text { text: qsTr("Always Pass 1:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass1",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass1", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 2:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass2",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass2", text.toUpperCase()) }
 
                         Text { text: qsTr("Always Pass 3:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass3",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass3", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 4:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass4",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass4", text.toUpperCase()) }
 
                         Text { text: qsTr("Always Pass 5:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass5",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass5", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 6:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass6",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass6", text.toUpperCase()) }
 
                         Text { text: qsTr("Always Pass 7:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass7",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass7", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 8:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass8",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass8", text.toUpperCase()) }
 
                         Text { text: qsTr("Always Pass 9:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass9",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass9", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 10:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass10",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass10", text.toUpperCase()) }
 
                         Text { text: qsTr("Always Pass 11:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass11",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass11", text.toUpperCase()) }
                         Text { text: qsTr("Always Pass 12:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        TextField { text: bridge.getSetting("Pass12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Pass12",""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Pass12", text.toUpperCase()) }
 
                         // ── Territory ──
@@ -6968,24 +6980,24 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Europe:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory1",""); placeholderText: qsTr("EU / Europe"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory1",""); placeholderText: qsTr("EU / Europe"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory1", text) }
                         Text { text: qsTr("Africa:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory2",""); placeholderText: qsTr("AF / Africa"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory2",""); placeholderText: qsTr("AF / Africa"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory2", text) }
 
                         Text { text: qsTr("Oceania:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory3",""); placeholderText: qsTr("OC / Oceania"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory3",""); placeholderText: qsTr("OC / Oceania"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory3", text) }
                         Text { text: qsTr("Asia:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory4",""); placeholderText: qsTr("AS / Asia"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory4",""); placeholderText: qsTr("AS / Asia"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory4", text) }
 
                         Text { text: qsTr("North America:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory5",""); placeholderText: qsTr("NA / North America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory5",""); placeholderText: qsTr("NA / North America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory5", text) }
                         Text { text: qsTr("South America:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        TextField { text: bridge.getSetting("Territory6",""); placeholderText: qsTr("SA / South America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        DecoTextField { text: bridge.getSetting("Territory6",""); placeholderText: qsTr("SA / South America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("Territory6", text) }
 
                         // ── Opzioni Filtro ──

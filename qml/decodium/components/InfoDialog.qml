@@ -530,7 +530,7 @@ Dialog {
                                     font.pixelSize: 11
                                 }
 
-                                TextField {
+                                DecoTextField {
                                     id: feedbackSubject
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 42

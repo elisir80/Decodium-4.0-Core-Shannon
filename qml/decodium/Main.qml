@@ -13,7 +13,8 @@ import "components"
 
 ApplicationWindow {
     id: mainWindow
-    font.family: Qt.platform.os === "windows" ? "Segoe UI" : ""
+    font.family: bridge ? bridge.fontSettingFamily("Font", Qt.platform.os === "windows" ? "Segoe UI" : (Qt.platform.os === "osx" ? "Helvetica Neue" : ""), 10)
+                        : (Qt.platform.os === "windows" ? "Segoe UI" : (Qt.platform.os === "osx" ? "Helvetica Neue" : ""))
     readonly property int preferredMinimumWidth: 1200
     readonly property int preferredMinimumHeight: 480
     readonly property int currentScreenAvailableWidth: (Screen.desktopAvailableWidth > 0
@@ -2004,7 +2005,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 spacing: 12
 
-                TextField {
+                DecoTextField {
                     id: freqInput
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
@@ -2712,7 +2713,7 @@ ApplicationWindow {
                                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
                                 border.color: glassBorder; radius: 4
 
-                                ComboBox {
+                                DecoComboBox {
                                     id: compactModeCombo
                                     anchors.fill: parent
                                     anchors.margins: 1
@@ -3442,7 +3443,7 @@ ApplicationWindow {
 	                                }
 
 		                                contentItem: Item {
-		                                    TextField {
+		                                    DecoTextField {
 		                                        id: citySearchField
 		                                        anchors.left: parent.left
 		                                        anchors.right: parent.right
@@ -4365,7 +4366,7 @@ ApplicationWindow {
                                 border.color: pskSearchInput.activeFocus ? secondaryCyan : glassBorder
                                 radius: 4
 
-                                TextField {
+                                DecoTextField {
                                     id: pskSearchInput
                                     anchors.fill: parent
                                     anchors.margins: 2
@@ -8663,7 +8664,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         contentItem: Column {
             spacing: 12; padding: 16
             Text { text: "Output file path:"; font.pixelSize: 12; color: textPrimary }
-            TextField {
+            DecoTextField {
                 id: cabrilloPath
                 width: 360
                 text: (Qt.platform.os === "windows"
@@ -8797,7 +8798,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 color: textPrimary
             }
 
-            ComboBox {
+            DecoComboBox {
                 id: contestTypeCombo
                 width: 300
                 model: bridge.contestTypeNames
@@ -8813,7 +8814,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 visible: bridge.contestType > 0
             }
 
-            TextField {
+            DecoTextField {
                 width: 300
                 text: bridge.contestExchange
                 onTextChanged: bridge.contestExchange = text

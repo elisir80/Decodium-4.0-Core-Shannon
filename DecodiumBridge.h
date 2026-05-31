@@ -209,6 +209,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double rigPowerWatts READ rigPowerWatts NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigSwr READ rigSwr NOTIFY rigTelemetryChanged)
     Q_PROPERTY(double rigAlc READ rigAlc NOTIFY rigTelemetryChanged)  // 1.0.323 — ALC meter 0..100
+    Q_PROPERTY(bool rigAlcValid READ rigAlcValid NOTIFY rigTelemetryChanged)
     // 1.0.324 — ALC auto-calibration (Fase 2)
     Q_PROPERTY(int    alcTarget              READ alcTarget              WRITE setAlcTarget              NOTIFY alcTargetChanged)
     Q_PROPERTY(bool   alcCalibrating         READ alcCalibrating                                         NOTIFY alcCalibratingChanged)
@@ -635,6 +636,7 @@ public:
     double rigPowerWatts() const { return m_rigPowerWatts; }
     double rigSwr() const { return m_rigSwr; }
     double rigAlc() const { return m_rigAlc; }
+    bool rigAlcValid() const { return m_rigAlcValid; }
     // 1.0.324 — ALC auto-calibration getters
     int     alcTarget()             const { return m_alcTarget; }
     bool    alcCalibrating()        const { return m_alcCalibrating; }
@@ -1211,11 +1213,11 @@ public:
 
     // Cloudlog
     bool    cloudlogEnabled() const { return m_cloudlogEnabled; }
-    void    setCloudlogEnabled(bool v)       { if (m_cloudlogEnabled!=v){m_cloudlogEnabled=v;emit cloudlogEnabledChanged();} }
+    void    setCloudlogEnabled(bool v);
     QString cloudlogUrl()      const { return m_cloudlogUrl; }
-    void    setCloudlogUrl(const QString& v) { if (m_cloudlogUrl!=v){m_cloudlogUrl=v;emit cloudlogUrlChanged();} }
+    void    setCloudlogUrl(const QString& v);
     QString cloudlogApiKey()   const { return m_cloudlogApiKey; }
-    void    setCloudlogApiKey(const QString& v) { if (m_cloudlogApiKey!=v){m_cloudlogApiKey=v;emit cloudlogApiKeyChanged();} }
+    void    setCloudlogApiKey(const QString& v);
     Q_INVOKABLE void testCloudlogApi();
 
     // QRZ Logbook
@@ -1568,7 +1570,7 @@ private:
     QString configuredCatRigMode() const;
     bool configuredCatRigModeRequestsDataPacket() const;
     void applyConfiguredCatRigMode(const QString& reason);
-    void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0);
+    void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void applyNtpSettings();
     void configureNtpClientForMode(const QString& mode);
     void resetStartupTransientQsoState();
@@ -1982,6 +1984,7 @@ private:
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
     double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
+    bool m_rigAlcValid {false};
     // 1.0.324 — ALC auto-calibration state
     int     m_alcTarget        {20};
     bool    m_alcCalibrating   {false};

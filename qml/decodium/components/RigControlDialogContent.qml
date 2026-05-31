@@ -72,7 +72,7 @@ Rectangle {
 
             // Row 1 — Radio model
             Text { text: "Radio"; color: textSecondary; font.pixelSize: 12 }
-            ComboBox {
+            DecoComboBox {
                 id: rigCombo
                 Layout.fillWidth: true
                 implicitHeight: 34
@@ -137,7 +137,7 @@ Rectangle {
                         width: rigComboPopup.width
                         spacing: 6
 
-                        TextField {
+                        DecoTextField {
                             id: rigSearchField
                             x: 8
                             width: parent.width - 16
@@ -198,7 +198,7 @@ Rectangle {
                 color: textSecondary
                 font.pixelSize: 12
             }
-            TextField {
+            DecoTextField {
                 id: networkPortField
                 visible: networkRig
                 Layout.fillWidth: true
@@ -222,7 +222,7 @@ Rectangle {
                 visible: serialRig
                 Layout.fillWidth: true
                 spacing: 6
-                ComboBox {
+                DecoComboBox {
                     id: portCombo
                     Layout.fillWidth: true
                     implicitHeight: 34
@@ -249,7 +249,7 @@ Rectangle {
 
             // Row 4 — Baud rate
             Text { visible: serialRig; text: "Baud rate"; color: textSecondary; font.pixelSize: 12 }
-            ComboBox {
+            DecoComboBox {
                 id: baudCombo
                 visible: serialRig
                 Layout.fillWidth: true
@@ -273,7 +273,7 @@ Rectangle {
 
             // Row 5 — PTT method
             Text { text: "PTT method"; color: textSecondary; font.pixelSize: 12 }
-            ComboBox {
+            DecoComboBox {
                 id: pttCombo
                 Layout.fillWidth: true
                 implicitHeight: 34

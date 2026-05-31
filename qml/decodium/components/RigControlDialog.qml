@@ -292,7 +292,7 @@ Dialog {
                     RowLayout {
                         Layout.fillWidth: true; spacing: 4
 
-                        TextField {
+                        DecoTextField {
                             id: rigNameField
                             Layout.fillWidth: true; implicitHeight: controlHeight
                             leftPadding: 8
@@ -331,7 +331,7 @@ Dialog {
                         ColumnLayout {
                             anchors.fill: parent; anchors.margins: 8; spacing: 6
 
-                            TextField {
+                            DecoTextField {
                                 id: rigFilterField
                                 Layout.fillWidth: true; implicitHeight: 32
                                 placeholderText: "Filtra per nome (es. Icom, Yaesu, FT-991…)"
@@ -385,7 +385,7 @@ Dialog {
                     RowLayout {
                         Layout.fillWidth: true; spacing: 4
                         visible: bridge.catBackend !== "tci" && bridge.catManager.portType !== "network" && bridge.catManager.portType !== "tci"
-                        ComboBox {
+                        DecoComboBox {
                             id: portCombo
                             Layout.fillWidth: true; implicitHeight: controlHeight
                             editable: true
@@ -395,7 +395,7 @@ Dialog {
                                 if (idx >= 0) currentIndex = idx
                                 else editText = bridge.catManager.serialPort
                             }
-                            contentItem: TextField {
+                            contentItem: DecoTextField {
                                 leftPadding: 8; text: portCombo.editText; color: textPrimary; font.pixelSize: controlFontSize
                                 background: Rectangle { color: "transparent" }
                                 onTextEdited: portCombo.editText = text
@@ -422,7 +422,7 @@ Dialog {
                         text: "Baud:"; color: textSecondary; font.pixelSize: 12
                         visible: bridge.catManager.portType === "serial" || bridge.catManager.portType === "usb"
                     }
-                    ComboBox {
+                    DecoComboBox {
                         id: baudCombo
                         Layout.fillWidth: true; implicitHeight: controlHeight
                         visible: bridge.catManager.portType === "serial" || bridge.catManager.portType === "usb"
@@ -453,7 +453,7 @@ Dialog {
                         text: "Host:Port:"; color: textSecondary; font.pixelSize: 12
                         visible: bridge.catManager.portType === "network"
                     }
-                    TextField {
+                    DecoTextField {
                         id: networkField
                         Layout.fillWidth: true; implicitHeight: controlHeight
                         visible: bridge.catManager.portType === "network"
@@ -469,7 +469,7 @@ Dialog {
                         text: "TCI:"; color: textSecondary; font.pixelSize: 12
                         visible: bridge.catBackend === "tci" || bridge.catManager.portType === "tci"
                     }
-                    TextField {
+                    DecoTextField {
                         id: tciField
                         Layout.fillWidth: true; implicitHeight: controlHeight
                         visible: bridge.catBackend === "tci" || bridge.catManager.portType === "tci"
@@ -494,7 +494,7 @@ Dialog {
 
                     // PTT method
                     Text { text: "PTT:"; color: textSecondary; font.pixelSize: 12 }
-                    ComboBox {
+                    DecoComboBox {
                         id: pttCombo
                         Layout.fillWidth: true; implicitHeight: controlHeight
                         enabled: !rigDialog.usesTciControls()
@@ -511,7 +511,7 @@ Dialog {
 
                     // Split
                     Text { text: "Split:"; color: textSecondary; font.pixelSize: 12 }
-                    ComboBox {
+                    DecoComboBox {
                         id: splitCombo
                         Layout.fillWidth: true; implicitHeight: controlHeight
                         model: bridge.catManager.splitModeList
@@ -559,7 +559,7 @@ Dialog {
                     Text { text: "PTT port:"; color: textSecondary; font.pixelSize: 12 }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 4
-                        ComboBox {
+                        DecoComboBox {
                             id: pttPortCombo; Layout.fillWidth: true; implicitHeight: controlHeight; editable: true
                             model: ["CAT"].concat(bridge.catManager.portList)
                             Component.onCompleted: {
@@ -567,7 +567,7 @@ Dialog {
                                 currentIndex = idx >= 0 ? idx : 0
                                 editText = bridge.catManager.pttPort
                             }
-                            contentItem: TextField {
+                            contentItem: DecoTextField {
                                 leftPadding: 8; text: pttPortCombo.editText
                                 color: textPrimary; font.pixelSize: controlFontSize
                                 background: Rectangle { color: "transparent" }
@@ -592,7 +592,7 @@ Dialog {
 
                     // Data bits
                     Text { text: "Data bits:"; color: textSecondary; font.pixelSize: 12 }
-                    ComboBox {
+                    DecoComboBox {
                         id: dataCombo; Layout.fillWidth: true; implicitHeight: controlHeight
                         model: ["8","7"]
                         Component.onCompleted: { var i = find(bridge.catManager.dataBits); currentIndex = i>=0?i:0 }
@@ -607,7 +607,7 @@ Dialog {
 
                     // Stop bits
                     Text { text: "Stop bits:"; color: textSecondary; font.pixelSize: 12 }
-                    ComboBox {
+                    DecoComboBox {
                         id: stopCombo; Layout.fillWidth: true; implicitHeight: controlHeight
                         model: ["1","2"]
                         Component.onCompleted: { var i = find(bridge.catManager.stopBits); currentIndex = i>=0?i:0 }
@@ -622,7 +622,7 @@ Dialog {
 
                     // Handshake
                     Text { text: "Handshake:"; color: textSecondary; font.pixelSize: 12 }
-                    ComboBox {
+                    DecoComboBox {
                         id: hsCombo; Layout.fillWidth: true; implicitHeight: controlHeight
                         model: ["none","xonxoff","hardware"]
                         Component.onCompleted: { var i = find(bridge.catManager.handshake); currentIndex = i>=0?i:0 }

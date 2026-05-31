@@ -149,7 +149,7 @@ Window {
                 Layout.fillWidth: true
                 spacing: 4
                 Text { text: qsTr("Target callsign"); color: callDialog.cMuted; font.pixelSize: 12 }
-                TextField {
+                DecoTextField {
                     id: targetField
                     Layout.fillWidth: true
                     text: bridge ? bridge.targetCallSign : ""

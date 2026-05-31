@@ -43,7 +43,7 @@ Rectangle {
                         onCheckedChanged: if (appEngine) appEngine.contestType = checked ? 1 : 0
                     }
                     Text { text: "Exchange:"; color: textSecondary; font.pixelSize: 11 }
-                    TextField {
+                    DecoTextField {
                         Layout.preferredWidth: 100
                         text: appEngine ? appEngine.contestExchange : ""
                         placeholderText: "e.g., 599 001"
@@ -89,7 +89,7 @@ Rectangle {
                                 color: textSecondary
                                 Layout.preferredWidth: 40
                             }
-                            TextField {
+                            DecoTextField {
                                 Layout.preferredWidth: 220
                                 text: appEngine && appEngine.macroManager ? appEngine.macroManager.getMacro(index) : ""
                                 placeholderText: "Macro " + (index + 1)

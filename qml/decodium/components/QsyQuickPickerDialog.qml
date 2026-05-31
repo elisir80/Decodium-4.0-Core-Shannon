@@ -106,7 +106,7 @@ Window {
                     indicator: Rectangle { width: 16; height: 16; radius: 3; color: parent.checked ? "#ff7814" : "#2a2a3e"; border.color: "#505070"; y: parent.height/2 - height/2 }
                 }
                 Text { text: qsTr("Modo:"); color: "#aaaacc"; font.pixelSize: 12 }
-                ComboBox {
+                DecoComboBox {
                     id: modeCombo
                     model: qsyPickerDialog.uniqueModes()
                     currentIndex: 0
@@ -114,7 +114,7 @@ Window {
                     implicitWidth: 100
                 }
                 Text { text: qsTr("Banda:"); color: "#aaaacc"; font.pixelSize: 12 }
-                ComboBox {
+                DecoComboBox {
                     id: bandCombo
                     model: qsyPickerDialog.uniqueBands()
                     currentIndex: 0

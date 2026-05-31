@@ -1014,7 +1014,7 @@ Item {
                     font.bold: true
                 }
 
-                TextField {
+                DecoTextField {
                     id: dxCallField
                     Layout.preferredWidth: qsoInfoWidth(text, "Call", 74, 126)
                     Layout.preferredHeight: qsoInfoControlHeight
@@ -1053,7 +1053,7 @@ Item {
                     font.bold: true
                 }
 
-                TextField {
+                DecoTextField {
                     id: dxGridField
                     Layout.preferredWidth: qsoInfoWidth(text, "Grid", 58, 84)
                     Layout.preferredHeight: qsoInfoControlHeight
@@ -1092,7 +1092,7 @@ Item {
                     font.bold: true
                 }
 
-                TextField {
+                DecoTextField {
                     id: rptSentField
                     Layout.preferredWidth: qsoInfoWidth(text, "-10", 44, 58)
                     Layout.preferredHeight: qsoInfoControlHeight
@@ -1131,7 +1131,7 @@ Item {
                     font.bold: true
                 }
 
-                TextField {
+                DecoTextField {
                     id: rptRcvdField
                     Layout.preferredWidth: qsoInfoWidth(text, "--", 44, 58)
                     Layout.preferredHeight: qsoInfoControlHeight
@@ -1405,7 +1405,7 @@ Item {
                 }
             }
 
-            TextField {
+            DecoTextField {
                 id: txEditField
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
@@ -1473,9 +1473,10 @@ Item {
         id: logConfirmPopup
         parent: Overlay.overlay
         modal: true
+        dim: false
         focus: true
-        width: 520
-        height: 450
+        width: 570
+        height: 490
         x: parent ? Math.round((parent.width - width) / 2) : 0
         y: parent ? Math.round((parent.height - height) / 2) : 0
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -1537,7 +1538,7 @@ Item {
                 Text { text: logPreviewCall || "-"; color: textPrimary; font.pixelSize: 14; font.bold: true }
 
                 Text { text: "Grid:"; color: textSecondary; font.pixelSize: 13 }
-                TextField {
+                DecoTextField {
                     id: logGridField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -1569,7 +1570,7 @@ Item {
                 Text { text: logPreviewFreq && logPreviewFreq !== "0" ? logPreviewFreq + " Hz" : "-"; color: textPrimary; font.pixelSize: 14 }
 
                 Text { text: "Comment:"; color: textSecondary; font.pixelSize: 13 }
-                TextField {
+                DecoTextField {
                     id: logCommentField
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34

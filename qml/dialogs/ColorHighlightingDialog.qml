@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "../decodium/components"
 
 // ColorHighlightingDialog — palette WSJT-X (B7)
 Dialog {
@@ -172,7 +173,7 @@ Dialog {
                 color: "#B0BEC5"
             }
 
-            TextField {
+            DecoTextField {
                 id: colorPickerInput
                 width: 240
                 text: colorPickerDialog.currentHex

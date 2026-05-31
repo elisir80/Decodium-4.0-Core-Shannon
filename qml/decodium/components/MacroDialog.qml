@@ -262,7 +262,7 @@ Dialog {
                         Layout.leftMargin: 20
                     }
 
-                    TextField {
+                    DecoTextField {
                         id: exchangeField
                         text: appEngine.macroManager ? appEngine.macroManager.exchange : ""
                         Layout.preferredWidth: 120
@@ -377,7 +377,7 @@ Dialog {
                                     }
                                 }
 
-                                TextField {
+                                DecoTextField {
                                     id: macroField
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 32

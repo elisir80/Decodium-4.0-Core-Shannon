@@ -42,6 +42,7 @@ private:
   bool do_pwr2_ = false;
   bool do_swr_ = false;
   bool do_alc_ = false;  // 1.0.323 — lettura RIG_LEVEL_ALC in TX (ALC automatico, fase 1 display)
+  bool alc_probe_pending_ = false;
 
   // 1.0.204 — throttle telemetry polling: SWR/PWR add ~300ms per poll on slow
   // rigs (FT-991 38400 baud). Polling at full 1Hz blocks the worker thread

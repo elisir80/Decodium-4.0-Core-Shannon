@@ -211,7 +211,7 @@ Rectangle {
                 text: "Nome operatore / callsign"
                 color: textPrimary
             }
-            TextField {
+            DecoTextField {
                 id: newLogbookNameField
                 Layout.fillWidth: true
                 placeholderText: "es. 9H1SR oppure AMICO"
@@ -346,7 +346,7 @@ Rectangle {
                     RowLayout {
                         anchors.fill: parent; anchors.margins: 3; spacing: 3
                         Text { text: "\uD83D\uDD0D"; font.pixelSize: 10; color: textSecondary }
-                        TextField {
+                        DecoTextField {
                             id: searchField; Layout.fillWidth: true
                             placeholderText: "Cerca..."
                             font.pixelSize: 10; font.family: decodiumMonoFontFamily
@@ -554,7 +554,7 @@ Rectangle {
                             width: 112; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editCallF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editCallF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily; font.bold: true
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -571,7 +571,7 @@ Rectangle {
                             width: 70; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editGridF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editGridF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -588,7 +588,7 @@ Rectangle {
                             width: 58; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editBandF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editBandF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -605,7 +605,7 @@ Rectangle {
                             width: 58; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editModeF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editModeF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -622,7 +622,7 @@ Rectangle {
                             width: 52; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editSentF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editSentF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -639,7 +639,7 @@ Rectangle {
                             width: 52; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                             border.color: editRcvdF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.25)
-                            TextField {
+                            DecoTextField {
                                 id: editRcvdF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -664,7 +664,7 @@ Rectangle {
                             Layout.fillWidth: true; height: 28; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editCommentF.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editCommentF; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 10; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0

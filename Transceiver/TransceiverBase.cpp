@@ -379,10 +379,11 @@ void TransceiverBase::update_swr (unsigned int p)
   actual_.swr (p);
 }
 
-void TransceiverBase::update_alc (unsigned int p)
+void TransceiverBase::update_alc (unsigned int p, bool valid)
 {
-  CAT_TRACE ("alc: " << p);
+  CAT_TRACE ("alc: " << p << " valid=" << valid);
   actual_.alc (p);
+  actual_.alc_valid (valid);
 }
 
 void TransceiverBase::update_complete (bool force_signal)

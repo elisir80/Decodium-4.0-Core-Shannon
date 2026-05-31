@@ -249,7 +249,7 @@ void SoundOutput::restart(QIODevice* source)
   m_sourceDevice.clear();
   m_pendingWrite.clear();
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   if (m_stream
       && !m_streamDevice.isNull()
       && m_openDeviceId == m_device.id()
@@ -370,7 +370,7 @@ void SoundOutput::restart(QIODevice* source)
   }
   configMs = phaseTimer.elapsed();
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   m_sourceDevice = source;
   phaseTimer.restart();
   m_streamDevice = m_stream->start();
@@ -438,13 +438,13 @@ void SoundOutput::finishPlayback()
   m_pumpTimer.stop();
   m_pendingWrite.clear();
   m_sourceDevice.clear();
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   if (m_stream && !m_streamDevice.isNull()) {
     m_coreAudioKeepAlive = true;
     m_stream->setVolume(0.0f);
     pumpAudio();
     m_pumpTimer.start();
-    Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink kept warm after finish"));
+    Q_EMIT status(QStringLiteral("TX SoundOutput sink kept warm after finish"));
     qInfo().noquote() << "[TX-TL] sound_output_retire"
                       << "reason=finish"
                       << "mode=keepalive"
@@ -478,13 +478,13 @@ void SoundOutput::stop()
   m_pumpTimer.stop();
   m_pendingWrite.clear();
   m_sourceDevice.clear();
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   if (m_stream && !m_streamDevice.isNull()) {
     m_coreAudioKeepAlive = true;
     m_stream->setVolume(0.0f);
     pumpAudio();
     m_pumpTimer.start();
-    Q_EMIT status(QStringLiteral("TX SoundOutput CoreAudio sink kept warm after stop"));
+    Q_EMIT status(QStringLiteral("TX SoundOutput sink kept warm after stop"));
     qInfo().noquote() << "[TX-TL] sound_output_retire"
                       << "reason=stop"
                       << "mode=keepalive"
@@ -565,7 +565,7 @@ void SoundOutput::resetAttenuation()
 
 void SoundOutput::pumpAudio()
 {
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   if (!m_stream || !m_streamDevice) {
     m_pumpTimer.stop();
     return;
@@ -632,6 +632,17 @@ void SoundOutput::pumpAudio()
     request -= request % bytesPerFrame;
     if (request <= 0) {
       break;
+    }
+
+    if (!m_sourceDevice->isOpen()) {
+      if (m_coreAudioKeepAlive) {
+        m_sourceDevice.clear();
+        continue;
+      }
+      m_pumpTimer.stop();
+      Q_EMIT error(tr("Audio TX source read error: generated TX audio source was closed before playback completed. device=\"%1\", format=%2")
+                   .arg(m_device.description(), formatSummary(m_stream->format())));
+      return;
     }
 
     QByteArray chunk(static_cast<int>(request), Qt::Uninitialized);
@@ -706,7 +717,7 @@ void SoundOutput::handleStateChanged(QAudio::State newState)
     Q_EMIT status(tr("Suspended"));
     break;
   case QAudio::StoppedState:
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
     if (m_coreAudioKeepAlive) {
       Q_EMIT status(tr("TX output stopped while parked"));
       break;

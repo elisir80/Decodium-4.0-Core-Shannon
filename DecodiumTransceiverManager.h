@@ -58,6 +58,7 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(double  powerWatts  READ powerWatts  NOTIFY powerWattsChanged)
     Q_PROPERTY(double  swr         READ swr         NOTIFY swrChanged)
     Q_PROPERTY(double  alc         READ alc         NOTIFY alcChanged)  // 1.0.323 — ALC meter 0..100
+    Q_PROPERTY(bool    alcValid    READ alcValid    NOTIFY alcChanged)
 
     // ── Liste per UI ──────────────────────────────────────────────────────
     Q_PROPERTY(QStringList rigList  READ rigList  NOTIFY rigListChanged)
@@ -106,6 +107,7 @@ public:
     double  powerWatts()   const { return m_powerWatts; }
     double  swr()          const { return m_swr; }
     double  alc()          const { return m_alc; }
+    bool    alcValid()     const { return m_alcValid; }
 
     QStringList rigList()       const;
     QStringList portList()      const { return m_portList; }
@@ -210,7 +212,7 @@ signals:
 
 private:
     void enforceForceLineAvailability();
-    void updateTelemetry(double powerWatts, double swr, double alc = 0.0);
+    void updateTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void reconnectRigForParameterChange(const QString& reason);
     void scheduleTransientReconnect(const QString& reason);
     void setConnecting(bool v);
@@ -250,6 +252,7 @@ private:
     double  m_powerWatts   {0.0};
     double  m_swr          {0.0};
     double  m_alc          {0.0};  // 1.0.323 — ALC meter 0..100
+    bool    m_alcValid     {false};
 
     QStringList m_portList;
     bool    m_catAutoConnect {false};

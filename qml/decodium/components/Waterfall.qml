@@ -499,7 +499,7 @@ Item {
                 Rectangle { width:1; height:14; color:"#333" }
 
                 Text { text: "Color"; color: wfText; font.pixelSize: 10 }
-                ComboBox {
+                DecoComboBox {
                     id: labelColorCombo
                     Layout.preferredWidth: 86
                     Layout.alignment: Qt.AlignVCenter
@@ -537,7 +537,7 @@ Item {
                 // ── Palette / Auto / [] / Peak / Zoom / dBm ──
                 // Unita alla barra Calls per avere un'unica riga superiore (feedback IK8OLM)
                 Text { text: "Palette:"; color: wfText; font.pixelSize: 10 }
-                ComboBox {
+                DecoComboBox {
                     id: paletteCombo
                     Layout.preferredWidth: 106
                     model: waterfallDisplay.paletteNames
@@ -1305,7 +1305,7 @@ Item {
                             font.pixelSize: Math.max(10, waterfallDisplay.labelFontSize)
                             font.bold: waterfallDisplay.labelBold
                             font.hintingPreference: Font.PreferFullHinting
-                            renderType: Text.NativeRendering
+                            renderType: Text.QtRendering
                         }
                         MouseArea {
                             x: Math.round(modelData.textX - 3)

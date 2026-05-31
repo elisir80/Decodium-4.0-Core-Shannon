@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "components"
 
 Dialog {
     id: catDialog
@@ -46,7 +47,7 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Label { text: "Radio:"; color: textSec; Layout.preferredWidth: 100 }
-            ComboBox {
+            DecoComboBox {
                 id: rigCombo
                 Layout.fillWidth: true
                 model: bridge.catManager.rigList
@@ -105,7 +106,7 @@ Dialog {
                         width: rigComboPopup.width
                         spacing: 6
 
-                        TextField {
+                        DecoTextField {
                             id: rigSearchField
                             x: 8
                             width: parent.width - 16
@@ -166,7 +167,7 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Label { text: "Porta seriale:"; color: textSec; Layout.preferredWidth: 100 }
-            ComboBox {
+            DecoComboBox {
                 id: portCombo
                 Layout.fillWidth: true
                 model: bridge.catManager.portList
@@ -177,7 +178,7 @@ Dialog {
                                  bridge.catManager.serialPort = editText
                 onEditTextChanged: if (bridge.catManager.serialPort !== editText)
                                        bridge.catManager.serialPort = editText
-                contentItem: TextField {
+                contentItem: DecoTextField {
                     leftPadding: 8
                     text: portCombo.editText
                     color: textColor
@@ -222,7 +223,7 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Label { text: "Velocità (baud):"; color: textSec; Layout.preferredWidth: 100 }
-            ComboBox {
+            DecoComboBox {
                 id: baudCombo
                 Layout.fillWidth: true
                 model: bridge.catManager.baudList
@@ -254,7 +255,7 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Label { text: "PTT:"; color: textSec; Layout.preferredWidth: 100 }
-            ComboBox {
+            DecoComboBox {
                 id: pttCombo
                 Layout.fillWidth: true
                 model: ["CAT","DTR","RTS","VOX"]
