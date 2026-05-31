@@ -25,6 +25,8 @@ Item {
     signal requestOpenSettings()
     signal requestOpenLog()    // 1.0.344 — pulsante LOG header → finestra QSO Log
     signal requestOpenMam()    // 1.0.344 — finestra MAM (Multi-Answer Mode)
+    signal requestOpenMacro()  // 1.0.345 — Macro Dialog (editor messaggi)
+    signal requestOpenCat()    // 1.0.345 — CAT / Rig Control dialog
 
     // --- Theme token shortcuts (Fase 1) — NO hardcoded hex anywhere below ---------
     readonly property var tm: bridge ? bridge.themeManager : null
@@ -282,10 +284,8 @@ Item {
                             MouseArea {
                                 id: tbMA; anchors.fill: parent; hoverEnabled: true
                                 // 1.0.344 — SETUP/LOG/MAM cablati; MACRO/CAT placeholder.
-                                cursorShape: (parent.modelData === "SETUP"
-                                              || parent.modelData === "LOG"
-                                              || parent.modelData === "MAM")
-                                             ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                // 1.0.345 — tutti i pulsanti header cablati.
+                                cursorShape: Qt.PointingHandCursor
                                 onClicked: {
                                     if (parent.modelData === "SETUP")
                                         workspace.requestOpenSettings()
@@ -293,6 +293,10 @@ Item {
                                         workspace.requestOpenLog()
                                     else if (parent.modelData === "MAM")
                                         workspace.requestOpenMam()
+                                    else if (parent.modelData === "MACRO")
+                                        workspace.requestOpenMacro()
+                                    else if (parent.modelData === "CAT")
+                                        workspace.requestOpenCat()
                                 }
                             }
                         }

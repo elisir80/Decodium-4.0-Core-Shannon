@@ -7045,6 +7045,14 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 item.requestOpenMam.connect(function() {
                     mamWindow.open()
                 })
+                // 1.0.345 — MACRO + CAT dalla DX-Pedition.
+                item.requestOpenMacro.connect(function() {
+                    mainWindow.openMacroDialog()
+                })
+                item.requestOpenCat.connect(function() {
+                    if (bridge && bridge.openCatSettings)
+                        bridge.openCatSettings()
+                })
             }
         }
 
