@@ -23,6 +23,8 @@ Item {
     // so without these the user would be trapped). See Main.qml dxPeditionLoader.
     signal requestExitDxPedition()
     signal requestOpenSettings()
+    signal requestOpenLog()    // 1.0.344 — pulsante LOG header → finestra QSO Log
+    signal requestOpenMam()    // 1.0.344 — finestra MAM (Multi-Answer Mode)
 
     // --- Theme token shortcuts (Fase 1) — NO hardcoded hex anywhere below ---------
     readonly property var tm: bridge ? bridge.themeManager : null
@@ -261,7 +263,7 @@ Item {
                     spacing: 6
                     Layout.alignment: Qt.AlignVCenter
                     Repeater {
-                        model: ["SETUP", "LOG", "MACRO", "CAT"]
+                        model: ["SETUP", "LOG", "MAM", "MACRO", "CAT"]
                         delegate: Rectangle {
                             required property string modelData
                             implicitWidth: tbTxt.implicitWidth + 16
@@ -279,11 +281,18 @@ Item {
                             }
                             MouseArea {
                                 id: tbMA; anchors.fill: parent; hoverEnabled: true
-                                cursorShape: parent.modelData === "SETUP"
+                                // 1.0.344 — SETUP/LOG/MAM cablati; MACRO/CAT placeholder.
+                                cursorShape: (parent.modelData === "SETUP"
+                                              || parent.modelData === "LOG"
+                                              || parent.modelData === "MAM")
                                              ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 onClicked: {
                                     if (parent.modelData === "SETUP")
                                         workspace.requestOpenSettings()
+                                    else if (parent.modelData === "LOG")
+                                        workspace.requestOpenLog()
+                                    else if (parent.modelData === "MAM")
+                                        workspace.requestOpenMam()
                                 }
                             }
                         }
@@ -576,6 +585,9 @@ Item {
                             handleLogPrompt: false
                             showAsyncIcon: false
                             showBandBar: false
+                            // 1.0.344 — il pulsante MAM in TX Macros apre la finestra MAM
+                            // (propagata a Main.qml che possiede l'istanza MamWindow).
+                            onMamWindowRequested: workspace.requestOpenMam()
                         }
                     }
                 }

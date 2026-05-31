@@ -7038,6 +7038,13 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 item.requestOpenSettings.connect(function() {
                     mainWindow.openSettingsDialog()
                 })
+                // 1.0.344 — LOG header + finestra MAM dalla DX-Pedition.
+                item.requestOpenLog.connect(function() {
+                    mainWindow.openLogWindow()
+                })
+                item.requestOpenMam.connect(function() {
+                    mamWindow.open()
+                })
             }
         }
 

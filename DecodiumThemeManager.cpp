@@ -126,7 +126,9 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     // ogni avvio (rendeva DX-Pedition non selezionabile in modo permanente). Ora
     // ripristina il tema salvato dall'utente, validandolo contro i temi noti.
     QString stored = s.value("theme/current", startupTheme).toString().trimmed();
-    if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "DX-Pedition")
+    // 1.0.344 — rename tema DX-Pedition -> Darkcodium: migra il valore salvato.
+    if (stored == "DX-Pedition") { stored = "Darkcodium"; s.setValue("theme/current", stored); }
+    if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "Darkcodium")
         stored = startupTheme;
     m_currentTheme = stored;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
@@ -199,14 +201,14 @@ void DecodiumThemeManager::setCustomTextColor(const QString& hex)
 const DecodiumThemeManager::ThemePalette& DecodiumThemeManager::currentPalette() const
 {
     if (m_currentTheme == "Stellar Light") return s_stellarLight;
-    if (m_currentTheme == "DX-Pedition")   return s_dxPedition;
+    if (m_currentTheme == "Darkcodium")   return s_dxPedition;
     return s_oceanBlue;
 }
 
 void DecodiumThemeManager::setCurrentTheme(const QString& name)
 {
     if (m_currentTheme == name) return;
-    if (name != "Ocean Blue" && name != "Stellar Light" && name != "DX-Pedition") return;
+    if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium") return;
     m_currentTheme = name;
     QSettings("Decodium", "Decodium").setValue("theme/current", name);
     emit currentThemeChanged();
@@ -297,7 +299,7 @@ QColor DecodiumThemeManager::primaryColor()   const { return currentPalette().pr
 QColor DecodiumThemeManager::secondaryColor() const { return currentPalette().secondaryColor; }
 QColor DecodiumThemeManager::accentColor() const
 {
-    if (m_currentTheme == "DX-Pedition") {
+    if (m_currentTheme == "Darkcodium") {
         QColor a, d, p; accentTriple(a, d, p); return a;
     }
     return currentPalette().accentColor;
@@ -342,14 +344,14 @@ QColor DecodiumThemeManager::ledMagenta()     const { return currentPalette().le
 // ragionevoli dai getter esistenti, così quei temi restano invariati e validi.
 QColor DecodiumThemeManager::accentDim() const
 {
-    if (m_currentTheme == "DX-Pedition") {
+    if (m_currentTheme == "Darkcodium") {
         QColor a, d, p; accentTriple(a, d, p); return d;
     }
     return accentColor().darker(160);
 }
 QColor DecodiumThemeManager::accentDeep() const
 {
-    if (m_currentTheme == "DX-Pedition") {
+    if (m_currentTheme == "Darkcodium") {
         QColor a, d, p; accentTriple(a, d, p); return p;
     }
     return accentColor().darker(420);

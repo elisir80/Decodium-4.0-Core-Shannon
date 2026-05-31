@@ -45,7 +45,7 @@ class DecodiumThemeManager : public QObject
     Q_PROPERTY(bool    customColorsEnabled READ customColorsEnabled WRITE setCustomColorsEnabled NOTIFY paletteChanged)
     Q_PROPERTY(QString customBgColor       READ customBgColor       WRITE setCustomBgColor       NOTIFY paletteChanged)
     Q_PROPERTY(QString customTextColor     READ customTextColor     WRITE setCustomTextColor     NOTIFY paletteChanged)
-    // DX-Pedition Fase 1 — accent swappabile (solo tema "DX-Pedition") + densità (metrica)
+    // DX-Pedition Fase 1 — accent swappabile (solo tema "Darkcodium") + densità (metrica)
     Q_PROPERTY(QString accentVariant       READ accentVariant       WRITE setAccentVariant       NOTIFY paletteChanged)
     Q_PROPERTY(QString density             READ density             WRITE setDensity             NOTIFY densityChanged)
 
@@ -83,7 +83,7 @@ public:
     QColor txColor()        const;
     QColor rxColor()        const;
 
-    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "DX-Pedition"}; }
+    QStringList availableThemes() const { return {"Ocean Blue", "Stellar Light", "Darkcodium"}; }
     QString currentTheme() const { return m_currentTheme; }
     void setCurrentTheme(const QString& name);
     bool isLightTheme() const;

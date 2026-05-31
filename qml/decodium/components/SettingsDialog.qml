@@ -3538,13 +3538,13 @@ Dialog {
                             color: textSecondary; font.pixelSize: 12
                             Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight
                             verticalAlignment: Text.AlignVCenter
-                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            visible: bridge.themeManager.currentTheme === "Darkcodium"
                         }
                         RowLayout {
                             id: dxpAccentRow
                             Layout.columnSpan: 3; Layout.fillWidth: true
                             spacing: 8
-                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            visible: bridge.themeManager.currentTheme === "Darkcodium"
                             readonly property var accents: [
                                 { key: "phosphor", color: "#19ff88" },
                                 { key: "cyan",     color: "#66e6ff" },
@@ -3575,13 +3575,13 @@ Dialog {
                             color: textSecondary; font.pixelSize: 12
                             Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight
                             verticalAlignment: Text.AlignVCenter
-                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            visible: bridge.themeManager.currentTheme === "Darkcodium"
                         }
                         RowLayout {
                             id: dxpDensityRow
                             Layout.columnSpan: 3; Layout.fillWidth: true
                             spacing: 0
-                            visible: bridge.themeManager.currentTheme === "DX-Pedition"
+                            visible: bridge.themeManager.currentTheme === "Darkcodium"
                             readonly property var densities: ["compact", "regular", "comfy"]
                             Repeater {
                                 model: dxpDensityRow.densities
