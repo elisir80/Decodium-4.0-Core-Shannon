@@ -410,7 +410,7 @@ Dialog {
                         Button {
                             implicitWidth: 36; implicitHeight: 36
                             padding: 0
-                            ToolTip.text: "Aggiorna porte"; ToolTip.visible: hovered
+                            ToolTip.text: "Aggiorna porte"; ToolTip.visible: hovered; ToolTip.delay: 500
                             onClicked: bridge.catManager.refreshPorts()
                             background: Rectangle { color: parent.hovered ? bgMedium : "transparent"; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: "↻"; color: secondaryCyan; font.pixelSize: 18; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }

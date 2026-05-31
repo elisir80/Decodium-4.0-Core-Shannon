@@ -210,6 +210,7 @@ Dialog {
                     width: 28; height: 28
                     text: "↻"
                     ToolTip.text: "Aggiorna porte"
+                    ToolTip.delay: 500
                     ToolTip.visible: hovered
                     onClicked: bridge.catManager.refreshPorts()
                     background: Rectangle { color: "transparent" }

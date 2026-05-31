@@ -3383,7 +3383,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Spalma i decode FT8/FT4 dal batch finale del periodo a streaming continuo con fade animato (~100ms per row). FT2 async resta invariato (gia' streaming). Default ON; auto-fallback se rileva UI stall su PC modesti. Disattiva per comportamento batch legacy.")
+                                    ToolTip.text: qsTr("Spalma i decode FT8/FT4 dal batch finale del periodo a streaming continuo con fade animato (~100 ms per riga). FT2 async resta invariato (già streaming). Default: ON; auto-fallback se rileva stall UI su PC modesti. Disattiva per il comportamento batch legacy.")
                                 }
                                 Item { Layout.preferredWidth: autoSequenceGrid.labelWidth; Layout.preferredHeight: controlHeight }
                                 Item { Layout.preferredWidth: autoSequenceGrid.checkWidth; Layout.preferredHeight: controlHeight }
@@ -3639,7 +3639,7 @@ Dialog {
                             }
                             ToolTip.visible: hovered
                             ToolTip.delay: 600
-                            ToolTip.text: qsTr("Alternative single-pane operator view optimized for DX pile-ups: a 3-column tactical dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in; the standard layout is unchanged when this is off.")
+                            ToolTip.text: qsTr("Vista operatore alternativa a pannello unico ottimizzata per i pile-up DX: cruscotto tattico a 3 colonne (Cluster / Cascata / TX) al posto del workspace classico. Opt-in, default OFF: il layout standard resta invariato quando è disattivata.")
                         }
 
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
@@ -6230,7 +6230,7 @@ Dialog {
                                     checked: settingsDialog.boolSetting("DirectVisualAudioCaptureUnsafe", false)
                                     onToggled: settingsDialog.setBoolSettingIfChanged("DirectVisualAudioCaptureUnsafe", checked, false)
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only raises the visual refresh rate.")
+                                    ToolTip.text: qsTr("Panadapter visivo veloce. In modalità legacy può aprire una seconda cattura audio; in modalità normale aumenta solo il refresh rate visivo. Default: OFF.")
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
@@ -6241,7 +6241,7 @@ Dialog {
                                     checked: bridge.lowCpuModeEnabled
                                     onToggled: bridge.lowCpuModeEnabled = checked
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Profile for slow PCs: up to 2 FT threads, slower waterfall, reduced early/deep decoding.")
+                                    ToolTip.text: qsTr("Profilo per PC lenti: massimo 2 thread FT, cascata più lenta, decodifica early/deep ridotta. Default: OFF.")
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }

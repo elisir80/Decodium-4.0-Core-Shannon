@@ -348,7 +348,7 @@ Rectangle {
                         Text { text: "\uD83D\uDD0D"; font.pixelSize: 10; color: textSecondary }
                         DecoTextField {
                             id: searchField; Layout.fillWidth: true
-                            placeholderText: "Search..."
+                            placeholderText: "Cerca..."
                             font.pixelSize: 10; font.family: decodiumMonoFontFamily
                             color: textPrimary; placeholderTextColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             onTextChanged: { clearSelection(); refreshLog() }
@@ -402,7 +402,7 @@ Rectangle {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Remove filters"
+                    ToolTip.text: "Rimuovi i filtri"
                     ToolTip.delay: 500
                 }
 
@@ -415,7 +415,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Text { anchors.centerIn: parent; text: "\u2B07"; font.pixelSize: 11; color: importFloatMA.containsMouse ? accentGreen : textSecondary }
                     MouseArea { id: importFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openImportAdifDialog() }
-                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: "Import ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: "Importa ADIF"; ToolTip.delay: 500
                 }
 
                 // Export ADIF
@@ -425,7 +425,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Text { anchors.centerIn: parent; text: "\u2B06"; font.pixelSize: 11; color: exportFloatMA.containsMouse ? secondaryCyan : textSecondary }
                     MouseArea { id: exportFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openExportAdifDialog() }
-                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: "Export ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: "Esporta ADIF"; ToolTip.delay: 500
                 }
 
                 // Refresh
