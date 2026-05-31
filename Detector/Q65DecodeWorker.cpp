@@ -7,17 +7,19 @@
 #include "commons.h"
 extern "C"
 {
-  void ftx_q65_async_decode_c (short const* iwave, int* nqd0, int* nutc, int* ntrperiod,
-                               int* nsubmode, int* nfqso, int* ntol, int* ndepth,
-                               int* nfa, int* nfb, int* nclearave, int* single_decode,
-                               int* nagain, int* max_drift, int* lnewdat, float* emedelay,
-                               char const* mycall, char const* hiscall, char const* hisgrid,
-                               int* nqsoprogress, int* ncontest, int* lapcqonly,
-                               int syncsnrs[], int snrs[], float dts[], float freqs[],
-                               int idecs[], int nuseds[], signed char bits77[],
-                               char decodeds[], int* nout,
-                               fortran_charlen_t, fortran_charlen_t,
-                               fortran_charlen_t, fortran_charlen_t);
+  void ftx_q65_async_decode_with_zap_c (short const* iwave, int* nqd0, int* nutc,
+                                        int* ntrperiod, int* nsubmode, int* nfqso,
+                                        int* ntol, int* ndepth, int* nfa, int* nfb,
+                                        int* nclearave, int* single_decode, int* nagain,
+                                        int* max_drift, int* lnewdat, float* emedelay,
+                                        char const* mycall, char const* hiscall,
+                                        char const* hisgrid, int* nqsoprogress,
+                                        int* ncontest, int* lapcqonly, int* lzap,
+                                        int syncsnrs[], int snrs[], float dts[],
+                                        float freqs[], int idecs[], int nuseds[],
+                                        signed char bits77[], char decodeds[], int* nout,
+                                        fortran_charlen_t, fortran_charlen_t,
+                                        fortran_charlen_t, fortran_charlen_t);
 }
 
 namespace
@@ -155,23 +157,21 @@ void Q65DecodeWorker::decode (DecodeRequest const& request)
   int nqsoprogress = qBound (0, request.nqsoprogress, 6);
   int ncontest = qBound (0, request.ncontest, 16);
   int lapcqonly = request.lapcqonly ? 1 : 0;
+  int lzap = request.zapEnabled ? 1 : 0;
   int nout = 0;
 
   auto mycall = to_fortran_field (request.mycall, 12);
   auto hiscall = to_fortran_field (request.hiscall, 12);
   auto hisgrid = to_fortran_field (request.hisgrid, 6);
 
-  ftx_q65_async_decode_c (localAudio.constData (), &nqd0, &nutc, &ntrperiod, &nsubmode,
-                     &nfqso, &ntol, &ndepth, &nfa, &nfb, &nclearave,
-                     &single_decode, &nagain, &max_drift, &lnewdat,
-                     &emedelay, mycall.constData (), hiscall.constData (), hisgrid.constData (),
-                     &nqsoprogress, &ncontest, &lapcqonly,
-                     &syncsnrs[0],
-                     &snrs[0], &dts[0], &freqs[0], &idecs[0], &nuseds[0],
-                     &bits77[0], &decodeds[0], &nout,
-                     static_cast<fortran_charlen_t> (12),
-                     static_cast<fortran_charlen_t> (12),
-                     static_cast<fortran_charlen_t> (6),
+  ftx_q65_async_decode_with_zap_c (localAudio.constData (), &nqd0, &nutc, &ntrperiod,
+                     &nsubmode, &nfqso, &ntol, &ndepth, &nfa, &nfb, &nclearave,
+                     &single_decode, &nagain, &max_drift, &lnewdat, &emedelay,
+                     mycall.constData (), hiscall.constData (), hisgrid.constData (),
+                     &nqsoprogress, &ncontest, &lapcqonly, &lzap, &syncsnrs[0],
+                     &snrs[0], &dts[0], &freqs[0], &idecs[0], &nuseds[0], &bits77[0],
+                     &decodeds[0], &nout, static_cast<fortran_charlen_t> (12),
+                     static_cast<fortran_charlen_t> (12), static_cast<fortran_charlen_t> (6),
                      static_cast<fortran_charlen_t> (kQ65MaxLines * kDecodedChars));
 
   QString const utcPrefix = format_decode_utc (request.nutc);

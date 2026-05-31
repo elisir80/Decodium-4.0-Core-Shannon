@@ -60,6 +60,8 @@ extern "C"
                            int* ipk, int* jpk, int* ll, int* mode_q65,
                            float const sync[85], float s3[]);
   void ftx_q65_sync_curve_c (float ccf1[], int* count, float* rms1);
+  int ftx_q65_zap_enabled_c ();
+  void ftx_q65_set_zap_enabled_c (int* enabled);
   void legacy_pack77_unpack_c (char const c77[77], int received, char msgsent[37],
                                bool* success);
 }
@@ -239,6 +241,29 @@ namespace
     std::vector<float> last_s1;
     std::vector<Q65HistEntry> history;
     std::vector<Q65CallerEntry> callers;
+  };
+
+  class ScopedQ65ZapMode
+  {
+  public:
+    explicit ScopedQ65ZapMode (bool enabled)
+      : previous_ {ftx_q65_zap_enabled_c ()}
+    {
+      int value = enabled ? 1 : 0;
+      ftx_q65_set_zap_enabled_c (&value);
+    }
+
+    ~ScopedQ65ZapMode ()
+    {
+      int value = previous_;
+      ftx_q65_set_zap_enabled_c (&value);
+    }
+
+    ScopedQ65ZapMode (ScopedQ65ZapMode const&) = delete;
+    ScopedQ65ZapMode& operator= (ScopedQ65ZapMode const&) = delete;
+
+  private:
+    int previous_ {1};
   };
 
   QByteArray to_fortran_field (QByteArray value, int width)
@@ -1708,8 +1733,11 @@ namespace
                                char const* mycall, char const* hiscall, char const* hisgrid,
                                int* nqsoprogress, int* ncontest, int* lapcqonly,
                                int* syncsnrs, int* snrs, float* dts, float* freqs, int* idecs,
-                               int* nuseds, signed char* bits77, char* decodeds, int* nout)
+                               int* nuseds, signed char* bits77, char* decodeds, int* nout,
+                               bool zapEnabled)
   {
+    ScopedQ65ZapMode zap_mode {zapEnabled};
+
     std::fill_n (syncsnrs, kQ65MaxLines, 0);
     std::fill_n (snrs, kQ65MaxLines, 0);
     std::fill_n (dts, kQ65MaxLines, 0.0f);
@@ -1777,7 +1805,8 @@ namespace
                                 char const* mycall, char const* hiscall, char const* hisgrid,
                                 int* nqsoprogress, int* ncontest, int* lapcqonly,
                                 int* syncsnrs, int* snrs, float* dts, float* freqs, int* idecs,
-                                int* nuseds, signed char* bits77, char* decodeds, int* nout)
+                                int* nuseds, signed char* bits77, char* decodeds, int* nout,
+                                bool zapEnabled)
   {
     if (!iwave || !nqd0 || !nutc || !ntrperiod || !nsubmode || !nfqso || !ntol || !ndepth
         || !nfa || !nfb || !nclearave || !single_decode || !nagain || !max_drift
@@ -1797,7 +1826,7 @@ namespace
                             nfa, nfb, nclearave, single_decode, nagain, max_drift,
                             lnewdat, emedelay, mycall, hiscall, hisgrid, nqsoprogress,
                             ncontest, lapcqonly, syncsnrs, snrs, dts, freqs, idecs,
-                            nuseds, bits77, decodeds, nout);
+                            nuseds, bits77, decodeds, nout, zapEnabled);
   }
 }
 
@@ -1868,7 +1897,32 @@ extern "C" void ftx_q65_async_decode_c (short const* iwave,
                            nfa, nfb, nclearave, single_decode, nagain, max_drift,
                            lnewdat, emedelay, mycall, hiscall, hisgrid, nqsoprogress,
                            ncontest, lapcqonly, syncsnrs, snrs, dts, freqs, idecs,
-                           nuseds, bits77, decodeds, nout);
+                           nuseds, bits77, decodeds, nout, true);
+}
+
+extern "C" void ftx_q65_async_decode_with_zap_c (short const* iwave,
+                                                 int* nqd0, int* nutc, int* ntrperiod,
+                                                 int* nsubmode, int* nfqso, int* ntol,
+                                                 int* ndepth, int* nfa, int* nfb,
+                                                 int* nclearave, int* single_decode,
+                                                 int* nagain, int* max_drift, int* lnewdat,
+                                                 float* emedelay, char const* mycall,
+                                                 char const* hiscall, char const* hisgrid,
+                                                 int* nqsoprogress, int* ncontest,
+                                                 int* lapcqonly, int* lzap,
+                                                 int syncsnrs[], int snrs[], float dts[],
+                                                 float freqs[], int idecs[], int nuseds[],
+                                                 signed char bits77[], char decodeds[],
+                                                 int* nout, fortran_charlen_t,
+                                                 fortran_charlen_t, fortran_charlen_t,
+                                                 fortran_charlen_t)
+{
+  bool const zapEnabled = lzap && *lzap != 0;
+  decode_q65_into_outputs (iwave, nqd0, nutc, ntrperiod, nsubmode, nfqso, ntol, ndepth,
+                           nfa, nfb, nclearave, single_decode, nagain, max_drift,
+                           lnewdat, emedelay, mycall, hiscall, hisgrid, nqsoprogress,
+                           ncontest, lapcqonly, syncsnrs, snrs, dts, freqs, idecs,
+                           nuseds, bits77, decodeds, nout, zapEnabled);
 }
 
 extern "C" void ftx_q65_async_decode_c_api (short const* iwave,
@@ -1887,7 +1941,7 @@ extern "C" void ftx_q65_async_decode_c_api (short const* iwave,
                            nfa, nfb, nclearave, single_decode, nagain, max_drift,
                            lnewdat, emedelay, mycall, hiscall, hisgrid, nqsoprogress,
                            ncontest, lapcqonly, syncsnrs, snrs, dts, freqs, idecs,
-                           nuseds, bits77, decodeds, nout);
+                           nuseds, bits77, decodeds, nout, true);
 }
 
 extern "C" void ftx_q65_async_decode_latest_c_api (short const* iwave,
@@ -1952,7 +2006,7 @@ extern "C" void ftx_q65_async_decode_latest_c_api (short const* iwave,
                            lnewdat, emedelay, mycall, hiscall, hisgrid, nqsoprogress,
                            ncontest, lapcqonly, syncsnrs.data (), snrs.data (), dts.data (),
                            freqs.data (), idecs.data (), nuseds.data (), bits77.data (),
-                           decodeds.data (), &nout);
+                           decodeds.data (), &nout, true);
 
   int latest = -1;
   for (int i = 0; i < nout; ++i)
@@ -2032,7 +2086,7 @@ extern "C" void ftx_q65_decode_and_emit_params_c (short const* iwave,
                            params->hisgrid, &nqsoprogress, &ncontest, &lapcqonly,
                            syncsnrs.data (), snrs.data (), dts.data (), freqs.data (),
                            idecs.data (), nuseds.data (), bits77.data (), decodeds.data (),
-                           &nout);
+                           &nout, true);
 
   int const count = std::max (0, std::min (nout, kQ65MaxLines));
   if (decoded_count)

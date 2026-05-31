@@ -1134,6 +1134,8 @@ int main(int argc, char* argv[])
         QGuiApplication::setFont(uiFont);
         QApplication::setFont(uiFont);
     }
+    QQuickWindow::setTextRenderType(QQuickWindow::QtTextRendering);
+    L("Qt Quick text render type forced: QtTextRendering");
     app.setApplicationName("Decodium");
     app.setApplicationVersion(QStringLiteral(FORK_RELEASE_VERSION));
     app.setOrganizationName("IU8LMC");

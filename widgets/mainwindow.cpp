@@ -13440,6 +13440,7 @@ void MainWindow::requestInProcessQ65Decode ()
   request.lapcqonly = dec_data.params.lapcqonly ? 1 : 0;
   if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr) {
     request.coherentAvgEnabled = bridge->property ("coherentAvgEnabled").toBool ();
+    request.zapEnabled = bridge->property ("zapEnabled").toBool ();
   }
 
   m_q65DecodePending = true;

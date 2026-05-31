@@ -3,7 +3,9 @@
 
 #include <cmath>
 #include <QDebug>
+#include <QDir>
 #include <QElapsedTimer>
+#include <QFileInfo>
 #include <QRegularExpression>
 #include <QSerialPortInfo>
 #include <QSettings>
@@ -41,6 +43,14 @@ QString comparablePortName(QString value)
         return QStringLiteral("CAT");
     if (value.startsWith(QStringLiteral("\\\\.\\")))
         value.remove(0, 4);
+#if defined(Q_OS_LINUX)
+    if (value.startsWith(QLatin1Char('/'))) {
+        QFileInfo const info(value);
+        QString const canonical = info.canonicalFilePath();
+        if (!canonical.isEmpty())
+            value = canonical;
+    }
+#endif
     if (value.startsWith(QStringLiteral("/dev/")))
         value.remove(0, 5);
     return value.toLower();
@@ -84,6 +94,21 @@ void appendUniqueSerialPort(QStringList& ports, QString const& rawPort)
         ports << port;
 }
 
+#if defined(Q_OS_LINUX)
+QStringList enumerateLinuxSerialByIdPaths()
+{
+    QStringList paths;
+    QDir const byIdDir(QStringLiteral("/dev/serial/by-id"));
+    QFileInfoList const entries = byIdDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
+                                                        QDir::Name);
+    for (QFileInfo const& entry : entries) {
+        if (entry.isSymLink() || entry.exists())
+            paths << entry.absoluteFilePath();
+    }
+    return paths;
+}
+#endif
+
 int serialPortNumber(QString const& port)
 {
     static QRegularExpression const rx(QStringLiteral(R"(^COM(\d+)$)"),
@@ -112,6 +137,11 @@ QStringList enumerateSerialPorts(QString const& savedSerialPort, QString const& 
         appendUniqueSerialPort(ports, info.portName());
         appendUniqueSerialPort(ports, info.systemLocation());
     }
+
+#if defined(Q_OS_LINUX)
+    for (QString const& path : enumerateLinuxSerialByIdPaths())
+        appendUniqueSerialPort(ports, path);
+#endif
 
 #if defined(Q_OS_WIN)
     QSettings serialMap(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DEVICEMAP\\SERIALCOMM"),
@@ -912,7 +942,9 @@ void DecodiumCatManager::setRigPtt(bool on)
         emit statusUpdate("CAT PTT: " + QString::fromLatin1(cmd));
     } else if (m_pttMethod == "DTR" || m_pttMethod == "RTS") {
         // DTR/RTS PTT: usa porta separata se configurata, altrimenti la porta CAT
-        bool useSeparatePort = (!m_pttPort.isEmpty() && m_pttPort != "CAT" && m_pttPort != m_serialPort);
+        bool useSeparatePort = (!m_pttPort.isEmpty()
+                                && 0 != m_pttPort.compare(QStringLiteral("CAT"), Qt::CaseInsensitive)
+                                && comparablePortName(m_pttPort) != comparablePortName(m_serialPort));
         QSerialPort* pttSerial = m_serial;
 
         if (useSeparatePort) {

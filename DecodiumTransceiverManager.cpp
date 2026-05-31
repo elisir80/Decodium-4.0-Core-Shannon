@@ -8,7 +8,9 @@
 #include "Transceiver/TransceiverBase.hpp"
 
 #include <QByteArray>
+#include <QDir>
 #include <QElapsedTimer>
+#include <QFileInfo>
 #include <QThread>
 #include <QSerialPortInfo>
 #include <QSettings>
@@ -36,7 +38,7 @@ QString extractPortNameFromReason(QString const& reason)
     auto m = rxWin.match(reason);
     if (m.hasMatch())
         return m.captured(1).toUpper();
-    static QRegularExpression const rxUnix(QStringLiteral(R"((/dev/[A-Za-z0-9._-]+))"));
+    static QRegularExpression const rxUnix(QStringLiteral(R"((/dev/[^\s:;,)]+))"));
     m = rxUnix.match(reason);
     if (m.hasMatch())
         return m.captured(1);
@@ -137,8 +139,12 @@ QString sanitizeHamlibFailure(QString const& reason)
 QString normalizeDevicePath(QString value)
 {
     value = value.trimmed();
-    if (value.isEmpty() || value == "CAT" || value == "None")
+    if (value.isEmpty())
         return value;
+    if (0 == value.compare(QStringLiteral("CAT"), Qt::CaseInsensitive))
+        return QStringLiteral("CAT");
+    if (0 == value.compare(QStringLiteral("None"), Qt::CaseInsensitive))
+        return QStringLiteral("None");
 
 #if defined(Q_OS_WIN)
     return value;
@@ -158,6 +164,14 @@ QString comparablePortName(QString value)
         return value;
     if (value.startsWith(QStringLiteral("\\\\.\\")))
         value.remove(0, 4);
+#if defined(Q_OS_LINUX)
+    if (value.startsWith(QLatin1Char('/'))) {
+        QFileInfo const info(value);
+        QString const canonical = info.canonicalFilePath();
+        if (!canonical.isEmpty())
+            value = canonical;
+    }
+#endif
     if (value.startsWith(QStringLiteral("/dev/")))
         value.remove(0, 5);
     return value.toLower();
@@ -556,6 +570,30 @@ void appendUniqueSerialPort(QStringList& ports, QString const& rawPort)
     }
 }
 
+#if defined(Q_OS_LINUX)
+QStringList enumerateLinuxSerialByIdPaths()
+{
+    QStringList paths;
+    QDir const byIdDir(QStringLiteral("/dev/serial/by-id"));
+    QFileInfoList const entries = byIdDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
+                                                        QDir::Name);
+    for (QFileInfo const& entry : entries) {
+        if (entry.isSymLink() || entry.exists())
+            paths << entry.absoluteFilePath();
+    }
+    return paths;
+}
+
+bool linuxSerialByIdPathAvailable(QString const& port)
+{
+    QString const value = normalizeDevicePath(port);
+    if (!value.startsWith(QStringLiteral("/dev/serial/by-id/")))
+        return false;
+    QFileInfo const info(value);
+    return info.exists();
+}
+#endif
+
 int serialPortNumber(QString const& port)
 {
     static QRegularExpression const rx(QStringLiteral(R"(^COM(\d+)$)"),
@@ -586,6 +624,11 @@ QStringList enumerateSerialPorts(QString const& savedSerialPort, QString const& 
         appendUniqueSerialPort(ports, info.portName());
         appendUniqueSerialPort(ports, info.systemLocation());
     }
+
+#if defined(Q_OS_LINUX)
+    for (QString const& path : enumerateLinuxSerialByIdPaths())
+        appendUniqueSerialPort(ports, path);
+#endif
 
 #if defined(Q_OS_WIN)
     // Qt occasionally misses virtual/driver-created ports on Windows. The
@@ -618,6 +661,15 @@ bool serialPortCurrentlyAvailable(QString const& port)
             return true;
         }
     }
+
+#if defined(Q_OS_LINUX)
+    if (linuxSerialByIdPathAvailable(port))
+        return true;
+    for (QString const& path : enumerateLinuxSerialByIdPaths()) {
+        if (comparablePortName(path) == wanted)
+            return true;
+    }
+#endif
 
 #if defined(Q_OS_WIN)
     QSettings serialMap(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DEVICEMAP\\SERIALCOMM"),
@@ -1689,7 +1741,8 @@ void DecodiumTransceiverManager::connectRig()
                 if (m_split   != spl)  { m_split   = spl;  emit splitChanged(); }
                 updateTelemetry(static_cast<double>(state.power()) / 1000.0,
                                 static_cast<double>(state.swr()) / 100.0,
-                                static_cast<double>(state.alc()));
+                                static_cast<double>(state.alc()),
+                                state.alc_valid());
             },
             Qt::QueuedConnection);
 
@@ -1825,7 +1878,7 @@ void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reaso
     });
 }
 
-void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr, double alc)
+void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr, double alc, bool alcValid)
 {
     if (m_powerWatts != powerWatts) {
         m_powerWatts = powerWatts;
@@ -1835,8 +1888,9 @@ void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr, 
         m_swr = swr;
         emit swrChanged();
     }
-    if (m_alc != alc) {  // 1.0.323 — ALC meter
+    if (m_alc != alc || m_alcValid != alcValid) {  // 1.0.323 — ALC meter
         m_alc = alc;
+        m_alcValid = alcValid;
         emit alcChanged();
     }
 }

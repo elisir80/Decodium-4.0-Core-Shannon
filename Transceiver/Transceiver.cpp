@@ -38,6 +38,7 @@ QDebug operator << (QDebug d, Transceiver::TransceiverState const& s)
     << "; LEVEL: " << s.level_ << "dBm"
     << "; POWER: " << s.power_ << "mWatts"
     << "; SWR: " << s.swr_
+    << "; ALC: " << (s.alc_valid_ ? s.alc_ : 0) << (s.alc_valid_ ? "" : " (invalid)")
     << ")\n";
   return d.space (); 
 }
@@ -58,6 +59,7 @@ std::ostream& operator << (std::ostream& os, Transceiver::TransceiverState const
     << "; PTT: " << (s.ptt_ ? "on" : "off")
     << "; POWER: " << s.power_ << "mWatts"
     << "; SWR: " << s.swr_
+    << "; ALC: " << (s.alc_valid_ ? s.alc_ : 0) << (s.alc_valid_ ? "" : " (invalid)")
     << "; TUNE: " << s.tune_
     << ")\n";
 }
@@ -94,7 +96,8 @@ bool operator != (Transceiver::TransceiverState const& lhs, Transceiver::Transce
     || lhs.level_ != rhs.level_
     || lhs.power_ != rhs.power_
     || lhs.swr_ != rhs.swr_
-    || lhs.alc_ != rhs.alc_;
+    || lhs.alc_ != rhs.alc_
+    || lhs.alc_valid_ != rhs.alc_valid_;
 }
 
 bool operator == (Transceiver::TransceiverState const& lhs, Transceiver::TransceiverState const& rhs)

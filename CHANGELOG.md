@@ -1,5 +1,63 @@
 # Changelog / Registro Modifiche
 
+## [1.0.347] - 2026-05-31
+
+### Italiano
+
+Release di stabilizzazione dopo la 1.0.346, centrata su affidabilita' audio/CAT, compatibilita' Linux/macOS, pulizia della UI QML e gestione piu' robusta di Cloudlog.
+
+#### Aggiunto
+
+- Supporto Linux ai path seriali stabili `/dev/serial/by-id` nelle liste CAT e PTT, con confronto canonico dei symlink.
+- Identita' audio piu' stabile nei percorsi di selezione periferica, con refresh esplicito della cache prima di TX/Tune.
+- Telemetria ALC con validita' separata, cosi' il valore `0` non viene piu' confuso con dato assente.
+- Controllo ZAP cablato nel percorso decode Q65.
+- Componenti QML dedicati `DecoComboBox` e `DecoTextField` per evitare rendering errato di emoji/simboli nei campi Material su macOS.
+
+#### Modificato
+
+- Cloudlog normalizza meglio l'endpoint API, distingue errori HTTP/autenticazione e segnala API key valida/non valida con messaggi piu' chiari.
+- La finestra "prompt to log" non usa piu' il dim Material sullo sfondo ed e' leggermente piu' alta per contenere correttamente i pulsanti.
+- MessageBox e popup QML hanno dimensioni piu' conservative per evitare sovrapposizioni tra testo e pulsanti.
+- La status bar mostra ALC solo quando Hamlib lo considera realmente disponibile.
+- Metadati locali, Inno Setup, NSIS e workflow macOS legacy allineati alla versione `1.0.347`.
+
+#### Corretto
+
+- Corretto il crash Linux visto dopo `Tune` quando Qt audio segnalava `IOError` e il callback tentava lo stop da thread non GUI.
+- Evitato il falso uso di una porta PTT separata quando `/dev/serial/by-id/...` e `/dev/tty*` puntano allo stesso dispositivo.
+- Migliorata la gestione Hamlib ALC sui backend Linux che rispondono a `RIG_LEVEL_ALC` anche se non lo dichiarano nelle capability.
+- Ridotto il rischio di fallback audio verso un device omonimo o default non voluto quando piu' periferiche espongono lo stesso nome.
+- Corretto l'errore QML su macOS relativo a proprieta' non supportate in `TxPanel`.
+
+### English
+
+Stabilization release after 1.0.346, focused on audio/CAT reliability, Linux/macOS compatibility, QML UI cleanup, and more robust Cloudlog handling.
+
+#### Added
+
+- Linux support for stable `/dev/serial/by-id` serial paths in CAT and PTT lists, including canonical symlink comparison.
+- More stable audio identity handling in device selection paths, with explicit cache refresh before TX/Tune.
+- ALC telemetry with a separate validity flag, so value `0` is no longer treated as missing data.
+- ZAP wiring in the Q65 decode path.
+- Dedicated `DecoComboBox` and `DecoTextField` QML controls to avoid emoji/symbol rendering corruption in Material fields on macOS.
+
+#### Changed
+
+- Cloudlog now normalizes API endpoints more reliably, distinguishes HTTP/authentication failures, and reports valid/invalid API keys more clearly.
+- The "prompt to log" popup no longer dims the Material background and has a slightly taller layout for its buttons.
+- MessageBox and QML popups use more conservative sizing to avoid text/button overlap.
+- The status bar displays ALC only when Hamlib reports it as truly available.
+- Local version metadata, Inno Setup, NSIS, and the legacy macOS workflow are aligned to `1.0.347`.
+
+#### Fixed
+
+- Fixed the Linux crash seen after `Tune` when Qt audio reported `IOError` and the stop path ran from the wrong thread.
+- Avoided treating `/dev/serial/by-id/...` and `/dev/tty*` as separate PTT ports when they point to the same device.
+- Improved Hamlib ALC handling on Linux backends that can answer `RIG_LEVEL_ALC` even when the capability mask does not advertise it.
+- Reduced the risk of silent audio fallback to an unwanted same-name/default device.
+- Fixed the macOS QML load error caused by unsupported properties in `TxPanel`.
+
 ## [1.0.345] - 2026-05-31
 
 ### Italiano

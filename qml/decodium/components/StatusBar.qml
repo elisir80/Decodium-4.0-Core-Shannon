@@ -33,6 +33,7 @@ Rectangle {
     property double rigPowerWatts: bridge ? bridge.rigPowerWatts : 0.0
     property double rigSwr: bridge ? bridge.rigSwr : 0.0
     property double rigAlc: bridge ? bridge.rigAlc : 0.0  // 1.0.323 — ALC meter 0..100
+    property bool rigAlcValid: bridge ? bridge.rigAlcValid : false
     property bool pwrAndSwrEnabled: bridge ? bridge.getSetting("PWRandSWR", false) : false
     property bool checkSwrEnabled: bridge ? bridge.getSetting("CheckSWR", false) : false
     readonly property bool rigTelemetryBackendActive: bridge && (bridge.catBackend === "hamlib" || bridge.catBackend === "tci")
@@ -450,22 +451,24 @@ Rectangle {
                 height: 18
                 width: 56
                 radius: 9
-                color: rigAlc > 60 ? Qt.rgba(244/255, 67/255, 54/255, 0.35)
-                    : rigAlc > 0 ? Qt.rgba(76/255, 175/255, 80/255, 0.18)
+                color: rigAlcValid && rigAlc > 60 ? Qt.rgba(244/255, 67/255, 54/255, 0.35)
+                    : rigAlcValid ? Qt.rgba(76/255, 175/255, 80/255, 0.18)
                     : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
-                border.color: rigAlc > 0 ? alcStatusColor : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
+                border.color: rigAlcValid ? alcStatusColor : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
 
                 Text {
                     anchors.centerIn: parent
-                    text: rigAlc > 0 ? "ALC " + Math.round(rigAlc) : "ALC --"
+                    text: rigAlcValid ? "ALC " + Math.round(rigAlc) : "ALC --"
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
-                    font.bold: rigAlc > 60
-                    color: rigAlc > 60 ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : alcStatusColor
+                    font.bold: rigAlcValid && rigAlc > 60
+                    color: rigAlcValid && rigAlc > 60 ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : alcStatusColor
 
                     ToolTip.visible: alcMouseArea.containsMouse
                     ToolTip.delay: 500
-                    ToolTip.text: qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
+                    ToolTip.text: rigAlcValid
+                        ? qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
+                        : qsTr("ALC not reported by Hamlib for this rig/backend")
                 }
 
                 MouseArea {

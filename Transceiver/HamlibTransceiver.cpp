@@ -735,9 +735,12 @@ int HamlibTransceiver::do_start ()
       && (getLevelCaps & RIG_LEVEL_RFPOWER) == RIG_LEVEL_RFPOWER;
   bool const hasSwr = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_SWR) == RIG_LEVEL_SWR;
-  // 1.0.323 — ALC: stessa logica caps di SWR (RIG_LEVEL_ALC). go/no-go reale per FT-991.
-  bool const hasAlc = hasGetLevelFunction
+  // Some Hamlib/Linux backends can answer RIG_LEVEL_ALC even when the caps mask
+  // does not advertise it. Probe once during TX, then disable only on ENAVAIL/ENIMPL.
+  bool const hasAlcCap = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_ALC) == RIG_LEVEL_ALC;
+  alc_probe_pending_ = do_alc_ && hasGetLevelFunction && !hasAlcCap;
+  bool const hasAlc = hasAlcCap || alc_probe_pending_;
 
   do_pwr_ &= hasRfPowerMeterWatts;
   do_pwr2_ &= hasRfPower;
@@ -753,7 +756,9 @@ int HamlibTransceiver::do_start ()
         << "rfpowerMeterWatts=" << hasRfPowerMeterWatts
         << "rfpower=" << hasRfPower
         << "swr=" << hasSwr
-        << "alc=" << hasAlc;
+        << "alc=" << hasAlc
+        << "alcCap=" << hasAlcCap
+        << "alcProbe=" << alc_probe_pending_;
     }
 
   // the Net rigctl back end promises all functions work but we must
@@ -1405,19 +1410,43 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
         }
     }
 
-  // 1.0.323 — ALC: scala Hamlib 0.0..1.0 → 0..100 (come SWR). Usato da display ALC
-  // (fase 1) e in seguito dal loop ALC automatico (fase 2). Letto solo in TX.
+  // 1.0.323 — ALC: scala Hamlib 0.0..1.0 → 0..100. Some backends return an
+  // already scaled meter, so accept values above 1.5 as 0..100-ish directly.
   if (do_alc_)
     {
       rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_ALC, &strength);
       if (RIG_OK == rc && tx_active)
         {
-          update_alc (strength.f > 0.0 ? static_cast<unsigned int> (strength.f * 100) : 0);
+          if (alc_probe_pending_)
+            {
+              alc_probe_pending_ = false;
+              qInfo ().noquote () << "[CATDBG] Hamlib ALC opportunistic probe succeeded";
+            }
+          double const rawAlc = std::isfinite (strength.f) ? strength.f : 0.0;
+          unsigned int alc = 0;
+          if (rawAlc > 1.5)
+            {
+              alc = static_cast<unsigned int> (std::round (rawAlc));
+            }
+          else if (rawAlc > 0.0)
+            {
+              alc = static_cast<unsigned int> (std::round (rawAlc * 100.0));
+            }
+          update_alc (alc, true);
         }
       else
         {
           CAT_TRACE ("rig_get_level RIG_LEVEL_ALC failed with rc:" << rc << "ignoring");
-          update_alc (0);
+          if (rc == -RIG_ENAVAIL || rc == -RIG_ENIMPL)
+            {
+              if (do_alc_)
+                {
+                  qInfo ().noquote () << "[CATDBG] Hamlib ALC unavailable; disabling ALC polling rc=" << rc;
+                }
+              do_alc_ = false;
+              alc_probe_pending_ = false;
+            }
+          update_alc (0, false);
         }
     }
 

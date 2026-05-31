@@ -260,7 +260,7 @@ Popup {
                 text: "Nome operatore / callsign"
                 color: textPrimary
             }
-            TextField {
+            DecoTextField {
                 id: newLogbookNameField
                 Layout.fillWidth: true
                 placeholderText: "es. 9H1SR oppure AMICO"
@@ -511,7 +511,7 @@ Popup {
                     RowLayout {
                         anchors.fill: parent; anchors.margins: 4; spacing: 4
                         Text { text: "\uD83D\uDD0D"; font.pixelSize: 11; color: textSecondary }
-                        TextField {
+                        DecoTextField {
                             id: searchField
                             Layout.fillWidth: true
                             placeholderText: "Search call, grid..."
@@ -776,7 +776,7 @@ Popup {
                             width: 132; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editCall.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editCall; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily; font.bold: true
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -795,7 +795,7 @@ Popup {
                             width: 78; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editGrid.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editGrid; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -814,7 +814,7 @@ Popup {
                             width: 66; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editBand.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editBand; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -833,7 +833,7 @@ Popup {
                             width: 66; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editMode.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editMode; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -852,7 +852,7 @@ Popup {
                             width: 56; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editSent.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editSent; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -871,7 +871,7 @@ Popup {
                             width: 56; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editRcvd.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editRcvd; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0
@@ -898,7 +898,7 @@ Popup {
                             Layout.fillWidth: true; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
                             border.color: editComment.focus ? primaryBlue : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
-                            TextField {
+                            DecoTextField {
                                 id: editComment; anchors.fill: parent; anchors.margins: 2
                                 font.pixelSize: 11; font.family: decodiumMonoFontFamily
                                 leftPadding: 6; rightPadding: 4; topPadding: 0; bottomPadding: 0

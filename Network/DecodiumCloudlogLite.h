@@ -48,8 +48,9 @@ public:
                 const QString& myGrid);
 
     // --- Connectivity test -------------------------------------------------
-    // GETs {m_apiUrl}/api/auth?key={m_apiKey} and emits apiKeyOk() or
-    // apiKeyInvalid() depending on the JSON response.
+    // POSTs a harmless dummy ADIF record to the same Cloudlog API endpoint used
+    // by real uploads, so URL, host authentication and write permissions are
+    // tested together without creating a real QSO.
     Q_INVOKABLE void testApi();
 
 signals:
