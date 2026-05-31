@@ -1,5 +1,73 @@
 # Changelog / Registro Modifiche
 
+## [1.0.351] - 2026-05-31
+
+### Italiano
+
+Release finale dopo la 1.0.346. Integra il lavoro locale delle serie 1.0.347/1.0.348, l'allineamento di Martino fino a `v1.0.350` e il merge locale finale sul ramo principale.
+
+#### Aggiunto
+
+- Supporto Linux ai path seriali stabili `/dev/serial/by-id` nelle liste CAT/PTT.
+- Telemetria ALC con flag di validita' separato, cosi' `ALC --` indica dato non disponibile e `0` resta un valore valido.
+- Cablaggio del controllo ZAP nel decoder Q65.
+- Componenti QML `DecoComboBox` e `DecoTextField` per evitare rendering errato di emoji/simboli nei campi Material su macOS.
+- Refresh automatico delle periferiche audio prima dell'auto-monitor all'avvio.
+- Worked-before preciso per chiamata, banda e modo.
+- Opzioni Display > Decodes per mostrare/nascondere `Dist` e `Az` in Full Spectrum e Signal RX, piu' colonna `Freq` in Signal RX.
+
+#### Modificato
+
+- Integrata la localizzazione italiana completa post-merge di Martino `v1.0.350`.
+- Conservate le funzioni fork-only durante il merge: DX-Pedition Mode, ALC, miglioramenti FT8/FT2 e funzioni UI locali.
+- Cloudlog normalizza meglio gli endpoint API e distingue errori HTTP/autenticazione/proxy con messaggi piu' chiari.
+- Prompt-to-log e MessageBox hanno layout piu' robusti, senza dim Material invasivo e con pulsanti non sovrapposti.
+- Check SWR non blocca piu' Tune: resta protezione su TX reale e AutoCQ.
+- Il panadapter non mostra piu' i marker gialli duplicati a 500/1000/1500/2000/2500/3000 Hz.
+- Aggiornati metadati locali, Inno Setup, NSIS e workflow macOS legacy alla versione `1.0.351`.
+
+#### Corretto
+
+- Crash Linux TX/Tune dopo errore audio (`QSocketNotifier` da thread errato e `SIGNAL 11`).
+- Fallback audio indesiderato con periferiche omonime o cache Qt non aggiornata.
+- Falsi worked-before tra modi o bande differenti.
+- Autosequenza con CPU lente, nominativi speciali/lunghi e hash diretti al partner attivo.
+- Avvio QML su macOS causato da proprieta' non supportate in `TxPanel`.
+- Doppia porta CAT/PTT quando `/dev/serial/by-id/...` punta allo stesso device di `/dev/tty*`.
+
+### English
+
+Final release after 1.0.346. It integrates the local 1.0.347/1.0.348 work, Martino's alignment up to `v1.0.350`, and the final local merge on the main branch.
+
+#### Added
+
+- Linux support for stable `/dev/serial/by-id` serial paths in CAT/PTT lists.
+- ALC telemetry with a separate validity flag, so `ALC --` means unavailable while `0` remains a valid value.
+- ZAP wiring into the Q65 decoder.
+- QML `DecoComboBox` and `DecoTextField` controls to avoid Material emoji/symbol rendering corruption on macOS.
+- Automatic audio-device refresh before startup auto-monitor.
+- Worked-before tracking by exact call, band, and mode.
+- Display > Decodes options for `Dist` and `Az` in Full Spectrum and Signal RX, plus `Freq` in Signal RX.
+
+#### Changed
+
+- Integrated Martino's complete Italian localization after the `v1.0.350` merge.
+- Preserved fork-only features during merge: DX-Pedition Mode, ALC, FT8/FT2 improvements, and local UI features.
+- Cloudlog now normalizes API endpoints better and distinguishes HTTP/authentication/proxy failures more clearly.
+- Prompt-to-log and MessageBox layouts are more robust, without invasive Material dimming and without button/text overlap.
+- Check SWR no longer blocks Tune; protection remains active for real TX and AutoCQ.
+- The panadapter no longer draws duplicate yellow 500/1000/1500/2000/2500/3000 Hz markers.
+- Local metadata, Inno Setup, NSIS, and the legacy macOS workflow are aligned to `1.0.351`.
+
+#### Fixed
+
+- Linux TX/Tune crash after audio errors (`QSocketNotifier` from the wrong thread followed by `SIGNAL 11`).
+- Unwanted audio fallback with same-name devices or stale Qt audio cache.
+- False worked-before matches across different bands or modes.
+- Autosequence handling for slow CPUs, long/special callsigns, and hashes directed to the active partner.
+- macOS QML startup failure caused by unsupported `TxPanel` properties.
+- Duplicate CAT/PTT ports when `/dev/serial/by-id/...` points to the same device as `/dev/tty*`.
+
 ## [1.0.348] - 2026-05-31
 
 ### Italiano
