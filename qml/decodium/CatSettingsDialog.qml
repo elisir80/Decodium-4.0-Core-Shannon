@@ -184,7 +184,10 @@ Dialog {
                     color: textColor
                     font.pixelSize: 12
                     background: Rectangle { color: "transparent" }
-                    onTextChanged: portCombo.editText = text
+                    // 1.0.352 fix: onTextEdited (solo input utente) invece di onTextChanged,
+                    // che scattava anche sull'update del binding text: portCombo.editText
+                    // rompendolo. Allineato a RigControlDialog.
+                    onTextEdited: portCombo.editText = text
                 }
                 background: Rectangle {
                     color: bgLight; border.color: accent; border.width: 1; radius: 4

@@ -90,8 +90,23 @@ QString normalizedSerialPortName(QString value)
 void appendUniqueSerialPort(QStringList& ports, QString const& rawPort)
 {
     QString const port = normalizedSerialPortName(rawPort);
-    if (!port.isEmpty() && !ports.contains(port, Qt::CaseInsensitive))
+    if (port.isEmpty())
+        return;
+#if defined(Q_OS_LINUX)
+    // 1.0.352 fix: dedup CANONICO. /dev/ttyUSB0 e /dev/serial/by-id/usb-... che
+    // puntano allo stesso device hanno stringhe diverse ma stesso target reale;
+    // senza canonicalizzazione comparivano come due porte distinte. comparablePortName
+    // risolve i symlink (canonicalFilePath) -> stesso device = una sola voce.
+    QString const key = comparablePortName(port);
+    for (QString const& existing : ports) {
+        if (comparablePortName(existing) == key)
+            return;
+    }
+    ports << port;
+#else
+    if (!ports.contains(port, Qt::CaseInsensitive))
         ports << port;
+#endif
 }
 
 #if defined(Q_OS_LINUX)
@@ -102,7 +117,9 @@ QStringList enumerateLinuxSerialByIdPaths()
     QFileInfoList const entries = byIdDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
                                                         QDir::Name);
     for (QFileInfo const& entry : entries) {
-        if (entry.isSymLink() || entry.exists())
+        // 1.0.352 fix: usare solo exists() (risolve il symlink). isSymLink() era true
+        // anche per symlink ROTTI (target rimosso dopo unplug) -> porta-fantasma in lista.
+        if (entry.exists())
             paths << entry.absoluteFilePath();
     }
     return paths;

@@ -142,6 +142,15 @@ void Q65DecodeWorker::decode (DecodeRequest const& request)
   int nutc = qMax (0, request.nutc);
   int ntrperiod = qBound (15, request.ntrperiod, 300);
   int nsubmode = qBound (0, request.nsubmode, 4);
+
+  // Fork 1.0.352 - guard over-read heap: ftx_q65_async_decode_with_zap_c legge sempre
+  // ntrperiod*RX_SAMPLE_RATE campioni da iwave SENZA conoscere la lunghezza reale
+  // dell'input (a differenza dei worker FT8/FST4 che clampano). Un buffer parziale
+  // (es. cambio modo a meta' periodo) causerebbe una lettura heap oltre il buffer fino
+  // a ~1.4 MB. Padding a zero fino alla dimensione attesa, come fa FST4DecodeWorker.
+  int const expectedSamples = ntrperiod * RX_SAMPLE_RATE;
+  if (localAudio.size () < static_cast<qsizetype> (expectedSamples))
+    localAudio.resize (expectedSamples);
   int nfqso = qBound (0, request.nfqso, 5000);
   int ntol = qMax (0, request.ntol);
   int ndepth = qMax (1, request.ndepth);

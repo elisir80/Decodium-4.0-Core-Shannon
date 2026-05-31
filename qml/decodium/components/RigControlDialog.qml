@@ -476,7 +476,10 @@ Dialog {
                         text: bridge.catManager.tciPort
                         placeholderText: "localhost:50001"
                         color: textPrimary; font.pixelSize: controlFontSize
-                        onTextChanged: bridge.catManager.tciPort = text
+                        // 1.0.352 fix: onEditingFinished (come networkField sopra) invece di
+                        // onTextChanged, che scattava sugli update programmatici del setter C++
+                        // rompendo il binding dichiarativo text:.
+                        onEditingFinished: bridge.catManager.tciPort = text.trim()
                         background: Rectangle { color: bgMedium; border.color: activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                     }
 

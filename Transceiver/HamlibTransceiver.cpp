@@ -1446,6 +1446,18 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
               do_alc_ = false;
               alc_probe_pending_ = false;
             }
+          else if (alc_probe_pending_)
+            {
+              // 1.0.352 - il probe ALC OPPORTUNISTICO (cap mask non dichiara ALC) ha
+              // fallito con rc != ENAVAIL/ENIMPL (es. -RIG_ETIMEOUT su seriale/Net
+              // congestionata). Senza questo, si ritenterebbe ad OGNI tick di TX
+              // (telemetry non throttlata in TX) -> transazione seriale inutile per
+              // tutta la durata del TX. Chiudi il probe best-effort. I rig che
+              // DICHIARANO ALC (alc_probe_pending_=false) non sono toccati.
+              qInfo ().noquote () << "[CATDBG] Hamlib ALC opportunistic probe failed rc=" << rc << "; disabling probe";
+              do_alc_ = false;
+              alc_probe_pending_ = false;
+            }
           update_alc (0, false);
         }
     }

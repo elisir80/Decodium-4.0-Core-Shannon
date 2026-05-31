@@ -565,9 +565,22 @@ QString normalizedSerialPortName(QString value)
 void appendUniqueSerialPort(QStringList& ports, QString const& rawPort)
 {
     QString const port = normalizedSerialPortName(rawPort);
-    if (!port.isEmpty() && !ports.contains(port, Qt::CaseInsensitive)) {
+    if (port.isEmpty())
+        return;
+#if defined(Q_OS_LINUX)
+    // 1.0.352 fix: dedup CANONICO (vedi DecodiumCatManager). /dev/ttyUSB0 e
+    // /dev/serial/by-id/usb-... -> stesso device fisico = una sola voce.
+    QString const key = comparablePortName(port);
+    for (QString const& existing : ports) {
+        if (comparablePortName(existing) == key)
+            return;
+    }
+    ports << port;
+#else
+    if (!ports.contains(port, Qt::CaseInsensitive)) {
         ports << port;
     }
+#endif
 }
 
 #if defined(Q_OS_LINUX)
@@ -578,7 +591,8 @@ QStringList enumerateLinuxSerialByIdPaths()
     QFileInfoList const entries = byIdDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
                                                         QDir::Name);
     for (QFileInfo const& entry : entries) {
-        if (entry.isSymLink() || entry.exists())
+        // 1.0.352 fix: solo exists() (risolve il symlink), esclude i symlink rotti.
+        if (entry.exists())
             paths << entry.absoluteFilePath();
     }
     return paths;

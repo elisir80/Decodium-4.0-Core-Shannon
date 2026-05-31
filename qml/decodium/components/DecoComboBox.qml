@@ -28,6 +28,10 @@ ComboBox {
     function optionText(optionModel) {
         if (optionModel === undefined || optionModel === null)
             return ""
+        // 1.0.352 fix: model di stringhe/numeri semplici (es. model: ["A","B"]) —
+        // senza questo fallback nessun ramo matcha e il popup mostra item vuoti.
+        if (typeof optionModel !== "object")
+            return String(optionModel)
         if (control.textRole && optionModel[control.textRole] !== undefined)
             return String(optionModel[control.textRole])
         if (optionModel.text !== undefined)
