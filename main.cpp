@@ -39,6 +39,7 @@
 #include <QMetaType>
 #include <QElapsedTimer>
 #include <QThread>
+#include <QFont>
 
 #include "ExceptionCatchingApplication.hpp"
 #include "Logger.hpp"
@@ -278,6 +279,15 @@ int main(int argc, char *argv[])
     }
   });
   QApplication::setStyle(QStyleFactory::create("Fusion"));
+#if defined (Q_OS_WIN)
+  {
+    QFont ui_font {QStringLiteral("Segoe UI")};
+    ui_font.setPointSize(9);
+    ui_font.setStyleHint(QFont::SansSerif);
+    ui_font.setStyleStrategy(QFont::PreferAntialias);
+    QApplication::setFont(ui_font);
+  }
+#endif
   try
     {
       // LOG_INfO ("+++++++++++++++++++++++++++ Resources ++++++++++++++++++++++++++++");

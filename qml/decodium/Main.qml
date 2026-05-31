@@ -13,6 +13,7 @@ import "components"
 
 ApplicationWindow {
     id: mainWindow
+    font.family: Qt.platform.os === "windows" ? "Segoe UI" : ""
     readonly property int preferredMinimumWidth: 1200
     readonly property int preferredMinimumHeight: 480
     readonly property int currentScreenAvailableWidth: (Screen.desktopAvailableWidth > 0
@@ -8946,9 +8947,11 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
 	        // Handle window close
 	        onClosing: function(close) {
-                mainWindow.waterfallPanelVisible = false
-                mainWindow.waterfallDetached = false
-                mainWindow.waterfallMinimized = false
+                if (!mainWindow.applicationClosing) {
+                    mainWindow.waterfallPanelVisible = false
+                    mainWindow.waterfallDetached = false
+                    mainWindow.waterfallMinimized = false
+                }
 	            close.accepted = true
 	        }
 
@@ -9755,10 +9758,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         onHeightChanged: mainWindow.scheduleWindowStateSave()
 
         onClosing: function(close) {
-            mainWindow.liveMapPanelVisible = false
-            mainWindow.liveMapDetached = false
-            mainWindow.liveMapMinimized = false
-            mainWindow.syncLiveMapFloatingVisibility(false)
+            if (!mainWindow.applicationClosing) {
+                mainWindow.liveMapPanelVisible = false
+                mainWindow.liveMapDetached = false
+                mainWindow.liveMapMinimized = false
+                mainWindow.syncLiveMapFloatingVisibility(false)
+            }
             close.accepted = true
         }
 

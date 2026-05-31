@@ -8,6 +8,7 @@ import QtQuick.Window
 
 ApplicationWindow {
     id: bootWindow
+    font.family: Qt.platform.os === "windows" ? "Segoe UI" : ""
     visible: true
     visibility: Window.Windowed
     flags: Qt.SplashScreen | Qt.WindowStaysOnTopHint
