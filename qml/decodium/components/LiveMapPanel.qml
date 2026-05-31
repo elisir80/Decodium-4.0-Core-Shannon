@@ -218,7 +218,7 @@ Rectangle {
                         onClicked: if (root.worldMap) root.worldMap.resetView()
                     }
                     ToolTip.visible: resetMa.containsMouse
-                    ToolTip.text: qsTr("Reset view (auto-fit)")
+                    ToolTip.text: qsTr("Reset vista (auto-fit)")
                     ToolTip.delay: 500
                 }
 
@@ -259,7 +259,7 @@ Rectangle {
                         }
                     }
                     ToolTip.visible: greylineMa.containsMouse
-                    ToolTip.text: qsTr("Toggle day/night greyline overlay")
+                    ToolTip.text: qsTr("Attiva/disattiva overlay greyline giorno/notte")
                     ToolTip.delay: 500
                 }
 
@@ -274,7 +274,7 @@ Rectangle {
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.detached ? "Dock" : "Pop"
+                        text: root.detached ? "Aggancia" : "Stacca"
                         font.pixelSize: 10
                         font.bold: true
                         color: liveMapDetachMA.containsMouse ? secondaryCyan : textSecondary

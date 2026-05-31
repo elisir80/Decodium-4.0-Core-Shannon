@@ -585,7 +585,7 @@ Popup {
                     border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.5)
                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                    Text { id: importLabel; anchors.centerIn: parent; text: "Import ADIF"; font.pixelSize: 10; font.bold: true; color: accentGreen }
+                    Text { id: importLabel; anchors.centerIn: parent; text: "Importa ADIF"; font.pixelSize: 10; font.bold: true; color: accentGreen }
                     MouseArea {
                         id: importMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: logWindow.openImportAdifDialog()
@@ -600,7 +600,7 @@ Popup {
                     border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.5)
                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                    Text { id: adifLabel; anchors.centerIn: parent; text: "Export ADIF"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
+                    Text { id: adifLabel; anchors.centerIn: parent; text: "Esporta ADIF"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
                     MouseArea {
                         id: exportMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: logWindow.openExportAdifDialog()

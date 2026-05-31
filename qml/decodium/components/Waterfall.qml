@@ -1631,7 +1631,7 @@ Item {
                 font.bold: true
             }
             Text {
-                text: qsTr("Show controls")
+                text: qsTr("Mostra controlli")
                 color: accentCyan
                 font.pixelSize: 11
                 font.bold: true

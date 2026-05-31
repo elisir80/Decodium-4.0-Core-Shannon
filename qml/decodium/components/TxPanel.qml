@@ -1512,7 +1512,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    text: qsTr("Confirm QSO Log")
+                    text: qsTr("Conferma registrazione QSO")
                     color: accentGreen
                     font.pixelSize: 18
                     font.bold: true
@@ -1622,7 +1622,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        text: txPanel.logClusterSpotAvailable ? qsTr("Spot to cluster") : qsTr("Cluster not connected")
+                        text: txPanel.logClusterSpotAvailable ? qsTr("Spot al cluster") : qsTr("Cluster non connesso")
                         color: txPanel.logClusterSpotAvailable ? textPrimary : textSecondary
                         font.pixelSize: 13
                         elide: Text.ElideRight

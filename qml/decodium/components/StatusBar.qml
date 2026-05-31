@@ -467,8 +467,8 @@ Rectangle {
                     ToolTip.visible: alcMouseArea.containsMouse
                     ToolTip.delay: 500
                     ToolTip.text: rigAlcValid
-                        ? qsTr("ALC meter 0..100\n>60 = over-ALC (TX power too high)")
-                        : qsTr("ALC not reported by Hamlib for this rig/backend")
+                        ? qsTr("Misuratore ALC 0..100\n>60 = ALC eccessivo (potenza TX troppo alta)")
+                        : qsTr("ALC non riportato da Hamlib per questo rig/backend")
                 }
 
                 MouseArea {

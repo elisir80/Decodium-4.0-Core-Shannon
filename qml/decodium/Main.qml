@@ -2079,7 +2079,7 @@ ApplicationWindow {
 
         Text {
             anchors.centerIn: parent
-            text: "Dock Waterfall Here"
+            text: "Aggancia qui la Waterfall"
             color: secondaryCyan
             font.pixelSize: 16
             font.bold: true
@@ -3451,7 +3451,7 @@ ApplicationWindow {
 		                                        anchors.margins: 10
 		                                        height: 34
 		                                        text: worldClock.citySearchText
-		                                        placeholderText: qsTr("Search city...")
+		                                        placeholderText: qsTr("Cerca città...")
 		                                        placeholderTextColor: textSecondary
 	                                        color: textPrimary
 		                                        selectionColor: secondaryCyan
@@ -4718,7 +4718,7 @@ ApplicationWindow {
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-	                            text: waterfallPanel.isDockHighlighted ? "Dock Waterfall" : "Waterfall detached"
+	                            text: waterfallPanel.isDockHighlighted ? "Aggancia Waterfall" : "Waterfall staccata"
                                 color: waterfallPanel.isDockHighlighted ? secondaryCyan : textSecondary
                                 font.pixelSize: waterfallPanel.isDockHighlighted ? 16 : 12
                                 font.bold: waterfallPanel.isDockHighlighted
@@ -4726,7 +4726,7 @@ ApplicationWindow {
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-	                                text: "Use Dock to reattach it"
+	                                text: "Usa Aggancia per riagganciarla"
                                 color: textSecondary
                                 font.pixelSize: 10
                                 visible: !waterfallPanel.isDockHighlighted
@@ -7165,7 +7165,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     }
 
                     Text {
-                        text: "The legacy radio backend reported a problem."
+                        text: "Il backend radio legacy ha segnalato un problema."
                         font.pixelSize: 11
                         color: textSecondary
                     }
@@ -7185,7 +7185,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             }
 
             Button {
-                text: rigErrorDetailsVisible ? "Hide details" : "Show details"
+                text: rigErrorDetailsVisible ? "Nascondi dettagli" : "Mostra dettagli"
                 Layout.alignment: Qt.AlignLeft
                 onClicked: rigErrorDetailsVisible = !rigErrorDetailsVisible
 
@@ -7755,7 +7755,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
             Button {
                 visible: warningDialogDetails.length > 0
-                text: warningDialogDetailsVisible ? "Hide details" : "Show details"
+                text: warningDialogDetailsVisible ? "Nascondi dettagli" : "Mostra dettagli"
                 Layout.alignment: Qt.AlignLeft
                 onClicked: warningDialogDetailsVisible = !warningDialogDetailsVisible
 
@@ -8033,7 +8033,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         }
 
         MenuItem {
-            text: "📂 " + qsTr("Open ALL.TXT Folder")
+            text: "📂 " + qsTr("Apri cartella ALL.TXT")
             onTriggered: bridge.openAllTxtFolder()
 
             background: Rectangle {
@@ -8328,7 +8328,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         }
 
         MenuItem {
-            text: "📂 " + qsTr("Export Cabrillo...")
+            text: "📂 " + qsTr("Esporta Cabrillo...")
             onTriggered: cabrilloDlg.open()
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -8356,7 +8356,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	        MenuSeparator { contentItem: Rectangle { implicitHeight: 1; color: glassBorder } }
 
 		        MenuItem {
-		            text: (worldClock.showWorldClock ? "✓ " : "☐ ") + qsTr("Show Clock")
+		            text: (worldClock.showWorldClock ? "✓ " : "☐ ") + qsTr("Mostra orologio")
 		            onTriggered: worldClock.setClockVisible(!worldClock.showWorldClock)
 		            background: Rectangle {
 	                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -8371,7 +8371,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		        }
 
 		        MenuItem {
-		            text: (dxClusterToolbarVisible ? "✓ " : "☐ ") + qsTr("Show DX Cluster")
+		            text: (dxClusterToolbarVisible ? "✓ " : "☐ ") + qsTr("Mostra DX Cluster")
 		            onTriggered: mainWindow.setDxClusterToolbarVisible(!dxClusterToolbarVisible)
 		            background: Rectangle {
 		                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -8386,7 +8386,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		        }
 
 		        MenuItem {
-		            text: (pskReporterToolbarVisible ? "✓ " : "☐ ") + qsTr("Show PSK Reporter")
+		            text: (pskReporterToolbarVisible ? "✓ " : "☐ ") + qsTr("Mostra PSK Reporter")
 		            onTriggered: mainWindow.setPskReporterToolbarVisible(!pskReporterToolbarVisible)
 		            background: Rectangle {
 		                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -8866,8 +8866,8 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 color: accentOrange
             }
             Text { text: "F1 - F7: Select TX1 - TX7"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "F9: Toggle RX Only First/Second"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Escape: Halt (immediate TX stop)"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "F9: attiva/disattiva solo RX 1º/2º"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Escape: Halt (stop TX immediato)"; font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
@@ -8877,9 +8877,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 font.bold: true
                 color: secondaryCyan
             }
-            Text { text: "Ctrl+A: Toggle Auto Sequence"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Ctrl+A: attiva/disattiva Sequenza automatica"; font.pixelSize: 12; color: textPrimary }
             Text { text: "Ctrl+G: Generate all TX messages"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Ctrl+Z: Toggle ZAP mode"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Ctrl+Z: attiva/disattiva modalità ZAP"; font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
@@ -8889,9 +8889,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 font.bold: true
                 color: successGreen
             }
-            Text { text: "Alt+L: Log current QSO"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Alt+M: Clear decode list (Monitor)"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Alt+S: Stop TX"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Alt+L: registra il QSO corrente"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Alt+M: svuota la lista decodifiche (Monitor)"; font.pixelSize: 12; color: textPrimary }
+            Text { text: "Alt+S: ferma la TX"; font.pixelSize: 12; color: textPrimary }
         }
 
         footer: DialogButtonBox {
