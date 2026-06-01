@@ -22721,6 +22721,23 @@ bool DecodiumBridge::applyPendingAutoSeqTxAfterCompletedTx(int finishedTx)
         m_logAfterOwn73 = true;
         m_ft2DeferredLogPending = false;
     }
+    // FIX 1.0.359 (9H1SR, log a 2 lati Bruce/ZL3DMH): un reply differito TX3/4/5 dopo
+    // un CQ FT2 ancora attivo NON deve partire nello slot del partner — che ha appena
+    // risposto nello slot opposto al nostro CQ. Senza questo, advanceQsoState+setTxEnabled
+    // fa partire il TX col solo debounce 200ms -> stesso slot del partner -> collisione
+    // (entrambi in TX, nessuno ascolta). Replico il meccanismo GIA' attivo per TX2
+    // (holdFt2ReplyAfterActiveCq ramo deferredTx==2): marco m_lastNtx=deferredTx +
+    // m_asyncLastTxEndMs=now cosi' il gate di periodo (sameExchangeStepRetry in
+    // checkAndStartPeriodicTx) attende un periodo e il reply parte nel NOSTRO slot
+    // successivo, saltando lo slot del partner. deferredTx==2 non arriva qui (gestito
+    // sopra). Solo FT2 async; tutti gli altri modi/percorsi invariati.
+    if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled
+        && finishedTx == 6 && deferredTx >= 3 && deferredTx <= 5) {
+        m_asyncLastTxEndMs = QDateTime::currentMSecsSinceEpoch();
+        m_lastNtx = deferredTx;
+        bridgeLog(QStringLiteral("auto-seq: FT2 reply TX%1 differito dopo CQ -> attende un periodo e salta lo slot del partner (anti-collisione)")
+                      .arg(deferredTx));
+    }
     if (!m_txEnabled) {
         setTxEnabled(true);
     }
