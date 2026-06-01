@@ -167,6 +167,73 @@ Item {
     // Signal for MAM window request
     signal mamWindowRequested()
 
+    // ── Ordine pulsanti TX panel (drag&drop magnetico, persistente) ──────────
+    // Replica della meccanica STEP 1 (toolbar superiore in Main.qml): modello-
+    // ordine separato + Repeater + Component-per-pulsante + Loader + MouseArea
+    // unica con holdTimer (click-vs-drag) + ghost proxy + snap magnetico.
+    // Il Mode selector NON è nel modello (resta primo elemento fisso).
+    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,async,hound,waitpounce"
+    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","async","hound","waitpounce"]
+    property var uiTxPanelOrder: parseTxPanelOrder(String(bridge.getSetting("uiTxPanelOrder", "") || ""))
+
+    // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
+    function parseTxPanelOrder(csv) {
+        var def = uiTxPanelOrderDefault.split(",")
+        if (!csv || csv.length === 0)
+            return def
+        var parts = String(csv).split(",")
+        var out = []
+        var seen = ({})
+        for (var i = 0; i < parts.length; ++i) {
+            var id = parts[i].trim()
+            if (id.length === 0)
+                continue
+            if (uiTxPanelKnownIds.indexOf(id) < 0)
+                continue            // id sconosciuto -> scarta
+            if (seen[id])
+                continue            // dedup
+            seen[id] = true
+            out.push(id)
+        }
+        // Aggiungi eventuali id mancanti (nuovo pulsante introdotto dopo) in coda.
+        for (var j = 0; j < def.length; ++j) {
+            if (!seen[def[j]]) {
+                out.push(def[j])
+                seen[def[j]] = true
+            }
+        }
+        if (out.length === 0)
+            return def
+        return out
+    }
+
+    function persistTxPanelOrder() {
+        if (bridge) bridge.setSetting("uiTxPanelOrder", uiTxPanelOrder.join(","))
+    }
+
+    // Sposta l'id dalla posizione 'from' alla posizione 'to' nel modello e committa.
+    function moveTxPanelButton(from, to) {
+        if (from === to || from < 0 || to < 0)
+            return
+        var arr = uiTxPanelOrder.slice()
+        if (from >= arr.length || to >= arr.length)
+            return
+        var item = arr.splice(from, 1)[0]
+        arr.splice(to, 0, item)
+        uiTxPanelOrder = arr
+        persistTxPanelOrder()
+    }
+
+    // Reattivo al reset dal tab "UI Buttons" di SettingsDialog (setting svuotato).
+    Connections {
+        target: engine
+        ignoreUnknownSignals: true
+        function onSettingValueChanged(key, value) {
+            if (key === "uiTxPanelOrder")
+                txPanel.uiTxPanelOrder = txPanel.parseTxPanelOrder(String(value || ""))
+        }
+    }
+
     // Style properties
     property color glassBg: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.85)
     property color glassBorder: bridge.themeManager.glassBorder
@@ -449,533 +516,684 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("MAM", "\u21C6")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: mamBtn.checked ? Qt.rgba(255/255, 152/255, 0, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: mamBtn.checked ? warningOrange : glassBorder
-                            border.width: mamBtn.checked ? 2 : 1
+                        // ── Pulsanti TX panel riordinabili via drag&drop magnetico ──
+                        // Replica STEP 1 (toolbar in Main.qml): un Repeater itera il modello
+                        // ORDINATO (txPanel.uiTxPanelOrder) e un Loader per slot carica il
+                        // Component giusto. Click breve = azione; long-press = drag (riordino).
+                        // Contratto Component: btnVisible, prefWidth, hovered, tip, activate(mouse).
+                        Repeater {
+                            id: txCtrlRepeater
+                            model: txPanel.uiTxPanelOrder
 
-                            Button {
-                                id: mamBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: engine ? engine.multiAnswerMode : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onCheckedChanged: if (engine) engine.multiAnswerMode = checked
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
-                                    label: "MAM"
-                                    glyph: "\u21C6"
-                                    foreground: mamBtn.checked ? warningOrange : textSecondary
-                                    glyphSize: txPanel.toolbarGlyphSize
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: mamBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Multi-Answer Mode (MAM) — clic destro = apri finestra (default OFF)")
-                                ToolTip.delay: 500
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.RightButton
-                                onClicked: txPanel.mamWindowRequested()
-                            }
-                        }
-
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("DEEP", "\u25CE")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: deepBtn.checked ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: deepBtn.checked ? accentGreen : glassBorder
-                            border.width: deepBtn.checked ? 2 : 1
-
-                            Button {
-                                id: deepBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: engine ? engine.deepSearchEnabled : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onCheckedChanged: if (engine) engine.deepSearchEnabled = checked
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
-                                    label: "DEEP"
-                                    glyph: "\u25CE"
-                                    foreground: deepBtn.checked ? accentGreen : textSecondary
-                                    glyphSize: txPanel.toolbarGlyphSize
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: deepBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Deep Search: ricerca profonda dei segnali deboli tramite i callsign noti (default OFF)")
-                                ToolTip.delay: 500
-                            }
-                        }
-
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("AP", "\u25C6")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: apBtn.checked ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: apBtn.checked ? secondaryCyan : glassBorder
-                            border.width: apBtn.checked ? 2 : 1
-
-                            Button {
-                                id: apBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: engine ? engine.ft8ApEnabled : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onCheckedChanged: if (engine) engine.ft8ApEnabled = checked
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
-                                    label: "AP"
-                                    glyph: "\u25C6"
-                                    foreground: apBtn.checked ? secondaryCyan : textSecondary
-                                    glyphSize: txPanel.toolbarGlyphSize
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: apBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Decodifica a priori (AP): usa informazioni note per recuperare i segnali deboli (default OFF)")
-                                ToolTip.delay: 500
-                            }
-                        }
-
-                        // 1.0.342 - SWL rimosso (piu spazio TX Macros DX-Pedition)
-                        // 1.0.182 \u2014 Button QQC2-native restyle
-                        Button {
-                            id: autoSeqBtn2
-                            width: txPanel.toolbarActionWidth("SEQ", "\u21BB")
-                            height: txPanel.toolbarButtonHeight
-                            checkable: true
-                            checked: engine ? engine.autoSeq : false
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            onCheckedChanged: if (engine) engine.autoSeq = checked
-                            background: Rectangle {
-                                radius: 5
-                                color: autoSeqBtn2.checked ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                                border.color: autoSeqBtn2.checked ? primaryBlue : glassBorder
-                                border.width: autoSeqBtn2.checked ? 2 : 1
-                            }
-                            contentItem: ToolbarButtonContent {
-                                label: "SEQ"
-                                glyph: "\u21BB"
-                                foreground: autoSeqBtn2.checked ? primaryBlue : textSecondary
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: autoSeqBtn2.checked
-                            }
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Sequenza automatica del QSO (default OFF)")
-                            ToolTip.delay: 500
-                        }
-
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("QQ", "\u21E8")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: qqBtn.checked ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: qqBtn.checked ? accentGreen : glassBorder
-                            border.width: qqBtn.checked ? 2 : 1
-
-                            Button {
-                                id: qqBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: engine ? engine.quickQsoEnabled : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onCheckedChanged: if (engine) engine.quickQsoEnabled = checked
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
-                                    label: "QQ"
-                                    glyph: "\u21E8"
-                                    foreground: qqBtn.checked ? accentGreen : textSecondary
-                                    glyphSize: txPanel.toolbarGlyphSize
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: qqBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Quick QSO: salta TX1 e parte da TX2 (rapporto diretto) (default OFF)")
-                                ToolTip.delay: 500
-                            }
-                        }
-
-                        // 1.0.182 \u2014 Button QQC2-native restyle
-                        Button {
-                            id: txEnableBtn
-                            property bool txActive: engine ? engine.txEnabled : false
-                            width: txPanel.toolbarActionWidth("TX", "\u25B2")
-                            height: txPanel.toolbarButtonHeight
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            onClicked: {
-                                if (!engine) {
-                                    return
-                                }
-                                if (!engine.txEnabled) {
-                                    engine.txEnabled = true
-                                } else if (engine.autoCqRepeat) {
-                                    return
-                                } else {
-                                    engine.haltWithReason("qml-tx-enable-toggle")
+                            function componentForId(id) {
+                                switch (id) {
+                                    case "mam":       return comp_mam
+                                    case "deep":      return comp_deep
+                                    case "ap":        return comp_ap
+                                    case "seq":       return comp_seq
+                                    case "quickqso":  return comp_quickqso
+                                    case "enabletx":  return comp_enabletx
+                                    case "holdfreq":  return comp_holdfreq
+                                    case "autocq":    return comp_autocq
+                                    case "call":      return comp_call
+                                    case "txphase":   return comp_txphase
+                                    case "alt12":     return comp_alt12
+                                    case "halt":      return comp_halt
+                                    case "clear":     return comp_clear
+                                    case "tune":      return comp_tune
+                                    case "async":     return comp_async
+                                    case "hound":     return comp_hound
+                                    case "waitpounce":return comp_waitpounce
+                                    default:          return null
                                 }
                             }
-                            background: Rectangle {
-                                radius: 5
-                                color: txEnableBtn.txActive ? Qt.rgba(244/255, 67/255, 54/255, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                                border.color: txEnableBtn.txActive ? errorRed : glassBorder
-                                border.width: txEnableBtn.txActive ? 2 : 1
-                            }
-                            contentItem: ToolbarButtonContent {
-                                label: "TX"
-                                glyph: "\u25B2"
-                                foreground: txEnableBtn.txActive ? errorRed : textSecondary
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: true
-                            }
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Abilita la TX")
-                            ToolTip.delay: 500
-                        }
 
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("HOLD", "\uD83D\uDD13")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: holdTxFreqBtn.checked ? Qt.rgba(255/255, 193/255, 7/255, 0.25) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: holdTxFreqBtn.checked ? "#FFC107" : glassBorder
-                            border.width: holdTxFreqBtn.checked ? 2 : 1
+                            // Stato drag condiviso fra gli slot
+                            property int dragIndex: -1
+                            property int dropIndex: -1
 
-                            Button {
-                                id: holdTxFreqBtn
-                                anchors.fill: parent
-                                checkable: true
-                                checked: bridge ? bridge.holdTxFreq : false
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                onClicked: {
-                                    if (bridge) {
-                                        bridge.holdTxFreq = checked
+                            // Indice modello di destinazione in base alla X (scena) del puntatore.
+                            function computeTargetIndex(from, sceneX) {
+                                var n = txCtrlRepeater.count
+                                var target = from
+                                for (var i = 0; i < n; ++i) {
+                                    if (i === from)
+                                        continue
+                                    var it = txCtrlRepeater.itemAt(i)
+                                    if (!it || !it.visible)
+                                        continue
+                                    var mid = it.x + it.width / 2
+                                    if (i < from && sceneX < mid) { target = i; break }
+                                    if (i > from) {
+                                        if (sceneX > mid) target = i
                                     }
                                 }
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
+                                return target
+                            }
+
+                            // Ogni slot e' un Item dimensionato come il pulsante (Flow lo posiziona
+                            // in base a width/height; visible:false -> Flow salta lo slot).
+                            delegate: Item {
+                                id: slot
+                                property string buttonId: modelData
+                                property bool slotVisible: btnLoader.item ? btnLoader.item.btnVisible : false
+                                property bool dragging: txCtrlRepeater.dragIndex === index
+
+                                visible: slotVisible
+                                width: btnLoader.item ? btnLoader.item.prefWidth : 0
+                                height: txPanel.toolbarButtonHeight
+                                z: dragging ? 10 : 0
+
+                                Loader {
+                                    id: btnLoader
+                                    anchors.fill: parent
+                                    sourceComponent: txCtrlRepeater.componentForId(slot.buttonId)
+                                    opacity: slot.dragging ? 0.25 : 1.0
+                                    Behavior on opacity { NumberAnimation { duration: 120 } }
+                                    // Spostamento magnetico: gli slot fra origine e destinazione
+                                    // scorrono per "aprire" il varco; animato (NO layer.enabled/FBO).
+                                    x: {
+                                        var d = txCtrlRepeater.dragIndex
+                                        var t = txCtrlRepeater.dropIndex
+                                        if (d < 0 || t < 0 || index === d)
+                                            return 0
+                                        var dragged = txCtrlRepeater.itemAt(d)
+                                        var shift = (dragged ? dragged.width : 0) + topControlsFlow.spacing
+                                        if (t > d && index > d && index <= t)
+                                            return -shift
+                                        if (t < d && index >= t && index < d)
+                                            return shift
+                                        return 0
+                                    }
+                                    Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
+                                    onLoaded: {
+                                        if (item)
+                                            item.hovered = Qt.binding(function() { return dragMA.containsMouse && txCtrlRepeater.dragIndex < 0 })
+                                    }
+                                }
+
+                                // MouseArea unica: hover + click + long-press->drag.
+                                MouseArea {
+                                    id: dragMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    preventStealing: true
+
+                                    property bool armed: false
+                                    property real pressSceneX: 0
+                                    property bool moved: false
+
+                                    Timer {
+                                        id: holdTimer
+                                        interval: 350
+                                        repeat: false
+                                        onTriggered: {
+                                            if (dragMA.pressedButtons & Qt.LeftButton) {
+                                                dragMA.armed = true
+                                                txCtrlRepeater.dragIndex = index
+                                                txCtrlRepeater.dropIndex = index
+                                                txDragGhost.startFor(slot, index)
+                                            }
+                                        }
+                                    }
+
+                                    onPressed: function(mouse) {
+                                        armed = false
+                                        moved = false
+                                        pressSceneX = mapToItem(topControlsFlow, mouse.x, mouse.y).x
+                                        if (mouse.button === Qt.LeftButton)
+                                            holdTimer.start()
+                                    }
+
+                                    onPositionChanged: function(mouse) {
+                                        var sx = mapToItem(topControlsFlow, mouse.x, mouse.y).x
+                                        if (Math.abs(sx - pressSceneX) > 6)
+                                            moved = true
+                                        if (armed) {
+                                            txDragGhost.updateX(sx)
+                                            // NON muta il modello durante il drag (eviterebbe la
+                                            // distruzione del delegate) -> commit al rilascio.
+                                            txCtrlRepeater.dropIndex = txCtrlRepeater.computeTargetIndex(index, sx)
+                                        } else if (moved) {
+                                            holdTimer.stop()
+                                        }
+                                    }
+
+                                    onReleased: function(mouse) {
+                                        holdTimer.stop()
+                                        if (armed) {
+                                            var sx = mapToItem(topControlsFlow, mouse.x, mouse.y).x
+                                            var target = txCtrlRepeater.computeTargetIndex(index, sx)
+                                            txDragGhost.stop()
+                                            txCtrlRepeater.dragIndex = -1
+                                            txCtrlRepeater.dropIndex = -1
+                                            armed = false
+                                            if (target !== index)
+                                                txPanel.moveTxPanelButton(index, target)
+                                            return
+                                        }
+                                        // Click breve: esegui azione (passa mouse per right-click MAM).
+                                        if (!moved && btnLoader.item)
+                                            btnLoader.item.activate(mouse)
+                                    }
+
+                                    onCanceled: {
+                                        holdTimer.stop()
+                                        if (armed) {
+                                            txDragGhost.stop()
+                                            txCtrlRepeater.dragIndex = -1
+                                            txCtrlRepeater.dropIndex = -1
+                                            armed = false
+                                        }
+                                    }
+
+                                    ToolTip.visible: containsMouse && txCtrlRepeater.dragIndex < 0 && btnLoader.item && btnLoader.item.tip.length > 0
+                                    ToolTip.text: btnLoader.item ? btnLoader.item.tip : ""
+                                    ToolTip.delay: 500
+                                }
+                            }
+                        }
+
+                        // ════════ Component dei pulsanti TX panel ════════
+                        // Ogni Component conserva aspetto e logica originali del pulsante.
+                        // Contratto: btnVisible (gate), prefWidth (larghezza nel Flow),
+                        // hovered (impostato dallo slot/ghost), tip (ToolTip), activate(mouse).
+
+                        // MAM (Rectangle wrapper; sinistro=toggle, destro=apri finestra MAM)
+                        Component {
+                            id: comp_mam
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("MAM", "⇆")
+                                readonly property string tip: qsTr("Multi-Answer Mode (MAM) — clic destro = apri finestra (default OFF)")
+                                function activate(mouse) {
+                                    if (mouse && mouse.button === Qt.RightButton)
+                                        txPanel.mamWindowRequested()
+                                    else if (engine)
+                                        engine.multiAnswerMode = !engine.multiAnswerMode
+                                }
+                                radius: 5
+                                color: (engine && engine.multiAnswerMode) ? Qt.rgba(255/255, 152/255, 0, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: (engine && engine.multiAnswerMode) ? warningOrange : (hovered ? secondaryCyan : glassBorder)
+                                border.width: (engine && engine.multiAnswerMode) ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "MAM"
+                                    glyph: "⇆"
+                                    foreground: (engine && engine.multiAnswerMode) ? warningOrange : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: engine && engine.multiAnswerMode
+                                }
+                            }
+                        }
+
+                        // DEEP
+                        Component {
+                            id: comp_deep
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("DEEP", "◎")
+                                readonly property string tip: qsTr("Deep Search: ricerca profonda dei segnali deboli tramite i callsign noti (default OFF)")
+                                function activate(mouse) { if (engine) engine.deepSearchEnabled = !engine.deepSearchEnabled }
+                                radius: 5
+                                color: (engine && engine.deepSearchEnabled) ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: (engine && engine.deepSearchEnabled) ? accentGreen : (hovered ? secondaryCyan : glassBorder)
+                                border.width: (engine && engine.deepSearchEnabled) ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "DEEP"
+                                    glyph: "◎"
+                                    foreground: (engine && engine.deepSearchEnabled) ? accentGreen : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: engine && engine.deepSearchEnabled
+                                }
+                            }
+                        }
+
+                        // AP
+                        Component {
+                            id: comp_ap
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("AP", "◆")
+                                readonly property string tip: qsTr("Decodifica a priori (AP): usa informazioni note per recuperare i segnali deboli (default OFF)")
+                                function activate(mouse) { if (engine) engine.ft8ApEnabled = !engine.ft8ApEnabled }
+                                radius: 5
+                                color: (engine && engine.ft8ApEnabled) ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: (engine && engine.ft8ApEnabled) ? secondaryCyan : (hovered ? secondaryCyan : glassBorder)
+                                border.width: (engine && engine.ft8ApEnabled) ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "AP"
+                                    glyph: "◆"
+                                    foreground: (engine && engine.ft8ApEnabled) ? secondaryCyan : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: engine && engine.ft8ApEnabled
+                                }
+                            }
+                        }
+
+                        // SEQ
+                        Component {
+                            id: comp_seq
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("SEQ", "↻")
+                                readonly property string tip: qsTr("Sequenza automatica del QSO (default OFF)")
+                                function activate(mouse) { if (engine) engine.autoSeq = !engine.autoSeq }
+                                radius: 5
+                                color: (engine && engine.autoSeq) ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: (engine && engine.autoSeq) ? primaryBlue : (hovered ? secondaryCyan : glassBorder)
+                                border.width: (engine && engine.autoSeq) ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "SEQ"
+                                    glyph: "↻"
+                                    foreground: (engine && engine.autoSeq) ? primaryBlue : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: engine && engine.autoSeq
+                                }
+                            }
+                        }
+
+                        // Quick QSO
+                        Component {
+                            id: comp_quickqso
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("QQ", "⇨")
+                                readonly property string tip: qsTr("Quick QSO: salta TX1 e parte da TX2 (rapporto diretto) (default OFF)")
+                                function activate(mouse) { if (engine) engine.quickQsoEnabled = !engine.quickQsoEnabled }
+                                radius: 5
+                                color: (engine && engine.quickQsoEnabled) ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: (engine && engine.quickQsoEnabled) ? accentGreen : (hovered ? secondaryCyan : glassBorder)
+                                border.width: (engine && engine.quickQsoEnabled) ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "QQ"
+                                    glyph: "⇨"
+                                    foreground: (engine && engine.quickQsoEnabled) ? accentGreen : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: engine && engine.quickQsoEnabled
+                                }
+                            }
+                        }
+
+                        // Enable TX
+                        Component {
+                            id: comp_enabletx
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("TX", "▲")
+                                readonly property bool txActive: engine ? engine.txEnabled : false
+                                readonly property string tip: qsTr("Abilita la TX")
+                                function activate(mouse) {
+                                    if (!engine) return
+                                    if (!engine.txEnabled) {
+                                        engine.txEnabled = true
+                                    } else if (engine.autoCqRepeat) {
+                                        return
+                                    } else {
+                                        engine.haltWithReason("qml-tx-enable-toggle")
+                                    }
+                                }
+                                radius: 5
+                                color: txActive ? Qt.rgba(244/255, 67/255, 54/255, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: txActive ? errorRed : (hovered ? secondaryCyan : glassBorder)
+                                border.width: txActive ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "TX"
+                                    glyph: "▲"
+                                    foreground: parent.txActive ? errorRed : textSecondary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: true
+                                }
+                            }
+                        }
+
+                        // Hold Tx Freq (bind a bridge.holdTxFreq)
+                        Component {
+                            id: comp_holdfreq
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("HOLD", "🔓")
+                                readonly property bool isHeld: bridge ? bridge.holdTxFreq : false
+                                readonly property string tip: qsTr("Blocca la frequenza TX\n(Hold Tx Freq)")
+                                function activate(mouse) { if (bridge) bridge.holdTxFreq = !bridge.holdTxFreq }
+                                radius: 5
+                                color: isHeld ? Qt.rgba(255/255, 193/255, 7/255, 0.25) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: isHeld ? "#FFC107" : (hovered ? secondaryCyan : glassBorder)
+                                border.width: isHeld ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
                                     label: "HOLD"
-                                    glyph: holdTxFreqBtn.checked ? "\uD83D\uDD12" : "\uD83D\uDD13"
-                                    foreground: holdTxFreqBtn.checked ? "#FFC107" : textSecondary
+                                    glyph: parent.isHeld ? "🔒" : "🔓"
+                                    foreground: parent.isHeld ? "#FFC107" : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: holdTxFreqBtn.checked
-                                }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Blocca la frequenza TX\n(Hold Tx Freq)")
-                                ToolTip.delay: 500
-                            }
-                        }
-
-                        // 1.0.182 — Button QQC2-native restyle
-                        Button {
-                            id: autoCqButton
-                            width: txPanel.toolbarActionWidth("ACQ", "⟳")
-                            height: txPanel.toolbarButtonHeight
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            background: Rectangle {
-                                radius: 5
-                                color: engine && engine.autoCqRepeat ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
-                                border.color: engine && engine.autoCqRepeat ? successGreen : Qt.alpha(textPrimary, 0.2)
-                                border.width: engine && engine.autoCqRepeat ? 2 : 1
-                            }
-                            contentItem: ToolbarButtonContent {
-                                label: "ACQ"
-                                glyph: "⟳"
-                                foreground: engine && engine.autoCqRepeat ? successGreen : textPrimary
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: engine && engine.autoCqRepeat
-                            }
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Auto CQ ripetuto\nChiama CQ automaticamente finché non arriva una risposta (default OFF)")
-                            ToolTip.delay: 500
-
-                            onClicked: {
-                                if (engine) {
-                                    if (!engine.autoSeq && !engine.autoCqRepeat)
-                                        engine.autoSeq = true
-                                    engine.autoCqRepeat = !engine.autoCqRepeat
+                                    boldLabel: parent.isHeld
                                 }
                             }
                         }
 
-                        // 1.0.262 \u2014 CALL feature: pulsante chiamata diretta con retry/timeout
-                        Button {
-                            id: callButton
-                            width: txPanel.toolbarActionWidth("CALL", "\ud83d\udcde")
-                            height: txPanel.toolbarButtonHeight
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            background: Rectangle {
+                        // Auto CQ
+                        Component {
+                            id: comp_autocq
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("ACQ", "⟳")
+                                readonly property bool acqOn: engine && engine.autoCqRepeat
+                                readonly property string tip: qsTr("Auto CQ ripetuto\nChiama CQ automaticamente finché non arriva una risposta (default OFF)")
+                                function activate(mouse) {
+                                    if (engine) {
+                                        if (!engine.autoSeq && !engine.autoCqRepeat)
+                                            engine.autoSeq = true
+                                        engine.autoCqRepeat = !engine.autoCqRepeat
+                                    }
+                                }
                                 radius: 5
-                                color: engine && engine.targetCallActive ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
-                                border.color: engine && engine.targetCallActive ? successGreen : Qt.alpha(textPrimary, 0.2)
-                                border.width: engine && engine.targetCallActive ? 2 : 1
+                                color: acqOn ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
+                                border.color: acqOn ? successGreen : (hovered ? secondaryCyan : Qt.alpha(textPrimary, 0.2))
+                                border.width: acqOn ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "ACQ"
+                                    glyph: "⟳"
+                                    foreground: parent.acqOn ? successGreen : textPrimary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: parent.acqOn
+                                }
                             }
-                            contentItem: ToolbarButtonContent {
-                                label: "CALL"
-                                glyph: "\ud83d\udcde"
-                                foreground: engine && engine.targetCallActive ? successGreen : textPrimary
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: engine && engine.targetCallActive
-                            }
-                            ToolTip.visible: hovered
-                            ToolTip.text: engine && engine.targetCallActive
-                                          ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire il pannello").arg(engine.targetCallSign)
-                                                .arg(engine.targetCallRetryCount)
-                                                .arg(engine.targetCallMaxRetries === 0 ? "\u221e" : engine.targetCallMaxRetries)
-                                          : qsTr("Chiamata diretta (CALL)\nApri il pannello di chiamata diretta di un callsign\ncon controllo di tentativi, timeout e periodo")
-                            ToolTip.delay: 500
-
-                            onClicked: txPanel.callRequested()
                         }
 
-                        // 1.0.182 \u2014 Button QQC2-native restyle
-                        Button {
-                            id: txPhaseButton
-                            width: txPanel.toolbarActionWidth(engine && engine.txPeriod === 1 ? "1ST" : "2ND",
-                                                              engine && engine.txPeriod === 1 ? "\u2460" : "\u2461")
-                            height: txPanel.toolbarButtonHeight
-                            visible: engine && engine.mode !== "FT2"
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            background: Rectangle {
+                        // CALL
+                        Component {
+                            id: comp_call
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("CALL", "📞")
+                                readonly property bool callOn: engine && engine.targetCallActive
+                                readonly property string tip: engine && engine.targetCallActive
+                                              ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire il pannello").arg(engine.targetCallSign)
+                                                    .arg(engine.targetCallRetryCount)
+                                                    .arg(engine.targetCallMaxRetries === 0 ? "∞" : engine.targetCallMaxRetries)
+                                              : qsTr("Chiamata diretta (CALL)\nApri il pannello di chiamata diretta di un callsign\ncon controllo di tentativi, timeout e periodo")
+                                function activate(mouse) { txPanel.callRequested() }
                                 radius: 5
-                                color: engine && engine.txPeriod === 1 ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.28)
-                                                                       : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                                border.color: engine && engine.txPeriod === 1 ? primaryBlue : glassBorder
-                                border.width: engine && engine.txPeriod === 1 ? 2 : 1
+                                color: callOn ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
+                                border.color: callOn ? successGreen : (hovered ? secondaryCyan : Qt.alpha(textPrimary, 0.2))
+                                border.width: callOn ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "CALL"
+                                    glyph: "📞"
+                                    foreground: parent.callOn ? successGreen : textPrimary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: parent.callOn
+                                }
                             }
-                            contentItem: ToolbarButtonContent {
-                                label: engine && engine.txPeriod === 1 ? "1ST" : "2ND"
-                                glyph: engine && engine.txPeriod === 1 ? "\u2460" : "\u2461"
-                                foreground: engine && engine.txPeriod === 1 ? primaryBlue : textPrimary
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: true
-                            }
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Slot TX\n1º: :00/:30\n2º: :15/:45")
-                            ToolTip.delay: 500
-                            onClicked: if (engine) engine.txPeriod = engine.txPeriod === 1 ? 0 : 1
                         }
 
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("ALT 1/2", "\u21C4")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            visible: engine && engine.mode !== "FT2"
-                            color: engine && engine.alt12Enabled ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.22)
-                                                                 : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                            border.color: engine && engine.alt12Enabled ? warningOrange : glassBorder
-                            border.width: engine && engine.alt12Enabled ? 2 : 1
+                        // TX Phase (gate: mode !== FT2)
+                        Component {
+                            id: comp_txphase
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: engine && engine.mode !== "FT2"
+                                readonly property bool first: engine && engine.txPeriod === 1
+                                readonly property real prefWidth: txPanel.toolbarActionWidth(first ? "1ST" : "2ND", first ? "①" : "②")
+                                readonly property string tip: qsTr("Slot TX\n1º: :00/:30\n2º: :15/:45")
+                                function activate(mouse) { if (engine) engine.txPeriod = engine.txPeriod === 1 ? 0 : 1 }
+                                radius: 5
+                                color: first ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.28)
+                                             : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: first ? primaryBlue : (hovered ? secondaryCyan : glassBorder)
+                                border.width: first ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: parent.first ? "1ST" : "2ND"
+                                    glyph: parent.first ? "①" : "②"
+                                    foreground: parent.first ? primaryBlue : textPrimary
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: true
+                                }
+                            }
+                        }
 
-                            Button {
-                                id: alt12Button
-                                anchors.fill: parent
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
+                        // ALT 1/2 (gate: mode !== FT2)
+                        Component {
+                            id: comp_alt12
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: engine && engine.mode !== "FT2"
+                                readonly property bool altOn: engine && engine.alt12Enabled
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("ALT 1/2", "⇄")
+                                readonly property string tip: qsTr("Auto CQ: alterna le fasi TX/RX dopo CQ ripetuti senza risposta (default OFF)")
+                                function activate(mouse) { if (engine) engine.alt12Enabled = !engine.alt12Enabled }
+                                radius: 5
+                                color: altOn ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.22)
+                                             : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: altOn ? warningOrange : (hovered ? secondaryCyan : glassBorder)
+                                border.width: altOn ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
                                     label: "ALT 1/2"
-                                    glyph: "\u21C4"
-                                    foreground: engine && engine.alt12Enabled ? warningOrange : textPrimary
+                                    glyph: "⇄"
+                                    foreground: parent.altOn ? warningOrange : textPrimary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.alt12Enabled
+                                    boldLabel: parent.altOn
                                 }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Auto CQ: alterna le fasi TX/RX dopo CQ ripetuti senza risposta (default OFF)")
-                                ToolTip.delay: 500
-                                onClicked: if (engine) engine.alt12Enabled = !engine.alt12Enabled
                             }
                         }
 
-                        // 1.0.182 \u2014 Button QQC2-native restyle
-                        Button {
-                            id: haltButton
-                            width: txPanel.toolbarActionWidth("HALT", "\u25A0")
-                            height: txPanel.toolbarButtonHeight
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            background: Rectangle {
+                        // HALT
+                        Component {
+                            id: comp_halt
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("HALT", "■")
+                                readonly property string tip: qsTr("Interrompi la TX")
+                                function activate(mouse) { if (engine) engine.haltWithReason("qml-halt-button") }
                                 radius: 5
                                 color: txPanel.txVisualActive
-                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, haltButton.hovered ? 0.96 : 0.88)
-                                       : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, haltButton.hovered ? 0.28 : 0.16)
+                                       ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, hovered ? 0.96 : 0.88)
+                                       : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, hovered ? 0.28 : 0.16)
                                 border.color: txPanel.txVisualActive ? Qt.lighter(errorRed, 1.2) : accentGreen
                                 border.width: txPanel.txVisualActive ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "HALT"
+                                    glyph: "■"
+                                    foreground: txPanel.txVisualActive ? "#FFF8F6" : accentGreen
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: true
+                                }
                             }
-                            contentItem: ToolbarButtonContent {
-                                label: "HALT"
-                                glyph: "\u25A0"
-                                foreground: txPanel.txVisualActive ? "#FFF8F6" : accentGreen
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: true
-                            }
-                            onClicked: if (engine) engine.haltWithReason("qml-halt-button")
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Interrompi la TX")
-                            ToolTip.delay: 500
                         }
 
-                        Rectangle {
-                            width: txPanel.toolbarActionWidth("CLEAR", "")
-                            height: txPanel.toolbarButtonHeight
-                            radius: 5
-                            color: clearTxButton.hovered ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
-                                                         : Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.12)
-                            border.color: warningOrange
-                            border.width: 1
-
-                            Button {
-                                id: clearTxButton
-                                anchors.fill: parent
-                                padding: 0
-                                topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                                enabled: engine !== null
-                                onClicked: if (engine) engine.clearTxMessages()
-                                background: Rectangle { color: "transparent" }
-                                contentItem: ToolbarButtonContent {
+                        // CLEAR (niente glyph)
+                        Component {
+                            id: comp_clear
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("CLEAR", "")
+                                readonly property string tip: qsTr("Cancella DX, rapporti e TX1-TX5")
+                                function activate(mouse) { if (engine) engine.clearTxMessages() }
+                                radius: 5
+                                color: hovered ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
+                                               : Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.12)
+                                border.color: warningOrange
+                                border.width: 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
                                     label: "CLEAR"
                                     foreground: warningOrange
                                     labelSize: txPanel.toolbarLabelSize
                                     boldLabel: true
                                 }
-                                ToolTip.visible: hovered
-                                ToolTip.text: qsTr("Cancella DX, rapporti e TX1-TX5")
-                                ToolTip.delay: 500
                             }
                         }
 
-                        // 1.0.182 \u2014 Button QQC2-native restyle
-                        Button {
-                            id: tuneButton
-                            property bool isTuning: engine && engine.tuning
-                            width: txPanel.toolbarActionWidth(tuneButton.isTuning ? "STOP" : "TUNE", "\u266B")
-                            height: txPanel.toolbarButtonHeight
-                            padding: 0
-                            topInset: 0; bottomInset: 0; leftInset: 0; rightInset: 0
-                            background: Rectangle {
+                        // TUNE
+                        Component {
+                            id: comp_tune
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property bool isTuning: engine && engine.tuning
+                                readonly property real prefWidth: txPanel.toolbarActionWidth(isTuning ? "STOP" : "TUNE", "♫")
+                                readonly property string tip: qsTr("Tune (emette la portante di accordo)")
+                                function activate(mouse) {
+                                    if (engine) {
+                                        if (engine.tuning) engine.stopTune()
+                                        else engine.startTune()
+                                    }
+                                }
                                 radius: 5
-                                color: tuneButton.isTuning ? Qt.alpha(warningOrange, 0.5) : Qt.alpha(warningOrange, 0.2)
+                                color: isTuning ? Qt.alpha(warningOrange, 0.5) : Qt.alpha(warningOrange, 0.2)
                                 border.color: warningOrange
-                                border.width: tuneButton.isTuning ? 2 : 1
-                            }
-                            contentItem: ToolbarButtonContent {
-                                label: tuneButton.isTuning ? "STOP" : "TUNE"
-                                glyph: "\u266B"
-                                foreground: warningOrange
-                                glyphSize: txPanel.toolbarGlyphSize
-                                labelSize: txPanel.toolbarLabelSize
-                                boldLabel: true
-                            }
-                            onClicked: {
-                                if (engine) {
-                                    if (engine.tuning) engine.stopTune()
-                                    else engine.startTune()
+                                border.width: isTuning ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: parent.isTuning ? "STOP" : "TUNE"
+                                    glyph: "♫"
+                                    foreground: warningOrange
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: true
                                 }
                             }
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Tune (emette la portante di accordo)")
-                            ToolTip.delay: 500
                         }
 
-                        AsyncModeWidget {
-                            id: asyncModeVis
-                            width: 90
-                            height: txPanel.toolbarButtonHeight
-                            visible: txPanel.showAsyncIcon && engine && engine.mode === "FT2"
-                            running: engine ? (engine.asyncTxEnabled || engine.asyncDecodeEnabled) : false
-                            transmitting: engine ? engine.transmitting : false
-                            snr: engine ? engine.asyncSnrDb : -99
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Modalità Async FT2 — onda sinusoidale: verde=RX, rosso=TX (default OFF)")
-                            ToolTip.delay: 400
+                        // Async (AsyncModeWidget; display-only, gate: FT2 + showAsyncIcon)
+                        Component {
+                            id: comp_async
+                            AsyncModeWidget {
+                                // 'hovered' è già definito da AsyncModeWidget: lo riusiamo come da contratto.
+                                readonly property bool btnVisible: txPanel.showAsyncIcon && engine && engine.mode === "FT2"
+                                readonly property real prefWidth: 90
+                                readonly property string tip: qsTr("Modalità Async FT2 — onda sinusoidale: verde=RX, rosso=TX (default OFF)")
+                                function activate(mouse) {}
+                                running: engine ? (engine.asyncTxEnabled || engine.asyncDecodeEnabled) : false
+                                transmitting: engine ? engine.transmitting : false
+                                snr: engine ? engine.asyncSnrDb : -99
+                            }
                         }
 
-                        Rectangle {
-                            id: houndModeBadge
-                            width: 82
-                            height: txPanel.toolbarButtonHeight
-                            visible: engine && engine.houndMode
-                            radius: 5
-                            color: Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
-                            border.color: warningOrange
-                            border.width: 2
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "HOUND"
-                                color: warningOrange
-                                font.family: decodiumMonoFontFamily
-                                font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
-                                font.bold: true
+                        // HOUND badge (display-only, gate: houndMode)
+                        Component {
+                            id: comp_hound
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: engine && engine.houndMode
+                                readonly property real prefWidth: 82
+                                readonly property string tip: qsTr("Modalità Hound attiva")
+                                function activate(mouse) {}
+                                radius: 5
+                                color: Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
+                                border.color: warningOrange
+                                border.width: 2
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "HOUND"
+                                    color: warningOrange
+                                    font.family: decodiumMonoFontFamily
+                                    font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
+                                    font.bold: true
+                                }
                             }
-
-                            MouseArea {
-                                id: houndModeBadgeHover
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                acceptedButtons: Qt.NoButton
-                            }
-
-                            ToolTip.visible: houndModeBadgeHover.containsMouse
-                            ToolTip.text: qsTr("Modalità Hound attiva")
-                            ToolTip.delay: 400
                         }
 
-                        Rectangle {
-                            id: waitPounceBadge
-                            width: 54
-                            height: txPanel.toolbarButtonHeight
-                            visible: engine && engine.waitPounceActive
-                            radius: 5
-                            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
-                            border.color: secondaryCyan
-                            border.width: 2
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "W&P"
-                                color: secondaryCyan
-                                font.family: decodiumMonoFontFamily
-                                font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
-                                font.bold: true
+                        // W&P badge (display-only, gate: waitPounceActive)
+                        Component {
+                            id: comp_waitpounce
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: engine && engine.waitPounceActive
+                                readonly property real prefWidth: 54
+                                readonly property string tip: qsTr("Wait & Pounce attivo")
+                                function activate(mouse) {}
+                                radius: 5
+                                color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
+                                border.color: secondaryCyan
+                                border.width: 2
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "W&P"
+                                    color: secondaryCyan
+                                    font.family: decodiumMonoFontFamily
+                                    font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
+                                    font.bold: true
+                                }
                             }
-
-                            MouseArea {
-                                id: waitPounceBadgeHover
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                acceptedButtons: Qt.NoButton
-                            }
-
-                            ToolTip.visible: waitPounceBadgeHover.containsMouse
-                            ToolTip.text: qsTr("Wait & Pounce attivo")
-                            ToolTip.delay: 400
                         }
 
+                    }
+
+                    // ── Ghost trascinato (proxy visuale che segue il puntatore) ──
+                    // Sibling del Flow (NON figlio: Flow non gestisce la sua x); overlay
+                    // assoluto attivo SOLO durante il drag. Le coordinate combaciano col
+                    // Flow perché entrambi hanno origine (0,0) in questo Item wrapper.
+                    Item {
+                        id: txDragGhost
+                        visible: false
+                        x: 0
+                        y: 0
+                        height: txPanel.toolbarButtonHeight
+                        z: 50
+                        property Item sourceSlot: null
+
+                        function startFor(s, idx) {
+                            sourceSlot = s
+                            width = s.width
+                            txGhostLoader.sourceComponent = txCtrlRepeater.componentForId(s.buttonId)
+                            visible = true
+                        }
+                        function updateX(sceneX) {
+                            var nx = sceneX - width / 2
+                            if (nx < 0) nx = 0
+                            if (nx > topControlsFlow.width - width) nx = topControlsFlow.width - width
+                            x = nx
+                        }
+                        function stop() {
+                            visible = false
+                            sourceSlot = null
+                            txGhostLoader.sourceComponent = null
+                        }
+
+                        Behavior on x { NumberAnimation { duration: 60; easing.type: Easing.OutQuad } }
+
+                        Loader {
+                            id: txGhostLoader
+                            anchors.fill: parent
+                            opacity: 0.9
+                            onLoaded: { if (item) item.hovered = true }
+                        }
                     }
                 }
             }

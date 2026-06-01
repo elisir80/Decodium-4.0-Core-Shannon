@@ -7211,6 +7211,36 @@ Dialog {
                             }
                         }
 
+                        // ── Ordine pulsanti TX panel (drag&drop) ──
+                        Rectangle {
+                            Layout.columnSpan: 2
+                            Layout.topMargin: 6
+                            implicitWidth: resetTxOrderLabel.implicitWidth + 28
+                            implicitHeight: 30
+                            radius: 4
+                            color: resetTxOrderMA.containsMouse ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.25) : Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.12)
+                            border.color: primaryBlue
+                            border.width: 1
+
+                            Text {
+                                id: resetTxOrderLabel
+                                anchors.centerIn: parent
+                                text: qsTr("Restore default TX panel order")
+                                color: textPrimary
+                                font.pixelSize: 12
+                            }
+
+                            MouseArea {
+                                id: resetTxOrderMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                // Reset via il canale setting canonico: TxPanel.onSettingValueChanged
+                                // ricostruisce uiTxPanelOrder dal default quando il valore è vuoto.
+                                onClicked: if (bridge) bridge.setSetting("uiTxPanelOrder", "")
+                            }
+                        }
+
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2; Layout.fillHeight: true }
                     }
                 }
