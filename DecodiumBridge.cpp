@@ -23927,8 +23927,17 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             if (nowMs - it.value() > cooldownMs) it = m_qsoCooldown.erase(it);
             else ++it;
         }
-        if (m_qsoCooldown.contains(cooldownKey)) {
-            bridgeLog("QSO cooldown: ignoro " + last_word + " da " + cooldownKey);
+        // FIX 1.0.360 (9H1SR): un 73/RR73 da un nominativo APPENA LOGGATO/lavorato non
+        // deve riaprire un QSO (nuova chiamata/TX1). m_qsoCooldown viene azzerato da
+        // vari reset di stato (clearTxMessages, resetStartupTransientQsoState, cambio
+        // modo) e l'entry appena inserita sul log puo' sparire -> il repeat RR73 sfuggiva
+        // e ripartiva un TX1. Aggiungo il check resiliente isRecentAutoCqWorkedOrLogged
+        // Duplicate (QHash call|band|mode popolato sul log, age-pruned, NON azzerato dai
+        // reset di stato).
+        if (m_qsoCooldown.contains(cooldownKey)
+            || isRecentAutoCqWorkedOrLoggedDuplicate(cooldownKey, m_frequency, m_mode)) {
+            bridgeLog("QSO cooldown: ignoro " + last_word + " da " + cooldownKey
+                      + " (recently worked/logged)");
             return;
         }
     }
