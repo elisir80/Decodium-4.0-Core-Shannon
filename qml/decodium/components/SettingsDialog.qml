@@ -7172,6 +7172,45 @@ Dialog {
                             }
                         }
 
+                        // ── Ordine pulsanti toolbar (drag&drop) ──
+                        Text { text: qsTr("TOOLBAR BUTTON ORDER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 14 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Text {
+                            text: qsTr("Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.")
+                            color: textSecondary; font.pixelSize: 12; wrapMode: Text.WordWrap
+                            Layout.columnSpan: 2; Layout.fillWidth: true; Layout.topMargin: 2
+                        }
+
+                        Rectangle {
+                            Layout.columnSpan: 2
+                            Layout.topMargin: 4
+                            implicitWidth: resetOrderLabel.implicitWidth + 28
+                            implicitHeight: 30
+                            radius: 4
+                            color: resetOrderMA.containsMouse ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.25) : Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.12)
+                            border.color: primaryBlue
+                            border.width: 1
+
+                            Text {
+                                id: resetOrderLabel
+                                anchors.centerIn: parent
+                                text: qsTr("Restore default button order")
+                                color: textPrimary
+                                font.pixelSize: 12
+                            }
+
+                            MouseArea {
+                                id: resetOrderMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                // Reset via il canale setting canonico: Main.onSettingValueChanged
+                                // ricostruisce uiToolbarOrder dal default quando il valore è vuoto.
+                                onClicked: if (bridge) bridge.setSetting("uiToolbarOrder", "")
+                            }
+                        }
+
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2; Layout.fillHeight: true }
                     }
                 }

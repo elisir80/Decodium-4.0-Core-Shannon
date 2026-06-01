@@ -869,6 +869,62 @@ ApplicationWindow {
     property bool uiBtnMacroVisible:          settingBool("uiBtnMacroVisible", true)
     property bool uiBtnAstroVisible:          settingBool("uiBtnAstroVisible", true)
     property bool uiBtnCatVisible:            settingBool("uiBtnCatVisible", true)
+
+    // === Ordine pulsanti toolbar (drag&drop riordinabile, persistente) ===
+    readonly property string uiToolbarOrderDefault: "setup,rec,wav,sep1,log,macro,astro,sep2,cat"
+    property var uiToolbarOrder: parseToolbarOrder(String(bridge.getSetting("uiToolbarOrder", "") || ""))
+
+    // Tutti gli id validi (pulsanti + separatori). Usato per validare/normalizzare.
+    readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","cat","sep1","sep2"]
+
+    // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
+    function parseToolbarOrder(csv) {
+        var def = uiToolbarOrderDefault.split(",")
+        if (!csv || csv.length === 0)
+            return def
+        var parts = String(csv).split(",")
+        var out = []
+        var seen = ({})
+        for (var i = 0; i < parts.length; ++i) {
+            var id = parts[i].trim()
+            if (id.length === 0)
+                continue
+            if (uiToolbarKnownIds.indexOf(id) < 0)
+                continue            // id sconosciuto -> scarta
+            if (seen[id])
+                continue            // dedup
+            seen[id] = true
+            out.push(id)
+        }
+        // Aggiungi eventuali id mancanti (es. nuovo pulsante introdotto dopo) in coda nell'ordine di default
+        for (var j = 0; j < def.length; ++j) {
+            if (!seen[def[j]]) {
+                out.push(def[j])
+                seen[def[j]] = true
+            }
+        }
+        if (out.length === 0)
+            return def
+        return out
+    }
+
+    function persistToolbarOrder() {
+        persistUiSetting("uiToolbarOrder", uiToolbarOrder.join(","))
+    }
+
+    // Sposta l'id dalla posizione 'from' alla posizione 'to' nel modello e committa.
+    function moveToolbarButton(from, to) {
+        if (from === to || from < 0 || to < 0)
+            return
+        var arr = uiToolbarOrder.slice()
+        if (from >= arr.length || to >= arr.length)
+            return
+        var item = arr.splice(from, 1)[0]
+        arr.splice(to, 0, item)
+        uiToolbarOrder = arr
+        persistToolbarOrder()
+    }
+
     property bool uiBtnFooterResetVisible:    settingBool("uiBtnFooterResetVisible", true)
     property bool uiBtnFooterHistoryVisible:  settingBool("uiBtnFooterHistoryVisible", true)
     property bool uiBtnFooterDxcVisible:      settingBool("uiBtnFooterDxcVisible", true)
@@ -1224,6 +1280,8 @@ ApplicationWindow {
                 mainWindow.uiBtnAstroVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiBtnCatVisible")
                 mainWindow.uiBtnCatVisible = mainWindow.coerceBool(value, true)
+            else if (key === "uiToolbarOrder")
+                mainWindow.uiToolbarOrder = mainWindow.parseToolbarOrder(String(value || ""))
             else if (key === "uiBtnFooterResetVisible")
                 mainWindow.uiBtnFooterResetVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiBtnFooterHistoryVisible")
@@ -2861,59 +2919,284 @@ ApplicationWindow {
                         border.color: glassBorder
                         radius: 4
 
+                        // ── Toolbar riordinabile via drag&drop (vedi mainWindow.uiToolbarOrder) ──
+                        // Ogni pulsante è un Component indicizzato per id; un Repeater itera
+                        // il modello ORDINATO e un Loader per slot carica il Component giusto.
+                        // Click breve = azione; long-press = drag magnetico (riordino in barra).
                         RowLayout {
+                            id: headerUtilityRow
                             anchors.fill: parent
                             anchors.margins: 2
                             spacing: 1
 
-                        // Settings
-                        Rectangle {
-                            id: settingsButton
-                            visible: mainWindow.uiBtnSetupVisible
-                            Layout.preferredWidth: 50
-                            Layout.fillHeight: true
-                            radius: 3
-                            color: settingsMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
+                            // Stato drag condiviso fra gli slot
+                            property int dragIndex: -1        // indice modello in trascinamento (-1 = nessuno)
+                            property int dropIndex: -1        // indice di inserimento proposto durante il drag
 
+                            // Mappa id -> Component visuale
+                            function componentForId(id) {
+                                switch (id) {
+                                    case "setup":  return comp_setup
+                                    case "rec":    return comp_rec
+                                    case "wav":    return comp_wav
+                                    case "log":    return comp_log
+                                    case "macro":  return comp_macro
+                                    case "astro":  return comp_astro
+                                    case "cat":    return comp_cat
+                                    case "sep1":
+                                    case "sep2":   return comp_sep
+                                    default:       return null
+                                }
+                            }
+                            function isSeparator(id) { return id === "sep1" || id === "sep2" }
+
+                            Repeater {
+                                id: headerUtilityRepeater
+                                model: mainWindow.uiToolbarOrder
+
+                                // Ogni slot è un Item Layout-managed che ospita il Component del pulsante.
+                                delegate: Item {
+                                    id: slot
+                                    property string buttonId: modelData
+                                    property bool isSep: headerUtilityRow.isSeparator(buttonId)
+                                    // Il pulsante interno espone btnVisible / prefWidth via il Loader.item
+                                    property bool slotVisible: btnLoader.item ? btnLoader.item.btnVisible : true
+                                    property bool dragging: headerUtilityRow.dragIndex === index
+
+                                    visible: slotVisible
+                                    Layout.preferredWidth: btnLoader.item ? btnLoader.item.prefWidth : 0
+                                    Layout.fillHeight: true
+                                    Layout.topMargin: isSep ? 4 : 0
+                                    Layout.bottomMargin: isSep ? 4 : 0
+                                    z: dragging ? 10 : 0
+
+                                    Loader {
+                                        id: btnLoader
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: parent.width
+                                        height: parent.height
+                                        sourceComponent: headerUtilityRow.componentForId(slot.buttonId)
+                                        // L'opacità cala mentre lo slot è in drag (il ghost lo rappresenta)
+                                        opacity: slot.dragging ? 0.25 : 1.0
+                                        Behavior on opacity { NumberAnimation { duration: 120 } }
+                                        // Spostamento magnetico: gli slot fra origine e destinazione del drag
+                                        // scorrono per "aprire" il varco; animato (NO layer.enabled/FBO).
+                                        x: {
+                                            var d = headerUtilityRow.dragIndex
+                                            var t = headerUtilityRow.dropIndex
+                                            if (d < 0 || t < 0 || index === d)
+                                                return 0
+                                            var dragged = headerUtilityRepeater.itemAt(d)
+                                            var shift = (dragged ? dragged.width : 0) + headerUtilityRow.spacing
+                                            if (t > d && index > d && index <= t)
+                                                return -shift   // si spostano a sinistra
+                                            if (t < d && index >= t && index < d)
+                                                return shift    // si spostano a destra
+                                            return 0
+                                        }
+                                        Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
+                                        onLoaded: {
+                                            if (item) {
+                                                item.hovered = Qt.binding(function() { return dragMA.containsMouse && !slot.isSep && headerUtilityRow.dragIndex < 0 })
+                                            }
+                                        }
+                                    }
+
+                                    // MouseArea unica per slot: hover + click + long-press->drag.
+                                    // I separatori non sono interattivi.
+                                    MouseArea {
+                                        id: dragMA
+                                        anchors.fill: parent
+                                        enabled: !slot.isSep
+                                        visible: !slot.isSep
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                        preventStealing: true
+
+                                        property bool armed: false      // long-press scattato -> in drag
+                                        property real pressSceneX: 0
+                                        property bool moved: false
+
+                                        // Timer per armare il drag dopo ~350ms di pressione
+                                        Timer {
+                                            id: holdTimer
+                                            interval: 350
+                                            repeat: false
+                                            onTriggered: {
+                                                // Solo tasto sinistro avvia il drag
+                                                if (dragMA.pressedButtons & Qt.LeftButton) {
+                                                    dragMA.armed = true
+                                                    headerUtilityRow.dragIndex = index
+                                                    headerUtilityRow.dropIndex = index
+                                                    dragGhost.startFor(slot, index)
+                                                }
+                                            }
+                                        }
+
+                                        onPressed: function(mouse) {
+                                            armed = false
+                                            moved = false
+                                            pressSceneX = mapToItem(headerUtilityRow, mouse.x, mouse.y).x
+                                            if (mouse.button === Qt.LeftButton)
+                                                holdTimer.start()
+                                        }
+
+                                        onPositionChanged: function(mouse) {
+                                            var sx = mapToItem(headerUtilityRow, mouse.x, mouse.y).x
+                                            if (Math.abs(sx - pressSceneX) > 6)
+                                                moved = true
+                                            if (armed) {
+                                                dragGhost.updateX(sx)
+                                                // Feedback magnetico: marca lo slot target (gap) sotto al puntatore.
+                                                // NON muta il modello durante il drag (eviterebbe la distruzione
+                                                // del delegate e la perdita del mouse grab) -> commit al rilascio.
+                                                headerUtilityRow.dropIndex = headerUtilityRow.computeTargetIndex(index, sx)
+                                            } else if (moved) {
+                                                // Movimento prima del long-press: annulla il click,
+                                                // ma NON avvia drag (serve il long-press) -> niente azione.
+                                                holdTimer.stop()
+                                            }
+                                        }
+
+                                        onReleased: function(mouse) {
+                                            holdTimer.stop()
+                                            if (armed) {
+                                                // Fine drag: snap allo slot più vicino e commit (una volta).
+                                                var sx = mapToItem(headerUtilityRow, mouse.x, mouse.y).x
+                                                var target = headerUtilityRow.computeTargetIndex(index, sx)
+                                                dragGhost.stop()
+                                                headerUtilityRow.dragIndex = -1
+                                                headerUtilityRow.dropIndex = -1
+                                                armed = false
+                                                if (target !== index)
+                                                    mainWindow.moveToolbarButton(index, target)
+                                                return
+                                            }
+                                            // Click breve senza drag -> esegui azione del pulsante.
+                                            if (!moved && btnLoader.item)
+                                                btnLoader.item.activate(mouse)
+                                        }
+
+                                        onCanceled: {
+                                            holdTimer.stop()
+                                            if (armed) {
+                                                dragGhost.stop()
+                                                headerUtilityRow.dragIndex = -1
+                                                headerUtilityRow.dropIndex = -1
+                                                armed = false
+                                            }
+                                        }
+
+                                        ToolTip.visible: containsMouse && !slot.isSep && headerUtilityRow.dragIndex < 0 && btnLoader.item
+                                        ToolTip.text: btnLoader.item ? btnLoader.item.tip : ""
+                                    }
+                                }
+                            }
+
+                            // Calcola l'indice modello di destinazione in base alla X (scena) del puntatore.
+                            // 'from' = indice dello slot trascinato; sceneX = X corrente nel RowLayout.
+                            // Restituisce l'indice (post-spostamento) dove finirebbe il pulsante.
+                            function computeTargetIndex(from, sceneX) {
+                                var n = headerUtilityRepeater.count
+                                var target = from
+                                for (var i = 0; i < n; ++i) {
+                                    if (i === from)
+                                        continue
+                                    var it = headerUtilityRepeater.itemAt(i)
+                                    if (!it || !it.visible)
+                                        continue
+                                    var mid = it.x + it.width / 2
+                                    if (i < from && sceneX < mid) { target = i; break }
+                                    if (i > from) {
+                                        if (sceneX > mid) target = i
+                                    }
+                                }
+                                return target
+                            }
+                        }
+
+                        // ── Ghost trascinato (proxy visuale che segue il puntatore) ──
+                        // Parentato al Rectangle barra; assoluto SOLO durante il drag (non è nel layout).
+                        Item {
+                            id: dragGhost
+                            visible: false
+                            height: parent.height - 4
+                            anchors.verticalCenter: parent.verticalCenter
+                            z: 50
+                            property Item sourceSlot: null
+
+                            function startFor(s, idx) {
+                                sourceSlot = s
+                                width = s.width
+                                ghostLoader.sourceComponent = headerUtilityRow.componentForId(s.buttonId)
+                                visible = true
+                            }
+                            function updateX(sceneX) {
+                                // Centra il ghost sotto il puntatore, clamp nella barra.
+                                var nx = sceneX - width / 2
+                                if (nx < 0) nx = 0
+                                if (nx > parent.width - width) nx = parent.width - width
+                                x = nx
+                            }
+                            function stop() {
+                                visible = false
+                                sourceSlot = null
+                                ghostLoader.sourceComponent = null
+                            }
+
+                            Behavior on x { NumberAnimation { duration: 60; easing.type: Easing.OutQuad } }
+
+                            Loader {
+                                id: ghostLoader
+                                anchors.fill: parent
+                                opacity: 0.9
+                                onLoaded: { if (item) item.hovered = true }
+                            }
+                        }
+                    } // End Rectangle
+
+                    // ════════ Component dei pulsanti toolbar ════════
+                    // Ogni Component conserva l'aspetto e la logica originali del pulsante.
+                    // Contratto comune: btnVisible (gate), prefWidth (larghezza Layout),
+                    // hovered (impostato dallo slot/ghost), tip (testo ToolTip),
+                    // activate(mouse) (azione eseguita al click breve).
+
+                    // Settings ⚙
+                    Component {
+                        id: comp_setup
+                        Rectangle {
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnSetupVisible
+                            readonly property real prefWidth: 50
+                            readonly property string tip: "Impostazioni"
+                            function activate(mouse) { openSettingsDialog() }
+                            radius: 3
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text {
-                                    text: "⚙"
-                                    font.pixelSize: 14
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Text {
-                                    text: "Setup"
-                                    font.pixelSize: 9
-                                    color: textPrimary
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                Text { text: "⚙"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Setup"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
-
-                            MouseArea {
-                                id: settingsMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: openSettingsDialog()
-                            }
-
-                            ToolTip.visible: settingsMA.containsMouse
-                            ToolTip.text: "Impostazioni"
                         }
+                    }
 
-                        // REC
+                    // REC
+                    Component {
+                        id: comp_rec
                         Rectangle {
-                            visible: mainWindow.uiBtnRecVisible
-                            Layout.preferredWidth: 50
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnRecVisible
+                            readonly property real prefWidth: 50
+                            readonly property string tip: bridge.recordRxEnabled && bridge.wavManager ?
+                                          "Registrazione: " + bridge.wavManager.recordedSeconds + "s" : "Avvia registrazione"
+                            function activate(mouse) { bridge.recordRxEnabled = !bridge.recordRxEnabled }
                             radius: 3
-                            color: recMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
                                    (bridge.recordRxEnabled ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : "transparent")
                             border.color: bridge.recordRxEnabled ? bridge.themeManager.ledRed : "transparent"
                             border.width: bridge.recordRxEnabled ? 1 : 0
-
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
@@ -2930,112 +3213,69 @@ ApplicationWindow {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
-
-                            MouseArea {
-                                id: recMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: bridge.recordRxEnabled = !bridge.recordRxEnabled
-                            }
-
-                            ToolTip.visible: recMA.containsMouse
-                            ToolTip.text: bridge.recordRxEnabled && bridge.wavManager ?
-                                          "Registrazione: " + bridge.wavManager.recordedSeconds + "s" : "Avvia registrazione"
                         }
+                    }
 
-                        // Open WAV for decode
+                    // WAV 📂 (sinistro: file; destro: cartella)
+                    Component {
+                        id: comp_wav
                         Rectangle {
-                            visible: mainWindow.uiBtnWavVisible
-                            Layout.preferredWidth: 45
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnWavVisible
+                            readonly property real prefWidth: 45
+                            readonly property string tip: qsTr("Clic: apri un file WAV\nClic destro: decodifica una cartella")
+                            function activate(mouse) {
+                                if (mouse && mouse.button === Qt.RightButton)
+                                    mainWindow.chooseWavFolderForDecode()   // Right-click: batch folder
+                                else
+                                    mainWindow.chooseWavFileForDecode()     // Left-click: single file
+                            }
                             radius: 3
-                            color: wavMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
-
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text {
-                                    text: "📂"
-                                    font.pixelSize: 12
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Text {
-                                    text: "WAV"
-                                    font.pixelSize: 9
-                                    color: textPrimary
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                Text { text: "📂"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "WAV"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
-
-                            MouseArea {
-                                id: wavMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                onClicked: function(mouse) {
-                                    if (mouse.button === Qt.RightButton)
-                                        mainWindow.chooseWavFolderForDecode()  // Right-click: batch folder
-                                    else
-                                        mainWindow.chooseWavFileForDecode()    // Left-click: single file
-                                }
-                            }
-
-                            ToolTip.visible: wavMA.containsMouse
-                            ToolTip.text: qsTr("Clic: apri un file WAV\nClic destro: decodifica una cartella")
                         }
+                    }
 
-                        // Separator
-                        Rectangle { width: 1; Layout.fillHeight: true; Layout.topMargin: 4; Layout.bottomMargin: 4; color: glassBorder }
-
-                        // Log
+                    // Log 📋
+                    Component {
+                        id: comp_log
                         Rectangle {
-                            visible: mainWindow.uiBtnLogVisible
-                            Layout.preferredWidth: 45
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnLogVisible
+                            readonly property real prefWidth: 45
+                            readonly property string tip: "Log QSO"
+                            function activate(mouse) { openLogWindow() }
                             radius: 3
-                            color: logMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
-
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text {
-                                    text: "📋"
-                                    font.pixelSize: 12
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Text {
-                                    text: "Log"
-                                    font.pixelSize: 9
-                                    color: secondaryCyan
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                Text { text: "📋"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Log"; font.pixelSize: 9; color: secondaryCyan; anchors.verticalCenter: parent.verticalCenter }
                             }
-
-                            MouseArea {
-                                id: logMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: openLogWindow()
-                            }
-
-                            ToolTip.visible: logMA.containsMouse
-                            ToolTip.text: "Log QSO"
                         }
+                    }
 
-                        // Macro
+                    // Macro M
+                    Component {
+                        id: comp_macro
                         Rectangle {
-                            visible: mainWindow.uiBtnMacroVisible
-                            Layout.preferredWidth: 50
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnMacroVisible
+                            readonly property real prefWidth: 50
+                            readonly property string tip: bridge.macroManager && bridge.macroManager.contestMode ?
+                                          "Contest: " + bridge.macroManager.contestName : "Macro TX"
+                            function activate(mouse) { openMacroDialog() }
                             radius: 3
-                            color: macroMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
                                    (bridge.macroManager && bridge.macroManager.contestMode ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : "transparent")
                             border.color: bridge.macroManager && bridge.macroManager.contestMode ? accentGreen : "transparent"
                             border.width: bridge.macroManager && bridge.macroManager.contestMode ? 1 : 0
-
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
@@ -3053,82 +3293,51 @@ ApplicationWindow {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
-
-                            MouseArea {
-                                id: macroMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: openMacroDialog()
-                            }
-
-                            ToolTip.visible: macroMA.containsMouse
-                            ToolTip.text: bridge.macroManager && bridge.macroManager.contestMode ?
-                                          "Contest: " + bridge.macroManager.contestName : "Macro TX"
                         }
+                    }
 
-                        // Astro
+                    // Astro 🌙
+                    Component {
+                        id: comp_astro
                         Rectangle {
-                            visible: mainWindow.uiBtnAstroVisible
-                            Layout.preferredWidth: 48
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnAstroVisible
+                            readonly property real prefWidth: 48
+                            readonly property string tip: "Dati astronomici"
+                            function activate(mouse) { openAstroWindow() }
                             radius: 3
-                            color: astroMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
-
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text {
-                                    text: "🌙"
-                                    font.pixelSize: 12
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Text {
-                                    text: "Astro"
-                                    font.pixelSize: 9
-                                    color: textPrimary
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                Text { text: "🌙"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Astro"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
-
-                            MouseArea {
-                                id: astroMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: openAstroWindow()
-                            }
-
-                            ToolTip.visible: astroMA.containsMouse
-                            ToolTip.text: "Dati astronomici"
                         }
+                    }
 
-                        // Separator
-                        Rectangle { width: 1; Layout.fillHeight: true; Layout.topMargin: 4; Layout.bottomMargin: 4; color: glassBorder }
-
-                        // CAT - native HvRigControl
+                    // CAT
+                    Component {
+                        id: comp_cat
                         Rectangle {
-                            visible: mainWindow.uiBtnCatVisible
-                            Layout.preferredWidth: 48
-                            Layout.fillHeight: true
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnCatVisible
+                            readonly property real prefWidth: 48
+                            readonly property string tip: bridge.catConnected ? "CAT: " + bridge.catRigName : "Clicca per configurare il CAT"
+                            function activate(mouse) { openSettingsTab(1) }
                             radius: 3
-                            color: catMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
+                            color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
                                    (bridge.catConnected ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : "transparent")
                             border.color: bridge.catConnected ? accentGreen : "transparent"
                             border.width: bridge.catConnected ? 1 : 0
-
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 2
-
                                 Rectangle {
-                                    width: 8
-                                    height: 8
-                                    radius: 4
+                                    width: 8; height: 8; radius: 4
                                     anchors.verticalCenter: parent.verticalCenter
                                     color: bridge.catConnected ? accentGreen : bridge.themeManager.ledRed
                                 }
-
                                 Text {
                                     text: "CAT"
                                     font.pixelSize: 9
@@ -3137,20 +3346,21 @@ ApplicationWindow {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
-
-                            MouseArea {
-                                id: catMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: openSettingsTab(1)
-                            }
-
-                            ToolTip.visible: catMA.containsMouse
-                            ToolTip.text: bridge.catConnected ? "CAT: " + bridge.catRigName : "Clicca per configurare il CAT"
                         }
                     }
-                    } // End Rectangle
+
+                    // Separatore (non interattivo, sempre visibile, larghezza 1px)
+                    Component {
+                        id: comp_sep
+                        Rectangle {
+                            property bool hovered: false
+                            readonly property bool btnVisible: true
+                            readonly property real prefWidth: 1
+                            readonly property string tip: ""
+                            function activate(mouse) {}
+                            color: glassBorder
+                        }
+                    }
                 } // End Grouped buttons Item
 
 	                // World Clock with Analog Display
