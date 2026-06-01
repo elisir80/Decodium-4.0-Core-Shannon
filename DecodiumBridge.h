@@ -425,6 +425,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
+    // 1.0.355 — opt-in: salta decode sync di fine-slot quando l'async ha gia' coperto lo slot
+    Q_PROPERTY(bool ft2AsyncSkipRedundantSyncDecode READ ft2AsyncSkipRedundantSyncDecode WRITE setFt2AsyncSkipRedundantSyncDecode NOTIFY ft2AsyncSkipRedundantSyncDecodeChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
     // Diversamente dalla 1.0.186 revertita, qui e' default OFF e ha gate molto
     // piu' stretti + log immediato di ogni invocazione (anche se guardrail rifiuta).
@@ -1329,6 +1331,7 @@ signals:
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2ApHashCacheChanged();         // 1.0.293
+    void ft2AsyncSkipRedundantSyncDecodeChanged();  // 1.0.355
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
     void smoothDecodeFlowChanged();  // 1.0.179 — Smooth Decode Flow
@@ -1883,6 +1886,8 @@ private:
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
     bool m_ft2ApHashCache {false};         // 1.0.293: AP hashed-callsign cache (Fase 0: seed + hit-rate, no decode change)
+    bool m_ft2AsyncSkipRedundantSyncDecode {false};  // 1.0.355: salta decode sync fine-slot se async ha gia' coperto lo slot
+    qint64 m_ft2AsyncDecodeProducedSlotMs {0};       // 1.0.355: indice slot corrected-UTC dell'ultimo decode async accettato
     bool m_ft8DeepDecodeInTx {false};      // 1.0.299: deep depth-4 follow-up (decode-list-only) anche durante TX/QSO. Opt-in.
     // 1.0.293 — cache band-wide degli hash28 dei call visti in banda (single-thread, GUI-confined).
     HashedCallsignCache m_hashedCallsignCache;
@@ -2695,6 +2700,9 @@ public:
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
     Q_INVOKABLE bool ft2ApHashCache() const { return m_ft2ApHashCache; }
     Q_INVOKABLE void setFt2ApHashCache(bool v);
+    // 1.0.355 — opt-in: salta decode sync ridondante di fine-slot (riduce latenza aggancio)
+    Q_INVOKABLE bool ft2AsyncSkipRedundantSyncDecode() const { return m_ft2AsyncSkipRedundantSyncDecode; }
+    Q_INVOKABLE void setFt2AsyncSkipRedundantSyncDecode(bool v);
     Q_INVOKABLE bool ft8DeepDecodeInTx() const { return m_ft8DeepDecodeInTx; }
     Q_INVOKABLE void setFt8DeepDecodeInTx(bool v);
 

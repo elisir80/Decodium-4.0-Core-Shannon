@@ -5512,6 +5512,19 @@ void DecodiumBridge::setFt2ApHashCache(bool v)
     bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Fase 0: seed+hit-rate)").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.355 — opt-in: salta il decode sync di fine-slot quando l'async ha GIA'
+// prodotto un decode per quello slot. Riduce la contesa sul runtime_mutex/worker
+// FT2 (~1.8s post-TX) che ritarda l'aggancio della risposta. Default OFF.
+void DecodiumBridge::setFt2AsyncSkipRedundantSyncDecode(bool v)
+{
+    if (m_ft2AsyncSkipRedundantSyncDecode == v) return;
+    m_ft2AsyncSkipRedundantSyncDecode = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), v);
+    emit ft2AsyncSkipRedundantSyncDecodeChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Skip redundant end-slot sync decode %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.299 — Deep decode anche in TX (decode-list-only). Quando ON, il deep depth-4
 // follow-up gira anche durante l'operazione TX/QSO (txStartPending) per recuperare le
 // stazioni di terzi che il fast pass depth-2 perde, SENZA toccare il timing/decisione TX
@@ -23025,6 +23038,13 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
     //  S4 JITTER     anti-collisione multi-stazione (hash callsign 50-250ms)
     //  S5 HARD CAP   max 2500ms wait (safety)
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    // FIX temporale (1.0.355): nowMs e' wall-clock e lo usano i gate RMS/decode-quiet
+    // (che lavorano su timestamp wall-clock). Il branch slot-anchored invece ragiona
+    // in correctedUtcEpochMs() (tempo-segnale, con offset NTP applicato). Confrontare
+    // un end-time in scala corrected contro nowMs wall-clock introduce un errore pari
+    // all'offset NTP (~97ms). refNowMs seleziona la scala corretta per ciascun branch.
+    qint64 const nowCorrectedMs = correctedUtcEpochMs();
+    qint64 refNowMs = nowMs;
 
     // S1: Slot estimation — partner ha iniziato TX ~3200ms prima del primo
     //     decode (DSP early decode arriva ad ~80-90% del frame). Frame dura
@@ -23045,16 +23065,24 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
         estimatedPartnerStartMs = m_ft2AsyncPartnerSlotMs;
         estimatedPartnerEndMs   = m_ft2AsyncPartnerSlotMs + payloadMs;
+        // estimatedPartnerEndMs e' in scala corrected-UTC -> confronta con nowCorrectedMs.
+        refNowMs = nowCorrectedMs;
+        // Log: signalEnd e wallEnd sono entrambi "ms alla fine", ciascuno nella PROPRIA
+        // scala (signalEnd in corrected, wallEnd in wall-clock); diff = differenza tra le
+        // due stime ms-alla-fine (non un mix di scale diverse come prima).
         bridgeLog(QStringLiteral("smartFt2Tx slot-anchor: signalEnd=%1ms wallEnd=%2ms diff=%3ms")
-                  .arg(estimatedPartnerEndMs - nowMs)
+                  .arg(estimatedPartnerEndMs - nowCorrectedMs)
                   .arg(wallClockEndMs > 0 ? wallClockEndMs - nowMs : 0)
-                  .arg(wallClockEndMs > 0 ? estimatedPartnerEndMs - wallClockEndMs : 0));
+                  .arg(wallClockEndMs > 0
+                           ? (estimatedPartnerEndMs - nowCorrectedMs) - (wallClockEndMs - nowMs)
+                           : 0));
     } else {
         // Fallback wall-clock SOLO se il dato signal-time non e' disponibile.
         estimatedPartnerEndMs = wallClockEndMs;
+        refNowMs = nowMs;
     }
-    if (estimatedPartnerEndMs > nowMs) {
-        slotDelay = estimatedPartnerEndMs - nowMs + 200;
+    if (estimatedPartnerEndMs > refNowMs) {
+        slotDelay = estimatedPartnerEndMs - refNowMs + 200;
     }
 
     // S2: RMS gate
@@ -24831,6 +24859,8 @@ void DecodiumBridge::loadSettings()
     m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
     m_ft2AdaptiveDecode     = s.value(QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
     m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
+    // 1.0.355 — skip decode sync di fine-slot quando l'async ha gia' coperto lo slot
+    m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
     // 1.0.304 (#9) — resume-on-reply, opt-in default OFF
@@ -29905,7 +29935,10 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                         (frameRefMs / static_cast<qint64>(ft2PeriodMs))
                         * static_cast<qint64>(ft2PeriodMs);
                     if (partnerDtValid) {
-                        slotStartMs += static_cast<qint64>(partnerDtSec * 1000.0);
+                        // CLAMP DT: il DT del decode puo' essere spurio (>|0.8s| =
+                        // sync sbagliato o falso decode) e spostare la stima dello slot
+                        // su un boundary errato. Limita a +/-0.8s (range fisico FT2).
+                        slotStartMs += static_cast<qint64>(qBound(-0.8, partnerDtSec, 0.8) * 1000.0);
                     }
                     m_ft2AsyncPartnerSlotMs = slotStartMs;
                 } else {
@@ -29913,6 +29946,18 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                 }
             }
             m_ft2AsyncLastDecodeMs = decodeNowMs;
+            // 1.0.355 — STEP 2: registra l'INDICE di slot corrected-UTC che l'async
+            // ha appena coperto con righe accettate. feedAudioToDecoder confronta il
+            // suo slotIndexForUtc (= completedUtcSlot, anch'esso correctedUtcEpochMs()/
+            // periodMs) con questo per decidere se il decode sync di fine-slot e'
+            // ridondante. NOTA: indice di slot (non ms), per matchare completedUtcSlot.
+            {
+                int const ft2PeriodMs = periodMsForMode(QStringLiteral("FT2"));
+                if (ft2PeriodMs > 0) {
+                    m_ft2AsyncDecodeProducedSlotMs =
+                        correctedUtcEpochMs() / static_cast<qint64>(ft2PeriodMs);
+                }
+            }
         }
         if (gotResponse && !m_transmitting) {
             if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
@@ -32650,14 +32695,36 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }
 
     } else if (modeSnapshot == "FT2") {
-        // FIX C (1.0.354): in FT2-async NON sopprimere il decode sync di
-        // fine-slot (come faceva 1.0.353) ma DECLASSARLO a depth<=4 (vedi cap
-        // piu' sotto). L'async (depth4 incrementale, ogni 100ms) da' la
-        // reattivita'; la passata sync sul buffer COMPLETO di slot a depth
-        // ridotta + weak-averaging resta l'unica che recupera le stazioni
-        // deboli/marginali che l'async parziale perde, ma costa ~400ms sul
-        // worker invece di ~1s del depth-20 -> buco RX sul confine ~dimezzato.
+        // FIX C (1.0.354): in FT2-async il decode sync di fine-slot — che la
+        // 1.0.353 SOPPRIMEVA del tutto in async — qui viene RIPRISTINATO, ma a
+        // profondita' piena FT2 (depth-4: la profondita' FT2 e' strutturalmente
+        // clampata a 4 da effectiveDecodeDepth -> qBound(1,m_ndepth,4); il "20"
+        // che a volte compare nei log e' in realta' 4|16, cioe' depth-4 con il
+        // bit di weak-averaging, NON depth-20). L'async (depth-4 incrementale,
+        // ogni 100ms) da' la reattivita'; questa passata sync gira a depth-4 +
+        // weak-averaging (|16) sul buffer COMPLETO di slot e resta l'unica che
+        // recupera le stazioni deboli/marginali che l'async parziale perde.
         // Modo FT2 NON-async invariato.
+        // 1.0.355 — STEP 2 (opt-in, default OFF): se l'async ha GIA' prodotto
+        // un decode accettato per QUESTO slot (m_ft2AsyncDecodeProducedSlotMs ==
+        // slotIndexForUtc, entrambi indici corrected-UTC), salta la passata sync
+        // di fine-slot: gira sullo STESSO worker/runtime_mutex dell'async e la
+        // contesa (~1.8s post-TX) ritarda l'aggancio della risposta. La teniamo
+        // SOLO quando l'async e' tornato vuoto per lo slot (recupero weak), come
+        // faceva la 1.0.353. Log throttled 10s.
+        if (m_asyncTxEnabled && m_ft2AsyncSkipRedundantSyncDecode
+            && slotIndexForUtc >= 0
+            && m_ft2AsyncDecodeProducedSlotMs == slotIndexForUtc) {
+            static qint64 s_lastSkipLogMs = 0;
+            if (nowMs - s_lastSkipLogMs >= 10000) {
+                s_lastSkipLogMs = nowMs;
+                bridgeLog(QStringLiteral("FT2 async: skip redundant end-slot sync decode (slot=%1 already covered by async)")
+                              .arg(slotIndexForUtc));
+            }
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
         decodium::ft2::DecodeRequest req;
         req.serial = serial; req.audio = audioSnapshot;
         req.nutc = nutc; req.nqsoprogress = decodeQsoProgress;
@@ -32668,9 +32735,10 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         // restano attivi proprio mentre cerchi un risponditore debole. Default OFF = 1.0.288.
         bool const reduceForTx = txStartPending && (!m_ft2FullDecodeInAutoCq || cpuPressureActive());
         int ft2SyncDepth = reduceForTx ? qMin(decodeDepth, 2) : decodeDepth;
-        // FIX C (1.0.354): in async declassa la passata sync da depth-20 a
-        // depth<=4 (era soppressa). Il weak-averaging |16 qui sotto resta attivo
-        // (req.ndepth>=4) -> recupero weak-signal sul buffer completo a costo ridotto.
+        // FIX C (1.0.354): in async la passata sync (che la 1.0.353 sopprimeva)
+        // gira alla piena profondita' FT2 (clamp a 4: e' il massimo FT2). Il
+        // weak-averaging |16 qui sotto resta attivo (req.ndepth>=4) -> recupero
+        // weak-signal sul buffer completo di slot.
         if (m_asyncTxEnabled) ft2SyncDepth = qMin(ft2SyncDepth, 4);
         req.ndepth = ft2SyncDepth;
         if (!txAudioActive && !reduceForTx && req.ndepth >= 4) {

@@ -3303,6 +3303,32 @@ Dialog {
                                     ToolTip.text: qsTr("PHASE 0 (observability): logs into a cache the callsigns seen in-band (hashed, TTL 30 min) and measures how often a decoded call had already been seen — logged as [FT2WS-AP] in the diagnostic log.\n\nDoesn't change the decoder yet. It's the foundation for band-wide AP decoding (−3 dB target) coming in later phases.\n\nDefault: OFF.")
                                 }
 
+                                // 1.0.355 — FT2: salta decode ridondante di fine-slot
+                                Text {
+                                    text: qsTr("FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2AsyncSkipRedundantSyncDecodeCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2AsyncSkipRedundantSyncDecode : false
+                                    onToggled: {
+                                        if (bridge) bridge.ft2AsyncSkipRedundantSyncDecode = checked
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Solo FT2 async: quando il decode asincrono (incrementale ogni 100ms) ha GIÀ decodificato uno slot, salta la passata di decode sincrona di fine-slot per quello slot.\n\nVantaggio: elimina la contesa (~1.8s dopo il TX) sullo stesso worker, così l'aggancio della risposta del partner è più rapido.\n\nCosto: per gli slot già coperti dall'async perdi la passata weak-averaging completa di fine-slot (che recupera stazioni deboli/marginali). Gli slot in cui l'async è tornato VUOTO mantengono comunque il decode sync.\n\nDefault: OFF.")
+                                }
+
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
                                 Text {
                                     text: qsTr("FT2 partner-memory (anti-QSB):")
