@@ -4493,12 +4493,21 @@ static int minimumUsefulSyncPayloadMs(const QString& mode)
 
 static int ft2AsyncTxStartSafetyMs()
 {
-    return 550;
+    // FIX B: era 550 (finestra utile ~18% dello slot). 180ms basta a coprire
+    // PTT spin-up + sink start; libera ~76% dello slot per il TX async.
+    return 180;
 }
 
 static int latestFt2AsyncTxStartMs(int periodMs)
 {
-    int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
+    // FIX B: come latestD3CompatibleSyncTxStartMs per i modi sync, basta che
+    // resti payload UTILE (minimumUsefulSyncPayloadMs ~700ms) non l'intero
+    // payload (2520ms). Gate SOFT: oltre questo punto il troncamento payload
+    // non e' piu' tollerabile -> rinvio al prossimo slot.
+    int const minUsefulPayloadMs = minimumUsefulSyncPayloadMs(QStringLiteral("FT2"));
+    int const payloadMs = (minUsefulPayloadMs > 0)
+                              ? minUsefulPayloadMs
+                              : estimatedSyncPayloadMs(QStringLiteral("FT2"));
     if (periodMs <= 0 || payloadMs <= 0) {
         return 0;
     }
@@ -23023,12 +23032,29 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
     qint64 slotDelay = 0;
     qint64 estimatedPartnerStartMs = 0;
     qint64 estimatedPartnerEndMs   = 0;
+    // FIX A: ancora la stima al TEMPO-SEGNALE (slot-boundary del frame del
+    // partner ricavato dal clock UTC corretto + DT del decode), NON al
+    // wall-clock di QUANDO la CPU ha finito il decode (m_ft2AsyncFirstDecodeMs,
+    // che varia 200ms..2.6s -> frame-end sbagliato -> TX a caso).
+    qint64 wallClockEndMs = 0;
     if (m_ft2AsyncFirstDecodeMs > 0) {
         estimatedPartnerStartMs = m_ft2AsyncFirstDecodeMs - 3200;
-        estimatedPartnerEndMs   = estimatedPartnerStartMs + 3800;
-        if (estimatedPartnerEndMs > nowMs) {
-            slotDelay = estimatedPartnerEndMs - nowMs + 200;
-        }
+        wallClockEndMs          = estimatedPartnerStartMs + 3800;
+    }
+    if (m_ft2AsyncPartnerSlotMs > 0) {
+        int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
+        estimatedPartnerStartMs = m_ft2AsyncPartnerSlotMs;
+        estimatedPartnerEndMs   = m_ft2AsyncPartnerSlotMs + payloadMs;
+        bridgeLog(QStringLiteral("smartFt2Tx slot-anchor: signalEnd=%1ms wallEnd=%2ms diff=%3ms")
+                  .arg(estimatedPartnerEndMs - nowMs)
+                  .arg(wallClockEndMs > 0 ? wallClockEndMs - nowMs : 0)
+                  .arg(wallClockEndMs > 0 ? estimatedPartnerEndMs - wallClockEndMs : 0));
+    } else {
+        // Fallback wall-clock SOLO se il dato signal-time non e' disponibile.
+        estimatedPartnerEndMs = wallClockEndMs;
+    }
+    if (estimatedPartnerEndMs > nowMs) {
+        slotDelay = estimatedPartnerEndMs - nowMs + 200;
     }
 
     // S2: RMS gate
@@ -23392,10 +23418,24 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 m_currentTx == m_lastNtx
                 && m_currentTx >= 2
                 && m_currentTx <= 5;
-            if (!sameExchangeStepRetry
+            // FIX E: il retry dello stesso step NON deve costare un periodo
+            // intero (3750ms, "QSO sembra fermo"). Su FT2, se non Conservative
+            // e il partner non e' debole (SNR > -15), mezzo periodo (1875ms)
+            // basta a dare tempo al decode. 1.0/1.5 restano per deboli/Conservative.
+            bool const partnerWeakRetry =
+                m_currentPartnerSnrDb != 127 && m_currentPartnerSnrDb <= -15;
+            bool const ft2FastRetry =
+                m_mode == QStringLiteral("FT2")
+                && !m_ft2Conservative
+                && !partnerWeakRetry;
+            if ((!sameExchangeStepRetry || ft2FastRetry)
                 && !m_ft2Conservative
                 && m_currentPartnerSnrDb != 127
                 && m_currentPartnerSnrDb > -8) {
+                waitFactor = 0.5;
+            } else if (sameExchangeStepRetry && ft2FastRetry) {
+                // FIX E: same-step retry FT2 non-debole con SNR intermedio
+                // (-15..-8) -> mezzo periodo (non un periodo intero).
                 waitFactor = 0.5;
             } else if (m_currentPartnerSnrDb != 127 && m_currentPartnerSnrDb < -15) {
                 waitFactor = 1.5;
@@ -29795,6 +29835,9 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         && (m_autoSeq || m_autoCqRepeat);
     if (earlyAutoSeqActive || earlyFt2SignoffRescueScan) {
         bool gotResponse = false;
+        // FIX A: DT (secondi) del decode partner diretto, per ancorare lo slot.
+        double partnerDtSec = 0.0;
+        bool partnerDtValid = false;
         QString const myCallUpper = m_callsign.trimmed().toUpper();
         QString const myBaseUpper = normalizedBaseCall(myCallUpper);
         for (const auto& row : rows) {
@@ -29833,6 +29876,12 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                 }
                 autoSequenceStep(f);
                 gotResponse = true;
+                // FIX A: cattura il DT del partner diretto (f[2] = secondi).
+                if (f.size() >= 3) {
+                    bool dtOk = false;
+                    double const dt = f[2].trimmed().toDouble(&dtOk);
+                    if (dtOk) { partnerDtSec = dt; partnerDtValid = true; }
+                }
             }
         }
         // Track timing per smart scheduler FT2 async
@@ -29842,6 +29891,26 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             if (m_ft2AsyncLastDecodeMs == 0
                 || (decodeNowMs - m_ft2AsyncLastDecodeMs) > 1500) {
                 m_ft2AsyncFirstDecodeMs = decodeNowMs;
+                // FIX A: ancora la stima al TEMPO-SEGNALE. Lo slot del frame del
+                // partner = boundary del periodo che ha contenuto il frame,
+                // ricavato dal clock UTC corretto + DT. Il decode async arriva
+                // verso/poco dopo la fine del frame, quindi lo slot di
+                // appartenenza e' quello iniziato ~meta'-payload fa.
+                int const ft2PeriodMs = periodMsForMode(QStringLiteral("FT2"));
+                if (ft2PeriodMs > 0) {
+                    qint64 const epochMs = correctedUtcEpochMs();
+                    int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
+                    qint64 const frameRefMs = epochMs - static_cast<qint64>(payloadMs / 2);
+                    qint64 slotStartMs =
+                        (frameRefMs / static_cast<qint64>(ft2PeriodMs))
+                        * static_cast<qint64>(ft2PeriodMs);
+                    if (partnerDtValid) {
+                        slotStartMs += static_cast<qint64>(partnerDtSec * 1000.0);
+                    }
+                    m_ft2AsyncPartnerSlotMs = slotStartMs;
+                } else {
+                    m_ft2AsyncPartnerSlotMs = 0;
+                }
             }
             m_ft2AsyncLastDecodeMs = decodeNowMs;
         }
@@ -32581,6 +32650,23 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }
 
     } else if (modeSnapshot == "FT2") {
+        // FIX C: in modo FT2-async il decode async (depth4, ogni 100ms) copre
+        // gia' tutta la finestra dello slot. Il decode sincrono di fine-slot
+        // (qui, fino a depth20) gira sullo STESSO m_ft2Worker via il
+        // runtime_mutex globale: accodandosi DAVANTI all'async crea un buco RX
+        // di 0.5-1s proprio sul confine slot. Quando async e' attivo lo
+        // sopprimiamo (ridondante). Il modo FT2 NON-async resta invariato.
+        if (m_asyncTxEnabled) {
+            static qint64 s_lastFt2SyncSkipLogMs = 0;
+            if (nowMs - s_lastFt2SyncSkipLogMs >= 10000) {
+                s_lastFt2SyncSkipLogMs = nowMs;
+                bridgeLog(QStringLiteral("FT2 sync slot decode skipped: async path active (serial=%1)")
+                              .arg(serial));
+            }
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
         decodium::ft2::DecodeRequest req;
         req.serial = serial; req.audio = audioSnapshot;
         req.nutc = nutc; req.nqsoprogress = decodeQsoProgress;

@@ -2083,6 +2083,10 @@ private:
     // FT2 async smart TX scheduler (anti-collision)
     qint64                m_ft2AsyncLastDecodeMs   {0};
     qint64                m_ft2AsyncFirstDecodeMs  {0};   // start of current decode burst
+    // FIX A: signal-time slot boundary (epoch ms) of the partner's frame for
+    // the current decode burst, derived from the corrected UTC clock + decode DT.
+    // 0 = not available -> scheduleSmartFt2AsyncTx falls back to wall-clock estimate.
+    qint64                m_ft2AsyncPartnerSlotMs  {0};
     int                   m_ft2AsyncAudioQuietRuns {0};   // consecutive RMS<threshold samples
     void scheduleSmartFt2AsyncTx(const QString& reason);
     void onAudioLevelForFt2Gate();
