@@ -912,6 +912,30 @@ ApplicationWindow {
         persistUiSetting("uiToolbarOrder", uiToolbarOrder.join(","))
     }
 
+    // === Ordine World Clock vs blocco pulsanti toolbar (riposizionabile via maniglia) ===
+    // false (default) = posizione attuale: toolbar PRIMA, World Clock DOPO.
+    // true            = World Clock PRIMA del blocco pulsanti toolbar.
+    // Lo swap avviene SOLO fra questi due blocchi adiacenti del Flow header
+    // (vedi reorderableHeaderPair), senza toccare logo/freq/DX Cluster/PSK.
+    property bool uiWorldClockBeforeToolbar: settingBool("uiWorldClockBeforeToolbar", false)
+    onUiWorldClockBeforeToolbarChanged: {
+        applyHeaderPairOrder()
+        persistUiSetting("uiWorldClockBeforeToolbar", uiWorldClockBeforeToolbar)
+    }
+
+    // Riordina i due figli del Row reorderableHeaderPair re-parentando in coda
+    // l'elemento che deve stare per ULTIMO (operazione che preserva id/stato/binding).
+    function applyHeaderPairOrder() {
+        if (typeof reorderableHeaderPair === "undefined" || !reorderableHeaderPair)
+            return
+        // Item da mettere per ultimo: toolbar se il clock va prima, altrimenti il clock.
+        var last = uiWorldClockBeforeToolbar ? headerUtilityButtons : worldClock
+        if (!last)
+            return
+        last.parent = null
+        last.parent = reorderableHeaderPair
+    }
+
     // Sposta l'id dalla posizione 'from' alla posizione 'to' nel modello e committa.
     function moveToolbarButton(from, to) {
         if (from === to || from < 0 || to < 0)
@@ -1280,8 +1304,15 @@ ApplicationWindow {
                 mainWindow.uiBtnAstroVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiBtnCatVisible")
                 mainWindow.uiBtnCatVisible = mainWindow.coerceBool(value, true)
-            else if (key === "uiToolbarOrder")
+            else if (key === "uiToolbarOrder") {
                 mainWindow.uiToolbarOrder = mainWindow.parseToolbarOrder(String(value || ""))
+                // Il pulsante "Restore default button order" azzera questa chiave:
+                // resetta anche la posizione del World Clock al default (dopo la toolbar).
+                if (String(value || "").length === 0)
+                    mainWindow.uiWorldClockBeforeToolbar = false
+            }
+            else if (key === "uiWorldClockBeforeToolbar")
+                mainWindow.uiWorldClockBeforeToolbar = mainWindow.coerceBool(value, false)
             else if (key === "uiBtnFooterResetVisible")
                 mainWindow.uiBtnFooterResetVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiBtnFooterHistoryVisible")
@@ -2904,6 +2935,16 @@ ApplicationWindow {
                     }
                 } // End Sliders Item
 
+                // ── Coppia riordinabile: blocco pulsanti toolbar + World Clock ──
+                // Sono gli UNICI due blocchi header swappabili (maniglia sul World Clock).
+                // Restano figli adiacenti del Flow tramite questo Row; lo swap before/after
+                // avviene re-parentando in coda l'elemento da mettere per ultimo
+                // (vedi mainWindow.applyHeaderPairOrder), preservandone id/stato/binding.
+                Row {
+                    id: reorderableHeaderPair
+                    spacing: headerFlow.spacing
+                    Component.onCompleted: mainWindow.applyHeaderPairOrder()
+
                 // Grouped buttons: Settings, REC, WAV, Log, Macro, Astro, CAT
                 Item {
                     id: headerUtilityButtons
@@ -3490,6 +3531,105 @@ ApplicationWindow {
                             id: clockHover
                         }
 
+                        // ── Maniglia di trascinamento del World Clock ──
+                        // SOLO questa presa avvia il drag: il resto del clock conserva
+                        // intatti il selettore città (timezoneSelectorMA), il right-click
+                        // (worldClockMenu) e ogni altra interazione. Long-press 350ms +
+                        // soglia 6px (come STEP 1); al rilascio swap before/after toolbar
+                        // se il puntatore supera la metà del blocco pulsanti.
+                        Rectangle {
+                            id: worldClockDragHandle
+                            z: 30
+                            width: 14
+                            height: 14
+                            radius: 3
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.topMargin: 3
+                            anchors.rightMargin: 3
+                            color: worldClockHandleMA.containsMouse || worldClockHandleMA.armed
+                                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+                                   : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.12)
+                            border.color: worldClockHandleMA.containsMouse ? secondaryCyan : "transparent"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⠿"               // ⠿ braille pattern (presa)
+                                font.pixelSize: 11
+                                color: worldClockHandleMA.containsMouse ? secondaryCyan
+                                                                        : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6)
+                            }
+
+                            MouseArea {
+                                id: worldClockHandleMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.SizeAllCursor
+                                acceptedButtons: Qt.LeftButton
+                                preventStealing: true
+
+                                property bool armed: false
+                                property real pressSceneX: 0
+                                property bool moved: false
+
+                                Timer {
+                                    id: worldClockHoldTimer
+                                    interval: 350
+                                    repeat: false
+                                    onTriggered: {
+                                        if (worldClockHandleMA.pressedButtons & Qt.LeftButton) {
+                                            worldClockHandleMA.armed = true
+                                            worldClockDragGhost.startAt(worldClockHandleMA.pressSceneX)
+                                        }
+                                    }
+                                }
+
+                                function sceneX(mouse) {
+                                    return mapToItem(headerFlow, mouse.x, mouse.y).x
+                                }
+
+                                onPressed: function(mouse) {
+                                    armed = false
+                                    moved = false
+                                    pressSceneX = sceneX(mouse)
+                                    worldClockHoldTimer.start()
+                                }
+                                onPositionChanged: function(mouse) {
+                                    var sx = sceneX(mouse)
+                                    if (Math.abs(sx - pressSceneX) > 6)
+                                        moved = true
+                                    if (armed)
+                                        worldClockDragGhost.updateX(sx)
+                                    else if (moved)
+                                        worldClockHoldTimer.stop()
+                                }
+                                onReleased: function(mouse) {
+                                    worldClockHoldTimer.stop()
+                                    if (armed) {
+                                        var sx = sceneX(mouse)
+                                        worldClockDragGhost.stop()
+                                        armed = false
+                                        // Snap magnetico: confronta X col centro del blocco toolbar.
+                                        var tb = headerUtilityButtons.mapToItem(headerFlow, headerUtilityButtons.width / 2, 0).x
+                                        var wantBefore = sx < tb
+                                        if (wantBefore !== mainWindow.uiWorldClockBeforeToolbar)
+                                            mainWindow.uiWorldClockBeforeToolbar = wantBefore
+                                    }
+                                }
+                                onCanceled: {
+                                    worldClockHoldTimer.stop()
+                                    if (armed) {
+                                        worldClockDragGhost.stop()
+                                        armed = false
+                                    }
+                                }
+                                ToolTip.visible: containsMouse && !armed
+                                ToolTip.text: qsTr("Trascina per riposizionare l'orologio")
+                                ToolTip.delay: 500
+                            }
+                        }
+
 	                        Rectangle {
 	                            id: analogClockFace
 	                            visible: worldClock.showAnalogClock
@@ -3840,6 +3980,7 @@ ApplicationWindow {
 	                        }
 	                    }
 	                }
+                } // End reorderableHeaderPair (toolbar + World Clock)
 
                 // Waterfall restore button (visible when minimized)
                 Rectangle {
@@ -4754,6 +4895,60 @@ ApplicationWindow {
 
 
             } // End headerFlow
+
+            // ── Ghost del World Clock durante il drag dalla maniglia ──
+            // Proxy visuale parentato a headerBar (NON nel Flow, così non viene
+            // posizionato dal layout); segue il puntatore con Behavior on x.
+            // NESSUN layer.enabled/FBO. Le coordinate sono in spazio headerFlow,
+            // riportate a headerBar aggiungendo l'offset headerFlow.x.
+            Rectangle {
+                id: worldClockDragGhost
+                visible: false
+                z: 200
+                width: 90
+                height: 30
+                radius: 6
+                y: headerFlow.y + 6
+                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.92)
+                border.color: secondaryCyan
+                border.width: 1
+                opacity: 0.9
+
+                function startAt(sceneX) {
+                    visible = true
+                    updateX(sceneX)
+                }
+                function updateX(sceneX) {
+                    var nx = headerFlow.x + sceneX - width / 2
+                    var minX = headerFlow.x
+                    var maxX = headerFlow.x + headerFlow.width - width
+                    if (nx < minX) nx = minX
+                    if (nx > maxX) nx = maxX
+                    x = nx
+                }
+                function stop() {
+                    visible = false
+                }
+
+                Behavior on x { NumberAnimation { duration: 60; easing.type: Easing.OutQuad } }
+
+                Row {
+                    anchors.centerIn: parent
+                    spacing: 4
+                    Text {
+                        text: "⠿"
+                        font.pixelSize: 12
+                        color: secondaryCyan
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Text {
+                        text: "🕐 " + qsTr("Clock")
+                        font.pixelSize: 11
+                        color: textPrimary
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
         } // End Header Bar Rectangle
 
         // Content area for dockable panels (wrapped in Flickable for vertical scroll
