@@ -29927,13 +29927,14 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                 // verso/poco dopo la fine del frame, quindi lo slot di
                 // appartenenza e' quello iniziato ~meta'-payload fa.
                 int const ft2PeriodMs = periodMsForMode(QStringLiteral("FT2"));
-                if (ft2PeriodMs > 0) {
-                    qint64 const epochMs = correctedUtcEpochMs();
-                    int const payloadMs = estimatedSyncPayloadMs(QStringLiteral("FT2"));
-                    qint64 const frameRefMs = epochMs - static_cast<qint64>(payloadMs / 2);
-                    qint64 slotStartMs =
-                        (frameRefMs / static_cast<qint64>(ft2PeriodMs))
-                        * static_cast<qint64>(ft2PeriodMs);
+                // FIX A v2 (1.0.356): ancora lo slot del partner allo slot calcolato
+                // al DISPATCH (m_ft2AsyncDispatchSlotStartMs, dalla finestra audio),
+                // NON al correctedUtcEpochMs() di QUI: il callback ready arriva 0.2-2.6s
+                // dopo il dispatch (latenza decode variabile) e ricalcolare lo slot ora
+                // faceva oscillare la stima di ~mezzo periodo (signalEnd swing fino a
+                // 1.9s nei log reali). Lo slot al dispatch e' stabile e corretto.
+                if (ft2PeriodMs > 0 && m_ft2AsyncDispatchSlotStartMs > 0) {
+                    qint64 slotStartMs = m_ft2AsyncDispatchSlotStartMs;
                     if (partnerDtValid) {
                         // CLAMP DT: il DT del decode puo' essere spurio (>|0.8s| =
                         // sync sbagliato o falso decode) e spostare la stima dello slot
@@ -29942,6 +29943,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                     }
                     m_ft2AsyncPartnerSlotMs = slotStartMs;
                 } else {
+                    // Fallback: slot del dispatch non disponibile -> wall-clock estimate.
                     m_ft2AsyncPartnerSlotMs = 0;
                 }
             }
@@ -30242,6 +30244,16 @@ void DecodiumBridge::onAsyncDecodeTimer()
             (windowStartMs + static_cast<qint64>(decodePeriodMs / 2))
             / static_cast<qint64>(decodePeriodMs);
         req.nutc = utcTokenForSlotStart(slotIndex, decodePeriodMs);
+        // FIX A v2 (1.0.356): memorizza lo slot-start del frame partner in scala
+        // corrected-UTC, calcolato ORA al dispatch dalla finestra audio (stabile),
+        // non al callback ready (latenza-dipendente). onFt2AsyncDecodeReady lo usa
+        // come ancora. Coerente con refNowMs=nowCorrectedMs in scheduleSmartFt2AsyncTx.
+        qint64 const correctedNowMs = correctedUtcEpochMs();
+        qint64 const correctedWindowStart = correctedNowMs - static_cast<qint64>(decodePeriodMs);
+        m_ft2AsyncDispatchSlotStartMs =
+            ((correctedWindowStart + static_cast<qint64>(decodePeriodMs / 2))
+             / static_cast<qint64>(decodePeriodMs))
+            * static_cast<qint64>(decodePeriodMs);
     }
     req.nqsoprogress = legacyDecodeQsoProgress();
     req.nfqso = nfqso;

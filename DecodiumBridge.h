@@ -2092,6 +2092,11 @@ private:
     // the current decode burst, derived from the corrected UTC clock + decode DT.
     // 0 = not available -> scheduleSmartFt2AsyncTx falls back to wall-clock estimate.
     qint64                m_ft2AsyncPartnerSlotMs  {0};
+    // FIX A v2 (1.0.356): slot-start (epoch ms, corrected-UTC) della finestra audio
+    // calcolato al DISPATCH del decode async (stabile), non al callback ready (che e'
+    // gonfiato dalla latenza di decode variabile). onFt2AsyncDecodeReady lo usa come
+    // ancora dello slot del partner. Single-flight => corrisponde al ready in arrivo.
+    qint64                m_ft2AsyncDispatchSlotStartMs {0};
     int                   m_ft2AsyncAudioQuietRuns {0};   // consecutive RMS<threshold samples
     void scheduleSmartFt2AsyncTx(const QString& reason);
     void onAudioLevelForFt2Gate();
