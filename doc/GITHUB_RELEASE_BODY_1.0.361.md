@@ -9,6 +9,7 @@ Release cumulativa dalla 1.0.356 alla 1.0.361.
 - Fix FT2 per evitare collisioni in autosequenza: quando una risposta TX3/TX4/TX5 nasce da un CQ del partner, la risposta viene differita allo slot corretto invece di trasmettere sopra l'altra stazione.
 - Rafforzato il cooldown dopo RR73/73: un nominativo appena loggato non riapre subito un QSO gia concluso.
 - World Clock reso riposizionabile con maniglia di drag, cosi l'utente puo spostarlo senza interferire con la lettura della UI.
+- Fix di compatibilita per i build runner Qt 6.11/Linux: lo switch sul backend grafico Qt Quick ora gestisce in modo robusto backend grafici non coperti dalla guardia di versione, evitando failure con `-Werror=switch`.
 - Versione applicazione, installer e metadati allineati alla 1.0.361.
 
 ## Dettaglio tecnico
@@ -18,6 +19,7 @@ Release cumulativa dalla 1.0.356 alla 1.0.361.
 - `v1.0.359`: fix collisione FT2, risposta differita TX3/TX4/TX5 dopo CQ del partner.
 - `v1.0.360`: fix RR73/73 da nominativo appena loggato, con cooldown piu resiliente.
 - `v1.0.361`: World Clock riposizionabile con maniglia dedicata.
+- Build release: aggiunto fallback `default` nel logging del backend Qt Quick per evitare errori di compilazione quando Qt espone nuovi valori `QSGRendererInterface::GraphicsApi`.
 
 ## File principali modificati
 
