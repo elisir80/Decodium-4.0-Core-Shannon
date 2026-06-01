@@ -155,8 +155,8 @@ static const char* qsgGraphicsApiName(QSGRendererInterface::GraphicsApi api)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
     case QSGRendererInterface::Direct3D12: return "Direct3D12";
 #endif
+    default: return "Unrecognized";
     }
-    return "Unrecognized";
 }
 
 static QQuickWindow* firstQuickWindow(QQmlApplicationEngine& engine)
