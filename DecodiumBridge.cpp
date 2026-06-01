@@ -32650,23 +32650,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }
 
     } else if (modeSnapshot == "FT2") {
-        // FIX C: in modo FT2-async il decode async (depth4, ogni 100ms) copre
-        // gia' tutta la finestra dello slot. Il decode sincrono di fine-slot
-        // (qui, fino a depth20) gira sullo STESSO m_ft2Worker via il
-        // runtime_mutex globale: accodandosi DAVANTI all'async crea un buco RX
-        // di 0.5-1s proprio sul confine slot. Quando async e' attivo lo
-        // sopprimiamo (ridondante). Il modo FT2 NON-async resta invariato.
-        if (m_asyncTxEnabled) {
-            static qint64 s_lastFt2SyncSkipLogMs = 0;
-            if (nowMs - s_lastFt2SyncSkipLogMs >= 10000) {
-                s_lastFt2SyncSkipLogMs = nowMs;
-                bridgeLog(QStringLiteral("FT2 sync slot decode skipped: async path active (serial=%1)")
-                              .arg(serial));
-            }
-            m_decoding = false;
-            emit decodingChanged();
-            return;
-        }
+        // FIX C (1.0.354): in FT2-async NON sopprimere il decode sync di
+        // fine-slot (come faceva 1.0.353) ma DECLASSARLO a depth<=4 (vedi cap
+        // piu' sotto). L'async (depth4 incrementale, ogni 100ms) da' la
+        // reattivita'; la passata sync sul buffer COMPLETO di slot a depth
+        // ridotta + weak-averaging resta l'unica che recupera le stazioni
+        // deboli/marginali che l'async parziale perde, ma costa ~400ms sul
+        // worker invece di ~1s del depth-20 -> buco RX sul confine ~dimezzato.
+        // Modo FT2 NON-async invariato.
         decodium::ft2::DecodeRequest req;
         req.serial = serial; req.audio = audioSnapshot;
         req.nutc = nutc; req.nqsoprogress = decodeQsoProgress;
@@ -32676,7 +32667,12 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         // l'attesa AutoCQ (solo sotto CPU pressure) → OSD + 4ª passata + weak-averaging
         // restano attivi proprio mentre cerchi un risponditore debole. Default OFF = 1.0.288.
         bool const reduceForTx = txStartPending && (!m_ft2FullDecodeInAutoCq || cpuPressureActive());
-        req.ndepth = reduceForTx ? qMin(decodeDepth, 2) : decodeDepth;
+        int ft2SyncDepth = reduceForTx ? qMin(decodeDepth, 2) : decodeDepth;
+        // FIX C (1.0.354): in async declassa la passata sync da depth-20 a
+        // depth<=4 (era soppressa). Il weak-averaging |16 qui sotto resta attivo
+        // (req.ndepth>=4) -> recupero weak-signal sul buffer completo a costo ridotto.
+        if (m_asyncTxEnabled) ft2SyncDepth = qMin(ft2SyncDepth, 4);
+        req.ndepth = ft2SyncDepth;
         if (!txAudioActive && !reduceForTx && req.ndepth >= 4) {
             req.ndepth |= 16;  // Enable FT2 weak-signal bitmetric averaging at deep decode.
         }
