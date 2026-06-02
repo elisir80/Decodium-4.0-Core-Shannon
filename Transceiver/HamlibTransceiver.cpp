@@ -739,7 +739,17 @@ int HamlibTransceiver::do_start ()
   // does not advertise it. Probe once during TX, then disable only on ENAVAIL/ENIMPL.
   bool const hasAlcCap = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_ALC) == RIG_LEVEL_ALC;
-  alc_probe_pending_ = do_alc_ && hasGetLevelFunction && !hasAlcCap;
+  // 1.0.365 — do NOT run the opportunistic ALC probe on slow serial buses
+  // (Icom CI-V, Yaesu): on a rig whose caps mask does not advertise ALC, the
+  // extra rig_get_level(ALC) issued every TX tick congests the serial port and
+  // can make a concurrent rig_set_ptt(OFF) fail (Icom one_transaction -13 bus
+  // error), leaving the radio stuck in TX — regressed in 1.0.326 when the probe
+  // + unconditional do_alc_ were introduced (worked in 1.0.325). Rigs that
+  // DECLARE ALC in caps (e.g. Yaesu FT-991) are unaffected; the probe stays
+  // available on fast back ends (Net rigctl / non-serial).
+  bool const port_is_serial =
+      !m_->is_dummy_ && rig_get_caps_int (m_->model_, RIG_CAPS_PORT_TYPE) == RIG_PORT_SERIAL;
+  alc_probe_pending_ = do_alc_ && hasGetLevelFunction && !hasAlcCap && !port_is_serial;
   bool const hasAlc = hasAlcCap || alc_probe_pending_;
 
   do_pwr_ &= hasRfPowerMeterWatts;
@@ -995,6 +1005,27 @@ void HamlibTransceiver::do_stop ()
         {
           pbwidth_t width;
           rig_get_mode (m_->rig_.data (), RIG_VFO_CURR, &impl::dummy_mode_, &width);
+        }
+    }
+  // 1.0.365 — safety net: always release PTT before closing the rig. The
+  // normal TX-off path do_ptt(false) routes through error_check(), which
+  // THROWS on a CI-V bus error, leaving ptt_on_ true and the radio stuck in
+  // TX when the app is closed mid-transmission. rig_close() does NOT turn TX
+  // off on Icom CI-V. Drop PTT here best-effort: no throw, a few retries,
+  // independent of bus state.
+  if (m_->rig_ && !m_->is_dummy_
+      && RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt
+      && (ptt_on_ || state ().ptt ()))
+    {
+      for (int attempt = 0; attempt < 3; ++attempt)
+        {
+          int const rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
+          CAT_TRACE ("do_stop PTT=false attempt=" << attempt << " rc=" << rc);
+          if (RIG_OK == rc)
+            {
+              ptt_on_ = false;
+              break;
+            }
         }
     }
   if (m_->rig_)
