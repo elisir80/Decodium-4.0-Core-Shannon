@@ -2502,8 +2502,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot0
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot0 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot0 && worldClock.visible
                 }
 
                 // Hamburger Menu Button
@@ -2550,8 +2550,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot1
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot1 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot1 && worldClock.visible
                 }
 
                 // Logo group
@@ -2581,8 +2581,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot2
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot2 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot2 && worldClock.visible
                 }
 
                 // Radio Frequency Display with CAT status
@@ -2999,8 +2999,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot3
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot3 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot3 && worldClock.visible
                 }
 
                 // RX/TX Sliders + LVL/Monitor
@@ -3254,8 +3254,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot4
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot4 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot4 && worldClock.visible
                 }
 
                 // Grouped buttons: Settings, REC, WAV, Log, Macro, Astro, CAT
@@ -3723,8 +3723,8 @@ ApplicationWindow {
                 Item {
                     id: clockSlot5
                     height: 80
-                    width: worldClock.parent === this ? worldClock.width : 0
-                    visible: worldClock.parent === this && worldClock.visible
+                    width: worldClock.parent === clockSlot5 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot5 && worldClock.visible
                 }
 
 	                // World Clock with Analog Display
