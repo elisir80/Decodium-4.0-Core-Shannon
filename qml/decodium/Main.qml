@@ -183,11 +183,16 @@ ApplicationWindow {
         return Math.max(minimum, Math.round(numeric))
     }
 
+    // Stadio 1: la larghezza-valore vive ora sugli SLOT-HOST (colSlot0/1/2) per POSIZIONE.
+    // Le chiavi restano mappate per posizione (slot0=uiFullSpectrumPanelWidth,
+    // slot1=uiSignalRxPanelWidth, slot2=uiLiveMapPanelWidth) indipendentemente da quale
+    // pannello le occupa. I minimi sono per-slot (classicMinWidthForSlot) ma il default
+    // (mappa = ordine attuale) coincide esattamente col comportamento precedente.
     function restoreDecodePanelWidths() {
         if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit ||
-            typeof period1Panel === "undefined" || !period1Panel ||
-            typeof rxFreqPanel === "undefined" || !rxFreqPanel ||
-            typeof liveMapPanelHost === "undefined" || !liveMapPanelHost) {
+            typeof colSlot0 === "undefined" || !colSlot0 ||
+            typeof colSlot1 === "undefined" || !colSlot1 ||
+            typeof colSlot2 === "undefined" || !colSlot2) {
             Qt.callLater(restoreDecodePanelWidths)
             return
         }
@@ -198,61 +203,63 @@ ApplicationWindow {
             return
         }
 
-        liveMapPanelHost.targetPanelWidth = safeStoredPanelWidth(savedLiveMapPanelWidth, 360, 280)
+        colSlot2.targetPanelWidth = safeStoredPanelWidth(savedLiveMapPanelWidth, 360, 280)
 
         if (!decodePanelLayoutSaved) {
-            period1Panel.userDraggedSplit = false
-            period1Panel.applyCenterSplit()
+            colSlot0.userDraggedSplit = false
+            colSlot0.applyCenterSplit()
             return
         }
 
-        var period1Min = 360
-        var rxMin = 260
-        var mapMin = 280
-        var savedPeriod1 = safeStoredPanelWidth(savedPeriod1PanelWidth, 400, period1Min)
-        var savedRx = safeStoredPanelWidth(savedRxFreqPanelWidth, 400, rxMin)
-        var savedMap = safeStoredPanelWidth(savedLiveMapPanelWidth, 360, mapMin)
-        var mapWidth = 0
+        // Minimi per posizione (seguono il pannello che occupa lo slot).
+        var slot0Min = classicMinWidthForSlot(0)
+        var slot1Min = classicMinWidthForSlot(1)
+        var savedSlot0 = safeStoredPanelWidth(savedPeriod1PanelWidth, 400, slot0Min)
+        var savedSlot1 = safeStoredPanelWidth(savedRxFreqPanelWidth, 400, slot1Min)
+        var savedSlot2 = safeStoredPanelWidth(savedLiveMapPanelWidth, 360, 280)
+        var slot2Width = 0
 
-        if (mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached) {
-            var maxMapWidth = Math.max(mapMin, totalWidth - period1Min - rxMin)
-            mapWidth = Math.min(savedMap, maxMapWidth)
+        // Lo slot2 mostra una larghezza solo se NON è collassato (Live Map visibile lì).
+        if (!classicSlotCollapsed(2)) {
+            var slot2Min = classicMinWidthForSlot(2)
+            var maxSlot2Width = Math.max(slot2Min, totalWidth - slot0Min - slot1Min)
+            slot2Width = Math.min(savedSlot2, maxSlot2Width)
         }
 
-        var remainingWidth = Math.max(period1Min + rxMin, totalWidth - mapWidth)
-        var savedCombined = Math.max(1, savedPeriod1 + savedRx)
-        var period1Width = Math.round(remainingWidth * (savedPeriod1 / savedCombined))
-        period1Width = Math.max(period1Min, Math.min(period1Width, remainingWidth - rxMin))
-        var rxWidth = Math.max(rxMin, remainingWidth - period1Width)
+        var remainingWidth = Math.max(slot0Min + slot1Min, totalWidth - slot2Width)
+        var savedCombined = Math.max(1, savedSlot0 + savedSlot1)
+        var slot0Width = Math.round(remainingWidth * (savedSlot0 / savedCombined))
+        slot0Width = Math.max(slot0Min, Math.min(slot0Width, remainingWidth - slot1Min))
+        var slot1Width = Math.max(slot1Min, remainingWidth - slot0Width)
 
-        period1Panel.userDraggedSplit = true
-        period1Panel.targetPanelWidth = period1Width
-        rxFreqPanel.targetPanelWidth = rxWidth
-        if (mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
-            liveMapPanelHost.targetPanelWidth = mapWidth
+        colSlot0.userDraggedSplit = true
+        colSlot0.targetPanelWidth = slot0Width
+        colSlot1.targetPanelWidth = slot1Width
+        if (!classicSlotCollapsed(2))
+            colSlot2.targetPanelWidth = slot2Width
     }
 
     function persistDecodePanelWidths() {
         if (!bridge)
             return
 
-        if (typeof period1Panel !== "undefined" && period1Panel &&
-            !period1Detached && period1Panel.width >= 360) {
-            savedPeriod1PanelWidth = Math.round(period1Panel.width)
+        if (typeof colSlot0 !== "undefined" && colSlot0 &&
+            !colSlot0.slotCollapsed && colSlot0.width >= classicMinWidthForSlot(0)) {
+            savedPeriod1PanelWidth = Math.round(colSlot0.width)
             bridge.setSetting("uiFullSpectrumPanelWidth", savedPeriod1PanelWidth)
         }
 
-        if (typeof rxFreqPanel !== "undefined" && rxFreqPanel &&
-            !rxFreqDetached && rxFreqPanel.width >= 260) {
-            savedRxFreqPanelWidth = Math.round(rxFreqPanel.width)
+        if (typeof colSlot1 !== "undefined" && colSlot1 &&
+            !colSlot1.slotCollapsed && colSlot1.width >= classicMinWidthForSlot(1)) {
+            savedRxFreqPanelWidth = Math.round(colSlot1.width)
             bridge.setSetting("uiSignalRxPanelWidth", savedRxFreqPanelWidth)
         }
 
-        if (typeof liveMapPanelHost !== "undefined" && liveMapPanelHost) {
-            var liveMapWidth = liveMapPanelHost.visible ? liveMapPanelHost.width : liveMapPanelHost.targetPanelWidth
-            if (liveMapWidth >= 280) {
-                savedLiveMapPanelWidth = Math.round(liveMapWidth)
-                liveMapPanelHost.targetPanelWidth = savedLiveMapPanelWidth
+        if (typeof colSlot2 !== "undefined" && colSlot2) {
+            var slot2Width = !colSlot2.slotCollapsed ? colSlot2.width : colSlot2.targetPanelWidth
+            if (slot2Width >= 280) {
+                savedLiveMapPanelWidth = Math.round(slot2Width)
+                colSlot2.targetPanelWidth = savedLiveMapPanelWidth
                 bridge.setSetting("uiLiveMapPanelWidth", savedLiveMapPanelWidth)
             }
         }
@@ -310,6 +317,9 @@ ApplicationWindow {
         requestActivate()
         startupLog("main window show/raise/requestActivate done")
         Qt.callLater(restoreDecodePanelWidths)
+        // Stadio 1: applica l'ordine colonne persistito re-parentando i 3 pannelli
+        // negli slot-host indicati dalla mappa (default = ordine attuale -> no-op).
+        Qt.callLater(applyClassicColumnOrder)
         bridge.notifyMainQmlReady()
         startupLog("bridge notified ready")
         console.log("Main.qml window shown at " + x + "," + y + " size " + width + "x" + height)
@@ -949,6 +959,145 @@ ApplicationWindow {
         persistToolbarOrder()
     }
 
+    // === Ordine colonne pannelli decode (layout CLASSICO) — interscambiabili via drag ===
+    // Stadio 1: Full Spectrum / Signal RX / Live Map riposizionabili fra i 3 slot-host
+    // fissi dello SplitView (decodePanelsSplit). La mappa è un CSV di panelId; l'indice
+    // nella lista = posizione dello slot-host che ospita quel pannello. Gemella di
+    // uiToolbarOrder (parse/persist/listener). Default = ordine attuale → ZERO regressione.
+    // Lo SWAP avviene fra DUE slot (il pannello trascinato e quello sotto al puntatore):
+    // si scambiano i panelId nella mappa, si ri-assegnano i parent, si persiste.
+    readonly property string uiClassicColumnOrderDefault: "fullspectrum,signalrx,livemap"
+    readonly property var uiClassicColumnKnownIds: ["fullspectrum","signalrx","livemap"]
+    property var uiClassicColumnOrder: parseClassicColumnOrder(String(bridge.getSetting("uiClassicColumnOrder", "") || ""))
+
+    // Parsa il CSV in lista di panelId; ripristina/completa col default se assente/corrotto.
+    // Garantisce sempre una permutazione completa dei 3 id noti (nessun doppione, nessun buco).
+    function parseClassicColumnOrder(csv) {
+        var def = uiClassicColumnOrderDefault.split(",")
+        if (!csv || csv.length === 0)
+            return def
+        var parts = String(csv).split(",")
+        var out = []
+        var seen = ({})
+        for (var i = 0; i < parts.length; ++i) {
+            var id = parts[i].trim()
+            if (id.length === 0)
+                continue
+            if (uiClassicColumnKnownIds.indexOf(id) < 0)
+                continue            // id sconosciuto -> scarta
+            if (seen[id])
+                continue            // dedup
+            seen[id] = true
+            out.push(id)
+        }
+        // Aggiungi gli id mancanti in coda nell'ordine di default (mantiene permutazione completa)
+        for (var j = 0; j < def.length; ++j) {
+            if (!seen[def[j]]) {
+                out.push(def[j])
+                seen[def[j]] = true
+            }
+        }
+        if (out.length !== def.length)
+            return def
+        return out
+    }
+
+    function persistClassicColumnOrder() {
+        persistUiSetting("uiClassicColumnOrder", uiClassicColumnOrder.join(","))
+    }
+
+    // Restituisce lo slot-host (Item) corrispondente all'indice 0/1/2, o null.
+    function classicSlotForIndex(idx) {
+        if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit)
+            return null
+        switch (idx) {
+            case 0: return (typeof colSlot0 !== "undefined") ? colSlot0 : null
+            case 1: return (typeof colSlot1 !== "undefined") ? colSlot1 : null
+            case 2: return (typeof colSlot2 !== "undefined") ? colSlot2 : null
+            default: return null
+        }
+    }
+
+    // Restituisce il pannello (Item) corrispondente al panelId, o null.
+    function classicPanelForId(panelId) {
+        if (panelId === "fullspectrum")
+            return (typeof period1Panel !== "undefined") ? period1Panel : null
+        if (panelId === "signalrx")
+            return (typeof rxFreqPanel !== "undefined") ? rxFreqPanel : null
+        if (panelId === "livemap")
+            return (typeof liveMapPanelHost !== "undefined") ? liveMapPanelHost : null
+        return null
+    }
+
+    // Assegna ad ogni pannello il parent = slot-host nella posizione indicata dalla mappa.
+    // Operazione che preserva id/stato/binding (re-parent, come applyHeaderPairOrder).
+    // I pannelli usano anchors.fill: parent → riempiono lo slot che li ospita.
+    function applyClassicColumnOrder() {
+        if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit) {
+            Qt.callLater(applyClassicColumnOrder)
+            return
+        }
+        for (var i = 0; i < uiClassicColumnOrder.length; ++i) {
+            var panel = classicPanelForId(uiClassicColumnOrder[i])
+            var slot = classicSlotForIndex(i)
+            if (panel && slot && panel.parent !== slot)
+                panel.parent = slot
+        }
+    }
+
+    // Indice (0/1/2) della posizione che ospita il panelId nella mappa corrente; -1 se assente.
+    function classicSlotIndexOfId(panelId) {
+        return uiClassicColumnOrder.indexOf(panelId)
+    }
+
+    // panelId che occupa lo slot di indice idx (in base alla mappa corrente).
+    function classicIdInSlot(idx) {
+        return (idx >= 0 && idx < uiClassicColumnOrder.length) ? uiClassicColumnOrder[idx] : ""
+    }
+
+    // Larghezza minima dello slot = minimo "naturale" del pannello che lo occupa
+    // (segue il pannello, non lo slot, anche se la larghezza-valore è per-slot).
+    // Read-only su mappa+occupante: non re-immette nulla nella width -> no binding loop.
+    function classicMinWidthForSlot(idx) {
+        switch (classicIdInSlot(idx)) {
+            case "fullspectrum": return 360
+            case "signalrx":     return 260
+            case "livemap":      return 280
+            default:             return 260
+        }
+    }
+
+    // True se lo slot idx ospita la Live Map MA la Live Map è nascosta/staccata:
+    // in tal caso lo slot collassa (preferredWidth/minimumWidth -> 0), come faceva
+    // liveMapPanelHost.visible quando era figlio diretto dello SplitView.
+    function classicSlotCollapsed(idx) {
+        return classicIdInSlot(idx) === "livemap"
+               && !(mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
+    }
+
+    // SWAP dei panelId in due posizioni della mappa + ri-assegna parent + persiste.
+    function swapClassicColumns(a, b) {
+        if (a === b || a < 0 || b < 0)
+            return
+        var arr = uiClassicColumnOrder.slice()
+        if (a >= arr.length || b >= arr.length)
+            return
+        var tmp = arr[a]
+        arr[a] = arr[b]
+        arr[b] = tmp
+        uiClassicColumnOrder = arr
+        applyClassicColumnOrder()
+        persistClassicColumnOrder()
+    }
+
+    // Riporta l'ordine colonne al default (FS, Signal RX, Live Map) + re-parent + persist.
+    // Agganciato al Reset Layout esistente (Ctrl+Shift+L / resetLayoutConfirmDialog).
+    function resetClassicColumnOrder() {
+        uiClassicColumnOrder = uiClassicColumnOrderDefault.split(",")
+        applyClassicColumnOrder()
+        persistClassicColumnOrder()
+    }
+
     property bool uiBtnFooterResetVisible:    settingBool("uiBtnFooterResetVisible", true)
     property bool uiBtnFooterHistoryVisible:  settingBool("uiBtnFooterHistoryVisible", true)
     property bool uiBtnFooterDxcVisible:      settingBool("uiBtnFooterDxcVisible", true)
@@ -1126,8 +1275,8 @@ ApplicationWindow {
             mainWindow.syncLiveMapFloatingVisibility(false)
             if (mainWindow.decodePanelLayoutSaved)
                 mainWindow.restoreDecodePanelWidths()
-            else if (typeof period1Panel !== "undefined" && period1Panel)
-                period1Panel.applyCenterSplit()
+            else if (typeof colSlot0 !== "undefined" && colSlot0)
+                colSlot0.applyCenterSplit()
         })
     }
 
@@ -1310,6 +1459,10 @@ ApplicationWindow {
                 // resetta anche la posizione del World Clock al default (dopo la toolbar).
                 if (String(value || "").length === 0)
                     mainWindow.uiWorldClockBeforeToolbar = false
+            }
+            else if (key === "uiClassicColumnOrder") {
+                mainWindow.uiClassicColumnOrder = mainWindow.parseClassicColumnOrder(String(value || ""))
+                mainWindow.applyClassicColumnOrder()
             }
             else if (key === "uiWorldClockBeforeToolbar")
                 mainWindow.uiWorldClockBeforeToolbar = mainWindow.coerceBool(value, false)
@@ -5949,17 +6102,104 @@ ApplicationWindow {
                             // inizia a trascinare — disattiva il ri-centramento automatico
                             // al resize della finestra.
                             SplitHandle.onPressedChanged: {
-                                if (SplitHandle.pressed && typeof period1Panel !== "undefined")
-                                    period1Panel.userDraggedSplit = true
+                                if (SplitHandle.pressed && typeof colSlot0 !== "undefined")
+                                    colSlot0.userDraggedSplit = true
+                            }
+                        }
+
+                        // ════════ SLOT-HOST FISSI (Stadio 1 pannelli interscambiabili) ════════
+                        // I 3 figli diretti dello SplitView sono ORA questi Item a ordine FISSO
+                        // (colSlot0=sx, colSlot1=centro, colSlot2=dx): portano loro le attached
+                        // property SplitView.* + la larghezza-valore (per-slot). I 3 pannelli
+                        // (period1Panel/rxFreqPanel/liveMapPanelHost) sono re-parentati dentro
+                        // lo slot indicato dalla mappa uiClassicColumnOrder e usano
+                        // anchors.fill: parent. Lo SWAP riordina la MAPPA, non i figli dello
+                        // SplitView -> handle e dimensioni dei separatori restano stabili.
+                        //
+                        // Larghezza-valore: per-SLOT (posizione). Larghezza-MINIMA: segue il
+                        // pannello che occupa lo slot (classicMinWidthForSlot). Lo slot che
+                        // ospita la Live Map collassa a 0 quando la mappa è nascosta/staccata
+                        // (classicSlotCollapsed), com'era con liveMapPanelHost.visible.
+                        Item {
+                            id: colSlot0
+                            property int targetPanelWidth: mainWindow.savedPeriod1PanelWidth
+                            // Centro-split affidabile 50/50 (ex-period1Panel): ricalcola la metà
+                            // sinistra finché il parent non ha width; disattivato se l'utente
+                            // ha trascinato il separatore.
+                            property bool userDraggedSplit: false
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(0)
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(0)
+                            function applyCenterSplit() {
+                                if (userDraggedSplit) return
+                                if (parent && parent.width > 0) {
+                                    var mapW = 0
+                                    if (typeof colSlot2 !== "undefined" && !colSlot2.slotCollapsed)
+                                        mapW = colSlot2.targetPanelWidth
+                                    colSlot0.targetPanelWidth = Math.max(360, Math.round((parent.width - mapW) * 0.5))
+                                } else {
+                                    Qt.callLater(applyCenterSplit)
+                                }
+                            }
+                            Component.onCompleted: Qt.callLater(function() {
+                                if (mainWindow.decodePanelLayoutSaved)
+                                    mainWindow.restoreDecodePanelWidths()
+                                else
+                                    applyCenterSplit()
+                            })
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 360 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
+                            }
+                            Connections {
+                                target: colSlot0.parent
+                                ignoreUnknownSignals: true
+                                function onWidthChanged() {
+                                    if (!colSlot0.userDraggedSplit)
+                                        colSlot0.applyCenterSplit()
+                                }
+                            }
+                        }
+
+                        Item {
+                            id: colSlot1
+                            property int targetPanelWidth: mainWindow.savedRxFreqPanelWidth
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(1)
+                            SplitView.fillWidth: true
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(1)
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
+                            }
+                        }
+
+                        Item {
+                            id: colSlot2
+                            property int targetPanelWidth: mainWindow.savedLiveMapPanelWidth
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(2)
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(2)
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 280 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
                             }
                         }
 
                         // ========== LEFT: Band Activity ==========
                         Rectangle {
                             id: period1Panel
-                            property int targetPanelWidth: mainWindow.savedPeriod1PanelWidth
-                            SplitView.preferredWidth: targetPanelWidth
-                            SplitView.minimumWidth: 360
+                            parent: colSlot0
+                            anchors.fill: parent
                             readonly property bool compactColumns: width < 620
                             readonly property int utcColumnWidth: compactColumns ? 66 : 86
                             readonly property int dbColumnWidth: compactColumns ? 34 : 38
@@ -5972,44 +6212,9 @@ ApplicationWindow {
                             readonly property int dxccColumnWidth: mainWindow.showDxccInfo ? (compactColumns ? 108 : Math.min(300, Math.max(190, Math.round(width * 0.24)))) : 0
                             readonly property int azColumnWidth: mainWindow.showDxccInfo && mainWindow.fullSpectrumShowAzColumn ? (compactColumns ? 42 : 52) : 0
                             readonly property int messageMinWidth: compactColumns ? 72 : 140
-                            // Divisore Full Spectrum / Signal RX: 50/50 affidabile.
-                            // Se `parent.width==0` al momento del callback (timing race),
-                            // applyCenterSplit() si ri-schedula finché il parent non ha width.
-                            // Il flag userDraggedSplit (settato su onPressedChanged del handle)
-                            // disattiva il ri-centramento se l'utente ha trascinato il separatore.
-                            property bool userDraggedSplit: false
-                            function applyCenterSplit() {
-                                if (userDraggedSplit) return
-                                if (parent && parent.width > 0) {
-                                    var liveMapWidth = (typeof liveMapPanelHost !== "undefined" && liveMapPanelHost.visible)
-                                                     ? liveMapPanelHost.targetPanelWidth
-                                                     : 0
-                                    period1Panel.targetPanelWidth = Math.max(360, Math.round((parent.width - liveMapWidth) * 0.5))
-                                } else {
-                                    Qt.callLater(applyCenterSplit)
-                                }
-                            }
-                            Component.onCompleted: Qt.callLater(function() {
-                                if (mainWindow.decodePanelLayoutSaved)
-                                    mainWindow.restoreDecodePanelWidths()
-                                else
-                                    applyCenterSplit()
-                            })
-                            onWidthChanged: {
-                                if (width >= 360 && Math.abs(targetPanelWidth - width) >= 1) {
-                                    targetPanelWidth = Math.round(width)
-                                    if (!mainWindow.windowStateRestoreInProgress)
-                                        mainWindow.scheduleWindowStateSave()
-                                }
-                            }
-                            Connections {
-                                target: period1Panel.parent
-                                ignoreUnknownSignals: true
-                                function onWidthChanged() {
-                                    if (!period1Panel.userDraggedSplit)
-                                        period1Panel.applyCenterSplit()
-                                }
-                            }
+                            // Stadio 1: questo pannello riempie il suo slot-host (colSlot0 di
+                            // default; spostabile via mappa). La larghezza-valore e il
+                            // centro-split sono ora su colSlot0; qui resta solo il contenuto.
                             color: "transparent"
 
                             // Placeholder when detached - magnetic dock zone
@@ -6110,6 +6315,15 @@ ApplicationWindow {
                                         anchors.fill: parent
                                         anchors.margins: 6
                                         spacing: 8
+
+                                        // Maniglia di drag colonna (Stadio 1)
+                                        Loader {
+                                            Layout.preferredWidth: 16
+                                            Layout.preferredHeight: 16
+                                            Layout.alignment: Qt.AlignVCenter
+                                            sourceComponent: colDragHandleComponent
+                                            onLoaded: if (item) item.panelId = "fullspectrum"
+                                        }
 
                                         // Active period indicator (pulsing)
                                         Rectangle {
@@ -6674,10 +6888,8 @@ NumberAnimation {
                         // ========== RIGHT: RX Frequency ==========
                         Rectangle {
                             id: rxFreqPanel
-                            property int targetPanelWidth: mainWindow.savedRxFreqPanelWidth
-                            SplitView.fillWidth: true
-                            SplitView.preferredWidth: targetPanelWidth
-                            SplitView.minimumWidth: 260
+                            parent: colSlot1
+                            anchors.fill: parent
                             readonly property bool compactColumns: width < 450
                             readonly property bool compactHeader: width < 350
                             readonly property int utcColumnWidth: compactColumns ? 62 : 78
@@ -6689,14 +6901,9 @@ NumberAnimation {
                             readonly property int gapColumnWidth: compactColumns ? 8 : 12
                             readonly property int distanceColumnWidth: mainWindow.signalRxShowDistColumn && !compactColumns ? 56 : 0
                             readonly property int azColumnWidth: mainWindow.signalRxShowAzColumn && !compactColumns ? 42 : 0
+                            // Stadio 1: riempie il suo slot-host (colSlot1 di default). La
+                            // larghezza-valore è ora su colSlot1; qui resta solo il contenuto.
                             color: "transparent"
-                            onWidthChanged: {
-                                if (width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
-                                    targetPanelWidth = Math.round(width)
-                                    if (!mainWindow.windowStateRestoreInProgress)
-                                        mainWindow.scheduleWindowStateSave()
-                                }
-                            }
 
                             // Placeholder when detached - magnetic dock zone
                             Rectangle {
@@ -6792,6 +6999,15 @@ NumberAnimation {
                                         anchors.fill: parent
                                         anchors.margins: 6
                                         spacing: 6
+
+                                        // Maniglia di drag colonna (Stadio 1)
+                                        Loader {
+                                            Layout.preferredWidth: 16
+                                            Layout.preferredHeight: 16
+                                            Layout.alignment: Qt.AlignVCenter
+                                            sourceComponent: colDragHandleComponent
+                                            onLoaded: if (item) item.panelId = "signalrx"
+                                        }
 
                                         Rectangle {
                                             width: 10
@@ -7178,18 +7394,13 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
                         Rectangle {
                             id: liveMapPanelHost
+                            parent: colSlot2
+                            anchors.fill: parent
+                            // Stadio 1: riempie il suo slot-host (colSlot2 di default). Il
+                            // collasso quando la mappa è nascosta/staccata è gestito dallo slot
+                            // (classicSlotCollapsed) -> segue il pannello in qualunque slot.
                             visible: mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached
                             color: "transparent"
-                            property int targetPanelWidth: mainWindow.savedLiveMapPanelWidth
-                            SplitView.preferredWidth: visible ? targetPanelWidth : 0
-                            SplitView.minimumWidth: visible ? 280 : 0
-                            onWidthChanged: {
-                                if (visible && width >= 280 && Math.abs(targetPanelWidth - width) >= 1) {
-                                    targetPanelWidth = Math.round(width)
-                                    if (!mainWindow.windowStateRestoreInProgress)
-                                        mainWindow.scheduleWindowStateSave()
-                                }
-                            }
 
                             Loader {
                                 id: liveMapEmbeddedLoader
@@ -7197,6 +7408,22 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 active: liveMapPanelHost.visible
                                 asynchronous: true
                                 sourceComponent: liveMapEmbeddedComponent
+                            }
+
+                            // Maniglia di drag colonna (Stadio 1) — overlay sull'angolo
+                            // alto-SINISTRO (i controlli della mappa stanno in alto a destra),
+                            // sopra LiveMapPanel. Non tocca LiveMapPanel.qml.
+                            Loader {
+                                z: 50
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.leftMargin: 6
+                                anchors.topMargin: 6
+                                width: 16
+                                height: 16
+                                active: liveMapPanelHost.visible
+                                sourceComponent: colDragHandleComponent
+                                onLoaded: if (item) item.panelId = "livemap"
                             }
 
                             Component {
@@ -7208,6 +7435,249 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     detached: false
                                     onDetachRequested: mainWindow.detachLiveMapPanel()
                                 }
+                            }
+                        }
+                    }
+
+                    // ════════ Drag-layer pannelli interscambiabili (Stadio 1) ════════
+                    // Sibling dello SplitView dentro decodePanel (NON gestito dallo SplitView,
+                    // così non diventa una sezione/colonna). Ospita il ghost del pannello in
+                    // drag e l'evidenziazione magnetica dello slot target. NESSUN
+                    // layer.enabled/FBO. Coordinate in spazio decodePanel.
+                    Item {
+                        id: colDragLayer
+                        anchors.fill: parent
+                        z: 60
+                        // Trasparente agli eventi quando non si sta trascinando: NON deve
+                        // intercettare click/hover dei pannelli sottostanti.
+                        visible: dragSlotIndex >= 0
+                        enabled: false
+
+                        // Indice (0/1/2) dello slot di PARTENZA del drag corrente; -1 = nessun drag.
+                        property int dragSlotIndex: -1
+                        // Indice (0/1/2) dello slot target sotto il puntatore.
+                        property int dropSlotIndex: -1
+
+                        // Rettangolo (in spazio decodePanel) dello slot di indice idx.
+                        function slotRect(idx) {
+                            var slot = mainWindow.classicSlotForIndex(idx)
+                            if (!slot || slot.width <= 0)
+                                return null
+                            var p = slot.mapToItem(decodePanel, 0, 0)
+                            return Qt.rect(p.x, p.y, slot.width, slot.height)
+                        }
+
+                        // Slot il cui CENTRO è più vicino alla X (spazio decodePanel) del puntatore.
+                        // Ignora gli slot collassati (Live Map nascosta) come target.
+                        function computeTargetSlot(panelX) {
+                            var best = -1
+                            var bestDist = 1e12
+                            for (var i = 0; i < 3; ++i) {
+                                if (mainWindow.classicSlotCollapsed(i))
+                                    continue
+                                var r = slotRect(i)
+                                if (!r)
+                                    continue
+                                var mid = r.x + r.width / 2
+                                var d = Math.abs(panelX - mid)
+                                if (d < bestDist) { bestDist = d; best = i }
+                            }
+                            return best
+                        }
+
+                        // ── Evidenziazione magnetica dello slot target ──
+                        Rectangle {
+                            id: colDropHighlight
+                            visible: colDragLayer.dragSlotIndex >= 0 && colDragLayer.dropSlotIndex >= 0
+                            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
+                            border.color: secondaryCyan
+                            border.width: 2
+                            radius: 8
+                            property var r: visible ? colDragLayer.slotRect(colDragLayer.dropSlotIndex) : null
+                            x: r ? r.x : 0
+                            y: r ? r.y : 0
+                            width: r ? r.width : 0
+                            height: r ? r.height : 0
+                            Behavior on x { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+                            Behavior on width { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+                        }
+
+                        // ── Ghost del pannello trascinato (proxy visuale) ──
+                        Rectangle {
+                            id: colDragGhost
+                            visible: false
+                            z: 70
+                            radius: 8
+                            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.92)
+                            border.color: secondaryCyan
+                            border.width: 1
+                            opacity: 0.92
+                            property string label: ""
+
+                            function startFor(idx, panelX, panelY) {
+                                var r = colDragLayer.slotRect(idx)
+                                width = r ? Math.min(220, r.width) : 200
+                                height = 40
+                                label = colDragGhost.labelForId(mainWindow.classicIdInSlot(idx))
+                                updateAt(panelX, panelY)
+                                visible = true
+                            }
+                            function labelForId(panelId) {
+                                if (panelId === "fullspectrum") return "Full Spectrum"
+                                if (panelId === "signalrx")     return "Signal RX"
+                                if (panelId === "livemap")      return "Live Map"
+                                return panelId
+                            }
+                            function updateAt(panelX, panelY) {
+                                var nx = panelX - width / 2
+                                var ny = panelY - height / 2
+                                if (nx < 0) nx = 0
+                                if (nx > decodePanel.width - width) nx = decodePanel.width - width
+                                if (ny < 0) ny = 0
+                                if (ny > decodePanel.height - height) ny = decodePanel.height - height
+                                x = nx
+                                y = ny
+                            }
+                            function stop() {
+                                visible = false
+                                label = ""
+                            }
+
+                            Behavior on x { NumberAnimation { duration: 60; easing.type: Easing.OutQuad } }
+                            Behavior on y { NumberAnimation { duration: 60; easing.type: Easing.OutQuad } }
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 6
+                                Text {
+                                    text: "⠿"
+                                    font.pixelSize: 13
+                                    color: secondaryCyan
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: colDragGhost.label
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: textPrimary
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                        }
+                    }
+
+                    // ════════ Maniglia di drag riusabile per gli header dei 3 pannelli ════════
+                    // Pattern World Clock (commit 8c6ce2b): piccola presa ⠿, z alto,
+                    // SizeAllCursor; SOLO la presa avvia long-press 350ms + soglia 6px.
+                    // È un elemento separato e piccolo: NON interferisce con l'header-drag
+                    // del detach (che vive sull'header/finestra). Espone:
+                    //   panelId  -> id logico del pannello cui appartiene ("fullspectrum"/…)
+                    // Trova lo slot di partenza a runtime via classicSlotIndexOfId(panelId),
+                    // così funziona qualunque sia l'ordine corrente della mappa.
+                    Component {
+                        id: colDragHandleComponent
+                        Rectangle {
+                            id: colHandle
+                            property string panelId: ""
+                            width: 16
+                            height: 16
+                            radius: 3
+                            z: 40
+                            color: colHandleMA.containsMouse || colHandleMA.armed
+                                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+                                   : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.12)
+                            border.color: colHandleMA.containsMouse ? secondaryCyan : "transparent"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⠿"
+                                font.pixelSize: 12
+                                color: colHandleMA.containsMouse ? secondaryCyan
+                                                                 : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6)
+                            }
+
+                            MouseArea {
+                                id: colHandleMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.SizeAllCursor
+                                acceptedButtons: Qt.LeftButton
+                                preventStealing: true
+
+                                property bool armed: false
+                                property int srcSlot: -1
+                                property real pressX: 0
+                                property real pressY: 0
+                                property bool moved: false
+
+                                function panelPt(mouse) {
+                                    return mapToItem(decodePanel, mouse.x, mouse.y)
+                                }
+
+                                Timer {
+                                    id: colHandleHoldTimer
+                                    interval: 350
+                                    repeat: false
+                                    onTriggered: {
+                                        if (colHandleMA.pressedButtons & Qt.LeftButton) {
+                                            colHandleMA.srcSlot = mainWindow.classicSlotIndexOfId(colHandle.panelId)
+                                            if (colHandleMA.srcSlot < 0)
+                                                return
+                                            colHandleMA.armed = true
+                                            colDragLayer.dragSlotIndex = colHandleMA.srcSlot
+                                            colDragLayer.dropSlotIndex = colHandleMA.srcSlot
+                                            colDragGhost.startFor(colHandleMA.srcSlot,
+                                                                  colHandleMA.pressX, colHandleMA.pressY)
+                                        }
+                                    }
+                                }
+
+                                onPressed: function(mouse) {
+                                    armed = false
+                                    moved = false
+                                    var p = panelPt(mouse)
+                                    pressX = p.x
+                                    pressY = p.y
+                                    colHandleHoldTimer.start()
+                                }
+                                onPositionChanged: function(mouse) {
+                                    var p = panelPt(mouse)
+                                    if (Math.abs(p.x - pressX) > 6 || Math.abs(p.y - pressY) > 6)
+                                        moved = true
+                                    if (armed) {
+                                        colDragGhost.updateAt(p.x, p.y)
+                                        colDragLayer.dropSlotIndex = colDragLayer.computeTargetSlot(p.x)
+                                    } else if (moved) {
+                                        colHandleHoldTimer.stop()
+                                    }
+                                }
+                                onReleased: function(mouse) {
+                                    colHandleHoldTimer.stop()
+                                    if (armed) {
+                                        var p = panelPt(mouse)
+                                        var target = colDragLayer.computeTargetSlot(p.x)
+                                        colDragGhost.stop()
+                                        var src = colDragLayer.dragSlotIndex
+                                        colDragLayer.dragSlotIndex = -1
+                                        colDragLayer.dropSlotIndex = -1
+                                        armed = false
+                                        if (target >= 0 && target !== src)
+                                            mainWindow.swapClassicColumns(src, target)
+                                    }
+                                }
+                                onCanceled: {
+                                    colHandleHoldTimer.stop()
+                                    if (armed) {
+                                        colDragGhost.stop()
+                                        colDragLayer.dragSlotIndex = -1
+                                        colDragLayer.dropSlotIndex = -1
+                                        armed = false
+                                    }
+                                }
+                                ToolTip.visible: containsMouse && !armed
+                                ToolTip.text: qsTr("Trascina per scambiare la colonna")
+                                ToolTip.delay: 500
                             }
                         }
                     }
@@ -7533,6 +8003,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
         }
 
         onAccepted: {
+            mainWindow.resetClassicColumnOrder()
             if (bridge)
                 bridge.resetWindowLayout()
         }
@@ -7936,7 +8407,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
     Shortcut {
         sequence: "Ctrl+Shift+L"
         context: Qt.ApplicationShortcut
-        onActivated: { if (bridge) bridge.resetWindowLayout() }
+        onActivated: { mainWindow.resetClassicColumnOrder(); if (bridge) bridge.resetWindowLayout() }
     }
     // 1.0.268 (Phase 5.3) — apre Decode History Dialog
     Shortcut {
