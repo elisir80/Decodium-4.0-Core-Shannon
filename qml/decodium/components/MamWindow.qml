@@ -12,7 +12,10 @@ Dialog {
     width: 700
     height: 450
     modal: false
-    standardButtons: Dialog.Close
+    // 1.0.364+ — niente CloseOnPressOutside: la finestra MAM non si chiude piu' per
+    // un click accidentale fuori. Resta chiudibile con Esc o con la X (in tema)
+    // nell'header. Rimosso standardButtons (footer di stile default fuori-tema).
+    closePolicy: Popup.CloseOnEscape
     property var engine: null
     property bool positionInitialized: false
 
@@ -221,6 +224,34 @@ Dialog {
             font.pixelSize: 16
             font.bold: true
             color: warningOrange
+        }
+
+        // 1.0.364+ — X di chiusura in tema (sostituisce il footer standardButtons).
+        // Sta sopra il MouseArea di drag (ultimo figlio dichiarato) e ha il suo
+        // MouseArea che intercetta il click.
+        Rectangle {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 10
+            width: 28
+            height: 28
+            radius: 6
+            color: closeMamMA.containsMouse ? Qt.rgba(0.95, 0.26, 0.21, 0.30)
+                                            : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+            border.color: closeMamMA.containsMouse ? errorRed : glassBorder
+            Text {
+                anchors.centerIn: parent
+                text: "✕"
+                color: closeMamMA.containsMouse ? errorRed : textPrimary
+                font.pixelSize: 14
+            }
+            MouseArea {
+                id: closeMamMA
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: mamWindow.close()
+            }
         }
     }
 
