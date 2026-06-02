@@ -1017,6 +1017,13 @@ Item {
                 function decodeColor(label) {
                     if (waterfallDisplay.labelUseCustomColor)
                         return waterfallDisplay.labelColor
+                    // 1.0.366+ fix regressione (dal 1.0.332): rispetta il colore
+                    // highlight precalcolato (DXCC/new/worked-before, campo `color`
+                    // = highlightBg dal modello). Dal 1.0.332 il rendering era passato
+                    // al Repeater QML che ignorava questo campo -> i call uscivano solo
+                    // coi 3 colori fissi. Ora torna l'highlight WSJT-X-like.
+                    if (label.color && String(label.color).length > 0)
+                        return label.color
                     if (label.isMyCall)
                         return "#ff5050"
                     if (label.isCQ)
