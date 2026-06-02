@@ -967,19 +967,62 @@ ApplicationWindow {
         return v
     }
 
-    // Re-parenta l'orologio nell'host-slot indicato dall'indice (un solo re-parent →
-    // preserva id/stato/timer/popup citySearchPopup+worldClockMenu, che sono suoi figli).
+    // L'orologio è un OVERLAY FLOATING: vive in mainWindow.contentItem a coordinate
+    // x,y libere (drag dalla maniglia), posizionabile ovunque nella finestra. NON usa
+    // più gli host-slot dell'header. Posizione persistita in uiWorldClockX/Y.
     function applyWorldClockSlot() {
-        if (!headerFlow || !headerFlow.clockSlots)
-            return
         if (typeof worldClock === "undefined" || !worldClock)
             return
-        var i = clampWorldClockSlot(uiWorldClockHeaderSlot)
-        var host = headerFlow.clockSlots[i]
+        var host = mainWindow.contentItem
         if (!host)
             return
         if (worldClock.parent !== host)
             worldClock.parent = host
+        worldClock.z = 1000
+        var rx = safeBridgeSetting("uiWorldClockX", null)
+        var ry = safeBridgeSetting("uiWorldClockY", null)
+        var px = (rx === null || rx === undefined || String(rx).length === 0) ? NaN : parseFloat(rx)
+        var py = (ry === null || ry === undefined || String(ry).length === 0) ? NaN : parseFloat(ry)
+        if (isNaN(px)) px = host.width - worldClock.width - 12
+        if (isNaN(py)) py = 6
+        worldClock.x = clampClockX(px)
+        worldClock.y = clampClockY(py)
+    }
+
+    function clampClockX(v) {
+        var host = mainWindow.contentItem
+        if (!host) return v
+        var maxX = Math.max(0, host.width - worldClock.width)
+        if (v < 0) return 0
+        if (v > maxX) return maxX
+        return v
+    }
+
+    function clampClockY(v) {
+        var host = mainWindow.contentItem
+        if (!host) return v
+        var maxY = Math.max(0, host.height - worldClock.height)
+        if (v < 0) return 0
+        if (v > maxY) return maxY
+        return v
+    }
+
+    function clampWorldClockNow() {
+        if (typeof worldClock === "undefined" || !worldClock) return
+        worldClock.x = clampClockX(worldClock.x)
+        worldClock.y = clampClockY(worldClock.y)
+    }
+
+    function persistWorldClockPos() {
+        if (typeof worldClock === "undefined" || !worldClock) return
+        persistUiSetting("uiWorldClockX", Math.round(worldClock.x))
+        persistUiSetting("uiWorldClockY", Math.round(worldClock.y))
+    }
+
+    function resetWorldClockPos() {
+        persistUiSetting("uiWorldClockX", "")
+        persistUiSetting("uiWorldClockY", "")
+        applyWorldClockSlot()
     }
 
     // Snap magnetico al rilascio: data la X (spazio headerFlow) del puntatore, sceglie
@@ -1570,7 +1613,7 @@ ApplicationWindow {
                 // Il pulsante "Restore default button order" azzera questa chiave:
                 // resetta anche la posizione del World Clock al default (dopo la toolbar).
                 if (String(value || "").length === 0)
-                    mainWindow.uiWorldClockHeaderSlot = mainWindow.worldClockSlotDefault
+                    mainWindow.resetWorldClockPos()
             }
             else if (key === "uiClassicColumnOrder") {
                 mainWindow.uiClassicColumnOrder = mainWindow.parseClassicColumnOrder(String(value || ""))
@@ -3770,6 +3813,12 @@ ApplicationWindow {
 	                        updateTime()
 	                    }
 
+	                    Connections {
+	                        target: mainWindow
+	                        function onWidthChanged() { mainWindow.clampWorldClockNow() }
+	                        function onHeightChanged() { mainWindow.clampWorldClockNow() }
+	                    }
+
 	                    function ensureVisiblePart() {
 	                        if (!showAnalogClock && !showDigitalClock && !showWorldClockCities) {
 	                            showDigitalClock = true
@@ -3895,6 +3944,8 @@ ApplicationWindow {
                                 property bool armed: false
                                 property real pressSceneX: 0
                                 property bool moved: false
+                                property real grabDX: 0
+                                property real grabDY: 0
 
                                 Timer {
                                     id: worldClockHoldTimer
@@ -3913,38 +3964,29 @@ ApplicationWindow {
                                 }
 
                                 onPressed: function(mouse) {
-                                    armed = false
+                                    armed = true
                                     moved = false
-                                    pressSceneX = sceneX(mouse)
-                                    worldClockHoldTimer.start()
+                                    var pp = mapToItem(worldClock.parent, mouse.x, mouse.y)
+                                    grabDX = pp.x - worldClock.x
+                                    grabDY = pp.y - worldClock.y
                                 }
                                 onPositionChanged: function(mouse) {
-                                    var sx = sceneX(mouse)
-                                    if (Math.abs(sx - pressSceneX) > 6)
-                                        moved = true
-                                    if (armed)
-                                        worldClockDragGhost.updateX(sx)
-                                    else if (moved)
-                                        worldClockHoldTimer.stop()
+                                    if (!armed)
+                                        return
+                                    moved = true
+                                    var pp = mapToItem(worldClock.parent, mouse.x, mouse.y)
+                                    worldClock.x = mainWindow.clampClockX(pp.x - grabDX)
+                                    worldClock.y = mainWindow.clampClockY(pp.y - grabDY)
                                 }
                                 onReleased: function(mouse) {
-                                    worldClockHoldTimer.stop()
                                     if (armed) {
-                                        var sx = sceneX(mouse)
-                                        worldClockDragGhost.stop()
                                         armed = false
-                                        // Snap magnetico: scegli l'host-slot col gap più vicino a sx.
-                                        var target = mainWindow.computeClockSlot(sx)
-                                        if (target !== mainWindow.uiWorldClockHeaderSlot)
-                                            mainWindow.uiWorldClockHeaderSlot = target
+                                        if (moved)
+                                            mainWindow.persistWorldClockPos()
                                     }
                                 }
                                 onCanceled: {
-                                    worldClockHoldTimer.stop()
-                                    if (armed) {
-                                        worldClockDragGhost.stop()
-                                        armed = false
-                                    }
+                                    armed = false
                                 }
                                 ToolTip.visible: containsMouse && !armed
                                 ToolTip.text: qsTr("Trascina per riposizionare l'orologio")
