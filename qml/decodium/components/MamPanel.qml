@@ -390,6 +390,19 @@ Item {
                         color: mamPanel.secondaryCyan
                     }
 
+                    // 1.0.365+ — con MAM multi-stream ON il doppio-click su una
+                    // stazione decodificata la aggiunge a questa lista (la chiamo
+                    // io da TX1) invece di spegnere il MAM.
+                    Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: qsTr("Doppio-click su una stazione per aggiungerla alla lista.")
+                        font.pixelSize: 10
+                        font.italic: true
+                        opacity: 0.7
+                        color: mamPanel.secondaryCyan
+                    }
+
                     Repeater {
                         model: mamPanel.engine ? mamPanel.engine.mamActiveSlots : []
 

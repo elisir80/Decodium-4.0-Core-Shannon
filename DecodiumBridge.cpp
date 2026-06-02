@@ -14196,6 +14196,65 @@ bool DecodiumBridge::mamMultiStreamSequencerActive() const
         && !m_manualTxHold;
 }
 
+// 1.0.365+ — path CLICK->SLOT (modello Fox/hunter): l'utente fa doppio-click
+// (o spot DX cluster) su una stazione mentre il MAM multi-stream e' attivo;
+// invece di spegnere il MAM e aprire un single-QSO, creiamo (o accodiamo) uno
+// slot in cui IO chiamo lei partendo da TX1 ("CALL MYCALL GRID"). Tutto gated
+// su mamMultiStreamSequencerActive(): con MAM OFF non viene mai invocata.
+void DecodiumBridge::mamEnqueueClickedStation(const QString& callFull, int audioFreqHz)
+{
+    if (!mamMultiStreamSequencerActive()) {
+        return;
+    }
+    QString const base = Radio::base_callsign(callFull).trimmed().toUpper();
+    QString const myBaseUpper = normalizedBaseCall(m_callsign.trimmed().toUpper());
+    if (base.isEmpty() || base == myBaseUpper) {
+        return;
+    }
+    // Gia' in lista: non duplicare (ne' come slot ne' ripartendo da TX1).
+    if (mamSlotIndexForCall(base) >= 0) {
+        return;
+    }
+    // Niente capacita' libera: accoda; mamPromoteFromQueue() lo aprira' quando
+    // uno slot si libera (stessa via dei caller spontanei).
+    if (m_mamSlots.size() >= m_mamMaxStreams) {
+        int const qFreq = qBound(200, audioFreqHz > 0 ? audioFreqHz : m_rxFrequency, 4000);
+        enqueueCallerInternal(base, qFreq, -10, true);
+        bridgeLog(QStringLiteral("MAM click-enqueue (queued, no free slot): %1 @ %2Hz")
+                      .arg(base).arg(qFreq));
+        return;
+    }
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    MamQsoSlot s;
+    s.call = base;
+    s.callFull = normalizeCallToken(callFull).toUpper();
+    if (s.callFull.isEmpty()) {
+        s.callFull = base;
+    }
+    s.grid = QString {};
+    // Freq audio cliccata: clamp 200..4000 + de-dup ~50Hz vs gli slot esistenti
+    // (sposta se collide), come mamIngestDecode/mamPromoteFromQueue.
+    int fHz = qBound(200, audioFreqHz > 0 ? audioFreqHz : m_rxFrequency, 4000);
+    for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
+        bool collision = false;
+        for (MamQsoSlot const& other : m_mamSlots) {
+            if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
+        }
+        if (!collision) break;
+        fHz = qBound(200, fHz + 60, 4000);
+    }
+    s.audioFreqHz = fHz;
+    s.progress = 1;     // CQ-stage: IO inizio la chiamata
+    s.currentTx = 1;    // TX1 = "CALL MYCALL GRID"
+    s.startedOnMs = nowMs;
+    s.lastHeardMs = nowMs;
+    s.state = MamQsoSlot::State::Active;
+    m_mamSlots.append(s);
+    bridgeLog(QStringLiteral("MAM click-enqueue: %1 @ %2Hz slot=%3")
+                  .arg(s.callFull).arg(s.audioFreqHz).arg(m_mamSlots.size()));
+    emit mamActiveSlotsChanged();
+}
+
 int DecodiumBridge::mamSlotIndexForCall(const QString& base) const
 {
     QString const target = normalizedBaseCall(base);
@@ -21467,6 +21526,13 @@ void DecodiumBridge::engageDxClusterSpot(const QString& call, int audioFreqHz)
     bridgeLog(QStringLiteral("engageDxClusterSpot: call=%1 audioHz=%2 mode=%3")
               .arg(cleaned).arg(audioFreqHz).arg(m_mode));
 
+    // MAM multi-stream ON: lo spot diventa uno slot (IO chiamo da TX1) senza
+    // spegnere il MAM ne' attivare il single-QSO. Con MAM OFF e' un no-op.
+    if (mamMultiStreamSequencerActive()) {
+        mamEnqueueClickedStation(cleaned, audioFreqHz);
+        return;
+    }
+
     QString const previousDx = m_dxCall.trimmed();
     bool const newQso = Radio::base_callsign(previousDx).trimmed().compare(
                               Radio::base_callsign(cleaned).trimmed(), Qt::CaseInsensitive) != 0;
@@ -21622,6 +21688,15 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
         emit warningRaised(tr("TX non avviata"),
                            tr("Nominativo compresso non risolto"),
                            message);
+        return;
+    }
+
+    // MAM multi-stream ON: il doppio-click aggiunge la stazione alla coda/slot
+    // (IO la chiamo da TX1) invece di spegnere il MAM e aprire un single-QSO.
+    // Con MAM OFF (default) e' un no-op: il path single-QSO sottostante e'
+    // byte-identico.
+    if (mamMultiStreamSequencerActive()) {
+        mamEnqueueClickedStation(hisCall, audioFreq);
         return;
     }
 

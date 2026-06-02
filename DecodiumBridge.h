@@ -2849,6 +2849,11 @@ public:
     void    mamPromoteFromQueue();
     void    mamLogSlot(MamQsoSlot& s);
     int     mamSlotIndexForCall(const QString& base) const;
+    // 1.0.365+ — path CLICK->SLOT: doppio-click / spot DX cluster su una stazione
+    // con MAM multi-stream attivo la aggiunge a uno slot (IO chiamo da TX1) o, se
+    // pieno, alla coda. Q_INVOKABLE per un eventuale pulsante QML. Gated da
+    // mamMultiStreamSequencerActive(): con MAM OFF non fa nulla.
+    Q_INVOKABLE void mamEnqueueClickedStation(const QString& callFull, int audioFreqHz);
 
 private:
 
