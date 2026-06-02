@@ -923,28 +923,89 @@ ApplicationWindow {
         persistUiSetting("uiToolbarOrder", uiToolbarOrder.join(","))
     }
 
-    // === Ordine World Clock vs blocco pulsanti toolbar (riposizionabile via maniglia) ===
-    // false (default) = posizione attuale: toolbar PRIMA, World Clock DOPO.
-    // true            = World Clock PRIMA del blocco pulsanti toolbar.
-    // Lo swap avviene SOLO fra questi due blocchi adiacenti del Flow header
-    // (vedi reorderableHeaderPair), senza toccare logo/freq/DX Cluster/PSK.
-    property bool uiWorldClockBeforeToolbar: settingBool("uiWorldClockBeforeToolbar", false)
-    onUiWorldClockBeforeToolbarChanged: {
-        applyHeaderPairOrder()
-        persistUiSetting("uiWorldClockBeforeToolbar", uiWorldClockBeforeToolbar)
+    // === Posizione World Clock fra i blocchi dell'header (snap magnetico via maniglia) ===
+    // L'orologio resta IN LINEA nel Flow header (non finestra OS, non overlay x/y): viene
+    // re-parentato in uno dei 6 host-slot fissi inseriti nei gap STABILI fra i blocchi
+    // (vedi headerFlow.clockSlots). L'indice = lo slot che ospita l'orologio:
+    //   0 = prima dell'hamburger      3 = prima dei Sliders
+    //   1 = fra hamburger e logo      4 = prima del blocco pulsanti toolbar ("before")
+    //   2 = fra logo e freq display   5 = subito DOPO il blocco pulsanti toolbar ("after", DEFAULT)
+    // Default = 5 (posizione attuale, toolbar PRIMA / clock DOPO) → ZERO regressione.
+    // I blocchi condizionali (restore/DX/PSK) NON sono posizioni di aggancio.
+    readonly property int worldClockSlotBeforeToolbar: 4
+    readonly property int worldClockSlotAfterToolbar: 5
+    readonly property int worldClockSlotDefault: worldClockSlotAfterToolbar
+    property int uiWorldClockHeaderSlot: resolveInitialWorldClockSlot()
+    onUiWorldClockHeaderSlotChanged: {
+        applyWorldClockSlot()
+        persistUiSetting("uiWorldClockHeaderSlot", uiWorldClockHeaderSlot)
     }
 
-    // Riordina i due figli del Row reorderableHeaderPair re-parentando in coda
-    // l'elemento che deve stare per ULTIMO (operazione che preserva id/stato/binding).
-    function applyHeaderPairOrder() {
-        if (typeof reorderableHeaderPair === "undefined" || !reorderableHeaderPair)
+    // Init dell'indice slot: legge la nuova chiave; in sua assenza migra la VECCHIA chiave
+    // bool uiWorldClockBeforeToolbar (true→slot before, false→slot after) one-shot.
+    function resolveInitialWorldClockSlot() {
+        var raw = safeBridgeSetting("uiWorldClockHeaderSlot", null)
+        if (raw !== null && raw !== undefined && String(raw).trim().length > 0) {
+            var v = parseInt(raw, 10)
+            if (!isNaN(v))
+                return clampWorldClockSlot(v)
+        }
+        // Retrocompat: vecchio toggle bool (prima/dopo la toolbar).
+        var legacy = safeBridgeSetting("uiWorldClockBeforeToolbar", null)
+        if (legacy !== null && legacy !== undefined && String(legacy).trim().length > 0)
+            return coerceBool(legacy, false) ? worldClockSlotBeforeToolbar : worldClockSlotAfterToolbar
+        return worldClockSlotDefault
+    }
+
+    function clampWorldClockSlot(i) {
+        var n = (headerFlow && headerFlow.clockSlots) ? headerFlow.clockSlots.length : 6
+        var v = parseInt(i, 10)
+        if (isNaN(v))
+            v = worldClockSlotDefault
+        if (v < 0) v = 0
+        if (v > n - 1) v = n - 1
+        return v
+    }
+
+    // Re-parenta l'orologio nell'host-slot indicato dall'indice (un solo re-parent →
+    // preserva id/stato/timer/popup citySearchPopup+worldClockMenu, che sono suoi figli).
+    function applyWorldClockSlot() {
+        if (!headerFlow || !headerFlow.clockSlots)
             return
-        // Item da mettere per ultimo: toolbar se il clock va prima, altrimenti il clock.
-        var last = uiWorldClockBeforeToolbar ? headerUtilityButtons : worldClock
-        if (!last)
+        if (typeof worldClock === "undefined" || !worldClock)
             return
-        last.parent = null
-        last.parent = reorderableHeaderPair
+        var i = clampWorldClockSlot(uiWorldClockHeaderSlot)
+        var host = headerFlow.clockSlots[i]
+        if (!host)
+            return
+        if (worldClock.parent !== host)
+            worldClock.parent = host
+    }
+
+    // Snap magnetico al rilascio: data la X (spazio headerFlow) del puntatore, sceglie
+    // l'host-slot col gap più vicino. Modellata su computeTargetIndex della toolbar:
+    // per gli slot vuoti (width 0) il "centro" coincide con la loro x (posizione del gap).
+    function computeClockSlot(sceneX) {
+        if (!headerFlow || !headerFlow.clockSlots)
+            return uiWorldClockHeaderSlot
+        var slots = headerFlow.clockSlots
+        var best = -1
+        var bestDist = Number.MAX_VALUE
+        for (var i = 0; i < slots.length; ++i) {
+            var s = slots[i]
+            if (!s)
+                continue
+            var mapped = s.mapToItem(headerFlow, s.width / 2, 0)
+            var center = mapped.x
+            var d = Math.abs(sceneX - center)
+            if (d < bestDist) {
+                bestDist = d
+                best = i
+            }
+        }
+        if (best < 0)
+            return uiWorldClockHeaderSlot
+        return best
     }
 
     // Sposta l'id dalla posizione 'from' alla posizione 'to' nel modello e committa.
@@ -1066,7 +1127,7 @@ ApplicationWindow {
     }
 
     // Assegna ad ogni pannello il parent = slot-host nella posizione indicata dalla mappa.
-    // Operazione che preserva id/stato/binding (re-parent, come applyHeaderPairOrder).
+    // Operazione che preserva id/stato/binding (re-parent, come applyWorldClockSlot).
     // I pannelli usano anchors.fill: parent → riempiono lo slot che li ospita.
     // Stadio 2: gestisce 4 pannelli; il re-parent fra un colSlot (SplitView) e txSlot
     // (txPanelContainer) è cross-container ma `panel.parent = host` + anchors.fill funziona
@@ -1509,14 +1570,22 @@ ApplicationWindow {
                 // Il pulsante "Restore default button order" azzera questa chiave:
                 // resetta anche la posizione del World Clock al default (dopo la toolbar).
                 if (String(value || "").length === 0)
-                    mainWindow.uiWorldClockBeforeToolbar = false
+                    mainWindow.uiWorldClockHeaderSlot = mainWindow.worldClockSlotDefault
             }
             else if (key === "uiClassicColumnOrder") {
                 mainWindow.uiClassicColumnOrder = mainWindow.parseClassicColumnOrder(String(value || ""))
                 mainWindow.applyClassicColumnOrder()
             }
+            else if (key === "uiWorldClockHeaderSlot") {
+                var slotVal = parseInt(value, 10)
+                if (isNaN(slotVal))
+                    slotVal = mainWindow.worldClockSlotDefault
+                mainWindow.uiWorldClockHeaderSlot = mainWindow.clampWorldClockSlot(slotVal)
+            }
             else if (key === "uiWorldClockBeforeToolbar")
-                mainWindow.uiWorldClockBeforeToolbar = mainWindow.coerceBool(value, false)
+                // Retrocompat: vecchio toggle bool → slot before/after toolbar.
+                mainWindow.uiWorldClockHeaderSlot = mainWindow.coerceBool(value, false)
+                    ? mainWindow.worldClockSlotBeforeToolbar : mainWindow.worldClockSlotAfterToolbar
             else if (key === "uiBtnFooterResetVisible")
                 mainWindow.uiBtnFooterResetVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiBtnFooterHistoryVisible")
@@ -2419,6 +2488,24 @@ ApplicationWindow {
                 anchors.margins: 6
                 spacing: 8
 
+                // ── Host-slot dell'orologio fra i blocchi dell'header ──
+                // 6 Item "gancio" nei gap STABILI del Flow. L'orologio (worldClock) è
+                // re-parentato in UNO di essi (vedi mainWindow.applyWorldClockSlot). Quando
+                // uno slot NON ospita l'orologio è width 0 E visible:false, così il Flow lo
+                // salta del tutto (niente micro-gap residuo dallo spacing fra invisibili).
+                readonly property var clockSlots: [clockSlot0, clockSlot1, clockSlot2,
+                                                   clockSlot3, clockSlot4, clockSlot5]
+
+                Component.onCompleted: mainWindow.applyWorldClockSlot()
+
+                // slot 0 — prima dell'hamburger
+                Item {
+                    id: clockSlot0
+                    height: 80
+                    width: worldClock.parent === clockSlot0 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot0
+                }
+
                 // Hamburger Menu Button
                 Rectangle {
                     width: 40
@@ -2459,6 +2546,14 @@ ApplicationWindow {
                     ToolTip.delay: 500
                 }
 
+                // slot 1 — fra hamburger e logo
+                Item {
+                    id: clockSlot1
+                    height: 80
+                    width: worldClock.parent === clockSlot1 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot1
+                }
+
                 // Logo group
                 Rectangle {
                     width: 90
@@ -2480,6 +2575,14 @@ ApplicationWindow {
                             color: textSecondary
                         }
                     }
+                }
+
+                // slot 2 — fra logo e freq display
+                Item {
+                    id: clockSlot2
+                    height: 80
+                    width: worldClock.parent === clockSlot2 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot2
                 }
 
                 // Radio Frequency Display with CAT status
@@ -2892,6 +2995,14 @@ ApplicationWindow {
                     }
                 }
 
+                // slot 3 — fra freq display e Sliders
+                Item {
+                    id: clockSlot3
+                    height: 80
+                    width: worldClock.parent === clockSlot3 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot3
+                }
+
                 // RX/TX Sliders + LVL/Monitor
                 Item {
                     width: 200
@@ -3139,17 +3250,17 @@ ApplicationWindow {
                     }
                 } // End Sliders Item
 
-                // ── Coppia riordinabile: blocco pulsanti toolbar + World Clock ──
-                // Sono gli UNICI due blocchi header swappabili (maniglia sul World Clock).
-                // Restano figli adiacenti del Flow tramite questo Row; lo swap before/after
-                // avviene re-parentando in coda l'elemento da mettere per ultimo
-                // (vedi mainWindow.applyHeaderPairOrder), preservandone id/stato/binding.
-                Row {
-                    id: reorderableHeaderPair
-                    spacing: headerFlow.spacing
-                    Component.onCompleted: mainWindow.applyHeaderPairOrder()
+                // slot 4 — prima del blocco pulsanti toolbar (= "before toolbar")
+                Item {
+                    id: clockSlot4
+                    height: 80
+                    width: worldClock.parent === clockSlot4 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot4
+                }
 
                 // Grouped buttons: Settings, REC, WAV, Log, Macro, Astro, CAT
+                // (ex figlio del Row reorderableHeaderPair, ora figlio diretto del Flow:
+                // l'orologio non è più appaiato qui ma vive negli host-slot — vedi clockSlots).
                 Item {
                     id: headerUtilityButtons
                     width: 360
@@ -3608,6 +3719,14 @@ ApplicationWindow {
                     }
                 } // End Grouped buttons Item
 
+                // slot 5 — subito dopo il blocco pulsanti toolbar (= "after toolbar", DEFAULT)
+                Item {
+                    id: clockSlot5
+                    height: 80
+                    width: worldClock.parent === clockSlot5 ? worldClock.width : 0
+                    visible: worldClock.parent === clockSlot5
+                }
+
 	                // World Clock with Analog Display
 	                Item {
 	                    id: worldClock
@@ -3814,11 +3933,10 @@ ApplicationWindow {
                                         var sx = sceneX(mouse)
                                         worldClockDragGhost.stop()
                                         armed = false
-                                        // Snap magnetico: confronta X col centro del blocco toolbar.
-                                        var tb = headerUtilityButtons.mapToItem(headerFlow, headerUtilityButtons.width / 2, 0).x
-                                        var wantBefore = sx < tb
-                                        if (wantBefore !== mainWindow.uiWorldClockBeforeToolbar)
-                                            mainWindow.uiWorldClockBeforeToolbar = wantBefore
+                                        // Snap magnetico: scegli l'host-slot col gap più vicino a sx.
+                                        var target = mainWindow.computeClockSlot(sx)
+                                        if (target !== mainWindow.uiWorldClockHeaderSlot)
+                                            mainWindow.uiWorldClockHeaderSlot = target
                                     }
                                 }
                                 onCanceled: {
@@ -4183,8 +4301,7 @@ ApplicationWindow {
 	                            }
 	                        }
 	                    }
-	                }
-                } // End reorderableHeaderPair (toolbar + World Clock)
+	                } // End World Clock Item
 
                 // Waterfall restore button (visible when minimized)
                 Rectangle {
