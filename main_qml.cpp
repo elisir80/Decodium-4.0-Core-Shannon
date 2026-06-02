@@ -1308,6 +1308,19 @@ int main(int argc, char* argv[])
         DecodiumLogging::instance()->logStartupDiagnostics();
     L("bridge OK");
 
+    // 1.0.364+ — MAM multi-stream nativo (FASE 1): hook di verifica env-gated.
+    // Con DECODIUM_MAM_DUMP impostato, genera un WAV multi-stream FT8 di test e
+    // lo scrive su disco. Gated da env var => zero impatto in produzione; utile
+    // per l'analisi spettrale offline delle fasi 2-3.
+    if (qEnvironmentVariableIsSet("DECODIUM_MAM_DUMP")) {
+        bridge.mamDumpTestWav(QStringLiteral("C:/decodium-4.0/_mam_test.wav"),
+                              {QStringLiteral("CQ TEST AA1AAA"),
+                               QStringLiteral("BB2BBB AA1AAA -10"),
+                               QStringLiteral("CC3CCC AA1AAA RR73")},
+                              {600, 1200, 1800});
+        L("MAM dump test WAV requested via DECODIUM_MAM_DUMP");
+    }
+
     // Keep the bridge alive longer than the QML engine. During shutdown QML
     // bindings still reevaluate while root objects are being torn down.
     // If the context object dies first, QML sees bridge == null and floods the

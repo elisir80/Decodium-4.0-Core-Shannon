@@ -2266,6 +2266,12 @@ private:
         QByteArray pcm;
     };
     TxAudioCache       m_txAudioCache;
+    // 1.0.364+ — MAM multi-stream nativo (FASE 1). Default OFF: con
+    // m_mamMultiStream==false multiStreamActive() ritorna sempre false e il
+    // path TX e' identico al mono single-stream.
+    bool               m_mamMultiStream {false};
+    QStringList        m_mamMessages;
+    QVector<int>       m_mamF0sHz;
     bool               m_txAudioPrecomputeScheduled {false};
     bool               m_cachedTxOutputDeviceValid {false};
     QString            m_cachedTxOutputDeviceName;
@@ -2769,6 +2775,18 @@ public:
     Q_INVOKABLE void recordFrameTimestamp();
     void noteDecodeReceived() const;   // contatore "received" (enrich)
     void noteDecodeCommitted();        // contatore "committed" (append)
+
+    // 1.0.364+ — MAM multi-stream nativo (FASE 1, solo C++, default OFF).
+    // multiStreamActive() e' true solo quando il toggle e' attivo, il modo e'
+    // FT8 e ci sono >=2 messaggi con altrettante frequenze. Quando false il
+    // path TX resta byte-identico al mono single-stream esistente.
+    bool multiStreamActive() const;
+    // Test/verifica offline: genera il multi-stream wave dai messaggi/f0
+    // passati direttamente (indipendente dallo stato del bridge) e lo scrive
+    // come WAV mono 16-bit via writeMono16WavFile. Serve per l'analisi
+    // spettrale delle fasi 2-3 senza UI.
+    Q_INVOKABLE bool mamDumpTestWav(const QString& path, const QStringList& messages,
+                                    const QVector<int>& f0sHz, int sampleRate = 48000);
 
 private:
 

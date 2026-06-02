@@ -4451,6 +4451,59 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
     return wave;
 }
 
+// 1.0.364+ — MAM multi-stream nativo (FASE 1). Genera N stream FT8 (uno per
+// messaggio/frequenza), li somma campione-per-campione e peak-normalizza il
+// risultato (stessa logica di normalize_wave/foxcom). Usato solo quando
+// multiStreamActive() e' true; abort su qualunque errore di codifica.
+static QVector<float> generateMultiStreamFt8Wave(QStringList const& messages,
+                                                 QVector<int> const& f0sHz,
+                                                 QString* errorOut = nullptr)
+{
+    if (messages.isEmpty() || messages.size() != f0sHz.size()) {
+        if (errorOut) *errorOut = QStringLiteral("MAM multi-stream: input non valido");
+        return {};
+    }
+
+    static constexpr int kFt8Nsym = 79;
+    static constexpr int kFt8Nsps = 7680;
+    QVector<float> acc(kFt8Nsym * kFt8Nsps, 0.0f);
+
+    for (int i = 0; i < messages.size(); ++i) {
+        auto enc = decodium::txmsg::encodeFt8(messages.at(i));
+        if (!enc.ok || enc.tones.size() < kFt8Nsym) {
+            if (errorOut) {
+                *errorOut = QStringLiteral("MAM multi-stream: codifica FT8 fallita per [%1]")
+                                .arg(messages.at(i));
+            }
+            return {};
+        }
+        QVector<float> const slot = decodium::txwave::generateFt8Wave(
+            enc.tones.constData(), kFt8Nsym, kFt8Nsps, 2.0f, 48000.0f,
+            static_cast<float>(f0sHz.at(i)));
+        int const samples = std::min(static_cast<int>(acc.size()),
+                                     static_cast<int>(slot.size()));
+        for (int k = 0; k < samples; ++k) {
+            acc[k] += slot.at(k);
+        }
+    }
+
+    // Peak-normalize a 0.98 (come normalize_wave foxcom ma con ~2% di headroom):
+    // evita i campioni a fondo scala (Int16 32767) dopo la conversione del sink,
+    // senza distorsione percepibile su FT8 (envelope costante, -0.17 dB).
+    float peak = 0.0f;
+    for (float const sample : acc) {
+        peak = std::max(peak, std::abs(sample));
+    }
+    if (peak > 0.0f) {
+        float const norm = 0.98f / peak;
+        for (float& sample : acc) {
+            sample *= norm;
+        }
+    }
+
+    return acc;
+}
+
 static int estimatedSyncPayloadMs(const QString& mode)
 {
     if (mode == QStringLiteral("FT8"))
@@ -14031,6 +14084,33 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
     }
 }
 
+// 1.0.364+ — MAM multi-stream nativo (FASE 1).
+bool DecodiumBridge::multiStreamActive() const
+{
+    return m_mamMultiStream
+        && m_mode.trimmed().toUpper() == QStringLiteral("FT8")
+        && m_mamMessages.size() >= 2
+        && m_mamMessages.size() == m_mamF0sHz.size();
+}
+
+// Test puro: genera il multi-stream wave dagli argomenti diretti (NON usa
+// m_mamMessages) e lo scrive come WAV mono 16-bit. Per analisi offline.
+bool DecodiumBridge::mamDumpTestWav(const QString& path, const QStringList& messages,
+                                    const QVector<int>& f0sHz, int sampleRate)
+{
+    QString err;
+    QVector<float> w = generateMultiStreamFt8Wave(messages, f0sHz, &err);
+    if (w.isEmpty()) {
+        bridgeLog(QStringLiteral("MAM dump test WAV: generazione fallita: %1").arg(err));
+        return false;
+    }
+    bool const ok = writeMono16WavFile(path, w, sampleRate);
+    bridgeLog(QStringLiteral("MAM dump test WAV %1: %2 (%3 samples)")
+                  .arg(ok ? QStringLiteral("saved") : QStringLiteral("failed"), path)
+                  .arg(w.size()));
+    return ok;
+}
+
 bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFrequency, bool needPcm,
                                            QVector<float>* waveOut, QByteArray* pcmOut,
                                            QAudioFormat* formatOut, QAudioDevice* deviceOut,
@@ -14073,7 +14153,10 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
             && m_txAudioCache.tciAudio == tciAudio;
     };
 
-    if (cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
+    // 1.0.364+ — MAM multi-stream: bypassa la cache (force rebuild) cosi' il
+    // multi-stream non serve mai PCM/wave mono stantio. Mono path invariato.
+    if (!multiStreamActive()
+        && cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
                 && m_cachedTxOutputDeviceName == m_audioOutputDevice
@@ -14134,7 +14217,12 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     QString buildError;
     QElapsedTimer phaseTimer;
     phaseTimer.start();
-    QVector<float> wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
+    QVector<float> wave;
+    if (multiStreamActive()) {
+        wave = generateMultiStreamFt8Wave(m_mamMessages, m_mamF0sHz, &buildError);
+    } else {
+        wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
+    }
     qint64 const waveMs = phaseTimer.elapsed();
     if (wave.isEmpty()) {
         if (errorOut) {
