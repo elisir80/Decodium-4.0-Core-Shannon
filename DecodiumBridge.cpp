@@ -14516,6 +14516,30 @@ void DecodiumBridge::scheduleFt2AsyncTxAtNextSafeSlot(const QString& reason,
         return;
     }
 
+    // FIX 1.0.364 — rilevatore di fase-bloccata + sfasamento automatico (anti same-slot
+    // lock FT2). In FT2 half-duplex due stazioni devono ALTERNARE la trasmissione: se
+    // entrambe trasmettono nella stessa fase non si sentono (deadlock, confermato dai
+    // log a 2 lati ZL1BW/ZL3DMH). Se stiamo ritrasmettendo lo stesso TX (m_txRetryCount
+    // >= 3, QSO bloccato) e lo slot in cui trasmetteremmo ha la STESSA parita' dello
+    // slot del partner (m_ft2AsyncPartnerSlotMs, vedi Fix A v2) -> aggiungo un periodo
+    // cosi' ci spostiamo nella fase OPPOSTA (trasmettiamo quando il partner ascolta).
+    // Auto-stabilizzante: una volta in fase opposta la parita' e' diversa e non sfasa
+    // piu'. Rompe il lock anche se l'altra stazione gira una versione vecchia.
+    if (m_ft2AsyncPartnerSlotMs > 0 && m_txRetryCount >= 3) {
+        int const ft2LockPeriodMs = periodMsForMode(QStringLiteral("FT2"));
+        if (ft2LockPeriodMs > 0) {
+            qint64 const lockNowMs = correctedUtcEpochMs();
+            qint64 const ourSlot = (lockNowMs + delayMs) / static_cast<qint64>(ft2LockPeriodMs);
+            qint64 const partnerSlot = m_ft2AsyncPartnerSlotMs / static_cast<qint64>(ft2LockPeriodMs);
+            qint64 const parity = (((ourSlot - partnerSlot) % 2) + 2) % 2;
+            if (parity == 0) {
+                delayMs += ft2LockPeriodMs;
+                bridgeLog(QStringLiteral("FT2 phase-lock breaker: stessa fase TX del partner per %1 retry -> sfaso +1 periodo (ourSlot=%2 partnerSlot=%3 newDelay=%4ms)")
+                              .arg(m_txRetryCount).arg(ourSlot).arg(partnerSlot).arg(delayMs));
+            }
+        }
+    }
+
     bridgeLog(QStringLiteral("FT2 async late TX guard: defer TX%1 (%2) elapsed=%3ms latest=%4ms delay=%5ms")
                   .arg(m_currentTx)
                   .arg(reason)
