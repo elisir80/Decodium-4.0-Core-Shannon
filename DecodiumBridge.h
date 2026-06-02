@@ -427,6 +427,12 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
     // 1.0.355 — opt-in: salta decode sync di fine-slot quando l'async ha gia' coperto lo slot
     Q_PROPERTY(bool ft2AsyncSkipRedundantSyncDecode READ ft2AsyncSkipRedundantSyncDecode WRITE setFt2AsyncSkipRedundantSyncDecode NOTIFY ft2AsyncSkipRedundantSyncDecodeChanged)
+    // 1.0.364+ — MAM multi-stream (MSHV) FASE 3: toggle opt-in + cap stream + lista
+    // slot attivi per la UI. Default OFF: comportamento MAM seriale invariato.
+    Q_PROPERTY(bool mamMultiStream READ mamMultiStream WRITE setMamMultiStream NOTIFY mamMultiStreamChanged)
+    Q_PROPERTY(int mamMaxStreams READ mamMaxStreams WRITE setMamMaxStreams NOTIFY mamMaxStreamsChanged)
+    Q_PROPERTY(QVariantList mamActiveSlots READ mamActiveSlots NOTIFY mamActiveSlotsChanged)
+    Q_PROPERTY(int mamActiveSlotCount READ mamActiveSlotCount NOTIFY mamActiveSlotsChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
     // Diversamente dalla 1.0.186 revertita, qui e' default OFF e ha gate molto
     // piu' stretti + log immediato di ogni invocazione (anche se guardrail rifiuta).
@@ -1332,6 +1338,9 @@ signals:
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2ApHashCacheChanged();         // 1.0.293
     void ft2AsyncSkipRedundantSyncDecodeChanged();  // 1.0.355
+    void mamMultiStreamChanged();      // 1.0.364+ — MAM multi-stream FASE 3
+    void mamMaxStreamsChanged();       // 1.0.364+ — cap stream simultanei
+    void mamActiveSlotsChanged();      // 1.0.364+ — lista slot QSO attivi per UI
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
     void smoothDecodeFlowChanged();  // 1.0.179 — Smooth Decode Flow
@@ -2827,6 +2836,11 @@ public:
     // Tutto gated da mamMultiStreamSequencerActive(); se OFF non vengono mai
     // invocate e il path single-QSO e' intatto.
     Q_INVOKABLE void setMamMultiStream(bool on);
+    bool    mamMultiStream() const { return m_mamMultiStream; }
+    void    setMamMaxStreams(int v);
+    int     mamMaxStreams() const { return m_mamMaxStreams; }
+    QVariantList mamActiveSlots() const;
+    int     mamActiveSlotCount() const { return m_mamSlots.size(); }
     bool    mamMultiStreamSequencerActive() const;
     void    mamDispatchPeriod();
     void    mamIngestDecode(const QStringList& f);

@@ -49,6 +49,19 @@ Item {
         }
     }
 
+    // 1.0.364+ — etichetta leggibile dello stato di uno stream MAM dal suo
+    // progress/currentTx (per la lista multi-stream).
+    function mamStreamStage(progress, tx) {
+        switch (tx) {
+        case 2: return "TX2 rpt"
+        case 3: return "TX3 R+rpt"
+        case 4: return "TX4 RR73"
+        case 5: return "TX5 73"
+        case 6: return "CQ"
+        default: return qsoProgressName(progress)
+        }
+    }
+
     function queueCall(entry) {
         if (!entry)
             return ""
@@ -349,10 +362,91 @@ Item {
                 }
 
                 Text {
-                    visible: !mamPanel.mamHasActiveCaller
+                    visible: !mamPanel.mamHasActiveCaller && !(mamPanel.engine && mamPanel.engine.mamMultiStream)
                     text: "No active caller"
                     font.pixelSize: 12
                     color: mamPanel.textSecondary
+                }
+
+                // 1.0.364+ — MAM multi-stream (MSHV): QSO paralleli attivi.
+                // Visibile solo col toggle multi-stream ON; la vista coda/NOW
+                // seriale qui sopra resta intatta per il MAM seriale.
+                Column {
+                    width: parent.width
+                    spacing: 4
+                    visible: mamPanel.engine ? mamPanel.engine.mamMultiStream : false
+
+                    Rectangle {
+                        width: parent.width
+                        height: 1
+                        color: mamPanel.glassBorder
+                        visible: mamPanel.mamHasActiveCaller
+                    }
+
+                    Text {
+                        text: qsTr("QSO attivi (multi-stream): ") + (mamPanel.engine ? mamPanel.engine.mamActiveSlotCount : 0)
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: mamPanel.secondaryCyan
+                    }
+
+                    Repeater {
+                        model: mamPanel.engine ? mamPanel.engine.mamActiveSlots : []
+
+                        Rectangle {
+                            width: parent ? parent.width : 0
+                            height: msRow.implicitHeight + 8
+                            radius: 4
+                            color: Qt.rgba(mamPanel.secondaryCyan.r, mamPanel.secondaryCyan.g, mamPanel.secondaryCyan.b, 0.08)
+
+                            RowLayout {
+                                id: msRow
+                                anchors.fill: parent
+                                anchors.margins: 5
+                                spacing: 6
+
+                                Text {
+                                    text: modelData.call
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: mamPanel.accentGreen
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+
+                                Text {
+                                    text: modelData.freq + " Hz"
+                                    font.pixelSize: 11
+                                    color: mamPanel.textSecondary
+                                    Layout.preferredWidth: 54
+                                    horizontalAlignment: Text.AlignRight
+                                }
+
+                                Text {
+                                    text: mamPanel.mamStreamStage(modelData.progress, modelData.tx)
+                                    font.pixelSize: 11
+                                    color: mamPanel.warningOrange
+                                    Layout.preferredWidth: 78
+                                    horizontalAlignment: Text.AlignRight
+                                }
+
+                                Text {
+                                    text: (modelData.snr === 127 ? "--" : modelData.snr) + " dB"
+                                    font.pixelSize: 11
+                                    color: mamPanel.textSecondary
+                                    Layout.preferredWidth: 44
+                                    horizontalAlignment: Text.AlignRight
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        visible: mamPanel.engine ? mamPanel.engine.mamActiveSlotCount === 0 : true
+                        text: qsTr("Nessuno stream attivo")
+                        font.pixelSize: 11
+                        color: mamPanel.textSecondary
+                    }
                 }
             }
         }

@@ -14144,7 +14144,47 @@ void DecodiumBridge::setMamMultiStream(bool on)
         m_mamMessages.clear();
         m_mamF0sHz.clear();
     }
+    // FASE 3: persisti nello store canonico Decodium3 (come i toggle FT2).
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("MamMultiStream"), on);
+    emit mamMultiStreamChanged();
+    emit mamActiveSlotsChanged();
     bridgeLog(QStringLiteral("MAM multi-stream sequencer toggled: %1").arg(on ? 1 : 0));
+}
+
+// FASE 3 - cap stream simultanei MAM (clamp 2..5). Persistito nello store
+// canonico Decodium3; riletto da loadSettings al prossimo avvio.
+void DecodiumBridge::setMamMaxStreams(int v)
+{
+    int const clamped = qBound(2, v, 5);
+    if (m_mamMaxStreams == clamped) {
+        return;
+    }
+    m_mamMaxStreams = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("MamMaxStreams"), m_mamMaxStreams);
+    emit mamMaxStreamsChanged();
+    bridgeLog(QStringLiteral("MAM max streams set: %1").arg(m_mamMaxStreams));
+}
+
+// FASE 3 - snapshot read-only degli slot QSO multi-stream attivi per la UI.
+// Un QVariantMap per slot; NON muta stato. Emesso via mamActiveSlotsChanged()
+// dai punti che modificano m_mamSlots.
+QVariantList DecodiumBridge::mamActiveSlots() const
+{
+    QVariantList out;
+    out.reserve(m_mamSlots.size());
+    for (MamQsoSlot const& s : m_mamSlots) {
+        QVariantMap m;
+        m.insert(QStringLiteral("call"), s.callFull.isEmpty() ? s.call : s.callFull);
+        m.insert(QStringLiteral("freq"), s.audioFreqHz);
+        m.insert(QStringLiteral("progress"), s.progress);
+        m.insert(QStringLiteral("tx"), s.currentTx);
+        m.insert(QStringLiteral("snr"), s.partnerSnrDb);
+        m.insert(QStringLiteral("retry"), s.retryCount);
+        out.append(m);
+    }
+    return out;
 }
 
 bool DecodiumBridge::mamMultiStreamSequencerActive() const
@@ -14293,6 +14333,7 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
                       .arg(s.audioFreqHz)
                       .arg(s.reportSent)
                       .arg(m_mamSlots.size()));
+        emit mamActiveSlotsChanged();
         return;
     }
 
@@ -14315,6 +14356,7 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
             s.state = MamQsoSlot::State::Done;
         }
         bridgeLog(QStringLiteral("MAM slot %1: final 73 -> done").arg(s.callFull));
+        emit mamActiveSlotsChanged();
         return;
     }
     if (hasSignoff) {
@@ -14334,6 +14376,7 @@ void DecodiumBridge::mamIngestDecode(const QStringList& f)
         s.currentTx = 2;
         s.progress = 2;
     }
+    emit mamActiveSlotsChanged();
 }
 
 // Rimuove gli slot conclusi o scaduti. Timeout: troppi retry sullo stesso step
@@ -14366,6 +14409,7 @@ void DecodiumBridge::mamPruneSlots()
     }
     if (removed > 0) {
         bridgeLog(QStringLiteral("MAM prune: removed %1 slot(s), %2 active").arg(removed).arg(m_mamSlots.size()));
+        emit mamActiveSlotsChanged();
     }
 }
 
@@ -14375,6 +14419,7 @@ void DecodiumBridge::mamPruneSlots()
 void DecodiumBridge::mamPromoteFromQueue()
 {
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    int const slotsBefore = m_mamSlots.size();
     while (m_mamSlots.size() < m_mamMaxStreams && !m_callerQueue.isEmpty()) {
         QString const entry = m_callerQueue.takeFirst();
         emit callerQueueChanged();
@@ -14416,6 +14461,9 @@ void DecodiumBridge::mamPromoteFromQueue()
         m_mamSlots.append(s);
         bridgeLog(QStringLiteral("MAM slot promoted from queue: %1 freq=%2Hz (slots=%3)")
                       .arg(s.callFull).arg(s.audioFreqHz).arg(m_mamSlots.size()));
+    }
+    if (m_mamSlots.size() != slotsBefore) {
+        emit mamActiveSlotsChanged();
     }
 }
 
@@ -14561,6 +14609,7 @@ void DecodiumBridge::mamDispatchPeriod()
                   .arg(m_mamSlots.size())
                   .arg(pidx)
                   .arg(elapsedMs));
+    emit mamActiveSlotsChanged();
     startTx();
 }
 
@@ -25479,6 +25528,9 @@ void DecodiumBridge::loadSettings()
     m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
     // 1.0.355 — skip decode sync di fine-slot quando l'async ha gia' coperto lo slot
     m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
+    // 1.0.364+ - MAM multi-stream (MSHV) FASE 3 (default OFF; cap 2..5, default 3)
+    m_mamMultiStream = s.value(QStringLiteral("MamMultiStream"), false).toBool();
+    m_mamMaxStreams  = qBound(2, s.value(QStringLiteral("MamMaxStreams"), 3).toInt(), 5);
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
     // 1.0.304 (#9) — resume-on-reply, opt-in default OFF

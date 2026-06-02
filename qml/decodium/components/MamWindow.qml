@@ -65,6 +65,19 @@ Dialog {
         }
     }
 
+    // 1.0.364+ - etichetta leggibile dello stato di uno stream MAM dal suo
+    // progress/currentTx (per la lista multi-stream).
+    function mamStreamStage(progress, tx) {
+        switch (tx) {
+        case 2: return "TX2 rpt"
+        case 3: return "TX3 R+rpt"
+        case 4: return "TX4 RR73"
+        case 5: return "TX5 73"
+        case 6: return "CQ"
+        default: return qsoProgressName(progress)
+        }
+    }
+
     function queueCall(entry) {
         if (!entry)
             return ""
@@ -404,10 +417,91 @@ Dialog {
                     }
 
                     Text {
-                        visible: !mamWindow.mamHasActiveCaller
+                        visible: !mamWindow.mamHasActiveCaller && !(mamWindow.engine && mamWindow.engine.mamMultiStream)
                         text: "No active caller"
                         font.pixelSize: 12
                         color: textSecondary
+                    }
+
+                    // 1.0.364+ - MAM multi-stream (MSHV): QSO paralleli attivi.
+                    // Visibile solo col toggle multi-stream ON; la vista coda/NOW
+                    // seriale resta intatta per il MAM seriale.
+                    Column {
+                        width: parent.width
+                        spacing: 6
+                        visible: mamWindow.engine ? mamWindow.engine.mamMultiStream : false
+
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            color: mamWindow.glassBorder
+                            visible: mamWindow.mamHasActiveCaller
+                        }
+
+                        Text {
+                            text: qsTr("QSO attivi (multi-stream): ") + (mamWindow.engine ? mamWindow.engine.mamActiveSlotCount : 0)
+                            font.pixelSize: 12
+                            font.bold: true
+                            color: secondaryCyan
+                        }
+
+                        Repeater {
+                            model: mamWindow.engine ? mamWindow.engine.mamActiveSlots : []
+
+                            Rectangle {
+                                width: parent ? parent.width : 0
+                                height: msRow.implicitHeight + 8
+                                radius: 4
+                                color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.08)
+
+                                RowLayout {
+                                    id: msRow
+                                    anchors.fill: parent
+                                    anchors.margins: 6
+                                    spacing: 6
+
+                                    Text {
+                                        text: modelData.call
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: accentGreen
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text {
+                                        text: modelData.freq + " Hz"
+                                        font.pixelSize: 11
+                                        color: textSecondary
+                                        Layout.preferredWidth: 58
+                                        horizontalAlignment: Text.AlignRight
+                                    }
+
+                                    Text {
+                                        text: mamWindow.mamStreamStage(modelData.progress, modelData.tx)
+                                        font.pixelSize: 11
+                                        color: warningOrange
+                                        Layout.preferredWidth: 82
+                                        horizontalAlignment: Text.AlignRight
+                                    }
+
+                                    Text {
+                                        text: (modelData.snr === 127 ? "--" : modelData.snr) + " dB"
+                                        font.pixelSize: 11
+                                        color: textSecondary
+                                        Layout.preferredWidth: 46
+                                        horizontalAlignment: Text.AlignRight
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            visible: mamWindow.engine ? mamWindow.engine.mamActiveSlotCount === 0 : true
+                            text: qsTr("Nessuno stream attivo")
+                            font.pixelSize: 11
+                            color: textSecondary
+                        }
                     }
                 }
             }

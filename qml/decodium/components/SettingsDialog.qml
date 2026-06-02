@@ -3329,6 +3329,63 @@ Dialog {
                                     ToolTip.text: qsTr("Solo FT2 async: quando il decode asincrono (incrementale ogni 100ms) ha GIÀ decodificato uno slot, salta la passata di decode sincrona di fine-slot per quello slot.\n\nVantaggio: elimina la contesa (~1.8s dopo il TX) sullo stesso worker, così l'aggancio della risposta del partner è più rapido.\n\nCosto: per gli slot già coperti dall'async perdi la passata weak-averaging completa di fine-slot (che recupera stazioni deboli/marginali). Gli slot in cui l'async è tornato VUOTO mantengono comunque il decode sync.\n\nDefault: OFF.")
                                 }
 
+                                // 1.0.364+ — MAM multi-stream (MSHV): risponde a più
+                                // chiamanti nello stesso slot su frequenze diverse.
+                                // Opzione AGGIUNTIVA del MAM seriale. Default OFF.
+                                Text {
+                                    text: qsTr("FT2/FT8 MAM multi-stream (MSHV, sperimentale):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: mamMultiStreamCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.mamMultiStream : false
+                                    onToggled: {
+                                        if (bridge) bridge.mamMultiStream = checked
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Modalità MSHV multi-stream: in un singolo periodo risponde a PIÙ chiamanti contemporaneamente, ciascuno sulla SUA frequenza audio (come una stazione DX-pedition).\n\nÈ un'OPZIONE AGGIUNTIVA del MAM: serve avere MAM (Multi-Answer Mode) o AutoCQ attivo perché entri in funzione. Con questo OFF il MAM resta seriale (un chiamante alla volta) come prima.\n\nSPERIMENTALE. Default: OFF.")
+                                }
+
+                                // 1.0.364+ — MAM multi-stream: numero massimo di stream simultanei
+                                Text {
+                                    text: qsTr("MAM multi-stream: max stream simultanei:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                SpinBox {
+                                    id: mamMaxStreamsSpin
+                                    Layout.columnSpan: 3
+                                    Layout.preferredWidth: 110
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 2; to: 5; editable: true
+                                    enabled: bridge ? bridge.mamMultiStream : false
+                                    opacity: enabled ? 1.0 : 0.4
+                                    value: bridge ? bridge.mamMaxStreams : 3
+                                    onValueModified: if (bridge && bridge.mamMaxStreams !== value) bridge.mamMaxStreams = value
+                                    contentItem: TextInput { text: mamMaxStreamsSpin.textFromValue(mamMaxStreamsSpin.value, mamMaxStreamsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !mamMaxStreamsSpin.editable; validator: mamMaxStreamsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Quanti QSO paralleli può portare avanti contemporaneamente il MAM multi-stream (ognuno sulla sua frequenza).\n\nRange 2-5. Default: 3.\n\nValori alti richiedono più CPU per generare gli stream audio sovrapposti. Abilitato solo con MAM multi-stream attivo.")
+                                }
+
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
                                 Text {
                                     text: qsTr("FT2 partner-memory (anti-QSB):")
