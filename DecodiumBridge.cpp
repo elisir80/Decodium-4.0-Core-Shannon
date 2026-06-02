@@ -10706,6 +10706,7 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     m_localCatFrequencyTargetHz = hz;
     m_localCatFrequencyGuardUntilMs = nowMs + 8000;
+    m_localCatFrequencyGuardMaxMs = nowMs + 20000;  // 1.0.362 tetto re-arm guard
     setFrequency(hz);
 
     if (!m_catConnected) {
@@ -10887,6 +10888,12 @@ bool DecodiumBridge::shouldIgnoreCatFrequencyDuringLocalQsy(double hz, const QSt
                            QString::number(m_localCatFrequencyTargetHz, 'f', 0),
                            QString::number(m_localCatFrequencyGuardUntilMs - nowMs)));
         m_lastIgnoredCatFrequencyLogMs = nowMs;
+    }
+    // 1.0.362 — ri-arma il guard finche' il rig continua a riportare una freq != target
+    // (FT-991 lento): senza questo, dopo gli 8s iniziali una poll stale FT8 passava e la
+    // freq tornava a FT8 in FT2. Bounded da m_localCatFrequencyGuardMaxMs (~20s totali).
+    if (m_localCatFrequencyGuardMaxMs > 0 && nowMs < m_localCatFrequencyGuardMaxMs) {
+        m_localCatFrequencyGuardUntilMs = std::min<qint64>(nowMs + 3000, m_localCatFrequencyGuardMaxMs);
     }
     return true;
 }

@@ -2021,6 +2021,11 @@ private:
     qint64 m_lastUiStallLogMs {0};
     double m_localCatFrequencyTargetHz {0.0};
     qint64 m_localCatFrequencyGuardUntilMs {0};
+    // 1.0.362 — tetto massimo del guard anti-poll-stale: finché il rig riporta una
+    // frequenza diversa dal target (es. FT8 dopo aver chiesto FT2 su un FT-991 lento),
+    // shouldIgnoreCatFrequencyDuringLocalQsy ri-arma il guard fino a questo tetto, così
+    // i report vecchi non scavalcano la finestra di 8s e la freq non torna a FT8.
+    qint64 m_localCatFrequencyGuardMaxMs {0};
     qint64 m_lastIgnoredCatFrequencyLogMs {0};
     int    m_localRxFrequencyTargetHz {0};
     qint64 m_localRxFrequencyGuardUntilMs {0};

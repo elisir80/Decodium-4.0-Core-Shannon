@@ -317,8 +317,9 @@ ApplicationWindow {
         requestActivate()
         startupLog("main window show/raise/requestActivate done")
         Qt.callLater(restoreDecodePanelWidths)
-        // Stadio 1: applica l'ordine colonne persistito re-parentando i 3 pannelli
-        // negli slot-host indicati dalla mappa (default = ordine attuale -> no-op).
+        // Stadio 1+2: applica l'ordine pannelli persistito re-parentando i 4 pannelli
+        // (3 colonne + TX area) negli slot-host indicati dalla mappa (default = ordine
+        // attuale -> no-op; una mappa salvata a 3 elementi migra con "txpanel" in slot 3).
         Qt.callLater(applyClassicColumnOrder)
         bridge.notifyMainQmlReady()
         startupLog("bridge notified ready")
@@ -966,12 +967,34 @@ ApplicationWindow {
     // uiToolbarOrder (parse/persist/listener). Default = ordine attuale → ZERO regressione.
     // Lo SWAP avviene fra DUE slot (il pannello trascinato e quello sotto al puntatore):
     // si scambiano i panelId nella mappa, si ri-assegnano i parent, si persiste.
-    readonly property string uiClassicColumnOrderDefault: "fullspectrum,signalrx,livemap"
-    readonly property var uiClassicColumnKnownIds: ["fullspectrum","signalrx","livemap"]
+    //
+    // Stadio 2: aggiunto "txpanel" come 4° slot. Gli slot 0/1/2 = le 3 colonne dello
+    // SplitView (colSlot0/1/2), lo slot 3 = la TX area (txSlot, dentro txPanelContainer,
+    // FUORI dallo SplitView -> lo SplitView resta a 3 figli). Lo swap è ora CROSS-container:
+    // re-parenta un pannello fra un colSlot e txSlot (anchors.fill -> assume la geometria
+    // del nuovo host: colonna alta-stretta vs area TX larga-bassa, atteso/voluto).
+    //
+    // Stadio 3: aggiunta la Waterfall come 5° pannello (slot 4 = topSlot, il pannello
+    // superiore dello SplitView VERTICALE mainVerticalSplit). Lo slot 4 è gestito ad
+    // ALTEZZA (SplitView.preferredHeight) anziché a larghezza come i colSlot/txSlot; il
+    // pannello "waterfall" (waterfallPanelHost, wrapper attorno al Loader+Waterfall) si
+    // adatta via anchors.fill al nuovo host quando viene spostato. CRITICO: lo swap
+    // RE-PARENTA l'Item Waterfall esistente SENZA distruggerlo/ricrearlo (il Loader
+    // embedded NON tocca active/sourceComponent durante il re-parent -> il PanadapterItem
+    // e il feed PCM via bridge restano vivi, niente "freeze waterfall"). Il default mette
+    // "waterfall" in coda (indice 4 -> topSlot) per riflettere ESATTAMENTE il layout
+    // attuale -> ZERO regressione; una mappa salvata a 3/4 elementi riceve gli id mancanti
+    // (incluso "waterfall") appesi in coda nell'ordine di default -> migrazione indolore.
+    readonly property string uiClassicColumnOrderDefault: "fullspectrum,signalrx,livemap,txpanel,waterfall"
+    readonly property var uiClassicColumnKnownIds: ["fullspectrum","signalrx","livemap","txpanel","waterfall"]
     property var uiClassicColumnOrder: parseClassicColumnOrder(String(bridge.getSetting("uiClassicColumnOrder", "") || ""))
 
     // Parsa il CSV in lista di panelId; ripristina/completa col default se assente/corrotto.
-    // Garantisce sempre una permutazione completa dei 3 id noti (nessun doppione, nessun buco).
+    // Garantisce sempre una permutazione completa dei 4 id noti (nessun doppione, nessun buco).
+    // MIGRAZIONE Stadio 1->2: una mappa salvata a 3 elementi (senza "txpanel") mantiene le
+    // 3 colonne dov'erano e riceve "txpanel" appeso in coda (slot 3) -> TX resta dov'è, zero
+    // regressione. Lo stesso meccanismo (append degli id mancanti nell'ordine di default)
+    // copre già qualunque sottoinsieme parziale.
     function parseClassicColumnOrder(csv) {
         var def = uiClassicColumnOrderDefault.split(",")
         if (!csv || csv.length === 0)
@@ -1006,19 +1029,28 @@ ApplicationWindow {
         persistUiSetting("uiClassicColumnOrder", uiClassicColumnOrder.join(","))
     }
 
-    // Restituisce lo slot-host (Item) corrispondente all'indice 0/1/2, o null.
+    // Restituisce lo slot-host (Item) corrispondente all'indice 0/1/2/3/4, o null.
+    // Slot 0/1/2 = colSlot0/1/2 (figli dello SplitView ORIZZONTALE decodePanelsSplit, a larghezza).
+    // Slot 3     = txSlot (dentro txPanelContainer, FUORI dallo SplitView, larga-bassa).
+    // Slot 4     = waterfallPanel (figlio TOP dello SplitView VERTICALE mainVerticalSplit, ad ALTEZZA).
     function classicSlotForIndex(idx) {
-        if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit)
-            return null
         switch (idx) {
-            case 0: return (typeof colSlot0 !== "undefined") ? colSlot0 : null
-            case 1: return (typeof colSlot1 !== "undefined") ? colSlot1 : null
-            case 2: return (typeof colSlot2 !== "undefined") ? colSlot2 : null
+            case 0: return (typeof decodePanelsSplit !== "undefined" && decodePanelsSplit
+                            && typeof colSlot0 !== "undefined") ? colSlot0 : null
+            case 1: return (typeof decodePanelsSplit !== "undefined" && decodePanelsSplit
+                            && typeof colSlot1 !== "undefined") ? colSlot1 : null
+            case 2: return (typeof decodePanelsSplit !== "undefined" && decodePanelsSplit
+                            && typeof colSlot2 !== "undefined") ? colSlot2 : null
+            case 3: return (typeof txSlot !== "undefined") ? txSlot : null
+            case 4: return (typeof waterfallPanel !== "undefined") ? waterfallPanel : null
             default: return null
         }
     }
 
     // Restituisce il pannello (Item) corrispondente al panelId, o null.
+    // "txpanel"   -> txPanelHostWrapper (wrapper re-parentabile attorno all'istanza TxPanel).
+    // "waterfall" -> waterfallPanelHost (wrapper attorno al Loader+Waterfall embedded; il
+    //                re-parent sposta QUESTO Item senza ricaricare il Loader -> feed PCM intatto).
     function classicPanelForId(panelId) {
         if (panelId === "fullspectrum")
             return (typeof period1Panel !== "undefined") ? period1Panel : null
@@ -1026,12 +1058,25 @@ ApplicationWindow {
             return (typeof rxFreqPanel !== "undefined") ? rxFreqPanel : null
         if (panelId === "livemap")
             return (typeof liveMapPanelHost !== "undefined") ? liveMapPanelHost : null
+        if (panelId === "txpanel")
+            return (typeof txPanelHostWrapper !== "undefined") ? txPanelHostWrapper : null
+        if (panelId === "waterfall")
+            return (typeof waterfallPanelHost !== "undefined") ? waterfallPanelHost : null
         return null
     }
 
     // Assegna ad ogni pannello il parent = slot-host nella posizione indicata dalla mappa.
     // Operazione che preserva id/stato/binding (re-parent, come applyHeaderPairOrder).
     // I pannelli usano anchors.fill: parent → riempiono lo slot che li ospita.
+    // Stadio 2: gestisce 4 pannelli; il re-parent fra un colSlot (SplitView) e txSlot
+    // (txPanelContainer) è cross-container ma `panel.parent = host` + anchors.fill funziona
+    // comunque (i due host sono in sotto-alberi diversi della stessa finestra).
+    // Stadio 3: gestisce 5 pannelli; il 5° (waterfall) può migrare fra il topSlot
+    // (mainVerticalSplit, ad ALTEZZA) e un colSlot/txSlot (a LARGHEZZA). Il re-parent usa
+    // SOLO `panel.parent = host` con guard `panel.parent !== slot` (no churn): NON tocca il
+    // Loader embedded della Waterfall (active/sourceComponent restano invariati) -> l'Item
+    // Waterfall e il suo PanadapterItem NON vengono mai distrutti/ricreati -> feed PCM e
+    // Connections col bridge restano vivi, nessun "freeze waterfall".
     function applyClassicColumnOrder() {
         if (typeof decodePanelsSplit === "undefined" || !decodePanelsSplit) {
             Qt.callLater(applyClassicColumnOrder)
@@ -1063,6 +1108,12 @@ ApplicationWindow {
             case "fullspectrum": return 360
             case "signalrx":     return 260
             case "livemap":      return 280
+            case "txpanel":      return 320
+            // La Waterfall, se messa in una COLONNA stretta, accetta geometria insolita
+            // (scelta esplicita dell'utente): minimo modesto perché non collassi a 0.
+            // Nel topSlot (slot 4, ad ALTEZZA) questa minWidth non viene usata dallo
+            // SplitView verticale -> nessun effetto sul layout di default.
+            case "waterfall":    return 280
             default:             return 260
         }
     }
@@ -5221,8 +5272,14 @@ ApplicationWindow {
                     // e impediva di restringere il waterfall ("superiore bloccata"). Ora è
                     // gestito imperativamente: init one-shot in Component.onCompleted, drag/snap
                     // liberi; un Binding dedicato forza 40px solo quando è staccato (placeholder).
-                    visible: mainWindow.waterfallPanelVisible || waterfallDetached
-                    SplitView.minimumHeight: !mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0)  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
+                    // Stadio 3: waterfallPanel è il TOP SLOT-HOST (slot 4). Quando ospita
+                    // davvero la Waterfall (hostsWaterfall) usa la logica visibilità/altezza
+                    // waterfall-specifica; quando invece ospita un ALTRO pannello (Waterfall
+                    // spostata in una colonna) lo slot resta visibile e senza vincoli di altezza
+                    // waterfall, lasciando che il pannello ospite gestisca la propria visibilità.
+                    readonly property bool hostsWaterfall: mainWindow.classicIdInSlot(4) === "waterfall"
+                    visible: hostsWaterfall ? (mainWindow.waterfallPanelVisible || waterfallDetached) : true
+                    SplitView.minimumHeight: !hostsWaterfall ? 0 : (!mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0))  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                     radius: 8
                     border.color: isDockHighlighted ? secondaryCyan : glassBorder
@@ -5258,11 +5315,17 @@ ApplicationWindow {
 
                     // 1.0.288 — quando il waterfall è staccato, il pannello collassa al
                     // placeholder 40px; tornato embedded ripristina l'altezza precedente.
+                    // Stadio 3: questi override di ALTEZZA sono specifici della Waterfall, ma
+                    // waterfallPanel è ora un SLOT-HOST che può ospitare un ALTRO pannello (se
+                    // la Waterfall è stata spostata in una colonna). Quindi si applicano SOLO
+                    // quando il topSlot (slot 4) ospita davvero la Waterfall: altrimenti il
+                    // topSlot conserva la sua preferredHeight normale per il pannello ospite.
                     Binding {
                         target: waterfallPanel
                         property: "SplitView.preferredHeight"
                         value: 40
                         when: mainWindow.waterfallPanelVisible && waterfallDetached
+                              && mainWindow.classicIdInSlot(4) === "waterfall"
                         restoreMode: Binding.RestoreBindingOrValue
                     }
 
@@ -5271,13 +5334,20 @@ ApplicationWindow {
                         property: "SplitView.preferredHeight"
                         value: 0
                         when: !mainWindow.waterfallPanelVisible
+                              && mainWindow.classicIdInSlot(4) === "waterfall"
                         restoreMode: Binding.RestoreBindingOrValue
                     }
 
-                    // Placeholder when detached - magnetic dock zone
+                    // Placeholder when detached - magnetic dock zone.
+                    // Stadio 3: figlio diretto dello SLOT-HOST (waterfallPanel), NON del
+                    // pannello re-parentabile -> resta nel topSlot e serve da zona di dock.
+                    // Mostrato solo quando il topSlot ospita davvero la Waterfall (id "waterfall"
+                    // in slot 4): se la Waterfall è stata spostata in una colonna e un altro
+                    // pannello occupa il topSlot, il placeholder non deve coprirlo. Il dock-back
+                    // resta possibile via la finestra flottante (zona = waterfallPanel) comunque.
                     Rectangle {
                         anchors.fill: parent
-                        visible: waterfallDetached
+                        visible: waterfallDetached && mainWindow.classicIdInSlot(4) === "waterfall"
                         color: waterfallPanel.isDockHighlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                         radius: 8
                         border.color: waterfallPanel.isDockHighlighted ? secondaryCyan : glassBorder
@@ -5325,8 +5395,19 @@ ApplicationWindow {
                         }
                     }
 
-                    // Embedded waterfall content
+                    // ════════ PANNELLO RE-PARENTABILE "waterfall" (Stadio 3) ════════
+                    // Questo Item è il contenuto re-parentabile (panelId "waterfall"): contiene
+                    // il Loader+Waterfall embedded + gli overlay (label, maniglia ⠿, Pop).
+                    // Di DEFAULT è figlio del topSlot (waterfallPanel) e lo riempie via
+                    // anchors.fill: parent. Lo SWAP (applyClassicColumnOrder/swapClassicColumns)
+                    // RE-PARENTA QUESTO Item in un colSlot/txSlot (o lo riporta nel topSlot)
+                    // -> anchors.fill assume la geometria del nuovo host (colonna alta-stretta,
+                    // area TX larga-bassa, o top largo-basso). CRITICO PCM: il re-parent NON
+                    // tocca waterfallEmbeddedLoader.active/sourceComponent -> il Loader resta
+                    // attivo, l'istanza Waterfall e il suo PanadapterItem NON vengono
+                    // distrutti/ricreati, il feed PCM via bridge prosegue (no freeze).
                     Rectangle {
+                        id: waterfallPanelHost
                         anchors.fill: parent
                         visible: mainWindow.waterfallPanelVisible && !waterfallDetached
                         color: "transparent"
@@ -5340,6 +5421,8 @@ ApplicationWindow {
                             anchors.bottom: parent.bottom
                             anchors.margins: 4
                             visible: mainWindow.waterfallPanelVisible && !waterfallDetached
+                            // active NON dipende dal parent: il re-parent dello swap NON lo
+                            // cambia -> Loader mai ricaricato -> PanadapterItem/feed PCM vivi.
                             active: mainWindow.waterfallPanelVisible && !waterfallDetached
                             // 1.0.175 — Carica off-thread come gia' fa il
                             // detached (Loader asynchronous:true a r.8304),
@@ -5376,12 +5459,31 @@ ApplicationWindow {
                             }
                         }
 
+                        // Maniglia di drag pannello (Stadio 3) — overlay sull'angolo
+                        // alto-SINISTRO (il pulsante Pop è in alto a destra), sopra il
+                        // Waterfall. Stesso colDragHandleComponent degli altri pannelli;
+                        // panelId "waterfall". Viaggia con waterfallPanelHost quando
+                        // re-parentato in un colSlot/txSlot. active: !waterfallDetached
+                        // (mentre è staccato il pannello mostra il placeholder, niente drag).
+                        Loader {
+                            z: 50
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.leftMargin: 6
+                            anchors.topMargin: 5
+                            width: 16
+                            height: 16
+                            active: !waterfallDetached
+                            sourceComponent: colDragHandleComponent
+                            onLoaded: if (item) item.panelId = "waterfall"
+                        }
+
                         // Etichetta "Waterfall" integrata come overlay (non occupa spazio)
                         Text {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.topMargin: 6
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: 28
                             text: "Waterfall"
                             font.pixelSize: 10
                             font.bold: true
@@ -7449,47 +7551,61 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         }
                     }
 
-                    // ════════ Drag-layer pannelli interscambiabili (Stadio 1) ════════
-                    // Sibling dello SplitView dentro decodePanel (NON gestito dallo SplitView,
-                    // così non diventa una sezione/colonna). Ospita il ghost del pannello in
-                    // drag e l'evidenziazione magnetica dello slot target. NESSUN
-                    // layer.enabled/FBO. Coordinate in spazio decodePanel.
+                    // ════════ Drag-layer pannelli interscambiabili (Stadio 1+2) ════════
+                    // Dichiarato dentro decodePanel ma RE-PARENTATO a contentArea (parent:
+                    // contentArea) così copre SIA le 3 colonne (decodePanel) SIA la TX area
+                    // (txPanelContainer), entrambe figlie di contentArea -> targeting 2-D su
+                    // 4 slot cross-container. NON gestito da alcuno SplitView (non diventa
+                    // sezione/colonna). Ospita ghost + evidenziazione magnetica. NESSUN
+                    // layer.enabled/FBO. Coordinate in spazio contentArea.
                     Item {
                         id: colDragLayer
-                        anchors.fill: parent
+                        parent: contentArea
+                        anchors.fill: contentArea
                         z: 60
                         // Trasparente agli eventi quando non si sta trascinando: NON deve
                         // intercettare click/hover dei pannelli sottostanti.
                         visible: dragSlotIndex >= 0
                         enabled: false
 
-                        // Indice (0/1/2) dello slot di PARTENZA del drag corrente; -1 = nessun drag.
+                        // Indice (0..4) dello slot di PARTENZA del drag corrente; -1 = nessun drag.
                         property int dragSlotIndex: -1
-                        // Indice (0/1/2) dello slot target sotto il puntatore.
+                        // Indice (0..4) dello slot target sotto il puntatore.
                         property int dropSlotIndex: -1
+                        // Stadio 3: numero di slot interscambiabili (3 colonne + TX area + Waterfall top).
+                        readonly property int slotCount: 5
 
-                        // Rettangolo (in spazio decodePanel) dello slot di indice idx.
+                        // Rettangolo (in spazio contentArea) dello slot di indice idx.
+                        // contentArea è l'antenato comune di colSlot0/1/2 (via decodePanel),
+                        // di txSlot (via txPanelContainer) e del topSlot waterfallPanel (via
+                        // mainVerticalSplit): mapToItem è valido per tutti e 5 gli slot.
                         function slotRect(idx) {
                             var slot = mainWindow.classicSlotForIndex(idx)
-                            if (!slot || slot.width <= 0)
+                            if (!slot || slot.width <= 0 || slot.height <= 0)
                                 return null
-                            var p = slot.mapToItem(decodePanel, 0, 0)
+                            var p = slot.mapToItem(contentArea, 0, 0)
                             return Qt.rect(p.x, p.y, slot.width, slot.height)
                         }
 
-                        // Slot il cui CENTRO è più vicino alla X (spazio decodePanel) del puntatore.
-                        // Ignora gli slot collassati (Live Map nascosta) come target.
-                        function computeTargetSlot(panelX) {
+                        // Slot il cui CENTRO 2-D è più vicino al puntatore (spazio contentArea).
+                        // Stadio 3: targeting in 2 dimensioni su 5 slot — la Waterfall (topSlot,
+                        // in alto a tutta larghezza) + i 3 colSlot affiancati al centro + il
+                        // txSlot largo-basso in basso. Ignora gli slot collassati (Live Map
+                        // nascosta) e quelli senza rettangolo (pannello staccato -> host a 0).
+                        function computeTargetSlot(panelX, panelY) {
                             var best = -1
-                            var bestDist = 1e12
-                            for (var i = 0; i < 3; ++i) {
+                            var bestDist = 1e24
+                            for (var i = 0; i < slotCount; ++i) {
                                 if (mainWindow.classicSlotCollapsed(i))
                                     continue
                                 var r = slotRect(i)
                                 if (!r)
                                     continue
-                                var mid = r.x + r.width / 2
-                                var d = Math.abs(panelX - mid)
+                                var midX = r.x + r.width / 2
+                                var midY = r.y + r.height / 2
+                                var dx = panelX - midX
+                                var dy = panelY - midY
+                                var d = dx * dx + dy * dy
                                 if (d < bestDist) { bestDist = d; best = i }
                             }
                             return best
@@ -7536,15 +7652,17 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 if (panelId === "fullspectrum") return "Full Spectrum"
                                 if (panelId === "signalrx")     return "Signal RX"
                                 if (panelId === "livemap")      return "Live Map"
+                                if (panelId === "txpanel")      return "TX Panel"
+                                if (panelId === "waterfall")    return "Waterfall"
                                 return panelId
                             }
                             function updateAt(panelX, panelY) {
                                 var nx = panelX - width / 2
                                 var ny = panelY - height / 2
                                 if (nx < 0) nx = 0
-                                if (nx > decodePanel.width - width) nx = decodePanel.width - width
+                                if (nx > contentArea.width - width) nx = contentArea.width - width
                                 if (ny < 0) ny = 0
-                                if (ny > decodePanel.height - height) ny = decodePanel.height - height
+                                if (ny > contentArea.height - height) ny = contentArea.height - height
                                 x = nx
                                 y = ny
                             }
@@ -7622,7 +7740,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 property bool moved: false
 
                                 function panelPt(mouse) {
-                                    return mapToItem(decodePanel, mouse.x, mouse.y)
+                                    return mapToItem(contentArea, mouse.x, mouse.y)
                                 }
 
                                 Timer {
@@ -7657,7 +7775,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                         moved = true
                                     if (armed) {
                                         colDragGhost.updateAt(p.x, p.y)
-                                        colDragLayer.dropSlotIndex = colDragLayer.computeTargetSlot(p.x)
+                                        colDragLayer.dropSlotIndex = colDragLayer.computeTargetSlot(p.x, p.y)
                                     } else if (moved) {
                                         colHandleHoldTimer.stop()
                                     }
@@ -7666,7 +7784,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     colHandleHoldTimer.stop()
                                     if (armed) {
                                         var p = panelPt(mouse)
-                                        var target = colDragLayer.computeTargetSlot(p.x)
+                                        var target = colDragLayer.computeTargetSlot(p.x, p.y)
                                         colDragGhost.stop()
                                         var src = colDragLayer.dragSlotIndex
                                         colDragLayer.dragSlotIndex = -1
@@ -7754,10 +7872,14 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 property int minHeight: 100
                 property int maxHeight: 350
 
-                // Placeholder when detached - magnetic dock zone
+                // Placeholder when detached - magnetic dock zone.
+                // Stadio 2: mostrato solo quando la TX area (slot 3) ospita davvero il TX
+                // (id "txpanel"); se il TX è stato spostato in una colonna, l'area TX ospita
+                // un altro pannello e il placeholder non deve coprirlo. Il dock-back resta
+                // possibile via la finestra flottante (zona = txPanelContainer) in ogni caso.
                 Rectangle {
                     anchors.fill: parent
-                    visible: txPanelDetached
+                    visible: txPanelDetached && mainWindow.classicIdInSlot(3) === "txpanel"
                     color: txPanelDockHighlighted ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                     radius: 12
                     border.color: txPanelDockHighlighted ? bridge.themeManager.ledRed : glassBorder
@@ -7805,52 +7927,90 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     }
                 }
 
-                // Actual TxPanel content
-                TxPanel {
-                    id: txPanelComponent
+                // ════════ SLOT-HOST 4 (Stadio 2 — TX area interscambiabile) ════════
+                // txSlot riempie l'area TX (txPanelContainer) ed ospita il pannello
+                // assegnato allo slot 3 dalla mappa. Di DEFAULT contiene txPanelHostWrapper
+                // (wrapper re-parentabile attorno all'istanza TxPanel). Lo SWAP cross-container
+                // re-parenta txPanelHostWrapper in un colSlot (e una colonna in txSlot) via
+                // applyClassicColumnOrder/swapClassicColumns. txSlot NON è figlio dello
+                // SplitView -> lo SplitView resta a 3 figli. Placeholder detach + resize
+                // handle restano figli DIRETTI di txPanelContainer (operano sull'AREA, non
+                // sul pannello): detach/verticalResize del TX preservati in ogni ordine.
+                Item {
+                    id: txSlot
                     anchors.fill: parent
-                    engine: bridge
-                    showAsyncIcon: mainWindow.asyncIconVisible
-                    visible: !txPanelDetached
-                    onMamWindowRequested: mamWindow.open()
-                    onCallRequested: callDialogInstance.show()
 
-                    // Detach button overlay at top-right
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-                        anchors.rightMargin: 8
-                        width: 34
-                        height: 18
-                        radius: 4
-                        z: 200
-                        color: txDetachMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3) : "transparent"
-                        border.color: txDetachMA.containsMouse ? secondaryCyan : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
-                        border.width: 1
+                    // Wrapper re-parentabile (panelId "txpanel"). anchors.fill -> assume la
+                    // geometria del nuovo host (txSlot largo-basso, o un colSlot alto-stretto).
+                    Item {
+                        id: txPanelHostWrapper
+                        anchors.fill: parent
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Pop"
-                            font.pixelSize: 10
-                            font.bold: true
-                            color: txDetachMA.containsMouse ? secondaryCyan : textSecondary
-                        }
-
-                        MouseArea {
-                            id: txDetachMA
+                        // Actual TxPanel content
+                        TxPanel {
+                            id: txPanelComponent
                             anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                txPanelDetached = true
-                                txPanelFloatingWindow.show()
+                            engine: bridge
+                            showAsyncIcon: mainWindow.asyncIconVisible
+                            visible: !txPanelDetached
+                            onMamWindowRequested: mamWindow.open()
+                            onCallRequested: callDialogInstance.show()
+
+                            // Maniglia di drag colonna (Stadio 2) — overlay sull'angolo
+                            // alto-SINISTRO dell'header TX (il pulsante Pop è in alto a
+                            // destra), sopra TxPanel. Non tocca TxPanel.qml. Viaggia col
+                            // pannello quando re-parentato in un colSlot.
+                            Loader {
+                                z: 210
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.leftMargin: 6
+                                anchors.topMargin: 5
+                                width: 16
+                                height: 16
+                                active: !txPanelDetached
+                                sourceComponent: colDragHandleComponent
+                                onLoaded: if (item) item.panelId = "txpanel"
+                            }
+
+                            // Detach button overlay at top-right
+                            Rectangle {
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: 5
+                                anchors.rightMargin: 8
+                                width: 34
+                                height: 18
+                                radius: 4
+                                z: 200
+                                color: txDetachMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3) : "transparent"
+                                border.color: txDetachMA.containsMouse ? secondaryCyan : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Pop"
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: txDetachMA.containsMouse ? secondaryCyan : textSecondary
+                                }
+
+                                MouseArea {
+                                    id: txDetachMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        txPanelDetached = true
+                                        txPanelFloatingWindow.show()
+                                    }
+                                }
+
+                                ToolTip.visible: txDetachMA.containsMouse
+                                ToolTip.text: qsTr("Stacca pannello TX")
+                                ToolTip.delay: 500
                             }
                         }
-
-                        ToolTip.visible: txDetachMA.containsMouse
-                        ToolTip.text: qsTr("Stacca pannello TX")
-                        ToolTip.delay: 500
                     }
                 }
 
