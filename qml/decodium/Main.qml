@@ -967,6 +967,8 @@ ApplicationWindow {
         return v
     }
 
+    property real worldClockTargetX: NaN   // posizione voluta dall'utente (pre-clamp)
+    property real worldClockTargetY: NaN
     // L'orologio è un OVERLAY FLOATING: vive in mainWindow.contentItem a coordinate
     // x,y libere (drag dalla maniglia), posizionabile ovunque nella finestra. NON usa
     // più gli host-slot dell'header. Posizione persistita in uiWorldClockX/Y.
@@ -983,15 +985,19 @@ ApplicationWindow {
         var ry = safeBridgeSetting("uiWorldClockY", null)
         var px = (rx === null || rx === undefined || String(rx).length === 0) ? NaN : parseFloat(rx)
         var py = (ry === null || ry === undefined || String(ry).length === 0) ? NaN : parseFloat(ry)
+        mainWindow.persistUiSetting("uiWorldClockX", 777)
+        mainWindow.persistUiSetting("uiWorldClockY", 555)
         if (isNaN(px)) px = host.width - worldClock.width - 12
         if (isNaN(py)) py = 6
+        worldClockTargetX = px   // posizione VOLUTA (pre-clamp), per recupero al resize
+        worldClockTargetY = py
         worldClock.x = clampClockX(px)
         worldClock.y = clampClockY(py)
     }
 
     function clampClockX(v) {
         var host = mainWindow.contentItem
-        if (!host) return v
+        if (!host || host.width <= 0) return v
         var maxX = Math.max(0, host.width - worldClock.width)
         if (v < 0) return 0
         if (v > maxX) return maxX
@@ -1000,7 +1006,7 @@ ApplicationWindow {
 
     function clampClockY(v) {
         var host = mainWindow.contentItem
-        if (!host) return v
+        if (!host || host.height <= 0) return v
         var maxY = Math.max(0, host.height - worldClock.height)
         if (v < 0) return 0
         if (v > maxY) return maxY
@@ -1009,12 +1015,16 @@ ApplicationWindow {
 
     function clampWorldClockNow() {
         if (typeof worldClock === "undefined" || !worldClock) return
-        worldClock.x = clampClockX(worldClock.x)
-        worldClock.y = clampClockY(worldClock.y)
+        var tx = isNaN(worldClockTargetX) ? worldClock.x : worldClockTargetX
+        var ty = isNaN(worldClockTargetY) ? worldClock.y : worldClockTargetY
+        worldClock.x = clampClockX(tx)
+        worldClock.y = clampClockY(ty)
     }
 
     function persistWorldClockPos() {
         if (typeof worldClock === "undefined" || !worldClock) return
+        worldClockTargetX = worldClock.x
+        worldClockTargetY = worldClock.y
         persistUiSetting("uiWorldClockX", Math.round(worldClock.x))
         persistUiSetting("uiWorldClockY", Math.round(worldClock.y))
     }
