@@ -467,9 +467,6 @@ ApplicationWindow {
         bridge.saveWindowState("rxFreqFloatingWindow", Math.round(rxFreqFloatingWindow.x), Math.round(rxFreqFloatingWindow.y), Math.round(rxFreqFloatingWindow.width), Math.round(rxFreqFloatingWindow.height), rxFreqDetached, rxFreqMinimized)
         bridge.saveWindowState("txPanelFloatingWindow", Math.round(txPanelFloatingWindow.x), Math.round(txPanelFloatingWindow.y), Math.round(txPanelFloatingWindow.width), Math.round(txPanelFloatingWindow.height), txPanelDetached, txPanelMinimized)
         bridge.saveWindowState("liveMapFloatingWindow", Math.round(liveMapFloatingWindow.x), Math.round(liveMapFloatingWindow.y), Math.round(liveMapFloatingWindow.width), Math.round(liveMapFloatingWindow.height), liveMapDetached, false)
-        if (typeof worldClockFloatingWindow !== "undefined" && worldClockFloatingWindow) {
-            bridge.saveWindowState("worldClockFloatingWindow", Math.round(worldClockFloatingWindow.x), Math.round(worldClockFloatingWindow.y), Math.round(worldClockFloatingWindow.width), Math.round(worldClockFloatingWindow.height), worldClockDetached, false)
-        }
         bridge.saveWindowState("decoSyncMonitorWindow", Math.round(decoSyncMonitorWindow.x), Math.round(decoSyncMonitorWindow.y), Math.round(decoSyncMonitorWindow.width), Math.round(decoSyncMonitorWindow.height), false, decoSyncMonitorWindow.visibility === Window.Minimized)
         // 1.0.275 — DX Cluster floating window
         if (dxClusterFloatingWindow) {
@@ -812,10 +809,6 @@ ApplicationWindow {
     property bool txPanelMinimized: false
     property bool liveMapDetached: false
     property bool liveMapMinimized: false
-    // (fork-only) — World Clock pop-out (finestra OS staccabile). Default agganciato
-    // (false) -> comportamento attuale invariato. Re-parent dell'Item worldClock fra
-    // l'header (worldClockHeaderHost) e la finestra (worldClockDockHost), come Stadio 3.
-    property bool worldClockDetached: false
     // 1.0.275 (fork-only) — DX Cluster floating window state
     property bool dxClusterDetached: true   // default detached (era sempre floating)
     property bool dxClusterMinimized: false
@@ -865,7 +858,6 @@ ApplicationWindow {
         })
     }
     onLiveMapMinimizedChanged: scheduleWindowStateSave()
-    onWorldClockDetachedChanged: scheduleWindowStateSave()
 
     // === GAP 3 — Nuovi pannelli (A3, B9, A4, C14) ===
     property bool timeSyncPanelVisible:       settingBool("uiTimeSyncPanelVisible", false)
@@ -947,12 +939,8 @@ ApplicationWindow {
     function applyHeaderPairOrder() {
         if (typeof reorderableHeaderPair === "undefined" || !reorderableHeaderPair)
             return
-        // Item da mettere per ultimo: toolbar se il clock va prima, altrimenti il
-        // World Clock. NB: il figlio del Row da riordinare è worldClockHeaderHost
-        // (wrapper-slot dell'orologio), NON worldClock direttamente: quando l'orologio
-        // è staccato vive nella finestra OS e il suo slot header collassa, ma resta
-        // sempre worldClockHeaderHost a definire la posizione nel Row.
-        var last = uiWorldClockBeforeToolbar ? headerUtilityButtons : worldClockHeaderHost
+        // Item da mettere per ultimo: toolbar se il clock va prima, altrimenti il clock.
+        var last = uiWorldClockBeforeToolbar ? headerUtilityButtons : worldClock
         if (!last)
             return
         last.parent = null
@@ -1266,42 +1254,6 @@ ApplicationWindow {
         } else {
             liveMapFloatingWindow.hide()
         }
-    }
-    // ── World Clock pop-out (re-parent dell'Item worldClock, NON estrazione) ──
-    // detach: sposta worldClock dentro la finestra OS (worldClockDockHost) e mostra
-    // la finestra; dock: lo riporta nello slot header (worldClockHeaderHost), nasconde
-    // la finestra e ripristina l'ordine before/after toolbar. Timer/stato/popup del
-    // clock restano vivi perché l'Item non viene mai distrutto, solo ri-parentato.
-    function syncWorldClockFloatingVisibility(activate) {
-        if (typeof worldClockFloatingWindow === "undefined" || !worldClockFloatingWindow)
-            return
-        if (mainWindow.worldClockDetached) {
-            worldClockFloatingWindow.show()
-            if (activate) {
-                worldClockFloatingWindow.raise()
-                worldClockFloatingWindow.requestActivate()
-            }
-        } else {
-            worldClockFloatingWindow.hide()
-        }
-    }
-    function detachWorldClock() {
-        if (typeof worldClockDockHost === "undefined" || !worldClockDockHost)
-            return
-        if (typeof worldClock !== "undefined" && worldClock)
-            worldClock.parent = worldClockDockHost
-        mainWindow.worldClockDetached = true
-        mainWindow.syncWorldClockFloatingVisibility(true)
-    }
-    function dockWorldClock() {
-        mainWindow.worldClockDetached = false
-        if (typeof worldClock !== "undefined" && worldClock
-                && typeof worldClockHeaderHost !== "undefined" && worldClockHeaderHost)
-            worldClock.parent = worldClockHeaderHost
-        if (typeof worldClockFloatingWindow !== "undefined" && worldClockFloatingWindow)
-            worldClockFloatingWindow.hide()
-        // Ripristina l'ordine before/after toolbar dello slot header.
-        mainWindow.applyHeaderPairOrder()
     }
 	    function detachWaterfallPanel() {
             mainWindow.waterfallPanelVisible = true
@@ -3656,26 +3608,9 @@ ApplicationWindow {
                     }
                 } // End Grouped buttons Item
 
-                // ── Slot header del World Clock (wrapper per il pop-out) ──
-                // worldClock vive QUI quando è agganciato; quando è staccato viene
-                // ri-parentato in worldClockDockHost (finestra OS) e questo slot
-                // collassa a width 0 / visible false così il Row reorderableHeaderPair
-                // si ricompatta. È SEMPRE questo Item (non worldClock) il figlio del
-                // Row riordinato da applyHeaderPairOrder().
-                Item {
-                    id: worldClockHeaderHost
-                    height: 80
-                    width: mainWindow.worldClockDetached
-                           ? 0
-                           : (worldClock.showWorldClock ? worldClock.compactWidth : 0)
-                    visible: !mainWindow.worldClockDetached
-
 	                // World Clock with Analog Display
 	                Item {
 	                    id: worldClock
-	                    // Pop-out: quando staccato riempie la finestra OS; quando
-	                    // agganciato resta width/height nel suo slot header.
-	                    anchors.fill: mainWindow.worldClockDetached ? parent : undefined
 	                    visible: showWorldClock
 	                    width: showWorldClock ? compactWidth : 0
 	                    height: 80
@@ -3808,10 +3743,6 @@ ApplicationWindow {
                         // se il puntatore supera la metà del blocco pulsanti.
                         Rectangle {
                             id: worldClockDragHandle
-                            // Pop-out: la maniglia header (reorder before/after toolbar)
-                            // ha senso solo quando l'orologio è agganciato. Quando è
-                            // staccato il riposizionamento avviene via la finestra OS.
-                            visible: !mainWindow.worldClockDetached
                             z: 30
                             width: 14
                             height: 14
@@ -3837,7 +3768,6 @@ ApplicationWindow {
                             MouseArea {
                                 id: worldClockHandleMA
                                 anchors.fill: parent
-                                enabled: !mainWindow.worldClockDetached
                                 hoverEnabled: true
                                 cursorShape: Qt.SizeAllCursor
                                 acceptedButtons: Qt.LeftButton
@@ -4060,15 +3990,8 @@ ApplicationWindow {
 			                                property int visibleResultRows: Math.max(1, Math.min(7, worldClock.citySearchResults.length))
 			                                property int preferredHeight: 64 + visibleResultRows * 46 + (worldClock.citySearchResults.length === 0 ? 36 : 8)
                                             property real availableHeightBelow: {
-                                                // Pop-out: usa la finestra CORRENTE del selettore (mainWindow
-                                                // quando agganciato, worldClockFloatingWindow quando staccato)
-                                                // invece di hardcodare mainWindow, così il popup città resta
-                                                // dimensionato correttamente anche nella finestra OS.
-                                                var win = (typeof Window !== 'undefined' && timezoneSelector.Window.window)
-                                                          ? timezoneSelector.Window.window : mainWindow
-                                                var host = (win && win.contentItem) ? win.contentItem : mainWindow.contentItem
-                                                var p = timezoneSelector.mapToItem(host, 0, timezoneSelector.height + 4)
-                                                return Math.max(154, win.height - p.y - 16)
+                                                var p = timezoneSelector.mapToItem(mainWindow.contentItem, 0, timezoneSelector.height + 4)
+                                                return Math.max(154, mainWindow.height - p.y - 16)
                                             }
 			                                height: Math.min(420, Math.min(Math.max(154, preferredHeight),
 			                                    availableHeightBelow))
@@ -4255,24 +4178,12 @@ ApplicationWindow {
 	                                contentItem: Rectangle { implicitHeight: 1; color: glassBorder }
 	                            }
 	                            MenuItem {
-	                                text: mainWindow.worldClockDetached
-	                                      ? qsTr("Aggancia orologio")
-	                                      : qsTr("Stacca orologio")
-	                                onTriggered: {
-	                                    if (mainWindow.worldClockDetached)
-	                                        mainWindow.dockWorldClock()
-	                                    else
-	                                        mainWindow.detachWorldClock()
-	                                }
-	                            }
-	                            MenuItem {
 	                                text: qsTr("Hide clock")
 	                                onTriggered: worldClock.setClockVisible(false)
 	                            }
 	                        }
 	                    }
 	                }
-                } // End worldClockHeaderHost (slot del World Clock)
                 } // End reorderableHeaderPair (toolbar + World Clock)
 
                 // Waterfall restore button (visible when minimized)
@@ -10964,97 +10875,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     detached: true
                     onDetachRequested: mainWindow.dockLiveMapPanel()
                 }
-            }
-        }
-    }
-
-    // ========== DETACHABLE WORLD CLOCK WINDOW ==========
-    // (fork-only) Pop-out OS dell'orologio (re-parent dell'Item worldClock, NON una
-    // copia). Window normale (NIENTE StaysOnTop, come DX Cluster). worldClockDockHost
-    // ospita l'Item worldClock quando è staccato; al dock torna nello slot header.
-    Window {
-        id: worldClockFloatingWindow
-        width: 360
-        height: 200
-        minimumWidth: 220
-        minimumHeight: 140
-        visible: false
-        flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
-             | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
-        title: "World Clock"
-        color: bgDeep
-
-        x: mainWindow.x + 120
-        y: mainWindow.y + 120
-
-        Component.onCompleted: {
-            mainWindow.restoreFloatingWindowState(worldClockFloatingWindow, "worldClockFloatingWindow", "worldClockDetached", "")
-            // Se lo stato salvato era "staccato", ri-parenta l'orologio nella finestra
-            // appena entrambi gli host esistono, poi mostra la finestra.
-            if (mainWindow.worldClockDetached) {
-                Qt.callLater(function() {
-                    if (typeof worldClock !== "undefined" && worldClock
-                            && typeof worldClockDockHost !== "undefined" && worldClockDockHost)
-                        worldClock.parent = worldClockDockHost
-                    mainWindow.syncWorldClockFloatingVisibility(false)
-                })
-            } else {
-                worldClockFloatingWindow.hide()
-            }
-        }
-        onXChanged: mainWindow.scheduleWindowStateSave()
-        onYChanged: mainWindow.scheduleWindowStateSave()
-        onWidthChanged: mainWindow.scheduleWindowStateSave()
-        onHeightChanged: mainWindow.scheduleWindowStateSave()
-
-        onClosing: function(close) {
-            if (!mainWindow.applicationClosing)
-                mainWindow.dockWorldClock()
-            close.accepted = true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
-            border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.45)
-            border.width: 1
-
-            // Host del re-parent: l'Item worldClock viene messo qui da detachWorldClock().
-            Item {
-                id: worldClockDockHost
-                anchors.fill: parent
-                anchors.margins: 10
-                anchors.topMargin: 36
-            }
-
-            // Pulsante "Dock" (clone stile p1FloatDockMA) per riagganciare.
-            Rectangle {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: 8
-                anchors.rightMargin: 8
-                width: 42
-                height: 22
-                radius: 4
-                color: wcFloatDockMA.containsMouse ? Qt.rgba(76/255, 175/255, 80/255, 0.3) : "transparent"
-                border.color: wcFloatDockMA.containsMouse ? bridge.themeManager.successColor : Qt.rgba(76/255, 175/255, 80/255, 0.45)
-                border.width: 1
-                Text {
-                    anchors.centerIn: parent
-                    text: "Dock"
-                    font.pixelSize: 10
-                    font.bold: true
-                    color: wcFloatDockMA.containsMouse ? bridge.themeManager.successColor : textPrimary
-                }
-                MouseArea {
-                    id: wcFloatDockMA
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: mainWindow.dockWorldClock()
-                }
-                ToolTip.visible: wcFloatDockMA.containsMouse
-                ToolTip.text: qsTr("Aggancia orologio")
             }
         }
     }
