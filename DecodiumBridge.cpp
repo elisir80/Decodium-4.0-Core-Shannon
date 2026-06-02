@@ -11370,6 +11370,11 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
+        // 1.0.364+ MAM multi-stream nativo (FASE 2): un cambio modo invalida
+        // ogni QSO multi-stream in corso (MAM e' solo FT8).
+        m_mamSlots.clear();
+        m_mamMessages.clear();
+        m_mamF0sHz.clear();
         // A mode switch invalidates short-lived CAT/audio-frequency guards
         // from the previous mode. Leaving them active can make a later CAT
         // poll look stale and keep the displayed frequency stuck.
@@ -13523,6 +13528,10 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
 void DecodiumBridge::clearTxMessages()
 {
     bridgeLog("clearTxMessages: reset QSO/TX state");
+    // 1.0.364+ MAM multi-stream nativo (FASE 2): reset slot multi-QSO.
+    m_mamSlots.clear();
+    m_mamMessages.clear();
+    m_mamF0sHz.clear();
     clearDeferredManualSyncTx(QStringLiteral("clear-tx-messages"));
 
     if (m_transmitting || m_tuning)
@@ -14089,7 +14098,7 @@ bool DecodiumBridge::multiStreamActive() const
 {
     return m_mamMultiStream
         && m_mode.trimmed().toUpper() == QStringLiteral("FT8")
-        && m_mamMessages.size() >= 2
+        && m_mamMessages.size() >= 1
         && m_mamMessages.size() == m_mamF0sHz.size();
 }
 
@@ -14109,6 +14118,450 @@ bool DecodiumBridge::mamDumpTestWav(const QString& path, const QStringList& mess
                   .arg(ok ? QStringLiteral("saved") : QStringLiteral("failed"), path)
                   .arg(w.size()));
     return ok;
+}
+
+// ============================================================================
+// 1.0.364+ - MAM multi-stream nativo (FASE 2): sequencer multi-QSO paralleli.
+// Modello MSHV "rispondi sulla freq del chiamante". TUTTO gated da
+// mamMultiStreamSequencerActive(); con il toggle OFF nessuna di queste funzioni
+// viene mai invocata e il sequencer single-QSO esistente resta byte-identico.
+// Le funzioni riusano SOLO primitivi puri (parsing/inferenza/codifica messaggi)
+// e NON chiamano setDxCall/setReportSent/setCurrentTx/advanceQsoState/
+// regenerateTxMessages: lo stato per-slot vive in m_mamSlots, isolato dai
+// membri single-QSO (m_dxCall/m_qsoProgress/m_currentTx/...).
+// ============================================================================
+
+void DecodiumBridge::setMamMultiStream(bool on)
+{
+    if (m_mamMultiStream == on) {
+        return;
+    }
+    m_mamMultiStream = on;
+    if (!on) {
+        // OFF: smonta tutto lo stato multi-stream. m_mamMessages/m_mamF0sHz
+        // vuoti -> multiStreamActive() torna false -> seam TX mono invariato.
+        m_mamSlots.clear();
+        m_mamMessages.clear();
+        m_mamF0sHz.clear();
+    }
+    bridgeLog(QStringLiteral("MAM multi-stream sequencer toggled: %1").arg(on ? 1 : 0));
+}
+
+bool DecodiumBridge::mamMultiStreamSequencerActive() const
+{
+    return m_mamMultiStream
+        && m_mode.trimmed().toUpper() == QStringLiteral("FT8")
+        && (m_autoCqRepeat || m_multiAnswerMode)
+        && !usingLegacyBackendForTx()
+        && !m_manualTxHold;
+}
+
+int DecodiumBridge::mamSlotIndexForCall(const QString& base) const
+{
+    QString const target = normalizedBaseCall(base);
+    if (target.isEmpty()) {
+        return -1;
+    }
+    for (int i = 0; i < m_mamSlots.size(); ++i) {
+        if (m_mamSlots.at(i).call == target) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Costruisce il messaggio TX dello slot dal suo stato. PURA: usa
+// standardFtxQsoMessage (file-static) come il single-QSO genStdMsgs.
+QString DecodiumBridge::mamBuildSlotMessage(MamQsoSlot& s)
+{
+    return standardFtxQsoMessage(s.currentTx, s.callFull, m_callsign,
+                                 m_grid.left(4), s.reportSent,
+                                 m_sendRR73, m_quickQsoEnabled,
+                                 QStringLiteral("FT8"));
+}
+
+// Parsa un decode FT8 (campi [time,snr,dt,df,message,aptype,quality,freq]) e,
+// se diretto al mio call, lo instrada allo slot del partner (creandone uno se
+// arriva una grid e ci sono slot liberi). NON emette segnali ne' tocca lo stato
+// single-QSO.
+void DecodiumBridge::mamIngestDecode(const QStringList& f)
+{
+    if (f.size() < 5) {
+        return;
+    }
+    QString const myCallUpper = m_callsign.trimmed().toUpper();
+    QString const myBaseUpper = normalizedBaseCall(myCallUpper);
+    if (myBaseUpper.isEmpty()) {
+        return;
+    }
+    QString const message = f.at(4);
+    // Solo i decode diretti al mio call alimentano il sequencer.
+    if (!messageContainsCallToken(message, myCallUpper, myBaseUpper)) {
+        return;
+    }
+    QString const partner = inferPartnerFromDirectedMessage(message, myCallUpper, myBaseUpper);
+    QString const partnerBase = normalizedBaseCall(partner);
+    if (partnerBase.isEmpty() || partnerBase == myBaseUpper) {
+        return;
+    }
+
+    // Anti-riapertura: stazioni gia' lavorate di recente o in cooldown non
+    // devono riaprire uno slot (eviterebbe loop su 73 ripetuti).
+    if (isRecentAutoCqDuplicate(partnerBase, m_frequency, m_mode)
+        || m_qsoCooldown.contains(partnerBase)) {
+        return;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+
+    // Classifica il token terminale del messaggio (oltre ai due call).
+    QStringList const tokens = normalizedMessageTokens(message);
+    bool hasGrid = false;
+    bool hasPlainReport = false;
+    bool hasRogerReport = false;
+    bool hasSignoff = false;
+    bool isFinal73 = false;
+    int  receivedReportDb = 0;
+    bool receivedReportValid = false;
+    for (QString const& tk : tokens) {
+        if (tokenMatchesCall(tk, myCallUpper, myBaseUpper)
+            || tokenMatchesCall(tk, partner, partnerBase)) {
+            continue;
+        }
+        if (isGridTokenStrict(tk)) {
+            hasGrid = true;
+        } else if (isPlainSignalReportToken(tk)) {
+            hasPlainReport = true;
+            receivedReportDb = decodeSnrOrDefault(tk);
+            receivedReportValid = true;
+        } else if (isRogerSignalReportToken(tk)) {
+            hasRogerReport = true;
+            QString num = tk;
+            num.remove(0, 1); // strip leading 'R'
+            receivedReportDb = decodeSnrOrDefault(num);
+            receivedReportValid = true;
+        } else if (isQsoSignoffToken(tk)) {
+            hasSignoff = true;
+            if (tk == QStringLiteral("73")) {
+                isFinal73 = true;
+            }
+        }
+    }
+
+    int const decodedSnr = (f.size() >= 2) ? decodeSnrOrDefault(f.at(1)) : 127;
+    int const partnerFreqHz = (f.size() >= 8)
+        ? f.at(7).trimmed().toInt()
+        : 0;
+
+    int idx = mamSlotIndexForCall(partnerBase);
+    if (idx < 0) {
+        // Slot nuovo solo se il partner sta APRENDO il QSO (mi manda la grid in
+        // risposta al CQ) e c'e' capacita'. Un signoff/report orfano senza slot
+        // non apre nulla.
+        if (!hasGrid || m_mamSlots.size() >= m_mamMaxStreams) {
+            return;
+        }
+        MamQsoSlot s;
+        s.call = partnerBase;
+        s.callFull = normalizeCallToken(partner).toUpper();
+        // grid: primo token grid valido.
+        for (QString const& tk : tokens) {
+            if (isGridTokenStrict(tk)) { s.grid = tk.toUpper(); break; }
+        }
+        // Freq audio del chiamante (MSHV): clamp 200..4000 + de-dup ~50Hz vs
+        // gli altri slot attivi (evita due stream sovrapposti).
+        int fHz = qBound(200, partnerFreqHz > 0 ? partnerFreqHz : m_rxFrequency, 4000);
+        for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
+            bool collision = false;
+            for (MamQsoSlot const& other : m_mamSlots) {
+                if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
+            }
+            if (!collision) break;
+            fHz = qBound(200, fHz + 60, 4000);
+        }
+        s.audioFreqHz = fHz;
+        s.progress = 2;     // REPLY
+        s.currentTx = 2;    // io rispondo con il report
+        s.partnerSnrDb = (decodedSnr != 127) ? decodedSnr : 127;
+        s.reportSent = formatSignalReport((decodedSnr != 127) ? decodedSnr : -10);
+        s.reportReceived = QStringLiteral("-10");
+        s.startedOnMs = nowMs;
+        s.lastHeardMs = nowMs;
+        m_mamSlots.append(s);
+        bridgeLog(QStringLiteral("MAM slot opened: %1 grid=%2 freq=%3Hz rpt=%4 (slots=%5)")
+                      .arg(s.callFull, s.grid.isEmpty() ? QStringLiteral("-") : s.grid)
+                      .arg(s.audioFreqHz)
+                      .arg(s.reportSent)
+                      .arg(m_mamSlots.size()));
+        return;
+    }
+
+    // Slot esistente: aggiorna avanzamento.
+    MamQsoSlot& s = m_mamSlots[idx];
+    s.lastHeardMs = nowMs;
+    if (decodedSnr != 127) {
+        s.partnerSnrDb = decodedSnr;
+    }
+    if (receivedReportValid) {
+        s.reportReceived = formatSignalReport(receivedReportDb);
+    }
+
+    if (isFinal73) {
+        // 73 finale del partner: QSO concluso, logga e marca Done.
+        s.currentTx = 5;
+        if (!s.logged) {
+            mamLogSlot(s);
+        } else {
+            s.state = MamQsoSlot::State::Done;
+        }
+        bridgeLog(QStringLiteral("MAM slot %1: final 73 -> done").arg(s.callFull));
+        return;
+    }
+    if (hasSignoff) {
+        // RR73/RRR del partner: io chiudo con 73.
+        s.currentTx = 5;
+        s.progress = 5;
+    } else if (hasRogerReport) {
+        // R+report: io invio RR73.
+        s.currentTx = 4;
+        s.progress = 4;
+    } else if (hasPlainReport) {
+        // report semplice: io invio R+report.
+        s.currentTx = 3;
+        s.progress = 3;
+    } else if (hasGrid) {
+        // re-invio della grid: resto su report (TX2).
+        s.currentTx = 2;
+        s.progress = 2;
+    }
+}
+
+// Rimuove gli slot conclusi o scaduti. Timeout: troppi retry sullo stesso step
+// oppure nessun ascolto da >6 periodi.
+void DecodiumBridge::mamPruneSlots()
+{
+    if (m_mamSlots.isEmpty()) {
+        return;
+    }
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const periodMs = qMax<qint64>(1, periodMsForMode(QStringLiteral("FT8")));
+    int const maxRetry = maxCallerRetries();
+    int removed = 0;
+    for (int i = m_mamSlots.size() - 1; i >= 0; --i) {
+        MamQsoSlot const& s = m_mamSlots.at(i);
+        bool drop = false;
+        if (s.logged || s.state == MamQsoSlot::State::Done) {
+            drop = true;
+        } else if (s.retryCount > maxRetry) {
+            drop = true;
+            bridgeLog(QStringLiteral("MAM slot %1 dropped: retry limit %2").arg(s.callFull).arg(maxRetry));
+        } else if (s.lastHeardMs > 0 && (nowMs - s.lastHeardMs) > 6 * periodMs) {
+            drop = true;
+            bridgeLog(QStringLiteral("MAM slot %1 dropped: silent > 6 periods").arg(s.callFull));
+        }
+        if (drop) {
+            m_mamSlots.removeAt(i);
+            ++removed;
+        }
+    }
+    if (removed > 0) {
+        bridgeLog(QStringLiteral("MAM prune: removed %1 slot(s), %2 active").arg(removed).arg(m_mamSlots.size()));
+    }
+}
+
+// Promuove i caller in coda a slot attivi finche' c'e' capacita'. Usa la coda
+// m_callerQueue (entry "BASECALL freq snr") gia' alimentata da
+// maybeEnqueueMamCallerFromMessage in caso di overflow.
+void DecodiumBridge::mamPromoteFromQueue()
+{
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    while (m_mamSlots.size() < m_mamMaxStreams && !m_callerQueue.isEmpty()) {
+        QString const entry = m_callerQueue.takeFirst();
+        emit callerQueueChanged();
+        QStringList const parts = entry.split(' ', Qt::SkipEmptyParts);
+        if (parts.isEmpty()) {
+            continue;
+        }
+        QString const base = normalizedBaseCall(parts.first());
+        if (base.isEmpty() || base == normalizedBaseCall(m_callsign)) {
+            continue;
+        }
+        if (mamSlotIndexForCall(base) >= 0
+            || isRecentAutoCqDuplicate(base, m_frequency, m_mode)
+            || m_qsoCooldown.contains(base)) {
+            continue;
+        }
+        int const qFreq = parts.size() >= 2 ? parts.at(1).toInt() : m_rxFrequency;
+        int const qSnr  = parts.size() >= 3 ? qBound(-50, parts.at(2).toInt(), 49) : -10;
+        MamQsoSlot s;
+        s.call = base;
+        s.callFull = base; // dalla coda abbiamo solo la base
+        int fHz = qBound(200, qFreq > 0 ? qFreq : m_rxFrequency, 4000);
+        for (int guard = 0; guard < m_mamSlots.size() + 2; ++guard) {
+            bool collision = false;
+            for (MamQsoSlot const& other : m_mamSlots) {
+                if (qAbs(other.audioFreqHz - fHz) < 50) { collision = true; break; }
+            }
+            if (!collision) break;
+            fHz = qBound(200, fHz + 60, 4000);
+        }
+        s.audioFreqHz = fHz;
+        s.progress = 2;
+        s.currentTx = 2;
+        s.partnerSnrDb = qSnr;
+        s.reportSent = formatSignalReport(qSnr);
+        s.reportReceived = QStringLiteral("-10");
+        s.startedOnMs = nowMs;
+        s.lastHeardMs = nowMs;
+        m_mamSlots.append(s);
+        bridgeLog(QStringLiteral("MAM slot promoted from queue: %1 freq=%2Hz (slots=%3)")
+                      .arg(s.callFull).arg(s.audioFreqHz).arg(m_mamSlots.size()));
+    }
+}
+
+// Logga il QSO di uno slot riusando logQsoNow() via snapshot pending, SENZA
+// prompt UI. Popola i campi m_pendingAutoLog* dai dati dello slot (come fa
+// capturePendingAutoLogSnapshot per il single-QSO) e li ripulisce dopo.
+void DecodiumBridge::mamLogSlot(MamQsoSlot& s)
+{
+    if (s.logged) {
+        s.state = MamQsoSlot::State::Done;
+        return;
+    }
+    QString const logCall = s.callFull.trimmed().isEmpty() ? s.call : s.callFull;
+    if (logCall.trimmed().isEmpty()) {
+        s.state = MamQsoSlot::State::Done;
+        s.logged = true;
+        return;
+    }
+    QDateTime const nowUtc = QDateTime::currentDateTimeUtc();
+    QDateTime const onUtc = s.startedOnMs > 0
+        ? QDateTime::fromMSecsSinceEpoch(s.startedOnMs, Qt::UTC)
+        : nowUtc;
+    m_pendingAutoLogValid = true;
+    m_pendingAutoLogCall = logCall;
+    m_pendingAutoLogGrid = s.grid.trimmed();
+    m_pendingAutoLogRptSent = s.reportSent.trimmed();
+    m_pendingAutoLogRptRcvd = s.reportReceived.trimmed();
+    m_pendingAutoLogOn = onUtc;
+    m_pendingAutoLogOff = (nowUtc < onUtc) ? onUtc : nowUtc;
+    m_pendingAutoLogDialFreq = m_frequency;
+    m_qsoLogged = false;
+    logQsoNow();
+    clearPendingAutoLogSnapshot();
+    s.logged = true;
+    s.state = MamQsoSlot::State::Done;
+    m_qsoCooldown[s.call] = QDateTime::currentMSecsSinceEpoch();
+    rememberRecentAutoCqWorked(s.call, m_frequency, m_mode);
+    bridgeLog(QStringLiteral("MAM slot %1 logged (rptSent=%2 rptRcvd=%3)")
+                  .arg(logCall, s.reportSent, s.reportReceived));
+}
+
+// Dispatch di un periodo TX MAM. Sostituisce checkAndStartPeriodicTx quando il
+// sequencer multi-stream e' attivo. Calcola la parita' slot (come
+// checkAndStartPeriodicTx), prune/promote, costruisce m_mamMessages/m_mamF0sHz
+// per gli slot attivi e avvia startTx() (la seam FASE 1 produce il wave
+// multi-stream). Il caso 1-slot e' gestito da multiStreamActive()>=1.
+void DecodiumBridge::mamDispatchPeriod()
+{
+    // (1) Parita' slot + late-start guard (come il ramo sync di
+    // checkAndStartPeriodicTx). Se non e' il nostro periodo: ascolto.
+    qint64 const msNow = correctedUtcMsecsSinceStartOfDay();
+    int const pMs = periodMsForMode(m_mode);
+    if (pMs <= 0) {
+        return;
+    }
+    int const pidx = static_cast<int>(msNow / static_cast<qint64>(pMs));
+    bool const isEven = (pidx % 2 == 0);
+    bool const isOurPeriod = bridgeTxPeriodIsEven(m_txPeriod) ? isEven : !isEven;
+    if (!isOurPeriod) {
+        return;
+    }
+    int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, effectiveRelaxLatestCap());
+    if (latestStartMs > 0 && elapsedMs >= latestStartMs) {
+        // Troppo tardi nello slot: rinvio al prossimo (no troncamento payload).
+        scheduleSyncTxAtNextValidSlot(QStringLiteral("mamDispatchPeriod"), elapsedMs, latestStartMs);
+        return;
+    }
+
+    // (2)(3) manutenzione slot e promozione dalla coda.
+    mamPruneSlots();
+    mamPromoteFromQueue();
+
+    // (4) Costruisci i payload per gli slot attivi (cap m_mamMaxStreams).
+    m_mamMessages.clear();
+    m_mamF0sHz.clear();
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    QVector<int> txSlotIdx;
+    for (int i = 0; i < m_mamSlots.size() && m_mamMessages.size() < m_mamMaxStreams; ++i) {
+        MamQsoSlot& s = m_mamSlots[i];
+        if (s.state == MamQsoSlot::State::Done || s.logged) {
+            continue;
+        }
+        if (s.currentTx < 1 || s.currentTx > 6) {
+            continue;
+        }
+        QString const msg = mamBuildSlotMessage(s);
+        if (msg.trimmed().isEmpty()) {
+            continue;
+        }
+        m_mamMessages.append(msg);
+        m_mamF0sHz.append(s.audioFreqHz);
+        txSlotIdx.append(i);
+        s.lastTxSlotMs = nowMs;
+        if (s.currentTx == s.lastNtx) {
+            ++s.retryCount;
+        } else {
+            s.retryCount = 1;
+        }
+        s.lastNtx = s.currentTx;
+        s.lastTransmittedMessage = msg;
+    }
+
+    // Slot che hanno appena inviato il 73 (TX5): se sendRR73 il QSO e' di
+    // fatto chiuso lato mio; loggali ora (se non gia' loggati dal 73 ricevuto).
+    for (int j = 0; j < txSlotIdx.size(); ++j) {
+        MamQsoSlot& s = m_mamSlots[txSlotIdx.at(j)];
+        if (s.currentTx == 5) {
+            s.state = MamQsoSlot::State::Signoff;
+            ++s.nTx73;
+            if (m_sendRR73 && !s.logged) {
+                mamLogSlot(s);
+            }
+        }
+    }
+
+    if (m_mamMessages.isEmpty()) {
+        // (5) Nessuno slot da servire. Costruiamo un CQ singolo direttamente per
+        // restare nel path MAM (non deleghiamo a checkAndStartPeriodicTx per
+        // evitare ricorsione, dato che quello rientra in mamDispatchPeriod).
+        QString const grid4 = m_grid.left(4);
+        QString cq = m_tx6.trimmed();
+        if (cq.isEmpty() && !m_callsign.trimmed().isEmpty()) {
+            cq = QStringLiteral("CQ %1%2")
+                     .arg(m_callsign.trimmed().toUpper(),
+                          grid4.isEmpty() ? QString() : QStringLiteral(" ") + grid4);
+        }
+        if (m_autoCqRepeat && !cq.isEmpty()) {
+            m_mamMessages.append(cq);
+            m_mamF0sHz.append(qBound(200, m_txFrequency > 0 ? m_txFrequency : m_rxFrequency, 4000));
+            bridgeLog(QStringLiteral("MAM dispatch: no active slots, sending CQ [%1]").arg(cq));
+        } else {
+            // Niente da trasmettere: resto in ascolto.
+            return;
+        }
+    }
+
+    // (5) startTx(): la seam FASE 1 vede multiStreamActive() (>=1) e genera il
+    // wave multi-stream da m_mamMessages/m_mamF0sHz. Il caso 1-slot e quello
+    // N-slot passano entrambi di qui.
+    bridgeLog(QStringLiteral("MAM dispatch TX: streams=%1 slots_active=%2 pidx=%3 elapsed=%4ms")
+                  .arg(m_mamMessages.size())
+                  .arg(m_mamSlots.size())
+                  .arg(pidx)
+                  .arg(elapsedMs));
+    startTx();
 }
 
 bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFrequency, bool needPcm,
@@ -15215,6 +15668,15 @@ void DecodiumBridge::startTx()
     }
 
     QString msg = buildCurrentTxMessage();
+    // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM il payload reale e' la
+    // lista m_mamMessages (la seam FASE 1 genera il wave multi-stream da
+    // m_mamMessages/m_mamF0sHz). buildCurrentTxMessage() legge lo stato
+    // single-QSO non popolato in MAM: usa il primo stream come msg
+    // rappresentativo (passa la guard 'msg vuoto', cache key/log/TX-echo).
+    // Gated: senza MAM attivo questo blocco non esiste -> startTx byte-identico.
+    if (mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
+        msg = m_mamMessages.first();
+    }
     forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     bridgeLog("startTx: msg=[" + msg + "]");
     if (msg.trimmed().isEmpty()) {
@@ -16981,6 +17443,8 @@ void DecodiumBridge::haltWithReason(const QString& reason)
     stopTx();
     stopTune();
     setTxEnabled(false);
+    // 1.0.364+ MAM multi-stream nativo (FASE 2): halt azzera gli slot.
+    m_mamSlots.clear();
 }
 
 void DecodiumBridge::refreshAudioDevices()
@@ -21611,7 +22075,11 @@ void DecodiumBridge::maybeEnqueueMamCallerFromMessage(const QString& message,
     if (enqueueCallerInternal(partnerBase, freq, snr, true)) {
         bridgeLog(QStringLiteral("MAM queue: enqueued %1 from directed decode while active=%2 msg=%3")
                       .arg(partnerBase, activePartnerBase.isEmpty() ? QStringLiteral("IDLE") : activePartnerBase, msg));
-        if (activePartnerBase.isEmpty() && (m_autoCqRepeat || m_txEnabled || m_currentTx == 6)) {
+        // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM la promozione dei
+        // caller la fa mamPromoteFromQueue() dentro mamDispatchPeriod; qui NON
+        // chiamiamo processNextInQueue (avvierebbe il path single-QSO).
+        if (activePartnerBase.isEmpty() && (m_autoCqRepeat || m_txEnabled || m_currentTx == 6)
+            && !mamMultiStreamSequencerActive()) {
             processNextInQueue();
         }
     }
@@ -23311,6 +23779,11 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     auto inFlightReset = qScopeGuard([this]() { m_periodicTxInFlight = false; });
 
     if (m_manualTxHold || !m_monitoring || m_transmitting || m_tuning) return;
+    // 1.0.364+ MAM multi-stream nativo (FASE 2): se il sequencer multi-QSO
+    // e' attivo gestisce TUTTO il dispatch del periodo e ritorna. Gated da
+    // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
+    // e il path single-QSO sottostante resta byte-identico.
+    if (mamMultiStreamSequencerActive()) { mamDispatchPeriod(); return; }
     if (ft2AutoCqAwaitingPartnerDecode()) {
         return;
     }
@@ -29785,7 +30258,15 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
             || m_autoCqRepeat);
     bool autoSeqGotResponse = false;
-    if (autoSeqActive || ft2SignoffRescueScan) {
+    // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM i decode diretti a me
+    // alimentano mamIngestDecode (slot per-call) invece di autoSequenceStep.
+    // Gated: con MAM OFF l'else-if e' identico all'if originale.
+    if (mamMultiStreamSequencerActive()) {
+        for (const auto& row : rows) {
+            QStringList f = parseFt8Row(row);
+            if (f.size() >= 5) mamIngestDecode(f);
+        }
+    } else if (autoSeqActive || ft2SignoffRescueScan) {
         for (const auto& row : rows) {
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;

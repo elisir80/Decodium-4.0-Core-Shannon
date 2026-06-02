@@ -2272,6 +2272,35 @@ private:
     bool               m_mamMultiStream {false};
     QStringList        m_mamMessages;
     QVector<int>       m_mamF0sHz;
+    // 1.0.364+ — MAM multi-stream nativo (FASE 2). Sequencer multi-QSO
+    // paralleli, modello MSHV "rispondi sulla freq del chiamante". Default OFF
+    // (m_mamMultiStream==false): nessuno slot viene mai creato, mamDispatchPeriod
+    // non viene mai invocato (gated da mamMultiStreamSequencerActive()) e il path
+    // single-QSO resta byte-identico. Ogni slot replica lo stato single-QSO
+    // (dxCall/grid/progress/currentTx/report/retry) in modo isolato, senza
+    // toccare i membri m_dxCall/m_qsoProgress/m_currentTx/... usati dal mono.
+    struct MamQsoSlot {
+        QString call;            // base callsign del partner (UPPER)
+        QString callFull;        // callsign completo come decodificato
+        QString grid;            // grid 4-char del partner (se nota)
+        int     audioFreqHz {0}; // freq audio del chiamante (MSHV: TX su questa)
+        int     progress {0};    // 0=IDLE 1=CQ 2=REPLY 3=REPORT 4=ROGER 5=SIGNOFF
+        int     currentTx {0};   // 1..6 step FT8 corrente dello slot
+        int     lastNtx {-1};    // ultimo currentTx trasmesso (per retry count)
+        int     retryCount {0};  // invii consecutivi dello stesso step
+        int     nTx73 {0};       // quante volte ho inviato il signoff
+        QString reportSent;      // report che invio (da SNR ricevuto)
+        QString reportReceived;  // report ricevuto dal partner
+        int     partnerSnrDb {127}; // 127 = sentinel "no data"
+        qint64  startedOnMs {0};    // epoch ms di apertura slot (per log On)
+        qint64  lastTxSlotMs {0};   // epoch ms ultimo slot in cui ho TX questo slot
+        qint64  lastHeardMs {0};    // epoch ms ultimo decode diretto a me
+        bool    logged {false};     // QSO loggato
+        QString lastTransmittedMessage;
+        enum class State { Active, Signoff, Done } state {State::Active};
+    };
+    QVector<MamQsoSlot> m_mamSlots;
+    int                 m_mamMaxStreams {3};
     bool               m_txAudioPrecomputeScheduled {false};
     bool               m_cachedTxOutputDeviceValid {false};
     QString            m_cachedTxOutputDeviceName;
@@ -2778,8 +2807,14 @@ public:
 
     // 1.0.364+ — MAM multi-stream nativo (FASE 1, solo C++, default OFF).
     // multiStreamActive() e' true solo quando il toggle e' attivo, il modo e'
-    // FT8 e ci sono >=2 messaggi con altrettante frequenze. Quando false il
-    // path TX resta byte-identico al mono single-stream esistente.
+    // FT8 e c'e' >=1 messaggio con altrettante frequenze. Quando false (sempre
+    // se m_mamMultiStream==false, oppure se m_mamMessages e' vuoto) il path TX
+    // resta byte-identico al mono single-stream esistente.
+    // FASE 2: la soglia e' >=1 (era >=2 in FASE 1) cosi' il caso 1-slot del
+    // sequencer usa generateMultiStreamFt8Wave (1 stream all'offset dello slot)
+    // invece del mono path che leggerebbe lo stato single-QSO non popolato in
+    // MAM. m_mamMessages e' scritto SOLO da mamDispatchPeriod (mai altrove),
+    // quindi cambiare la soglia non ha effetti runtime fuori dal MAM.
     bool multiStreamActive() const;
     // Test/verifica offline: genera il multi-stream wave dai messaggi/f0
     // passati direttamente (indipendente dallo stato del bridge) e lo scrive
@@ -2787,6 +2822,19 @@ public:
     // spettrale delle fasi 2-3 senza UI.
     Q_INVOKABLE bool mamDumpTestWav(const QString& path, const QStringList& messages,
                                     const QVector<int>& f0sHz, int sampleRate = 48000);
+
+    // 1.0.364+ — MAM multi-stream nativo (FASE 2): sequencer multi-QSO.
+    // Tutto gated da mamMultiStreamSequencerActive(); se OFF non vengono mai
+    // invocate e il path single-QSO e' intatto.
+    Q_INVOKABLE void setMamMultiStream(bool on);
+    bool    mamMultiStreamSequencerActive() const;
+    void    mamDispatchPeriod();
+    void    mamIngestDecode(const QStringList& f);
+    QString mamBuildSlotMessage(MamQsoSlot& s);
+    void    mamPruneSlots();
+    void    mamPromoteFromQueue();
+    void    mamLogSlot(MamQsoSlot& s);
+    int     mamSlotIndexForCall(const QString& base) const;
 
 private:
 
