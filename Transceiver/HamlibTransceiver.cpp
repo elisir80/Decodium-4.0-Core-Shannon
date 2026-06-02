@@ -1585,9 +1585,37 @@ void HamlibTransceiver::do_ptt (bool on)
     {
       if (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt)
         {
-          CAT_TRACE ("rig_set_ptt PTT=false");
-          m_->error_check (rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF), tr ("setting PTT off"));
-          ptt_on_ = false;  // set AFTER successful rig_set_ptt
+          // 1.0.366 — robust PTT release on EVERY TX-off (not just shutdown).
+          // The old path used error_check() which THROWS on the first hamlib
+          // error (e.g. Icom CI-V bus error / timeout on a congested COM port):
+          // a single failure left ptt_on_ true and the radio stuck in TX.
+          // Drop PTT best-effort instead — no throw, a few retries — so a
+          // transient bus glitch does not strand the rig in transmit. We do NOT
+          // signal a UI error here: a failed PTT-off must not abort the
+          // surrounding TX-teardown sequence. The PTT-on path above keeps
+          // throwing, since a failed TX start SHOULD surface to the user.
+          int rc = -RIG_EIO;
+          for (int attempt = 0; attempt < 3; ++attempt)
+            {
+              rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
+              CAT_TRACE ("rig_set_ptt PTT=false attempt=" << attempt << " rc=" << rc);
+              if (RIG_OK == rc)
+                {
+                  break;
+                }
+            }
+          if (RIG_OK == rc)
+            {
+              ptt_on_ = false;  // set AFTER successful rig_set_ptt
+            }
+          else
+            {
+              // Leave ptt_on_ true so do_stop()'s release retry (1.0.365) and
+              // any later TX-off attempt know the rig may still be keyed.
+              qWarning ().noquote ()
+                << "[CATDBG] Hamlib PTT-off failed after retries rc=" << rc
+                << "— radio may still be transmitting (bus error/timeout)";
+            }
         }
     }
 
