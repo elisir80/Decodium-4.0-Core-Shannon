@@ -4451,11 +4451,15 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
     return wave;
 }
 
-// 1.0.364+ — MAM multi-stream nativo (FASE 1). Genera N stream FT8 (uno per
+// 1.0.364+ — MAM multi-stream nativo (FASE 1). Genera N stream FTx (uno per
 // messaggio/frequenza), li somma campione-per-campione e peak-normalizza il
 // risultato (stessa logica di normalize_wave/foxcom). Usato solo quando
 // multiStreamActive() e' true; abort su qualunque errore di codifica.
-static QVector<float> generateMultiStreamFt8Wave(QStringList const& messages,
+// 1.0.365+ — parametrico per modo: FT8/FT4/FT2 condividono questo path
+// (encoder + generatore d'onda + nsym/nsps presi da buildTxWaveformForMessage).
+// I parametri d'onda DEVONO restare allineati a buildTxWaveformForMessage.
+static QVector<float> generateMultiStreamFtxWave(QString const& mode,
+                                                 QStringList const& messages,
                                                  QVector<int> const& f0sHz,
                                                  QString* errorOut = nullptr)
 {
@@ -4464,22 +4468,51 @@ static QVector<float> generateMultiStreamFt8Wave(QStringList const& messages,
         return {};
     }
 
-    static constexpr int kFt8Nsym = 79;
-    static constexpr int kFt8Nsps = 7680;
-    QVector<float> acc(kFt8Nsym * kFt8Nsps, 0.0f);
+    // Parametri per modo (identici a buildTxWaveformForMessage). nsym include
+    // i simboli di sync; nsps = campioni/simbolo a 48 kHz. acc = nsym*nsps.
+    QString const normalizedMode = mode.trimmed().toUpper();
+    int nsym = 0;
+    int nsps = 0;
+    if (normalizedMode == QStringLiteral("FT8") || normalizedMode.isEmpty()) {
+        nsym = 79; nsps = 7680;
+    } else if (normalizedMode == QStringLiteral("FT4")) {
+        nsym = 103; nsps = 4 * 576;
+    } else if (normalizedMode == QStringLiteral("FT2")) {
+        nsym = 103; nsps = 4 * 288;
+    } else {
+        if (errorOut) {
+            *errorOut = QStringLiteral("MAM multi-stream: modo non supportato %1").arg(normalizedMode);
+        }
+        return {};
+    }
+
+    QVector<float> acc(nsym * nsps, 0.0f);
 
     for (int i = 0; i < messages.size(); ++i) {
-        auto enc = decodium::txmsg::encodeFt8(messages.at(i));
-        if (!enc.ok || enc.tones.size() < kFt8Nsym) {
+        decodium::txmsg::EncodedMessage enc;
+        if (normalizedMode == QStringLiteral("FT4")) {
+            enc = decodium::txmsg::encodeFt4(messages.at(i));
+        } else if (normalizedMode == QStringLiteral("FT2")) {
+            enc = decodium::txmsg::encodeFt2(messages.at(i));
+        } else {
+            enc = decodium::txmsg::encodeFt8(messages.at(i));
+        }
+        if (!enc.ok || enc.tones.size() < nsym) {
             if (errorOut) {
-                *errorOut = QStringLiteral("MAM multi-stream: codifica FT8 fallita per [%1]")
-                                .arg(messages.at(i));
+                *errorOut = QStringLiteral("MAM multi-stream: codifica %1 fallita per [%2]")
+                                .arg(normalizedMode, messages.at(i));
             }
             return {};
         }
-        QVector<float> const slot = decodium::txwave::generateFt8Wave(
-            enc.tones.constData(), kFt8Nsym, kFt8Nsps, 2.0f, 48000.0f,
-            static_cast<float>(f0sHz.at(i)));
+        QVector<float> slot;
+        float const f0 = static_cast<float>(f0sHz.at(i));
+        if (normalizedMode == QStringLiteral("FT4")) {
+            slot = decodium::txwave::generateFt4Wave(enc.tones.constData(), nsym, nsps, 48000.0f, f0);
+        } else if (normalizedMode == QStringLiteral("FT2")) {
+            slot = decodium::txwave::generateFt2Wave(enc.tones.constData(), nsym, nsps, 48000.0f, f0);
+        } else {
+            slot = decodium::txwave::generateFt8Wave(enc.tones.constData(), nsym, nsps, 2.0f, 48000.0f, f0);
+        }
         int const samples = std::min(static_cast<int>(acc.size()),
                                      static_cast<int>(slot.size()));
         for (int k = 0; k < samples; ++k) {
@@ -14097,9 +14130,22 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
 bool DecodiumBridge::multiStreamActive() const
 {
     return m_mamMultiStream
-        && m_mode.trimmed().toUpper() == QStringLiteral("FT8")
+        && isMamMultiStreamMode()
         && m_mamMessages.size() >= 1
         && m_mamMessages.size() == m_mamF0sHz.size();
+}
+
+// 1.0.365+ — modi ammessi al MAM multi-stream. FT8 (path sync), FT4 (path
+// sync via onFt4DecodeReady->onFt8DecodeReady), FT2 (path async: i decode
+// arrivano da onFt2AsyncDecodeReady, il TX dal boundary di onPeriodTimer ->
+// checkAndStartPeriodicTx -> mamDispatchPeriod). Default OFF resta byte-
+// identico: il gate scatta solo se anche m_mamMultiStream e' true.
+bool DecodiumBridge::isMamMultiStreamMode() const
+{
+    QString const m = m_mode.trimmed().toUpper();
+    return m == QStringLiteral("FT8")
+        || m == QStringLiteral("FT4")
+        || m == QStringLiteral("FT2");
 }
 
 // Test puro: genera il multi-stream wave dagli argomenti diretti (NON usa
@@ -14108,7 +14154,7 @@ bool DecodiumBridge::mamDumpTestWav(const QString& path, const QStringList& mess
                                     const QVector<int>& f0sHz, int sampleRate)
 {
     QString err;
-    QVector<float> w = generateMultiStreamFt8Wave(messages, f0sHz, &err);
+    QVector<float> w = generateMultiStreamFtxWave(m_mode, messages, f0sHz, &err);
     if (w.isEmpty()) {
         bridgeLog(QStringLiteral("MAM dump test WAV: generazione fallita: %1").arg(err));
         return false;
@@ -14190,7 +14236,7 @@ QVariantList DecodiumBridge::mamActiveSlots() const
 bool DecodiumBridge::mamMultiStreamSequencerActive() const
 {
     return m_mamMultiStream
-        && m_mode.trimmed().toUpper() == QStringLiteral("FT8")
+        && isMamMultiStreamMode()
         && (m_autoCqRepeat || m_multiAnswerMode)
         && !usingLegacyBackendForTx()
         && !m_manualTxHold;
@@ -14276,7 +14322,7 @@ QString DecodiumBridge::mamBuildSlotMessage(MamQsoSlot& s)
     return standardFtxQsoMessage(s.currentTx, s.callFull, m_callsign,
                                  m_grid.left(4), s.reportSent,
                                  m_sendRR73, m_quickQsoEnabled,
-                                 QStringLiteral("FT8"));
+                                 m_mode);
 }
 
 // Parsa un decode FT8 (campi [time,snr,dt,df,message,aptype,quality,freq]) e,
@@ -14780,7 +14826,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     phaseTimer.start();
     QVector<float> wave;
     if (multiStreamActive()) {
-        wave = generateMultiStreamFt8Wave(m_mamMessages, m_mamF0sHz, &buildError);
+        wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
     } else {
         wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
     }
@@ -30590,6 +30636,21 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     bridgeLog("onFt2AsyncDecodeReady: rows=" + QString::number(rows.size()));
     bridgeLog("  async_raw[0]='" + rows[0] + "'");
 
+    // 1.0.365+ MAM multi-stream nativo (FASE 2, FT2 async): se il sequencer
+    // multi-QSO e' attivo i decode diretti a me alimentano mamIngestDecode
+    // (slot per-call) invece dell'auto-seq single-QSO (il blocco early-autoseq
+    // sotto e' gated dallo stesso predicato). NON facciamo return: lasciamo che
+    // il lavoro UI/lista/DXCC sotto popoli la decode-list come in onFt8DecodeReady.
+    // Il TX FT2 parte dal boundary di onPeriodTimer -> checkAndStartPeriodicTx ->
+    // mamDispatchPeriod (gia' gated). Con MAM OFF nulla di questo scatta e il
+    // path FT2 async normale resta byte-identico.
+    if (mamMultiStreamSequencerActive()) {
+        for (const auto& row : rows) {
+            QStringList f = parseFt8Row(row);
+            if (f.size() >= 5) mamIngestDecode(f);
+        }
+    }
+
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
         QString loadedPath;
         if (reloadDxccLookup(&loadedPath)) {
@@ -30616,7 +30677,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         && !m_callsign.isEmpty()
         && m_asyncTxEnabled
         && (m_autoSeq || m_autoCqRepeat);
-    if (earlyAutoSeqActive || earlyFt2SignoffRescueScan) {
+    if ((earlyAutoSeqActive || earlyFt2SignoffRescueScan) && !mamMultiStreamSequencerActive()) {
         bool gotResponse = false;
         // FIX A: DT (secondi) del decode partner diretto, per ancorare lo slot.
         double partnerDtSec = 0.0;

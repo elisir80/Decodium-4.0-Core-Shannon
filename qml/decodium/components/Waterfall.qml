@@ -1354,6 +1354,62 @@ Item {
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#ffc8ff" }
                 }
 
+                // 1.0.365+ (fork) - MAM multi-stream: marker per ogni slot QSO
+                // attivo (modello Fox/hunter). Una linea verticale arancione +
+                // etichetta col call alla freq audio dello slot, mappata con la
+                // stessa xForFreq() di RX/TX/decode. Gated da bridge.mamMultiStream:
+                // con il MAM OFF mamActiveSlots e' vuoto e nulla viene disegnato.
+                Repeater {
+                    id: mamSlotMarkers
+                    model: bridge && bridge.mamMultiStream ? bridge.mamActiveSlots : []
+                    delegate: Item {
+                        readonly property real slotFreq: Number(modelData.freq)
+                        readonly property string slotCall: String(modelData.call)
+                        readonly property bool slotTx: modelData.tx !== undefined && Number(modelData.tx) > 0
+                        readonly property real markerX: spectrumGpuOverlay.xForFreq(slotFreq)
+                        x: 0
+                        y: 0
+                        width: spectrumGpuOverlay.width
+                        height: spectrumGpuOverlay.height
+                        z: 40
+                        visible: bridge && bridge.mamMultiStream
+                                 && markerX >= 0 && markerX < spectrumGpuOverlay.width
+                        // Linea verticale arancione (distinta dal RX ciano e dal TX rosso).
+                        Rectangle {
+                            x: Math.round(markerX) - 1
+                            y: 0
+                            width: 2
+                            height: parent.height
+                            color: "#ffa000"
+                            opacity: 0.92
+                        }
+                        // Etichetta col call dello slot, ancorata in alto.
+                        Rectangle {
+                            id: mamSlotLabelBox
+                            readonly property real boxW: mamSlotLabelText.implicitWidth + 8
+                            x: spectrumGpuOverlay.markerBoxX(markerX, boxW)
+                            y: 2
+                            width: boxW
+                            height: mamSlotLabelText.implicitHeight + 4
+                            color: "#331a00"
+                            border.width: 1
+                            border.color: "#ffa000"
+                            opacity: 0.92
+                            radius: 2
+                            Text {
+                                id: mamSlotLabelText
+                                anchors.centerIn: parent
+                                text: slotCall + (slotTx ? " TX" : "")
+                                color: "#ffd27f"
+                                font.family: spectrumGpuOverlay.fixedFontFamily
+                                font.pixelSize: Math.max(9, waterfallDisplay.labelFontSize - 1)
+                                font.bold: true
+                                renderType: Text.QtRendering
+                            }
+                        }
+                    }
+                }
+
                 Item {
                     id: txSignalWidthGuide
                     z: -1

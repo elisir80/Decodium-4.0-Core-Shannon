@@ -2820,11 +2820,16 @@ public:
     // se m_mamMultiStream==false, oppure se m_mamMessages e' vuoto) il path TX
     // resta byte-identico al mono single-stream esistente.
     // FASE 2: la soglia e' >=1 (era >=2 in FASE 1) cosi' il caso 1-slot del
-    // sequencer usa generateMultiStreamFt8Wave (1 stream all'offset dello slot)
+    // sequencer usa generateMultiStreamFtxWave (1 stream all'offset dello slot)
     // invece del mono path che leggerebbe lo stato single-QSO non popolato in
     // MAM. m_mamMessages e' scritto SOLO da mamDispatchPeriod (mai altrove),
     // quindi cambiare la soglia non ha effetti runtime fuori dal MAM.
     bool multiStreamActive() const;
+    // 1.0.365+ — modi ammessi al MAM multi-stream (FT8/FT4/FT2). Usato dai
+    // gate multiStreamActive()/mamMultiStreamSequencerActive() al posto del
+    // vecchio confronto FT8-only. Default OFF invariato (gate combinato con
+    // m_mamMultiStream).
+    bool isMamMultiStreamMode() const;
     // Test/verifica offline: genera il multi-stream wave dai messaggi/f0
     // passati direttamente (indipendente dallo stato del bridge) e lo scrive
     // come WAV mono 16-bit via writeMono16WavFile. Serve per l'analisi
