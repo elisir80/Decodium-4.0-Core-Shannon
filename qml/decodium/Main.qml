@@ -6108,18 +6108,22 @@ ApplicationWindow {
                         }
 
                         // ════════ SLOT-HOST FISSI (Stadio 1 pannelli interscambiabili) ════════
-                        // I 3 figli diretti dello SplitView sono ORA questi Item a ordine FISSO
-                        // (colSlot0=sx, colSlot1=centro, colSlot2=dx): portano loro le attached
-                        // property SplitView.* + la larghezza-valore (per-slot). I 3 pannelli
-                        // (period1Panel/rxFreqPanel/liveMapPanelHost) sono re-parentati dentro
-                        // lo slot indicato dalla mappa uiClassicColumnOrder e usano
-                        // anchors.fill: parent. Lo SWAP riordina la MAPPA, non i figli dello
-                        // SplitView -> handle e dimensioni dei separatori restano stabili.
+                        // I 3 figli diretti dello SplitView sono ESATTAMENTE questi Item a ordine
+                        // FISSO (colSlot0=sx, colSlot1=centro, colSlot2=dx): portano loro le
+                        // attached property SplitView.* + la larghezza-valore (per-slot). Ogni
+                        // colSlot DICHIARA al suo interno il proprio pannello di DEFAULT come
+                        // figlio naturale (anchors.fill: parent): colSlot0->period1Panel,
+                        // colSlot1->rxFreqPanel, colSlot2->liveMapPanelHost. Lo SWAP re-parenta
+                        // imperativamente i pannelli tra i colSlot (applyClassicColumnOrder /
+                        // swapClassicColumns), ma i figli DIRETTI dello SplitView restano sempre
+                        // i 3 colSlot -> 2 soli separatori, niente handle duplicati.
                         //
                         // Larghezza-valore: per-SLOT (posizione). Larghezza-MINIMA: segue il
                         // pannello che occupa lo slot (classicMinWidthForSlot). Lo slot che
                         // ospita la Live Map collassa a 0 quando la mappa è nascosta/staccata
                         // (classicSlotCollapsed), com'era con liveMapPanelHost.visible.
+
+                        // ========== SLOT 0 (default: LEFT Band Activity / Full Spectrum) ==========
                         Item {
                             id: colSlot0
                             property int targetPanelWidth: mainWindow.savedPeriod1PanelWidth
@@ -6132,6 +6136,7 @@ ApplicationWindow {
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(0)
                             function applyCenterSplit() {
                                 if (userDraggedSplit) return
+                                if (mainWindow.decodePanelLayoutSaved) return
                                 if (parent && parent.width > 0) {
                                     var mapW = 0
                                     if (typeof colSlot2 !== "undefined" && !colSlot2.slotCollapsed)
@@ -6149,6 +6154,12 @@ ApplicationWindow {
                             })
                             onWidthChanged: {
                                 if (!slotCollapsed && width >= 360 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    // Variazione di width non originata da applyCenterSplit/restore
+                                    // = drag manuale del separatore: marca lo split come spostato a
+                                    // mano (ridondante col SplitHandle.onPressedChanged, ma copre il
+                                    // caso in cui il press non venga intercettato) e persiste.
+                                    if (!mainWindow.windowStateRestoreInProgress && !userDraggedSplit)
+                                        userDraggedSplit = true
                                     targetPanelWidth = Math.round(width)
                                     if (!mainWindow.windowStateRestoreInProgress)
                                         mainWindow.scheduleWindowStateSave()
@@ -6158,47 +6169,14 @@ ApplicationWindow {
                                 target: colSlot0.parent
                                 ignoreUnknownSignals: true
                                 function onWidthChanged() {
-                                    if (!colSlot0.userDraggedSplit)
+                                    if (!colSlot0.userDraggedSplit && !mainWindow.decodePanelLayoutSaved)
                                         colSlot0.applyCenterSplit()
                                 }
                             }
-                        }
-
-                        Item {
-                            id: colSlot1
-                            property int targetPanelWidth: mainWindow.savedRxFreqPanelWidth
-                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(1)
-                            SplitView.fillWidth: true
-                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
-                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(1)
-                            onWidthChanged: {
-                                if (!slotCollapsed && width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
-                                    targetPanelWidth = Math.round(width)
-                                    if (!mainWindow.windowStateRestoreInProgress)
-                                        mainWindow.scheduleWindowStateSave()
-                                }
-                            }
-                        }
-
-                        Item {
-                            id: colSlot2
-                            property int targetPanelWidth: mainWindow.savedLiveMapPanelWidth
-                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(2)
-                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
-                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(2)
-                            onWidthChanged: {
-                                if (!slotCollapsed && width >= 280 && Math.abs(targetPanelWidth - width) >= 1) {
-                                    targetPanelWidth = Math.round(width)
-                                    if (!mainWindow.windowStateRestoreInProgress)
-                                        mainWindow.scheduleWindowStateSave()
-                                }
-                            }
-                        }
 
                         // ========== LEFT: Band Activity ==========
                         Rectangle {
                             id: period1Panel
-                            parent: colSlot0
                             anchors.fill: parent
                             readonly property bool compactColumns: width < 620
                             readonly property int utcColumnWidth: compactColumns ? 66 : 86
@@ -6884,11 +6862,27 @@ NumberAnimation {
                                 }
                             }
                         }
+                        }
+
+                        // ========== SLOT 1 (default: RIGHT RX Frequency / Signal RX) ==========
+                        Item {
+                            id: colSlot1
+                            property int targetPanelWidth: mainWindow.savedRxFreqPanelWidth
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(1)
+                            SplitView.fillWidth: true
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(1)
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
+                            }
 
                         // ========== RIGHT: RX Frequency ==========
                         Rectangle {
                             id: rxFreqPanel
-                            parent: colSlot1
                             anchors.fill: parent
                             readonly property bool compactColumns: width < 450
                             readonly property bool compactHeader: width < 350
@@ -7391,10 +7385,25 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 }
                             }
                         }
+                        }
+
+                        // ========== SLOT 2 (default: Live Map) ==========
+                        Item {
+                            id: colSlot2
+                            property int targetPanelWidth: mainWindow.savedLiveMapPanelWidth
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(2)
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(2)
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 280 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
+                            }
 
                         Rectangle {
                             id: liveMapPanelHost
-                            parent: colSlot2
                             anchors.fill: parent
                             // Stadio 1: riempie il suo slot-host (colSlot2 di default). Il
                             // collasso quando la mappa è nascosta/staccata è gestito dallo slot
@@ -7436,6 +7445,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     onDetachRequested: mainWindow.detachLiveMapPanel()
                                 }
                             }
+                        }
                         }
                     }
 
