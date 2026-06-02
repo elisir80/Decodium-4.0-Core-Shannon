@@ -1670,11 +1670,12 @@ Item {
     Rectangle {
         id: waterfallControlsToggle
         visible: waterfallPanel.showControls && !waterfallPanel.controlsExpanded
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: 8
-        anchors.rightMargin: 72
-        width: Math.min(136, Math.max(112, parent.width - 88))
+        // Posizione libera (mobile): -1 = non impostato \u2192 default top-right come prima.
+        property real userX: -1
+        property real userY: -1
+        x: userX >= 0 ? Math.max(0, Math.min(userX, parent.width - width)) : (parent.width - width - 72)
+        y: userY >= 0 ? Math.max(0, Math.min(userY, parent.height - height)) : 8
+        width: Math.min(158, Math.max(134, parent.width - 88))
         height: 30
         z: 200
         radius: 7
@@ -1684,8 +1685,17 @@ Item {
         border.color: accentCyan
         border.width: toggleMouse.containsMouse ? 2 : 1
 
+        // Ripristina posizione salvata all'avvio (stesso helper bridge.getSetting delle altre graph-settings)
+        Component.onCompleted: {
+            var sx = bridge.getSetting("uiWfControlsToggleX", -1)
+            var sy = bridge.getSetting("uiWfControlsToggleY", -1)
+            if (sx >= 0) userX = waterfallPanel.clampNumber(sx, 0, Math.max(0, parent.width - width), -1)
+            if (sy >= 0) userY = waterfallPanel.clampNumber(sy, 0, Math.max(0, parent.height - height), -1)
+        }
+
         Row {
             anchors.centerIn: parent
+            anchors.horizontalCenterOffset: 9
             spacing: 7
             Text {
                 text: "\u2630"
@@ -1704,9 +1714,54 @@ Item {
         MouseArea {
             id: toggleMouse
             anchors.fill: parent
+            anchors.leftMargin: 20
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: waterfallPanel.setControlsExpanded(!waterfallPanel.controlsExpanded)
+        }
+
+        // Maniglia di trascinamento (pattern World Clock / MamWindow): solo questa muove il pulsante.
+        Rectangle {
+            id: wfToggleHandle
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 3
+            width: 16
+            height: 24
+            radius: 4
+            color: wfToggleHandleMA.containsMouse
+                   ? Qt.rgba(accentCyan.r, accentCyan.g, accentCyan.b, 0.25)
+                   : "transparent"
+            Text {
+                anchors.centerIn: parent
+                text: "\u283f"
+                color: accentCyan
+                font.pixelSize: 12
+            }
+            MouseArea {
+                id: wfToggleHandleMA
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.SizeAllCursor
+                property point clickPos: Qt.point(0, 0)
+                onPressed: function(mouse) {
+                    clickPos = Qt.point(mouse.x, mouse.y)
+                    if (waterfallControlsToggle.userX < 0) waterfallControlsToggle.userX = waterfallControlsToggle.x
+                    if (waterfallControlsToggle.userY < 0) waterfallControlsToggle.userY = waterfallControlsToggle.y
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed) return
+                    var nx = waterfallControlsToggle.userX + (mouse.x - clickPos.x)
+                    var ny = waterfallControlsToggle.userY + (mouse.y - clickPos.y)
+                    var p = waterfallControlsToggle.parent
+                    waterfallControlsToggle.userX = Math.max(0, Math.min(nx, p.width - waterfallControlsToggle.width))
+                    waterfallControlsToggle.userY = Math.max(0, Math.min(ny, p.height - waterfallControlsToggle.height))
+                }
+                onReleased: {
+                    waterfallPanel.persistGraphSetting("uiWfControlsToggleX", Math.round(waterfallControlsToggle.userX))
+                    waterfallPanel.persistGraphSetting("uiWfControlsToggleY", Math.round(waterfallControlsToggle.userY))
+                }
+            }
         }
 
         ToolTip.visible: toggleMouse.containsMouse
@@ -1782,6 +1837,14 @@ Item {
                 waterfallDisplay.labelColor = preset.color
             } else if (key === "uiWaterfallShowCallsigns") {
                 waterfallPanel.setShowDecodeCallsigns(waterfallPanel.coerceBool(value, true), false)
+            } else if (key === "uiWfControlsToggleX") {
+                var tx = Number(value)
+                if (isFinite(tx) && tx >= 0)
+                    waterfallControlsToggle.userX = waterfallPanel.clampNumber(tx, 0, Math.max(0, waterfallControlsToggle.parent.width - waterfallControlsToggle.width), waterfallControlsToggle.userX)
+            } else if (key === "uiWfControlsToggleY") {
+                var ty = Number(value)
+                if (isFinite(ty) && ty >= 0)
+                    waterfallControlsToggle.userY = waterfallPanel.clampNumber(ty, 0, Math.max(0, waterfallControlsToggle.parent.height - waterfallControlsToggle.height), waterfallControlsToggle.userY)
             } else {
                 waterfallPanel.restoringSettings = false
                 return
