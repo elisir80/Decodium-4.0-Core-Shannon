@@ -4577,27 +4577,31 @@ static int minimumUsefulSyncPayloadMs(const QString& mode)
     return 0;
 }
 
-static int ft2AsyncTxStartSafetyMs()
+static int ft2AsyncTxStartSafetyMs(bool conservative)
 {
-    // FIX B: era 550 (finestra utile ~18% dello slot). 180ms basta a coprire
-    // PTT spin-up + sink start; libera ~76% dello slot per il TX async.
-    return 180;
+    // FIX B (1.0.353): 180ms basta a coprire PTT spin-up + sink start e libera
+    // ~76% dello slot per il TX async (tollera il troncamento del payload).
+    // 1.0.367 — con ft2ConservativeTiming (default ON) torna a 550ms: finestra
+    // utile ~18%, niente frame troncati (comportamento calmo stile Decodium 3.0).
+    return conservative ? 550 : 180;
 }
 
-static int latestFt2AsyncTxStartMs(int periodMs)
+static int latestFt2AsyncTxStartMs(int periodMs, bool conservative)
 {
-    // FIX B: come latestD3CompatibleSyncTxStartMs per i modi sync, basta che
-    // resti payload UTILE (minimumUsefulSyncPayloadMs ~700ms) non l'intero
-    // payload (2520ms). Gate SOFT: oltre questo punto il troncamento payload
-    // non e' piu' tollerabile -> rinvio al prossimo slot.
-    int const minUsefulPayloadMs = minimumUsefulSyncPayloadMs(QStringLiteral("FT2"));
-    int const payloadMs = (minUsefulPayloadMs > 0)
-                              ? minUsefulPayloadMs
-                              : estimatedSyncPayloadMs(QStringLiteral("FT2"));
+    // 1.0.367 — gate SOFT: oltre questo punto del periodo si rinvia il TX al
+    // prossimo slot invece di trasmettere ORA.
+    //  - conservative (default ON): richiede spazio per il payload FT2 INTERO
+    //    (~2520ms) -> finestra ~18%, mai un frame troncato (l'utente preferisce
+    //    stabilità: feedback_ft2_stability_over_reactivity).
+    //  - non-conservative (FIX B 1.0.353): basta il payload UTILE minimo
+    //    (~700ms) -> finestra fino a ~76%, TX più reattivo ma può troncare.
+    int const payloadMs = conservative
+                              ? estimatedSyncPayloadMs(QStringLiteral("FT2"))
+                              : minimumUsefulSyncPayloadMs(QStringLiteral("FT2"));
     if (periodMs <= 0 || payloadMs <= 0) {
         return 0;
     }
-    return qMax(0, periodMs - payloadMs - ft2AsyncTxStartSafetyMs());
+    return qMax(0, periodMs - payloadMs - ft2AsyncTxStartSafetyMs(conservative));
 }
 
 static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bool immediateClickTx = false)
@@ -5555,6 +5559,20 @@ void DecodiumBridge::setFt8FastSequence(bool v)
     settings.setValue(QStringLiteral("Ft8FastSequence"), v);
     emit ft8FastSequenceChanged();
     bridgeLog(QStringLiteral("[FT2WS] FT8 fast sequence %1").arg(v ? "ON" : "OFF"));
+}
+
+// 1.0.367 — finestra TX FT2 async conservativa (default ON). ON = richiede spazio
+// per il payload INTERO (~18% slot, niente frame troncati, stile Decodium 3.0).
+// OFF = comportamento FIX B 1.0.353 (finestra ~76%, più reattivo ma può troncare).
+// Persistito Decodium3. Vedi latestFt2AsyncTxStartMs / ft2AsyncTxStartSafetyMs.
+void DecodiumBridge::setFt2ConservativeTiming(bool v)
+{
+    if (m_ft2ConservativeTiming == v) return;
+    m_ft2ConservativeTiming = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2ConservativeTiming"), v);
+    emit ft2ConservativeTimingChanged();
+    bridgeLog(QStringLiteral("[FT2WS] FT2 conservative TX window %1").arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -15122,7 +15140,7 @@ bool DecodiumBridge::isFt2AsyncTxStartTooLate(int* elapsedMsOut,
     }
 
     int const periodMs = periodMsForMode(m_mode);
-    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs);
+    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs, m_ft2ConservativeTiming);
     if (latestStartMsOut) {
         *latestStartMsOut = latestStartMs;
     }
@@ -15156,7 +15174,7 @@ qint64 DecodiumBridge::safeFt2AsyncTxDelay(qint64 requestedDelayMs, QString* adj
     }
 
     int const periodMs = periodMsForMode(m_mode);
-    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs);
+    int const latestStartMs = latestFt2AsyncTxStartMs(periodMs, m_ft2ConservativeTiming);
     if (periodMs <= 0 || latestStartMs <= 0) {
         return requestedDelayMs;
     }
@@ -25639,6 +25657,8 @@ void DecodiumBridge::loadSettings()
     m_maxCallerRetries = qBound(1, s.value(QStringLiteral("MaxCallerRetries"), 10).toInt(), 99);
     // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
     m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
+    // 1.0.367 — finestra TX FT2 async conservativa. Default ON = stabilità (no frame troncati).
+    m_ft2ConservativeTiming = s.value(QStringLiteral("Ft2ConservativeTiming"), true).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
     m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();

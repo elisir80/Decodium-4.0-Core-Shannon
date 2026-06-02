@@ -419,6 +419,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2ManualOneShotEnabled READ ft2ManualOneShotEnabled WRITE setFt2ManualOneShotEnabled NOTIFY ft2ManualOneShotEnabledChanged)
     // 1.0.317 — opt-in: FT8 sequenze veloci (grace 1200→400ms + accetta decode tardivi entro d3Cap)
     Q_PROPERTY(bool ft8FastSequence READ ft8FastSequence WRITE setFt8FastSequence NOTIFY ft8FastSequenceChanged)
+    Q_PROPERTY(bool ft2ConservativeTiming READ ft2ConservativeTiming WRITE setFt2ConservativeTiming NOTIFY ft2ConservativeTimingChanged)
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
@@ -1332,6 +1333,7 @@ signals:
     void ft8SignoffRetryCapChanged();  // 1.0.315 — cap ripetizioni 73/RR73 FT8
     void ft2ManualOneShotEnabledChanged(); // 1.0.321 — FT2 manual one-shot disarm opt-in
     void ft8FastSequenceChanged();     // 1.0.317 — grace ridotta + late-decode accept FT8
+    void ft2ConservativeTimingChanged(); // 1.0.367 — finestra TX FT2 async stretta (no frame troncati)
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
@@ -1888,6 +1890,7 @@ private:
     // d3CapMs (~11s) invece di scartare lo slot. Sotto pressione CPU la safety
     // (effectiveAutoTxDecodeGraceMs qMax(900,...)) sovrascrive comunque.
     bool m_ft8FastSequence {false};
+    bool m_ft2ConservativeTiming {true}; // 1.0.367 — default ON: finestra TX FT2 async ~18% (payload intero, niente troncamento)
     // 1.0.174 — FT2 weak-signal pack master flag (opt-in, default OFF).
     bool m_ft2Conservative {false};
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
@@ -2743,6 +2746,8 @@ public:
     // 1.0.317 — FT8 fast sequence (grace 400ms + accept late decodes)
     Q_INVOKABLE bool ft8FastSequence() const { return m_ft8FastSequence; }
     Q_INVOKABLE void setFt8FastSequence(bool v);
+    Q_INVOKABLE bool ft2ConservativeTiming() const { return m_ft2ConservativeTiming; }
+    Q_INVOKABLE void setFt2ConservativeTiming(bool v);
     // 1.0.326 B4 — helper: relax latestD3 cap se ftxImmediateClickTx OR ft8FastSequence+FT8
     bool effectiveRelaxLatestCap() const { return m_ftxImmediateClickTx || (m_ft8FastSequence && m_mode == QStringLiteral("FT8")); }
     // 1.0.289 — FT2 enhancement toggles

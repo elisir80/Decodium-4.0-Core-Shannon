@@ -3116,6 +3116,33 @@ Dialog {
                                     ToolTip.text: qsTr("Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.\n\nTwo changes:\n  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary\n  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'\n\nSAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety > reactivity on loaded PCs).\n\nDefault: OFF (= conservative upstream behaviour, max decode reliability).")
                                 }
 
+                                // 1.0.367 — opt-in: finestra TX FT2 async conservativa (default ON = calmo/stabile)
+                                Text {
+                                    text: qsTr("FT2: conservative TX window (no truncated frames):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2ConservativeTimingCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2ConservativeTiming : true
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft2ConservativeTiming !== checked)
+                                            bridge.setFt2ConservativeTiming(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Controls how late in a slot the async FT2 TX may start.\n\n• ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can't decode. Calm, Decodium-3.0-style stability.\n• OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.\n\nEnable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.")
+                                }
+
                                 // 1.0.321 — opt-in: FT2 manual one-shot disarm (Salvatore 1.0.300 latch fix)
                                 Text {
                                     text: qsTr("FT2: manual one-shot disarm (1.0.300+):")

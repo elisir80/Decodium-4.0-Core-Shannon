@@ -1594,8 +1594,11 @@ void HamlibTransceiver::do_ptt (bool on)
           // signal a UI error here: a failed PTT-off must not abort the
           // surrounding TX-teardown sequence. The PTT-on path above keeps
           // throwing, since a failed TX start SHOULD surface to the user.
+          // 1.0.367 — 2 attempts (was 3): on a healthy bus the first call
+          // always succeeds (no stall); the cap bounds the worst-case worker
+          // stall on a dead bus to ~2×timeout instead of ~3×.
           int rc = -RIG_EIO;
-          for (int attempt = 0; attempt < 3; ++attempt)
+          for (int attempt = 0; attempt < 2; ++attempt)
             {
               rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
               CAT_TRACE ("rig_set_ptt PTT=false attempt=" << attempt << " rc=" << rc);
@@ -1619,7 +1622,16 @@ void HamlibTransceiver::do_ptt (bool on)
         }
     }
 
-  update_PTT (on);
+  // 1.0.367 — report the ACTUAL PTT state, not the requested one. If a PTT-off
+  // failed above (rig may still be keyed) ptt_on_ stays true; propagating
+  // update_PTT(false) would desync the app (UI thinks RX while the rig is still
+  // transmitting). Before 1.0.366 error_check() threw before reaching this
+  // line, so the inconsistency could not occur; the no-throw release reopened
+  // it. Use the real state when we control a PTT line; fall back to the
+  // requested value only when there is no PTT port (RIG_PTT_NONE / VOX).
+  bool const effective_ptt =
+      (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt) ? ptt_on_ : on;
+  update_PTT (effective_ptt);
   if (on)
     {
       schedule_transmit_telemetry_burst ();
