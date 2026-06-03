@@ -3089,6 +3089,33 @@ Dialog {
                                     ToolTip.text: qsTr("Restores the 'TX starts IMMEDIATELY on double-click' behaviour of 1.0.283.\n\n• FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)\n• FT8/FT4: raises the clickable window cap to d3CapMs (~11s on FT8, 5.6s on FT4) = real 1.0.283 behaviour\n\nDefault: OFF (= safe upstream behaviour).\n\nEnable if it bothers you to wait 1 cycle after the click.")
                                 }
 
+                                // 1.0.371 - opt-in: logga RR73 (TX4) anche se il partner sparisce (FT2 async AutoCQ)
+                                Text {
+                                    text: qsTr("Log RR73 even if partner leaves (FT2):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2LogRr73OnPartnerLeftCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2LogRr73OnPartnerLeft : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft2LogRr73OnPartnerLeft !== checked)
+                                            bridge.setFt2LogRr73OnPartnerLeft(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.\n\nMatches TX5/73 and sync mode behaviour.\n\nDefault: OFF.")
+                                }
+
                                 // 1.0.317 — opt-in: FT8 fast sequence (grace ridotta + late-decode accept)
                                 Text {
                                     text: qsTr("FT8: fast sequences (WSJT-X/JTDX style):")

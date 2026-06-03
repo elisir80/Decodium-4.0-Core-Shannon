@@ -410,6 +410,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int ft2SignoffRetryCap READ ft2SignoffRetryCap WRITE setFt2SignoffRetryCap NOTIFY ft2SignoffRetryCapChanged)
     // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283). Rilassa period-gate FT2/FT8/FT4. Default OFF (= upstream sicuro)
     Q_PROPERTY(bool ftxImmediateClickTx READ ftxImmediateClickTx WRITE setFtxImmediateClickTx NOTIFY ftxImmediateClickTxChanged)
+    Q_PROPERTY(bool ft2LogRr73OnPartnerLeft READ ft2LogRr73OnPartnerLeft WRITE setFt2LogRr73OnPartnerLeft NOTIFY ft2LogRr73OnPartnerLeftChanged)
     // 1.0.315 — ripetizioni signoff (73/RR73) regolabili anche per FT4 e FT8 (oltre a FT2)
     Q_PROPERTY(int ft4SignoffRetryCap READ ft4SignoffRetryCap WRITE setFt4SignoffRetryCap NOTIFY ft4SignoffRetryCapChanged)
     Q_PROPERTY(int ft8SignoffRetryCap READ ft8SignoffRetryCap WRITE setFt8SignoffRetryCap NOTIFY ft8SignoffRetryCapChanged)
@@ -1329,6 +1330,7 @@ signals:
     void ft2ConservativeChanged();  // 1.0.174 — FT2 Weak-Signal Pack
     void ft2SignoffRetryCapChanged();  // 1.0.311 — cap ripetizioni 73/RR73 FT2
     void ftxImmediateClickTxChanged(); // 1.0.314 — TX immediato al click (stile 1.0.283)
+    void ft2LogRr73OnPartnerLeftChanged(); // 1.0.371 - log RR73 (TX4) anche se il partner sparisce (FT2 async)
     void ft4SignoffRetryCapChanged();  // 1.0.315 — cap ripetizioni 73/RR73 FT4
     void ft8SignoffRetryCapChanged();  // 1.0.315 — cap ripetizioni 73/RR73 FT8
     void ft2ManualOneShotEnabledChanged(); // 1.0.321 — FT2 manual one-shot disarm opt-in
@@ -1875,6 +1877,7 @@ private:
     // 1.0.314 — opt-in TX immediato al click (stile 1.0.283). Default OFF = comportamento upstream.
     // ON: rilassa il period-gate FT2 (TX1 da double-click bypassa) e il cap finestra FT8/FT4 (650→2000ms shift accettato).
     bool m_ftxImmediateClickTx {false};
+    bool m_ft2LogRr73OnPartnerLeft {false};
     // 1.0.315 — cap ripetizioni 73/RR73 FT4 (default 4) e FT8 (default 3), regolabili 1-8.
     // Stesso pattern di m_ft2SignoffRetryCap: valore ASSOLUTO (niente extra conservative/weak).
     int  m_ft4SignoffRetryCap {4};
@@ -2735,6 +2738,8 @@ public:
     // 1.0.314 — TX immediato al click (FT2 bypass period-gate TX1, FT8/FT4 cap 2000ms invece di 650ms)
     Q_INVOKABLE bool ftxImmediateClickTx() const { return m_ftxImmediateClickTx; }
     Q_INVOKABLE void setFtxImmediateClickTx(bool v);
+    Q_INVOKABLE bool ft2LogRr73OnPartnerLeft() const { return m_ft2LogRr73OnPartnerLeft; }
+    Q_INVOKABLE void setFt2LogRr73OnPartnerLeft(bool v);
     // 1.0.315 — ripetizioni signoff regolabili per FT4 e FT8 (oltre a FT2), 1-8 assoluto
     Q_INVOKABLE int  ft4SignoffRetryCap() const { return m_ft4SignoffRetryCap; }
     Q_INVOKABLE void setFt4SignoffRetryCap(int v);
