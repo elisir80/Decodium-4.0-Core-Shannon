@@ -937,6 +937,13 @@ bool DecodiumLegacyBackend::holdTxFreq() const
     return false;
 }
 
+void DecodiumLegacyBackend::setTxWatchdogMinutes(int minutes)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetTxWatchdogMinutes(minutes);
+    }
+}
+
 void DecodiumLegacyBackend::setAutoCq(bool enabled)
 {
     if (m_mainWindow) {

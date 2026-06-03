@@ -368,6 +368,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString colorNewCall           READ colorNewCall           WRITE setColorNewCall           NOTIFY colorNewCallChanged)
     Q_PROPERTY(QString colorNewCallBand       READ colorNewCallBand       WRITE setColorNewCallBand       NOTIFY colorNewCallBandChanged)
     Q_PROPERTY(QString colorLotwUser          READ colorLotwUser          WRITE setColorLotwUser          NOTIFY colorLotwUserChanged)
+    Q_PROPERTY(QString decodeColorFallback    READ decodeColorFallback    CONSTANT)
     Q_PROPERTY(bool    b4Strikethrough READ b4Strikethrough WRITE setB4Strikethrough NOTIFY b4StrikethroughChanged)
     // Alias usato da DecodeList.qml
     Q_PROPERTY(bool    showB4Strikethrough READ b4Strikethrough NOTIFY b4StrikethroughChanged)
@@ -844,6 +845,10 @@ public:
     void setColorNewCallBand(const QString& v) { if (m_colorNewCallBand!=v){m_colorNewCallBand=v;emit colorNewCallBandChanged();} }
     QString colorLotwUser() const { return m_colorLotwUser; }
     void setColorLotwUser(const QString& v) { if (m_colorLotwUser!=v){m_colorLotwUser=v;emit colorLotwUserChanged();} }
+    QString decodeColorFallback() const { return QStringLiteral("#AFC4D8"); }
+    Q_INVOKABLE bool decodeColorEnabled(const QString& prop) const;
+    Q_INVOKABLE void setDecodeColorEnabled(const QString& prop, bool enabled);
+    Q_INVOKABLE QString effectiveDecodeColor(const QString& prop) const;
 
     // Returns the priority-ranked WSJT-X background color for a decode entry,
     // or empty string when no highlight applies.
@@ -938,6 +943,8 @@ public slots:
     Q_INVOKABLE void advanceQsoState(int txNum); // GitHub TxController clone
 
 private:
+    QString decodeColorValue(const QString& prop) const;
+
     // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers (gate stretto + log immediato)
     void rememberPartnerStateV2(QString const& tag);
     bool tryResumeFromPartnerMemoryV2(QString const& newDxCall);
@@ -1436,6 +1443,7 @@ signals:
     void colorNewCallChanged();
     void colorNewCallBandChanged();
     void colorLotwUserChanged();
+    void decodeColorEnabledChanged(QString prop, bool enabled);
     void b4StrikethroughChanged();
     // B8 — Alert sounds
     void alertSoundsEnabledChanged();
@@ -2389,7 +2397,8 @@ private:
     bool    m_targetCallSavedAlt12   {false};
     bool    m_targetCallWasTransmitting {false}; // edge detector per transmittingChanged
 
-    int  m_txWatchdogTicks  {0};   // tick watchdog a 250ms (240 tick = 60s)
+    int  m_txWatchdogTicks  {0};   // tick watchdog a 250ms: period/count logic
+    qint64 m_txWatchdogActiveSinceMs {0}; // wall-clock source for minute watchdog
     static constexpr int TX_WATCHDOG_MAX = 240; // 60s @ 250ms
 
     // appEngine stub members
@@ -2492,6 +2501,7 @@ private:
     QString m_colorNewCall           {"#00E0E0"}; // cyan
     QString m_colorNewCallBand       {"#B5E8E8"}; // light cyan
     QString m_colorLotwUser          {"#FFFFFF"}; // white bg, dark red text
+    QHash<QString, bool> m_decodeColorEnabled;
 
     // Worked-before tracking (per-band/DXCC/zone/grid). Populated from ADIF
     // import + each logged TX. Keys for *byBand sets are "BAND|VALUE", e.g.

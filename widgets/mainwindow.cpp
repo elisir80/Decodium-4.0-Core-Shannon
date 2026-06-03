@@ -4921,6 +4921,13 @@ bool MainWindow::legacyHoldTxFreq() const
   return ui->cbHoldTxFreq->isChecked();
 }
 
+void MainWindow::legacySetTxWatchdogMinutes(int minutes)
+{
+  m_config.set_watchdog(qBound(0, minutes, 999));
+  tx_watchdog(false);
+  update_watchdog_label();
+}
+
 void MainWindow::legacySetAutoCq(bool enabled)
 {
   onRemoteSetAutoCqRequested(QString {}, enabled);

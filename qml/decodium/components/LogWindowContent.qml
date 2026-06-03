@@ -367,7 +367,7 @@ Rectangle {
 
                 StyledComboBox {
                     id: modeFilter
-                    model: ["All", "FT8", "FT4", "SFox", "JT65", "JT9", "Q65", "MSK144"]
+                    model: ["All", "FT8", "FT4", "FT2", "SFox", "JT65", "JT9", "Q65", "MSK144"]
                     currentIndex: 0
                     Layout.preferredWidth: 75; height: 26; font.pixelSize: 9
                     onCurrentTextChanged: { clearSelection(); refreshLog() }

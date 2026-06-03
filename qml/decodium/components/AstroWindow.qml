@@ -18,6 +18,8 @@ Dialog {
     padding: 16
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
+    property int minimumResizeWidth: 480
+    property int minimumResizeHeight: 430
 
     function clampToParent() {
         if (!parent) return
@@ -83,17 +85,26 @@ Dialog {
         color: "transparent"
 
         MouseArea {
-            anchors.fill: parent
-            property point clickPos: Qt.point(0, 0)
+            z: 2
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.rightMargin: 80
+            acceptedButtons: Qt.LeftButton
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
-                clickPos = Qt.point(mouse.x, mouse.y)
+                pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                pressWindowPos = Qt.point(astroWindow.x, astroWindow.y)
                 astroWindow.positionInitialized = true
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
-                astroWindow.x += mouse.x - clickPos.x
-                astroWindow.y += mouse.y - clickPos.y
+                var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                astroWindow.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
+                astroWindow.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
                 astroWindow.clampToParent()
             }
         }
@@ -189,23 +200,29 @@ Dialog {
         }
     }
 
-    contentItem: ColumnLayout {
-        spacing: 10
+    contentItem: Item {
+        implicitWidth: astroContentLayout.implicitWidth
+        implicitHeight: astroContentLayout.implicitHeight
 
-        ScrollView {
-            id: astroScroll
-            clip: true
-            rightPadding: 12
-            bottomPadding: 8
-            contentWidth: availableWidth
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumHeight: 0
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ColumnLayout {
+            id: astroContentLayout
+            anchors.fill: parent
+            spacing: 10
 
-            ColumnLayout {
-                width: Math.max(astroScroll.availableWidth, 0)
-                spacing: 12
+            ScrollView {
+                id: astroScroll
+                clip: true
+                rightPadding: 12
+                bottomPadding: 8
+                contentWidth: availableWidth
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+                ColumnLayout {
+                    width: Math.max(astroScroll.availableWidth, 0)
+                    spacing: 12
 
                 Rectangle {
                     Layout.fillWidth: true
@@ -909,6 +926,80 @@ Dialog {
                 }
 
                 Item { Layout.fillWidth: true }
+            }
+        }
+    }
+
+        Rectangle {
+            id: astroResizeGrip
+            z: 50
+            width: 22
+            height: 22
+            radius: 5
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 2
+            anchors.bottomMargin: 2
+            color: astroResizeMA.containsMouse
+                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
+                   : "transparent"
+            border.color: astroResizeMA.containsMouse ? secondaryCyan : "transparent"
+
+            Rectangle {
+                width: 12
+                height: 2
+                radius: 1
+                rotation: -45
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 5
+                anchors.bottomMargin: 7
+                color: astroResizeMA.containsMouse ? secondaryCyan : Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.55)
+            }
+
+            Rectangle {
+                width: 7
+                height: 2
+                radius: 1
+                rotation: -45
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 5
+                anchors.bottomMargin: 12
+                color: astroResizeMA.containsMouse ? secondaryCyan : Qt.rgba(textSecondary.r, textSecondary.g, textSecondary.b, 0.45)
+            }
+
+            MouseArea {
+                id: astroResizeMA
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton
+                cursorShape: Qt.SizeFDiagCursor
+                property point pressGlobalPos: Qt.point(0, 0)
+                property real pressWidth: 0
+                property real pressHeight: 0
+
+                onPressed: function(mouse) {
+                    pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    pressWidth = astroWindow.width
+                    pressHeight = astroWindow.height
+                    astroWindow.positionInitialized = true
+                }
+
+                onPositionChanged: function(mouse) {
+                    if (!pressed) return
+                    var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    var maxWidth = astroWindow.parent
+                            ? Math.max(astroWindow.minimumResizeWidth, astroWindow.parent.width - astroWindow.x)
+                            : 1200
+                    var maxHeight = astroWindow.parent
+                            ? Math.max(astroWindow.minimumResizeHeight, astroWindow.parent.height - astroWindow.y)
+                            : 900
+                    astroWindow.width = Math.max(astroWindow.minimumResizeWidth,
+                                                 Math.min(maxWidth, pressWidth + currentGlobalPos.x - pressGlobalPos.x))
+                    astroWindow.height = Math.max(astroWindow.minimumResizeHeight,
+                                                  Math.min(maxHeight, pressHeight + currentGlobalPos.y - pressGlobalPos.y))
+                }
             }
         }
     }

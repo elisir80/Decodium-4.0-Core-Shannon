@@ -12,6 +12,7 @@
 
 #include "Logger.hpp"
 #include "commons.h"
+#include "Detector/DecodeMetricLogging.hpp"
 #include "Detector/FortranRuntimeGuard.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -274,20 +275,25 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
       return;
     }
   QString const utcPrefix = format_decode_utc (request.nutc);
-  qInfo().noquote()
-      << QStringLiteral ("[DECODEMETRIC] mode=FT2-async wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 ap_cache=%11 thread=0x%12")
-             .arg (waitMs)
-             .arg (decodeMs)
-             .arg (totalTimer.elapsed ())
-             .arg (request.threadCount)
-             .arg (activeThreads)
-             .arg (request.audio.size ())
-             .arg (nout)
-             .arg (ndepth)
-             .arg (nfa)
-             .arg (nfb)
-             .arg (request.apHashCache.size ())
-             .arg (current_thread_id_hex ());
+  qint64 const totalMs = totalTimer.elapsed ();
+  static std::atomic<qint64> lastMetricLogMs {0};
+  if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
+    {
+      qInfo().noquote()
+          << QStringLiteral ("[DECODEMETRIC] mode=FT2-async wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 ap_cache=%11 thread=0x%12")
+                 .arg (waitMs)
+                 .arg (decodeMs)
+                 .arg (totalMs)
+                 .arg (request.threadCount)
+                 .arg (activeThreads)
+                 .arg (request.audio.size ())
+                 .arg (nout)
+                 .arg (ndepth)
+                 .arg (nfa)
+                 .arg (nfb)
+                 .arg (request.apHashCache.size ())
+                 .arg (current_thread_id_hex ());
+    }
   Q_EMIT asyncDecodeReady (build_rows (utcPrefix, '~', nout, snrs, dts, freqs, naps, quals,
                                        decodeds));
 }
@@ -358,20 +364,25 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   LOG_DEBUG ("FT2 decode completed: stage=" << ft2_dsp_rollout_stage ()
              << " nout=" << nout);
   QString const utcPrefix = format_decode_utc (request.nutc);
-  qInfo().noquote()
-      << QStringLiteral ("[DECODEMETRIC] mode=FT2 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
-             .arg (request.serial)
-             .arg (waitMs)
-             .arg (decodeMs)
-             .arg (totalTimer.elapsed ())
-             .arg (request.threadCount)
-             .arg (activeThreads)
-             .arg (request.audio.size ())
-             .arg (nout)
-             .arg (ndepth)
-             .arg (nfa)
-             .arg (nfb)
-             .arg (current_thread_id_hex ());
+  qint64 const totalMs = totalTimer.elapsed ();
+  static std::atomic<qint64> lastMetricLogMs {0};
+  if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
+    {
+      qInfo().noquote()
+          << QStringLiteral ("[DECODEMETRIC] mode=FT2 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+                 .arg (request.serial)
+                 .arg (waitMs)
+                 .arg (decodeMs)
+                 .arg (totalMs)
+                 .arg (request.threadCount)
+                 .arg (activeThreads)
+                 .arg (request.audio.size ())
+                 .arg (nout)
+                 .arg (ndepth)
+                 .arg (nfa)
+                 .arg (nfb)
+                 .arg (current_thread_id_hex ());
+    }
   Q_EMIT decodeReady (request.serial, build_rows (utcPrefix, '~', nout, snrs, dts, freqs, naps,
                                                   quals, decodeds));
 }

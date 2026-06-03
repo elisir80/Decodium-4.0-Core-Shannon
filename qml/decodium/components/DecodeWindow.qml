@@ -44,6 +44,7 @@ Window {
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
     property int decodeColorBoost: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
+    property int decodeColorRevision: 0
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     readonly property real leftPanelWidth: width * 0.5
@@ -88,6 +89,9 @@ Window {
         if (!decodeWindow.hasNativeRxDecodeModel())
             rxDecodeModel = currentRxDecodes()
     }
+    function refreshDecodeColors() {
+        decodeColorRevision = (decodeColorRevision + 1) % 1000000
+    }
 	    Connections {
 	        target: bridge
 	        function onSettingValueChanged(key, value) {
@@ -95,10 +99,32 @@ Window {
 	                decodeShowPeriodSeparator = value
 	            else if (key === "decodeNewestFirst")
 	                decodeNewestFirst = value
-	            else if (key === "uiDecodeColorBoost")
-	                decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
-	        }
-	    }
+		            else if (key === "uiDecodeColorBoost")
+		                decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
+		        }
+                function onDecodeColorEnabledChanged(prop, enabled) {
+                    decodeWindow.refreshDecodeColors()
+                }
+                function onColorCQChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorMyCallChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorDXEntityChanged() { decodeWindow.refreshDecodeColors() }
+                function onColor73Changed() { decodeWindow.refreshDecodeColors() }
+                function onColorB4Changed() { decodeWindow.refreshDecodeColors() }
+                function onColorTxMessageChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewDxccChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewDxccBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewContinentChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewContinentBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewCqZoneChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewCqZoneBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewItuZoneChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewItuZoneBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewGridChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewGridBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewCallChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorNewCallBandChanged() { decodeWindow.refreshDecodeColors() }
+                function onColorLotwUserChanged() { decodeWindow.refreshDecodeColors() }
+		    }
     property bool hideTelemetryOnlyDecodes: Qt.platform.os === "windows"
     property string highlightOrangeCallsigns: bridge.getSetting("HighlightOrangeCallsigns", "")
     property string highlightBlueCallsigns: bridge.getSetting("HighlightBlueCallsigns", "")
@@ -203,9 +229,6 @@ Window {
     }
 
     // Shannon-compatible color scheme
-    readonly property color colorTx:          (bridge && bridge.themeManager) ? bridge.themeManager.warningColor : "#FF8C00"
-    readonly property color colorLotw:        "#44BBFF"   // Azzurro — utente LotW
-
     function isSignoffMessage(message) {
         var words = String(message || "").toUpperCase().replace(/[<>;,]/g, " ").split(/\s+/)
         for (var i = 0; i < words.length; ++i) {
@@ -235,7 +258,13 @@ Window {
         return ""
     }
 
+    function effectiveDecodeColor(prop) {
+        decodeWindow.decodeColorRevision
+        return bridge.effectiveDecodeColor(prop)
+    }
+
     function wsjtxHighlightHex(modelData) {
+        decodeWindow.decodeColorRevision
         var hex = bridge.decodeHighlightBg(modelData)
         if (!hex || hex.length === 0) return ""
         return hex
@@ -368,20 +397,20 @@ Window {
 
         var customColor = customHighlightColor(modelData)
         if (customColor !== "") return boostedDecodeTextColor(customColor)
-        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(bridge.color73)
-        if (modelData.isB4 || modelData.dxIsWorked) return boostedDecodeTextColor(bridge.colorB4)
+        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
+        if (modelData.isB4 || modelData.dxIsWorked) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
 
         var textHighlight = wsjtxTextHighlightColor(modelData)
         if (textHighlight.length > 0)
             return boostedDecodeTextColor(textHighlight)
 
-        if (modelData.isTx)     return boostedDecodeTextColor(colorTx)
-        if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(bridge.colorMyCall)
-        if (modelData.isLotw)   return boostedDecodeTextColor(colorLotw)
+        if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
+        if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
+        if (modelData.isLotw)   return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
-            return boostedDecodeTextColor(bridge.colorDXEntity)
-        if (modelData.isCQ)     return boostedDecodeTextColor(bridge.colorCQ)
+            return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
+        if (modelData.isCQ)     return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         return boostedDecodeTextColor(textPrimary)
     }
 
@@ -1286,7 +1315,7 @@ Component.onCompleted: {
                                             text: modelData.dxCountry || ""
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-	                                            color: decodeWindow.boostedDecodeTextColor(modelData.dxCountry ? bridge.colorDXEntity : textSecondary)
+	                                            color: decodeWindow.boostedDecodeTextColor(modelData.dxCountry ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                             elide: Text.ElideNone

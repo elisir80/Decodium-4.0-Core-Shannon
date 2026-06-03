@@ -292,12 +292,13 @@ Rectangle {
             Rectangle {
                 id: ftThreadsLed
                 visible: showFooterFtThreads
-                width: 40
+                width: autoMode ? 58 : 40
                 height: 18
                 radius: 9
 
                 property int threadCount: bridge ? bridge.ftThreads : 1
                 property bool autoMode: bridge ? bridge.ftThreadsAuto : false
+                readonly property string displayValue: autoMode ? "AUTO" : threadCount.toString()
                 property bool isActive: threadCount > 1
 
                 color: isActive ? Qt.rgba(255/255, 152/255, 0/255, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -326,9 +327,8 @@ Rectangle {
                     }
 
                     Text {
-                        text: ftThreadsLed.autoMode ? "A" + ftThreadsLed.threadCount.toString()
-                                                    : ftThreadsLed.threadCount.toString()
-                        font.pixelSize: 9
+                        text: ftThreadsLed.displayValue
+                        font.pixelSize: ftThreadsLed.autoMode ? 8 : 9
                         font.bold: true
                         font.family: decodiumMonoFontFamily
                         color: ftThreadsLed.isActive ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : textSecondary
@@ -354,8 +354,7 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: "FT Decoder Threads: "
-                              + (ftThreadsLed.autoMode ? "AUTO " : "")
-                              + ftThreadsLed.threadCount
+                              + ftThreadsLed.displayValue
                               + "\nClic: cicla 1-8 - Clic destro: AUTO"
                     }
                 }

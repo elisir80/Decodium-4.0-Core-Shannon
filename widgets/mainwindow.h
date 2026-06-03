@@ -206,6 +206,7 @@ public:
   void legacySetTxEnabled(bool enabled);
   void legacySetHoldTxFreq(bool enabled);
   bool legacyHoldTxFreq() const;
+  void legacySetTxWatchdogMinutes(int minutes);
   void legacySetAutoCq(bool enabled);
   void legacySetDecodeDepthBits(int bits);
   void legacySetCqOnly(bool enabled);

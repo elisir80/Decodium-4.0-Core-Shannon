@@ -1358,6 +1358,18 @@ bool Configuration::disable_TX_on_73 () const {return m_->disable_TX_on_73_;}
 bool Configuration::force_call_1st() const {return m_->force_call_1st_;}
 bool Configuration::alternate_bindings() const {return m_->alternate_bindings_;}
 int Configuration::watchdog () const {return m_->watchdog_;}
+void Configuration::set_watchdog (int minutes)
+{
+  m_->watchdog_ = qBound (0, minutes, 999);
+  if (m_->ui_ && m_->ui_->tx_watchdog_spin_box)
+    {
+      bool const blocked = m_->ui_->tx_watchdog_spin_box->blockSignals (true);
+      m_->ui_->tx_watchdog_spin_box->setValue (m_->watchdog_);
+      m_->ui_->tx_watchdog_spin_box->blockSignals (blocked);
+    }
+  m_->settings_->setValue ("TxWatchdog", m_->watchdog_);
+  m_->settings_->sync ();
+}
 int Configuration::tune_watchdog_time () const {return m_->tune_watchdog_time_;}
 bool Configuration::tune_watchdog () const {return m_->tune_watchdog_;}
 bool Configuration::TX_messages () const {return m_->TX_messages_;}

@@ -13,7 +13,9 @@ Dialog {
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
-    width: Math.min(Math.round(((parent && parent.width > 0) ? parent.width : 1440) * 0.94), 1520)
+    width: Math.min(Math.round(((parent && parent.width > 0) ? parent.width : 1440) * 0.98),
+                    Math.max(520, ((parent && parent.width > 0) ? parent.width : 1440) - 24),
+                    1680)
     height: Math.min(Math.round(((parent && parent.height > 0) ? parent.height : 960) * 0.98), 1080)
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
@@ -27,6 +29,9 @@ Dialog {
     readonly property int wideFieldMinWidth: 420
     readonly property int portFieldMinWidth: 190
     readonly property int frequencyPageMinWidth: 1120
+    readonly property int scrollLeftMargin: 10
+    readonly property int scrollTopMargin: 10
+    readonly property int scrollRightMargin: 46
     property string dataDownloadStatus: ""
     property bool dataDownloadIsError: false
     property string uiFontLabel: bridge.fontSettingLabel("Font", "", 0)
@@ -75,6 +80,38 @@ Dialog {
 
     function setBoolSettingIfChanged(key, value, fallback) {
         if (boolSetting(key, fallback) !== value)
+            bridge.setSetting(key, value)
+    }
+
+    function territorySettingMatches(key, code, aliases) {
+        var raw = String(bridge.getSetting(key, "") || "")
+        if (raw.trim().length === 0)
+            return false
+
+        var text = raw.toUpperCase().replace(/[^A-Z]+/g, " ").trim()
+        var compact = text.replace(/\s+/g, "")
+        var accepted = [code].concat(aliases || [])
+        for (var i = 0; i < accepted.length; ++i) {
+            var alias = String(accepted[i] || "").toUpperCase().replace(/[^A-Z]+/g, " ").trim()
+            if (alias.length === 0)
+                continue
+            var aliasCompact = alias.replace(/\s+/g, "")
+            if (text === alias || compact === aliasCompact || text.indexOf(alias) >= 0)
+                return true
+        }
+        return false
+    }
+
+    function normalizeTerritorySetting(key, code, aliases) {
+        var raw = String(bridge.getSetting(key, "") || "")
+        if (raw.trim().length === 0)
+            return
+        bridge.setSetting(key, territorySettingMatches(key, code, aliases) ? code : "")
+    }
+
+    function setTerritoryExcluded(key, code, excluded) {
+        var value = excluded ? code : ""
+        if (String(bridge.getSetting(key, "") || "") !== value)
             bridge.setSetting(key, value)
     }
 
@@ -1449,9 +1486,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Dettagli Stazione ──
                         Text { text: qsTr("STATION DETAILS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -1568,9 +1610,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Backend CAT ──
                         Text { text: qsTr("BACKEND CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -2546,9 +2593,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Dispositivi Audio ──
                         Text { text: qsTr("AUDIO DEVICES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 4 }
@@ -2772,9 +2824,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Frequenza e Timing ──
                         Text { text: qsTr("FREQUENCY AND TIMING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -2845,11 +2902,12 @@ Dialog {
                             GridLayout {
                                 id: autoSequenceGrid
                                 width: parent.width
-                                columns: 4
-                                columnSpacing: 14
+                                columns: 2
+                                columnSpacing: 16
                                 rowSpacing: 10
                                 property int checkWidth: 34
-                                property real labelWidth: Math.max(150, (width - (checkWidth * 2) - (columnSpacing * 3)) / 2)
+                                property int valueWidth: 110
+                                property real labelWidth: Math.max(240, width - valueWidth - columnSpacing)
 
                                 Text {
                                     text: qsTr("Auto Sequence:")
@@ -2973,13 +3031,9 @@ Dialog {
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
 
-                                // ── completa la riga corrente prima dell'header FT2 ──
-                                Item { Layout.preferredWidth: autoSequenceGrid.labelWidth; Layout.preferredHeight: controlHeight }
-                                Item { Layout.preferredWidth: autoSequenceGrid.checkWidth; Layout.preferredHeight: controlHeight }
-
                                 // ══════════ FT2 UTILITY ══════════
-                                Text { text: qsTr("FT2 UTILITY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-                                Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+                                Text { text: qsTr("FT2 UTILITY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 10 }
+                                Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                                 // 1.0.311 — FT2: ripetizioni del 73/RR73 finale regolabili (era fisso 8)
                                 Text {
@@ -2993,8 +3047,7 @@ Dialog {
                                 }
                                 SpinBox {
                                     id: ft2SignoffCapSpin
-                                    Layout.columnSpan: 3
-                                    Layout.preferredWidth: 110
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
                                     Layout.alignment: Qt.AlignLeft
                                     implicitHeight: controlHeight
                                     from: 1; to: 8; editable: true
@@ -3020,8 +3073,7 @@ Dialog {
                                 }
                                 SpinBox {
                                     id: ft4SignoffCapSpin
-                                    Layout.columnSpan: 3
-                                    Layout.preferredWidth: 110
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
                                     Layout.alignment: Qt.AlignLeft
                                     implicitHeight: controlHeight
                                     from: 1; to: 8; editable: true
@@ -3047,8 +3099,7 @@ Dialog {
                                 }
                                 SpinBox {
                                     id: ft8SignoffCapSpin
-                                    Layout.columnSpan: 3
-                                    Layout.preferredWidth: 110
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
                                     Layout.alignment: Qt.AlignLeft
                                     implicitHeight: controlHeight
                                     from: 1; to: 8; editable: true
@@ -3202,15 +3253,16 @@ Dialog {
                                     text: qsTr("Caller retries (max TX repeats per step):")
                                     color: textSecondary
                                     font.pixelSize: 12
-                                    elide: Text.ElideRight
+                                    wrapMode: Text.WordWrap
                                     verticalAlignment: Text.AlignVCenter
                                     Layout.preferredWidth: autoSequenceGrid.labelWidth
-                                    Layout.preferredHeight: controlHeight
+                                    Layout.columnSpan: 2
+                                    Layout.preferredHeight: Math.max(controlHeight, implicitHeight)
                                 }
                                 SpinBox {
                                     id: maxCallerRetriesSpin
-                                    Layout.columnSpan: 3
-                                    Layout.preferredWidth: 110
+                                    Layout.columnSpan: 2
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
                                     Layout.alignment: Qt.AlignLeft
                                     implicitHeight: controlHeight
                                     from: 1; to: 99; editable: true
@@ -3423,8 +3475,7 @@ Dialog {
                                 }
                                 SpinBox {
                                     id: mamMaxStreamsSpin
-                                    Layout.columnSpan: 3
-                                    Layout.preferredWidth: 110
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
                                     Layout.alignment: Qt.AlignLeft
                                     implicitHeight: controlHeight
                                     from: 2; to: 5; editable: true
@@ -3522,8 +3573,6 @@ Dialog {
                                     ToolTip.delay: 400
                                     ToolTip.text: qsTr("Spalma i decode FT8/FT4 dal batch finale del periodo a streaming continuo con fade animato (~100 ms per riga). FT2 async resta invariato (già streaming). Default: ON; auto-fallback se rileva stall UI su PC modesti. Disattiva per il comportamento batch legacy.")
                                 }
-                                Item { Layout.preferredWidth: autoSequenceGrid.labelWidth; Layout.preferredHeight: controlHeight }
-                                Item { Layout.preferredWidth: autoSequenceGrid.checkWidth; Layout.preferredHeight: controlHeight }
                             }
                         }
 
@@ -3647,9 +3696,14 @@ Dialog {
 
                     GridLayout {
                         id: displaySettingsGrid
-                        width: displaySettingsScroll.availableWidth - 20
+                        width: Math.max(0, displaySettingsScroll.availableWidth - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Aspetto / Tema ──
                         Text { text: qsTr("ASPETTO / TEMA"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -3923,6 +3977,7 @@ Dialog {
                         Text { text: qsTr("Frameless pop-out:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
                         CheckBox {
                             id: framelessPopoutsCheck
+                            Layout.leftMargin: 24
                             checked: bridge ? bridge.uiFramelessPopouts : false
                             onCheckedChanged: {
                                 if (bridge) bridge.setUiFramelessPopouts(checked)
@@ -3940,6 +3995,7 @@ Dialog {
                         Text { text: qsTr("Detach Full Spectrum:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
                         CheckBox {
                             id: autoDetachFullSpectrumCheck
+                            Layout.leftMargin: 24
                             checked: bridge ? bridge.autoDetachFullSpectrum : false
                             onCheckedChanged: {
                                 if (bridge) bridge.setAutoDetachFullSpectrum(checked)
@@ -3957,7 +4013,7 @@ Dialog {
                         Text { text: qsTr("Spectrum FPS cap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: spectrumFpsCombo
-                            Layout.preferredWidth: 120
+                            Layout.preferredWidth: 170
                             model: ["15 fps", "20 fps", "30 fps"]
                             currentIndex: {
                                 if (!bridge) return 1
@@ -4234,9 +4290,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Remote Web Server (PWA per iPad/mobile) ──
                         Text { text: qsTr("REMOTE WEB SERVER (iPad / mobile PWA)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -4528,9 +4589,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Servizi di Rete ──
                         Text { text: qsTr("NETWORK SERVICES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -5314,7 +5380,7 @@ Dialog {
                     id: frequenciesScrollView
                     clip: true
                     readonly property int pageContentWidth: settingsDialog.frequencyPageMinWidth
-                    contentWidth: settingsDialog.frequencyPageMinWidth + 20
+                    contentWidth: settingsDialog.frequencyPageMinWidth + settingsDialog.scrollLeftMargin + settingsDialog.scrollRightMargin
                     contentHeight: frequenciesContent.implicitHeight + 20
                     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
@@ -5916,9 +5982,14 @@ Dialog {
 
                     GridLayout {
                         id: colorsSettingsGrid
-                        width: colorsSettingsScroll.availableWidth - 20
+                        width: Math.max(0, colorsSettingsScroll.availableWidth - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Colori Decodifica ──
                         Text { text: qsTr("DECODE COLORS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -5934,6 +6005,8 @@ Dialog {
                                 property string targetProp: modelData.prop
                                 property string defaultColor: modelData.defaultColor
                                 property string currentColor: bridge[targetProp] || defaultColor
+                                property bool colorEnabled: bridge.decodeColorEnabled(targetProp)
+                                property string shownColor: colorEnabled ? currentColor : bridge.decodeColorFallback
 
                                 Text {
                                     text: modelData.label + ":"
@@ -5943,14 +6016,41 @@ Dialog {
                                     elide: Text.ElideRight
                                 }
 
+                                CheckBox {
+                                    id: decodeColorEnabledCheck
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: controlHeight
+                                    checked: decodeColorRow.colorEnabled
+                                    onClicked: {
+                                        decodeColorRow.colorEnabled = checked
+                                        bridge.setDecodeColorEnabled(decodeColorRow.targetProp, checked)
+                                        decodeColorInput.text = decodeColorRow.shownColor
+                                    }
+                                    indicator: Rectangle {
+                                        width: 18
+                                        height: 18
+                                        radius: 3
+                                        color: parent.checked ? primaryBlue : bgMedium
+                                        border.color: glassBorder
+                                        y: parent.height / 2 - height / 2
+                                    }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Use this specific decode color. When OFF, this category uses the shared default color.")
+                                }
+
                                 Rectangle {
                                     width: 60
                                     height: 24
                                     radius: 4
-                                    color: settingsDialog.validHexColor(decodeColorRow.currentColor) ? decodeColorRow.currentColor : decodeColorRow.defaultColor
+                                    color: settingsDialog.validHexColor(decodeColorRow.shownColor) ? decodeColorRow.shownColor : bridge.decodeColorFallback
+                                    opacity: decodeColorRow.colorEnabled ? 1.0 : 0.55
                                     border.color: glassBorder
                                     MouseArea {
                                         anchors.fill: parent
+                                        enabled: decodeColorRow.colorEnabled
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: decodeColorPresetPop.open()
                                     }
@@ -5988,7 +6088,9 @@ Dialog {
 
                                 DecoTextField {
                                     id: decodeColorInput
-                                    text: decodeColorRow.currentColor
+                                    text: decodeColorRow.shownColor
+                                    enabled: decodeColorRow.colorEnabled
+                                    opacity: enabled ? 1.0 : 0.55
                                     selectByMouse: true
                                     implicitHeight: controlHeight
                                     Layout.preferredWidth: 110
@@ -5996,7 +6098,7 @@ Dialog {
                                     font.pixelSize: controlFontSize
                                     onActiveFocusChanged: {
                                         if (!activeFocus)
-                                            text = decodeColorRow.currentColor
+                                            text = decodeColorRow.shownColor
                                     }
                                     onAccepted: {
                                         if (settingsDialog.setDecodeHighlightColor(decodeColorRow.targetProp, text))
@@ -6013,6 +6115,8 @@ Dialog {
                                     text: qsTr("Reset")
                                     Layout.preferredWidth: 72
                                     implicitHeight: controlHeight
+                                    enabled: decodeColorRow.colorEnabled
+                                    opacity: enabled ? 1.0 : 0.55
                                     onClicked: {
                                         settingsDialog.setDecodeHighlightColor(decodeColorRow.targetProp, decodeColorRow.defaultColor)
                                         decodeColorInput.text = decodeColorRow.defaultColor
@@ -6279,9 +6383,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Avvio ──
                         Text { text: qsTr("STARTUP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -6831,9 +6940,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Audio Alerts ──
                         Text { text: qsTr("AUDIO ALERTS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -6982,9 +7096,14 @@ Dialog {
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                     GridLayout {
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 4; columnSpacing: 10; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         // ── Blacklist ──
                         Text { text: qsTr("BLACKLIST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
@@ -7153,29 +7272,59 @@ Dialog {
                             onTextChanged: bridge.setSetting("Pass12", text.toUpperCase()) }
 
                         // ── Territory ──
-                        Text { text: qsTr("TERRITORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Text { text: qsTr("EXCLUDE TERRITORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         Text { text: qsTr("Europe:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory1",""); placeholderText: qsTr("EU / Europe"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory1", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory1", "EU", ["EUROPE", "EUROPA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory1", "EU", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory1", "EU", ["EUROPE", "EUROPA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
                         Text { text: qsTr("Africa:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory2",""); placeholderText: qsTr("AF / Africa"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory2", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory2", "AF", ["AFRICA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory2", "AF", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory2", "AF", ["AFRICA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
 
                         Text { text: qsTr("Oceania:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory3",""); placeholderText: qsTr("OC / Oceania"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory3", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory3", "OC", ["OCEANIA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory3", "OC", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory3", "OC", ["OCEANIA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
                         Text { text: qsTr("Asia:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory4",""); placeholderText: qsTr("AS / Asia"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory4", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory4", "AS", ["ASIA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory4", "AS", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory4", "AS", ["ASIA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
 
                         Text { text: qsTr("North America:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory5",""); placeholderText: qsTr("NA / North America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory5", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory5", "NA", ["NORTH AMERICA", "N. AMERICA", "N AMERICA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory5", "NA", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory5", "NA", ["NORTH AMERICA", "N. AMERICA", "N AMERICA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
                         Text { text: qsTr("South America:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
-                        DecoTextField { text: bridge.getSetting("Territory6",""); placeholderText: qsTr("SA / South America"); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; color: textPrimary; font.pixelSize: controlFontSize; background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("Territory6", text) }
+                        CheckBox {
+                            checked: settingsDialog.territorySettingMatches("Territory6", "SA", ["SOUTH AMERICA", "S. AMERICA", "S AMERICA"])
+                            onToggled: settingsDialog.setTerritoryExcluded("Territory6", "SA", checked)
+                            Component.onCompleted: settingsDialog.normalizeTerritorySetting("Territory6", "SA", ["SOUTH AMERICA", "S. AMERICA", "S AMERICA"])
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
 
                         // ── Opzioni Filtro ──
                         Text { text: qsTr("FILTER OPTIONS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
@@ -7215,9 +7364,14 @@ Dialog {
 
                     GridLayout {
                         id: uiButtonsGrid
-                        width: parent.width - 20
+                        width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
                         columns: 2; columnSpacing: 28; rowSpacing: 8
-                        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        anchors.topMargin: settingsDialog.scrollTopMargin
 
                         readonly property var toolbarButtons: [
                             { label: qsTr("Monitor (MON / STOP)"),  key: "uiBtnMonitorVisible" },

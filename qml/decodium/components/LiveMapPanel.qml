@@ -106,7 +106,10 @@ Rectangle {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 6
+                anchors.leftMargin: root.detachable && !root.detached ? 30 : 6
+                anchors.rightMargin: 6
+                anchors.topMargin: 6
+                anchors.bottomMargin: 6
                 spacing: 8
 
                 Rectangle {

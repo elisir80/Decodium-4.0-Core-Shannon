@@ -209,6 +209,7 @@ public:
   bool force_call_1st() const;
   bool alternate_bindings() const;
   int watchdog () const;
+  void set_watchdog (int minutes);
   int tune_watchdog_time () const;
   bool tune_watchdog () const;
   bool TX_messages () const;

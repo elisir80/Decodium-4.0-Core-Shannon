@@ -535,7 +535,7 @@ Popup {
 
                 StyledComboBox {
                     id: modeFilter
-                    model: ["All", "FT8", "FT4", "SFox", "JT65", "JT9", "Q65", "MSK144", "MSK40", "FSK441"]
+                    model: ["All", "FT8", "FT4", "FT2", "SFox", "JT65", "JT9", "Q65", "MSK144", "MSK40", "FSK441"]
                     currentIndex: 0
                     Layout.preferredWidth: 85; height: 28
                     font.pixelSize: 10

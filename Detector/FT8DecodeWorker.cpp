@@ -12,6 +12,7 @@
 
 #include "Logger.hpp"
 #include "commons.h"
+#include "Detector/DecodeMetricLogging.hpp"
 #include "Detector/FortranRuntimeGuard.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -307,20 +308,25 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       // Triggera LED Turbo Feedback (soglia >8 in DecodiumBridge::notifyTurboIterations).
       Q_EMIT turboIterations (rows.isEmpty () ? 0 : 50);
     }
-  qInfo().noquote()
-      << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
-             .arg (request.serial)
-             .arg (waitMs)
-             .arg (decodeMs)
-             .arg (totalTimer.elapsed ())
-             .arg (request.threadCount)
-             .arg (activeThreads)
-             .arg (request.audio.size ())
-             .arg (nout)
-             .arg (ndepth)
-             .arg (nfa)
-             .arg (nfb)
-             .arg (current_thread_id_hex ());
+  qint64 const totalMs = totalTimer.elapsed ();
+  static std::atomic<qint64> lastMetricLogMs {0};
+  if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
+    {
+      qInfo().noquote()
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+                 .arg (request.serial)
+                 .arg (waitMs)
+                 .arg (decodeMs)
+                 .arg (totalMs)
+                 .arg (request.threadCount)
+                 .arg (activeThreads)
+                 .arg (request.audio.size ())
+                 .arg (nout)
+                 .arg (ndepth)
+                 .arg (nfa)
+                 .arg (nfb)
+                 .arg (current_thread_id_hex ());
+    }
   Q_EMIT decodeReady (request.serial, rows);
 }
 

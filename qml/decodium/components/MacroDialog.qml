@@ -11,7 +11,8 @@ import QtQuick.Layouts
 Dialog {
     id: macroDialog
     title: "Macro Settings"
-    modal: true
+    modal: false
+    dim: false
     width: 700
     height: 600
     closePolicy: Popup.CloseOnEscape
@@ -58,17 +59,26 @@ Dialog {
         color: "transparent"
 
         MouseArea {
-            anchors.fill: parent
-            property point clickPos: Qt.point(0, 0)
+            z: 2
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.rightMargin: 80
+            acceptedButtons: Qt.LeftButton
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
-                clickPos = Qt.point(mouse.x, mouse.y)
+                pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                pressWindowPos = Qt.point(macroDialog.x, macroDialog.y)
                 macroDialog.positionInitialized = true
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
-                macroDialog.x += mouse.x - clickPos.x
-                macroDialog.y += mouse.y - clickPos.y
+                var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                macroDialog.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
+                macroDialog.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
                 macroDialog.clampToParent()
             }
         }

@@ -1683,6 +1683,7 @@ ApplicationWindow {
         function onColorNewCallChanged() { mainWindow.refreshDecodeColors() }
         function onColorNewCallBandChanged() { mainWindow.refreshDecodeColors() }
         function onColorLotwUserChanged() { mainWindow.refreshDecodeColors() }
+        function onDecodeColorEnabledChanged(prop, enabled) { mainWindow.refreshDecodeColors() }
     }
 
     function decodeClamp01(value) {
@@ -1787,15 +1788,20 @@ ApplicationWindow {
         return false
     }
 
-	    function customHighlightColor(modelData) {
-	        if (!modelData)
-	            return ""
-	        var message = modelData.message || ""
-	        if (highlightOrange && highlightListMatches(message, highlightOrangeCallsigns))
-	            return "#E14B00"
+    function customHighlightColor(modelData) {
+        if (!modelData)
+            return ""
+        var message = modelData.message || ""
+        if (highlightOrange && highlightListMatches(message, highlightOrangeCallsigns))
+            return "#E14B00"
         if (highlightBlue && highlightListMatches(message, highlightBlueCallsigns))
             return "#0064FF"
         return ""
+    }
+
+    function effectiveDecodeColor(prop) {
+        mainWindow.decodeColorRevision
+        return bridge.effectiveDecodeColor(prop)
     }
 
 	    // Shannon-compatible color function (allineato a DecodeWindow.qml)
@@ -1803,16 +1809,16 @@ ApplicationWindow {
         if (!modelData)
             return boostedDecodeTextColor(textPrimary)
         var customColor = customHighlightColor(modelData)
-        if (modelData.isTx)     return boostedDecodeTextColor(bridge.themeManager.warningColor)
-        if (modelData.isMyCall) return boostedDecodeTextColor(bridge.colorMyCall)
+        if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
+        if (modelData.isMyCall) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
         if (customColor !== "") return boostedDecodeTextColor(customColor)
-        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(bridge.color73)
-        if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(bridge.colorB4)
-        if (modelData.isLotw === true) return boostedDecodeTextColor("#44BBFF")
+        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
+        if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
+        if (modelData.isLotw === true) return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
-            return boostedDecodeTextColor(bridge.colorDXEntity)
-        if (modelData.isCQ) return boostedDecodeTextColor(bridge.colorCQ)
+            return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
+        if (modelData.isCQ) return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         return boostedDecodeTextColor(textPrimary)
     }
 
@@ -1879,9 +1885,9 @@ ApplicationWindow {
         if (customColor !== "")
             return boostedDecodeTextColor(customColor)
         if (highlight73 && isSignoffMessage(modelData.message))
-            return boostedDecodeTextColor(bridge.color73)
+            return boostedDecodeTextColor(effectiveDecodeColor("color73"))
         if (modelData.isB4 === true || modelData.dxIsWorked === true)
-            return boostedDecodeTextColor(bridge.colorB4)
+            return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
 
         var textHex = decodePassiveHighlightTextColor(modelData)
         if (textHex.length > 0)
@@ -3172,84 +3178,10 @@ ApplicationWindow {
                             }
                         }
 
-                        // Row 2: Mode selector
+                        // Row 2: Monitor/Stop control
                         RowLayout {
                             spacing: 2
 
-                            // Mode selector
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 30
-                                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
-                                border.color: glassBorder; radius: 4
-
-                                DecoComboBox {
-                                    id: compactModeCombo
-                                    anchors.fill: parent
-                                    anchors.margins: 1
-                                    model: bridge.availableModes()
-                                    currentIndex: model.indexOf(bridge.mode)
-                                    onActivated: function(idx) {
-                                        bridge.mode = model[idx]
-                                    }
-                                    font.pixelSize: 11; font.bold: true
-                                    leftPadding: 8
-                                    rightPadding: 22
-                                    topPadding: 4
-                                    bottomPadding: 4
-                                    background: Rectangle { color: "transparent" }
-                                    contentItem: Text {
-                                        text: compactModeCombo.displayText
-                                        font.pixelSize: 11; font.bold: true
-                                        color: secondaryCyan
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignLeft
-                                        elide: Text.ElideRight
-                                    }
-                                    delegate: ItemDelegate {
-                                        width: compactModePopup.width
-                                        height: 34
-                                        contentItem: Text {
-                                            text: modelData
-                                            font.pixelSize: 11; font.bold: true
-                                            color: bridge.mode === modelData ? secondaryCyan : textPrimary
-                                            verticalAlignment: Text.AlignVCenter
-                                            elide: Text.ElideRight
-                                        }
-                                        background: Rectangle {
-                                            color: hovered ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
-                                        }
-                                    }
-                                    popup: Popup {
-                                        id: compactModePopup
-                                        y: compactModeCombo.height + 1
-                                        width: Math.max(compactModeCombo.width, 168)
-                                        implicitHeight: Math.min(contentItem.implicitHeight + 2, 360)
-                                        padding: 1
-
-                                        contentItem: ListView {
-                                            clip: true
-                                            implicitHeight: contentHeight
-                                            model: compactModeCombo.popup.visible ? compactModeCombo.delegateModel : null
-                                            currentIndex: compactModeCombo.highlightedIndex
-
-                                            ScrollBar.vertical: ScrollBar {
-                                                policy: ScrollBar.AsNeeded
-                                            }
-                                        }
-
-                                        background: Rectangle {
-                                            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.97)
-                                            border.color: glassBorder
-                                            radius: 4
-                                        }
-                                    }
-                                    ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Seleziona il modo del decoder")
-                                }
-                            }
-
-                            // Monitor/Stop Button
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 16
@@ -7048,7 +6980,7 @@ NumberAnimation {
 	                                                        text: entry.dxCountry || ""
                                                         font.family: mainWindow.decodedTextFontFamily
                                                         font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-		                                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? bridge.colorDXEntity : textSecondary)
+		                                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? mainWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
                                                         horizontalAlignment: Text.AlignRight
                                                         verticalAlignment: Text.AlignVCenter
                                                         elide: Text.ElideRight
@@ -7728,7 +7660,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     Item {
                         id: colDragLayer
                         parent: contentArea
-                        anchors.fill: contentArea
+                        anchors.fill: parent
                         z: 60
                         // Trasparente agli eventi quando non si sta trascinando: NON deve
                         // intercettare click/hover dei pannelli sottostanti.
@@ -10690,6 +10622,12 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             border.color: secondaryCyan
             border.width: 2
 
+            FloatingResizeHandles {
+                targetWindow: astroFloatingWindow
+                maxWidth: 1400
+                maxHeight: 1200
+            }
+
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 8
@@ -10702,15 +10640,26 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     radius: 6
 
                     MouseArea {
-                        anchors.fill: parent
-                        property point clickPos: Qt.point(0, 0)
+                        id: astroFloatDragArea
+                        z: 2
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.rightMargin: 88
+                        acceptedButtons: Qt.LeftButton
+                        property point pressGlobalPos: Qt.point(0, 0)
+                        property point pressWindowPos: Qt.point(0, 0)
                         cursorShape: Qt.SizeAllCursor
-                        onPressed: function(mouse) { clickPos = Qt.point(mouse.x, mouse.y) }
+                        onPressed: function(mouse) {
+                            pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                            pressWindowPos = Qt.point(astroFloatingWindow.x, astroFloatingWindow.y)
+                        }
                         onPositionChanged: function(mouse) {
                             if (pressed) {
-                                var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
-                                astroFloatingWindow.x += delta.x
-                                astroFloatingWindow.y += delta.y
+                                var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                                astroFloatingWindow.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
+                                astroFloatingWindow.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
                             }
                         }
                     }
@@ -11562,7 +11511,7 @@ NumberAnimation {
 	                                        fontSizeMode: Text.HorizontalFit
 	                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
 	                                        maximumLineCount: 1
-			                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? bridge.colorDXEntity : textSecondary)
+			                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? mainWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
 	                                        horizontalAlignment: Text.AlignRight
 	                                        verticalAlignment: Text.AlignVCenter
 	                                        elide: Text.ElideRight

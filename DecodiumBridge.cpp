@@ -6304,6 +6304,9 @@ void DecodiumBridge::persistTxWatchdogSettings()
 
     syncSettingToLegacyIni(QStringLiteral("TxWatchdog"), legacyMinutes);
     syncSettingToLegacyIni(QStringLiteral("TXWatchdog"), legacyMinutes);
+    if (legacyBackendAvailable()) {
+        m_legacyBackend->setTxWatchdogMinutes(legacyMinutes);
+    }
 }
 
 void DecodiumBridge::setTxWatchdogMode(int v)
@@ -6316,6 +6319,7 @@ void DecodiumBridge::setTxWatchdogMode(int v)
 
     m_txWatchdogMode = v;
     m_txWatchdogTicks = 0;
+    m_txWatchdogActiveSinceMs = 0;
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -6337,6 +6341,7 @@ void DecodiumBridge::setTxWatchdogTime(int v)
 
     m_txWatchdogTime = v;
     m_txWatchdogTicks = 0;
+    m_txWatchdogActiveSinceMs = 0;
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -6358,6 +6363,7 @@ void DecodiumBridge::setTxWatchdogCount(int v)
 
     m_txWatchdogCount = v;
     m_txWatchdogTicks = 0;
+    m_txWatchdogActiveSinceMs = 0;
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -8211,6 +8217,13 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                   .arg(m_catConnected ? 1 : 0));
 #if defined(Q_OS_MAC)
                     if (!enabled && m_bridgeAudioLegacyTxActive) {
+                        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+                        if (m_txPlaybackHoldUntilMs > nowMs || m_txAudioRestartPending) {
+                            bridgeLog(QStringLiteral("legacyPttRequested: ignored early legacy PTT off while bridge audio is playing hold_ms=%1 restart_pending=%2")
+                                          .arg(qMax<qint64>(0, m_txPlaybackHoldUntilMs - nowMs))
+                                          .arg(m_txAudioRestartPending ? 1 : 0));
+                            return;
+                        }
                         stopBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-off"));
                     }
                     if (enabled && shouldUseBridgeAudioForLegacyDigitalTx()
@@ -8426,8 +8439,12 @@ void DecodiumBridge::syncLegacyBackendDialogState()
     m_legacyBackend->setTxMessage(5, m_tx5);
     m_legacyBackend->setTxMessage(6, m_tx6);
     m_legacyBackend->selectTxMessage(qBound(1, m_currentTx, 6));
+    int const legacyTxWatchdogMinutes = (m_txWatchdogMode == 1 && m_txWatchdogTime > 0)
+        ? m_txWatchdogTime
+        : 0;
+    m_legacyBackend->setTxWatchdogMinutes(legacyTxWatchdogMinutes);
     syncSpecialOperationToLegacyBackend();
-    bridgeLog(QStringLiteral("legacyTxSync: mode=%1 outDev=%2 outChan=%3 inDev=%4 inChan=%5 tx=%6 rx=%7 currentTx=%8 txPeriod=%9 alt12=%10 txLevel=%11 legacyTxAttn=%12")
+    bridgeLog(QStringLiteral("legacyTxSync: mode=%1 outDev=%2 outChan=%3 inDev=%4 inChan=%5 tx=%6 rx=%7 currentTx=%8 txPeriod=%9 alt12=%10 txLevel=%11 legacyTxAttn=%12 txWatchdogMin=%13")
                   .arg(m_mode,
                        m_audioOutputDevice,
                        QString::number(m_audioOutputChannel),
@@ -8439,7 +8456,8 @@ void DecodiumBridge::syncLegacyBackendDialogState()
                        houndTxSlotLock ? QStringLiteral("0") : QString::number(m_txPeriod),
                        (!houndTxSlotLock && m_alt12Enabled) ? QStringLiteral("1") : QStringLiteral("0"),
                        QString::number(qRound(qBound(0.0, m_txOutputLevel, 450.0))),
-                       QString::number(legacyTxAttn)));
+                       QString::number(legacyTxAttn),
+                       QString::number(legacyTxWatchdogMinutes)));
 }
 
 void DecodiumBridge::syncLegacyBackendTxState()
@@ -8796,7 +8814,9 @@ void DecodiumBridge::syncLegacyBackendState()
                                 true);
     }
     updateBool(m_decoding, m_monitoring, [this]() { emit decodingChanged(); });
-    updateBool(m_transmitting, legacyTransmittingNow, [this]() { emit transmittingChanged(); });
+    bool const effectiveLegacyTransmitting =
+        legacyTransmittingNow || m_bridgeAudioLegacyTxActive;
+    updateBool(m_transmitting, effectiveLegacyTransmitting, [this]() { emit transmittingChanged(); });
     bool const legacyTxStartedForMirror =
         usingLegacyBackendForTx()
         && legacyTransmittingNow
@@ -10355,26 +10375,119 @@ void DecodiumBridge::rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> co
     }
 }
 
+namespace {
+const QStringList& decodeColorPropertyNames()
+{
+    static const QStringList props {
+        QStringLiteral("colorTxMessage"),
+        QStringLiteral("colorMyCall"),
+        QStringLiteral("colorNewDxccBand"),
+        QStringLiteral("colorNewDxcc"),
+        QStringLiteral("colorNewContinentBand"),
+        QStringLiteral("colorNewContinent"),
+        QStringLiteral("colorNewCqZoneBand"),
+        QStringLiteral("colorNewCqZone"),
+        QStringLiteral("colorNewItuZoneBand"),
+        QStringLiteral("colorNewItuZone"),
+        QStringLiteral("colorNewGridBand"),
+        QStringLiteral("colorNewGrid"),
+        QStringLiteral("colorNewCallBand"),
+        QStringLiteral("colorNewCall"),
+        QStringLiteral("colorLotwUser"),
+        QStringLiteral("colorCQ"),
+        QStringLiteral("colorDXEntity"),
+        QStringLiteral("color73"),
+        QStringLiteral("colorB4")
+    };
+    return props;
+}
+
+bool isDecodeColorProperty(const QString& prop)
+{
+    return decodeColorPropertyNames().contains(prop);
+}
+
+QString decodeColorEnabledSettingKey(const QString& prop)
+{
+    return prop + QStringLiteral("Enabled");
+}
+}
+
+QString DecodiumBridge::decodeColorValue(const QString& prop) const
+{
+    if (prop == QStringLiteral("colorTxMessage")) return m_colorTxMessage;
+    if (prop == QStringLiteral("colorMyCall")) return m_colorMyCall;
+    if (prop == QStringLiteral("colorNewDxccBand")) return m_colorNewDxccBand;
+    if (prop == QStringLiteral("colorNewDxcc")) return m_colorNewDxcc;
+    if (prop == QStringLiteral("colorNewContinentBand")) return m_colorNewContinentBand;
+    if (prop == QStringLiteral("colorNewContinent")) return m_colorNewContinent;
+    if (prop == QStringLiteral("colorNewCqZoneBand")) return m_colorNewCqZoneBand;
+    if (prop == QStringLiteral("colorNewCqZone")) return m_colorNewCqZone;
+    if (prop == QStringLiteral("colorNewItuZoneBand")) return m_colorNewItuZoneBand;
+    if (prop == QStringLiteral("colorNewItuZone")) return m_colorNewItuZone;
+    if (prop == QStringLiteral("colorNewGridBand")) return m_colorNewGridBand;
+    if (prop == QStringLiteral("colorNewGrid")) return m_colorNewGrid;
+    if (prop == QStringLiteral("colorNewCallBand")) return m_colorNewCallBand;
+    if (prop == QStringLiteral("colorNewCall")) return m_colorNewCall;
+    if (prop == QStringLiteral("colorLotwUser")) return m_colorLotwUser;
+    if (prop == QStringLiteral("colorCQ")) return m_colorCQ;
+    if (prop == QStringLiteral("colorDXEntity")) return m_colorDXEntity;
+    if (prop == QStringLiteral("color73")) return m_color73;
+    if (prop == QStringLiteral("colorB4")) return m_colorB4;
+    return QString();
+}
+
+bool DecodiumBridge::decodeColorEnabled(const QString& prop) const
+{
+    if (!isDecodeColorProperty(prop))
+        return true;
+    return m_decodeColorEnabled.value(prop, true);
+}
+
+void DecodiumBridge::setDecodeColorEnabled(const QString& prop, bool enabled)
+{
+    if (!isDecodeColorProperty(prop))
+        return;
+    if (m_decodeColorEnabled.value(prop, true) == enabled)
+        return;
+
+    m_decodeColorEnabled.insert(prop, enabled);
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    const QString key = decodeColorEnabledSettingKey(prop);
+    s.setValue(key, enabled);
+    s.sync();
+    syncSettingToLegacyIni(key, enabled);
+    emit decodeColorEnabledChanged(prop, enabled);
+    emit settingValueChanged(key, enabled);
+}
+
+QString DecodiumBridge::effectiveDecodeColor(const QString& prop) const
+{
+    if (!isDecodeColorProperty(prop))
+        return QString();
+    return decodeColorEnabled(prop) ? decodeColorValue(prop) : decodeColorFallback();
+}
+
 QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
 {
-    if (entry.value(QStringLiteral("isTx")).toBool())                return m_colorTxMessage;
-    if (entry.value(QStringLiteral("isMyCall")).toBool())            return m_colorMyCall;
+    if (entry.value(QStringLiteral("isTx")).toBool())                return effectiveDecodeColor(QStringLiteral("colorTxMessage"));
+    if (entry.value(QStringLiteral("isMyCall")).toBool())            return effectiveDecodeColor(QStringLiteral("colorMyCall"));
 
-    if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())     return m_colorNewDxccBand;
-    if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())         return m_colorNewDxcc;
-    if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool())return m_colorNewContinentBand;
-    if (entry.value(QStringLiteral("dxIsNewContinent")).toBool())    return m_colorNewContinent;
-    if (entry.value(QStringLiteral("dxIsNewCqZoneBand")).toBool())   return m_colorNewCqZoneBand;
-    if (entry.value(QStringLiteral("dxIsNewCqZone")).toBool())       return m_colorNewCqZone;
-    if (entry.value(QStringLiteral("dxIsNewItuZoneBand")).toBool())  return m_colorNewItuZoneBand;
-    if (entry.value(QStringLiteral("dxIsNewItuZone")).toBool())      return m_colorNewItuZone;
-    if (entry.value(QStringLiteral("dxIsNewGridBand")).toBool())     return m_colorNewGridBand;
-    if (entry.value(QStringLiteral("dxIsNewGrid")).toBool())         return m_colorNewGrid;
-    if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return m_colorNewCallBand;
-    if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return m_colorNewCall;
+    if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewDxccBand"));
+    if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewDxcc"));
+    if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool())return effectiveDecodeColor(QStringLiteral("colorNewContinentBand"));
+    if (entry.value(QStringLiteral("dxIsNewContinent")).toBool())    return effectiveDecodeColor(QStringLiteral("colorNewContinent"));
+    if (entry.value(QStringLiteral("dxIsNewCqZoneBand")).toBool())   return effectiveDecodeColor(QStringLiteral("colorNewCqZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewCqZone")).toBool())       return effectiveDecodeColor(QStringLiteral("colorNewCqZone"));
+    if (entry.value(QStringLiteral("dxIsNewItuZoneBand")).toBool())  return effectiveDecodeColor(QStringLiteral("colorNewItuZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewItuZone")).toBool())      return effectiveDecodeColor(QStringLiteral("colorNewItuZone"));
+    if (entry.value(QStringLiteral("dxIsNewGridBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewGridBand"));
+    if (entry.value(QStringLiteral("dxIsNewGrid")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewGrid"));
+    if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewCallBand"));
+    if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewCall"));
 
-    if (entry.value(QStringLiteral("isLotw")).toBool())              return m_colorLotwUser;
-    if (entry.value(QStringLiteral("isCQ")).toBool())                return m_colorCQ;
+    if (entry.value(QStringLiteral("isLotw")).toBool())              return effectiveDecodeColor(QStringLiteral("colorLotwUser"));
+    if (entry.value(QStringLiteral("isCQ")).toBool())                return effectiveDecodeColor(QStringLiteral("colorCQ"));
     return QString();
 }
 
@@ -21083,6 +21196,10 @@ void DecodiumBridge::saveSettings()
     s.setValue("colorNewCall",          m_colorNewCall);
     s.setValue("colorNewCallBand",      m_colorNewCallBand);
     s.setValue("colorLotwUser",         m_colorLotwUser);
+    for (const QString& prop : decodeColorPropertyNames()) {
+        s.setValue(decodeColorEnabledSettingKey(prop),
+                   m_decodeColorEnabled.value(prop, true));
+    }
     // B8 — Alerts
     s.setValue("alertSoundsEnabled", m_alertSoundsEnabled);
     s.setValue("alert_Enabled",      m_alertSoundsEnabled);
@@ -25910,6 +26027,10 @@ void DecodiumBridge::loadSettings()
     m_colorNewCall          = s.value("colorNewCall",          m_colorNewCall         ).toString();
     m_colorNewCallBand      = s.value("colorNewCallBand",      m_colorNewCallBand     ).toString();
     m_colorLotwUser         = s.value("colorLotwUser",         m_colorLotwUser        ).toString();
+    m_decodeColorEnabled.clear();
+    for (const QString& prop : decodeColorPropertyNames()) {
+        m_decodeColorEnabled.insert(prop, s.value(decodeColorEnabledSettingKey(prop), true).toBool());
+    }
     // B8 — Alerts
     m_alertSoundsEnabled = s.value("alertSoundsEnabled", s.value("alert_Enabled", false)).toBool();
     // Cloudlog
@@ -28341,6 +28462,63 @@ static QStringList decodeFilterTerms(const DecodiumBridge& bridge,
     return terms;
 }
 
+static QString canonicalDecodeFilterTerritoryTerm(QString term)
+{
+    term = term.trimmed().toUpper();
+    term.replace(QLatin1Char('/'), QLatin1Char(' '));
+    term.replace(QLatin1Char('-'), QLatin1Char(' '));
+    term.replace(QLatin1Char('_'), QLatin1Char(' '));
+    term.replace(QLatin1Char('.'), QLatin1Char(' '));
+    term = term.simplified();
+    if (term.isEmpty()) {
+        return {};
+    }
+
+    auto hasToken = [&term](QString const& token) {
+        QString const paddedTerm = QStringLiteral(" ") + term + QStringLiteral(" ");
+        QString const paddedToken = QStringLiteral(" ") + token + QStringLiteral(" ");
+        return term == token || paddedTerm.contains(paddedToken);
+    };
+
+    if (hasToken(QStringLiteral("EU")) || term.contains(QStringLiteral("EUROPE"))
+        || term.contains(QStringLiteral("EUROPA"))) {
+        return QStringLiteral("EU");
+    }
+    if (hasToken(QStringLiteral("AF")) || term.contains(QStringLiteral("AFRICA"))) {
+        return QStringLiteral("AF");
+    }
+    if (hasToken(QStringLiteral("OC")) || term.contains(QStringLiteral("OCEANIA"))) {
+        return QStringLiteral("OC");
+    }
+    if (hasToken(QStringLiteral("AS")) || term.contains(QStringLiteral("ASIA"))) {
+        return QStringLiteral("AS");
+    }
+    if (hasToken(QStringLiteral("NA")) || term.contains(QStringLiteral("NORTH AMERICA"))
+        || term.contains(QStringLiteral("N AMERICA"))) {
+        return QStringLiteral("NA");
+    }
+    if (hasToken(QStringLiteral("SA")) || term.contains(QStringLiteral("SOUTH AMERICA"))
+        || term.contains(QStringLiteral("S AMERICA"))) {
+        return QStringLiteral("SA");
+    }
+
+    return {};
+}
+
+static QStringList decodeFilterTerritoryTerms(const DecodiumBridge& bridge)
+{
+    QStringList terms;
+    terms.reserve(6);
+    for (int i = 1; i <= 6; ++i) {
+        QString const term = canonicalDecodeFilterTerritoryTerm(
+            bridge.getSetting(QStringLiteral("Territory") + QString::number(i), QString()).toString());
+        if (!term.isEmpty() && !terms.contains(term)) {
+            terms.append(term);
+        }
+    }
+    return terms;
+}
+
 static DecodeUserFilterConfig readDecodeUserFilterConfig(const DecodiumBridge& bridge)
 {
     DecodeUserFilterConfig filters;
@@ -28360,7 +28538,7 @@ static DecodeUserFilterConfig readDecodeUserFilterConfig(const DecodiumBridge& b
     filters.blacklistTerms = decodeFilterTerms(bridge, QStringLiteral("Blacklist"), 12);
     filters.whitelistTerms = decodeFilterTerms(bridge, QStringLiteral("Whitelist"), 12);
     filters.passTerms = decodeFilterTerms(bridge, QStringLiteral("Pass"), 12);
-    filters.territoryTerms = decodeFilterTerms(bridge, QStringLiteral("Territory"), 6);
+    filters.territoryTerms = decodeFilterTerritoryTerms(bridge);
     return filters;
 }
 
@@ -31320,20 +31498,26 @@ void DecodiumBridge::onPeriodTimer()
     emit periodProgressChanged();
 
     // === TX watchdog configurabile (allineato a mainwindow m_txWatchdogMode) ===
-    // m_txWatchdogMode: 0=off, 1=time-based (minuti), 2=count-based (periodi)
+    // m_txWatchdogMode: 0=off, 1=time-based (wall-clock minuti), 2=count-based (periodi)
     if (m_txEnabled || m_transmitting) {
+        if (m_txWatchdogTicks <= 0 || m_txWatchdogActiveSinceMs <= 0) {
+            m_txWatchdogActiveSinceMs = nowMs;
+        }
         ++m_txWatchdogTicks;
         // 1.0.187 — FT2 Pack G: prima del watchdog standard, se siamo in TX3
         // (R+report) stallato per 2+ periodi, forza un re-send TX2 invece di
         // far morire il QSO. Cap a 1 per QSO. Gated Conservative+FT2.
         // La funzione resetta m_txWatchdogTicks a 0, quindi il watchdog skippa
         // questo period naturalmente — niente return early (rischio rottura pipeline).
-        maybeForceTx2ResendOnStall();
+        if (maybeForceTx2ResendOnStall()) {
+            m_txWatchdogActiveSinceMs = nowMs;
+        }
         bool watchdogFired = false;
         if (m_txWatchdogMode == 1) {
-            // Time-based: m_txWatchdogTime minuti × 240 tick/min (250ms × 240 = 60s = 1 min)
-            int maxTicks = m_txWatchdogTime * 240;
-            if (maxTicks > 0 && m_txWatchdogTicks >= maxTicks) watchdogFired = true;
+            qint64 const maxMs = qint64(m_txWatchdogTime) * 60 * 1000;
+            if (maxMs > 0 && nowMs - m_txWatchdogActiveSinceMs >= maxMs) {
+                watchdogFired = true;
+            }
         } else if (m_txWatchdogMode == 2) {
             // Count-based: m_txWatchdogCount periodi × ticksMax tick/periodo
             int maxTicks = m_txWatchdogCount * m_periodTicksMax;
@@ -31360,6 +31544,7 @@ void DecodiumBridge::onPeriodTimer()
                 }
             }
             m_txWatchdogTicks = 0;
+            m_txWatchdogActiveSinceMs = 0;
             m_autoCQPeriodsMissed = 0;
             m_txRetryCount = 0;
             m_lastNtx = -1;
@@ -31372,6 +31557,7 @@ void DecodiumBridge::onPeriodTimer()
         }
     } else {
         m_txWatchdogTicks = 0;      // reset quando TX non attivo
+        m_txWatchdogActiveSinceMs = 0;
         m_autoCQPeriodsMissed = 0;
     }
 

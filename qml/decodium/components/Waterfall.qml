@@ -420,20 +420,37 @@ Item {
                 anchors.topMargin: 3; anchors.bottomMargin: 5
                 spacing: 6
 
-                Text { text: "Calls:"; color: accentCyan; font.pixelSize: 10; font.bold: true }
+                Text {
+                    text: "Calls:"
+                    color: accentCyan
+                    font.pixelSize: 10
+                    font.bold: true
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.alignment: Qt.AlignVCenter
+                }
                 CheckBox {
                     id: showCallsCheck
+                    Layout.preferredWidth: 18
+                    Layout.preferredHeight: 18
+                    Layout.alignment: Qt.AlignVCenter
+                    leftPadding: 0
+                    rightPadding: 0
+                    topPadding: 0
+                    bottomPadding: 0
                     checked: waterfallPanel.showDecodeCallsigns
                     onClicked: waterfallPanel.setShowDecodeCallsigns(checked)
                     ToolTip.text: "Mostra i callsign decodificati sulla cascata"
                     ToolTip.visible: showCallsCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
+                        x: Math.round((showCallsCheck.width - width) / 2)
+                        y: Math.round((showCallsCheck.height - height) / 2)
                         implicitWidth: 14; implicitHeight: 14; radius: 2
                         color: showCallsCheck.checked ? accentCyan : wfToolbarBg
                         border.color: accentCyan; border.width: 1
                         Text { anchors.centerIn: parent; text: "C"; color: "black"; font.pixelSize: 9; font.bold: true; visible: showCallsCheck.checked }
                     }
+                    contentItem: Item { implicitWidth: 0; implicitHeight: 0 }
                 }
 
                 Text { text: "Font"; color: wfText; font.pixelSize: 10 }
@@ -501,7 +518,8 @@ Item {
                 Text { text: "Color"; color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: labelColorCombo
-                    Layout.preferredWidth: 86
+                    Layout.preferredWidth: 122
+                    Layout.minimumWidth: 122
                     Layout.alignment: Qt.AlignVCenter
                     font.pixelSize: 10
                     model: waterfallPanel.labelColorPresets.map(function(p){ return p.name })
@@ -515,19 +533,92 @@ Item {
                         }
                     }
                     background: Rectangle { color: wfToolbarBg; border.color: borderColor; radius: 2 }
-                    contentItem: Row {
-                        spacing: 4
-                        leftPadding: 4
+                    contentItem: Item {
+                        implicitWidth: 88
+                        implicitHeight: 22
+
                         Rectangle {
+                            id: labelColorSwatch
+                            x: 6
                             anchors.verticalCenter: parent.verticalCenter
                             width: 10; height: 10; radius: 2
                             color: waterfallPanel.labelColorPresets[labelColorCombo.currentIndex].color
                             border.color: "#555"; border.width: 1
                         }
                         Text {
+                            anchors.left: labelColorSwatch.right
+                            anchors.leftMargin: 6
+                            anchors.right: parent.right
+                            anchors.rightMargin: 24
                             anchors.verticalCenter: parent.verticalCenter
                             text: labelColorCombo.displayText
                             font.pixelSize: 10; color: textPrimary
+                            elide: Text.ElideRight
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                    delegate: ItemDelegate {
+                        id: colorDelegate
+                        required property int index
+
+                        width: ListView.view ? ListView.view.width : 196
+                        height: 38
+                        leftPadding: 12
+                        rightPadding: 12
+                        highlighted: labelColorCombo.highlightedIndex === index
+
+                        contentItem: RowLayout {
+                            spacing: 8
+
+                            Rectangle {
+                                Layout.preferredWidth: 13
+                                Layout.preferredHeight: 13
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: 3
+                                color: waterfallPanel.labelColorPresets[colorDelegate.index].color
+                                border.color: Qt.rgba(1, 1, 1, 0.55)
+                                border.width: 1
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                text: waterfallPanel.labelColorPresets[colorDelegate.index].name
+                                color: "#ffffff"
+                                font.pixelSize: 12
+                                font.bold: colorDelegate.highlighted || labelColorCombo.currentIndex === colorDelegate.index
+                                elide: Text.ElideNone
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+
+                        background: Rectangle {
+                            color: colorDelegate.highlighted || labelColorCombo.currentIndex === colorDelegate.index
+                                   ? Qt.rgba(accentCyan.r, accentCyan.g, accentCyan.b, 0.42)
+                                   : "transparent"
+                        }
+                    }
+                    popup: Popup {
+                        y: labelColorCombo.height + 2
+                        width: Math.max(labelColorCombo.width, 196)
+                        height: Math.min(contentItem.implicitHeight + 8, 310)
+                        padding: 4
+                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: contentHeight
+                            model: labelColorCombo.popup.visible ? labelColorCombo.delegateModel : null
+                            currentIndex: labelColorCombo.highlightedIndex
+                            highlightMoveDuration: 0
+                            boundsBehavior: Flickable.StopAtBounds
+                            ScrollBar.vertical: ScrollBar { }
+                        }
+
+                        background: Rectangle {
+                            color: "#07111f"
+                            border.color: accentCyan
+                            border.width: 1
+                            radius: 4
                         }
                     }
                 }
@@ -539,7 +630,7 @@ Item {
                 Text { text: "Palette:"; color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: paletteCombo
-                    Layout.preferredWidth: 106
+                    Layout.preferredWidth: 142
                     model: waterfallDisplay.paletteNames
                     currentIndex: 0
                     font.pixelSize: 10
@@ -547,7 +638,65 @@ Item {
                         waterfallPanel.setPaletteIndex(currentIndex, true)
                     }
                     background: Rectangle { color: wfToolbarBg; border.color: borderColor; radius: 2 }
-                    contentItem: Text { text: paletteCombo.displayText; font.pixelSize: 10; color: textPrimary; verticalAlignment: Text.AlignVCenter; leftPadding: 4 }
+                    contentItem: Text {
+                        text: paletteCombo.displayText
+                        font.pixelSize: 10
+                        color: textPrimary
+                        verticalAlignment: Text.AlignVCenter
+                        leftPadding: 6
+                        rightPadding: 24
+                        elide: Text.ElideRight
+                    }
+                    delegate: ItemDelegate {
+                        id: paletteDelegate
+                        required property int index
+                        required property var model
+
+                        width: ListView.view ? ListView.view.width : 214
+                        height: 38
+                        leftPadding: 12
+                        rightPadding: 12
+                        highlighted: paletteCombo.highlightedIndex === index
+
+                        contentItem: Text {
+                            text: paletteCombo.optionText(paletteDelegate.model)
+                            color: "#ffffff"
+                            font.pixelSize: 12
+                            font.bold: paletteDelegate.highlighted || paletteCombo.currentIndex === paletteDelegate.index
+                            elide: Text.ElideNone
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        background: Rectangle {
+                            color: paletteDelegate.highlighted || paletteCombo.currentIndex === paletteDelegate.index
+                                   ? Qt.rgba(accentCyan.r, accentCyan.g, accentCyan.b, 0.42)
+                                   : "transparent"
+                        }
+                    }
+                    popup: Popup {
+                        y: paletteCombo.height + 2
+                        width: Math.max(paletteCombo.width, 214)
+                        height: Math.min(contentItem.implicitHeight + 8, 360)
+                        padding: 4
+                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: contentHeight
+                            model: paletteCombo.popup.visible ? paletteCombo.delegateModel : null
+                            currentIndex: paletteCombo.highlightedIndex
+                            highlightMoveDuration: 0
+                            boundsBehavior: Flickable.StopAtBounds
+                            ScrollBar.vertical: ScrollBar { }
+                        }
+
+                        background: Rectangle {
+                            color: "#07111f"
+                            border.color: accentCyan
+                            border.width: 1
+                            radius: 4
+                        }
+                    }
                 }
 
                 // Auto Range

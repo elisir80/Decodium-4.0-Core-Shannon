@@ -66,6 +66,7 @@ public:
     void setTxEnabled(bool enabled);
     void setHoldTxFreq(bool enabled);
     bool holdTxFreq() const;
+    void setTxWatchdogMinutes(int minutes);
     void setAutoCq(bool enabled);
     void setDecodeDepthBits(int bits);
     void setCqOnly(bool enabled);
