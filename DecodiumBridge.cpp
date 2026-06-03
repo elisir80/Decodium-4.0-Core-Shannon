@@ -5511,6 +5511,18 @@ void DecodiumBridge::setFtxImmediateClickTx(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Immediate-click TX (FT2/FT8/FT4) %1").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.371 - opt-in: logga il QSO chiuso da noi con RR73 (TX4) in FT2 AutoCQ async anche
+// se il partner sparisce. Default OFF = comportamento attuale (one-shot disarm).
+void DecodiumBridge::setFt2LogRr73OnPartnerLeft(bool v)
+{
+    if (m_ft2LogRr73OnPartnerLeft == v) return;
+    m_ft2LogRr73OnPartnerLeft = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2LogRr73OnPartnerLeft"), v);
+    emit ft2LogRr73OnPartnerLeftChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Log RR73 on partner-left (FT2 async TX4) %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.315 — cap ripetizioni 73/RR73 in FT4 (1-8, default 4). Persistito Decodium3.
 void DecodiumBridge::setFt4SignoffRetryCap(int v)
 {
@@ -23388,6 +23400,17 @@ void DecodiumBridge::armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QStrin
         return;
     }
 
+    // 1.0.371 - opt-in: per TX4 (RR73 al partner) in AutoCQ async NON applicare il one-shot
+    // disarm. Senza, m_txEnabled=false blocca il deferred-log (gate completeFinishedSignoffIfReady)
+    // -> QSO chiuso da noi con RR73 ma mai loggato se il partner sparisce (bug log IK7IMK/LB5JJ
+    // 1.0.354). Tornando subito (senza armare AwaitingPartnerDecode ne disarmare m_txEnabled) il
+    // flusso prosegue come async-OFF: il deferred-log logga al cap ("log anyway, partner left"),
+    // come gia avviene per TX5/sync. Allinea TX4 a TX5.
+    if (txNum == 4 && m_ft2LogRr73OnPartnerLeft && m_nTx73 >= 1) {
+        bridgeLog(QStringLiteral("FT2 AutoCQ TX4 RR73: skip one-shot disarm, deferred-log will close QSO even if partner leaves (opt-in)"));
+        return;
+    }
+
     armFt2AutoCqAwaitingPartnerDecode(txNum, reason);
     if (!m_txEnabled) {
         return;
@@ -25646,6 +25669,8 @@ void DecodiumBridge::loadSettings()
     m_ft2SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft2SignoffRetryCap"), 4).toInt(), 8);
     // 1.0.314 — opt-in TX immediato al click (stile 1.0.283), default OFF = upstream sicuro.
     m_ftxImmediateClickTx = s.value(QStringLiteral("FtxImmediateClickTx"), false).toBool();
+    // 1.0.371 - opt-in: logga RR73/TX4 anche se il partner sparisce (FT2 async). Default OFF.
+    m_ft2LogRr73OnPartnerLeft = s.value(QStringLiteral("Ft2LogRr73OnPartnerLeft"), false).toBool();
     // 1.0.315 — cap ripetizioni 73/RR73 anche per FT4 (default 4) e FT8 (default 3). Range 1-8.
     m_ft4SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft4SignoffRetryCap"), 4).toInt(), 8);
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);

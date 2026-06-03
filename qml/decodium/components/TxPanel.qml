@@ -224,6 +224,67 @@ Item {
         persistTxPanelOrder()
     }
 
+    // === Regolazione livello TX (drive/Pwr) con rotellina + tasto destro su "Enable TX" ===
+    // bridge.txOutputLevel 0..450 = attenuazione 0..45 dB (0 = massima uscita). La % mostrata
+    // e' "potenza": 100% = 0 dB att (level 0), 0% = 45 dB att (level 450).
+    readonly property real txPwrStepLevel: 9.0   // 2% di potenza per tacca di rotellina
+    function txPwrPercent() {
+        if (!bridge) return 0
+        return Math.round((450.0 - bridge.txOutputLevel) / 4.5)
+    }
+    function nudgeTxPwr(up) {
+        if (!bridge) return
+        var nv = bridge.txOutputLevel + (up ? -txPwrStepLevel : txPwrStepLevel)
+        if (nv < 0) nv = 0
+        if (nv > 450) nv = 450
+        bridge.txOutputLevel = nv
+        txPwrOverlay.flash()
+    }
+
+    // Overlay temporaneo: mostra la potenza TX durante la regolazione con la rotellina.
+    Rectangle {
+        id: txPwrOverlay
+        z: 9999
+        visible: opacity > 0.01
+        opacity: 0.0
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 6
+        width: txPwrCol.width + 28
+        height: txPwrCol.height + 16
+        radius: 8
+        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.96)
+        border.color: errorRed
+        border.width: 1
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+        function flash() { opacity = 1.0; txPwrHideTimer.restart() }
+        Timer { id: txPwrHideTimer; interval: 1100; onTriggered: txPwrOverlay.opacity = 0.0 }
+        Column {
+            id: txPwrCol
+            anchors.centerIn: parent
+            spacing: 2
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Potenza TX")
+                color: textSecondary
+                font.pixelSize: 10
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: txPanel.txPwrPercent() + "%"
+                color: errorRed
+                font.pixelSize: 20
+                font.bold: true
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: (bridge ? (bridge.txOutputLevel/10.0).toFixed(1) : "0") + " dB att"
+                color: textSecondary
+                font.pixelSize: 9
+            }
+        }
+    }
+
     // Reattivo al reset dal tab "UI Buttons" di SettingsDialog (setting svuotato).
     Connections {
         target: engine
@@ -624,6 +685,7 @@ Item {
                                     property bool armed: false
                                     property real pressSceneX: 0
                                     property bool moved: false
+                                    property bool wheelAdjusted: false
 
                                     Timer {
                                         id: holdTimer
@@ -642,6 +704,7 @@ Item {
                                     onPressed: function(mouse) {
                                         armed = false
                                         moved = false
+                                        wheelAdjusted = false
                                         pressSceneX = mapToItem(topControlsFlow, mouse.x, mouse.y).x
                                         if (mouse.button === Qt.LeftButton)
                                             holdTimer.start()
@@ -674,6 +737,11 @@ Item {
                                                 txPanel.moveTxPanelButton(index, target)
                                             return
                                         }
+                                        // Regolazione con rotellina (destro tenuto): nessuna azione al rilascio.
+                                        if (wheelAdjusted) { wheelAdjusted = false; return }
+                                        // Sul pulsante con wheelAdjustsTx il destro e' dedicato alla regolazione: niente toggle.
+                                        if (mouse.button === Qt.RightButton && btnLoader.item && btnLoader.item.wheelAdjustsTx === true)
+                                            return
                                         // Click breve: esegui azione (passa mouse per right-click MAM).
                                         if (!moved && btnLoader.item)
                                             btnLoader.item.activate(mouse)
@@ -686,6 +754,19 @@ Item {
                                             txCtrlRepeater.dragIndex = -1
                                             txCtrlRepeater.dropIndex = -1
                                             armed = false
+                                        }
+                                    }
+
+                                    // Tasto destro tenuto + rotellina su un pulsante con
+                                    // wheelAdjustsTx (Enable TX): regola la potenza TX (txOutputLevel).
+                                    onWheel: function(wheel) {
+                                        if (btnLoader.item && btnLoader.item.wheelAdjustsTx === true
+                                                && (wheel.buttons & Qt.RightButton)) {
+                                            txPanel.nudgeTxPwr(wheel.angleDelta.y > 0)
+                                            wheelAdjusted = true
+                                            wheel.accepted = true
+                                        } else {
+                                            wheel.accepted = false
                                         }
                                     }
 
@@ -839,7 +920,8 @@ Item {
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("TX", "▲")
                                 readonly property bool txActive: engine ? engine.txEnabled : false
-                                readonly property string tip: qsTr("Abilita la TX")
+                                readonly property bool wheelAdjustsTx: true
+                                readonly property string tip: qsTr("Abilita la TX\nTasto destro + rotellina: regola la potenza TX")
                                 function activate(mouse) {
                                     if (!engine) return
                                     if (!engine.txEnabled) {
