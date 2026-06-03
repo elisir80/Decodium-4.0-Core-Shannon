@@ -985,8 +985,6 @@ ApplicationWindow {
         var ry = safeBridgeSetting("uiWorldClockY", null)
         var px = (rx === null || rx === undefined || String(rx).length === 0) ? NaN : parseFloat(rx)
         var py = (ry === null || ry === undefined || String(ry).length === 0) ? NaN : parseFloat(ry)
-        mainWindow.persistUiSetting("uiWorldClockX", 777)
-        mainWindow.persistUiSetting("uiWorldClockY", 555)
         if (isNaN(px)) px = host.width - worldClock.width - 12
         if (isNaN(py)) py = 6
         worldClockTargetX = px   // posizione VOLUTA (pre-clamp), per recupero al resize
