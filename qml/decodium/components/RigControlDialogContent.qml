@@ -243,7 +243,7 @@ Rectangle {
                     background: Rectangle { color: Qt.rgba(1,1,1,0.07); border.color: glassBorder; radius: 4 }
                     contentItem: Text { text: parent.text; color: secondaryCyan; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: if (cat) { cat.refreshPorts(); var idx = portCombo.find(cat.serialPort); if (idx >= 0) portCombo.currentIndex = idx }
-                    ToolTip.visible: hovered; ToolTip.text: "Aggiorna porte"; ToolTip.delay: 500
+                    ToolTip.visible: hovered; ToolTip.text: "Refresh ports"; ToolTip.delay: 500
                 }
             }
 

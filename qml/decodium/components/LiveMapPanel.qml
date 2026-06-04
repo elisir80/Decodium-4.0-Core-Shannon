@@ -221,7 +221,7 @@ Rectangle {
                         onClicked: if (root.worldMap) root.worldMap.resetView()
                     }
                     ToolTip.visible: resetMa.containsMouse
-                    ToolTip.text: qsTr("Reset vista (auto-fit)")
+                    ToolTip.text: qsTr("Reset view (auto-fit)")
                     ToolTip.delay: 500
                 }
 
@@ -262,7 +262,7 @@ Rectangle {
                         }
                     }
                     ToolTip.visible: greylineMa.containsMouse
-                    ToolTip.text: qsTr("Attiva/disattiva overlay greyline giorno/notte")
+                    ToolTip.text: qsTr("Toggle day/night greyline overlay")
                     ToolTip.delay: 500
                 }
 
@@ -292,7 +292,7 @@ Rectangle {
                     }
 
                     ToolTip.visible: liveMapDetachMA.containsMouse
-                    ToolTip.text: root.detached ? qsTr("Riaggancia Live Map") : qsTr("Stacca Live Map")
+                    ToolTip.text: root.detached ? qsTr("Dock Live Map") : qsTr("Detach Live Map")
                     ToolTip.delay: 500
                 }
 

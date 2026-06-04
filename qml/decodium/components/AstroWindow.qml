@@ -92,6 +92,7 @@ Dialog {
             anchors.right: parent.right
             anchors.rightMargin: 80
             acceptedButtons: Qt.LeftButton
+            preventStealing: true
             property point pressGlobalPos: Qt.point(0, 0)
             property point pressWindowPos: Qt.point(0, 0)
             cursorShape: Qt.SizeAllCursor
@@ -99,6 +100,7 @@ Dialog {
                 pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
                 pressWindowPos = Qt.point(astroWindow.x, astroWindow.y)
                 astroWindow.positionInitialized = true
+                mouse.accepted = true
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
@@ -106,6 +108,7 @@ Dialog {
                 astroWindow.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
                 astroWindow.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
                 astroWindow.clampToParent()
+                mouse.accepted = true
             }
         }
 
@@ -152,7 +155,7 @@ Dialog {
                 }
 
                 ToolTip.visible: astroMinMA.containsMouse
-                ToolTip.text: "Riduci a icona"
+                ToolTip.text: "Minimize"
                 ToolTip.delay: 500
             }
 
@@ -182,7 +185,7 @@ Dialog {
                 }
 
                 ToolTip.visible: astroCloseMA.containsMouse
-                ToolTip.text: "Chiudi"
+                ToolTip.text: "Close"
                 ToolTip.delay: 500
             }
         }

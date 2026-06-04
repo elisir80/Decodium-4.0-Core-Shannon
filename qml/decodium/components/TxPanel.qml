@@ -789,7 +789,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("MAM", "⇆")
-                                readonly property string tip: qsTr("Multi-Answer Mode (MAM) — clic destro = apri finestra (default OFF)")
+                                readonly property string tip: qsTr("Multi-Answer Mode (MAM) - right-click opens the window (default OFF)")
                                 function activate(mouse) {
                                     if (mouse && mouse.button === Qt.RightButton)
                                         txPanel.mamWindowRequested()
@@ -819,7 +819,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("DEEP", "◎")
-                                readonly property string tip: qsTr("Deep Search: ricerca profonda dei segnali deboli tramite i callsign noti (default OFF)")
+                                readonly property string tip: qsTr("Deep Search: deeper weak-signal search using known callsigns (default OFF)")
                                 function activate(mouse) { if (engine) engine.deepSearchEnabled = !engine.deepSearchEnabled }
                                 radius: 5
                                 color: (engine && engine.deepSearchEnabled) ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -844,7 +844,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("AP", "◆")
-                                readonly property string tip: qsTr("Decodifica a priori (AP): usa informazioni note per recuperare i segnali deboli (default OFF)")
+                                readonly property string tip: qsTr("A priori decode (AP): uses known information to recover weak signals (default OFF)")
                                 function activate(mouse) { if (engine) engine.ft8ApEnabled = !engine.ft8ApEnabled }
                                 radius: 5
                                 color: (engine && engine.ft8ApEnabled) ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -869,7 +869,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("SEQ", "↻")
-                                readonly property string tip: qsTr("Sequenza automatica del QSO (default OFF)")
+                                readonly property string tip: qsTr("Automatic QSO sequencing (default OFF)")
                                 function activate(mouse) { if (engine) engine.autoSeq = !engine.autoSeq }
                                 radius: 5
                                 color: (engine && engine.autoSeq) ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -894,7 +894,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("QQ", "⇨")
-                                readonly property string tip: qsTr("Quick QSO: salta TX1 e parte da TX2 (rapporto diretto) (default OFF)")
+                                readonly property string tip: qsTr("Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)")
                                 function activate(mouse) { if (engine) engine.quickQsoEnabled = !engine.quickQsoEnabled }
                                 radius: 5
                                 color: (engine && engine.quickQsoEnabled) ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -921,7 +921,7 @@ Item {
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("TX", "▲")
                                 readonly property bool txActive: engine ? engine.txEnabled : false
                                 readonly property bool wheelAdjustsTx: true
-                                readonly property string tip: qsTr("Abilita la TX\nTasto destro + rotellina: regola la potenza TX")
+                                readonly property string tip: qsTr("Enable TX\nRight button + mouse wheel: adjust TX power")
                                 function activate(mouse) {
                                     if (!engine) return
                                     if (!engine.txEnabled) {
@@ -956,7 +956,7 @@ Item {
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("HOLD", "🔓")
                                 readonly property bool isHeld: bridge ? bridge.holdTxFreq : false
-                                readonly property string tip: qsTr("Blocca la frequenza TX\n(Hold Tx Freq)")
+                                readonly property string tip: qsTr("Lock the TX frequency\n(Hold Tx Freq)")
                                 function activate(mouse) { if (bridge) bridge.holdTxFreq = !bridge.holdTxFreq }
                                 radius: 5
                                 color: isHeld ? Qt.rgba(255/255, 193/255, 7/255, 0.25) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -982,7 +982,7 @@ Item {
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("ACQ", "⟳")
                                 readonly property bool acqOn: engine && engine.autoCqRepeat
-                                readonly property string tip: qsTr("Auto CQ ripetuto\nChiama CQ automaticamente finché non arriva una risposta (default OFF)")
+                                readonly property string tip: qsTr("Repeated Auto CQ\nAutomatically calls CQ until a reply arrives (default OFF)")
                                 function activate(mouse) {
                                     if (engine) {
                                         if (!engine.autoSeq && !engine.autoCqRepeat)
@@ -1015,10 +1015,10 @@ Item {
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("CALL", "📞")
                                 readonly property bool callOn: engine && engine.targetCallActive
                                 readonly property string tip: engine && engine.targetCallActive
-                                              ? qsTr("Chiamata attiva: %1 (tentativo %2/%3)\nClicca per aprire il pannello").arg(engine.targetCallSign)
+                                              ? qsTr("Active call: %1 (attempt %2/%3)\nClick to open the panel").arg(engine.targetCallSign)
                                                     .arg(engine.targetCallRetryCount)
                                                     .arg(engine.targetCallMaxRetries === 0 ? "∞" : engine.targetCallMaxRetries)
-                                              : qsTr("Chiamata diretta (CALL)\nApri il pannello di chiamata diretta di un callsign\ncon controllo di tentativi, timeout e periodo")
+                                              : qsTr("Direct call (CALL)\nOpen the direct callsign call panel\nwith retry, timeout, and period control")
                                 function activate(mouse) { txPanel.callRequested() }
                                 radius: 5
                                 color: callOn ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)
@@ -1044,7 +1044,7 @@ Item {
                                 readonly property bool btnVisible: engine && engine.mode !== "FT2"
                                 readonly property bool first: engine && engine.txPeriod === 1
                                 readonly property real prefWidth: txPanel.toolbarActionWidth(first ? "1ST" : "2ND", first ? "①" : "②")
-                                readonly property string tip: qsTr("Slot TX\n1º: :00/:30\n2º: :15/:45")
+                                readonly property string tip: qsTr("TX slot\n1st: :00/:30\n2nd: :15/:45")
                                 function activate(mouse) { if (engine) engine.txPeriod = engine.txPeriod === 1 ? 0 : 1 }
                                 radius: 5
                                 color: first ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.28)
@@ -1071,7 +1071,7 @@ Item {
                                 readonly property bool btnVisible: engine && engine.mode !== "FT2"
                                 readonly property bool altOn: engine && engine.alt12Enabled
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("ALT 1/2", "⇄")
-                                readonly property string tip: qsTr("Auto CQ: alterna le fasi TX/RX dopo CQ ripetuti senza risposta (default OFF)")
+                                readonly property string tip: qsTr("Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)")
                                 function activate(mouse) { if (engine) engine.alt12Enabled = !engine.alt12Enabled }
                                 radius: 5
                                 color: altOn ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.22)
@@ -1097,7 +1097,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("HALT", "■")
-                                readonly property string tip: qsTr("Interrompi la TX")
+                                readonly property string tip: qsTr("Stop TX")
                                 function activate(mouse) { if (engine) engine.haltWithReason("qml-halt-button") }
                                 radius: 5
                                 color: txPanel.txVisualActive
@@ -1124,7 +1124,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: true
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("CLEAR", "")
-                                readonly property string tip: qsTr("Cancella DX, rapporti e TX1-TX5")
+                                readonly property string tip: qsTr("Clear DX, reports, and TX1-TX5")
                                 function activate(mouse) { if (engine) engine.clearTxMessages() }
                                 radius: 5
                                 color: hovered ? Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
@@ -1149,7 +1149,7 @@ Item {
                                 readonly property bool btnVisible: true
                                 readonly property bool isTuning: engine && engine.tuning
                                 readonly property real prefWidth: txPanel.toolbarActionWidth(isTuning ? "STOP" : "TUNE", "♫")
-                                readonly property string tip: qsTr("Tune (emette la portante di accordo)")
+                                readonly property string tip: qsTr("Tune (transmits the tuning carrier)")
                                 function activate(mouse) {
                                     if (engine) {
                                         if (engine.tuning) engine.stopTune()
@@ -1179,7 +1179,7 @@ Item {
                                 // 'hovered' è già definito da AsyncModeWidget: lo riusiamo come da contratto.
                                 readonly property bool btnVisible: txPanel.showAsyncIcon && engine && engine.mode === "FT2"
                                 readonly property real prefWidth: 90
-                                readonly property string tip: qsTr("Modalità Async FT2 — onda sinusoidale: verde=RX, rosso=TX (default OFF)")
+                                readonly property string tip: qsTr("Async FT2 mode - sine wave: green=RX, red=TX (default OFF)")
                                 function activate(mouse) {}
                                 running: engine ? (engine.asyncTxEnabled || engine.asyncDecodeEnabled) : false
                                 transmitting: engine ? engine.transmitting : false
@@ -1194,7 +1194,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: engine && engine.houndMode
                                 readonly property real prefWidth: 82
-                                readonly property string tip: qsTr("Modalità Hound attiva")
+                                readonly property string tip: qsTr("Hound mode active")
                                 function activate(mouse) {}
                                 radius: 5
                                 color: Qt.rgba(warningOrange.r, warningOrange.g, warningOrange.b, 0.24)
@@ -1218,7 +1218,7 @@ Item {
                                 property bool hovered: false
                                 readonly property bool btnVisible: engine && engine.waitPounceActive
                                 readonly property real prefWidth: 54
-                                readonly property string tip: qsTr("Wait & Pounce attivo")
+                                readonly property string tip: qsTr("Wait & Pounce active")
                                 function activate(mouse) {}
                                 radius: 5
                                 color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
@@ -2097,8 +2097,8 @@ Item {
         ToolTip.visible: hovered
         ToolTip.delay: 800
         ToolTip.text: isDisabled
-                          ? qsTr("TX%1 disabilitato (clic destro → menu per riabilitare)").arg(txNum)
-                          : qsTr("Clic: invia ora\nClic destro: menu (Modifica / Salta TX%1)\nLong-press: modifica messaggio").arg(txNum)
+                          ? qsTr("TX%1 disabled (right-click -> menu to re-enable)").arg(txNum)
+                          : qsTr("Click: send now\nRight-click: menu (Edit / Skip TX%1)\nLong-press: edit message").arg(txNum)
 
         // 1.0.302: clic destro apre il menu contestuale (Modifica messaggio + Salta TX),
         // su richiesta tester. L'edit resta disponibile anche via long-press.

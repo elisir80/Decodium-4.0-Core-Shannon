@@ -173,6 +173,7 @@ private:
     QTimer*    m_pollTimer  {nullptr};
 
     bool    m_connected     {false};
+    bool    m_connecting    {false};
     QString m_rigName       {"OmniRig Rig 1"};
     QString m_pttMethod     {"CAT"};
     int     m_pollInterval  {2};

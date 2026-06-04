@@ -10,12 +10,13 @@ import QtQuick.Layouts
 
 Dialog {
     id: settingsDialog
+    readonly property int popupBaseWidth: (parent && parent.width > 0) ? parent.width : 1440
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
-    width: Math.min(Math.round(((parent && parent.width > 0) ? parent.width : 1440) * 0.98),
-                    Math.max(520, ((parent && parent.width > 0) ? parent.width : 1440) - 24),
-                    1680)
+    width: Math.min(Math.max(1360, Math.round(popupBaseWidth * 0.998)),
+                    Math.max(520, popupBaseWidth + 180),
+                    2200)
     height: Math.min(Math.round(((parent && parent.height > 0) ? parent.height : 960) * 0.98), 1080)
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
@@ -24,14 +25,17 @@ Dialog {
         var savedTab = Number(bridge.getSetting("uiSettingsCurrentTab", 0))
         return isFinite(savedTab) ? Math.max(0, Math.min(12, Math.floor(savedTab))) : 0
     }
-    readonly property int labelWidth: 140
-    readonly property int fieldMinWidth: 300
-    readonly property int wideFieldMinWidth: 420
-    readonly property int portFieldMinWidth: 190
+    property bool closeAlreadyPersisted: false
+    readonly property int labelWidth: 172
+    readonly property int fieldMinWidth: 380
+    readonly property int wideFieldMinWidth: 620
+    readonly property int portFieldMinWidth: 270
+    readonly property int numericFieldMinWidth: 220
+    readonly property int comboFieldMinWidth: 320
     readonly property int frequencyPageMinWidth: 1120
     readonly property int scrollLeftMargin: 10
     readonly property int scrollTopMargin: 10
-    readonly property int scrollRightMargin: 46
+    readonly property int scrollRightMargin: 12
     property string dataDownloadStatus: ""
     property bool dataDownloadIsError: false
     property string uiFontLabel: bridge.fontSettingLabel("Font", "", 0)
@@ -1008,6 +1012,12 @@ Dialog {
         bridge.saveSettings()
     }
 
+    function closeAfterPersist() {
+        closeAlreadyPersisted = true
+        persistSettingsNow()
+        close()
+    }
+
     function scheduleSettingsPersist() {
         if (!settingsDialog.visible || settingsDialog.warmupInProgress)
             return
@@ -1036,11 +1046,6 @@ Dialog {
             ensureInitialPosition()
     }
 
-    onClosed: {
-        if (!warmupInProgress)
-            persistSettingsNow()
-    }
-
     onCurrentTabChanged: {
         if (!warmupInProgress)
             bridge.setSetting("uiSettingsCurrentTab", currentTab)
@@ -1048,11 +1053,25 @@ Dialog {
             refreshFrequencySettings()
     }
 
+    onOpened: {
+        if (!warmupInProgress)
+            closeAlreadyPersisted = false
+    }
+
+    onClosed: {
+        settingsPersistTimer.stop()
+        catPersistTimer.stop()
+        if (!warmupInProgress && !closeAlreadyPersisted)
+            persistSettingsNow()
+        closeAlreadyPersisted = false
+    }
+
     Timer {
         id: warmupCloseTimer
         interval: 1
         repeat: false
         onTriggered: {
+            settingsDialog.closeAlreadyPersisted = true
             settingsDialog.close()
             settingsDialog.warmupInProgress = false
             settingsDialog.positionInitialized = false
@@ -1088,6 +1107,7 @@ Dialog {
     readonly property int controlHeight: Qt.platform.os === "linux" ? 36 : 32
     readonly property int controlFontSize: 12
     readonly property int controlVerticalPadding: Qt.platform.os === "linux" ? 1 : 0
+    readonly property int spinTextSidePadding: 52
 
     // ── Preset colors for color pickers ──────────────────────────────────
     readonly property var presetColors: [
@@ -1428,10 +1448,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        bridge.saveSettings()
-                        settingsDialog.close()
-                    }
+                    onClicked: settingsDialog.closeAfterPersist()
                 }
             }
         }
@@ -1445,7 +1462,7 @@ Dialog {
 
             // ── Sidebar ──────────────────────────────────────────────
             Rectangle {
-                Layout.preferredWidth: 190
+                Layout.preferredWidth: 210
                 Layout.fillHeight: true
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 
@@ -1505,7 +1522,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.callsign = text
+                            onTextChanged: {
+                                bridge.callsign = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
                         Text { text: qsTr("My Grid:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         DecoTextField {
@@ -1513,7 +1533,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.grid = text
+                            onTextChanged: {
+                                bridge.grid = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
 
                         Text { text: qsTr("Auto Grid:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
@@ -1563,7 +1586,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.stationName = text
+                            onTextChanged: {
+                                bridge.stationName = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
                         Text { text: qsTr("QTH:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         DecoTextField {
@@ -1571,7 +1597,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.stationQth = text
+                            onTextChanged: {
+                                bridge.stationQth = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
 
                         Text { text: qsTr("Rig Info:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
@@ -1580,7 +1609,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.stationRigInfo = text
+                            onTextChanged: {
+                                bridge.stationRigInfo = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
                         Text { text: qsTr("Antenna:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         DecoTextField {
@@ -1588,7 +1620,10 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.stationAntenna = text
+                            onTextChanged: {
+                                bridge.stationAntenna = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
 
                         Text { text: qsTr("Power (W):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
@@ -1596,8 +1631,11 @@ Dialog {
                             id: stPowerSpin
                             from: 0; to: 9999; value: bridge.stationPowerWatts; editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth
-                            onValueChanged: bridge.stationPowerWatts = value
-                            contentItem: TextInput { text: stPowerSpin.textFromValue(stPowerSpin.value, stPowerSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !stPowerSpin.editable; validator: stPowerSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            onValueChanged: {
+                                bridge.stationPowerWatts = value
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            contentItem: TextInput { text: stPowerSpin.textFromValue(stPowerSpin.value, stPowerSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !stPowerSpin.editable; validator: stPowerSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
@@ -2190,7 +2228,7 @@ Dialog {
                                 if (bridge.catManager) bridge.catManager.pollInterval = value
                                 settingsDialog.scheduleCatPersist()
                             }
-                            contentItem: TextInput { text: pollSpin.textFromValue(pollSpin.value, pollSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !pollSpin.editable; validator: pollSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: pollSpin.textFromValue(pollSpin.value, pollSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !pollSpin.editable; validator: pollSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -2638,7 +2676,10 @@ Dialog {
                             Layout.minimumWidth: wideFieldMinWidth
                             implicitHeight: controlHeight
                             currentIndex: settingsDialog.stringListIndexOf(bridge.audioInputDevices, bridge.audioInputDevice)
-                            onActivated: bridge.audioInputDevice = currentText
+                            onActivated: {
+                                bridge.audioInputDevice = currentText
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: audioInDevCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
@@ -2652,7 +2693,10 @@ Dialog {
                             model: [qsTr("Mono"),qsTr("Left"),qsTr("Right"),qsTr("Both")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             Layout.minimumWidth: fieldMinWidth
                             currentIndex: bridge.audioInputChannel
-                            onActivated: bridge.audioInputChannel = currentIndex
+                            onActivated: {
+                                bridge.audioInputChannel = currentIndex
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: audioInChCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
@@ -2670,7 +2714,10 @@ Dialog {
                             Layout.minimumWidth: wideFieldMinWidth
                             implicitHeight: controlHeight
                             currentIndex: settingsDialog.stringListIndexOf(bridge.audioOutputDevices, bridge.audioOutputDevice)
-                            onActivated: bridge.audioOutputDevice = currentText
+                            onActivated: {
+                                bridge.audioOutputDevice = currentText
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: audioOutDevCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
@@ -2684,7 +2731,10 @@ Dialog {
                             model: [qsTr("Mono"),qsTr("Left"),qsTr("Right"),qsTr("Both")]; Layout.fillWidth: true; implicitHeight: controlHeight
                             Layout.minimumWidth: fieldMinWidth
                             currentIndex: bridge.audioOutputChannel
-                            onActivated: bridge.audioOutputChannel = currentIndex
+                            onActivated: {
+                                bridge.audioOutputChannel = currentIndex
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: audioOutChCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
@@ -2706,11 +2756,16 @@ Dialog {
 	                                from: 0; to: 100; live: true; stepSize: 1
 	                                Layout.fillWidth: true
 	                                Binding on value { value: bridge.rxInputLevel; when: !setupRxInputLevelSlider.pressed }
-	                                onMoved: bridge.rxInputLevel = value
-	                                onPressedChanged: {
-	                                    if (!pressed && Math.abs(bridge.rxInputLevel - value) >= 0.5)
-	                                        bridge.rxInputLevel = value
-	                                }
+		                                onMoved: {
+		                                    bridge.rxInputLevel = value
+		                                    settingsDialog.scheduleSettingsPersist()
+		                                }
+		                                onPressedChanged: {
+		                                    if (!pressed && Math.abs(bridge.rxInputLevel - value) >= 0.5) {
+		                                        bridge.rxInputLevel = value
+		                                        settingsDialog.scheduleSettingsPersist()
+		                                    }
+		                                }
 	                            }
 	                            Text {
 	                                text: Math.round(bridge.rxInputLevel)
@@ -2740,7 +2795,10 @@ Dialog {
 	                                    anchors.fill: parent
 	                                    hoverEnabled: true
 	                                    cursorShape: Qt.PointingHandCursor
-	                                    onClicked: bridge.autoRxInputLevel = !bridge.autoRxInputLevel
+		                                    onClicked: {
+		                                        bridge.autoRxInputLevel = !bridge.autoRxInputLevel
+		                                        settingsDialog.scheduleSettingsPersist()
+		                                    }
 	                                }
 	                                ToolTip.visible: setupRxAutoMouse.containsMouse
 	                                ToolTip.text: bridge.autoRxInputLevel ? qsTr("Auto RX level active")
@@ -2754,11 +2812,16 @@ Dialog {
                             from: 450; to: 0; live: true; stepSize: 1
                             Layout.fillWidth: true; Layout.columnSpan: 3
                             Binding on value { value: bridge.txOutputLevel; when: !setupTxOutputLevelSlider.pressed }
-                            onMoved: bridge.txOutputLevel = value
-                            onPressedChanged: {
-                                if (!pressed && Math.abs(bridge.txOutputLevel - value) >= 0.5)
-                                    bridge.txOutputLevel = value
-                            }
+	                            onMoved: {
+	                                bridge.txOutputLevel = value
+	                                settingsDialog.scheduleSettingsPersist()
+	                            }
+	                            onPressedChanged: {
+	                                if (!pressed && Math.abs(bridge.txOutputLevel - value) >= 0.5) {
+	                                    bridge.txOutputLevel = value
+	                                    settingsDialog.scheduleSettingsPersist()
+	                                }
+	                            }
                         }
 
                         // ── Directory ──
@@ -2837,37 +2900,37 @@ Dialog {
                         Text { text: qsTr("FREQUENCY AND TIMING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("TX Frequency:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("TX Frequency:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: txFreqSpin
                             from: 0; to: 5000; value: bridge.txFrequency; editable: true
-                            implicitHeight: controlHeight; Layout.fillWidth: true
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                             onValueChanged: {
                                 if (bridge.txFrequency !== value)
                                     bridge.txFrequency = value
                                 bridge.setSetting("txFrequency", value)
                             }
-                            contentItem: TextInput { text: txFreqSpin.textFromValue(txFreqSpin.value, txFreqSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !txFreqSpin.editable; validator: txFreqSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: txFreqSpin.textFromValue(txFreqSpin.value, txFreqSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txFreqSpin.editable; validator: txFreqSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("TX Slot:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("TX Slot:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         DecoComboBox {
                             id: txSlotCombo
                             model: [qsTr("Second (:15/:45)"), qsTr("First (:00/:30)")]
                             currentIndex: bridge.txPeriod === 1 ? 1 : 0
-                            Layout.fillWidth: true; implicitHeight: controlHeight
+                            Layout.fillWidth: true; Layout.minimumWidth: comboFieldMinWidth; Layout.preferredWidth: comboFieldMinWidth; implicitHeight: controlHeight
                             onActivated: {
                                 bridge.txPeriod = currentIndex === 1 ? 1 : 0
                                 bridge.setSetting("txPeriod", bridge.txPeriod)
                             }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            contentItem: Text { text: txSlotCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Text { text: txSlotCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; rightPadding: 42; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
                         }
 
-                        Text { text: qsTr("TX Delay (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("TX Delay (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: txDelaySpin
                             from: 0; to: 5; stepSize: 1; value: Math.round(Number(bridge.getSetting("TxDelay", 0.2)) * 10); editable: true
@@ -2877,12 +2940,12 @@ Dialog {
                                 return isNaN(parsed) ? 0 : Math.round(parsed * 10)
                             }
                             validator: DoubleValidator { bottom: 0.0; top: 0.5; decimals: 1; notation: DoubleValidator.StandardNotation }
-                            implicitHeight: controlHeight; Layout.fillWidth: true
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                             onValueChanged: bridge.setSetting("TxDelay", value / 10)
-                            contentItem: TextInput { text: txDelaySpin.textFromValue(txDelaySpin.value, txDelaySpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !txDelaySpin.editable; validator: txDelaySpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: txDelaySpin.textFromValue(txDelaySpin.value, txDelaySpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txDelaySpin.editable; validator: txDelaySpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("Allow TX QSY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Allow TX QSY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         CheckBox {
                             checked: bridge.getSetting("TxQSYAllowed", false)
                             onCheckedChanged: bridge.setSetting("TxQSYAllowed", checked)
@@ -2987,13 +3050,18 @@ Dialog {
                                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                                     Layout.preferredHeight: controlHeight
                                     checked: bridge ? bridge.resumeQsoOnReply : false
-                                    onCheckedChanged: if (bridge) bridge.resumeQsoOnReply = checked
+                                    onCheckedChanged: {
+                                        if (bridge) {
+                                            bridge.resumeQsoOnReply = checked
+                                            settingsDialog.scheduleSettingsPersist()
+                                        }
+                                    }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("If you Halt while working a station and that station replies to you again within 2 minutes, Decodium automatically resumes the QSO (like v3).\n\nApplies to FT8/FT4/FT2.\n\nDefault: OFF (= Halt fully stops the sequence by default).")
+                                    ToolTip.text: qsTr("If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.\n\nApplies only to FT8/FT4/FT2 and only to the saved QSO state.\n\nDefault: OFF (= Halt fully stops the sequence by default).")
                                 }
                                 Text {
                                     text: qsTr("Disable TX after 73:")
@@ -3053,7 +3121,7 @@ Dialog {
                                     from: 1; to: 8; editable: true
                                     value: bridge ? bridge.ft2SignoffRetryCap : 4
                                     onValueChanged: if (bridge && bridge.ft2SignoffRetryCap !== value) bridge.setFt2SignoffRetryCap(value)
-                                    contentItem: TextInput { text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    contentItem: TextInput { text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
@@ -3079,7 +3147,7 @@ Dialog {
                                     from: 1; to: 8; editable: true
                                     value: bridge ? bridge.ft4SignoffRetryCap : 4
                                     onValueChanged: if (bridge && bridge.ft4SignoffRetryCap !== value) bridge.setFt4SignoffRetryCap(value)
-                                    contentItem: TextInput { text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    contentItem: TextInput { text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
@@ -3105,7 +3173,7 @@ Dialog {
                                     from: 1; to: 8; editable: true
                                     value: bridge ? bridge.ft8SignoffRetryCap : 3
                                     onValueChanged: if (bridge && bridge.ft8SignoffRetryCap !== value) bridge.setFt8SignoffRetryCap(value)
-                                    contentItem: TextInput { text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    contentItem: TextInput { text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
@@ -3268,7 +3336,7 @@ Dialog {
                                     from: 1; to: 99; editable: true
                                     value: bridge ? bridge.maxCallerRetries : 10
                                     onValueChanged: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
-                                    contentItem: TextInput { text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    contentItem: TextInput { text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
@@ -3383,9 +3451,9 @@ Dialog {
                                     ToolTip.text: qsTr("In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.\n\nWhen waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.\n\nUseful mainly on modest PCs.\n\nDefault: OFF.")
                                 }
 
-                                // 1.0.293 — FT2: AP hashed-callsign cache (Fase 0: solo osservabilità)
+                                // 1.0.293/294 — FT2: AP hashed-callsign cache (Phase 1: display-only rescue)
                                 Text {
-                                    text: qsTr("FT2: AP cache (experimental, Phase 0):")
+                                    text: qsTr("FT2: AP cache rescue (experimental):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -3406,7 +3474,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("PHASE 0 (observability): logs into a cache the callsigns seen in-band (hashed, TTL 30 min) and measures how often a decoded call had already been seen — logged as [FT2WS-AP] in the diagnostic log.\n\nDoesn't change the decoder yet. It's the foundation for band-wide AP decoding (−3 dB target) coming in later phases.\n\nDefault: OFF.")
+                                    ToolTip.text: qsTr("Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.\n\nSafety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.355 — FT2: salta decode ridondante di fine-slot
@@ -3425,14 +3493,17 @@ Dialog {
                                     Layout.preferredHeight: controlHeight
                                     checked: bridge ? bridge.ft2AsyncSkipRedundantSyncDecode : false
                                     onToggled: {
-                                        if (bridge) bridge.ft2AsyncSkipRedundantSyncDecode = checked
+                                        if (bridge) {
+                                            bridge.ft2AsyncSkipRedundantSyncDecode = checked
+                                            settingsDialog.scheduleSettingsPersist()
+                                        }
                                     }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Solo FT2 async: quando il decode asincrono (incrementale ogni 100ms) ha GIÀ decodificato uno slot, salta la passata di decode sincrona di fine-slot per quello slot.\n\nVantaggio: elimina la contesa (~1.8s dopo il TX) sullo stesso worker, così l'aggancio della risposta del partner è più rapido.\n\nCosto: per gli slot già coperti dall'async perdi la passata weak-averaging completa di fine-slot (che recupera stazioni deboli/marginali). Gli slot in cui l'async è tornato VUOTO mantengono comunque il decode sync.\n\nDefault: OFF.")
+                                    ToolTip.text: qsTr("FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.\n\nBenefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.\n\nCost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.\n\nDefault: OFF.")
                                 }
 
                                 // 1.0.364+ — MAM multi-stream (MSHV): risponde a più
@@ -3453,14 +3524,17 @@ Dialog {
                                     Layout.preferredHeight: controlHeight
                                     checked: bridge ? bridge.mamMultiStream : false
                                     onToggled: {
-                                        if (bridge) bridge.mamMultiStream = checked
+                                        if (bridge) {
+                                            bridge.mamMultiStream = checked
+                                            settingsDialog.scheduleSettingsPersist()
+                                        }
                                     }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Modalità MSHV multi-stream: in un singolo periodo risponde a PIÙ chiamanti contemporaneamente, ciascuno sulla SUA frequenza audio (come una stazione DX-pedition).\n\nÈ un'OPZIONE AGGIUNTIVA del MAM: serve avere MAM (Multi-Answer Mode) o AutoCQ attivo perché entri in funzione. Con questo OFF il MAM resta seriale (un chiamante alla volta) come prima.\n\nSPERIMENTALE. Default: OFF.")
+                                    ToolTip.text: qsTr("MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).\n\nThis is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.\n\nEXPERIMENTAL. Default: OFF.")
                                 }
 
                                 // 1.0.364+ — MAM multi-stream: numero massimo di stream simultanei
@@ -3482,13 +3556,18 @@ Dialog {
                                     enabled: bridge ? bridge.mamMultiStream : false
                                     opacity: enabled ? 1.0 : 0.4
                                     value: bridge ? bridge.mamMaxStreams : 3
-                                    onValueModified: if (bridge && bridge.mamMaxStreams !== value) bridge.mamMaxStreams = value
-                                    contentItem: TextInput { text: mamMaxStreamsSpin.textFromValue(mamMaxStreamsSpin.value, mamMaxStreamsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !mamMaxStreamsSpin.editable; validator: mamMaxStreamsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    onValueModified: {
+                                        if (bridge && bridge.mamMaxStreams !== value) {
+                                            bridge.mamMaxStreams = value
+                                            settingsDialog.scheduleSettingsPersist()
+                                        }
+                                    }
+                                    contentItem: TextInput { text: mamMaxStreamsSpin.textFromValue(mamMaxStreamsSpin.value, mamMaxStreamsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !mamMaxStreamsSpin.editable; validator: mamMaxStreamsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Quanti QSO paralleli può portare avanti contemporaneamente il MAM multi-stream (ognuno sulla sua frequenza).\n\nRange 2-5. Default: 3.\n\nValori alti richiedono più CPU per generare gli stream audio sovrapposti. Abilitato solo con MAM multi-stream attivo.")
+                                    ToolTip.text: qsTr("How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.\n\nRange 2-5. Default: 3.\n\nHigher values require more CPU to generate overlapping audio streams. Enabled only when MAM multi-stream is active.")
                                 }
 
                                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)
@@ -3571,7 +3650,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Spalma i decode FT8/FT4 dal batch finale del periodo a streaming continuo con fade animato (~100 ms per riga). FT2 async resta invariato (già streaming). Default: ON; auto-fallback se rileva stall UI su PC modesti. Disattiva per il comportamento batch legacy.")
+                                    ToolTip.text: qsTr("Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.")
                                 }
                             }
                         }
@@ -3580,7 +3659,7 @@ Dialog {
                         Text { text: qsTr("WATCHDOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("TX Watchdog (min):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("TX Watchdog (min):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: txWdSpin
                             from: 0; to: 999; value: bridge.txWatchdogMode === 1 ? bridge.txWatchdogTime : 0; editable: true
@@ -3588,16 +3667,17 @@ Dialog {
                             function applyWatchdog() {
                                 bridge.txWatchdogTime = value
                                 bridge.txWatchdogMode = value > 0 ? 1 : 0
+                                settingsDialog.scheduleSettingsPersist()
                             }
-                            implicitHeight: controlHeight; Layout.fillWidth: true
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                             onValueChanged: if (completed) applyWatchdog()
                             Component.onCompleted: completed = true
-                            contentItem: TextInput { text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("Tune Watchdog (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Tune Watchdog (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         RowLayout {
-                            Layout.fillWidth: true; spacing: 6
+                            Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth + 44; Layout.preferredWidth: numericFieldMinWidth + 44; spacing: 6
                             CheckBox {
                                 id: tuneWdCheck
                                 checked: bridge.getSetting("TuneWatchdog", true)
@@ -3608,9 +3688,9 @@ Dialog {
                             SpinBox {
                                 id: tuneWdSpin
                                 from: 0; to: 300; value: Number(bridge.getSetting("TuneWatchdogTime", 90)); editable: true; enabled: tuneWdCheck.checked
-                                implicitHeight: controlHeight; Layout.fillWidth: true
+                                implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                                 onValueChanged: bridge.setSetting("TuneWatchdogTime", value)
-                                contentItem: TextInput { text: tuneWdSpin.textFromValue(tuneWdSpin.value, tuneWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !tuneWdSpin.editable; validator: tuneWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                contentItem: TextInput { text: tuneWdSpin.textFromValue(tuneWdSpin.value, tuneWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !tuneWdSpin.editable; validator: tuneWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                 background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             }
                         }
@@ -3632,7 +3712,7 @@ Dialog {
                             from: 0; to: 999; value: Number(bridge.getSetting("IDint", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("IDint", value)
-                            contentItem: TextInput { text: cwIdIntSpin.textFromValue(cwIdIntSpin.value, cwIdIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !cwIdIntSpin.editable; validator: cwIdIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: cwIdIntSpin.textFromValue(cwIdIntSpin.value, cwIdIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cwIdIntSpin.editable; validator: cwIdIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -3830,7 +3910,7 @@ Dialog {
                             }
                             ToolTip.visible: hovered
                             ToolTip.delay: 600
-                            ToolTip.text: qsTr("Vista operatore alternativa a pannello unico ottimizzata per i pile-up DX: cruscotto tattico a 3 colonne (Cluster / Cascata / TX) al posto del workspace classico. Opt-in, default OFF: il layout standard resta invariato quando è disattivata.")
+                            ToolTip.text: qsTr("Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.")
                         }
 
                         // 1.0.307 (#2) — Scala interfaccia globale (icone+font+layout). Applica al riavvio.
@@ -3964,11 +4044,11 @@ Dialog {
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
                             ToolTip.text: qsTr(
-                                "Stile QML Quick Controls (richiede restart):\n" +
-                                "• Material (consigliato) — Google Material 3, customizable, default storico Decodium\n" +
-                                "• FluentWinUI3 — Windows 11 nativo (Mica/acrylic). Fallback automatico per SplitView/StackView.\n" +
+                                "QML Quick Controls style (requires restart):\n" +
+                                "• Material (recommended) — Google Material 3, customizable, Decodium's historical default\n" +
+                                "• FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.\n" +
                                 "• Universal — Microsoft Universal (WinPhone-style)\n" +
-                                "• Fusion — cross-platform desktop neutro"
+                                "• Fusion — neutral cross-platform desktop"
                             )
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
@@ -4266,7 +4346,7 @@ Dialog {
                             from: 0; to: 999; value: Number(bridge.getSetting("AlignSteps", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("AlignSteps", value)
-                            contentItem: TextInput { text: alignStepsSpin.textFromValue(alignStepsSpin.value, alignStepsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !alignStepsSpin.editable; validator: alignStepsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: alignStepsSpin.textFromValue(alignStepsSpin.value, alignStepsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !alignStepsSpin.editable; validator: alignStepsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -4276,7 +4356,7 @@ Dialog {
                             from: 0; to: 999; value: Number(bridge.getSetting("AlignSteps2", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("AlignSteps2", value)
-                            contentItem: TextInput { text: alignSteps2Spin.textFromValue(alignSteps2Spin.value, alignSteps2Spin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !alignSteps2Spin.editable; validator: alignSteps2Spin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: alignSteps2Spin.textFromValue(alignSteps2Spin.value, alignSteps2Spin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !alignSteps2Spin.editable; validator: alignSteps2Spin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
@@ -4347,13 +4427,13 @@ Dialog {
 
                         Text { text: qsTr(""); Layout.preferredWidth: 160 }
                         Button {
-                            // 1.0.170 fase 3 PWA: apri QR code in browser locale
-                            text: "📱 Apri QR per iPad"
+                            // PWA remote: apre l'URL locale autenticato in browser.
+                            text: "📱 Apri Remote per iPad"
                             enabled: bridge.webServerRunning()
                             Layout.columnSpan: 3
                             onClicked: {
-                                var url = bridge.webServerUrl()
-                                if (url) Qt.openUrlExternally(url + "qr")
+                                var url = bridge.webServerQrUrl()
+                                if (url) Qt.openUrlExternally(url)
                             }
                             background: Rectangle {
                                 color: parent.hovered ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.3)
@@ -4401,49 +4481,58 @@ Dialog {
                         Text { text: qsTr("DECODE PARAMETERS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Decode Depth:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Decode Depth:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         DecoComboBox {
                             id: decodeDepthCombo
-                            model: [qsTr("Fast"),qsTr("Normal"),qsTr("Deep")]; Layout.fillWidth: true; implicitHeight: controlHeight
+                            model: [qsTr("Fast"),qsTr("Normal"),qsTr("Deep")]; Layout.fillWidth: true; Layout.minimumWidth: comboFieldMinWidth; Layout.preferredWidth: comboFieldMinWidth; implicitHeight: controlHeight
                             currentIndex: Math.max(0, Math.min(count - 1, bridge.ndepth - 1))
-                            onActivated: bridge.ndepth = currentIndex + 1
+                            onActivated: {
+                                bridge.ndepth = currentIndex + 1
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            contentItem: Text { text: decodeDepthCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Text { text: decodeDepthCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; rightPadding: 42; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
-                        Text { text: qsTr("Low Freq (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Low Freq (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: nfaSpin
                             from: 0; to: 5000; value: bridge.nfa; editable: true
-                            implicitHeight: controlHeight; Layout.fillWidth: true
-                            onValueChanged: bridge.nfa = value
-                            contentItem: TextInput { text: nfaSpin.textFromValue(nfaSpin.value, nfaSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !nfaSpin.editable; validator: nfaSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
+                            onValueChanged: {
+                                bridge.nfa = value
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            contentItem: TextInput { text: nfaSpin.textFromValue(nfaSpin.value, nfaSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !nfaSpin.editable; validator: nfaSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("High Freq (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("High Freq (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: nfbSpin
                             from: 0; to: 5000; value: bridge.nfb; editable: true
-                            implicitHeight: controlHeight; Layout.fillWidth: true
-                            onValueChanged: bridge.nfb = value
-                            contentItem: TextInput { text: nfbSpin.textFromValue(nfbSpin.value, nfbSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !nfbSpin.editable; validator: nfbSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
+                            onValueChanged: {
+                                bridge.nfb = value
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            contentItem: TextInput { text: nfbSpin.textFromValue(nfbSpin.value, nfbSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !nfbSpin.editable; validator: nfbSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
-                        Text { text: qsTr("RX Bandwidth:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("RX Bandwidth:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: rxBwSpin
                             from: 100; to: 5000; value: Number(bridge.getSetting("RXBandwidth", 2500)); editable: true
-                            implicitHeight: controlHeight; Layout.fillWidth: true
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                             onValueChanged: bridge.setSetting("RXBandwidth", value)
-                            contentItem: TextInput { text: rxBwSpin.textFromValue(rxBwSpin.value, rxBwSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !rxBwSpin.editable; validator: rxBwSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: rxBwSpin.textFromValue(rxBwSpin.value, rxBwSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !rxBwSpin.editable; validator: rxBwSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("Decode at 52s:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Decode at 52s:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         CheckBox {
                             checked: bridge.getSetting("DecodeAt52s", false)
                             onCheckedChanged: bridge.setSetting("DecodeAt52s", checked)
@@ -4451,10 +4540,13 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
 
-                        Text { text: qsTr("Single Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { text: qsTr("Single Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         CheckBox {
                             checked: bridge.singleDecode
-                            onToggled: bridge.singleDecode = checked
+                            onToggled: {
+                                bridge.singleDecode = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4470,7 +4562,7 @@ Dialog {
                             from: 0; to: 99999; value: Number(bridge.getSetting("RandomErasurePatterns", 7)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("RandomErasurePatterns", value)
-                            contentItem: TextInput { text: erasurePatSpin.textFromValue(erasurePatSpin.value, erasurePatSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !erasurePatSpin.editable; validator: erasurePatSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: erasurePatSpin.textFromValue(erasurePatSpin.value, erasurePatSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !erasurePatSpin.editable; validator: erasurePatSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Aggressive:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
@@ -4479,7 +4571,7 @@ Dialog {
                             from: 0; to: 10; value: Number(bridge.getSetting("AggressiveLevel", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("AggressiveLevel", value)
-                            contentItem: TextInput { text: aggressiveSpin.textFromValue(aggressiveSpin.value, aggressiveSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !aggressiveSpin.editable; validator: aggressiveSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: aggressiveSpin.textFromValue(aggressiveSpin.value, aggressiveSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !aggressiveSpin.editable; validator: aggressiveSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -4514,7 +4606,7 @@ Dialog {
                             from: 0; to: 100; value: Number(bridge.getSetting("DegradeSN", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("DegradeSN", value)
-                            contentItem: TextInput { text: degradeSnSpin.textFromValue(degradeSnSpin.value, degradeSnSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !degradeSnSpin.editable; validator: degradeSnSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: degradeSnSpin.textFromValue(degradeSnSpin.value, degradeSnSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !degradeSnSpin.editable; validator: degradeSnSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -4525,14 +4617,20 @@ Dialog {
                         Text { text: qsTr("CQ Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.filterCqOnly
-                            onCheckedChanged: bridge.filterCqOnly = checked
+                            onCheckedChanged: {
+                                bridge.filterCqOnly = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("My Call Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.filterMyCallOnly
-                            onCheckedChanged: bridge.filterMyCallOnly = checked
+                            onCheckedChanged: {
+                                bridge.filterMyCallOnly = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4540,14 +4638,20 @@ Dialog {
                         Text { text: qsTr("Zap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.zapEnabled
-                            onCheckedChanged: bridge.zapEnabled = checked
+                            onCheckedChanged: {
+                                bridge.zapEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Deep Search:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.deepSearchEnabled
-                            onCheckedChanged: bridge.deepSearchEnabled = checked
+                            onCheckedChanged: {
+                                bridge.deepSearchEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4555,7 +4659,10 @@ Dialog {
                         Text { text: qsTr("AP Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.ft8ApEnabled
-                            onCheckedChanged: bridge.ft8ApEnabled = checked
+                            onCheckedChanged: {
+                                bridge.ft8ApEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4563,7 +4670,10 @@ Dialog {
                         Text { text: qsTr("Avg Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.avgDecodeEnabled
-                            onCheckedChanged: bridge.avgDecodeEnabled = checked
+                            onCheckedChanged: {
+                                bridge.avgDecodeEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4572,7 +4682,10 @@ Dialog {
                         Text { text: qsTr("Deep decode in TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.ft8DeepDecodeInTx
-                            onCheckedChanged: bridge.ft8DeepDecodeInTx = checked
+                            onCheckedChanged: {
+                                bridge.ft8DeepDecodeInTx = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                             hoverEnabled: true
@@ -4605,7 +4718,10 @@ Dialog {
                         Text { text: qsTr("PSK Reporter:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.pskReporterEnabled
-                            onCheckedChanged: bridge.pskReporterEnabled = checked
+                            onCheckedChanged: {
+                                bridge.pskReporterEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4648,7 +4764,7 @@ Dialog {
                             Layout.fillWidth: true
                             Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: if (bridge.dxCluster) bridge.dxCluster.port = value
-                            contentItem: TextInput { text: dxClusterPortSpin.textFromValue(dxClusterPortSpin.value, dxClusterPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !dxClusterPortSpin.editable; validator: dxClusterPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: dxClusterPortSpin.textFromValue(dxClusterPortSpin.value, dxClusterPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !dxClusterPortSpin.editable; validator: dxClusterPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -4716,7 +4832,10 @@ Dialog {
                         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.cloudlogEnabled
-                            onCheckedChanged: bridge.cloudlogEnabled = checked
+                            onCheckedChanged: {
+                                bridge.cloudlogEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4727,7 +4846,10 @@ Dialog {
                             text: bridge.cloudlogUrl; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.cloudlogUrl = text
+                            onTextChanged: {
+                                bridge.cloudlogUrl = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
 
                         Text { text: qsTr("API Key:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
@@ -4735,7 +4857,10 @@ Dialog {
                             text: bridge.cloudlogApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.cloudlogApiKey = text
+                            onTextChanged: {
+                                bridge.cloudlogApiKey = text
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                         }
 
                         Text { text: qsTr("Station ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
@@ -4744,7 +4869,7 @@ Dialog {
                             from: 0; to: 999; value: Number(bridge.getSetting("CloudlogStationID", 1)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("CloudlogStationID", value)
-                            contentItem: TextInput { text: cloudlogStIdSpin.textFromValue(cloudlogStIdSpin.value, cloudlogStIdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !cloudlogStIdSpin.editable; validator: cloudlogStIdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: cloudlogStIdSpin.textFromValue(cloudlogStIdSpin.value, cloudlogStIdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cloudlogStIdSpin.editable; validator: cloudlogStIdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
@@ -4756,7 +4881,10 @@ Dialog {
                         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.qrzLogbookEnabled
-                            onCheckedChanged: bridge.qrzLogbookEnabled = checked
+                            onCheckedChanged: {
+                                bridge.qrzLogbookEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4764,7 +4892,10 @@ Dialog {
                         Text { text: qsTr("Replace duplicates:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 130 }
                         CheckBox {
                             checked: bridge.qrzLogbookReplaceDuplicates
-                            onCheckedChanged: bridge.qrzLogbookReplaceDuplicates = checked
+                            onCheckedChanged: {
+                                bridge.qrzLogbookReplaceDuplicates = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4775,8 +4906,9 @@ Dialog {
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: {
-                                bridge.qrzLogbookApiKey = text
-                                settingsDialog.qrzLogbookTestStatus = ""
+	                                bridge.qrzLogbookApiKey = text
+	                                settingsDialog.scheduleSettingsPersist()
+	                                settingsDialog.qrzLogbookTestStatus = ""
                                 settingsDialog.qrzLogbookTestIsError = false
                                 settingsDialog.qrzLogbookTestBusy = false
                             }
@@ -4827,7 +4959,10 @@ Dialog {
                         Text { text: qsTr("LotW Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.lotwEnabled
-                            onCheckedChanged: bridge.lotwEnabled = checked
+                            onCheckedChanged: {
+                                bridge.lotwEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4852,7 +4987,7 @@ Dialog {
                             from: 0; to: 9999; value: Number(bridge.getSetting("LoTWDaysSinceUpload", 365)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("LoTWDaysSinceUpload", value)
-                            contentItem: TextInput { text: lotwDaysSpin.textFromValue(lotwDaysSpin.value, lotwDaysSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !lotwDaysSpin.editable; validator: lotwDaysSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: lotwDaysSpin.textFromValue(lotwDaysSpin.value, lotwDaysSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !lotwDaysSpin.editable; validator: lotwDaysSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -4940,14 +5075,20 @@ Dialog {
                         Text { text: qsTr("Record RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.recordRxEnabled
-                            onCheckedChanged: bridge.recordRxEnabled = checked
+                            onCheckedChanged: {
+                                bridge.recordRxEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Record TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.recordTxEnabled
-                            onCheckedChanged: bridge.recordTxEnabled = checked
+                            onCheckedChanged: {
+                                bridge.recordTxEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4955,7 +5096,10 @@ Dialog {
                         Text { text: qsTr("WSPR Upload:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.wsprUploadEnabled
-                            onCheckedChanged: bridge.wsprUploadEnabled = checked
+                            onCheckedChanged: {
+                                bridge.wsprUploadEnabled = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
@@ -4978,7 +5122,7 @@ Dialog {
                             from: 1025; to: 65535; value: Number(bridge.getSetting("RemoteHttpPort", 19091)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("RemoteHttpPort", value)
-                            contentItem: TextInput { text: remoteHttpPortSpin.textFromValue(remoteHttpPortSpin.value, remoteHttpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !remoteHttpPortSpin.editable; validator: remoteHttpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: remoteHttpPortSpin.textFromValue(remoteHttpPortSpin.value, remoteHttpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !remoteHttpPortSpin.editable; validator: remoteHttpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5085,7 +5229,7 @@ Dialog {
                             from: 1; to: 65535; value: Number(bridge.getSetting("UDPServerPort", 2237)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPServerPort", value)
-                            contentItem: TextInput { text: udpPortSpin.textFromValue(udpPortSpin.value, udpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpPortSpin.editable; validator: udpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: udpPortSpin.textFromValue(udpPortSpin.value, udpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpPortSpin.editable; validator: udpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5095,7 +5239,7 @@ Dialog {
                             from: 0; to: 65535; value: Number(bridge.getSetting("UDPListenPort", 0)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPListenPort", value)
-                            contentItem: TextInput { text: udpListenSpin.textFromValue(udpListenSpin.value, udpListenSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpListenSpin.editable; validator: udpListenSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: udpListenSpin.textFromValue(udpListenSpin.value, udpListenSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpListenSpin.editable; validator: udpListenSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Multicast TTL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -5104,7 +5248,7 @@ Dialog {
                             from: 0; to: 255; value: Number(bridge.getSetting("UDPTTL", 1)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPTTL", value)
-                            contentItem: TextInput { text: udpTtlSpin.textFromValue(udpTtlSpin.value, udpTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpTtlSpin.editable; validator: udpTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: udpTtlSpin.textFromValue(udpTtlSpin.value, udpTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTtlSpin.editable; validator: udpTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5157,7 +5301,7 @@ Dialog {
                             from: 1; to: 65535; value: Number(bridge.getSetting("UDPSecondaryServerPort", 2239)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPSecondaryServerPort", value)
-                            contentItem: TextInput { text: udpSecondaryPortSpin.textFromValue(udpSecondaryPortSpin.value, udpSecondaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpSecondaryPortSpin.editable; validator: udpSecondaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: udpSecondaryPortSpin.textFromValue(udpSecondaryPortSpin.value, udpSecondaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpSecondaryPortSpin.editable; validator: udpSecondaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Secondary TTL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -5166,7 +5310,7 @@ Dialog {
                             from: 0; to: 255; value: Number(bridge.getSetting("UDPSecondaryTTL", bridge.getSetting("UDPTTL", 1))); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPSecondaryTTL", value)
-                            contentItem: TextInput { text: udpSecondaryTtlSpin.textFromValue(udpSecondaryTtlSpin.value, udpSecondaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpSecondaryTtlSpin.editable; validator: udpSecondaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: udpSecondaryTtlSpin.textFromValue(udpSecondaryTtlSpin.value, udpSecondaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpSecondaryTtlSpin.editable; validator: udpSecondaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5223,7 +5367,7 @@ Dialog {
                             opacity: enabled ? 1.0 : 0.5
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPTertiaryServerPort", value)
-                            contentItem: TextInput { text: udpTertiaryPortSpin.textFromValue(udpTertiaryPortSpin.value, udpTertiaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpTertiaryPortSpin.editable; validator: udpTertiaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryPortSpin.enabled }
+                            contentItem: TextInput { text: udpTertiaryPortSpin.textFromValue(udpTertiaryPortSpin.value, udpTertiaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTertiaryPortSpin.editable; validator: udpTertiaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryPortSpin.enabled }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Tertiary TTL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -5234,7 +5378,7 @@ Dialog {
                             opacity: enabled ? 1.0 : 0.5
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("UDPTertiaryTTL", value)
-                            contentItem: TextInput { text: udpTertiaryTtlSpin.textFromValue(udpTertiaryTtlSpin.value, udpTertiaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !udpTertiaryTtlSpin.editable; validator: udpTertiaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryTtlSpin.enabled }
+                            contentItem: TextInput { text: udpTertiaryTtlSpin.textFromValue(udpTertiaryTtlSpin.value, udpTertiaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTertiaryTtlSpin.editable; validator: udpTertiaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryTtlSpin.enabled }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5291,7 +5435,7 @@ Dialog {
                             opacity: enabled ? 1.0 : 0.5
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("N1MMServerPort", value)
-                            contentItem: TextInput { text: n1mmPortSpin.textFromValue(n1mmPortSpin.value, n1mmPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !n1mmPortSpin.editable; validator: n1mmPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: n1mmPortSpin.enabled }
+                            contentItem: TextInput { text: n1mmPortSpin.textFromValue(n1mmPortSpin.value, n1mmPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !n1mmPortSpin.editable; validator: n1mmPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: n1mmPortSpin.enabled }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5353,7 +5497,7 @@ Dialog {
                             opacity: enabled ? 1.0 : 0.5
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
                             onValueChanged: bridge.setSetting("ADIFTcpPort", value)
-                            contentItem: TextInput { text: adifTcpPortSpin.textFromValue(adifTcpPortSpin.value, adifTcpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !adifTcpPortSpin.editable; validator: adifTcpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: adifTcpPortSpin.enabled }
+                            contentItem: TextInput { text: adifTcpPortSpin.textFromValue(adifTcpPortSpin.value, adifTcpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !adifTcpPortSpin.editable; validator: adifTcpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: adifTcpPortSpin.enabled }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
@@ -5484,7 +5628,7 @@ Dialog {
                                 hoverEnabled: true
                                 ToolTip.visible: hovered
                                 ToolTip.delay: 400
-                                ToolTip.text: qsTr("Azzera la calibrazione (slope=0, intercept=0). La frequenza viene scritta al rig senza correzione (fast path).")
+                                ToolTip.text: qsTr("Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).")
                             }
                         }
 
@@ -6476,7 +6620,7 @@ Dialog {
                                     checked: settingsDialog.boolSetting("DirectVisualAudioCaptureUnsafe", false)
                                     onToggled: settingsDialog.setBoolSettingIfChanged("DirectVisualAudioCaptureUnsafe", checked, false)
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Panadapter visivo veloce. In modalità legacy può aprire una seconda cattura audio; in modalità normale aumenta solo il refresh rate visivo. Default: OFF.")
+                                    ToolTip.text: qsTr("Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.")
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
@@ -6485,9 +6629,12 @@ Dialog {
                                 CheckBox {
                                     Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight
                                     checked: bridge.lowCpuModeEnabled
-                                    onToggled: bridge.lowCpuModeEnabled = checked
+                                    onToggled: {
+                                        bridge.lowCpuModeEnabled = checked
+                                        settingsDialog.scheduleSettingsPersist()
+                                    }
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Profilo per PC lenti: massimo 2 thread FT, cascata più lenta, decodifica early/deep ridotta. Default: OFF.")
+                                    ToolTip.text: qsTr("Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.")
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
@@ -6543,6 +6690,7 @@ Dialog {
                                     checked: bridge.vhfUhfFeatures
                                     onToggled: {
                                         bridge.vhfUhfFeatures = checked
+                                        settingsDialog.scheduleSettingsPersist()
                                         bridge.setSetting("VHFUHF", checked)
                                     }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -6632,7 +6780,10 @@ Dialog {
                                 CheckBox {
                                     Layout.preferredWidth: advancedOperatingGrid.checkWidth; Layout.preferredHeight: controlHeight
                                     checked: bridge.foxMode
-                                    onToggled: bridge.foxMode = checked
+                                    onToggled: {
+                                        bridge.foxMode = checked
+                                        settingsDialog.scheduleSettingsPersist()
+                                    }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
@@ -6640,7 +6791,10 @@ Dialog {
                                 CheckBox {
                                     Layout.preferredWidth: advancedOperatingGrid.checkWidth; Layout.preferredHeight: controlHeight
                                     checked: bridge.houndMode
-                                    onToggled: bridge.houndMode = checked
+                                    onToggled: {
+                                        bridge.houndMode = checked
+                                        settingsDialog.scheduleSettingsPersist()
+                                    }
                                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
@@ -6674,6 +6828,7 @@ Dialog {
                             currentIndex: Math.max(0, Math.min(model.length - 1, bridge.specialOperationActivity))
                             onActivated: {
                                 bridge.specialOperationActivity = currentIndex
+                                settingsDialog.scheduleSettingsPersist()
                             }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                             contentItem: Text { text: contestCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
@@ -6789,6 +6944,22 @@ Dialog {
                             wrapMode: Text.WordWrap
                             Layout.columnSpan: 4
                         }
+                        Text { text: qsTr("RF self-calibration:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: bridge.getSetting("DecoSyncSelfCalEnabled", false)
+                            onClicked: bridge.setSetting("DecoSyncSelfCalEnabled", checked)
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.")
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+                        Text {
+                            text: qsTr("Secondary hint only; it cannot create the first time lock.")
+                            color: textSecondary
+                            font.pixelSize: 11
+                            wrapMode: Text.WordWrap
+                            Layout.columnSpan: 2
+                        }
 
                         // ── ADV Decoding ──
                         Text { text: qsTr("ADV DECODING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
@@ -6800,7 +6971,10 @@ Dialog {
                             Switch {
                                 text: qsTr("AUTO - enable the 3 technologies when needed")
                                 checked: bridge.advAutoModeEnabled
-                                onToggled: bridge.advAutoModeEnabled = checked
+                                onToggled: {
+                                    bridge.advAutoModeEnabled = checked
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
                                 contentItem: Text {
                                     text: parent.text; color: textPrimary; font.pixelSize: 12; font.bold: true
                                     leftPadding: parent.indicator.width + 8
@@ -6833,7 +7007,10 @@ Dialog {
                             Switch {
                                 text: qsTr("Coherent Average (Q65/JT65)")
                                 checked: bridge.coherentAvgEnabled
-                                onToggled: bridge.coherentAvgEnabled = checked
+                                onToggled: {
+                                    bridge.coherentAvgEnabled = checked
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
                                 enabled: !bridge.advAutoModeEnabled
                                 contentItem: Text {
                                     text: parent.text; color: textPrimary; font.pixelSize: 12
@@ -6856,7 +7033,10 @@ Dialog {
                             Switch {
                                 text: qsTr("Neural Sync (FT8 OSD decoder)")
                                 checked: bridge.neuralSyncEnabled
-                                onToggled: bridge.neuralSyncEnabled = checked
+                                onToggled: {
+                                    bridge.neuralSyncEnabled = checked
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
                                 enabled: !bridge.advAutoModeEnabled
                                 contentItem: Text {
                                     text: parent.text; color: textPrimary; font.pixelSize: 12
@@ -6879,7 +7059,10 @@ Dialog {
                             Switch {
                                 text: qsTr("Turbo Feedback (extended LDPC iterations)")
                                 checked: bridge.turboFeedbackEnabled
-                                onToggled: bridge.turboFeedbackEnabled = checked
+                                onToggled: {
+                                    bridge.turboFeedbackEnabled = checked
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
                                 enabled: !bridge.advAutoModeEnabled
                                 contentItem: Text {
                                     text: parent.text; color: textPrimary; font.pixelSize: 12
@@ -6920,7 +7103,7 @@ Dialog {
                             from: 1; to: 3600; value: Number(bridge.getSetting("OTPinterval", 1)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: bridge.setSetting("OTPinterval", value)
-                            contentItem: TextInput { text: otpIntSpin.textFromValue(otpIntSpin.value, otpIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; readOnly: !otpIntSpin.editable; validator: otpIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            contentItem: TextInput { text: otpIntSpin.textFromValue(otpIntSpin.value, otpIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !otpIntSpin.editable; validator: otpIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("OTP URL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
@@ -7333,9 +7516,16 @@ Dialog {
                         Text { text: qsTr("Wait & Pounce:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.waitPounceActive
-                            onToggled: bridge.waitPounceActive = checked
+                            onToggled: {
+                                bridge.waitPounceActive = checked
+                                settingsDialog.scheduleSettingsPersist()
+                            }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Wait & Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.")
                         }
                         Text { text: qsTr("W&P Filters Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
@@ -7381,16 +7571,13 @@ Dialog {
                             { label: "Log",                          key: "uiBtnLogVisible" },
                             { label: "Macro",                        key: "uiBtnMacroVisible" },
                             { label: "Astro",                        key: "uiBtnAstroVisible" },
+                            { label: qsTr("Layout (window reset)"),  key: "uiBtnFooterResetVisible" },
+                            { label: qsTr("History (decode history)"), key: "uiBtnFooterHistoryVisible" },
                             { label: "CAT",                          key: "uiBtnCatVisible" },
                             { label: qsTr("Async FT2 (A)"),          key: "uiAsyncIconVisible" },
                             { label: "PSK Reporter",                 key: "uiPskReporterToolbarVisible" },
                             { label: qsTr("DX Cluster (toolbar)"),   key: "uiDxClusterToolbarVisible" },
                             { label: qsTr("World Clock"),            key: "uiWorldClockVisible" }
-                        ]
-                        readonly property var footerButtons: [
-                            { label: qsTr("Layout (window reset)"),         key: "uiBtnFooterResetVisible" },
-                            { label: qsTr("History (decode history)"),      key: "uiBtnFooterHistoryVisible" },
-                            { label: qsTr("DX Cluster (footer)"),           key: "uiBtnFooterDxcVisible" }
                         ]
 
                         Text {
@@ -7405,25 +7592,6 @@ Dialog {
 
                         Repeater {
                             model: uiButtonsGrid.toolbarButtons
-                            delegate: RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 8
-                                Text { text: modelData.label; color: textPrimary; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
-                                CheckBox {
-                                    checked: settingsDialog.boolSetting(modelData.key, true)
-                                    onToggled: settingsDialog.setBoolSettingIfChanged(modelData.key, checked, true)
-                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                                    contentItem: Text { text: ""; leftPadding: 24 }
-                                }
-                            }
-                        }
-
-                        // ── Barra in basso (footer) ──
-                        Text { text: qsTr("BOTTOM BAR (FOOTER)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 14 }
-                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 2; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
-
-                        Repeater {
-                            model: uiButtonsGrid.footerButtons
                             delegate: RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 8

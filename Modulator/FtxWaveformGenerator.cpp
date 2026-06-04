@@ -235,12 +235,12 @@ int encode_morse_bits (QString const& message, std::array<int, 250>* bits_out)
       (*bits_out)[static_cast<size_t> (n++)] = 0;
     }
 
-  for (int j = 0; j < 4 && n <= static_cast<int> (bits_out->size ()); ++j)
+  for (int j = 0; j < 4 && n < static_cast<int> (bits_out->size ()); ++j)
     {
       (*bits_out)[static_cast<size_t> (n++)] = 0;
     }
 
-  return n;
+  return std::min (n, static_cast<int> (bits_out->size ()));
 }
 
 void smooth_fortran_style (std::vector<float>& x, std::vector<float>& y, int nadd)

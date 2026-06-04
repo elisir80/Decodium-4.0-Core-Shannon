@@ -354,11 +354,16 @@ namespace
       }
     bool ok = false;
     double const parsed = QLocale::c ().toDouble (value.trimmed (), &ok);
-    if (!ok)
+    double const scaled = parsed * 10.0;
+    if (!ok
+        || !std::isfinite (parsed)
+        || !std::isfinite (scaled)
+        || scaled < 0.0
+        || scaled > static_cast<double> (std::numeric_limits<int>::max ()))
       {
         return false;
       }
-    *out = qMax (0, qRound (parsed * 10.0));
+    *out = qRound (scaled);
     return true;
   }
 

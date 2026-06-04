@@ -3,6 +3,7 @@
 
 #include "DecodiumTransceiverManager.h"
 
+#include "DecodiumLogging.hpp"
 #include "Transceiver/TransceiverFactory.hpp"
 #include "Transceiver/Transceiver.hpp"
 #include "Transceiver/TransceiverBase.hpp"
@@ -2002,14 +2003,13 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
     QElapsedTimer sendTimer;
     sendTimer.start();
     sendStateSync(d.get());
-    qInfo().noquote()
-        << "[TX-TL] hamlib_set_tx_frequency_ptt"
-        << "total_ms=" << totalTimer.elapsed()
-        << "send_state_ms=" << sendTimer.elapsed()
-        << "splitMode=" << m_splitMode
-        << "on=" << on
-        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
-        << "txHz=" << QString::number(hz, 'f', 0);
+    DIAG_INFO(QStringLiteral("[TX-TL] hamlib_set_tx_frequency_ptt total_ms=%1 send_state_ms=%2 splitMode=%3 on=%4 rxHz=%5 txHz=%6")
+                  .arg(totalTimer.elapsed())
+                  .arg(sendTimer.elapsed())
+                  .arg(m_splitMode)
+                  .arg(on ? 1 : 0)
+                  .arg(QString::number(static_cast<double>(d->desired.frequency()), 'f', 0),
+                       QString::number(hz, 'f', 0)));
 }
 
 void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on)
@@ -2042,13 +2042,12 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on
         << "txHz=" << QString::number(hz, 'f', 0);
     d->desired.ptt(on);
     sendState(d.get());
-    qInfo().noquote()
-        << "[TX-TL] hamlib_set_tx_frequency_ptt_async"
-        << "schedule_ms=" << totalTimer.elapsed()
-        << "splitMode=" << m_splitMode
-        << "on=" << on
-        << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
-        << "txHz=" << QString::number(hz, 'f', 0);
+    DIAG_INFO(QStringLiteral("[TX-TL] hamlib_set_tx_frequency_ptt_async schedule_ms=%1 splitMode=%2 on=%3 rxHz=%4 txHz=%5")
+                  .arg(totalTimer.elapsed())
+                  .arg(m_splitMode)
+                  .arg(on ? 1 : 0)
+                  .arg(QString::number(static_cast<double>(d->desired.frequency()), 'f', 0),
+                       QString::number(hz, 'f', 0)));
 }
 
 void DecodiumTransceiverManager::setRigPtt(bool on)
@@ -2063,11 +2062,14 @@ void DecodiumTransceiverManager::setRigPtt(bool on)
         return;
     }
     d->desired.ptt(on);
-    // 1.0.204 — PTT off non e' time-critical (lo stato del rig non e' letto
-    // immediatamente dal chiamante). Usare sendState (Queued) per non bloccare
-    // il main thread se il worker e' nel mezzo di do_poll (~150-470ms su
-    // FT-991 38400 baud). Il PTT on resta async via sendState gia' di suo.
-    sendState(d.get());
+    // PTT OFF e' safety-critical: stopTx()/halt()/stopTune() dichiarano la TX
+    // terminata subito dopo questa chiamata, quindi devono aspettare che il
+    // worker abbia almeno eseguito il comando OFF verso il backend CAT.
+    if (on) {
+        sendState(d.get());
+    } else {
+        sendStateSync(d.get());
+    }
 }
 
 void DecodiumTransceiverManager::setRigMode(const QString& mode)

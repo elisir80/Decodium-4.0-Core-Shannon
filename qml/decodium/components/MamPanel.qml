@@ -259,21 +259,21 @@ Item {
 
                             QueueMoveButton {
                                 symbol: "⇧"
-                                tip: "Porta al primo posto"
+                                tip: "Move to top"
                                 active: index > 0
                                 onTriggered: if (mamPanel.engine) mamPanel.engine.moveCallerQueueItem(index, 0)
                             }
 
                             QueueMoveButton {
                                 symbol: "↑"
-                                tip: "Sposta su"
+                                tip: "Move up"
                                 active: index > 0
                                 onTriggered: if (mamPanel.engine) mamPanel.engine.moveCallerQueueItem(index, index - 1)
                             }
 
                             QueueMoveButton {
                                 symbol: "↓"
-                                tip: "Sposta giù"
+                                tip: "Move down"
                                 active: index < queueList.count - 1
                                 onTriggered: if (mamPanel.engine) mamPanel.engine.moveCallerQueueItem(index, index + 1)
                             }

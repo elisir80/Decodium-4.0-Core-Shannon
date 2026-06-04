@@ -7,7 +7,7 @@
 //   - bridge.targetCallSign         (QString, settable)
 //   - bridge.targetCallMaxRetries   (int)
 //   - bridge.targetCallTimeoutS     (int)
-//   - bridge.targetCallPeriod       (int: 0=1st, 1=2nd, 2=alterna)
+//   - bridge.targetCallPeriod       (CALL UI int: 0=1st, 1=2nd, 2=alterna)
 //   - bridge.targetCallPauseS       (int)
 //   - bridge.targetCallRetryCount   (int, read-only)
 //   - bridge.startTargetCall()      / stopTargetCall()
@@ -179,7 +179,7 @@ Window {
                 rowSpacing: 8
 
                 Text { text: qsTr("Tentativi max"); color: callDialog.cMuted; font.pixelSize: 12 }
-                Text { text: qsTr("Timeout slot (s)"); color: callDialog.cMuted; font.pixelSize: 12 }
+                Text { text: qsTr("Timeout totale (s)"); color: callDialog.cMuted; font.pixelSize: 12 }
 
                 RowLayout {
                     Layout.fillWidth: true

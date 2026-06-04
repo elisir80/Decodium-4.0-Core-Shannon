@@ -1771,6 +1771,42 @@ namespace
     return asyncMarkerRx.match (upper).hasMatch ();
   }
 
+  bool ft2_word_click_token_is_callsign (QString const& token)
+  {
+    auto const normalized = normalize_call_token (token).trimmed ().toUpper ();
+    if (normalized.isEmpty ()) {
+      return false;
+    }
+
+    if (normalized.startsWith ('<') || normalized.endsWith ('>')) {
+      return false;
+    }
+
+    if (ghost_filter_known_token (normalized)
+        || grid_regexp.match (normalized).hasMatch ()) {
+      return false;
+    }
+
+    static QRegularExpression const callsignAlphabetRx {R"(^[A-Z0-9/]{3,11}$)"};
+    if (!callsignAlphabetRx.match (normalized).hasMatch ()) {
+      return false;
+    }
+
+    auto const base = Radio::base_callsign (normalized).trimmed ().toUpper ();
+    if (base.size () < 3 || base.size () > 11
+        || ghost_filter_known_token (base)
+        || grid_regexp.match (base).hasMatch ()) {
+      return false;
+    }
+
+    static QRegularExpression const plausibleBaseCallRx {R"(^[A-Z0-9]{1,4}[0-9][A-Z]{1,6}$)"};
+    if (!plausibleBaseCallRx.match (base).hasMatch ()) {
+      return false;
+    }
+
+    return Radio::is_callsign (base);
+  }
+
   bool ghost_filter_valid_callsign_token (QString const& token, AD1CCty const * countries)
   {
     auto normalized = normalize_call_token (token).toUpper ();
@@ -17710,7 +17746,7 @@ void MainWindow::handleDoubleClickOnCall(Qt::KeyboardModifiers modifiers, bool f
       && !clickedWord.isEmpty ()
       && clickedWord != "CQ"
       && clickedWord != "QRZ"
-      && Radio::is_callsign (clickedWord);
+      && ft2_word_click_token_is_callsign (clickedWord);
   if (isFt2BandActivityWordCallDoubleClick)
     {
       // The map is station-centric; Band Activity is row-centric. When the user
@@ -18185,8 +18221,7 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
   if (payload_directed_to_me
       && !payload_partner_base.isEmpty ()
       && payload_partner_base != my_base_upper
-      && (ft2_directed_response_to_me
-          || qso_partner_base_call.isEmpty ()
+      && (qso_partner_base_call.isEmpty ()
           || qso_partner_base_call == my_base_upper
           || message_contains_call_base (m_currentMessage, payload_partner_base)
           || message_contains_call_base (m_lastMessageSent, payload_partner_base))) {
@@ -18455,8 +18490,7 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
         && (directedResponsePartnerBase == qso_partner_base_call
             || base_call == qso_partner_base_call
             || qso_partner_matched
-            || placeholder_partner_reply
-            || ft2_directed_response_to_me);
+            || placeholder_partner_reply);
     bool const directedRogerReportForActiveQso =
         ftDirectedResponseMode
         && directed_to_me
@@ -21662,10 +21696,33 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
                                                      QByteArray * buffer,
                                                      QByteArray raw)
     {
+      static constexpr qsizetype kAutoSpotMaxBufferBytes = 65536;
+      static constexpr qsizetype kAutoSpotMaxPendingBytes = 1024;
       if (!socket || !buffer)
         {
-          return;
+          return false;
         }
+      auto appendPayload = [buffer] (char value) {
+          if (buffer->size() >= kAutoSpotMaxBufferBytes)
+            {
+              return false;
+            }
+          buffer->append(value);
+          return true;
+        };
+      auto storePending = [pending, &raw] (int start) {
+          if (!pending)
+            {
+              return true;
+            }
+          auto const remainder = raw.mid(start);
+          if (remainder.size() > kAutoSpotMaxPendingBytes)
+            {
+              return false;
+            }
+          *pending = remainder;
+          return true;
+        };
       if (pending && !pending->isEmpty())
         {
           raw.prepend(*pending);
@@ -21677,16 +21734,19 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
           auto const byte = static_cast<unsigned char>(raw.at(i));
           if (byte != 0xFF)
             {
-              buffer->append(raw.at(i));
+              if (!appendPayload(raw.at(i)))
+                {
+                  return false;
+                }
               ++i;
               continue;
             }
 
           if (i + 1 >= raw.size())
             {
-              if (pending)
+              if (!storePending(i))
                 {
-                  *pending = raw.mid(i);
+                  return false;
                 }
               break;
             }
@@ -21694,7 +21754,10 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
           auto const cmd = static_cast<unsigned char>(raw.at(i + 1));
           if (cmd == 0xFF)
             {
-              buffer->append(char(0xFF));
+              if (!appendPayload(char(0xFF)))
+                {
+                  return false;
+                }
               i += 2;
               continue;
             }
@@ -21713,9 +21776,9 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
                 }
               if (end < 0)
                 {
-                  if (pending)
+                  if (!storePending(i))
                     {
-                      *pending = raw.mid(i);
+                      return false;
                     }
                   break;
                 }
@@ -21727,9 +21790,9 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
             {
               if (i + 2 >= raw.size())
                 {
-                  if (pending)
+                  if (!storePending(i))
                     {
-                      *pending = raw.mid(i);
+                      return false;
                     }
                   break;
                 }
@@ -21764,6 +21827,7 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
 
           i += 2;
         }
+      return true;
     };
 
   auto * socket = new QTcpSocket {this};
@@ -21872,7 +21936,24 @@ void MainWindow::sendClusterAutoSpot(QString const& call,
            appendAutoSpotTrace, consumeClusterPayload] {
       QByteArray buffer = socket->property("cluster_buffer").toByteArray();
       QByteArray pending = socket->property("cluster_telnet_pending").toByteArray();
-      consumeClusterPayload(socket, &pending, &buffer, socket->readAll());
+      while (socket->bytesAvailable() > 0)
+        {
+          qint64 const chunkSize = qMin(socket->bytesAvailable(), qint64 {4096});
+          QByteArray const raw = socket->read(chunkSize);
+          if (raw.isEmpty())
+            {
+              break;
+            }
+          if (!consumeClusterPayload(socket, &pending, &buffer, raw))
+            {
+              socket->setProperty("cluster_telnet_pending", QByteArray {});
+              socket->setProperty("cluster_buffer", QByteArray {});
+              finishAutoSpot(false,
+                             QObject::tr("cluster verification response exceeded the safety limit"),
+                             QStringLiteral("OVERFLOW"));
+              return;
+            }
+        }
       socket->setProperty("cluster_telnet_pending", pending);
       socket->setProperty("cluster_buffer", buffer);
 
@@ -25758,6 +25839,12 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
       return;
     }
 
+  constexpr int kWorldMapGridCacheMaxEntries {8192};
+  constexpr qint64 kWorldMapGridCacheTtlSecs {12 * 60 * 60};
+  constexpr qint64 kWorldMapCall3MaxBytes {2 * 1024 * 1024};
+  constexpr int kWorldMapCall3MaxEntries {4096};
+  constexpr qsizetype kWorldMapCall3MaxLineLength {128};
+
   auto normalizeCall = [] (QString call)
     {
       call = call.trimmed().toUpper();
@@ -25795,6 +25882,7 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
   auto myBaseCall = normalizeCall(Radio::base_callsign(m_config.my_callsign()));
   auto const myCallKey = callKey(myCall);
   auto const myBaseCallKey = callKey(myBaseCall);
+  qint64 const nowSecs = QDateTime::currentSecsSinceEpoch();
 
   auto isMine = [&callKey, &myCallKey, &myBaseCallKey] (QString const& call)
     {
@@ -25802,15 +25890,62 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
       return !key.isEmpty() && (key == myCallKey || key == myBaseCallKey);
     };
 
+  auto pruneGridCache = [&] ()
+    {
+      for (auto it = m_worldMapGridSeenByCall.begin(); it != m_worldMapGridSeenByCall.end(); )
+        {
+          if (!m_worldMapGridByCall.contains(it.key()) || nowSecs - it.value() > kWorldMapGridCacheTtlSecs)
+            {
+              m_worldMapGridByCall.remove(it.key());
+              it = m_worldMapGridSeenByCall.erase(it);
+            }
+          else
+            {
+              ++it;
+            }
+        }
+
+      while (m_worldMapGridByCall.size() > kWorldMapGridCacheMaxEntries)
+        {
+          QString oldestKey;
+          qint64 oldestSeen = std::numeric_limits<qint64>::max();
+          for (auto it = m_worldMapGridSeenByCall.constBegin(); it != m_worldMapGridSeenByCall.constEnd(); ++it)
+            {
+              if (m_worldMapGridByCall.contains(it.key()) && it.value() < oldestSeen)
+                {
+                  oldestSeen = it.value();
+                  oldestKey = it.key();
+                }
+            }
+          if (oldestKey.isEmpty())
+            {
+              m_worldMapGridByCall.clear();
+              m_worldMapGridSeenByCall.clear();
+              break;
+            }
+          m_worldMapGridByCall.remove(oldestKey);
+          m_worldMapGridSeenByCall.remove(oldestKey);
+        }
+    };
+
   auto rememberGrid = [&] (QString const& call, QString const& grid)
     {
       auto key = callKey(call);
       auto locator = grid.trimmed().toUpper();
-      if (key.isEmpty() || !locator.contains(grid_regexp))
+      if (key.size() < 3 || key.size() > 11 || !locator.contains(grid_regexp))
+        {
+          return;
+        }
+      if (!m_worldMapGridByCall.contains(key) && m_worldMapGridByCall.size() >= kWorldMapGridCacheMaxEntries)
+        {
+          pruneGridCache();
+        }
+      if (!m_worldMapGridByCall.contains(key) && m_worldMapGridByCall.size() >= kWorldMapGridCacheMaxEntries)
         {
           return;
         }
       m_worldMapGridByCall.insert(key, locator.left(6));
+      m_worldMapGridSeenByCall.insert(key, nowSecs);
     };
 
   auto loadCall3GridCache = [&] ()
@@ -25832,11 +25967,21 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
               return;
             }
         }
+      if (f->size() > kWorldMapCall3MaxBytes)
+        {
+          return;
+        }
 
       QTextStream in(f);
-      while (!in.atEnd())
+      int loadedEntries = 0;
+      while (!in.atEnd() && loadedEntries < kWorldMapCall3MaxEntries
+             && m_worldMapGridByCall.size() < kWorldMapGridCacheMaxEntries)
         {
           auto line = in.readLine().trimmed();
+          if (line.size() > kWorldMapCall3MaxLineLength)
+            {
+              continue;
+            }
           if (line.isEmpty() || line.startsWith('#') || line.startsWith(';'))
             {
               continue;
@@ -25861,9 +26006,11 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
             }
 
           auto key = callKey(call);
-          if (!key.isEmpty() && !m_worldMapGridByCall.contains(key))
+          if (key.size() >= 3 && key.size() <= 11 && !m_worldMapGridByCall.contains(key))
             {
               m_worldMapGridByCall.insert(key, locator.left(6));
+              m_worldMapGridSeenByCall.insert(key, nowSecs);
+              ++loadedEntries;
             }
         }
     };
@@ -25876,10 +26023,18 @@ void MainWindow::updateWorldMapFromDecode(DecodedText const& decoded_text)
           return QString {};
         }
       auto locator = m_worldMapGridByCall.value(key);
+      if (!locator.isEmpty())
+        {
+          m_worldMapGridSeenByCall.insert(key, nowSecs);
+        }
       if (locator.isEmpty())
         {
           loadCall3GridCache();
           locator = m_worldMapGridByCall.value(key);
+          if (!locator.isEmpty())
+            {
+              m_worldMapGridSeenByCall.insert(key, nowSecs);
+            }
         }
       return locator;
     };

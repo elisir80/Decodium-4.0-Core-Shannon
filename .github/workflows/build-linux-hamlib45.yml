@@ -67,11 +67,19 @@ jobs:
           sudo make install
 
       - name: Configure CMake
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
+          set -euo pipefail
+          VERSION="${INPUT_VERSION#v}"
+          if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
+            echo "Invalid release version: ${INPUT_VERSION}" >&2
+            exit 1
+          fi
           cmake -B build-appimage -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=/usr \
-            -DFORK_RELEASE_VERSION="${{ github.event.inputs.version }}" \
+            -DFORK_RELEASE_VERSION="${VERSION}" \
             -DWSJT_GENERATE_DOCS=OFF \
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF

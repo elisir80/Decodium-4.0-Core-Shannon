@@ -691,6 +691,12 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
 #endif
     if (g_shuttingDown.load(std::memory_order_relaxed) && isIgnorableShutdownQmlMessage(msg))
         return;
+    if (msg.startsWith(QStringLiteral("[TX-TL]"))
+        || msg.startsWith(QStringLiteral("TX legacy bridge payload"))
+        || msg.startsWith(QStringLiteral("TX mac PCM payload"))) {
+        DIAG_INFO(msg);
+        return;
+    }
     L(msg.toLocal8Bit().constData());
 }
 
@@ -1682,10 +1688,10 @@ int main(int argc, char* argv[])
 #endif
     L("QML OK - entering event loop");
 
-    // 1.0.220 — Smoke TX test mode: env var DECODIUM_TX_SMOKE_TEST=1 attiva
-    // una sequenza di startTune/stopTune programmatica per stressare il
-    // lifecycle audio sink senza UI interaction. Utile per CI / verifica
-    // automatica del fix audio sink park Windows (1.0.216→218). Sequenza:
+    // 1.0.220 — Smoke TX test mode: DECODIUM_TX_SMOKE_TEST=I_UNDERSTAND_THIS_KEYS_TX
+    // attiva una sequenza di startTune/stopTune programmatica per stressare il
+    // lifecycle audio sink senza UI interaction. Questa prova puo' keyare la
+    // radio: la semplice presenza della variabile non e' sufficiente. Sequenza:
     //   t=5s   tune ON  (first cycle, ctor sink + WASAPI start)
     //   t=8s   tune OFF (retire + park 8s window inizia)
     //   t=11s  tune ON  (verifica recovery: sink_create durante park overlap)
@@ -1693,8 +1699,11 @@ int main(int argc, char* argv[])
     //   t=17s  quit     (esegue exit cleanup, verifica delete delayed)
     // Tutti gli eventi loggati con prefix [TX-SMOKE] + i marker [TX-TL]
     // standard dei fix 1.0.218 sono visibili nel diagnostic log.
-    if (qEnvironmentVariableIsSet("DECODIUM_TX_SMOKE_TEST")) {
-        L("[TX-SMOKE] DECODIUM_TX_SMOKE_TEST detected — arming Tune cycle");
+    QString const txSmokeTest = qEnvironmentVariable("DECODIUM_TX_SMOKE_TEST").trimmed();
+    if (!txSmokeTest.isEmpty() && txSmokeTest != QStringLiteral("I_UNDERSTAND_THIS_KEYS_TX")) {
+        L("[TX-SMOKE] DECODIUM_TX_SMOKE_TEST ignored: set it to I_UNDERSTAND_THIS_KEYS_TX to run the unsafe Tune cycle");
+    } else if (txSmokeTest == QStringLiteral("I_UNDERSTAND_THIS_KEYS_TX")) {
+        L("[TX-SMOKE] explicit DECODIUM_TX_SMOKE_TEST consent detected — arming Tune cycle");
         QTimer::singleShot(5000, &bridge, [&bridge]() {
             qInfo() << "[TX-SMOKE] t=5s startTune (cycle 1)";
             bridge.startTune();

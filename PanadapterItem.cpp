@@ -2691,7 +2691,7 @@ void PanadapterItem::renderSpectrum()
             bool isCQ = d.value("isCQ").toBool();
             bool isMyCall = d.value("isMyCall").toBool();
             int snr = d.value("snr").toInt();
-            if (call.isEmpty() || freq <= 0) continue;
+            if (call.isEmpty() || freq < 100 || freq > 5000) continue;
 
             int lx = fToX(freq);
             if (lx < 0 || lx >= w) continue;
@@ -2774,7 +2774,7 @@ void PanadapterItem::renderSpectrum()
             QVariantMap d = v.toMap();
             QString call = d.value("call").toString();
             int freq = d.value("freq").toInt();
-            if (call.isEmpty() || freq <= 0) continue;
+            if (call.isEmpty() || freq < 100 || freq > 5000) continue;
             int lx = fToX(freq);
             if (lx < 0 || lx >= w) continue;
 
@@ -2958,7 +2958,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             QVariantMap const d = v.toMap();
             QString const call = d.value(QStringLiteral("call")).toString();
             int const freq = d.value(QStringLiteral("freq")).toInt();
-            if (call.isEmpty() || freq <= 0)
+            if (call.isEmpty() || freq < 100 || freq > 5000)
                 continue;
             int const x = fToX(static_cast<float>(freq));
             if (x < 0 || x >= w)
@@ -3018,7 +3018,7 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             QVariantMap const d = v.toMap();
             QString const call = d.value(QStringLiteral("call")).toString();
             int const freq = d.value(QStringLiteral("freq")).toInt();
-            if (call.isEmpty() || freq <= 0)
+            if (call.isEmpty() || freq < 100 || freq > 5000)
                 continue;
             int const x = fToX(static_cast<float>(freq));
             if (x < 0 || x >= w)

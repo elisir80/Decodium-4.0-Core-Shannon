@@ -22,6 +22,9 @@ int const kSecondaryClusterPort = 7300;
 int const kConnectTimeoutMs = 8000;
 int const kReconnectDelayMs = 10000;
 qsizetype const kMaxRxBufferChars = 65536;
+qsizetype const kMaxVerifiedSpotBufferBytes = 65536;
+qsizetype const kMaxVerifiedSpotPendingBytes = 1024;
+qint64 const kVerifiedSpotReadChunkBytes = 4096;
 
 void beginConfiguredSettingsGroup(QSettings& settings)
 {
@@ -265,14 +268,32 @@ bool clusterPayloadShowsSubmittedSpot(QString const& myCall, QString const& dxCa
     return false;
 }
 
-void consumeTelnetClusterPayload(QTcpSocket* socket,
+bool consumeTelnetClusterPayload(QTcpSocket* socket,
                                  QByteArray* pending,
                                  QByteArray* buffer,
                                  QByteArray raw)
 {
     if (!socket || !buffer) {
-        return;
+        return false;
     }
+    auto appendPayload = [buffer](char value) {
+        if (buffer->size() >= kMaxVerifiedSpotBufferBytes) {
+            return false;
+        }
+        buffer->append(value);
+        return true;
+    };
+    auto storePending = [pending, &raw](int start) {
+        if (!pending) {
+            return true;
+        }
+        QByteArray const remainder = raw.mid(start);
+        if (remainder.size() > kMaxVerifiedSpotPendingBytes) {
+            return false;
+        }
+        *pending = remainder;
+        return true;
+    };
     if (pending && !pending->isEmpty()) {
         raw.prepend(*pending);
         pending->clear();
@@ -281,21 +302,25 @@ void consumeTelnetClusterPayload(QTcpSocket* socket,
     for (int i = 0; i < raw.size();) {
         auto const byte = static_cast<unsigned char>(raw.at(i));
         if (byte != 0xFF) {
-            buffer->append(raw.at(i));
+            if (!appendPayload(raw.at(i))) {
+                return false;
+            }
             ++i;
             continue;
         }
 
         if (i + 1 >= raw.size()) {
-            if (pending) {
-                *pending = raw.mid(i);
+            if (!storePending(i)) {
+                return false;
             }
             break;
         }
 
         auto const cmd = static_cast<unsigned char>(raw.at(i + 1));
         if (cmd == 0xFF) {
-            buffer->append(char(0xFF));
+            if (!appendPayload(char(0xFF))) {
+                return false;
+            }
             i += 2;
             continue;
         }
@@ -310,8 +335,8 @@ void consumeTelnetClusterPayload(QTcpSocket* socket,
                 }
             }
             if (end < 0) {
-                if (pending) {
-                    *pending = raw.mid(i);
+                if (!storePending(i)) {
+                    return false;
                 }
                 break;
             }
@@ -321,8 +346,8 @@ void consumeTelnetClusterPayload(QTcpSocket* socket,
 
         if (cmd >= 0xFB && cmd <= 0xFE) {
             if (i + 2 >= raw.size()) {
-                if (pending) {
-                    *pending = raw.mid(i);
+                if (!storePending(i)) {
+                    return false;
                 }
                 break;
             }
@@ -347,6 +372,7 @@ void consumeTelnetClusterPayload(QTcpSocket* socket,
 
         i += 2;
     }
+    return true;
 }
 
 void appendUniqueEndpoint(QList<QPair<QString, int>>& endpoints, const QString& host, int port)
@@ -893,7 +919,21 @@ bool DecodiumDxCluster::submitSpotVerified(const QString& dxCall, double freqKhz
             [socket, timeout, myCall, call, spotLine, verifyCommand, finishSpot] {
         QByteArray buffer = socket->property("cluster_buffer").toByteArray();
         QByteArray pending = socket->property("cluster_telnet_pending").toByteArray();
-        consumeTelnetClusterPayload(socket, &pending, &buffer, socket->readAll());
+        while (socket->bytesAvailable() > 0) {
+            qint64 const chunkSize = qMin(socket->bytesAvailable(), kVerifiedSpotReadChunkBytes);
+            QByteArray const raw = socket->read(chunkSize);
+            if (raw.isEmpty()) {
+                break;
+            }
+            if (!consumeTelnetClusterPayload(socket, &pending, &buffer, raw)) {
+                socket->setProperty("cluster_telnet_pending", QByteArray {});
+                socket->setProperty("cluster_buffer", QByteArray {});
+                finishSpot(false,
+                           QObject::tr("cluster verification response exceeded the safety limit"),
+                           QStringLiteral("OVERFLOW"));
+                return;
+            }
+        }
         socket->setProperty("cluster_telnet_pending", pending);
         socket->setProperty("cluster_buffer", buffer);
 

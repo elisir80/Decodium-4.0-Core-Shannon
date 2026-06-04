@@ -88,6 +88,7 @@
 #include <QSqlQuery>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QList>
 #include <QPointer>
 #include <QProcess>
 #include <QRunnable>
@@ -117,6 +118,10 @@
 #include <QDataStream>
 #include <QUrl>
 #include <QRegularExpression>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 #include <QScopedValueRollback>
 #include <cstdio>
 #include <cstring>
@@ -172,7 +177,6 @@ static void bridgeLog(const QString& msg) {
 
 static void txTimelineLog(const QString& msg) {
     bridgeLog(msg);
-    qInfo().noquote() << msg;
 }
 
 static constexpr qint64 kMainThreadTraceDefaultThresholdMs = 40;
@@ -425,6 +429,44 @@ static void deleteBufferLater(QBuffer *buffer, QObject *context)
     buffer->deleteLater();
 }
 
+#if defined(Q_OS_MAC)
+static QList<QPointer<QAudioSink>>& parkedCoreAudioTxSinks()
+{
+    static QList<QPointer<QAudioSink>> sinks;
+    return sinks;
+}
+
+static void parkCoreAudioTxSink(QAudioSink *sink, const QString& reason)
+{
+    if (!sink) {
+        return;
+    }
+    QObject *context = QCoreApplication::instance();
+    sink->setParent(context);
+
+    QList<QPointer<QAudioSink>>& sinks = parkedCoreAudioTxSinks();
+    for (int i = sinks.size() - 1; i >= 0; --i) {
+        if (!sinks.at(i)) {
+            sinks.removeAt(i);
+        }
+    }
+
+    static constexpr int kMaxParkedCoreAudioTxSinks = 12;
+    sinks.append(QPointer<QAudioSink>(sink));
+    while (sinks.size() > kMaxParkedCoreAudioTxSinks) {
+        QPointer<QAudioSink> old = sinks.takeFirst();
+        if (!old || old.data() == sink) {
+            continue;
+        }
+        old->disconnect();
+        old->deleteLater();
+        bridgeLog(QStringLiteral("TX CoreAudio parked sink cap reached: released oldest parked sink reason=%1 count=%2")
+                      .arg(reason)
+                      .arg(sinks.size()));
+    }
+}
+#endif
+
 // 1.0.217 — Lifetime parking allineato per platform.
 // Mac: short grace window (workaround stopAudioUnit crash CoreAudio) without
 // leaving parked TX sinks alive across multiple FT2 slots.
@@ -452,13 +494,13 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 
     if (deferCoreAudioSinkDelete()) {
 #if defined(Q_OS_MAC)
-        sink->setParent(nullptr);
-        if (buffer) {
-            buffer->setParent(nullptr);
+        if (sink->state() != QAudio::StoppedState) {
+            sink->setVolume(0.0f);
         }
-        sink->setVolume(0.0f);
-        bridgeLog(QStringLiteral("TX CoreAudio sink parked without delayed Qt/CoreAudio callbacks: reason=%1").arg(reason));
-        txTimelineLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=indefinite_mac").arg(reason));
+        deleteBufferLater(buffer, QCoreApplication::instance());
+        parkCoreAudioTxSink(sink, reason);
+        bridgeLog(QStringLiteral("TX CoreAudio sink parked bounded: reason=%1 cap=12").arg(reason));
+        txTimelineLog(QStringLiteral("[TX-TL] park_entry reason=%1 lifetime_ms=bounded_mac cap=12").arg(reason));
         return;
 #endif
         QObject *context = QCoreApplication::instance();
@@ -2465,12 +2507,23 @@ static QString adifRecordDedupeKey(QMap<QString, QString> const& fields)
     }.join(QLatin1Char('|'));
 }
 
+constexpr qint64 kMaxAdifDocumentBytes = 32LL * 1024LL * 1024LL;
+constexpr int kMaxAdifRecords = 200000;
+constexpr int kMaxAdifFieldBytes = 65536;
+constexpr int kMaxAdifFieldsPerRecord = 128;
+
 static QList<ParsedAdifRecord> parseAdifRecordsBytes(QByteArray const& bodyBytes)
 {
     QList<ParsedAdifRecord> records;
     ParsedAdifRecord record;
+    int fieldsInRecord = 0;
     int cursor = 0;
     while (cursor < bodyBytes.size()) {
+        if (records.size() >= kMaxAdifRecords) {
+            qWarning().noquote() << "[ADIF] record cap reached while parsing log:" << kMaxAdifRecords;
+            break;
+        }
+
         int const tagStart = bodyBytes.indexOf('<', cursor);
         if (tagStart < 0) {
             break;
@@ -2486,12 +2539,14 @@ static QList<ParsedAdifRecord> parseAdifRecordsBytes(QByteArray const& bodyBytes
             if (!record.fields.isEmpty()) {
                 records.append(record);
                 record = ParsedAdifRecord {};
+                fieldsInRecord = 0;
             }
             cursor = tagEnd + 1;
             continue;
         }
         if (specLower == "eoh") {
             record = ParsedAdifRecord {};
+            fieldsInRecord = 0;
             cursor = tagEnd + 1;
             continue;
         }
@@ -2523,16 +2578,32 @@ static QList<ParsedAdifRecord> parseAdifRecordsBytes(QByteArray const& bodyBytes
         }
 
         int const available = bodyBytes.size() - valueStart;
-        QByteArray const valueBytes = bodyBytes.mid(valueStart, std::min(valueLength, available));
+        if (valueLength > available) {
+            qWarning().noquote() << "[ADIF] truncated field discarded at byte" << valueStart;
+            break;
+        }
+        if (valueLength > kMaxAdifFieldBytes) {
+            qWarning().noquote() << "[ADIF] oversized field discarded at byte" << valueStart
+                                 << "length" << valueLength;
+            cursor = valueStart + valueLength;
+            continue;
+        }
+        if (fieldsInRecord >= kMaxAdifFieldsPerRecord) {
+            cursor = valueStart + valueLength;
+            continue;
+        }
+
+        QByteArray const valueBytes = bodyBytes.mid(valueStart, valueLength);
         QString const fieldName = QString::fromLatin1(fieldNameBytes).trimmed().toUpper();
         QString const value = QString::fromUtf8(valueBytes).trimmed();
         if (!fieldName.isEmpty()) {
             record.fields.insert(fieldName, value);
+            ++fieldsInRecord;
         }
         cursor = valueStart + valueLength;
     }
 
-    if (!record.fields.isEmpty()) {
+    if (!record.fields.isEmpty() && records.size() < kMaxAdifRecords) {
         records.append(record);
     }
     return records;
@@ -2544,6 +2615,15 @@ static ParsedAdifDocument loadAdifDocument(QString const& path)
     QFile file(path);
     if (!file.exists()) {
         doc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+        return doc;
+    }
+    QFileInfo const info(path);
+    if (info.size() > kMaxAdifDocumentBytes) {
+        doc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+        qWarning().noquote() << "[ADIF] skipped oversized ADIF document"
+                             << path
+                             << "size" << info.size()
+                             << "limit" << kMaxAdifDocumentBytes;
         return doc;
     }
     if (!file.open(QIODevice::ReadOnly)) {
@@ -5647,7 +5727,8 @@ void DecodiumBridge::setFt2ApHashCache(bool v)
     QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("Ft2ApHashCache"), v);
     emit ft2ApHashCacheChanged();
-    bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Fase 0: seed+hit-rate)").arg(v ? "ON" : "OFF"));
+    bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Phase 1: cache-confirmed borderline decodes; rescued rows are display-only for AutoSeq/TX)")
+                  .arg(v ? "ON" : "OFF"));
 }
 
 // 1.0.355 — opt-in: salta il decode sync di fine-slot quando l'async ha GIA'
@@ -5686,7 +5767,9 @@ void DecodiumBridge::setResumeQsoOnReply(bool v)
     m_resumeQsoOnReply = v;
     QSettings settings("Decodium", "Decodium3");
     settings.setValue(QStringLiteral("ResumeQsoOnReply"), v);
-    if (!v) { m_resumeTargetCall.clear(); m_resumeArmedMs = 0; }  // disattivando, disarma
+    if (!v) {
+        clearResumeQsoOnReplyArm(QStringLiteral("disabled"));
+    }
     emit resumeQsoOnReplyChanged();
     bridgeLog(QStringLiteral("[Resume] resume-on-reply %1").arg(v ? "ON" : "OFF"));
 }
@@ -5697,7 +5780,7 @@ void DecodiumBridge::setResumeQsoOnReply(bool v)
 //  - Default OFF (opt-in via Settings), gate strettissimo
 //  - Log IMMEDIATO ogni invocazione (anche se guardrail rifiuta) → debug visibile
 //  - Chiamati SOLO da setDxCall (resume) e advanceQsoState (remember), MAI da startTx
-//  - Resume bloccato se m_currentTx == 1 (siamo in CQ, niente "resume QSO")
+//  - Resume bloccato se non siamo gia' in un QSO attivo: TX6/CQ e idle non devono ripescare stato
 //  - Resume bloccato se m_transmitting (no contesa col TX in corso)
 void DecodiumBridge::rememberPartnerStateV2(QString const& tag)
 {
@@ -5760,8 +5843,16 @@ bool DecodiumBridge::tryResumeFromPartnerMemoryV2(QString const& newDxCall)
         bridgeLog(QStringLiteral("[FT2WS-F] resume skipped (empty candidate)"));
         return false;
     }
-    if (m_currentTx == 1) {
-        bridgeLog(QStringLiteral("[FT2WS-F] resume skipped (currentTx=1 in CQ) candidate=%1").arg(dx));
+    bool const currentStateCanResume =
+        m_qsoProgress > 1
+        && m_qsoProgress < 6
+        && m_currentTx >= 1
+        && m_currentTx <= 5;
+    if (!currentStateCanResume) {
+        bridgeLog(QStringLiteral("[FT2WS-F] resume skipped (not in active QSO state tx=%1 progress=%2) candidate=%3")
+                      .arg(m_currentTx)
+                      .arg(m_qsoProgress)
+                      .arg(dx));
         return false;
     }
     if (m_transmitting) {
@@ -5788,6 +5879,19 @@ bool DecodiumBridge::tryResumeFromPartnerMemoryV2(QString const& newDxCall)
     int const resumedTxNum    = it->lastTxNum;
     int const resumedProgress = it->qsoProgress;
     int const resumedSnr      = it->lastSnrDb;
+    bool const cachedStateCanResume =
+        resumedProgress > 1
+        && resumedProgress < 6
+        && resumedTxNum >= 1
+        && resumedTxNum <= 5;
+    if (!cachedStateCanResume) {
+        m_partnerMemory.remove(dx);
+        bridgeLog(QStringLiteral("[FT2WS-F] resume skipped (cached state not active tx=%1 progress=%2) candidate=%3")
+                      .arg(resumedTxNum)
+                      .arg(resumedProgress)
+                      .arg(dx));
+        return false;
+    }
     if (resumedProgress > 1) {
         m_qsoProgress = resumedProgress;
         emit qsoProgressChanged();
@@ -5857,7 +5961,9 @@ bool DecodiumBridge::maybeForceTx2ResendOnStall()
 
     m_ft2Tx2ResendsThisQso = 1;
     m_ft2LastForcedTxBefore = m_currentTx;
-    setCurrentTx(2);                              // torna a TX2 (re-send report)
+    if (!selectCurrentTxIfAllowed(2, QStringLiteral("FT2WS-G forced TX2 resend"))) {
+        return false;
+    }
     m_qsoProgress = 3;                            // REPORT (re-inviare)
     emit qsoProgressChanged();
     m_txWatchdogTicks = 0;
@@ -6342,6 +6448,9 @@ void DecodiumBridge::setTxWatchdogMode(int v)
     m_txWatchdogMode = v;
     m_txWatchdogTicks = 0;
     m_txWatchdogActiveSinceMs = 0;
+    m_txWatchdogLastProgressLogMs = 0;
+    m_txWatchdogElapsedActive = false;
+    m_txWatchdogElapsed.invalidate();
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -6364,6 +6473,9 @@ void DecodiumBridge::setTxWatchdogTime(int v)
     m_txWatchdogTime = v;
     m_txWatchdogTicks = 0;
     m_txWatchdogActiveSinceMs = 0;
+    m_txWatchdogLastProgressLogMs = 0;
+    m_txWatchdogElapsedActive = false;
+    m_txWatchdogElapsed.invalidate();
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -6386,6 +6498,9 @@ void DecodiumBridge::setTxWatchdogCount(int v)
     m_txWatchdogCount = v;
     m_txWatchdogTicks = 0;
     m_txWatchdogActiveSinceMs = 0;
+    m_txWatchdogLastProgressLogMs = 0;
+    m_txWatchdogElapsedActive = false;
+    m_txWatchdogElapsed.invalidate();
     m_autoCQPeriodsMissed = 0;
     persistTxWatchdogSettings();
 
@@ -6396,6 +6511,26 @@ void DecodiumBridge::setTxWatchdogCount(int v)
 void DecodiumBridge::qmlDebugLog(QString const& msg) const
 {
     bridgeLog(QStringLiteral("[QML] %1").arg(msg));
+}
+
+namespace
+{
+QString generateWebServerAccessToken()
+{
+    QString token;
+    token.reserve(64);
+    for (int i = 0; i < 4; ++i) {
+        token += QStringLiteral("%1")
+                     .arg(QRandomGenerator::global()->generate64(), 16, 16, QLatin1Char('0'));
+    }
+    return token;
+}
+
+bool webServerAccessTokenLooksUsable(QString const& token)
+{
+    static QRegularExpression const safeTokenRe(QStringLiteral("^[A-Za-z0-9._~-]{24,}$"));
+    return safeTokenRe.match(token).hasMatch();
+}
 }
 
 bool DecodiumBridge::startWebServer(int port)
@@ -6420,9 +6555,19 @@ bool DecodiumBridge::startWebServer(int port)
         connect(this, &DecodiumBridge::dxCallChanged, m_webServer,
                 &DecodiumWebServer::broadcastStateUpdate);
     }
-    bool const ok = m_webServer->start(static_cast<quint16>(qBound(1024, port, 65535)));
+    QSettings webSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    QString token = webSettings.value(QStringLiteral("WebServerAccessToken")).toString().trimmed();
+    if (!webServerAccessTokenLooksUsable(token)) {
+        token = generateWebServerAccessToken();
+        webSettings.setValue(QStringLiteral("WebServerAccessToken"), token);
+        webSettings.sync();
+    }
+
+    bool const ok = m_webServer->start(static_cast<quint16>(qBound(1024, port, 65535)), token);
     if (ok) {
-        bridgeLog(QStringLiteral("WebServer started at %1").arg(m_webServer->accessUrl()));
+        QString const url = m_webServer->accessUrl();
+        bridgeLog(QStringLiteral("WebServer started at %1 (token protected)")
+                      .arg(url.section(QStringLiteral("?token="), 0, 0)));
     }
     return ok;
 }
@@ -6443,6 +6588,11 @@ bool DecodiumBridge::webServerRunning() const
 QString DecodiumBridge::webServerUrl() const
 {
     return m_webServer ? m_webServer->accessUrl() : QString();
+}
+
+QString DecodiumBridge::webServerQrUrl() const
+{
+    return m_webServer ? m_webServer->qrUrl() : QString();
 }
 
 bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
@@ -7412,6 +7562,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     QTimer::singleShot(0, this, [this]() { halt(); });
             }
             if (c) {
+                ++m_omniRigReconnectSerial;
+                m_omniRigReconnectInProgress = false;
                 m_lastSuccessfulCatConnected = true;
                 m_lastSuccessfulCatBackend = m_catBackend;
                 if (!m_lastCatError.isEmpty()) {
@@ -7434,12 +7586,20 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 // Burst di tentativi (riusa retryRigConnection), gated off durante TX/tune
                 // (non toccare PTT/DTR) e a bassa cadenza (anti-stall, vedi connectRig blocking).
                 if (backend == QStringLiteral("omnirig") && !m_lastCatError.isEmpty()) {
+                    quint64 const reconnectSerial = ++m_omniRigReconnectSerial;
                     static constexpr int kOmniReconnectDelaysMs[] = {3000, 8000, 16000, 30000};
                     for (int const delayMs : kOmniReconnectDelaysMs) {
-                        QTimer::singleShot(delayMs, this, [this, delayMs]() {
+                        QTimer::singleShot(delayMs, this, [this, delayMs, reconnectSerial]() {
+                            if (reconnectSerial != m_omniRigReconnectSerial) return;
                             if (m_shuttingDown || m_catConnected) return;
                             if (m_transmitting || m_tuning) return;
                             if (m_catBackend != QStringLiteral("omnirig")) return;
+                            if (m_omniRigReconnectInProgress) {
+                                bridgeLog(QStringLiteral("OmniRig auto-reconnect runtime: skip overlapping attempt (delay=%1ms)").arg(delayMs));
+                                return;
+                            }
+                            m_omniRigReconnectInProgress = true;
+                            auto reconnectGuard = qScopeGuard([this]() { m_omniRigReconnectInProgress = false; });
                             bridgeLog(QStringLiteral("OmniRig auto-reconnect runtime: tentativo (delay=%1ms)").arg(delayMs));
                             retryRigConnection();
                         });
@@ -8027,21 +8187,19 @@ void DecodiumBridge::runPostQmlStartupServices()
     bool const autoConn = (m_catBackend == QStringLiteral("native")) ? m_nativeCat->catAutoConnect()
                         : (m_catBackend == QStringLiteral("omnirig")) ? m_omniRigCat->catAutoConnect()
                                                                       : m_hamlibCat->catAutoConnect();
-    // Respect the user's CAT Auto Connect choice. Inoltre, se l'utente ha
-    // gia' avuto una connessione CAT riuscita in passato, prova comunque a
-    // riconnettere all'avvio. HRD usa gli stessi retry dilazionati degli altri
-    // backend: evita socket stale ma non "dimentica" l'ultima connessione.
+    // Respect the user's CAT Auto Connect choice. A previous successful
+    // session may select the retry path only when auto-connect is still ON.
     QSettings catLastSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     bool const lastSuccess = catLastSettings.value(QStringLiteral("lastSuccessfulCatConnected"), false).toBool();
     QString const lastBackend = catLastSettings.value(QStringLiteral("lastSuccessfulCatBackend")).toString();
     bool const sameBackend = (lastBackend == m_catBackend);
-    bool const retryLastSuccessfulCat = lastSuccess && sameBackend;
+    bool const retryLastSuccessfulCat = autoConn && lastSuccess && sameBackend;
     bridgeLog(QStringLiteral("CAT[%1] autoConnect=%2 retryLastSuccessful=%3")
                   .arg(m_catBackend)
                   .arg(autoConn ? 1 : 0)
                   .arg(retryLastSuccessfulCat ? 1 : 0));
 
-    if (legacyOwnsRigControl(m_legacyBackend) || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
+    if ((legacyOwnsRigControl(m_legacyBackend) || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) && autoConn) {
         bridgeLog(QStringLiteral("CAT auto-connect delegated to legacy backend"));
         QTimer::singleShot(250, this, [this]() {
             if (!m_legacyBackend || !m_legacyBackend->available()) {
@@ -8246,6 +8404,9 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                   .arg(m_catBackend)
                                   .arg(m_catConnected ? 1 : 0));
 #if defined(Q_OS_MAC)
+                    if (!enabled) {
+                        cancelPendingLegacyBridgeAudioStart(QStringLiteral("legacy-ptt-off"));
+                    }
                     if (!enabled && m_bridgeAudioLegacyTxActive) {
                         qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
                         if (m_txPlaybackHoldUntilMs > nowMs || m_txAudioRestartPending) {
@@ -8298,7 +8459,13 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                       .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                         if (enabled && shouldUseBridgeAudioForLegacyDigitalTx()) {
-                            QTimer::singleShot(audioDelayMs, this, [this]() {
+                            quint64 const audioStartSerial =
+                                armPendingLegacyBridgeAudioStart(QStringLiteral("legacy-ptt-on"));
+                            QTimer::singleShot(audioDelayMs, this, [this, audioStartSerial]() {
+                                if (!consumePendingLegacyBridgeAudioStart(audioStartSerial,
+                                                                          QStringLiteral("legacy-ptt-on"))) {
+                                    return;
+                                }
                                 syncLegacyBackendState();
                                 if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-on"))) {
                                     bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed, stopping legacy TX"));
@@ -8355,7 +8522,13 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                                   .arg(audioDelayMs));
 #if defined(Q_OS_MAC)
                                     if (shouldUseBridgeAudioForLegacyDigitalTx()) {
-                                        QTimer::singleShot(audioDelayMs, this, [this]() {
+                                        quint64 const audioStartSerial =
+                                            armPendingLegacyBridgeAudioStart(QStringLiteral("legacy-ptt-delayed"));
+                                        QTimer::singleShot(audioDelayMs, this, [this, audioStartSerial]() {
+                                            if (!consumePendingLegacyBridgeAudioStart(audioStartSerial,
+                                                                                      QStringLiteral("legacy-ptt-delayed"))) {
+                                                return;
+                                            }
                                             syncLegacyBackendState();
                                             if (!startBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-delayed"))) {
                                                 bridgeLog(QStringLiteral("legacyPttRequested: delayed bridge TX audio failed, stopping legacy TX"));
@@ -11080,8 +11253,11 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
     }
 
     double const txDialHz = catSplitTxDialFrequencyHz();
-    // 1.0.192 — applica Frequency Calibration anche al TX dial (split mode)
-    double const txDialCalibrated = applyFrequencyCalibration(txDialHz);
+    // txDialHz <= 0 is the split-disable / no-valid-TX-dial sentinel. Preserve it:
+    // calibration intercepts must never turn that sentinel into a positive TX VFO.
+    double const txDialCalibrated = txDialHz > 0.0
+        ? applyFrequencyCalibration(txDialHz)
+        : 0.0;
     activeCatSetTxFreq(m_nativeCat, m_hamlibCat, m_catBackend, txDialCalibrated, m_omniRigCat);
 
     QString const splitMode = m_hamlibCat->splitMode().trimmed().toLower();
@@ -11311,7 +11487,11 @@ void DecodiumBridge::applyNtpSettings()
     } else if (ntpEnabledExplicit) {
         enabled = s.value(QStringLiteral("NTPEnabled"), false).toBool();
     }
-    if (m_decoSyncTime) m_decoSyncTime->setEnabled(enabled);
+    bool const selfCalEnabled = s.value(QStringLiteral("DecoSyncSelfCalEnabled"), false).toBool();
+    if (m_decoSyncTime) {
+        m_decoSyncTime->setEnabled(enabled);
+        m_decoSyncTime->setSelfCalibrationEnabled(enabled && selfCalEnabled);
+    }
     QString const customServer =
         s.value(QStringLiteral("NTPCustomServer"), QString()).toString().trimmed();
     double const storedOffset = s.value(QStringLiteral("NTPOffset_ms"), 0.0).toDouble();
@@ -11350,6 +11530,8 @@ void DecodiumBridge::applyNtpSettings()
                   .arg(enabled ? QStringLiteral("1") : QStringLiteral("0"),
                        customServer.isEmpty() ? QStringLiteral("<auto>") : customServer,
                        QString::number(storedOffset, 'f', 1)));
+    bridgeLog(QStringLiteral("DecoSync RF self-calibration: %1")
+                  .arg(enabled && selfCalEnabled ? QStringLiteral("enabled") : QStringLiteral("disabled")));
     if (enabled) {
         m_ntpClient->syncNow();
     }
@@ -12210,27 +12392,56 @@ void DecodiumBridge::setTx6(const QString& v) {
     }
 }
 int DecodiumBridge::currentTx() const { return m_currentTx; }
-void DecodiumBridge::setCurrentTx(int v) {
-    // 1.0.134: guard centralizzato per il TX skip mask.
-    // Tutti i path (autoSequenceStep, engageDxClusterSpot, sendTx,
-    // processDecodeDoubleClick) passano qui per cambiare il currentTx,
-    // quindi il check qui blocca anche le attivazioni "manuali"
-    // (click su spot DX cluster, doppio click su decode).
-    if (v >= 1 && v <= 6 && isTxDisabled(v)) {
-        bridgeLog(QStringLiteral("setCurrentTx: TX%1 user-disabled, ignored").arg(v));
-        return;
+bool DecodiumBridge::selectCurrentTxIfAllowed(int txNum, const QString& reason)
+{
+    QString const source = reason.trimmed().isEmpty() ? QStringLiteral("setCurrentTx") : reason.trimmed();
+    if (txNum < 1 || txNum > 6) {
+        bridgeLog(QStringLiteral("%1: invalid TX%2 selection rejected currentTx=%3")
+                      .arg(source)
+                      .arg(txNum)
+                      .arg(m_currentTx));
+        return false;
     }
-    if (v == 6) {
+    if (isTxDisabled(txNum)) {
+        bridgeLog(QStringLiteral("%1: TX%2 user-disabled, selection rejected currentTx=%3")
+                      .arg(source)
+                      .arg(txNum)
+                      .arg(m_currentTx));
+        emit statusMessage(QStringLiteral("TX%1 disabilitato").arg(txNum));
+        return false;
+    }
+    if (txNum == 6) {
         resetCompletedQsoLatchesForCq(QStringLiteral("set-current-tx6"));
     }
-    if (m_currentTx!=v) {
-        m_currentTx=v;
+    if (m_currentTx != txNum) {
+        m_currentTx = txNum;
         emit currentTxChanged();
         emit currentTxMessageChanged();
-        if (usingLegacyBackendForTx()) m_legacyBackend->selectTxMessage(qBound(1, v, 6));
+        if (usingLegacyBackendForTx()) m_legacyBackend->selectTxMessage(txNum);
         invalidateTxAudioCache();
         scheduleTxAudioPrecompute();
     }
+    return true;
+}
+
+bool DecodiumBridge::ensureCurrentTxCanTransmit(const QString& reason)
+{
+    QString const source = reason.trimmed().isEmpty() ? QStringLiteral("TX") : reason.trimmed();
+    if (m_currentTx < 1 || m_currentTx > 6) {
+        bridgeLog(QStringLiteral("%1: blocked invalid currentTx=%2").arg(source).arg(m_currentTx));
+        emit statusMessage(QStringLiteral("TX bloccato: slot non valido"));
+        return false;
+    }
+    if (isTxDisabled(m_currentTx)) {
+        bridgeLog(QStringLiteral("%1: blocked TX%2 because it is user-disabled").arg(source).arg(m_currentTx));
+        emit statusMessage(QStringLiteral("TX%1 disabilitato").arg(m_currentTx));
+        return false;
+    }
+    return true;
+}
+
+void DecodiumBridge::setCurrentTx(int v) {
+    (void)selectCurrentTxIfAllowed(v, QStringLiteral("setCurrentTx"));
 }
 QString DecodiumBridge::dxCall() const { return m_dxCall; }
 void DecodiumBridge::setDxCall(const QString& v) {
@@ -12477,6 +12688,12 @@ void DecodiumBridge::setTxEnabled(bool v)
         m_txEnabled = v;
         emit txEnabledChanged();
     }
+
+#if defined(Q_OS_MAC)
+    if (!v) {
+        cancelPendingLegacyBridgeAudioStart(QStringLiteral("tx-disabled"));
+    }
+#endif
 
     // The legacy backend can clear its own TX-enable state after completing a
     // QSO while the QML bridge still shows TX enabled. A subsequent double-click
@@ -12726,20 +12943,23 @@ void DecodiumBridge::startTargetCall()
     m_targetCallSavedTxPeriod  = m_txPeriod;
     m_targetCallSavedAlt12     = m_alt12Enabled;
 
+    ++m_targetCallSessionId;
     m_targetCallRetryCount      = 0;
-    m_targetCallLastTxUtc       = QDateTime::currentDateTimeUtc();
+    m_targetCallStartedUtc      = QDateTime::currentDateTimeUtc();
+    m_targetCallLastTxUtc       = QDateTime();
     m_targetCallWasTransmitting = m_transmitting;
     m_targetCallActive          = true;
     emit targetCallActiveChanged();
     emit targetCallRetryCountChanged();
 
-    // Imposta modo periodo FT8/FT4 (0=1st, 1=2nd, 2=alterna)
+    // CALL UI convention: 0=1st (:00/:30), 1=2nd (:15/:45), 2=alterna.
+    // Bridge txPeriod convention is reversed: 1=first/even, 0=second/odd.
     if (m_targetCallPeriod == 0) {
         setAlt12Enabled(false);
-        setTxPeriod(0);
+        setTxPeriod(1);
     } else if (m_targetCallPeriod == 1) {
         setAlt12Enabled(false);
-        setTxPeriod(1);
+        setTxPeriod(0);
     } else {
         setAlt12Enabled(true);
     }
@@ -12754,11 +12974,40 @@ void DecodiumBridge::startTargetCall()
             this, &DecodiumBridge::onTargetCallTransmittingChanged,
             Qt::UniqueConnection);
 
-    bridgeLog(QStringLiteral("startTargetCall: target=%1 maxRetries=%2 timeoutS=%3 period=%4 pauseS=%5")
+    quint64 const sessionId = m_targetCallSessionId;
+    if (m_targetCallTimeoutS > 0) {
+        QTimer::singleShot(m_targetCallTimeoutS * 1000, this, [this, sessionId]() {
+            if (!m_targetCallActive || m_targetCallSessionId != sessionId) {
+                return;
+            }
+            bool const qsoAlreadyProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
+            if (qsoAlreadyProgressed) {
+                bridgeLog(QStringLiteral("targetCall timeout ignored: QSO already progressed tx=%1 progress=%2")
+                              .arg(m_currentTx)
+                              .arg(m_qsoProgress));
+                return;
+            }
+            if (m_transmitting) {
+                bridgeLog(QStringLiteral("targetCall timeout reached during TX; stop deferred to TX end"));
+                return;
+            }
+            bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), stopping")
+                          .arg(m_targetCallTimeoutS));
+            stopTargetCall();
+        });
+    }
+
+    QString const periodLabel = (m_targetCallPeriod == 0)
+        ? QStringLiteral("1st")
+        : (m_targetCallPeriod == 1)
+            ? QStringLiteral("2nd")
+            : QStringLiteral("alternate");
+    bridgeLog(QStringLiteral("startTargetCall: target=%1 maxRetries=%2 timeoutS=%3 period=%4 txPeriod=%5 pauseS=%6")
                   .arg(m_targetCallSign)
                   .arg(m_targetCallMaxRetries == 0 ? QStringLiteral("inf") : QString::number(m_targetCallMaxRetries))
                   .arg(m_targetCallTimeoutS)
-                  .arg(m_targetCallPeriod)
+                  .arg(periodLabel)
+                  .arg(m_alt12Enabled ? QStringLiteral("alt") : QString::number(m_txPeriod))
                   .arg(m_targetCallPauseS));
 }
 
@@ -12769,6 +13018,7 @@ void DecodiumBridge::stopTargetCall()
     disconnect(this, &DecodiumBridge::transmittingChanged,
                this, &DecodiumBridge::onTargetCallTransmittingChanged);
 
+    ++m_targetCallSessionId;
     m_targetCallActive = false;
     emit targetCallActiveChanged();
 
@@ -12809,18 +13059,75 @@ void DecodiumBridge::tickTargetCallOnTx()
         // dxCall e' cambiato (es. partner ha risposto e siamo in mid-QSO) -> non contare retry
         return;
     }
-    ++m_targetCallRetryCount;
-    m_targetCallLastTxUtc = QDateTime::currentDateTimeUtc();
-    emit targetCallRetryCountChanged();
+    bool const qsoAlreadyProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
+    if (qsoAlreadyProgressed) {
+        bridgeLog(QStringLiteral("targetCall tx-end: QSO progressed to TX%1, retry timing not applied")
+                      .arg(m_currentTx));
+        return;
+    }
 
-    bridgeLog(QStringLiteral("targetCall tx-end: retry=%1/%2 dxCall=%3")
+    QDateTime const nowUtc = QDateTime::currentDateTimeUtc();
+    ++m_targetCallRetryCount;
+    m_targetCallLastTxUtc = nowUtc;
+    emit targetCallRetryCountChanged();
+    qint64 const elapsedS = m_targetCallStartedUtc.isValid()
+        ? qMax<qint64>(0, m_targetCallStartedUtc.secsTo(nowUtc))
+        : 0;
+
+    bridgeLog(QStringLiteral("targetCall tx-end: retry=%1/%2 dxCall=%3 elapsed=%4/%5s pause=%6s")
                   .arg(m_targetCallRetryCount)
                   .arg(m_targetCallMaxRetries == 0 ? QStringLiteral("inf") : QString::number(m_targetCallMaxRetries))
-                  .arg(m_dxCall));
+                  .arg(m_dxCall)
+                  .arg(elapsedS)
+                  .arg(m_targetCallTimeoutS)
+                  .arg(m_targetCallPauseS));
 
     if (m_targetCallMaxRetries > 0 && m_targetCallRetryCount >= m_targetCallMaxRetries) {
         bridgeLog(QStringLiteral("targetCall: max retries reached (%1), stopping").arg(m_targetCallMaxRetries));
         stopTargetCall();
+        return;
+    }
+
+    if (m_targetCallTimeoutS > 0 && elapsedS >= m_targetCallTimeoutS) {
+        bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), stopping")
+                      .arg(m_targetCallTimeoutS));
+        stopTargetCall();
+        return;
+    }
+
+    if (m_targetCallPauseS > 0) {
+        quint64 const sessionId = m_targetCallSessionId;
+        setTxEnabled(false);
+        bridgeLog(QStringLiteral("targetCall: pause %1s before next retry")
+                      .arg(m_targetCallPauseS));
+        QTimer::singleShot(m_targetCallPauseS * 1000, this, [this, sessionId]() {
+            if (!m_targetCallActive
+                || m_targetCallSessionId != sessionId
+                || m_transmitting
+                || m_tuning
+                || m_dxCall.compare(m_targetCallSign, Qt::CaseInsensitive) != 0) {
+                return;
+            }
+            QDateTime const resumeNowUtc = QDateTime::currentDateTimeUtc();
+            qint64 const resumeElapsedS = m_targetCallStartedUtc.isValid()
+                ? qMax<qint64>(0, m_targetCallStartedUtc.secsTo(resumeNowUtc))
+                : 0;
+            if (m_targetCallTimeoutS > 0 && resumeElapsedS >= m_targetCallTimeoutS) {
+                bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s), stopping")
+                              .arg(m_targetCallTimeoutS));
+                stopTargetCall();
+                return;
+            }
+            bool const resumeQsoProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
+            if (resumeQsoProgressed) {
+                bridgeLog(QStringLiteral("targetCall pause resume skipped: QSO already progressed tx=%1 progress=%2")
+                              .arg(m_currentTx)
+                              .arg(m_qsoProgress));
+                return;
+            }
+            bridgeLog(QStringLiteral("targetCall: pause complete, re-enabling TX"));
+            setTxEnabled(true);
+        });
     }
 }
 
@@ -13243,6 +13550,7 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
 void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    cancelPendingLegacyBridgeAudioStart(QStringLiteral("abort:%1").arg(reason));
     bridgeLog(QStringLiteral("legacyBridgeTxAudio abort request: reason=%1 active=%2 transmitting=%3")
                   .arg(reason)
                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
@@ -13278,6 +13586,63 @@ void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
     }
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+#else
+    Q_UNUSED(reason);
+#endif
+}
+
+quint64 DecodiumBridge::armPendingLegacyBridgeAudioStart(const QString& reason)
+{
+#if defined(Q_OS_MAC)
+    Q_UNUSED(reason);
+    m_legacyBridgeAudioTxStartPending = true;
+    return ++m_legacyBridgeAudioTxStartSerial;
+#else
+    Q_UNUSED(reason);
+    return 0;
+#endif
+}
+
+bool DecodiumBridge::consumePendingLegacyBridgeAudioStart(quint64 serial, const QString& reason)
+{
+#if defined(Q_OS_MAC)
+    if (!m_legacyBridgeAudioTxStartPending || serial != m_legacyBridgeAudioTxStartSerial) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio delayed start ignored (%1): stale serial").arg(reason));
+        return false;
+    }
+    if (m_shuttingDown || QCoreApplication::closingDown()) {
+        m_legacyBridgeAudioTxStartPending = false;
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio delayed start cancelled (%1): shutdown").arg(reason));
+        return false;
+    }
+    if (!shouldUseBridgeAudioForLegacyDigitalTx()) {
+        m_legacyBridgeAudioTxStartPending = false;
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio delayed start cancelled (%1): legacy bridge no longer active").arg(reason));
+        return false;
+    }
+    if (!m_txEnabled && !m_deferredManualSyncTx && !m_transmitting) {
+        m_legacyBridgeAudioTxStartPending = false;
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio delayed start cancelled (%1): TX no longer armed").arg(reason));
+        return false;
+    }
+    m_legacyBridgeAudioTxStartPending = false;
+    return true;
+#else
+    Q_UNUSED(serial);
+    Q_UNUSED(reason);
+    return false;
+#endif
+}
+
+void DecodiumBridge::cancelPendingLegacyBridgeAudioStart(const QString& reason)
+{
+#if defined(Q_OS_MAC)
+    bool const hadPending = m_legacyBridgeAudioTxStartPending;
+    ++m_legacyBridgeAudioTxStartSerial;
+    m_legacyBridgeAudioTxStartPending = false;
+    if (hadPending) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio delayed start cancelled: %1").arg(reason));
+    }
 #else
     Q_UNUSED(reason);
 #endif
@@ -13485,12 +13850,12 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_txPcmBuffer->seek(0);
     bufferMs = phaseTimer.elapsed();
     QPointer<QBuffer> const bufferGuard(m_txPcmBuffer);
-    qInfo().noquote() << "TX legacy bridge payload"
-                      << "reason=" << reason
-                      << "msg=" << msg.trimmed()
-                      << "waveSamples=" << wave.size()
-                      << "pcmBytes=" << m_txPcmData.size()
-                      << "bufferSize=" << m_txPcmBuffer->size();
+    bridgeLog(QStringLiteral("TX legacy bridge payload reason=%1 msg=[%2] waveSamples=%3 pcmBytes=%4 bufferSize=%5")
+                  .arg(reason,
+                       msg.trimmed())
+                  .arg(wave.size())
+                  .arg(m_txPcmData.size())
+                  .arg(m_txPcmBuffer->size()));
     phaseTimer.restart();
     m_txAudioRestartPending = true;
     QPointer<SoundOutput> const soundOutputGuard(m_soundOutput);
@@ -13575,6 +13940,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 void DecodiumBridge::stopBridgeAudioForLegacyDigitalTx(const QString& reason)
 {
 #if defined(Q_OS_MAC)
+    cancelPendingLegacyBridgeAudioStart(QStringLiteral("stop:%1").arg(reason));
     MainThreadTraceScope trace(QStringLiteral("legacy_bridge_audio_stop_main"),
                                QStringLiteral("reason=%1 active=%2 tx=%3")
                                    .arg(reason)
@@ -14413,6 +14779,7 @@ bool DecodiumBridge::mamMultiStreamSequencerActive() const
 {
     return m_mamMultiStream
         && isMamMultiStreamMode()
+        && m_txEnabled
         && (m_autoCqRepeat || m_multiAnswerMode)
         && !usingLegacyBackendForTx()
         && !m_manualTxHold;
@@ -14793,6 +15160,13 @@ void DecodiumBridge::mamLogSlot(MamQsoSlot& s)
 // multi-stream). Il caso 1-slot e' gestito da multiStreamActive()>=1.
 void DecodiumBridge::mamDispatchPeriod()
 {
+    if (!m_txEnabled) {
+        m_mamMessages.clear();
+        m_mamF0sHz.clear();
+        bridgeLog(QStringLiteral("MAM dispatch blocked: TX disabled"));
+        return;
+    }
+
     // (1) Parita' slot + late-start guard (come il ramo sync di
     // checkAndStartPeriodicTx). Se non e' il nostro periodo: ascolto.
     qint64 const msNow = correctedUtcMsecsSinceStartOfDay();
@@ -15978,6 +16352,7 @@ void DecodiumBridge::startTx()
         stopTune();
     }
     if (m_transmitting || m_tuning) { bridgeLog("startTx: already TX/tuning, abort"); return; }
+    if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx"))) return;
     if (!checkSwrAllowsTransmission(QStringLiteral("startTx"))) return;
     if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
         emit errorMessage(QStringLiteral("Backend legacy non disponibile per Fox/Hound"));
@@ -15986,6 +16361,7 @@ void DecodiumBridge::startTx()
     if (!prepareHoundTxSelectionForStart(QStringLiteral("startTx"))) {
         return;
     }
+    if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx after hound prepare"))) return;
 
     bool const fallbackToCq = (m_currentTx >= 1 && m_currentTx <= 5) &&
                               m_dxCall.trimmed().isEmpty() &&
@@ -15994,7 +16370,9 @@ void DecodiumBridge::startTx()
                               m_specialOperationActivity != kSpecialOpHound;
     if (fallbackToCq) {
         bridgeLog("startTx: no DX payload available, selecting TX6/CQ");
-        setCurrentTx(6);
+        if (!selectCurrentTxIfAllowed(6, QStringLiteral("startTx fallback CQ"))) {
+            return;
+        }
     }
 
     QString msg = buildCurrentTxMessage();
@@ -16269,19 +16647,19 @@ void DecodiumBridge::startTx()
         bridgeLog(QStringLiteral("startTx(mac-pcm): playback hold %1 ms for %2 samples")
                       .arg(txPlaybackMs + 300)
                       .arg(wave.size()));
-        qInfo().noquote() << "TX mac PCM payload"
-                          << "mode=" << m_mode
-                          << "msg=" << msg.trimmed()
-                          << "waveSamples=" << wave.size()
-                          << "peak=" << QString::number(txWavePeak(wave), 'f', 6)
-                          << "payloadMs=" << txPayloadMs
-                          << "ft2Async=" << macFt2Async
-                          << "alignSlot=" << macAlignToSyncSlot
-                          << "nominalLeadMs=" << macNominalLeadInMs
-                          << "initialSilenceMs=" << macInitialSilenceMs
-                          << "slotElapsedMs=" << macSlotElapsedMs
-                          << "pcmBytes=" << m_txPcmData.size()
-                          << "bufferSize=" << m_txPcmBuffer->size();
+        bridgeLog(QStringLiteral("TX mac PCM payload mode=%1 msg=[%2] waveSamples=%3 peak=%4 payloadMs=%5 ft2Async=%6 alignSlot=%7 nominalLeadMs=%8 initialSilenceMs=%9 slotElapsedMs=%10 pcmBytes=%11 bufferSize=%12")
+                      .arg(m_mode,
+                           msg.trimmed())
+                      .arg(wave.size())
+                      .arg(QString::number(txWavePeak(wave), 'f', 6))
+                      .arg(txPayloadMs)
+                      .arg(macFt2Async ? 1 : 0)
+                      .arg(macAlignToSyncSlot ? 1 : 0)
+                      .arg(macNominalLeadInMs)
+                      .arg(macInitialSilenceMs)
+                      .arg(macSlotElapsedMs)
+                      .arg(m_txPcmData.size())
+                      .arg(m_txPcmBuffer->size()));
         m_soundOutput->restart(m_txPcmBuffer);
         QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
             if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer) {
@@ -16658,20 +17036,20 @@ void DecodiumBridge::startTx()
             m_txAudioRestartPending = false;
             scheduleSyncTxBoundaryStop(QStringLiteral("sound-output"), txSerial);
 
-            qInfo().noquote() << QStringLiteral("[TX-TL] sound_output_launch mode=%1 msg=[%2] samples=%3 pcm_bytes=%4 pos=%5/%6 dev=%7 fmt=%8 configured_buf=%9 channel=%10 tx_level=%11 gain=%12 peak=%13")
-                                     .arg(m_mode,
-                                          msg.trimmed())
-                                     .arg(wave.size())
-                                     .arg(m_txPcmData.size())
-                                     .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
-                                     .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1)
-                                     .arg(outDev.description(),
-                                          audioFormatToString(outFmt))
-                                     .arg(static_cast<qlonglong>(txBufferBytes))
-                                     .arg(m_audioOutputChannel)
-                                     .arg(m_txOutputLevel, 0, 'f', 1)
-                                     .arg(effectiveGain, 0, 'f', 4)
-                                     .arg(wavePeak, 0, 'f', 6);
+            txTimelineLog(QStringLiteral("[TX-TL] sound_output_launch mode=%1 msg=[%2] samples=%3 pcm_bytes=%4 pos=%5/%6 dev=%7 fmt=%8 configured_buf=%9 channel=%10 tx_level=%11 gain=%12 peak=%13")
+                              .arg(m_mode,
+                                   msg.trimmed())
+                              .arg(wave.size())
+                              .arg(m_txPcmData.size())
+                              .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
+                              .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1)
+                              .arg(outDev.description(),
+                                   audioFormatToString(outFmt))
+                              .arg(static_cast<qlonglong>(txBufferBytes))
+                              .arg(m_audioOutputChannel)
+                              .arg(m_txOutputLevel, 0, 'f', 1)
+                              .arg(effectiveGain, 0, 'f', 4)
+                              .arg(wavePeak, 0, 'f', 6));
 
             QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
                 if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer) {
@@ -16952,12 +17330,17 @@ void DecodiumBridge::sendTx(int n)
     if (m_specialOperationActivity == kSpecialOpHound && n != 3) {
         n = 1;
     }
-    setCurrentTx(n);
+    if (!selectCurrentTxIfAllowed(n, QStringLiteral("sendTx"))) {
+        return;
+    }
     if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
         emit errorMessage(QStringLiteral("Backend legacy non disponibile per Fox/Hound"));
         return;
     }
     if (!prepareHoundTxSelectionForStart(QStringLiteral("sendTx"))) {
+        return;
+    }
+    if (!ensureCurrentTxCanTransmit(QStringLiteral("sendTx after hound prepare"))) {
         return;
     }
     QString selectedMessage = buildCurrentTxMessage();
@@ -17061,6 +17444,7 @@ void DecodiumBridge::stopTx()
 
     if (usingLegacyBackendForTx()) {
 #if defined(Q_OS_MAC)
+        cancelPendingLegacyBridgeAudioStart(QStringLiteral("stopTx"));
         if (m_bridgeAudioLegacyTxActive) {
             stopBridgeAudioForLegacyDigitalTx(QStringLiteral("stopTx"));
         }
@@ -17368,19 +17752,19 @@ bool DecodiumBridge::launchTuneAudio()
         m_soundOutput->setFormat(outDev, static_cast<unsigned>(qMax(1, outFmt.channelCount())), 49152);
         m_soundOutput->setAttenuation(attenuationDb);
         m_soundOutput->restart(m_txPcmBuffer);
-        qInfo().noquote() << QStringLiteral("[TX-TL] tune_sound_output_launch dev=%1 fmt=%2 configured_buf=%3 channel=%4 tx_level=%5 gain=%6 pcm_bytes=%7")
-                                 .arg(outDev.description(),
-                                      audioFormatToString(outFmt))
-                                 .arg(static_cast<qlonglong>(tuneBufferBytes))
-                                 .arg(m_audioOutputChannel)
-                                 .arg(m_txOutputLevel, 0, 'f', 1)
-                                 .arg(txGainFromSlider(m_txOutputLevel), 0, 'f', 4)
-                                 .arg(m_txPcmData.size());
+        txTimelineLog(QStringLiteral("[TX-TL] tune_sound_output_launch dev=%1 fmt=%2 configured_buf=%3 channel=%4 tx_level=%5 gain=%6 pcm_bytes=%7")
+                          .arg(outDev.description(),
+                               audioFormatToString(outFmt))
+                          .arg(static_cast<qlonglong>(tuneBufferBytes))
+                          .arg(m_audioOutputChannel)
+                          .arg(m_txOutputLevel, 0, 'f', 1)
+                          .arg(txGainFromSlider(m_txOutputLevel), 0, 'f', 4)
+                          .arg(m_txPcmData.size()));
         QTimer::singleShot(2000, this, [this]() {
             if (m_tuning && m_txPcmBuffer) {
-                qInfo().noquote() << QStringLiteral("[TX-TL] tune_sound_output_2s pos=%1/%2")
-                                         .arg(m_txPcmBuffer->pos())
-                                         .arg(m_txPcmBuffer->size());
+                txTimelineLog(QStringLiteral("[TX-TL] tune_sound_output_2s pos=%1/%2")
+                                  .arg(m_txPcmBuffer->pos())
+                                  .arg(m_txPcmBuffer->size()));
             }
         });
         return true;
@@ -17738,6 +18122,7 @@ void DecodiumBridge::haltWithReason(const QString& reason)
     clearDeferredManualSyncTx(haltReason);
 
 #if defined(Q_OS_MAC)
+    cancelPendingLegacyBridgeAudioStart(haltReason);
     bool const bridgeTuneMaybeActive =
         m_bridgeAudioTuneActive || (m_tuning && m_modulator && m_modulator->isActive());
     if (m_bridgeAudioLegacyTxActive) {
@@ -18835,7 +19220,8 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
     }
     if (key == QStringLiteral("NTPEnabled")
         || key == QStringLiteral("NTPCustomServer")
-        || key == QStringLiteral("NTPOffset_ms")) {
+        || key == QStringLiteral("NTPOffset_ms")
+        || key == QStringLiteral("DecoSyncSelfCalEnabled")) {
         applyNtpSettings();
 
         if (key == QStringLiteral("NTPEnabled")) {
@@ -18848,6 +19234,10 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
             emit statusMessage(server.isEmpty()
                                ? QStringLiteral("NTP: uso server pubblici automatici")
                                : QStringLiteral("NTP: server impostato su %1").arg(server));
+        } else if (key == QStringLiteral("DecoSyncSelfCalEnabled")) {
+            emit statusMessage(value.toBool()
+                               ? QStringLiteral("Time sync RF self-calibration enabled")
+                               : QStringLiteral("Time sync RF self-calibration disabled"));
         }
     }
 
@@ -18930,6 +19320,8 @@ using WorkingFrequencyItems = FrequencyList_v2_101::FrequencyItems;
 constexpr quint32 kQrgMagic = 0xadbccbdb;
 constexpr quint32 kQrgVersion = 101;
 constexpr quint32 kQrgVersion100 = 100;
+constexpr qint64 kMaxWorkingFrequencyImportBytes = 4 * 1024 * 1024;
+constexpr quint64 kMaxWorkingFrequencyImportRows = 4096;
 
 WorkingFrequencyItems workingFrequencyItemsFromSetting(const QVariant& value)
 {
@@ -19143,8 +19535,117 @@ QString frequencyDisplayString(Radio::Frequency frequencyHz)
         + QLatin1Char(')');
 }
 
+bool readQtSerializedListCount(QIODevice& device, QDataStream const& stream, quint64* count)
+{
+    if (!count) {
+        return false;
+    }
+    QByteArray prefix = device.peek(12);
+    if (prefix.size() < 4) {
+        return false;
+    }
+    QBuffer buffer(&prefix);
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream probe(&buffer);
+    probe.setVersion(stream.version());
+    quint32 count32 = 0;
+    probe >> count32;
+    if (probe.status() != QDataStream::Ok) {
+        return false;
+    }
+    if (count32 == 0xfffffffeu) {
+        if (prefix.size() < 12) {
+            return false;
+        }
+        quint64 count64 = 0;
+        probe >> count64;
+        if (probe.status() != QDataStream::Ok) {
+            return false;
+        }
+        *count = count64;
+        return true;
+    }
+    if (count32 == 0xffffffffu) {
+        return false;
+    }
+    *count = count32;
+    return true;
+}
+
+WorkingFrequencyItems readWorkingFrequenciesJsonFile(QFile& file, QString* error)
+{
+    QJsonParseError parseError{};
+    QJsonDocument const doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+        if (error) {
+            *error = QObject::tr("Failed to parse JSON frequencies file: %1")
+                         .arg(parseError.errorString());
+        }
+        return {};
+    }
+    QJsonArray const arr = doc.object().value(QStringLiteral("frequencies")).toArray();
+    if (arr.isEmpty()) {
+        if (error) {
+            *error = QObject::tr("No frequencies were found");
+        }
+        return {};
+    }
+    if (static_cast<quint64>(arr.size()) > kMaxWorkingFrequencyImportRows) {
+        if (error) {
+            *error = QObject::tr("Frequency file contains too many rows (%1, limit %2)")
+                         .arg(arr.size())
+                         .arg(kMaxWorkingFrequencyImportRows);
+        }
+        return {};
+    }
+
+    WorkingFrequencyItems list;
+    list.reserve(arr.size());
+    for (QJsonValue const& value : arr) {
+        QJsonObject const obj = value.toObject();
+        QString const region = obj.value(QStringLiteral("region")).toString();
+        QString const mode = obj.value(QStringLiteral("mode")).toString();
+        WorkingFrequencyItem item;
+        item.frequency_ = static_cast<Radio::Frequency>(
+            obj.value(QStringLiteral("frequency")).toString().toDouble() * 1000000.0);
+        item.region_ = IARURegions::value(region);
+        item.mode_ = Modes::value(mode);
+        item.description_ = obj.value(QStringLiteral("description")).toString();
+        item.source_ = obj.value(QStringLiteral("source")).toString();
+        item.start_time_ = QDateTime::fromString(obj.value(QStringLiteral("start_time")).toString(),
+                                                 Qt::ISODate);
+        item.end_time_ = QDateTime::fromString(obj.value(QStringLiteral("end_time")).toString(),
+                                               Qt::ISODate);
+        item.preferred_ = obj.value(QStringLiteral("preferred")).toBool();
+        if ((item.mode_ != Modes::ALL || QString::compare(QStringLiteral("ALL"), mode))
+            && (item.region_ != IARURegions::ALL
+                || QString::compare(QStringLiteral("ALL"), region, Qt::CaseInsensitive))
+            && item.isSane()) {
+            list.push_back(item);
+        }
+    }
+    sortWorkingFrequencyItems(list);
+    return list;
+}
+
 WorkingFrequencyItems readWorkingFrequenciesFile(const QString& path, QString* error)
 {
+    QFileInfo const info(path);
+    if (!info.exists() || !info.isFile()) {
+        if (error) {
+            *error = QObject::tr("Frequency file does not exist");
+        }
+        return {};
+    }
+    if (info.size() > kMaxWorkingFrequencyImportBytes) {
+        if (error) {
+            *error = QObject::tr("Frequency file is too large (%1 bytes, limit %2 bytes)")
+                         .arg(info.size())
+                         .arg(kMaxWorkingFrequencyImportBytes);
+        }
+        return {};
+    }
+
     QFile file {path};
     if (!file.open(QFile::ReadOnly)) {
         if (error) {
@@ -19154,16 +19655,16 @@ WorkingFrequencyItems readWorkingFrequenciesFile(const QString& path, QString* e
     }
 
     if (path.endsWith(QStringLiteral(".qrg.json"), Qt::CaseInsensitive)) {
-        try {
-            WorkingFrequencyItems items = FrequencyList_v2_101::from_json_file(&file);
-            sortWorkingFrequencyItems(items);
-            return items;
-        } catch (ReadFileException const& ex) {
+        WorkingFrequencyItems items = readWorkingFrequenciesJsonFile(file, error);
+        if (items.isEmpty()) {
             if (error) {
-                *error = ex.message_;
+                if (error->isEmpty()) {
+                    *error = QObject::tr("No valid working frequencies found");
+                }
             }
             return {};
         }
+        return items;
     }
 
     QDataStream in {&file};
@@ -19184,6 +19685,22 @@ WorkingFrequencyItems readWorkingFrequenciesFile(const QString& path, QString* e
         return {};
     }
 
+    quint64 serializedRows = 0;
+    if (!readQtSerializedListCount(file, in, &serializedRows)) {
+        if (error) {
+            *error = QObject::tr("Not a valid frequencies file: cannot read row count");
+        }
+        return {};
+    }
+    if (serializedRows > kMaxWorkingFrequencyImportRows) {
+        if (error) {
+            *error = QObject::tr("Frequency file contains too many rows (%1, limit %2)")
+                         .arg(serializedRows)
+                         .arg(kMaxWorkingFrequencyImportRows);
+        }
+        return {};
+    }
+
     WorkingFrequencyItems items;
     if (version == kQrgVersion100) {
         FrequencyList_v2::FrequencyItems oldItems;
@@ -19199,6 +19716,14 @@ WorkingFrequencyItems readWorkingFrequenciesFile(const QString& path, QString* e
     if (in.status() != QDataStream::Ok || !in.atEnd()) {
         if (error) {
             *error = QObject::tr("Not a valid frequencies file: contents corrupt");
+        }
+        return {};
+    }
+    if (static_cast<quint64>(items.size()) > kMaxWorkingFrequencyImportRows) {
+        if (error) {
+            *error = QObject::tr("Frequency file contains too many rows (%1, limit %2)")
+                         .arg(items.size())
+                         .arg(kMaxWorkingFrequencyImportRows);
         }
         return {};
     }
@@ -19477,6 +20002,13 @@ bool DecodiumBridge::loadWorkingFrequenciesFile(const QString& path, bool merge)
         items = model.frequency_list();
     } else {
         items = loaded;
+    }
+
+    if (static_cast<quint64>(items.size()) > kMaxWorkingFrequencyImportRows) {
+        emit errorMessage(QStringLiteral("Working frequency list too large after import (%1 rows, limit %2)")
+                              .arg(items.size())
+                              .arg(kMaxWorkingFrequencyImportRows));
+        return false;
     }
 
     sortWorkingFrequencyItems(items);
@@ -20488,7 +21020,10 @@ void DecodiumBridge::initUdpMessageClient()
             bridgeLog(QStringLiteral("UDP free_text received: '%1' send=%2")
                           .arg(text, send ? QStringLiteral("true") : QStringLiteral("false")));
             setTx6(text);
-            setCurrentTx(6);
+            bool const selected = selectCurrentTxIfAllowed(6, QStringLiteral("udp-free-text"));
+            if (send && !selected) {
+                return;
+            }
             if (send) {
                 setAutoCqRepeat(false);
                 clearManualTxHold(QStringLiteral("udp-free-text"));
@@ -21242,7 +21777,10 @@ void DecodiumBridge::saveSettings()
     s.setValue("cloudlogApiKey",   m_cloudlogApiKey);
     // QRZ Logbook
     s.setValue("qrzLogbookEnabled", m_qrzLogbookEnabled);
-    s.setValue("qrzLogbookApiKey",  m_qrzLogbookApiKey);
+    s.setValue("qrzLogbookApiKey",
+               secure_settings::value_for_write(secure_settings::service(m_callsign.trimmed().toUpper()),
+                                                QStringLiteral("qrzLogbookApiKey"),
+                                                m_qrzLogbookApiKey));
     s.setValue("qrzLogbookReplaceDuplicates", m_qrzLogbookReplaceDuplicates);
     // LotW / ADIF
     s.setValue("lotwEnabled",      m_lotwEnabled);
@@ -21492,6 +22030,12 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
 // ============================================================
 void DecodiumBridge::fetchPskHeardBy()
 {
+    static constexpr qsizetype kPskHeardByMaxReplyBytes = 1024 * 1024;
+    static constexpr qsizetype kPskHeardByMaxTagAttrs = 4096;
+    static constexpr int kPskHeardByMaxRows = 50;
+    static constexpr int kPskHeardByMaxCallLen = 18;
+    static constexpr int kPskHeardByMaxGridLen = 8;
+
     if (m_pskHeardByFetching) {
         bridgeLog(QStringLiteral("PSK heard-by: fetch gia' in corso, ignoro"));
         return;
@@ -21538,7 +22082,16 @@ void DecodiumBridge::fetchPskHeardBy()
     timeout->start();
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid]() {
-        QByteArray const data = reply->readAll();
+        QVariant const contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+        bool const declaredTooLarge =
+            contentLength.isValid()
+            && contentLength.toLongLong() > static_cast<qlonglong>(kPskHeardByMaxReplyBytes);
+        QByteArray data;
+        bool tooLarge = declaredTooLarge;
+        if (!declaredTooLarge) {
+            data = reply->read(static_cast<qint64>(kPskHeardByMaxReplyBytes + 1));
+            tooLarge = data.size() > kPskHeardByMaxReplyBytes || reply->bytesAvailable() > 0;
+        }
         QNetworkReply::NetworkError const err = reply->error();
         QString const errStr = reply->errorString();
         reply->deleteLater();
@@ -21548,7 +22101,7 @@ void DecodiumBridge::fetchPskHeardBy()
         QSet<QString> dxccSet;
         double maxKm = 0.0;
 
-        if (err == QNetworkReply::NoError) {
+        if (err == QNetworkReply::NoError && !tooLarge) {
             QString const xml = QString::fromUtf8(data);
             // Ogni spot e' un <receptionReport ... /> con attributi in ordine
             // variabile: catturiamo l'intero tag e poi i singoli attributi.
@@ -21557,21 +22110,31 @@ void DecodiumBridge::fetchPskHeardBy()
             QRegularExpression reLoc(QStringLiteral("\\breceiverLocator=\"([^\"]*)\""));
             QRegularExpression reSnr(QStringLiteral("\\bsNR=\"(-?[0-9]+)\""));
             QRegularExpression reFreq(QStringLiteral("\\bfrequency=\"([0-9]+)\""));
+            QRegularExpression reCall(QStringLiteral("^[A-Z0-9/]{2,18}$"));
+            QRegularExpression reGrid(QStringLiteral("^[A-R]{2}[0-9]{2}([A-X]{2})?([0-9]{2})?$"),
+                                      QRegularExpression::CaseInsensitiveOption);
             QSet<QString> seenReceivers;   // dedup per receiverCallsign (spot multipli)
             auto it = reTag.globalMatch(xml);
-            while (it.hasNext()) {
+            while (it.hasNext() && rows.size() < kPskHeardByMaxRows) {
                 QString const attrs = it.next().captured(1);
+                if (attrs.size() > kPskHeardByMaxTagAttrs) {
+                    continue;
+                }
 
                 QString rxCall;
                 auto mRx = reRx.match(attrs);
                 if (mRx.hasMatch()) rxCall = mRx.captured(1).trimmed().toUpper();
                 if (rxCall.isEmpty()) continue;
+                if (rxCall.size() > kPskHeardByMaxCallLen || !reCall.match(rxCall).hasMatch()) continue;
                 if (seenReceivers.contains(rxCall)) continue;   // tieni solo 1 riga/ricevitore
                 seenReceivers.insert(rxCall);
 
                 QString rxGrid;
                 auto mLoc = reLoc.match(attrs);
                 if (mLoc.hasMatch()) rxGrid = mLoc.captured(1).trimmed().toUpper();
+                if (rxGrid.size() > kPskHeardByMaxGridLen || (!rxGrid.isEmpty() && !reGrid.match(rxGrid).hasMatch())) {
+                    rxGrid.clear();
+                }
 
                 int snr = 0; bool hasSnr = false;
                 auto mSnr = reSnr.match(attrs);
@@ -21613,6 +22176,8 @@ void DecodiumBridge::fetchPskHeardBy()
                           .arg(rows.size())
                           .arg(dxccSet.size())
                           .arg(static_cast<int>(maxKm)));
+        } else if (tooLarge) {
+            bridgeLog(QStringLiteral("PSK heard-by '%1': risposta troppo grande, scartata").arg(call));
         } else {
             bridgeLog(QStringLiteral("PSK heard-by '%1': network error: %2")
                           .arg(call, errStr));
@@ -21646,14 +22211,23 @@ bool DecodiumBridge::tryStartWaitPounceFromEntry(const QVariantMap& entry,
     }
 
     bool const qsoBusy =
-        m_txEnabled
-        || m_transmitting
+        m_transmitting
         || m_tuning
         || m_autoCqRepeat
         || m_manualTxHold
         || !m_dxCall.trimmed().isEmpty()
         || (m_qsoProgress > 1 && m_qsoProgress < 6);
     if (qsoBusy || entry.value(QStringLiteral("isTx")).toBool()) {
+        return false;
+    }
+
+    bool const txCqArmed =
+        m_txEnabled
+        && m_currentTx == 6
+        && m_qsoProgress <= 1
+        && m_dxCall.trimmed().isEmpty();
+    if (!txCqArmed) {
+        bridgeLog(QStringLiteral("Wait & Pounce ignored: TX/CQ is not armed; RF decode cannot arm TX by itself"));
         return false;
     }
 
@@ -21752,6 +22326,15 @@ void DecodiumBridge::engageDxClusterSpot(const QString& call, int audioFreqHz)
     bridgeLog(QStringLiteral("engageDxClusterSpot: call=%1 audioHz=%2 mode=%3")
               .arg(cleaned).arg(audioFreqHz).arg(m_mode));
 
+    // A clicked spot/decode with no plausible audio offset must not start TX on
+    // whatever TX audio frequency happened to be selected previously.
+    if (audioFreqHz < 100 || audioFreqHz > 5000) {
+        bridgeLog(QStringLiteral("engageDxClusterSpot: audioHz=%1 fuori range [100,5000], click ignorato")
+                  .arg(audioFreqHz));
+        emit statusMessage(QStringLiteral("Spot ignorato: frequenza audio non valida"));
+        return;
+    }
+
     // MAM multi-stream ON: lo spot diventa uno slot (IO chiamo da TX1) senza
     // spegnere il MAM ne' attivare il single-QSO. Con MAM OFF e' un no-op.
     if (mamMultiStreamSequencerActive()) {
@@ -21770,19 +22353,11 @@ void DecodiumBridge::engageDxClusterSpot(const QString& call, int audioFreqHz)
     setDxCall(cleaned);
     setDxGrid(QString {});  // grid non noto, sarà aggiornato dal primo decode
 
-    // Validazione: rifiuta freq audio non plausibile (<100Hz). Lo spot
-    // alla freq di dial produce audio=0 che il QML coerciva a 1 (workaround
-    // per PanadapterItem freq<=0); ma 1Hz come tx freq rende TUNE inaudibile.
-    if (audioFreqHz >= 100 && audioFreqHz <= 5000) {
-        setTxFrequency(audioFreqHz);
-    } else if (audioFreqHz > 0) {
-        bridgeLog(QStringLiteral("engageDxClusterSpot: audioHz=%1 fuori range [100,5000], txFreq invariata")
-                  .arg(audioFreqHz));
-    }
+    setTxFrequency(audioFreqHz);
 
     // Forza TX1 (chiamata: <them> <me> <my-grid>)
-    if (m_currentTx != 1) {
-        setCurrentTx(1);
+    if (!selectCurrentTxIfAllowed(1, QStringLiteral("engageDxClusterSpot"))) {
+        return;
     }
 
     if (!m_txEnabled) {
@@ -22010,7 +22585,9 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
 
     genStdMsgs(hisCall, hisGrid);
     // advanceQsoState imposta currentTx + qsoProgress + resetta watchdog
-    advanceQsoState(newCurrentTx);
+    if (!advanceQsoState(newCurrentTx)) {
+        return;
+    }
     updateAutoCqPartnerLock();
 
     if (audioFreq > 0) setRxFrequency(audioFreq);
@@ -22048,10 +22625,7 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     // m_resumeTargetCall PRIMA di chiamare questo metodo, quindi non si auto-disarma.
     if (!m_resumeTargetCall.isEmpty()
         && normalizedBaseCall(hisCall.trimmed().toUpper()) != m_resumeTargetCall) {
-        bridgeLog(QStringLiteral("[Resume] disarmato: ingaggiato %1 != target %2")
-                      .arg(hisCall, m_resumeTargetCall));
-        m_resumeTargetCall.clear();
-        m_resumeArmedMs = 0;
+        clearResumeQsoOnReplyArm(QStringLiteral("manual target changed to %1").arg(hisCall));
     }
     emit statusMessage("QSO con " + hisCall + " — TX" + QString::number(newCurrentTx));
 
@@ -22122,6 +22696,13 @@ QString DecodiumBridge::autoCqBandKeyForFrequency(double freqHz) const
     QString const currentBand = m_bandManager ? m_bandManager->currentBandLambda().trimmed().toUpper()
                                               : QString {};
     return currentBand.isEmpty() ? QStringLiteral("--") : currentBand;
+}
+
+bool DecodiumBridge::autoCqCanRestartTx6() const
+{
+    return m_autoCqRepeat
+        && !m_tx6.trimmed().isEmpty()
+        && !isTxDisabled(6);
 }
 
 bool DecodiumBridge::isRecentAutoCqDuplicate(const QString& call, double freqHz, const QString& mode) const
@@ -22666,7 +23247,9 @@ bool DecodiumBridge::applyDeferredAutoSeqTxForRearm(const QString& reason)
     m_pendingAutoSeqMode.clear();
 
     if (deferredTx != m_currentTx) {
-        advanceQsoState(deferredTx);
+        if (!advanceQsoState(deferredTx)) {
+            return false;
+        }
     }
     if (deferredTx == 5) {
         m_logAfterOwn73 = true;
@@ -22686,11 +23269,33 @@ void DecodiumBridge::engageManualTxHold(const QString& reason, bool clearQueue)
     // (clearFt2AsyncAbortQsoState in FT2-async azzera m_dxCall). Solo se toggle ON e c'è un
     // partner ingaggiato. NON azzero nell'else: l'arm persiste fino a resume/timeout/altro
     // ingaggio (vedi tryResumeQsoOnReply, processDecodeDoubleClick, setResumeQsoOnReply).
-    if (m_resumeQsoOnReply && !m_dxCall.trimmed().isEmpty()) {
-        m_resumeTargetCall = normalizedBaseCall(m_dxCall.trimmed().toUpper());
+    QString const resumeMode = m_mode.trimmed().toUpper();
+    QString const resumeTarget = normalizedBaseCall(m_dxCall.trimmed().toUpper());
+    bool const resumeModeAllowed =
+        resumeMode == QStringLiteral("FT8")
+        || resumeMode == QStringLiteral("FT4")
+        || resumeMode == QStringLiteral("FT2");
+    bool const resumeActiveQso =
+        !resumeTarget.isEmpty()
+        && m_currentTx >= 1
+        && m_currentTx <= 5
+        && (m_transmitting
+            || m_txEnabled
+            || m_deferredManualSyncTx
+            || m_pendingAutoSeqTxAfterActiveTx > 0
+            || (m_qsoProgress > 1 && m_qsoProgress < 6));
+    if (m_resumeQsoOnReply && resumeModeAllowed && resumeActiveQso) {
+        m_resumeTargetCall = resumeTarget;
         m_resumeArmedMs = QDateTime::currentMSecsSinceEpoch();
-        bridgeLog(QStringLiteral("[Resume] armato su %1 (Halt) — riprende se risponde entro 2 min")
-                      .arg(m_resumeTargetCall));
+        m_resumeArmedMode = resumeMode;
+        m_resumeArmedTx = m_currentTx;
+        m_resumeArmedProgress = m_qsoProgress;
+        bridgeLog(QStringLiteral("[Resume] armato su %1 mode=%2 tx=%3 progress=%4 (Halt) — riprende solo su reply diretto entro 2 min")
+                      .arg(m_resumeTargetCall, m_resumeArmedMode)
+                      .arg(m_resumeArmedTx)
+                      .arg(m_resumeArmedProgress));
+    } else if (m_resumeQsoOnReply) {
+        clearResumeQsoOnReplyArm(QStringLiteral("manual hold without active resumable QSO"));
     }
     clearAutoCqPartnerLock();
     clearPendingAutoLogSnapshot();
@@ -22739,6 +23344,22 @@ void DecodiumBridge::clearManualTxHold(const QString& reason)
     bridgeLog(QStringLiteral("manualTxHold: cleared (%1)").arg(reason));
 }
 
+void DecodiumBridge::clearResumeQsoOnReplyArm(const QString& reason)
+{
+    bool const hadArm = !m_resumeTargetCall.isEmpty() || m_resumeArmedMs > 0;
+    QString const oldTarget = m_resumeTargetCall;
+    m_resumeTargetCall.clear();
+    m_resumeArmedMs = 0;
+    m_resumeArmedMode.clear();
+    m_resumeArmedTx = 0;
+    m_resumeArmedProgress = 0;
+    if (hadArm) {
+        bridgeLog(QStringLiteral("[Resume] disarmato (%1) target=%2")
+                      .arg(reason,
+                           oldTarget.isEmpty() ? QStringLiteral("<none>") : oldTarget));
+    }
+}
+
 // 1.0.304 (#9) — resume-on-reply. Se armato (Halt con partner, toggle ON) e quel partner
 // torna a rispondere a NOI (decode con suo call + mio call) entro 2 min, riprende il QSO via
 // processDecodeDoubleClick (stessa via del doppio-click: re-ingaggia + sceglie il TX giusto +
@@ -22750,9 +23371,17 @@ bool DecodiumBridge::tryResumeQsoOnReply(const QStringList& rows)
         return false;
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (m_resumeArmedMs <= 0 || nowMs - m_resumeArmedMs > 120000) {  // 2 min
-        bridgeLog(QStringLiteral("[Resume] disarmato (timeout 2 min) target=%1").arg(m_resumeTargetCall));
-        m_resumeTargetCall.clear();
-        m_resumeArmedMs = 0;
+        clearResumeQsoOnReplyArm(QStringLiteral("timeout 2 min"));
+        return false;
+    }
+    QString const modeUpper = m_mode.trimmed().toUpper();
+    if (m_resumeArmedMode.isEmpty()
+        || modeUpper != m_resumeArmedMode
+        || m_resumeArmedTx < 1
+        || m_resumeArmedTx > 5
+        || m_resumeArmedProgress <= 1
+        || m_resumeArmedProgress >= 6) {
+        clearResumeQsoOnReplyArm(QStringLiteral("stale resume context"));
         return false;
     }
     QString const myCallUpper = m_callsign.trimmed().toUpper();
@@ -22764,6 +23393,11 @@ bool DecodiumBridge::tryResumeQsoOnReply(const QStringList& rows)
         if (f.size() < 5) continue;
         QString const msg = f[4];
         if (!shouldAcceptDecodedMessage(msg)) continue;
+        QStringList const parts = msg.trimmed().split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+        if (parts.size() < 2) continue;
+        QString const firstBase = normalizedBaseCall(normalizedUsableCallToken(parts.at(0)));
+        QString const secondBase = normalizedBaseCall(normalizedUsableCallToken(parts.at(1)));
+        if (firstBase != myBaseUpper || secondBase != targetBase) continue;
         // Deve contenere SIA il partner sospeso SIA il mio call → mi sta rispondendo.
         if (!messageContainsCallToken(msg, targetBase, targetBase)) continue;
         if (!messageContainsCallToken(msg, myCallUpper, myBaseUpper)) continue;
@@ -22774,8 +23408,7 @@ bool DecodiumBridge::tryResumeQsoOnReply(const QStringList& rows)
             continue;
         bridgeLog(QStringLiteral("[Resume] %1 è tornato a rispondere → riprendo il QSO (msg='%2')")
                       .arg(targetBase, msg));
-        m_resumeTargetCall.clear();  // disarma PRIMA del re-ingaggio (no ri-trigger)
-        m_resumeArmedMs = 0;
+        clearResumeQsoOnReplyArm(QStringLiteral("matched direct reply"));
         processDecodeDoubleClick(msg, f[0], f[1], f[3].toInt());
         return true;
     }
@@ -22836,6 +23469,10 @@ void DecodiumBridge::clearFt2AsyncAbortQsoState(const QString& reason)
     m_ft2AsyncLastDecodeMs = 0;
     m_ft2AsyncFirstDecodeMs = 0;
     m_ft2AsyncAudioQuietRuns = 0;
+    m_ft2AsyncSmartTxPending = false;
+    ++m_ft2AsyncSmartTxSerial;
+    m_ft2AsyncSmartTxDeadlineMs = 0;
+    m_ft2AsyncSmartTxRetries = 0;
 
     setDxCall(QString());
     setDxGrid(QString());
@@ -23550,15 +24187,17 @@ void DecodiumBridge::armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QStrin
         return;
     }
 
-    // 1.0.371 - opt-in: per TX4 (RR73 al partner) in AutoCQ async NON applicare il one-shot
-    // disarm. Senza, m_txEnabled=false blocca il deferred-log (gate completeFinishedSignoffIfReady)
-    // -> QSO chiuso da noi con RR73 ma mai loggato se il partner sparisce (bug log IK7IMK/LB5JJ
-    // 1.0.354). Tornando subito (senza armare AwaitingPartnerDecode ne disarmare m_txEnabled) il
-    // flusso prosegue come async-OFF: il deferred-log logga al cap ("log anyway, partner left"),
-    // come gia avviene per TX5/sync. Allinea TX4 a TX5.
+    // 1.0.371 - opt-in: per TX4 (RR73 al partner) in AutoCQ async consenti il
+    // deferred-log se il partner sparisce, ma NON lasciare TX armata. La prima
+    // implementazione saltava anche il one-shot wait/disarm e poteva ritrasmettere
+    // RR73 fino al cap. Qui armiamo il deferred-log e poi proseguiamo nel normale
+    // one-shot: attesa di un fresh partner decode + TX disabilitata.
     if (txNum == 4 && m_ft2LogRr73OnPartnerLeft && m_nTx73 >= 1) {
-        bridgeLog(QStringLiteral("FT2 AutoCQ TX4 RR73: skip one-shot disarm, deferred-log will close QSO even if partner leaves (opt-in)"));
-        return;
+        if (!m_ft2DeferredLogPending) {
+            m_ft2DeferredLogPending = true;
+            capturePendingAutoLogSnapshot();
+        }
+        bridgeLog(QStringLiteral("FT2 AutoCQ TX4 RR73: deferred-log armed without extra RR73 retries (opt-in)"));
     }
 
     armFt2AutoCqAwaitingPartnerDecode(txNum, reason);
@@ -23628,7 +24267,9 @@ bool DecodiumBridge::applyPendingAutoSeqTxAfterCompletedTx(int finishedTx)
             bridgeLog(QStringLiteral("auto-seq: FT2 caller %1 decoded during CQ TX; arm TX%2 but wait safe RX period")
                           .arg(pendingPartnerBase)
                           .arg(deferredTx));
-            advanceQsoState(deferredTx);
+            if (!advanceQsoState(deferredTx)) {
+                return false;
+            }
         } else {
             bridgeLog(QStringLiteral("auto-seq: FT2 caller %1 decoded during CQ TX; TX%2 already armed, wait safe RX period")
                           .arg(pendingPartnerBase)
@@ -23656,7 +24297,9 @@ bool DecodiumBridge::applyPendingAutoSeqTxAfterCompletedTx(int finishedTx)
         bridgeLog(QStringLiteral("auto-seq: applying deferred TX%1 after active TX%2 completed")
                       .arg(deferredTx)
                       .arg(finishedTx));
-        advanceQsoState(deferredTx);
+        if (!advanceQsoState(deferredTx)) {
+            return false;
+        }
     } else {
         bridgeLog(QStringLiteral("auto-seq: deferred TX%1 already current after active TX")
                       .arg(deferredTx));
@@ -23741,7 +24384,10 @@ void DecodiumBridge::restoreAutoCqPartnerLock()
     if (restoredNtx < 1 || restoredNtx > 5) {
         restoredNtx = 2;
     }
-    setCurrentTx(restoredNtx);
+    if (!selectCurrentTxIfAllowed(restoredNtx, QStringLiteral("AutoCQ lock-restore"))) {
+        clearAutoCqPartnerLock();
+        return;
+    }
     m_qsoProgress = qMax(2, m_autoCqLockedProgress);
     emit qsoProgressChanged();
     m_txRetryCount = 0;
@@ -23799,7 +24445,7 @@ bool DecodiumBridge::enqueueCallerInternal(const QString& call,
 // === advanceQsoState — GitHub TxController clone ===
 // Mappa TX button number → QSOProgress enum, resetta watchdog
 // 0=IDLE, 1=CALLING_CQ, 2=REPLYING, 3=REPORT, 4=ROGER_REPORT, 5=SIGNOFF, 6=IDLE_QSO
-void DecodiumBridge::advanceQsoState(int txNum)
+bool DecodiumBridge::advanceQsoState(int txNum)
 {
     // Quick QSO (Ultra2): salta TX1 → vai diretto a TX2 (come FT2QsoFlowPolicy Ultra2)
     if (txNum == 1 && m_quickQsoEnabled) {
@@ -23811,11 +24457,13 @@ void DecodiumBridge::advanceQsoState(int txNum)
     // Salta TX4/TX5 e va diretto a SIGNOFF con log automatico
     if (txNum == 3 && m_quickQsoEnabled) {
         bridgeLog("advanceQsoState: QuickQSO TX3 con TU → SIGNOFF diretto");
-        setCurrentTx(txNum);
+        if (!selectCurrentTxIfAllowed(txNum, QStringLiteral("advanceQsoState quick-qso"))) {
+            return false;
+        }
         m_qsoProgress = 5; // SIGNOFF
         emit qsoProgressChanged();
         m_txWatchdogTicks = 0;
-        return;
+        return true;
     }
 
     int progress = 0;
@@ -23826,12 +24474,11 @@ void DecodiumBridge::advanceQsoState(int txNum)
         case 4: progress = 5; break; // TX4 (RR73/RRR)     → SIGNOFF
         case 5: progress = 5; break; // TX5 (73)           → SIGNOFF
         case 6: progress = 1; break; // TX6 (CQ)           → CALLING_CQ
-        default: return;
+        default: return false;
     }
-    if (txNum == 6) {
-        resetCompletedQsoLatchesForCq(QStringLiteral("advance-tx6"));
+    if (!selectCurrentTxIfAllowed(txNum, QStringLiteral("advanceQsoState"))) {
+        return false;
     }
-    setCurrentTx(txNum);
     if (m_qsoProgress != progress) { m_qsoProgress = progress; emit qsoProgressChanged(); }
     m_txWatchdogTicks = 0;  // reset watchdog ad ogni avanzamento di stato
     bridgeLog("advanceQsoState: TX" + QString::number(txNum) +
@@ -23840,6 +24487,7 @@ void DecodiumBridge::advanceQsoState(int txNum)
     // partner-memory (gate stretto + log immediato dentro helper).
     rememberPartnerStateV2(QStringLiteral("advanceQsoState"));
     prunePartnerMemoryIfDueV2();
+    return true;
 }
 
 bool DecodiumBridge::shouldDeferAutoTxUntilTimeSyncDecode(const QString& modeSnapshot) const
@@ -23906,8 +24554,21 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
     int const periodMs = periodMsForMode(normalizedMode);
-    // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs, effectiveRelaxLatestCap());
+    bool const activeQsoWaitsForReply =
+        (normalizedMode == QStringLiteral("FT8") || normalizedMode == QStringLiteral("FT4"))
+        && !m_dxCall.trimmed().isEmpty()
+        && m_currentTx >= 1
+        && m_currentTx <= 5
+        && (m_lastNtx >= 1 || m_qsoProgress > 2 || m_pendingAutoSeqTxAfterActiveTx > 0);
+    // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx.
+    // 1.0.375: in an active FT8/FT4 QSO, correctness beats a perfectly clean
+    // +500 ms start. The decoder is dispatched at ~+650 ms; using the normal
+    // clean-start cap here gave only ~400 ms of grace, so AutoTX could retry
+    // TX1/TX3 before seeing the partner's report/RR73 on slower machines.
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode,
+                                                              periodMs,
+                                                              effectiveRelaxLatestCap()
+                                                                  || activeQsoWaitsForReply);
     if (periodMs <= 0 || latestStartMs <= 0) {
         return;
     }
@@ -23954,11 +24615,13 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
     }
     int const delayMs = qMax(50, qMin(graceMs, maxDelayMs));
 
-    bridgeLog(QStringLiteral("time-sync auto TX: brief %1 decode grace before TX, fallback in %2ms")
+    bridgeLog(QStringLiteral("time-sync auto TX: brief %1 decode grace before TX, fallback in %2ms activeQso=%3 latest=%4ms")
                   .arg(modeSnapshot)
-                  .arg(delayMs));
+                  .arg(delayMs)
+                  .arg(activeQsoWaitsForReply ? 1 : 0)
+                  .arg(latestStartMs));
 
-    QTimer::singleShot(delayMs, this, [this, modeSnapshot, sessionId]() {
+    QTimer::singleShot(delayMs, this, [this, modeSnapshot, sessionId, activeQsoWaitsForReply]() {
         if (sessionId != m_periodTimerSessionId
             || m_mode != modeSnapshot
             || m_manualTxHold
@@ -23967,6 +24630,22 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
             return;
         }
         if (!shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)) {
+            return;
+        }
+
+        if (activeQsoWaitsForReply && hasPendingTimeSyncDecodeForMode(modeSnapshot)) {
+            QString const holdMode = modeSnapshot.trimmed().toUpper();
+            int const holdPeriodMs = periodMsForMode(holdMode);
+            int const holdLatestStartMs = latestD3CompatibleSyncTxStartMs(holdMode,
+                                                                          holdPeriodMs,
+                                                                          true);
+            int const holdElapsedMs = holdPeriodMs > 0
+                ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(holdPeriodMs))
+                : 0;
+            bridgeLog(QStringLiteral("time-sync auto TX: active QSO %1 decode still pending, skip stale fallback tx elapsed=%2ms latest=%3ms")
+                          .arg(modeSnapshot)
+                          .arg(holdElapsedMs)
+                          .arg(holdLatestStartMs));
             return;
         }
 
@@ -23995,6 +24674,48 @@ void DecodiumBridge::onAudioLevelForFt2Gate()
 
 void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
 {
+    static constexpr qint64 kSmartFt2AsyncTxMaxWaitMs = 2500;
+    static constexpr int kSmartFt2AsyncTxMaxRetries = 25;
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool const retry = (reason == QStringLiteral("retry"));
+    if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled
+        || m_manualTxHold || !m_monitoring || m_transmitting || m_tuning || !m_txEnabled) {
+        m_ft2AsyncSmartTxPending = false;
+        ++m_ft2AsyncSmartTxSerial;
+        m_ft2AsyncSmartTxDeadlineMs = 0;
+        m_ft2AsyncSmartTxRetries = 0;
+        bridgeLog(QStringLiteral("smartFt2Tx [%1]: cancelled mode=%2 async=%3 manualHold=%4 monitoring=%5 tx=%6 tune=%7 txEnabled=%8")
+                      .arg(reason, m_mode)
+                      .arg(m_asyncTxEnabled ? 1 : 0)
+                      .arg(m_manualTxHold ? 1 : 0)
+                      .arg(m_monitoring ? 1 : 0)
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_tuning ? 1 : 0)
+                      .arg(m_txEnabled ? 1 : 0));
+        return;
+    }
+    if (!retry && m_ft2AsyncSmartTxPending) {
+        bridgeLog(QStringLiteral("smartFt2Tx [%1]: coalesced with pending timer").arg(reason));
+        return;
+    }
+    if (!retry || m_ft2AsyncSmartTxDeadlineMs <= nowMs) {
+        ++m_ft2AsyncSmartTxSerial;
+        m_ft2AsyncSmartTxDeadlineMs = nowMs + kSmartFt2AsyncTxMaxWaitMs;
+        m_ft2AsyncSmartTxRetries = 0;
+    } else {
+        ++m_ft2AsyncSmartTxRetries;
+    }
+    qint64 const remainingBudgetMs = m_ft2AsyncSmartTxDeadlineMs - nowMs;
+    if (remainingBudgetMs <= 0 || m_ft2AsyncSmartTxRetries > kSmartFt2AsyncTxMaxRetries) {
+        m_ft2AsyncSmartTxPending = false;
+        bridgeLog(QStringLiteral("smartFt2Tx [%1]: stopped after budget/retry cap remaining=%2 retries=%3")
+                      .arg(reason)
+                      .arg(remainingBudgetMs)
+                      .arg(m_ft2AsyncSmartTxRetries));
+        return;
+    }
+
     // Sistema integrato anti-collisione FT2 async. Combina 5 strategie
     // selezionate autonomamente in base allo stato del canale:
     //  S1 SLOT-EST   stima fine-frame del partner da timestamp primo decode
@@ -24002,7 +24723,6 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
     //  S3 DECODE-Q   richiede no-new-decode per >400ms
     //  S4 JITTER     anti-collisione multi-stazione (hash callsign 50-250ms)
     //  S5 HARD CAP   max 2500ms wait (safety)
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     // FIX temporale (1.0.355): nowMs e' wall-clock e lo usano i gate RMS/decode-quiet
     // (che lavorano su timestamp wall-clock). Il branch slot-anchored invece ragiona
     // in correctedUtcEpochMs() (tempo-segnale, con offset NTP applicato). Confrontare
@@ -24079,30 +24799,47 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         finalDelay = jitterMs;
         strategy = QStringLiteral("S4-jitter");
     }
-    if (finalDelay > 2500) finalDelay = 2500;  // S5 cap
+    if (finalDelay > kSmartFt2AsyncTxMaxWaitMs) finalDelay = kSmartFt2AsyncTxMaxWaitMs;  // S5 per-delay cap
     QString safeSlotAdjustment;
     qint64 const safeFinalDelay = safeFt2AsyncTxDelay(finalDelay, &safeSlotAdjustment);
     if (safeFinalDelay != finalDelay) {
         strategy += QStringLiteral("+") + safeSlotAdjustment;
         finalDelay = safeFinalDelay;
     }
+    finalDelay = qBound<qint64>(0, finalDelay, remainingBudgetMs);
 
-    bridgeLog(QStringLiteral("smartFt2Tx [%1]: slotDelay=%2 rmsQuiet=%3 decodeQuiet=%4ms strategy=%5 final=%6ms")
+    bridgeLog(QStringLiteral("smartFt2Tx [%1]: slotDelay=%2 rmsQuiet=%3 decodeQuiet=%4ms strategy=%5 final=%6ms retry=%7 budget=%8ms")
               .arg(reason)
               .arg(slotDelay)
               .arg(rmsQuiet ? 1 : 0)
               .arg(decodeQuietMs)
               .arg(strategy)
-              .arg(finalDelay));
+              .arg(finalDelay)
+              .arg(m_ft2AsyncSmartTxRetries)
+              .arg(remainingBudgetMs));
 
     if (finalDelay <= 0) {
+        m_ft2AsyncSmartTxPending = false;
         if (!m_transmitting && !m_tuning && m_txEnabled) {
             checkAndStartPeriodicTx();
         }
         return;
     }
-    QTimer::singleShot((int)finalDelay, this, [this]() {
-        if (m_transmitting || m_tuning || !m_txEnabled) return;
+    quint64 const serial = m_ft2AsyncSmartTxSerial;
+    m_ft2AsyncSmartTxPending = true;
+    QTimer::singleShot((int)finalDelay, this, [this, serial]() {
+        if (serial != m_ft2AsyncSmartTxSerial) return;
+        m_ft2AsyncSmartTxPending = false;
+        if (m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled
+            || m_manualTxHold || !m_monitoring || m_transmitting || m_tuning || !m_txEnabled) {
+            return;
+        }
+        if (QDateTime::currentMSecsSinceEpoch() >= m_ft2AsyncSmartTxDeadlineMs
+            || m_ft2AsyncSmartTxRetries >= kSmartFt2AsyncTxMaxRetries) {
+            bridgeLog(QStringLiteral("smartFt2Tx: timer stopped at budget/retry cap retries=%1")
+                          .arg(m_ft2AsyncSmartTxRetries));
+            return;
+        }
         // Re-check gates
         qint64 const nowMs2 = QDateTime::currentMSecsSinceEpoch();
         qint64 const decodeQuietMs2 = m_ft2AsyncLastDecodeMs > 0
@@ -24120,7 +24857,7 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
             }
             checkAndStartPeriodicTx();
         } else {
-            // Gates ancora non puliti — re-schedule (max 1 retry)
+            // Gates ancora non puliti: bounded single-flight retry.
             scheduleSmartFt2AsyncTx(QStringLiteral("retry"));
         }
     });
@@ -24145,14 +24882,48 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
     // e il path single-QSO sottostante resta byte-identico.
     if (mamMultiStreamSequencerActive()) { mamDispatchPeriod(); return; }
-    if (ft2AutoCqAwaitingPartnerDecode()) {
-        return;
+    bool const awaitingFt2PartnerAtEntry = ft2AutoCqAwaitingPartnerDecode();
+    if (awaitingFt2PartnerAtEntry && !m_ft2DeferredLogPending) {
+        qint64 const waitAgeMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
+            ? qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - m_ft2AutoCqAwaitingPartnerSinceMs)
+            : 0;
+        int const waitPeriodMs = periodMsForMode(m_mode);
+        qint64 const waitLimitMs = waitPeriodMs > 0
+            ? qMax<qint64>(static_cast<qint64>(waitPeriodMs) * 3, 22500)
+            : 22500;
+        bool const retryCapAlreadyExceeded =
+            m_currentTx == m_lastNtx
+            && m_txRetryCount > m_maxCallerRetries;
+        if (retryCapAlreadyExceeded || waitAgeMs >= waitLimitMs || m_ft2AutoCqAwaitingPartnerSinceMs <= 0) {
+            bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: releasing stale partner wait TX%1 partner=%2 age=%3ms limit=%4ms retry=%5/%6")
+                          .arg(m_ft2AutoCqAwaitingPartnerTx)
+                          .arg(m_ft2AutoCqAwaitingPartnerBase.isEmpty()
+                                   ? QStringLiteral("<none>")
+                                   : m_ft2AutoCqAwaitingPartnerBase)
+                          .arg(waitAgeMs)
+                          .arg(waitLimitMs)
+                          .arg(m_txRetryCount)
+                          .arg(m_maxCallerRetries));
+            clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("timeout/retry cap"));
+        } else {
+            return;
+        }
     }
     if (!m_txEnabled) {
-        if (!m_autoCqRepeat) return;
-        bridgeLog(QStringLiteral("checkAndStartPeriodicTx: AutoCQ active with TX disabled -> rearm TX"));
-        setTxEnabled(true);
-        if (!m_txEnabled) return;
+        if (awaitingFt2PartnerAtEntry && m_ft2DeferredLogPending) {
+            // FT2 RR73 log-only wait: keep TX disarmed, but still allow the
+            // deferred-log timeout below to mature.
+        } else {
+            if (!m_autoCqRepeat) return;
+            if (m_currentTx >= 1 && m_currentTx <= 6 && isTxDisabled(m_currentTx)) {
+                bridgeLog(QStringLiteral("checkAndStartPeriodicTx: AutoCQ rearm blocked because TX%1 is user-disabled")
+                              .arg(m_currentTx));
+                return;
+            }
+            bridgeLog(QStringLiteral("checkAndStartPeriodicTx: AutoCQ active with TX disabled -> rearm TX"));
+            setTxEnabled(true);
+            if (!m_txEnabled) return;
+        }
     }
     if (m_autoCqRepeat
         && !m_autoCqLockedCall.trimmed().isEmpty()
@@ -24176,7 +24947,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             rememberCompletedAutoCqPartner(completedPartner, false, reason);
         }
         bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
-        bool const continueAutoCq = m_autoCqRepeat && !m_tx6.isEmpty();
+        bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
         m_qsoLogged = false;  // reset per il prossimo QSO
         m_logAfterOwn73 = false;
@@ -24208,7 +24979,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
-            advanceQsoState(6);
+            if (!advanceQsoState(6)) {
+                return;
+            }
             if (!m_txEnabled) {
                 setTxEnabled(true);
             }
@@ -24238,7 +25011,17 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         bool const localSignoffAlreadyStarted =
             (m_nTx73 >= 1 || completedCurrentSignoff)
             && (lastTxSignoffForActivePartner || completedCurrentSignoff);
-        if (!(m_txEnabled && signoffPayload && localSignoffAlreadyStarted)) {
+        bool const deferredRr73LogOnlyWait =
+            m_ft2DeferredLogPending
+            && m_ft2LogRr73OnPartnerLeft
+            && m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && m_autoCqRepeat
+            && m_currentTx == 4
+            && ft2AutoCqAwaitingPartnerDecode();
+        if (!((m_txEnabled || deferredRr73LogOnlyWait)
+              && signoffPayload
+              && localSignoffAlreadyStarted)) {
             return false;
         }
 
@@ -24283,6 +25066,25 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                                                                    m_currentPartnerSnrDb, m_ft2Conservative,
                                                                    m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap,
                                                                    m_ft4SignoffRetryCap, m_ft8SignoffRetryCap);
+            if (deferredRr73LogOnlyWait && m_nTx73 < signoffCap) {
+                qint64 const periodMs = periodMsForMode(m_mode);
+                qint64 const waitedMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
+                    ? qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - m_ft2AutoCqAwaitingPartnerSinceMs)
+                    : 0;
+                int const sentCount = qMax(1, m_nTx73);
+                int const remainingPeriods = qMax(1, signoffCap - sentCount);
+                qint64 const requiredWaitMs = periodMs > 0
+                    ? static_cast<qint64>(remainingPeriods) * periodMs
+                    : 0;
+                if (requiredWaitMs > 0 && waitedMs < requiredWaitMs) {
+                    return true;
+                }
+                finishAutoSequenceQso(QStringLiteral("checkAndStartPeriodicTx: deferred FT2 RR73 log-only wait cap %1/%2 elapsed=%3ms -> log anyway, partner left")
+                                          .arg(m_nTx73)
+                                          .arg(signoffCap)
+                                          .arg(waitedMs), true);
+                return true;
+            }
             if (m_nTx73 < signoffCap) {
                 bridgeLog(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 count=%3/%4, waiting for final ack")
                               .arg(m_currentTx)
@@ -24342,7 +25144,25 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     }
 
     if (ft2AutoCqAwaitingPartnerDecode()) {
-        return;
+        qint64 const waitAgeMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
+            ? qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - m_ft2AutoCqAwaitingPartnerSinceMs)
+            : 0;
+        int const waitPeriodMs = periodMsForMode(m_mode);
+        qint64 const waitLimitMs = waitPeriodMs > 0
+            ? qMax<qint64>(static_cast<qint64>(waitPeriodMs) * 3, 22500)
+            : 22500;
+        if (m_ft2AutoCqAwaitingPartnerSinceMs > 0 && waitAgeMs >= waitLimitMs) {
+            bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: secondary stale release TX%1 partner=%2 age=%3ms limit=%4ms")
+                          .arg(m_ft2AutoCqAwaitingPartnerTx)
+                          .arg(m_ft2AutoCqAwaitingPartnerBase.isEmpty()
+                                   ? QStringLiteral("<none>")
+                                   : m_ft2AutoCqAwaitingPartnerBase)
+                          .arg(waitAgeMs)
+                          .arg(waitLimitMs));
+            clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("secondary timeout"));
+        } else {
+            return;
+        }
     }
 
     // FT2 async mode:
@@ -24473,7 +25293,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         if (m_logAfterOwn73 && m_currentTx != 5 && !m_tx5.isEmpty()) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: own 73 pending -> force TX5 (current TX%1)")
                           .arg(m_currentTx));
-            advanceQsoState(5);
+            if (!advanceQsoState(5)) {
+                return;
+            }
             updateAutoCqPartnerLock();
         }
 
@@ -24510,7 +25332,10 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 effectiveMaxCallerRetries = qMax(effectiveMaxCallerRetries, 14);
             }
         }
-        if (applyRetryLimit && m_currentTx == m_lastNtx && m_txRetryCount > effectiveMaxCallerRetries) {
+        // m_txRetryCount is set to 1 by the first successful send of a TX step.
+        // The configured cap is the total number of sends, so equality already
+        // means the operator's retry budget has been consumed.
+        if (applyRetryLimit && m_currentTx == m_lastNtx && m_txRetryCount >= effectiveMaxCallerRetries) {
             QString const assistSuffix =
                 (effectiveMaxCallerRetries != m_maxCallerRetries)
                     ? QStringLiteral(" (slow CPU assist)")
@@ -24530,7 +25355,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 }
             }
             bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
-            bool const continueAutoCq = m_autoCqRepeat && !m_tx6.isEmpty();
+            bool const continueAutoCq = autoCqCanRestartTx6();
             // IMPORTANT: do not pulse TX off while AutoCQ is meant to continue.
             // On the legacy backend, setTxEnabled(false) also clears AutoCQ/Auto.
             if (!continueQueuedCaller && !continueAutoCq) {
@@ -24573,8 +25398,10 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 if (m_autoCqPauseSec > 0) {
                     bridgeLog("AutoCQ: pausing " + QString::number(m_autoCqPauseSec) + "s before next CQ");
                     QTimer::singleShot(m_autoCqPauseSec * 1000, this, [this]() {
-                        if (m_autoCqRepeat && !m_transmitting && !m_tuning) {
-                            advanceQsoState(6);
+                        if (autoCqCanRestartTx6() && !m_transmitting && !m_tuning) {
+                            if (!advanceQsoState(6)) {
+                                return;
+                            }
                             if (!m_txEnabled) {
                                 setTxEnabled(true);
                             }
@@ -24583,19 +25410,21 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                         }
                     });
                 } else {
-                    advanceQsoState(6);  // CQ
+                    if (!advanceQsoState(6)) {  // CQ
+                        return;
+                    }
                     if (!m_txEnabled) {
                         setTxEnabled(true);
                     }
                     // 1.0.256 fix BUG #1 FT8/FT4: parity check
-	                    checkAndStartPeriodicTx();
-	                }
-	            } else {
-	                if (m_qsoProgress != 0) {
-	                    m_qsoProgress = 0;
-	                    emit qsoProgressChanged();
-	                }
-	                setCurrentTx(m_tx6.trimmed().isEmpty() ? 1 : 6);
+                    checkAndStartPeriodicTx();
+                }
+            } else {
+                if (m_qsoProgress != 0) {
+                    m_qsoProgress = 0;
+                    emit qsoProgressChanged();
+                }
+                setCurrentTx(m_tx6.trimmed().isEmpty() ? 1 : 6);
             }
             return;
         }
@@ -24610,7 +25439,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             m_lastCqPidx = (int)(msNow2 / (qint64)pMs2);
         }
         startTx();
-    } else if (m_autoCqRepeat && !m_tx6.isEmpty()) {
+    } else if (autoCqCanRestartTx6()) {
         if (autoCqHasActivePartner()) {
             bridgeLog(QStringLiteral("checkAndStartPeriodicTx: suppress AutoCQ CQ fallback while partner active tx=%1 progress=%2 dx=%3 lock=%4")
                           .arg(m_currentTx)
@@ -24622,7 +25451,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             return;
         }
         bridgeLog("checkAndStartPeriodicTx: AutoCQ async=" + QString::number(m_asyncTxEnabled));
-        advanceQsoState(6);  // CQ → CALLING (0)
+        if (!advanceQsoState(6)) {  // CQ -> CALLING (0)
+            return;
+        }
         // Aggiorna lastCqPidx per la guardia anti-consecutivi
         if (!skipPeriodCheck) {
             qint64 msNow2 = correctedUtcMsecsSinceStartOfDay();
@@ -25072,7 +25903,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             restoreAutoCqPartnerLock();
         }
         if (m_dxCall.isEmpty()
-            && (messagePartnerMatchesCurrentQso || directedResponseToMe)
+            && messagePartnerMatchesCurrentQso
             && !messagePartner.trimmed().isEmpty()) {
             setDxCall(messagePartner);
         }
@@ -25128,7 +25959,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         rememberCompletedAutoCqPartner(completedPartner, true, reason);
         logQso();
         bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
-        bool const continueAutoCq = m_autoCqRepeat && !m_tx6.isEmpty();
+        bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
         m_qsoLogged = false;  // reset per il prossimo QSO
         m_logAfterOwn73 = false;
@@ -25160,7 +25991,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
-            advanceQsoState(6);
+            if (!advanceQsoState(6)) {
+                return;
+            }
             if (!m_txEnabled) {
                 setTxEnabled(true);
             }
@@ -25292,7 +26125,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     if (localSignoffStageActive && stalePreSignoffPayload) {
         int const keepTx = (m_currentTx == 5 || m_logAfterOwn73) ? 5 : 4;
         if (m_currentTx != keepTx) {
-            advanceQsoState(keepTx);
+            if (!advanceQsoState(keepTx)) {
+                return;
+            }
         }
         setTxEnabled(true);
         updateAutoCqPartnerLock();
@@ -25677,7 +26512,9 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         // Avanza stato QSO
         m_lastAutoSeqDecodeIdentity = autoSeqDecodeIdentity;
         clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("auto-seq TX%1").arg(nextTx));
-        advanceQsoState(nextTx);
+        if (!advanceQsoState(nextTx)) {
+            return;
+        }
         // Resetta guard FT2: risposta ricevuta → ritrasmetti subito
         m_asyncLastTxEndMs = 0;
         // Shannon: auto_tx_mode(true) — abilita TX dopo risposta valida da DX
@@ -26078,7 +26915,10 @@ void DecodiumBridge::loadSettings()
     }
     // QRZ Logbook
     m_qrzLogbookEnabled = s.value("qrzLogbookEnabled", false).toBool();
-    m_qrzLogbookApiKey = s.value("qrzLogbookApiKey", QString()).toString();
+    m_qrzLogbookApiKey = secure_settings::load_or_import(&s,
+                                                         secure_settings::service(m_callsign.trimmed().toUpper()),
+                                                         QStringLiteral("qrzLogbookApiKey"),
+                                                         s.value("qrzLogbookApiKey", QString()).toString()).trimmed();
     m_qrzLogbookReplaceDuplicates = s.value("qrzLogbookReplaceDuplicates", false).toBool();
     if (m_qrzLogbook) {
         m_qrzLogbook->setEnabled(m_qrzLogbookEnabled);
@@ -27933,7 +28773,7 @@ void DecodiumBridge::clearTxArmedAfterCompletedQso(const QString& completedCall,
     markWorldMapQsoClosed(completedCall, reason);
 
     bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
-    bool const continueAutoCq = m_autoCqRepeat && !m_tx6.trimmed().isEmpty();
+    bool const continueAutoCq = autoCqCanRestartTx6();
 
     QString const completedBase = Radio::base_callsign(completedCall).trimmed().toUpper();
     QString const activeBase = Radio::base_callsign(m_dxCall).trimmed().toUpper();
@@ -29926,7 +30766,9 @@ void DecodiumBridge::processMapContactClick(const QString& call, const QString& 
     }
 
     genStdMsgs(mapCall, mapGrid);
-    advanceQsoState(1);
+    if (!advanceQsoState(1)) {
+        return;
+    }
     updateAutoCqPartnerLock();
 
     bool const singleClickStartsTx = getSetting(QStringLiteral("MapSingleClickTX"), false).toBool();
@@ -30285,6 +31127,9 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         m_decodeUtcTokenBySerial.remove(serial);
         m_decodeSessionBySerial.remove(serial);
     };
+    auto forgetDecodeSerialGuard = qScopeGuard([&forgetDecodeSerial] {
+        forgetDecodeSerial();
+    });
 
     if (m_ft8EarlyDecodeSerials.remove(serial) > 0) {
         bridgeLog("onFt8DecodeReady: hidden FT8 early stage serial=" + QString::number(serial) +
@@ -30310,10 +31155,20 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         return;
     }
 
+    // 1.0.299 — i deep follow-up lanciati durante TX (ft8DeepDecodeInTx)
+    // sono decode-list-only. La decisione TX e' gia' stata presa dal fast pass:
+    // da qui in poi non devono attivare resume, MAM, W&P, UDP, alert o auto-seq.
+    bool const ft8DeepInTxListOnly = m_ft8DeepInTxSerials.remove(serial) > 0;
+    if (ft8DeepInTxListOnly) {
+        bridgeLog(QStringLiteral("onFt8DecodeReady: deep-in-TX serial=%1 list-only rows=%2")
+                      .arg(serial)
+                      .arg(rows.size()));
+    }
+
     // 1.0.304 (#9) — resume-on-reply: se in Halt con partner armato e quello ri-risponde,
     // riprende il QSO (re-ingaggio via processDecodeDoubleClick). Se ha ripreso, salta
     // l'auto-seq su QUESTA batch (più sotto) per evitare doppio advance sullo stesso decode.
-    bool const resumedQso = tryResumeQsoOnReply(rows);
+    bool const resumedQso = ft8DeepInTxListOnly ? false : tryResumeQsoOnReply(rows);
 
     if (isTimeSyncDecodeMode(m_mode)) {
         if (serialMode.isEmpty()) {
@@ -30530,7 +31385,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             ++userFiltered;
             continue;
         }
-        if (!hasUnresolvedPlaceholder) {
+        if (!ft8DeepInTxListOnly && !hasUnresolvedPlaceholder) {
             maybeEnqueueMamCallerFromDecode(f);
             maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], entry.value("mode").toString());
         }
@@ -30555,12 +31410,12 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             recentDecodeDedupKeys.insert(dedupKey);
         }
 
-        if (!hasUnresolvedPlaceholder) {
+        if (!ft8DeepInTxListOnly && !hasUnresolvedPlaceholder) {
             tryStartWaitPounceFromEntry(entry, m_decodeList, QStringLiteral("ft8"));
         }
 
         // B9 — Feed ActiveStationsModel: extract callsign from CQ messages
-        if (isCQ && !hasUnresolvedPlaceholder && m_activeStations) {
+        if (!ft8DeepInTxListOnly && isCQ && !hasUnresolvedPlaceholder && m_activeStations) {
             QString dxGridExtracted = entry.value("dxGrid").toString();
             if (!fromCall.isEmpty()) {
                 int freqHz = f[7].toInt();
@@ -30632,13 +31487,15 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         ++accepted;
 
         // UDP: invia decode a programmi esterni (JTAlert, GridTracker…)
-        udpSendDecode(true, row, serial);
+        if (!ft8DeepInTxListOnly) {
+            udpSendDecode(true, row, serial);
 
-        maybePlayDecodeAlert(isCQ, isMyCall);
+            maybePlayDecodeAlert(isCQ, isMyCall);
+        }
 
         // C17 — Fox OTP: verifica codice se SuperFox mode attivo
         // Formato messaggio Fox: "CALL OTP" dove OTP è numerico a 6 cifre
-        if (m_foxMode && !isMyCall) {
+        if (!ft8DeepInTxListOnly && m_foxMode && !isMyCall) {
             QStringList parts = msg.split(' ', Qt::SkipEmptyParts);
             if (parts.size() == 2) {
                 const QString& possibleCode = parts[1];
@@ -30669,13 +31526,9 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // Shannon (linea 9699): auto-seq attiva se m_auto=true e cbAutoSeq checked
     // Processa qualsiasi messaggio che contiene il nostro callsign — identico a Shannon
     // (Shannon condizione: "message contains my_call" OR "calling CQ && m_bAutoReply")
-    // 1.0.299 — i deep follow-up lanciati durante TX (ft8DeepDecodeInTx) sono
-    // decode-list-only: la lista UI e' gia' stata aggiornata sopra; qui SALTIAMO l'auto-seq
-    // per non ri-triggerare advanceQsoState/checkAndStartPeriodicTx sul partner (la decisione
-    // TX l'ha gia' presa il fast pass depth-2). .remove() pulisce anche il set.
-    bool const ft8DeepInTxListOnly = m_ft8DeepInTxSerials.remove(serial) > 0;
     bool const ft2SignoffRescueScan =
-        !resumedQso
+        !ft8DeepInTxListOnly
+        && !resumedQso
         && m_mode == QStringLiteral("FT2")
         && m_asyncTxEnabled
         && !m_callsign.isEmpty()
@@ -30690,7 +31543,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM i decode diretti a me
     // alimentano mamIngestDecode (slot per-call) invece di autoSequenceStep.
     // Gated: con MAM OFF l'else-if e' identico all'if originale.
-    if (mamMultiStreamSequencerActive()) {
+    if (!ft8DeepInTxListOnly && mamMultiStreamSequencerActive()) {
         for (const auto& row : rows) {
             QStringList f = parseFt8Row(row);
             if (f.size() >= 5) mamIngestDecode(f);
@@ -30832,7 +31685,14 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 // Su PC carichi la pressure-clamp in effectiveAutoTxDecodeGraceMs già
                 // forza grace>=900ms quindi il flag non danneggia la stabilità.
                 int effectiveCap = graceMs;
-                if (m_ft8FastSequence && normalizedAutoTxMode == QStringLiteral("FT8")) {
+                bool const activeQsoLateDecodeCanStillReply =
+                    (normalizedAutoTxMode == QStringLiteral("FT8") || normalizedAutoTxMode == QStringLiteral("FT4"))
+                    && !m_dxCall.trimmed().isEmpty()
+                    && m_currentTx >= 1
+                    && m_currentTx <= 5
+                    && (m_lastNtx >= 1 || m_qsoProgress > 2 || m_pendingAutoSeqTxAfterActiveTx > 0);
+                if ((m_ft8FastSequence && normalizedAutoTxMode == QStringLiteral("FT8"))
+                    || activeQsoLateDecodeCanStillReply) {
                     int const periodMs = periodMsForMode(normalizedAutoTxMode);
                     if (periodMs > 0) {
                         int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedAutoTxMode, periodMs, true);
@@ -30943,6 +31803,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         for (const auto& row : rows) {
             QStringList f = parseFt8Row(row);
             if (f.size() < 5) continue;
+            bool const apCacheRescuedDecode =
+                f.size() > 5 && f[5].trimmed() == QLatin1String("7");
+            if (apCacheRescuedDecode) {
+                bridgeLog(QStringLiteral("FT2 autoSeq: AP-cache-rescued decode is display-only, not feeding AutoSeq/TX: %1")
+                              .arg(f[4]));
+                continue;
+            }
             QString localHashPartner;
             bool const directedToLiteralCall = messageContainsCallToken(f[4], myCallUpper, myBaseUpper);
             bool const directedToLocalHash =
@@ -31531,41 +32398,73 @@ void DecodiumBridge::onPeriodTimer()
     emit periodProgressChanged();
 
     // === TX watchdog configurabile (allineato a mainwindow m_txWatchdogMode) ===
-    // m_txWatchdogMode: 0=off, 1=time-based (wall-clock minuti), 2=count-based (periodi)
-    if (m_txEnabled || m_transmitting) {
-        if (m_txWatchdogTicks <= 0 || m_txWatchdogActiveSinceMs <= 0) {
-            m_txWatchdogActiveSinceMs = nowMs;
+    // m_txWatchdogMode: 0=off, 1=time-based (monotonic real elapsed), 2=count-based (periodi)
+    bool const txWatchdogSessionActive =
+        m_txEnabled || m_transmitting || m_autoCqRepeat || m_deferredManualSyncTx;
+    bool const txWatchdogConfigured = (m_txWatchdogMode > 0);
+    if (txWatchdogSessionActive && txWatchdogConfigured) {
+        if (!m_txWatchdogElapsedActive || !m_txWatchdogElapsed.isValid()) {
+            m_txWatchdogElapsed.restart();
+            m_txWatchdogElapsedActive = true;
+            m_txWatchdogActiveSinceMs = QDateTime::currentMSecsSinceEpoch();
+            m_txWatchdogLastProgressLogMs = 0;
+            bridgeLog(QStringLiteral("TX watchdog armed: mode=%1 minutes=%2 count=%3 txEnabled=%4 transmitting=%5 autoCQ=%6 mono=1")
+                          .arg(m_txWatchdogMode)
+                          .arg(m_txWatchdogTime)
+                          .arg(m_txWatchdogCount)
+                          .arg(m_txEnabled ? 1 : 0)
+                          .arg(m_transmitting ? 1 : 0)
+                          .arg(m_autoCqRepeat ? 1 : 0));
         }
+        qint64 const txWatchdogElapsedMs = m_txWatchdogElapsed.elapsed();
         ++m_txWatchdogTicks;
         // 1.0.187 — FT2 Pack G: prima del watchdog standard, se siamo in TX3
         // (R+report) stallato per 2+ periodi, forza un re-send TX2 invece di
         // far morire il QSO. Cap a 1 per QSO. Gated Conservative+FT2.
-        // La funzione resetta m_txWatchdogTicks a 0, quindi il watchdog skippa
-        // questo period naturalmente — niente return early (rischio rottura pipeline).
+        // La funzione resetta m_txWatchdogTicks a 0; non deve pero' riarmare il
+        // watchdog a minuti, che misura la sessione TX/AutoCQ wall-clock.
         if (maybeForceTx2ResendOnStall()) {
-            m_txWatchdogActiveSinceMs = nowMs;
+            bridgeLog(QStringLiteral("TX watchdog: FT2 TX2 resend reset period counter only"));
         }
         bool watchdogFired = false;
         if (m_txWatchdogMode == 1) {
             qint64 const maxMs = qint64(m_txWatchdogTime) * 60 * 1000;
-            if (maxMs > 0 && nowMs - m_txWatchdogActiveSinceMs >= maxMs) {
+            if (maxMs > 0 && txWatchdogElapsedMs >= maxMs) {
                 watchdogFired = true;
             }
+            // Not too chatty: once after 1 minute, then every 5 minutes.
+            if (maxMs > 0
+                && txWatchdogElapsedMs >= 60000
+                && (m_txWatchdogLastProgressLogMs <= 0
+                    || txWatchdogElapsedMs - m_txWatchdogLastProgressLogMs >= 300000)) {
+                m_txWatchdogLastProgressLogMs = txWatchdogElapsedMs;
+                qint64 const remainingMs = qMax<qint64>(0, maxMs - txWatchdogElapsedMs);
+                bridgeLog(QStringLiteral("TX watchdog progress: elapsed=%1min remaining=%2min limit=%3min txEnabled=%4 transmitting=%5 autoCQ=%6")
+                              .arg(QString::number(double(txWatchdogElapsedMs) / 60000.0, 'f', 1))
+                              .arg(QString::number(double(remainingMs) / 60000.0, 'f', 1))
+                              .arg(m_txWatchdogTime)
+                              .arg(m_txEnabled ? 1 : 0)
+                              .arg(m_transmitting ? 1 : 0)
+                              .arg(m_autoCqRepeat ? 1 : 0));
+            }
         } else if (m_txWatchdogMode == 2) {
-            // Count-based: m_txWatchdogCount periodi × ticksMax tick/periodo
-            int maxTicks = m_txWatchdogCount * m_periodTicksMax;
+            // Count-based: conta i periodi completi; non moltiplicare due volte
+            // per m_txWatchdogCount, altrimenti Count=3 scatta dopo 9 periodi.
+            int maxTicks = m_periodTicksMax;
             if (maxTicks > 0 && m_txWatchdogTicks >= maxTicks) {
                 ++m_autoCQPeriodsMissed;
                 m_txWatchdogTicks = 0;  // reset per contare il prossimo periodo
                 if (m_autoCQPeriodsMissed >= m_txWatchdogCount) watchdogFired = true;
             }
-        } else if (m_txWatchdogMode == 0) {
-            // Off means off: do not kill a valid FT8/FT4/FT2 QSO mid-sequence.
-            watchdogFired = false;
         }
         if (watchdogFired) {
-            QString const watchdogReason =
-                "TX watchdog: timeout (mode=" + QString::number(m_txWatchdogMode) + ") → halt TX";
+            qint64 const elapsedMs = qMax<qint64>(0, txWatchdogElapsedMs);
+            QString const watchdogReason = QStringLiteral("TX watchdog: timeout mode=%1 elapsed=%2min limit=%3%4 -> halt TX")
+                .arg(m_txWatchdogMode)
+                .arg(QString::number(double(elapsedMs) / 60000.0, 'f', 1))
+                .arg(m_txWatchdogMode == 1 ? QString::number(m_txWatchdogTime)
+                                           : QString::number(m_txWatchdogCount))
+                .arg(m_txWatchdogMode == 1 ? QStringLiteral("min") : QStringLiteral(" periods"));
             bridgeLog(watchdogReason);
             if ((m_autoCqRepeat || m_multiAnswerMode) && m_qsoProgress > 1) {
                 if (m_autoCqRepeat) {
@@ -31578,6 +32477,9 @@ void DecodiumBridge::onPeriodTimer()
             }
             m_txWatchdogTicks = 0;
             m_txWatchdogActiveSinceMs = 0;
+            m_txWatchdogLastProgressLogMs = 0;
+            m_txWatchdogElapsedActive = false;
+            m_txWatchdogElapsed.invalidate();
             m_autoCQPeriodsMissed = 0;
             m_txRetryCount = 0;
             m_lastNtx = -1;
@@ -31589,8 +32491,21 @@ void DecodiumBridge::onPeriodTimer()
             emit statusMessage("TX watchdog: timeout, TX fermato");
         }
     } else {
+        if (m_txWatchdogElapsedActive || m_txWatchdogActiveSinceMs > 0) {
+            bridgeLog(QStringLiteral("TX watchdog disarmed: txEnabled=%1 transmitting=%2 autoCQ=%3 configured=%4 elapsed=%5min")
+                          .arg(m_txEnabled ? 1 : 0)
+                          .arg(m_transmitting ? 1 : 0)
+                          .arg(m_autoCqRepeat ? 1 : 0)
+                          .arg(txWatchdogConfigured ? 1 : 0)
+                          .arg(m_txWatchdogElapsed.isValid()
+                                   ? QString::number(double(qMax<qint64>(0, m_txWatchdogElapsed.elapsed())) / 60000.0, 'f', 1)
+                                   : QStringLiteral("0.0")));
+        }
         m_txWatchdogTicks = 0;      // reset quando TX non attivo
         m_txWatchdogActiveSinceMs = 0;
+        m_txWatchdogLastProgressLogMs = 0;
+        m_txWatchdogElapsedActive = false;
+        m_txWatchdogElapsed.invalidate();
         m_autoCQPeriodsMissed = 0;
     }
 
@@ -34456,7 +35371,9 @@ bool DecodiumBridge::forceRecentRogerReportSignoffIfNeeded(QString& message, con
     m_txRetryCount = 0;
     m_txWatchdogTicks = 0;
     m_autoCQPeriodsMissed = 0;
-    advanceQsoState(4);
+    if (!advanceQsoState(4)) {
+        return false;
+    }
     updateAutoCqPartnerLock();
     invalidateTxAudioCache();
     scheduleTxAudioPrecompute();
@@ -34548,19 +35465,23 @@ bool DecodiumBridge::repairOrRejectStalePartnerTxMessage(QString& message, const
     if (canRetryLastActiveStep) {
         int const retryTx = m_lastNtx;
         m_lastNtx = -1;
-        advanceQsoState(retryTx);
+        if (!advanceQsoState(retryTx)) {
+            return false;
+        }
         if (!m_txEnabled) {
             setTxEnabled(true);
         }
         bridgeLog(QStringLiteral("TX stale partner guard restored active QSO retry TX%1 for %2")
                       .arg(retryTx)
                       .arg(activeBase));
-    } else if (m_autoCqRepeat && !m_tx6.trimmed().isEmpty()) {
+    } else if (autoCqCanRestartTx6()) {
         m_lastNtx = -1;
         m_lastTransmittedMessage.clear();
         setDxCall(QString());
         setDxGrid(QString());
-        advanceQsoState(6);
+        if (!advanceQsoState(6)) {
+            return false;
+        }
         if (!m_txEnabled) {
             setTxEnabled(true);
         }
@@ -34587,7 +35508,9 @@ bool DecodiumBridge::prepareHoundTxSelectionForStart(const QString& reason)
                       .arg(desiredTx)
                       .arg(reason)
                       .arg(m_currentTx));
-        setCurrentTx(desiredTx);
+        if (!selectCurrentTxIfAllowed(desiredTx, QStringLiteral("Hound TX prepare"))) {
+            return false;
+        }
     }
 
     auto payloadForTx = [this, desiredTx]() {
@@ -35008,14 +35931,18 @@ void DecodiumBridge::processNextInQueue()
         genStdMsgs(nextCall, m_grid.left(4));
 
         // Il caller è già in coda: andiamo direttamente a TX2 (report)
-        advanceQsoState(2);
+        if (!advanceQsoState(2)) {
+            return;
+        }
         updateAutoCqPartnerLock();
         setTxEnabled(true);
         return;
     }
 
-    if (m_autoCqRepeat) {
-        advanceQsoState(6);
+    if (autoCqCanRestartTx6()) {
+        if (!advanceQsoState(6)) {
+            return;
+        }
         setTxEnabled(true);
         bridgeLog("processNextInQueue: coda vuota → torno a CQ");
     }

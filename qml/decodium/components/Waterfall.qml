@@ -115,6 +115,10 @@ Item {
         scheduleGraphSave()
     }
 
+    function isValidClickableAudioFreq(freq) {
+        return freq >= 100 && freq <= 5000
+    }
+
     function setPaletteIndex(index, persist) {
         if (syncingPaletteChoice)
             return
@@ -257,7 +261,7 @@ Item {
                 continue
             var call = d.fromCall || ""
             var freq = parseInt(d.freq || "0")
-            if (!call || freq <= 0)
+            if (!call || !waterfallPanel.isValidClickableAudioFreq(freq))
                 continue
             if (seen[call])
                 continue
@@ -439,7 +443,7 @@ Item {
                     bottomPadding: 0
                     checked: waterfallPanel.showDecodeCallsigns
                     onClicked: waterfallPanel.setShowDecodeCallsigns(checked)
-                    ToolTip.text: "Mostra i callsign decodificati sulla cascata"
+                    ToolTip.text: "Show decoded callsigns on the waterfall"
                     ToolTip.visible: showCallsCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -712,7 +716,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallAutoRange", checked)
                         }
                     }
-                    ToolTip.text: "Soglia di rumore automatica (IIR)"
+                    ToolTip.text: "Automatic noise threshold (IIR)"
                     ToolTip.visible: autoRangeCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -756,7 +760,7 @@ Item {
                             waterfallPanel.scheduleDxClusterRefresh(0)
                         }
                     }
-                    ToolTip.text: "Mostra gli spot del DX Cluster sulla cascata (clicca per chiamare)"
+                    ToolTip.text: "Show DX Cluster spots on the waterfall (click to call)"
                     ToolTip.visible: dxClusterCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -809,7 +813,7 @@ Item {
 
                     ToolTip.visible: collapseControlsMA.containsMouse
                     ToolTip.delay: 450
-                    ToolTip.text: qsTr("Nascondi i controlli della cascata")
+                    ToolTip.text: qsTr("Hide waterfall controls")
                 }
 
                 // Peak Hold toggle
@@ -822,7 +826,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallPeakHold", checked)
                         }
                     }
-                    ToolTip.text: "Peak Hold: mantiene visibili i picchi dello spettro"
+                    ToolTip.text: "Peak Hold: keeps spectrum peaks visible"
                     ToolTip.visible: peakHoldCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -867,7 +871,7 @@ Item {
                     text: waterfallDisplay.measuredFloor.toFixed(0) + "dBm"
                     color: accentGreen
                     font.pixelSize: 10
-                    ToolTip.text: "Soglia di rumore misurata"
+                    ToolTip.text: "Measured noise threshold"
                     ToolTip.visible: nfLabel.containsMouse
                     ToolTip.delay: 400
                     MouseArea { id: nfLabel; anchors.fill: parent; hoverEnabled: true }
@@ -1084,10 +1088,14 @@ Item {
             }
             onDxClusterSpotClicked: function(call, audioFreqHz) {
                 console.log("[Waterfall] DX cluster click → engage", call, "@", audioFreqHz, "Hz")
+                if (!waterfallPanel.isValidClickableAudioFreq(audioFreqHz))
+                    return
                 bridge.engageDxClusterSpot(call, audioFreqHz)
             }
             onDecodeLabelClicked: function(call, audioFreqHz) {
                 console.log("[Waterfall] decode label click → engage", call, "@", audioFreqHz, "Hz")
+                if (!waterfallPanel.isValidClickableAudioFreq(audioFreqHz))
+                    return
                 bridge.engageDxClusterSpot(call, audioFreqHz)
             }
 
@@ -1292,7 +1300,7 @@ Item {
                         var d = source[i]
                         var call = d.call || ""
                         var freq = Number(d.freq || 0)
-                        if (!call || freq <= 0)
+                        if (!call || !waterfallPanel.isValidClickableAudioFreq(freq))
                             continue
                         var x = xForFreq(freq)
                         if (x < 0 || x >= width)
@@ -1475,7 +1483,7 @@ Item {
                             // solo Ctrl+click chiama la stazione (engage).
                             onPressed: function(mouse) { mouse.accepted = !!(mouse.modifiers & Qt.ControlModifier) }
                             onClicked: function(mouse) {
-                                if (mouse.modifiers & Qt.ControlModifier)
+                                if ((mouse.modifiers & Qt.ControlModifier) && waterfallPanel.isValidClickableAudioFreq(modelData.freq))
                                     bridge.engageDxClusterSpot(modelData.call, modelData.freq)
                             }
                         }
@@ -1915,7 +1923,7 @@ Item {
 
         ToolTip.visible: toggleMouse.containsMouse
         ToolTip.delay: 450
-        ToolTip.text: qsTr("Mostra i controlli della cascata")
+        ToolTip.text: qsTr("Show waterfall controls")
     }
 
     // Sync Bridge → PanadapterItem

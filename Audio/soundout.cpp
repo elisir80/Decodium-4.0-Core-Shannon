@@ -3,6 +3,8 @@
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QElapsedTimer>
+#include <QList>
+#include <QPointer>
 #include <qmath.h>
 #include <QDebug>
 
@@ -82,6 +84,44 @@ bool deferCoreAudioSinkDelete()
 #endif
 }
 
+#if defined(Q_OS_MAC)
+QList<QPointer<QAudioSink>>& parkedSoundOutputCoreAudioSinks()
+{
+  static QList<QPointer<QAudioSink>> sinks;
+  return sinks;
+}
+
+void parkSoundOutputCoreAudioSink(QAudioSink *stream, QString const& reason)
+{
+  if (!stream) {
+    return;
+  }
+  QObject *context = QCoreApplication::instance();
+  stream->setParent(context);
+
+  QList<QPointer<QAudioSink>>& sinks = parkedSoundOutputCoreAudioSinks();
+  for (int i = sinks.size() - 1; i >= 0; --i) {
+    if (!sinks.at(i)) {
+      sinks.removeAt(i);
+    }
+  }
+
+  static constexpr int kMaxParkedSoundOutputCoreAudioSinks = 12;
+  sinks.append(QPointer<QAudioSink>(stream));
+  while (sinks.size() > kMaxParkedSoundOutputCoreAudioSinks) {
+    QPointer<QAudioSink> old = sinks.takeFirst();
+    if (!old || old.data() == stream) {
+      continue;
+    }
+    old->disconnect();
+    old->deleteLater();
+    qInfo() << "TX SoundOutput CoreAudio parked sink cap reached; released oldest parked sink:"
+            << reason
+            << "count=" << sinks.size();
+  }
+}
+#endif
+
 int parkedSinkLifetimeMs()
 {
 #if defined(Q_OS_MAC)
@@ -109,13 +149,17 @@ void SoundOutput::deleteRetiredStreamAfterCoreAudioCallbacks(QAudioSink *stream,
   }
 
   stream->disconnect();
-  stream->setParent(nullptr);
 #if defined(Q_OS_MAC)
-  stream->setVolume(0.0f);
-  qInfo() << "TX SoundOutput CoreAudio sink left parked without delayed Qt/CoreAudio callbacks:"
-          << reason;
+  if (stream->state() != QAudio::StoppedState) {
+    stream->setVolume(0.0f);
+  }
+  parkSoundOutputCoreAudioSink(stream, reason);
+  qInfo() << "TX SoundOutput CoreAudio sink parked bounded:"
+          << reason
+          << "cap=12";
   return;
 #endif
+  stream->setParent(nullptr);
 
   QObject *context = QCoreApplication::instance();
   if (!context) {

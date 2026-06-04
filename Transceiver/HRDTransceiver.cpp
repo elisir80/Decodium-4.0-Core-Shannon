@@ -858,8 +858,7 @@ int HRDTransceiver::find_dropdown (QRegularExpression const& re) const
 
 std::vector<int> HRDTransceiver::find_dropdown_selection (int dropdown, QRegularExpression const& re) const
 {
-  std::vector<int> indices;     // this will always contain at least a
-                                // -1
+  std::vector<int> indices;
   auto list = dropdowns_.value (dropdown_names_.value (dropdown));
   int index {0};
   while (-1 != (index = list.lastIndexOf (re, index - 1)))
@@ -914,7 +913,12 @@ int HRDTransceiver::lookup_mode (MODE mode, ModeMap const& map) const
     {
       throw error {tr ("Ham Radio Deluxe: rig doesn't support mode")};
     }
-  return std::get<1> (*it).front ();
+  auto const& selections = std::get<1> (*it);
+  if (selections.empty ())
+    {
+      throw error {tr ("Ham Radio Deluxe: rig doesn't support mode")};
+    }
+  return selections.front ();
 }
 
 auto HRDTransceiver::lookup_mode (int mode, ModeMap const& map) const -> MODE

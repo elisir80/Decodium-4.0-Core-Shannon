@@ -38,7 +38,7 @@ class DecodiumWsprUploader;
 class DxccLookup;
 class DecodiumLegacyBackend;
 #include "DecodiumDiagnostics.h"
-#include "lib/persistence/HashedCallsignCache.h"  // 1.0.293 — AP hashed-callsign cache Fase 0
+#include "lib/persistence/HashedCallsignCache.h"  // AP hashed-callsign cache for FT2 rescue/audit
 class DecodiumPropagationManager;
 class MessageClient;
 
@@ -940,7 +940,7 @@ public slots:
     Q_INVOKABLE void promptLogQso();
     Q_INVOKABLE void shutdown();
     Q_INVOKABLE void copyToClipboard(const QString &text);
-    Q_INVOKABLE void advanceQsoState(int txNum); // GitHub TxController clone
+    Q_INVOKABLE bool advanceQsoState(int txNum); // GitHub TxController clone
 
 private:
     QString decodeColorValue(const QString& prop) const;
@@ -1559,7 +1559,7 @@ private slots:
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
 private:
-    void tickTargetCallOnTx();   // 1.0.262 incrementa retry counter on TX end, ferma se max raggiunto
+    void tickTargetCallOnTx();   // CALL retry counter/timing enforcement on TX end
 
     // 1.0.270 (Phase 5.3+) — cleanup retention DB: elimina decode + sessioni orfane
     // piu' vecchie di N giorni + VACUUM. Eseguito UNA VOLTA al boot del worker.
@@ -1605,6 +1605,7 @@ private:
     bool shouldTrackDtSample(int snr, double dtValue, const QString& message,
                              const QString& decodeMode) const;
     QString autoCqBandKeyForFrequency(double freqHz) const;
+    bool autoCqCanRestartTx6() const;
     QString startupModeForFrequency(double dialFrequency) const;
     double workingFrequencyForBandMode(const QString& bandLambda, const QString& mode) const;
     void maybeApplyStartupModeFromRigFrequency(double dialFrequency, bool authoritativeRigFrequency = false);
@@ -1692,10 +1693,13 @@ private:
     void clearPendingAutoLogSnapshot();
     void clearPendingAutoSeqTx(const QString& reason);
     void forgetPartnerMemoryForCall(const QString& call, const QString& reason);
+    bool selectCurrentTxIfAllowed(int txNum, const QString& reason);
+    bool ensureCurrentTxCanTransmit(const QString& reason);
     void armLateAutoLogSnapshot();
     void clearLateAutoLogSnapshot();
     void engageManualTxHold(const QString& reason, bool clearQueue = false);
     void clearManualTxHold(const QString& reason);
+    void clearResumeQsoOnReplyArm(const QString& reason);
     // 1.0.304 (#9) — se armato (Halt con partner) e il partner ri-risponde, riprende il QSO.
     // Ritorna true se ha ripreso. Inerte se toggle OFF / non armato / timeout.
     bool tryResumeQsoOnReply(const QStringList& rows);
@@ -1790,6 +1794,8 @@ private:
     bool m_tuning {false};
     bool m_bridgeAudioTuneActive {false};
     bool m_bridgeAudioLegacyTxActive {false};
+    quint64 m_legacyBridgeAudioTxStartSerial {0};
+    bool m_legacyBridgeAudioTxStartPending {false};
     bool m_decoding {false};
     int m_rxFrequency {1500};
     int m_txFrequency {1500};
@@ -1908,7 +1914,7 @@ private:
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
-    bool m_ft2ApHashCache {false};         // 1.0.293: AP hashed-callsign cache (Fase 0: seed + hit-rate, no decode change)
+    bool m_ft2ApHashCache {false};         // 1.0.293/294: AP hash cache; cache-rescued decodes are display/audit only for AutoSeq/TX
     bool m_ft2AsyncSkipRedundantSyncDecode {false};  // 1.0.355: salta decode sync fine-slot se async ha gia' coperto lo slot
     qint64 m_ft2AsyncDecodeProducedSlotMs {0};       // 1.0.355: indice slot corrected-UTC dell'ultimo decode async accettato
     bool m_ft8DeepDecodeInTx {false};      // 1.0.299: deep depth-4 follow-up (decode-list-only) anche durante TX/QSO. Opt-in.
@@ -2004,12 +2010,17 @@ private:
     bool m_resumeQsoOnReply  {false};
     QString m_resumeTargetCall;        // base-call del partner sospeso (vuoto = disarmato)
     qint64  m_resumeArmedMs   {0};     // epoch ms dell'arm (timeout 120s)
+    QString m_resumeArmedMode;
+    int     m_resumeArmedTx {0};
+    int     m_resumeArmedProgress {0};
     int  m_asyncSnrDb          {-99};   // SNR ultimo decode FT2 (per AsyncModeWidget S-meter)
     // FT2 QSO cooldown: evita re-triggering sullo stesso 73 decodificato ogni ~4s (Shannon m_qsoCooldown)
     QMap<QString, qint64> m_qsoCooldown;  // callsign → timestamp msec UTC
     bool m_catConnected {false};
     QString m_catRigName;
     QString m_lastCatError;
+    quint64 m_omniRigReconnectSerial {0};
+    bool    m_omniRigReconnectInProgress {false};
     QString m_catMode;
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};
@@ -2126,6 +2137,10 @@ private:
     // ancora dello slot del partner. Single-flight => corrisponde al ready in arrivo.
     qint64                m_ft2AsyncDispatchSlotStartMs {0};
     int                   m_ft2AsyncAudioQuietRuns {0};   // consecutive RMS<threshold samples
+    bool                  m_ft2AsyncSmartTxPending {false};
+    quint64               m_ft2AsyncSmartTxSerial {0};
+    qint64                m_ft2AsyncSmartTxDeadlineMs {0};
+    int                   m_ft2AsyncSmartTxRetries {0};
     void scheduleSmartFt2AsyncTx(const QString& reason);
     void onAudioLevelForFt2Gate();
     bool                  m_autoSpotEnabled {false};
@@ -2388,17 +2403,22 @@ private:
     QString m_targetCallSign;
     int     m_targetCallMaxRetries   {10};   // 0 = infinito
     int     m_targetCallTimeoutS     {90};
-    int     m_targetCallPeriod       {2};    // 0=1st, 1=2nd, 2=alterna
+    int     m_targetCallPeriod       {2};    // CALL UI convention: 0=1st, 1=2nd, 2=alterna
     int     m_targetCallPauseS       {0};
     int     m_targetCallRetryCount   {0};
+    QDateTime m_targetCallStartedUtc;        // CALL wall-clock timeout anchor
     QDateTime m_targetCallLastTxUtc;         // ultima TX inviata al target
+    quint64 m_targetCallSessionId {0};       // invalidates timeout/pause timers across stop/start
     QString m_targetCallSavedDxCall;         // dxCall pre-attivazione (per ripristino on stop)
     int     m_targetCallSavedTxPeriod {0};
     bool    m_targetCallSavedAlt12   {false};
     bool    m_targetCallWasTransmitting {false}; // edge detector per transmittingChanged
 
     int  m_txWatchdogTicks  {0};   // tick watchdog a 250ms: period/count logic
-    qint64 m_txWatchdogActiveSinceMs {0}; // wall-clock source for minute watchdog
+    qint64 m_txWatchdogActiveSinceMs {0}; // wall-clock anchor for logs only
+    qint64 m_txWatchdogLastProgressLogMs {0};
+    QElapsedTimer m_txWatchdogElapsed; // monotonic source for minute watchdog
+    bool m_txWatchdogElapsedActive {false};
     static constexpr int TX_WATCHDOG_MAX = 240; // 60s @ 250ms
 
     // appEngine stub members
@@ -2809,6 +2829,7 @@ public:
     Q_INVOKABLE void    stopWebServer();
     Q_INVOKABLE bool    webServerRunning() const;
     Q_INVOKABLE QString webServerUrl() const;
+    Q_INVOKABLE QString webServerQrUrl() const;
     // 1.0.152: log dal QML al decodium_diagnostic.log (console.warn QML
     // non viene catturato dal handler bridgeLog).
     Q_INVOKABLE void qmlDebugLog(QString const& msg) const;
@@ -3038,6 +3059,9 @@ private:
     bool legacyBridgeAudioTxInFlight() const;
     bool preflightLegacyBridgeTxBeforePtt(const QString& reason);
     void abortLegacyBridgeTxRequest(const QString& reason);
+    quint64 armPendingLegacyBridgeAudioStart(const QString& reason);
+    bool consumePendingLegacyBridgeAudioStart(quint64 serial, const QString& reason);
+    void cancelPendingLegacyBridgeAudioStart(const QString& reason);
     bool startBridgeAudioForLegacyDigitalTx(const QString& reason);
     void stopBridgeAudioForLegacyDigitalTx(const QString& reason);
     bool useModernSpectrumFeedWithLegacy() const;

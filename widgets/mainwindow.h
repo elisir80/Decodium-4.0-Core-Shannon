@@ -852,6 +852,7 @@ private:
   QScopedPointer<IonosphericForecastWindow> m_ionosphericForecastWindow;
   QScopedPointer<DXClusterWindow> m_dxClusterWindow;
   QHash<QString, QString> m_worldMapGridByCall;
+  QHash<QString, qint64> m_worldMapGridSeenByCall;
   bool m_worldMapCall3Loaded {false};
   QScopedPointer<FoxLogWindow> m_foxLogWindow;
   QScopedPointer<CabrilloLogWindow> m_contestLogWindow;

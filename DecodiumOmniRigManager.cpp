@@ -30,6 +30,7 @@
 #include <QSettings>
 #include <QThread>
 #include <QTimer>
+#include <QScopeGuard>
 #include <QDebug>
 #include <QVariant>
 
@@ -250,6 +251,12 @@ DecodiumOmniRigManager::~DecodiumOmniRigManager()
 void DecodiumOmniRigManager::connectRig()
 {
     if (m_connected) return;
+    if (m_connecting) {
+        emit statusUpdate(QStringLiteral("OmniRig: connessione già in corso, retry ignorato."));
+        return;
+    }
+    m_connecting = true;
+    auto connectingGuard = qScopeGuard([this]() { m_connecting = false; });
 
     delete m_portBits; m_portBits = nullptr;
     delete m_rig;      m_rig      = nullptr;
@@ -317,6 +324,10 @@ void DecodiumOmniRigManager::connectRig()
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents, 80);
         QThread::msleep(250);
+        if (!m_rig) {
+            emit errorOccurred(QStringLiteral("OmniRig: connessione annullata durante l'attesa rig."));
+            return;
+        }
         status = m_rig->property("Status").toInt();
     }
 
@@ -362,6 +373,9 @@ void DecodiumOmniRigManager::connectRig()
 
 void DecodiumOmniRigManager::disconnectRig()
 {
+    if (m_connecting && !m_connected) {
+        m_connecting = false;
+    }
     m_pollTimer->stop();
     m_notRespondingPolls = 0;  // 1.0.303: la tolleranza NOTRESPONDING riparte pulita al prossimo connect
 

@@ -355,7 +355,7 @@ Rectangle {
                         delay: 500
                         text: "FT Decoder Threads: "
                               + ftThreadsLed.displayValue
-                              + "\nClic: cicla 1-8 - Clic destro: AUTO"
+                              + "\nClick: cycle 1-8 - Right-click: AUTO"
                     }
                 }
             }
@@ -434,8 +434,8 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: checkSwrEnabled
-                            ? "Controllo SWR attivo: TX/AutoCQ viene bloccata/interrotta quando SWR > 2,5; Tune resta disponibile per la misura"
-                            : "Telemetria potenza/SWR dal CAT"
+                            ? "SWR check active: TX/AutoCQ is blocked or interrupted when SWR > 2.5; Tune remains available for measurement"
+                            : "Power/SWR telemetry from CAT"
                     }
                 }
             }
@@ -466,8 +466,8 @@ Rectangle {
                     ToolTip.visible: alcMouseArea.containsMouse
                     ToolTip.delay: 500
                     ToolTip.text: rigAlcValid
-                        ? qsTr("Misuratore ALC 0..100\n>60 = ALC eccessivo (potenza TX troppo alta)")
-                        : qsTr("ALC non riportato da Hamlib per questo rig/backend")
+                        ? qsTr("ALC meter 0..100\n>60 = excessive ALC (TX power too high)")
+                        : qsTr("ALC is not reported by Hamlib for this rig/backend")
                 }
 
                 MouseArea {
@@ -475,169 +475,6 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                 }
-            }
-        }
-
-        // 1.0.269 (fork-only) — Reset Layout + Decode History buttons spostati qui dal
-        // HeaderBar per essere sempre visibili nel footer accanto a PWR/SWR/PSK.
-        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
-
-        Button {
-            id: footerResetLayoutButton
-            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterResetVisible
-            Layout.preferredWidth: narrowFooter ? 88 : (compactFooter ? 108 : 150)
-            Layout.preferredHeight: footerButtonHeight
-            implicitWidth: Layout.preferredWidth
-            implicitHeight: footerButtonHeight
-            padding: 0
-            ToolTip.visible: hovered
-            ToolTip.text: qsTr("Reset layout (Ctrl+Shift+L)\nRiporta tutte le finestre mobili nella finestra principale\ne ricentra Decodium sul monitor primario.")
-            ToolTip.delay: 300
-            onClicked: footerResetLayoutConfirm.open()
-            background: Rectangle {
-                color: Qt.rgba(255/255, 155/255, 58/255, 0.18)
-                border.color: Qt.rgba(255/255, 155/255, 58/255, 1.0)
-                border.width: 1
-                radius: 4
-            }
-            contentItem: Item {
-                Row {
-                    spacing: 6
-                    anchors.centerIn: parent
-
-                    Text {
-                        text: "☰"
-                        color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
-                        font.bold: true
-                        font.pixelSize: 15
-                    }
-
-                    Text {
-                        text: qsTr("Layout")
-                        color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
-                        font.bold: true
-                        font.pixelSize: 12
-                    }
-                }
-            }
-        }
-
-        Button {
-            id: footerHistoryButton
-            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterHistoryVisible
-            Layout.preferredWidth: narrowFooter ? 92 : (compactFooter ? 112 : 150)
-            Layout.preferredHeight: footerButtonHeight
-            implicitWidth: Layout.preferredWidth
-            implicitHeight: footerButtonHeight
-            padding: 0
-            ToolTip.visible: hovered
-            ToolTip.text: qsTr("Cronologia decodifiche (Ctrl+Shift+H)\nApre lo storico delle decodifiche salvate\nnel database SQLite. Filtri ed esportazione ADIF.")
-            ToolTip.delay: 300
-            onClicked: {
-                if (typeof historyDialogInstance !== 'undefined') historyDialogInstance.show()
-            }
-            background: Rectangle {
-                color: Qt.rgba(58/255, 157/255, 255/255, 0.18)
-                border.color: Qt.rgba(58/255, 157/255, 255/255, 1.0)
-                border.width: 1
-                radius: 4
-            }
-            contentItem: Item {
-                Row {
-                    spacing: 6
-                    anchors.centerIn: parent
-
-                    Text {
-                        text: "▤"
-                        color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
-                        font.bold: true
-                        font.pixelSize: 15
-                    }
-
-                    Text {
-                        text: qsTr("History")
-                        color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
-                        font.bold: true
-                        font.pixelSize: 12
-                    }
-                }
-            }
-        }
-
-        // 1.0.276 (fork-only) — DX Cluster toggle button
-        // Necessario perche' chiudendo la X della DxClusterFloatingWindow non c'era
-        // un modo "footer" per riaprirla. Verde acceso quando il pannello e' visibile.
-        Button {
-            id: footerDxClusterButton
-            visible: typeof mainWindow === 'undefined' || mainWindow.uiBtnFooterDxcVisible
-            Layout.preferredWidth: showFooterDxText ? (compactFooter ? 96 : 110) : 38
-            Layout.preferredHeight: footerButtonHeight
-            implicitWidth: Layout.preferredWidth
-            implicitHeight: footerButtonHeight
-            padding: 0
-            readonly property bool clusterOn: typeof mainWindow !== 'undefined'
-                                              && mainWindow.dxClusterPanelVisible
-            ToolTip.visible: hovered
-            ToolTip.text: qsTr("Cluster (toggle)\nApre o chiude la finestra mobile del DX Cluster.\nLa finestra può essere spostata su qualsiasi monitor.")
-            ToolTip.delay: 300
-            onClicked: {
-                if (typeof mainWindow !== 'undefined') {
-                    mainWindow.dxClusterPanelVisible = !mainWindow.dxClusterPanelVisible
-                    if (mainWindow.dxClusterPanelVisible && bridge && bridge.dxCluster
-                        && !bridge.dxCluster.connected) {
-                        bridge.connectDxCluster(bridge.dxCluster.host, bridge.dxCluster.port)
-                    }
-                }
-            }
-            background: Rectangle {
-                color: footerDxClusterButton.clusterOn
-                       ? Qt.rgba(58/255, 203/255, 108/255, 0.22)
-                       : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
-                border.color: footerDxClusterButton.clusterOn
-                              ? Qt.rgba(58/255, 203/255, 108/255, 1.0)
-                              : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
-                border.width: 1
-                radius: 4
-            }
-            contentItem: Item {
-                Row {
-                    spacing: 6
-                    anchors.centerIn: parent
-                    Text {
-                        text: footerDxClusterButton.clusterOn ? "●" : "○"
-                        color: footerDxClusterButton.clusterOn
-                               ? Qt.rgba(78/255, 220/255, 128/255, 1.0)
-                               : textSecondary
-                        font.bold: true
-                        font.pixelSize: 13
-                    }
-                    Text {
-                        visible: showFooterDxText
-                        text: qsTr("DX Cluster")
-                        color: footerDxClusterButton.clusterOn
-                               ? Qt.rgba(78/255, 220/255, 128/255, 1.0)
-                               : textSecondary
-                        font.bold: true
-                        font.pixelSize: 12
-                    }
-                }
-            }
-        }
-
-        Dialog {
-            id: footerResetLayoutConfirm
-            title: qsTr("Reset Layout")
-            modal: true
-            standardButtons: Dialog.Yes | Dialog.No
-            anchors.centerIn: Overlay.overlay
-            width: Math.min(440, Overlay.overlay ? Overlay.overlay.width - 48 : 440)
-            implicitWidth: width
-            onAccepted: { if (bridge) bridge.resetWindowLayout() }
-            contentItem: Text {
-                text: qsTr("Riportare tutte le finestre mobili nella finestra principale\ne ricentrare Decodium sul monitor primario?\n\nLe coordinate salvate delle finestre verranno cancellate.")
-                color: textPrimary
-                wrapMode: Text.WordWrap
-                width: footerResetLayoutConfirm.width - footerResetLayoutConfirm.leftPadding - footerResetLayoutConfirm.rightPadding
             }
         }
 
@@ -672,10 +509,10 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: !pskStatusRow.pskEnabled
-                              ? "PSK Reporter: disattivato"
+                              ? "PSK Reporter: disabled"
                               : (pskStatusRow.pskConnected
-                                 ? "PSK Reporter: connesso a report.pskreporter.info"
-                                 : "PSK Reporter: errori HTTP recenti")
+                                 ? "PSK Reporter: connected to report.pskreporter.info"
+                                 : "PSK Reporter: recent HTTP errors")
                     }
                 }
             }
@@ -783,12 +620,12 @@ Rectangle {
                     visible: gpuMonitorMouse.containsMouse
                     delay: 500
                     text: realGpuUsageAvailable
-                          ? "Uso reale della GPU del processo Decodium\n"
-                            + gpuLoadText + " dai contatori GPU del sistema\n"
-                            + gpuFps + " frame renderizzati/s"
-                          : "Contatore GPU del processo non disponibile\n"
-                            + "Attività di rendering stimata\n"
-                            + gpuFps + " frame renderizzati/s"
+                          ? "Real GPU usage for the Decodium process\n"
+                            + gpuLoadText + " from system GPU counters\n"
+                            + gpuFps + " rendered frames/s"
+                          : "Process GPU counter unavailable\n"
+                            + "Estimated rendering activity\n"
+                            + gpuFps + " rendered frames/s"
                 }
             }
         }

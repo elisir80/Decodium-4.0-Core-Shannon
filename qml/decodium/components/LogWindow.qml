@@ -412,7 +412,7 @@ Popup {
                         onClicked: { logWindowMinimized = true; logWindow.close() }
                     }
                     ToolTip.visible: logMinMA.containsMouse
-                    ToolTip.text: "Riduci a icona"; ToolTip.delay: 500
+                    ToolTip.text: "Minimize"; ToolTip.delay: 500
                 }
 
                 // Close
@@ -433,7 +433,7 @@ Popup {
                         onClicked: logWindow.close()
                     }
                     ToolTip.visible: logCloseMA.containsMouse
-                    ToolTip.text: "Chiudi"; ToolTip.delay: 500
+                    ToolTip.text: "Close"; ToolTip.delay: 500
                 }
             }
         }
@@ -468,7 +468,7 @@ Popup {
                     }
                     ToolTip.visible: hovered
                     ToolTip.text: appEngine && appEngine.logManager
-                                  ? "Logbook attivo: " + appEngine.logManager.activeLogbookPath
+                                  ? "Active logbook: " + appEngine.logManager.activeLogbookPath
                                   : "Logbook"
                     ToolTip.delay: 500
                 }
@@ -479,7 +479,7 @@ Popup {
                     border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.55)
                     Text { anchors.centerIn: parent; text: "New"; font.pixelSize: 10; font.bold: true; color: accentGreen }
                     MouseArea { id: newLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: createLogbookDialog.open() }
-                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Crea un logbook separato"; ToolTip.delay: 500
+                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Create a separate logbook"; ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -488,7 +488,7 @@ Popup {
                     border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.55)
                     Text { anchors.centerIn: parent; text: "Load"; font.pixelSize: 10; font.bold: true; color: secondaryCyan }
                     MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logWindow.openAddLogbookDialog() }
-                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Carica/usa un ADIF esistente come logbook"; ToolTip.delay: 500
+                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Load/use an existing ADIF as a logbook"; ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -497,7 +497,7 @@ Popup {
                     border.color: Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.5)
                     Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 10; font.bold: true; color: accentOrange }
                     MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
-                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Crea backup del logbook attivo"; ToolTip.delay: 500
+                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Back up the active logbook"; ToolTip.delay: 500
                 }
 
                 // Search field
@@ -572,7 +572,7 @@ Popup {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Rimuovi i filtri di ricerca, banda e modo"
+                    ToolTip.text: "Remove search, band, and mode filters"
                     ToolTip.delay: 500
                 }
 
@@ -590,7 +590,7 @@ Popup {
                         id: importMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: logWindow.openImportAdifDialog()
                     }
-                    ToolTip.visible: importMA.containsMouse; ToolTip.text: "Importa file ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: importMA.containsMouse; ToolTip.text: "Import ADIF file"; ToolTip.delay: 500
                 }
 
                 // Export ADIF
@@ -605,7 +605,7 @@ Popup {
                         id: exportMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: logWindow.openExportAdifDialog()
                     }
-                    ToolTip.visible: exportMA.containsMouse; ToolTip.text: "Esporta ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: exportMA.containsMouse; ToolTip.text: "Export ADIF"; ToolTip.delay: 500
                 }
 
                 // Refresh
@@ -619,7 +619,7 @@ Popup {
                         id: refreshMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: refreshLog()
                     }
-                    ToolTip.visible: refreshMA.containsMouse; ToolTip.text: "Aggiorna"; ToolTip.delay: 500
+                    ToolTip.visible: refreshMA.containsMouse; ToolTip.text: "Refresh"; ToolTip.delay: 500
                 }
             }
         }

@@ -304,7 +304,7 @@ Rectangle {
                     }
                     ToolTip.visible: hovered
                     ToolTip.text: appEngine && appEngine.logManager
-                                  ? "Logbook attivo: " + appEngine.logManager.activeLogbookPath
+                                  ? "Active logbook: " + appEngine.logManager.activeLogbookPath
                                   : "Logbook"
                     ToolTip.delay: 500
                 }
@@ -315,7 +315,7 @@ Rectangle {
                     border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.55)
                     Text { anchors.centerIn: parent; text: "New"; font.pixelSize: 9; font.bold: true; color: accentGreen }
                     MouseArea { id: newLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: createLogbookDialog.open() }
-                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Crea un logbook separato"; ToolTip.delay: 500
+                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Create a separate logbook"; ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -324,7 +324,7 @@ Rectangle {
                     border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.55)
                     Text { anchors.centerIn: parent; text: "Load"; font.pixelSize: 9; font.bold: true; color: secondaryCyan }
                     MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openAddLogbookDialog() }
-                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Carica/usa un ADIF esistente"; ToolTip.delay: 500
+                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Load/use an existing ADIF"; ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -333,7 +333,7 @@ Rectangle {
                     border.color: Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.5)
                     Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 9; font.bold: true; color: accentOrange }
                     MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
-                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Crea backup del logbook attivo"; ToolTip.delay: 500
+                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Back up the active logbook"; ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -402,7 +402,7 @@ Rectangle {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Rimuovi i filtri"
+                    ToolTip.text: "Remove filters"
                     ToolTip.delay: 500
                 }
 
@@ -415,7 +415,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Text { anchors.centerIn: parent; text: "\u2B07"; font.pixelSize: 11; color: importFloatMA.containsMouse ? accentGreen : textSecondary }
                     MouseArea { id: importFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openImportAdifDialog() }
-                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: "Importa ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: "Import ADIF"; ToolTip.delay: 500
                 }
 
                 // Export ADIF
@@ -425,7 +425,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Text { anchors.centerIn: parent; text: "\u2B06"; font.pixelSize: 11; color: exportFloatMA.containsMouse ? secondaryCyan : textSecondary }
                     MouseArea { id: exportFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openExportAdifDialog() }
-                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: "Esporta ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: "Export ADIF"; ToolTip.delay: 500
                 }
 
                 // Refresh
@@ -435,7 +435,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Text { anchors.centerIn: parent; text: "\u21BB"; font.pixelSize: 12; font.bold: true; color: refreshFloatMA.containsMouse ? accentGreen : textSecondary }
                     MouseArea { id: refreshFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: refreshLog() }
-                    ToolTip.visible: refreshFloatMA.containsMouse; ToolTip.text: "Aggiorna"; ToolTip.delay: 500
+                    ToolTip.visible: refreshFloatMA.containsMouse; ToolTip.text: "Refresh"; ToolTip.delay: 500
                 }
             }
         }

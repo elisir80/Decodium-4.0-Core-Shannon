@@ -125,8 +125,14 @@ DxccEntity DxccLookup::lookup(const QString& callsign) const
     if (m_entities.isEmpty())
         return {};
 
-    QString call = effectiveCall(callsign).toUpper();
+    QString const rawCall = callsign.trimmed();
+    if (rawCall.size() > 64)
+        return {};
+
+    QString call = effectiveCall(rawCall).toUpper();
     if (call.isEmpty())
+        return {};
+    if (call.size() > 32)
         return {};
 
     // Skip maritime-mobile and air-mobile — no DXCC entity

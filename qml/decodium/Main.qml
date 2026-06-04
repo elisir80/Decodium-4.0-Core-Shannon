@@ -176,6 +176,37 @@ ApplicationWindow {
         }
     }
 
+    function dragFloatingWindowToGlobal(windowRef, pressWindowPos, pressGlobalPos, currentGlobalPos) {
+        if (!windowRef || !pressWindowPos || !pressGlobalPos || !currentGlobalPos)
+            return
+        var nextX = Math.round(pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+        var nextY = Math.round(pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+        if (isFinite(nextX))
+            windowRef.x = nextX
+        if (isFinite(nextY))
+            windowRef.y = nextY
+    }
+
+    function startNativeFloatingWindowMove(windowRef) {
+        if (!windowRef || typeof windowRef.startSystemMove !== "function")
+            return false
+        try {
+            return windowRef.startSystemMove()
+        } catch(e) {
+            console.log("startSystemMove failed: " + e)
+        }
+        return false
+    }
+
+    function finishFloatingWindowDrag(windowRef) {
+        if (!windowRef)
+            return
+        var pos = clampWindowPosition(windowRef.x, windowRef.y, windowRef.width, windowRef.height)
+        windowRef.x = pos.x
+        windowRef.y = pos.y
+        scheduleWindowStateSave()
+    }
+
     function safeStoredPanelWidth(value, fallback, minimum) {
         var numeric = Number(value)
         if (!isFinite(numeric) || numeric <= 0)
@@ -882,11 +913,11 @@ ApplicationWindow {
     property bool uiBtnCatVisible:            settingBool("uiBtnCatVisible", true)
 
     // === Ordine pulsanti toolbar (drag&drop riordinabile, persistente) ===
-    readonly property string uiToolbarOrderDefault: "setup,rec,wav,sep1,log,macro,astro,sep2,cat"
+    readonly property string uiToolbarOrderDefault: "setup,rec,wav,sep1,log,macro,astro,layout,history,sep2,cat"
     property var uiToolbarOrder: parseToolbarOrder(String(bridge.getSetting("uiToolbarOrder", "") || ""))
 
     // Tutti gli id validi (pulsanti + separatori). Usato per validare/normalizzare.
-    readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","cat","sep1","sep2"]
+    readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","layout","history","cat","sep1","sep2"]
 
     // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
     function parseToolbarOrder(csv) {
@@ -1322,6 +1353,19 @@ ApplicationWindow {
         if (!visible)
             dxClusterPanelVisible = false
     }
+    function raiseDxClusterPanel() {
+        if (typeof dxClusterFloatingWindow === 'undefined' || !dxClusterFloatingWindow)
+            return
+        dxClusterMinimized = false
+        dxClusterFloatingWindow.visibility = Window.Windowed
+        dxClusterFloatingWindow.show()
+        dxClusterFloatingWindow.raise()
+        dxClusterFloatingWindow.requestActivate()
+    }
+    function openDxClusterPanel() {
+        mainWindow.dxClusterPanelVisible = true
+        Qt.callLater(function() { mainWindow.raiseDxClusterPanel() })
+    }
     function setPskReporterToolbarVisible(visible) {
         pskReporterToolbarVisible = visible
         persistUiSetting("uiPskReporterToolbarVisible", visible)
@@ -1344,9 +1388,7 @@ ApplicationWindow {
         // sulla Window per garantire riapertura affidabile dal footer toggle.
         if (typeof dxClusterFloatingWindow !== 'undefined') {
             if (dxClusterPanelVisible) {
-                dxClusterFloatingWindow.show()
-                dxClusterFloatingWindow.raise()
-                dxClusterFloatingWindow.requestActivate()
+                raiseDxClusterPanel()
             } else {
                 dxClusterFloatingWindow.hide()
             }
@@ -2352,7 +2394,7 @@ ApplicationWindow {
                             }
 
                             ToolTip.visible: bandMouseArea.containsMouse
-                            ToolTip.text: "Clicca per passare a " + modelData
+                            ToolTip.text: "Click to switch to " + modelData
                             ToolTip.delay: 300
                         }
                     }
@@ -2908,9 +2950,9 @@ ApplicationWindow {
                             }
 
                             ToolTip.visible: maCoherent.containsMouse
-                            ToolTip.text: "Media coerente: " + (bridge.coherentAvgEnabled
-                                ? (bridge.ledCoherentAveraging ? bridge.coherentCount + " segnali" : "ON (in attesa)")
-                                : "OFF (disattivato)") + "  -  clicca per attivare/disattivare"
+                            ToolTip.text: "Coherent averaging: " + (bridge.coherentAvgEnabled
+                                ? (bridge.ledCoherentAveraging ? bridge.coherentCount + " signals" : "ON (waiting)")
+                                : "OFF (disabled)") + "  -  click to toggle"
 
                             MouseArea {
                                 id: maCoherent
@@ -2943,9 +2985,9 @@ ApplicationWindow {
                             }
 
                             ToolTip.visible: maNeural.containsMouse
-                            ToolTip.text: "Sincronizzazione neurale: " + (bridge.neuralSyncEnabled
-                                ? (bridge.ledNeuralSync ? (bridge.neuralScore * 100).toFixed(0) + "%" : "ON (in attesa)")
-                                : "OFF (disattivato)") + "  -  clicca per attivare/disattivare"
+                            ToolTip.text: "Neural sync: " + (bridge.neuralSyncEnabled
+                                ? (bridge.ledNeuralSync ? (bridge.neuralScore * 100).toFixed(0) + "%" : "ON (waiting)")
+                                : "OFF (disabled)") + "  -  click to toggle"
 
                             MouseArea {
                                 id: maNeural
@@ -2978,9 +3020,9 @@ ApplicationWindow {
                             }
 
                             ToolTip.visible: maTurbo.containsMouse
-                            ToolTip.text: "Feedback turbo: " + (bridge.turboFeedbackEnabled
-                                ? (bridge.ledTurboFeedback ? bridge.turboIterations + " iter" : "ON (in attesa)")
-                                : "OFF (disattivato)") + "  -  clicca per attivare/disattivare"
+                            ToolTip.text: "Turbo feedback: " + (bridge.turboFeedbackEnabled
+                                ? (bridge.ledTurboFeedback ? bridge.turboIterations + " iter" : "ON (waiting)")
+                                : "OFF (disabled)") + "  -  click to toggle"
 
                             MouseArea {
                                 id: maTurbo
@@ -3028,7 +3070,7 @@ ApplicationWindow {
                                 onClicked: bridge.syncNtpNow()
                                 ToolTip.visible: containsMouse
                                 ToolTip.delay: 600
-                                ToolTip.text: qsTr("Clic: sincronizzazione NTP immediata per allineare il DT (FT8/FT4)")
+                                ToolTip.text: qsTr("Click: sync NTP now to align DT (FT8/FT4)")
                             }
                         }
                     }
@@ -3111,8 +3153,8 @@ ApplicationWindow {
 	                                        }
 	                                        ToolTip.visible: rxAutoLevelMouse.containsMouse
 	                                        ToolTip.text: bridge && bridge.autoRxInputLevel
-	                                                      ? qsTr("Livello RX automatico attivo")
-	                                                      : qsTr("Livello RX automatico disattivato")
+	                                                      ? qsTr("Auto RX level active")
+	                                                      : qsTr("Auto RX level disabled")
 	                                    }
 	                                    Slider {
 	                                        id: rxSliderHeader
@@ -3227,7 +3269,7 @@ ApplicationWindow {
                                 }
 
                                 ToolTip.visible: monitorMA.containsMouse
-                                ToolTip.text: bridge.monitoring ? "Interrompi il monitoraggio" : "Avvia il monitoraggio"
+                                ToolTip.text: bridge.monitoring ? "Stop monitoring" : "Start monitoring"
                             }
                         }
                     }
@@ -3246,7 +3288,7 @@ ApplicationWindow {
                 // l'orologio non è più appaiato qui ma vive negli host-slot — vedi clockSlots).
                 Item {
                     id: headerUtilityButtons
-                    width: 360
+                    width: 520
                     height: 74
 
                     Rectangle {
@@ -3281,6 +3323,8 @@ ApplicationWindow {
                                     case "log":    return comp_log
                                     case "macro":  return comp_macro
                                     case "astro":  return comp_astro
+                                    case "layout": return comp_layout
+                                    case "history": return comp_history
                                     case "cat":    return comp_cat
                                     case "sep1":
                                     case "sep2":   return comp_sep
@@ -3508,7 +3552,7 @@ ApplicationWindow {
                             property bool hovered: false
                             readonly property bool btnVisible: mainWindow.uiBtnSetupVisible
                             readonly property real prefWidth: 50
-                            readonly property string tip: "Impostazioni"
+                            readonly property string tip: "Settings"
                             function activate(mouse) { openSettingsDialog() }
                             radius: 3
                             color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
@@ -3529,7 +3573,7 @@ ApplicationWindow {
                             readonly property bool btnVisible: mainWindow.uiBtnRecVisible
                             readonly property real prefWidth: 50
                             readonly property string tip: bridge.recordRxEnabled && bridge.wavManager ?
-                                          "Registrazione: " + bridge.wavManager.recordedSeconds + "s" : "Avvia registrazione"
+                                          "Recording: " + bridge.wavManager.recordedSeconds + "s" : "Start recording"
                             function activate(mouse) { bridge.recordRxEnabled = !bridge.recordRxEnabled }
                             radius: 3
                             color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
@@ -3562,7 +3606,7 @@ ApplicationWindow {
                             property bool hovered: false
                             readonly property bool btnVisible: mainWindow.uiBtnWavVisible
                             readonly property real prefWidth: 45
-                            readonly property string tip: qsTr("Clic: apri un file WAV\nClic destro: decodifica una cartella")
+                            readonly property string tip: qsTr("Click: open a WAV file\nRight-click: decode a folder")
                             function activate(mouse) {
                                 if (mouse && mouse.button === Qt.RightButton)
                                     mainWindow.chooseWavFolderForDecode()   // Right-click: batch folder
@@ -3642,7 +3686,7 @@ ApplicationWindow {
                             property bool hovered: false
                             readonly property bool btnVisible: mainWindow.uiBtnAstroVisible
                             readonly property real prefWidth: 48
-                            readonly property string tip: "Dati astronomici"
+                            readonly property string tip: "Astronomical data"
                             function activate(mouse) { openAstroWindow() }
                             radius: 3
                             color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) : "transparent"
@@ -3655,6 +3699,73 @@ ApplicationWindow {
                         }
                     }
 
+                    // Layout reset
+                    Component {
+                        id: comp_layout
+                        Rectangle {
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnFooterResetVisible
+                            readonly property real prefWidth: 64
+                            readonly property string tip: qsTr("Reset layout (Ctrl+Shift+L)")
+                            function activate(mouse) { resetLayoutConfirmDialog.open() }
+                            radius: 3
+                            color: hovered ? Qt.rgba(255/255, 155/255, 58/255, 0.20) : "transparent"
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 4
+                                Text {
+                                    text: "☰"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: "Layout"
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                    color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                        }
+                    }
+
+                    // Decode history
+                    Component {
+                        id: comp_history
+                        Rectangle {
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnFooterHistoryVisible
+                            readonly property real prefWidth: 68
+                            readonly property string tip: qsTr("Decode history (Ctrl+Shift+H)")
+                            function activate(mouse) {
+                                if (typeof historyDialogInstance !== 'undefined')
+                                    historyDialogInstance.show()
+                            }
+                            radius: 3
+                            color: hovered ? Qt.rgba(58/255, 157/255, 255/255, 0.20) : "transparent"
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 4
+                                Text {
+                                    text: "▤"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: "History"
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                    color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                        }
+                    }
+
                     // CAT
                     Component {
                         id: comp_cat
@@ -3662,7 +3773,7 @@ ApplicationWindow {
                             property bool hovered: false
                             readonly property bool btnVisible: mainWindow.uiBtnCatVisible
                             readonly property real prefWidth: 48
-                            readonly property string tip: bridge.catConnected ? "CAT: " + bridge.catRigName : "Clicca per configurare il CAT"
+                            readonly property string tip: bridge.catConnected ? "CAT: " + bridge.catRigName : "Click to configure CAT"
                             function activate(mouse) { openSettingsTab(1) }
                             radius: 3
                             color: hovered ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.15) :
@@ -3929,7 +4040,7 @@ ApplicationWindow {
                                     armed = false
                                 }
                                 ToolTip.visible: containsMouse && !armed
-                                ToolTip.text: qsTr("Trascina per riposizionare l'orologio")
+                                ToolTip.text: qsTr("Drag to reposition the clock")
                                 ToolTip.delay: 500
                             }
                         }
@@ -4326,7 +4437,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: waterfallRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Waterfall")
+                    ToolTip.text: qsTr("Restore Waterfall")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4378,7 +4489,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: logRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Log QSO")
+                    ToolTip.text: qsTr("Restore QSO Log")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4430,7 +4541,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: astroRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Dati astronomici")
+                    ToolTip.text: qsTr("Restore astronomical data")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4487,7 +4598,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: liveMapRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Live Map")
+                    ToolTip.text: qsTr("Restore Live Map")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4553,9 +4664,11 @@ ApplicationWindow {
                             if (mouse.button === Qt.RightButton) {
                                 // Destro: disconnetti
                                 bridge.disconnectDxCluster()
+                                if (mainWindow.dxClusterPanelVisible)
+                                    Qt.callLater(function() { mainWindow.raiseDxClusterPanel() })
                             } else {
                                 // Sinistro: mostra pannello e connetti se non connesso
-                                dxClusterPanelVisible = true
+                                mainWindow.openDxClusterPanel()
                                 if (bridge.dxCluster && !bridge.dxCluster.connected) {
                                     bridge.connectDxCluster(bridge.dxCluster.host, bridge.dxCluster.port)
                                 }
@@ -4626,7 +4739,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: dxcBtnMA.containsMouse
-                    ToolTip.text: qsTr("DX Cluster\nClic sinistro: apri e connetti\nClic destro: disconnetti")
+                    ToolTip.text: qsTr("DX Cluster\nLeft-click: open and connect\nRight-click: disconnect")
                     ToolTip.delay: 400
 
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -4682,8 +4795,8 @@ ApplicationWindow {
 
                     ToolTip.visible: bypassFiltersMA.containsMouse
                     ToolTip.text: bridge.filtersBypassed
-                                  ? qsTr("Disattiva il bypass dei filtri")
-                                  : qsTr("Bypassa i filtri CQ/My Call e di setup")
+                                  ? qsTr("Disable filter bypass")
+                                  : qsTr("Bypass CQ/My Call and setup filters")
                     ToolTip.delay: 500
 
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -4730,7 +4843,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: macroRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina configurazione Macro")
+                    ToolTip.text: qsTr("Restore Macro configuration")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4782,7 +4895,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: rigRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Controllo Rig")
+                    ToolTip.text: qsTr("Restore Rig Control")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4835,7 +4948,7 @@ ApplicationWindow {
                     }
 
 	                    ToolTip.visible: p1RestoreMA.containsMouse
-	                    ToolTip.text: qsTr("Ripristina Full Spectrum")
+	                    ToolTip.text: qsTr("Restore Full Spectrum")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4887,7 +5000,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: p2RestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Periodo 2")
+                    ToolTip.text: qsTr("Restore Period 2")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4938,7 +5051,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: rxRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina Signal RX")
+                    ToolTip.text: qsTr("Restore Signal RX")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -4990,7 +5103,7 @@ ApplicationWindow {
                     }
 
                     ToolTip.visible: txRestoreMA.containsMouse
-                    ToolTip.text: qsTr("Ripristina pannello TX")
+                    ToolTip.text: qsTr("Restore TX panel")
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
@@ -5630,7 +5743,7 @@ ApplicationWindow {
                                 }
 
                                 ToolTip.visible: waterfallPopMA.containsMouse
-                                ToolTip.text: "Stacca Waterfall"
+                                ToolTip.text: "Detach Waterfall"
                                 ToolTip.delay: 500
                             }
                         }
@@ -6606,8 +6719,8 @@ ApplicationWindow {
 	                                            }
 	                                            ToolTip.visible: p1CompactMA.containsMouse
 	                                            ToolTip.text: mainWindow.compactFullSpectrum
-	                                                ? qsTr("Torna all'altezza riga normale")
-	                                                : qsTr("Righe compatte (2x decodifiche visibili)")
+	                                                ? qsTr("Return to normal row height")
+	                                                : qsTr("Compact rows (2x visible decodes)")
 	                                            ToolTip.delay: 500
 	                                        }
 
@@ -6637,7 +6750,7 @@ ApplicationWindow {
 	                                            }
 
 	                                            ToolTip.visible: p1DetachMA.containsMouse
-	                                            ToolTip.text: qsTr("Stacca Full Spectrum")
+	                                            ToolTip.text: qsTr("Detach Full Spectrum")
                                             ToolTip.delay: 500
                                         }
                                     }
@@ -7056,7 +7169,7 @@ NumberAnimation {
                                                 }
                                             }
                                             ToolTip.visible: pendingMA.containsMouse
-                                            ToolTip.text: qsTr("Vai all'ultima decodifica")
+                                            ToolTip.text: qsTr("Go to the latest decode")
                                             ToolTip.delay: 500
                                         }
                                     }
@@ -7241,7 +7354,7 @@ NumberAnimation {
                                                 onClicked: decodePanel.clearSignalRxDecodes()
                                             }
                                             ToolTip.visible: rxClearMA.containsMouse
-                                            ToolTip.text: qsTr("Svuota Signal RX")
+                                            ToolTip.text: qsTr("Clear Signal RX")
                                         }
 
 	                                        // 1.0.253 — Compact mode toggle Signal RX
@@ -7275,8 +7388,8 @@ NumberAnimation {
 	                                            }
 	                                            ToolTip.visible: rxCompactMA.containsMouse
 	                                            ToolTip.text: mainWindow.compactSignalRx
-	                                                ? qsTr("Torna all'altezza riga normale")
-	                                                : qsTr("Righe compatte (2x decodifiche visibili)")
+	                                                ? qsTr("Return to normal row height")
+	                                                : qsTr("Compact rows (2x visible decodes)")
 	                                            ToolTip.delay: 500
 	                                        }
 
@@ -7306,7 +7419,7 @@ NumberAnimation {
 	                                            }
 
 	                                            ToolTip.visible: rxDetachMA.containsMouse
-	                                            ToolTip.text: qsTr("Stacca Signal RX")
+	                                            ToolTip.text: qsTr("Detach Signal RX")
                                             ToolTip.delay: 500
                                         }
                                     }
@@ -7903,7 +8016,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     }
                                 }
                                 ToolTip.visible: containsMouse && !armed
-                                ToolTip.text: qsTr("Trascina per scambiare la colonna")
+                                ToolTip.text: qsTr("Drag to swap the column")
                                 ToolTip.delay: 500
                             }
                         }
@@ -8106,7 +8219,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 }
 
                                 ToolTip.visible: txDetachMA.containsMouse
-                                ToolTip.text: qsTr("Stacca pannello TX")
+                                ToolTip.text: qsTr("Detach TX panel")
                                 ToolTip.delay: 500
                             }
                         }
@@ -8595,6 +8708,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
     Loader {
         id: macroDialogLoader
+        anchors.fill: parent
         active: false
         asynchronous: true
         source: "components/MacroDialog.qml"
@@ -8611,6 +8725,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
     Loader {
         id: astroWindowLoader
+        anchors.fill: parent
         active: false
         asynchronous: true
         source: "components/AstroWindow.qml"
@@ -9729,34 +9844,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
             }
         }
 
-	        MenuItem {
-	            text: (bridge.foxMode ? "✓ " : "☐ ") + qsTr("Fox Mode (Caller Queue)")
-	            onTriggered: { bridge.foxMode = !bridge.foxMode; callerQueuePanelVisible = bridge.foxMode }
-            background: Rectangle {
-                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
-                radius: 6
-            }
-            contentItem: Text {
-                text: parent.text; font.pixelSize: 12
-                color: bridge.foxMode ? "#FF9800" : textSecondary
-                leftPadding: 10
-            }
-        }
-
-        MenuItem {
-            text: (bridge.houndMode ? "✓ " : "☐ ") + qsTr("Hound Mode")
-            onTriggered: { bridge.houndMode = !bridge.houndMode; callerQueuePanelVisible = bridge.foxMode }
-            background: Rectangle {
-                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
-                radius: 6
-            }
-            contentItem: Text {
-                text: parent.text; font.pixelSize: 12
-                color: bridge.houndMode ? "#FF9800" : textSecondary
-                leftPadding: 10
-            }
-        }
-
         MenuItem {
             text: (astroPanelVisible ? "✓ " : "☐ ") + qsTr("Astro / EME")
             onTriggered: astroPanelVisible = !astroPanelVisible
@@ -10356,7 +10443,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                            }
 
 	                            ToolTip.visible: waterfallDockMA.containsMouse
-	                            ToolTip.text: "Aggancia Waterfall"
+	                            ToolTip.text: "Dock Waterfall"
 	                            ToolTip.delay: 500
 	                        }
 
@@ -10388,7 +10475,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                             }
 
                             ToolTip.visible: minimizeMA.containsMouse
-	                            ToolTip.text: "Riduci a icona"
+	                            ToolTip.text: "Minimize"
                             ToolTip.delay: 500
                         }
 
@@ -10648,19 +10735,35 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         anchors.right: parent.right
                         anchors.rightMargin: 88
                         acceptedButtons: Qt.LeftButton
+                        preventStealing: true
                         property point pressGlobalPos: Qt.point(0, 0)
                         property point pressWindowPos: Qt.point(0, 0)
+                        property bool nativeMoveActive: false
                         cursorShape: Qt.SizeAllCursor
                         onPressed: function(mouse) {
                             pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
                             pressWindowPos = Qt.point(astroFloatingWindow.x, astroFloatingWindow.y)
+                            nativeMoveActive = mainWindow.startNativeFloatingWindowMove(astroFloatingWindow)
+                            mouse.accepted = true
                         }
                         onPositionChanged: function(mouse) {
-                            if (pressed) {
-                                var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                                astroFloatingWindow.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
-                                astroFloatingWindow.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
-                            }
+                            if (!pressed)
+                                return
+                            if (nativeMoveActive)
+                                return
+                            mainWindow.dragFloatingWindowToGlobal(astroFloatingWindow,
+                                                                  pressWindowPos,
+                                                                  pressGlobalPos,
+                                                                  mapToGlobal(mouse.x, mouse.y))
+                            mouse.accepted = true
+                        }
+                        onReleased: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(astroFloatingWindow)
+                        }
+                        onCanceled: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(astroFloatingWindow)
                         }
                     }
 
@@ -10755,16 +10858,43 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                     radius: 6
 
                     MouseArea {
-                        anchors.fill: parent
-                        property point clickPos: Qt.point(0, 0)
+                        id: macroFloatDragArea
+                        z: 2
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.rightMargin: 88
+                        acceptedButtons: Qt.LeftButton
+                        preventStealing: true
+                        property point pressGlobalPos: Qt.point(0, 0)
+                        property point pressWindowPos: Qt.point(0, 0)
+                        property bool nativeMoveActive: false
                         cursorShape: Qt.SizeAllCursor
-                        onPressed: function(mouse) { clickPos = Qt.point(mouse.x, mouse.y) }
+                        onPressed: function(mouse) {
+                            pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                            pressWindowPos = Qt.point(macroFloatingWindow.x, macroFloatingWindow.y)
+                            nativeMoveActive = mainWindow.startNativeFloatingWindowMove(macroFloatingWindow)
+                            mouse.accepted = true
+                        }
                         onPositionChanged: function(mouse) {
-                            if (pressed) {
-                                var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
-                                macroFloatingWindow.x += delta.x
-                                macroFloatingWindow.y += delta.y
-                            }
+                            if (!pressed)
+                                return
+                            if (nativeMoveActive)
+                                return
+                            mainWindow.dragFloatingWindowToGlobal(macroFloatingWindow,
+                                                                  pressWindowPos,
+                                                                  pressGlobalPos,
+                                                                  mapToGlobal(mouse.x, mouse.y))
+                            mouse.accepted = true
+                        }
+                        onReleased: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(macroFloatingWindow)
+                        }
+                        onCanceled: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(macroFloatingWindow)
                         }
                     }
 
@@ -11217,8 +11347,8 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		                            }
 		                            ToolTip.visible: p1FloatCompactMA.containsMouse
 		                            ToolTip.text: mainWindow.compactFullSpectrum
-		                                ? qsTr("Torna all'altezza riga normale")
-		                                : qsTr("Righe compatte (2x decodifiche visibili)")
+		                                ? qsTr("Return to normal row height")
+		                                : qsTr("Compact rows (2x visible decodes)")
 		                        }
 
 		                        Rectangle {
@@ -11243,7 +11373,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                                onClicked: mainWindow.dockFullSpectrumPanel()
 	                            }
 	                            ToolTip.visible: p1FloatDockMA.containsMouse
-		                            ToolTip.text: qsTr("Aggancia")
+		                            ToolTip.text: qsTr("Dock")
 	                        }
 
 		                        Rectangle {
@@ -11792,8 +11922,8 @@ NumberAnimation {
 	                                }
 	                                ToolTip.visible: rxFloatCompactMA.containsMouse
 	                                ToolTip.text: mainWindow.compactSignalRx
-	                                    ? qsTr("Torna all'altezza riga normale")
-	                                    : qsTr("Righe compatte (2x decodifiche visibili)")
+	                                    ? qsTr("Return to normal row height")
+	                                    : qsTr("Compact rows (2x visible decodes)")
 	                                ToolTip.delay: 500
 	                            }
 
@@ -11819,7 +11949,7 @@ NumberAnimation {
 	                                onClicked: mainWindow.dockSignalRxPanel()
 	                            }
 	                            ToolTip.visible: rxFloatDockMA.containsMouse
-		                            ToolTip.text: qsTr("Aggancia")
+		                            ToolTip.text: qsTr("Dock")
 		                }
 
 		                Rectangle {
@@ -12355,7 +12485,7 @@ NumberAnimation {
 	                                onClicked: { txPanelDockHighlighted = false; txPanelDetached = false; txPanelMinimized = false; txPanelFloatingWindow.close() }
 	                            }
 	                            ToolTip.visible: txFloatDockMA.containsMouse
-	                            ToolTip.text: qsTr("Aggancia pannello TX")
+	                            ToolTip.text: qsTr("Dock TX panel")
 	                        }
 
 	                        Rectangle {
