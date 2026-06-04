@@ -3239,6 +3239,24 @@ static bool isDirectedDecodeTerminalToken(QString const& token)
         || isRogerSignalReportToken(upper);
 }
 
+// 1.0.373 - ghost strutturale FT2/FT8: token "R" NUDO (singola lettera) seguito da un
+// grid valido (es. "CALL1 CALL2 R MK86", "CQ CALL/P R LD05"). Nessun tipo-messaggio
+// 77-bit standard produce "R <GRID>" (l'exchange con R e' "CALL CALL R-NN", mai "R GRID";
+// un CQ valido e' "CQ CALL GRID" senza R). Tipico falso-positivo LDPC a SNR basso con
+// callsign compound spazzatura. Sicuro: NON confonde R-12/R+05/Rdd (token interi != "R")
+// ne' RR73 col token "R" nudo. Default-ON: un TX conforme non lo genera mai.
+static bool looksLikeMalformedRGrid(QString const& msgText)
+{
+    QStringList const tokens = msgText.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    for (int i = 0; i + 1 < tokens.size(); ++i) {
+        if (tokens[i].trimmed().toUpper() == QStringLiteral("R")
+            && isGridTokenStrict(tokens[i + 1].trimmed().toUpper())) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool hasPortableOperatingDesignator(QString const& token)
 {
     QString const upper = normalizeCallToken(token).trimmed().toUpper();
@@ -5018,12 +5036,16 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
     // dallo SNR, per evitare righe "callsign" inesistenti e punti Live Map.
     QString const entryMode = entry.value(QStringLiteral("mode"), m_mode)
                                   .toString().trimmed().toUpper();
+    QString msgText = entry.value(QStringLiteral("displayMessage")).toString().trimmed();
+    if (msgText.isEmpty()) {
+        msgText = entry.value(QStringLiteral("message")).toString().trimmed();
+    }
+    // 1.0.373 - ghost strutturale "R nuda + grid" (CALL CALL R GRID / CQ CALL R GRID):
+    // formato non-standard 77-bit, solo decode LDPC corrotti lo generano. SNR-indipendente.
+    if (looksLikeMalformedRGrid(msgText)) {
+        return true;
+    }
     if (entryMode == QStringLiteral("FT2")) {
-        QString msgText = entry.value(QStringLiteral("displayMessage"))
-                              .toString().trimmed();
-        if (msgText.isEmpty()) {
-            msgText = entry.value(QStringLiteral("message")).toString().trimmed();
-        }
         if (decodeListModel_isTelemetryOnlyMessage(msgText)) {
             return true;
         }
