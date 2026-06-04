@@ -7875,6 +7875,14 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_startupModeAutoUntilMs = QDateTime::currentMSecsSinceEpoch() + 10000;
     m_startupModeAutoAuthoritativeApplied = false;
     maybeApplyStartupModeFromRigFrequency(m_frequency);
+    // 1.0.374: allinea il modo del BandManager al modo applicativo finale dell'avvio.
+    // Avviando GIA' in FT2 (modo salvato == startup) l'early-return di
+    // maybeApplyStartupModeFromRigFrequency salta setMode()->setCurrentMode(), cosi
+    // m_currentMode resterebbe FT8 (default) e il cambio banda dalla band-bar darebbe
+    // la freq FT8 invece di quella FT2. Ristabilisce l'invariante m_currentMode==m_mode.
+    if (m_bandManager) {
+        m_bandManager->setCurrentMode(m_mode);
+    }
     m_legacyStartupModeGuard = m_mode.trimmed();
     m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 10000;
     bridgeLog(QStringLiteral("Audio device enumeration deferred until Main.qml ready"));
@@ -11200,6 +11208,9 @@ void DecodiumBridge::applyRemoteBandChange(const QString& band)
 
     QString const beforeBand = m_bandManager->currentBandLambda();
     double const beforeFrequency = m_frequency;
+    // 1.0.374: il cambio banda deve risolvere la freq col modo applicativo corrente
+    // (changeBandByLambda usa m_currentMode, va tenuto allineato a m_mode).
+    m_bandManager->setCurrentMode(m_mode);
     m_bandManager->changeBandByLambda(normalized);
     QString const afterBand = m_bandManager->currentBandLambda();
     if (afterBand.compare(beforeBand, Qt::CaseInsensitive) == 0
