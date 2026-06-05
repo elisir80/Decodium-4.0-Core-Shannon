@@ -778,6 +778,7 @@ private:
   Q_SIGNAL void legacyPreferencesRequested () const;
   Q_SIGNAL void legacyQuitRequested () const;
   Q_SIGNAL void legacyPttRequested (bool enabled) const;
+  Q_SIGNAL void legacyAdifLogged (QByteArray const& adif) const;
 
 private:
   void requestRigPtt (bool enabled);

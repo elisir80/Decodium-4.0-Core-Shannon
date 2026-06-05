@@ -22175,6 +22175,7 @@ void MainWindow::acceptQSO (QDateTime const& QSO_date_off, QString const& call, 
 	                     legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryLoggedAdifEnabled"), true));
 	
 	    logIncremental(call, QString::fromUtf8(ADIF));    //avt 10/2/25
+	    Q_EMIT legacyAdifLogged(ADIF);
 
 	    bool const secondary_udp_enabled =
 	      legacy_runtime_bool (m_settings, QStringLiteral ("UDPSecondaryEnabled"), true);

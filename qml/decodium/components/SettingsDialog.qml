@@ -10,14 +10,17 @@ import QtQuick.Layouts
 
 Dialog {
     id: settingsDialog
-    readonly property int popupBaseWidth: (parent && parent.width > 0) ? parent.width : 1440
+    readonly property int popupViewportMargin: 16
+    readonly property int popupBaseWidth: (parent && parent.width > 0) ? Math.round(parent.width) : 1440
+    readonly property int popupBaseHeight: (parent && parent.height > 0) ? Math.round(parent.height) : 960
+    readonly property int popupMaxWidth: Math.max(1, popupBaseWidth - popupViewportMargin)
+    readonly property int popupMaxHeight: Math.max(1, popupBaseHeight - popupViewportMargin)
+    readonly property bool compactSettingsLayout: width < 1180
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
-    width: Math.min(Math.max(1360, Math.round(popupBaseWidth * 0.998)),
-                    Math.max(520, popupBaseWidth + 180),
-                    2200)
-    height: Math.min(Math.round(((parent && parent.height > 0) ? parent.height : 960) * 0.98), 1080)
+    width: Math.min(Math.max(360, Math.round(popupBaseWidth * 0.998)), popupMaxWidth, 2200)
+    height: Math.min(Math.max(320, Math.round(popupBaseHeight * 0.98)), popupMaxHeight, 1080)
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
     property bool warmupInProgress: false
@@ -26,13 +29,13 @@ Dialog {
         return isFinite(savedTab) ? Math.max(0, Math.min(12, Math.floor(savedTab))) : 0
     }
     property bool closeAlreadyPersisted: false
-    readonly property int labelWidth: 172
-    readonly property int fieldMinWidth: 380
-    readonly property int wideFieldMinWidth: 620
-    readonly property int portFieldMinWidth: 270
-    readonly property int numericFieldMinWidth: 220
-    readonly property int comboFieldMinWidth: 320
-    readonly property int frequencyPageMinWidth: 1120
+    readonly property int labelWidth: compactSettingsLayout ? 132 : 172
+    readonly property int fieldMinWidth: compactSettingsLayout ? 240 : 380
+    readonly property int wideFieldMinWidth: compactSettingsLayout ? 340 : 620
+    readonly property int portFieldMinWidth: compactSettingsLayout ? 180 : 270
+    readonly property int numericFieldMinWidth: compactSettingsLayout ? 160 : 220
+    readonly property int comboFieldMinWidth: compactSettingsLayout ? 240 : 320
+    readonly property int frequencyPageMinWidth: compactSettingsLayout ? 900 : 1120
     readonly property int scrollLeftMargin: 10
     readonly property int scrollTopMargin: 10
     readonly property int scrollRightMargin: 12
@@ -1042,8 +1045,20 @@ Dialog {
     }
 
     onAboutToShow: {
-        if (!warmupInProgress)
+        if (!warmupInProgress) {
             ensureInitialPosition()
+            clampToParent()
+        }
+    }
+
+    onWidthChanged: {
+        if (visible && !warmupInProgress)
+            clampToParent()
+    }
+
+    onHeightChanged: {
+        if (visible && !warmupInProgress)
+            clampToParent()
     }
 
     onCurrentTabChanged: {
@@ -1394,11 +1409,12 @@ Dialog {
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 10
+            anchors.margins: settingsDialog.width < 520 ? 8 : 12
+            spacing: settingsDialog.width < 520 ? 8 : 10
 
             Text {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 text: qsTr("Changes are applied immediately where supported.")
                 color: textSecondary
                 font.pixelSize: 11
@@ -1406,8 +1422,9 @@ Dialog {
             }
 
             Rectangle {
-                width: 110
-                height: 36
+                Layout.preferredWidth: settingsDialog.width < 520 ? 84 : 110
+                Layout.minimumWidth: 72
+                Layout.preferredHeight: 36
                 radius: 6
                 color: closeFooterMA.containsMouse ? Qt.rgba(1,1,1,0.08) : bgMedium
                 border.color: glassBorder
@@ -1429,8 +1446,9 @@ Dialog {
             }
 
             Rectangle {
-                width: 110
-                height: 36
+                Layout.preferredWidth: settingsDialog.width < 520 ? 84 : 110
+                Layout.minimumWidth: 72
+                Layout.preferredHeight: 36
                 radius: 6
                 color: okFooterMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.22) : bgMedium
                 border.color: accentGreen
@@ -1456,13 +1474,16 @@ Dialog {
 
     // ── Content ──────────────────────────────────────────────────────────
     contentItem: Item {
+        clip: true
+
         RowLayout {
             anchors.fill: parent
             spacing: 0
 
             // ── Sidebar ──────────────────────────────────────────────
             Rectangle {
-                Layout.preferredWidth: 210
+                Layout.preferredWidth: settingsDialog.compactSettingsLayout ? 180 : 210
+                Layout.minimumWidth: settingsDialog.compactSettingsLayout ? 160 : 210
                 Layout.fillHeight: true
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 

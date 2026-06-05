@@ -3057,6 +3057,7 @@ private:
     bool usingLegacyBackendForTx() const;
     bool shouldUseBridgeAudioForLegacyDigitalTx() const;
     bool legacyBridgeAudioTxInFlight() const;
+    void mirrorLegacyLoggedAdif(QByteArray const& adif);
     bool preflightLegacyBridgeTxBeforePtt(const QString& reason);
     void abortLegacyBridgeTxRequest(const QString& reason);
     quint64 armPendingLegacyBridgeAudioStart(const QString& reason);

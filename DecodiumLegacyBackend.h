@@ -127,6 +127,7 @@ Q_SIGNALS:
                         QString const& summary,
                         QString const& details) const;
     void rigPttRequested(bool enabled) const;
+    void adifLogged(QByteArray const& adif) const;
 
 private:
     void applyEmbeddedWidgetTheme();

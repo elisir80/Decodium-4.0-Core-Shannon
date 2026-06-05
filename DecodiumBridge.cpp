@@ -8187,19 +8187,20 @@ void DecodiumBridge::runPostQmlStartupServices()
     bool const autoConn = (m_catBackend == QStringLiteral("native")) ? m_nativeCat->catAutoConnect()
                         : (m_catBackend == QStringLiteral("omnirig")) ? m_omniRigCat->catAutoConnect()
                                                                       : m_hamlibCat->catAutoConnect();
-    // Respect the user's CAT Auto Connect choice. A previous successful
-    // session may select the retry path only when auto-connect is still ON.
+    // Auto Connect is the explicit preference; lastSuccessfulCatConnected
+    // preserves the common "close while connected, reopen connected" workflow.
     QSettings catLastSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     bool const lastSuccess = catLastSettings.value(QStringLiteral("lastSuccessfulCatConnected"), false).toBool();
     QString const lastBackend = catLastSettings.value(QStringLiteral("lastSuccessfulCatBackend")).toString();
     bool const sameBackend = (lastBackend == m_catBackend);
-    bool const retryLastSuccessfulCat = autoConn && lastSuccess && sameBackend;
+    bool const retryLastSuccessfulCat = lastSuccess && sameBackend;
+    bool const startupCatRequested = autoConn || retryLastSuccessfulCat;
     bridgeLog(QStringLiteral("CAT[%1] autoConnect=%2 retryLastSuccessful=%3")
                   .arg(m_catBackend)
                   .arg(autoConn ? 1 : 0)
                   .arg(retryLastSuccessfulCat ? 1 : 0));
 
-    if ((legacyOwnsRigControl(m_legacyBackend) || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) && autoConn) {
+    if ((legacyOwnsRigControl(m_legacyBackend) || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) && startupCatRequested) {
         bridgeLog(QStringLiteral("CAT auto-connect delegated to legacy backend"));
         QTimer::singleShot(250, this, [this]() {
             if (!m_legacyBackend || !m_legacyBackend->available()) {
@@ -8209,9 +8210,16 @@ void DecodiumBridge::runPostQmlStartupServices()
             syncLegacyBackendTxState();
             scheduleLegacyStateRefreshBurst();
         });
-    } else if (autoConn || retryLastSuccessfulCat) {
+    } else if (startupCatRequested) {
         m_startupCatRetryCount = 0;
-        static constexpr int kStartupCatRetryDelaysMs[] = {1000, 3500, 7000, 12000};
+        // Windows can expose COM ports late after USB/driver startup. HRD can
+        // also hold the first network probe until its 75s watchdog expires, so
+        // keep at least one retry beyond that window.
+        static constexpr int kStartupCatRetryDelaysMs[] = {
+            1000, 3500, 7000, 12000, 20000, 35000, 60000, 90000
+        };
+        constexpr int kStartupCatRetryAttemptCount =
+            int(sizeof(kStartupCatRetryDelaysMs) / sizeof(kStartupCatRetryDelaysMs[0]));
         int attempt = 0;
         for (int const delayMs : kStartupCatRetryDelaysMs) {
             ++attempt;
@@ -8221,7 +8229,7 @@ void DecodiumBridge::runPostQmlStartupServices()
                 m_startupCatRetryCount = attempt;
                 bridgeLog(QStringLiteral("CAT startup reconnect: attempt %1/%2 on %3 delay=%4ms")
                               .arg(attempt)
-                              .arg(4)
+                              .arg(kStartupCatRetryAttemptCount)
                               .arg(m_catBackend)
                               .arg(delayMs));
                 retryRigConnection();
@@ -8353,6 +8361,8 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                 this, &DecodiumBridge::onLegacyWaterfallRow);
         connect(m_legacyBackend, &DecodiumLegacyBackend::audioSamplesReady,
                 this, &DecodiumBridge::onLegacyAudioSamples);
+        connect(m_legacyBackend, &DecodiumLegacyBackend::adifLogged,
+                this, &DecodiumBridge::mirrorLegacyLoggedAdif);
         connect(m_legacyBackend, &DecodiumLegacyBackend::warningRaised,
                 this, [this](QString const& title, QString const& summary, QString const& details) {
             // Quando il CAT nativo gestisce il rig, solo i warning legacy
@@ -37513,6 +37523,73 @@ QVariantMap DecodiumBridge::getQsoStats() const
 
     QVariantList const rows = searchQsos(QString {}, QString {}, QString {}, QString {}, QString {});
     return qsoStatsFromRows(rows);
+}
+
+void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
+{
+    if (m_shuttingDown || adif.trimmed().isEmpty()) {
+        return;
+    }
+
+    QList<ParsedAdifRecord> const sourceRecords = parseAdifRecordsBytes(adif);
+    if (sourceRecords.isEmpty()) {
+        bridgeLog(QStringLiteral("legacy ADIF mirror skipped: no parsable record"));
+        return;
+    }
+
+    QString const activePath = ensureAdifLogPath();
+    ParsedAdifDocument dest = loadAdifDocument(activePath);
+    QSet<QString> existingKeys;
+    for (ParsedAdifRecord const& record : dest.records) {
+        QString const key = adifRecordDedupeKey(record.fields);
+        if (!key.isEmpty()) {
+            existingKeys.insert(key);
+        }
+    }
+
+    int imported = 0;
+    QStringList importedCalls;
+    for (ParsedAdifRecord const& record : sourceRecords) {
+        ParsedAdifRecord normalizedRecord = normalizeImportedAdifRecord(record);
+        QString const key = adifRecordDedupeKey(normalizedRecord.fields);
+        if (key.isEmpty() || existingKeys.contains(key)) {
+            continue;
+        }
+
+        dest.records.append(normalizedRecord);
+        existingKeys.insert(key);
+        ++imported;
+
+        QString const call = normalizedRecord.fields.value(QStringLiteral("CALL")).trimmed().toUpper();
+        if (!call.isEmpty() && !importedCalls.contains(call)) {
+            importedCalls.append(call);
+        }
+    }
+
+    if (imported <= 0) {
+        bridgeLog(QStringLiteral("legacy ADIF mirror skipped: duplicate or incomplete record"));
+        return;
+    }
+
+    if (!writeAdifDocument(activePath, dest)) {
+        emit errorMessage(QStringLiteral("Impossibile aggiornare il log ADIF attivo dal backend FT2: %1")
+                              .arg(activePath));
+        return;
+    }
+
+    rebuildWorkedCallsFromDocument(m_workedCalls, dest.records);
+    rebuildWorkedSetsFromAdifRecords(dest.records);
+    m_qsoCountCache = dest.records.size();
+    invalidateQsoSearchCache();
+    warmLogCacheAsync();
+    emit qsoCountChanged();
+    emit workedCountChanged();
+    emit qsoLogCacheChanged();
+    bridgeLog(QStringLiteral("legacy ADIF mirrored to active logbook: imported=%1 total=%2 calls=%3 path=%4")
+                  .arg(imported)
+                  .arg(m_qsoCountCache)
+                  .arg(importedCalls.join(QLatin1Char(',')))
+                  .arg(activePath));
 }
 
 int DecodiumBridge::importFromAdif(const QString& filename)

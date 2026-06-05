@@ -632,6 +632,10 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent)
                 SIGNAL(legacyPttRequested(bool)),
                 this,
                 SIGNAL(rigPttRequested(bool)));
+        connect(m_mainWindow,
+                SIGNAL(legacyAdifLogged(QByteArray const&)),
+                this,
+                SIGNAL(adifLogged(QByteArray const&)));
         m_available = true;
 
         // Prevent legacy startup options from auto-starting monitor behind the
