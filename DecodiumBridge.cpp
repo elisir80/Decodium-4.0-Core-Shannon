@@ -5486,14 +5486,30 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
                 double const mismatchKm = azdist(ent.lat, entLonEast,
                                                  gridLat, gridLon,
                                                  mismatchAz);
-                if (mismatchKm > 5000.0) {
-                    bridgeLog(QStringLiteral("[GhostFilter] directed call/grid mismatch suppress context=%1 call=%2 dxcc=%3 grid=%4 mismatch=%5km msg=%6")
-                                  .arg(context,
-                                       peer,
-                                       ent.name,
-                                       grid,
-                                       QString::number(qRound(mismatchKm)),
-                                       msg));
+                // 1.0.378: sopprimi per grid-mismatch SOLO se il decode e' a bassa
+                // confidenza (token finale "?", tipico dei ghost AP-aided). Un decode
+                // diretto a mycall ad ALTA confidenza con grid errato puo' essere una
+                // chiamata reale col grid corrotto -> meglio mostrarla che perdere il QSO.
+                QStringList const ghostTokens = msg.split(QRegularExpression(QStringLiteral("\\s+")),
+                                                          Qt::SkipEmptyParts);
+                bool const ghostLowConfidence = !ghostTokens.isEmpty()
+                    && ghostTokens.constLast().trimmed() == QStringLiteral("?");
+                if (mismatchKm > 5000.0 && ghostLowConfidence) {
+                    // dedup: il filtro gira a ogni rebuild lista (signal-rx); una riga
+                    // di log per messaggio invece di decine identiche.
+                    if (!m_loggedDirectedGhostMsgs.contains(msg)) {
+                        if (m_loggedDirectedGhostMsgs.size() > 256) {
+                            m_loggedDirectedGhostMsgs.clear();
+                        }
+                        m_loggedDirectedGhostMsgs.insert(msg);
+                        bridgeLog(QStringLiteral("[GhostFilter] directed call/grid mismatch suppress context=%1 call=%2 dxcc=%3 grid=%4 mismatch=%5km msg=%6")
+                                      .arg(context,
+                                           peer,
+                                           ent.name,
+                                           grid,
+                                           QString::number(qRound(mismatchKm)),
+                                           msg));
+                    }
                     return true;
                 }
             }
