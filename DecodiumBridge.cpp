@@ -21947,7 +21947,17 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
     timeout->start();
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, nam]() {
-        QByteArray const data = reply->readAll();
+        // 1.0.376 (sec #2): cap 1 MiB sulla risposta, come fetchPskHeardBy.
+        static constexpr qsizetype kPskSearchMaxReplyBytes = 1024 * 1024;
+        QVariant const contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+        QByteArray data;
+        bool const declaredTooLarge =
+            contentLength.isValid()
+            && contentLength.toLongLong() > static_cast<qlonglong>(kPskSearchMaxReplyBytes);
+        if (!declaredTooLarge) {
+            data = reply->read(static_cast<qint64>(kPskSearchMaxReplyBytes + 1));
+            if (data.size() > kPskSearchMaxReplyBytes) data.clear();
+        }
         QNetworkReply::NetworkError const err = reply->error();
         QString const errStr = reply->errorString();
         reply->deleteLater();
@@ -36495,17 +36505,20 @@ void DecodiumBridge::openWavForDecode(const QString& path)
     // Scansiona i chunk per trovare 'data'
     int dataOffset = -1;
     int dataSize   = 0;
-    int pos = 12; // dopo RIFF header (4 "RIFF" + 4 size + 4 "WAVE")
-    while (pos + 8 <= data.size()) {
+    // 1.0.376 (sec #13): scan a 64-bit + clamp al buffer; un chunkSize uint32 enorme
+    // castato a int rendeva pos negativo -> OOB read su WAV malformato.
+    qint64 pos = 12; // dopo RIFF header (4 "RIFF" + 4 size + 4 "WAVE")
+    while (pos + 8 <= static_cast<qint64>(data.size())) {
         const char* chunkId   = hdr + pos;
         uint32_t    chunkSize = *reinterpret_cast<const uint32_t*>(hdr + pos + 4);
         if (qstrncmp(chunkId, "data", 4) == 0) {
-            dataOffset = pos + 8;
-            dataSize   = static_cast<int>(chunkSize);
+            dataOffset = static_cast<int>(pos + 8);
+            dataSize   = static_cast<int>(qMin<qint64>(chunkSize,
+                                static_cast<qint64>(data.size()) - (pos + 8)));
             break;
         }
-        pos += 8 + static_cast<int>(chunkSize);
-        if (chunkSize & 1) ++pos; // padding byte se chunkSize dispari
+        pos += 8 + static_cast<qint64>(chunkSize);
+        if (chunkSize & 1u) ++pos; // padding byte se chunkSize dispari
     }
 
     if (dataOffset < 0 || dataOffset >= data.size()) {

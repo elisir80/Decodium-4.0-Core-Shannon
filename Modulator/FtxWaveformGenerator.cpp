@@ -1900,6 +1900,7 @@ extern "C" void foxgen_ (bool* bSuperFox, char const* /*fname*/, fortran_charlen
 
   int const max_samples = FOXCOM_WAVE_SIZE;
   int const copy_samples = std::min (max_samples, (int)wave.size ());
+  if (!foxcom_ensure_wave (&foxcom_)) return;  // 1.0.376 (sec #6): alloca prima di scrivere
   std::copy_n (wave.constBegin (), copy_samples, foxcom_.wave);
   if (copy_samples < max_samples)
     {
@@ -1957,6 +1958,7 @@ extern "C" void foxgenft2_ ()
 
   int const max_samples = FOXCOM_WAVE_SIZE;
   int const copy_samples = std::min (max_samples, (int)wave.size ());
+  if (!foxcom_ensure_wave (&foxcom_)) return;  // 1.0.376 (sec #6): alloca prima di scrivere
   std::copy_n (wave.constBegin (), copy_samples, foxcom_.wave);
   if (copy_samples < max_samples)
     {

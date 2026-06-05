@@ -16529,11 +16529,14 @@ void MainWindow::guiUpdate()
           float f0=ui->TxFreqSpinBox->value() - m_XIT + 1.5*dfreq;
           if(m_mode=="FST4W") f0=ui->WSPRfreqSpinBox->value() - m_XIT + 1.5*dfreq;
           auto const wave = decodium::txwave::generateFst4Wave (itone, nsym, nsps, fsample, hmod, f0);
-          std::fill_n (foxcom_.wave, FOXCOM_WAVE_SIZE, 0.0f);
-          foxcom_ensure_wave(&foxcom_);
-          std::copy_n (wave.constBegin (), qMin (wave.size (),
-                                                 static_cast<qsizetype>(FOXCOM_WAVE_SIZE)),
-                       foxcom_.wave);
+          // 1.0.376 (sec #6): alloca PRIMA di scrivere (era fill_n prima di ensure =
+          // NULL-write su processo fresco in FST4/FST4W).
+          if (foxcom_ensure_wave(&foxcom_)) {
+            std::fill_n (foxcom_.wave, FOXCOM_WAVE_SIZE, 0.0f);
+            std::copy_n (wave.constBegin (), qMin (wave.size (),
+                                                   static_cast<qsizetype>(FOXCOM_WAVE_SIZE)),
+                         foxcom_.wave);
+          }
 
           QString t = QString::fromStdString(message).trimmed();
         }
@@ -17711,6 +17714,16 @@ void MainWindow::handleDoubleClickOnCall(Qt::KeyboardModifiers modifiers, bool f
       lookup ();
       m_hisGrid = ui->dxGridEntry->text ();
       m_bDoubleClicked = previousDoubleClick;
+
+      // 1.0.376 (sec #14): onora il gate Digital Morse anche sul fast-path FT2 da Band
+      // Activity (come il path normale ~19152): prearma e attende btnTxNow invece di
+      // armare il TX da solo, cosi la conferma manuale scelta dall'operatore vale.
+      if (m_bDigitalMorse && m_mode == "FT2")
+        {
+          m_bTxPreloaded = true;
+          if (ui->btnTxNow) ui->btnTxNow->setVisible (true);
+          return;
+        }
 
       if (!startTxNow || m_mode == "WSPR" || m_mode == "FST4W")
         {
@@ -22816,6 +22829,7 @@ bool MainWindow::prepareRttyTransmission(QString const& text)
       if (copySamples <= 0) {
         return false;
       }
+      if (!foxcom_ensure_wave(&foxcom_)) return false;  // 1.0.376 (sec #6): alloca prima di scrivere
       std::copy_n(wave.constBegin(), copySamples, foxcom_.wave);
       std::fill(foxcom_.wave + copySamples, foxcom_.wave + kFoxWaveSampleCount, 0.0f);
     }
@@ -24648,7 +24662,9 @@ void MainWindow::handle_transceiver_failure (QString const& reason)
 
   // During active QSO/log transitions, transient CAT poll errors can occur.
   // Retry a few times first without forcing TX stop to avoid unnecessary drops.
-  if (m_rigAutoRetryCount < 3)
+  // 1.0.376 (sec #17): fail-closed durante TX/tune — non ritardare lo stop con i retry
+  // se il trasmettitore e attivo.
+  if (m_rigAutoRetryCount < 3 && !m_transmitting && !m_tune)
     {
       rigFailure (reason, true);
       return;

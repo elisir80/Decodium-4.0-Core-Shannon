@@ -143,10 +143,11 @@ typedef struct foxcom_block {
 #else
 #include <stdlib.h>
 #endif
-static inline void foxcom_ensure_wave(foxcom_block_t* fc) {
+static inline bool foxcom_ensure_wave(foxcom_block_t* fc) {
   if (!fc->wave) {
     fc->wave = (float*)calloc(FOXCOM_WAVE_SIZE, sizeof(float));
   }
+  return fc->wave != NULL;
 }
 
 typedef struct foxcom3_block {
