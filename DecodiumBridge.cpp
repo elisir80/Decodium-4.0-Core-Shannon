@@ -24488,6 +24488,13 @@ bool DecodiumBridge::advanceQsoState(int txNum)
         bridgeLog("advanceQsoState: QuickQSO attivo → salta TX1, va a TX2 (Ultra2)");
         txNum = 2;
     }
+    // 1.0.379: se TX1 e' disabilitato dall'utente (toggle Tx1), la risposta a un CQ
+    // deve comunque partire da TX2 (come WSJT-X con Tx1 off) invece di essere rifiutata
+    // e bloccare il QSO. Regressione 1.0.375 (advanceQsoState->bool senza fallback).
+    else if (txNum == 1 && isTxDisabled(1) && !isTxDisabled(2)) {
+        bridgeLog("advanceQsoState: TX1 user-disabled -> fallback a TX2 (reply-from-Tx2)");
+        txNum = 2;
+    }
 
     // Quick QSO (Ultra2): TX3 contiene "R+report TU" → dopo TX3 il QSO e' finito
     // Salta TX4/TX5 e va diretto a SIGNOFF con log automatico
