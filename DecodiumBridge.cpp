@@ -24597,21 +24597,8 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
 {
     QString const normalizedMode = modeSnapshot.trimmed().toUpper();
     int const periodMs = periodMsForMode(normalizedMode);
-    bool const activeQsoWaitsForReply =
-        (normalizedMode == QStringLiteral("FT8") || normalizedMode == QStringLiteral("FT4"))
-        && !m_dxCall.trimmed().isEmpty()
-        && m_currentTx >= 1
-        && m_currentTx <= 5
-        && (m_lastNtx >= 1 || m_qsoProgress > 2 || m_pendingAutoSeqTxAfterActiveTx > 0);
-    // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx.
-    // 1.0.375: in an active FT8/FT4 QSO, correctness beats a perfectly clean
-    // +500 ms start. The decoder is dispatched at ~+650 ms; using the normal
-    // clean-start cap here gave only ~400 ms of grace, so AutoTX could retry
-    // TX1/TX3 before seeing the partner's report/RR73 on slower machines.
-    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode,
-                                                              periodMs,
-                                                              effectiveRelaxLatestCap()
-                                                                  || activeQsoWaitsForReply);
+    // 1.0.326 B4: use effectiveRelaxLatestCap() (includes ft8FastSequence) — was using only m_ftxImmediateClickTx
+    int const latestStartMs = latestD3CompatibleSyncTxStartMs(normalizedMode, periodMs, effectiveRelaxLatestCap());
     if (periodMs <= 0 || latestStartMs <= 0) {
         return;
     }
@@ -24658,13 +24645,11 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
     }
     int const delayMs = qMax(50, qMin(graceMs, maxDelayMs));
 
-    bridgeLog(QStringLiteral("time-sync auto TX: brief %1 decode grace before TX, fallback in %2ms activeQso=%3 latest=%4ms")
+    bridgeLog(QStringLiteral("time-sync auto TX: brief %1 decode grace before TX, fallback in %2ms")
                   .arg(modeSnapshot)
-                  .arg(delayMs)
-                  .arg(activeQsoWaitsForReply ? 1 : 0)
-                  .arg(latestStartMs));
+                  .arg(delayMs));
 
-    QTimer::singleShot(delayMs, this, [this, modeSnapshot, sessionId, activeQsoWaitsForReply]() {
+    QTimer::singleShot(delayMs, this, [this, modeSnapshot, sessionId]() {
         if (sessionId != m_periodTimerSessionId
             || m_mode != modeSnapshot
             || m_manualTxHold
@@ -24673,22 +24658,6 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
             return;
         }
         if (!shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)) {
-            return;
-        }
-
-        if (activeQsoWaitsForReply && hasPendingTimeSyncDecodeForMode(modeSnapshot)) {
-            QString const holdMode = modeSnapshot.trimmed().toUpper();
-            int const holdPeriodMs = periodMsForMode(holdMode);
-            int const holdLatestStartMs = latestD3CompatibleSyncTxStartMs(holdMode,
-                                                                          holdPeriodMs,
-                                                                          true);
-            int const holdElapsedMs = holdPeriodMs > 0
-                ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(holdPeriodMs))
-                : 0;
-            bridgeLog(QStringLiteral("time-sync auto TX: active QSO %1 decode still pending, skip stale fallback tx elapsed=%2ms latest=%3ms")
-                          .arg(modeSnapshot)
-                          .arg(holdElapsedMs)
-                          .arg(holdLatestStartMs));
             return;
         }
 
