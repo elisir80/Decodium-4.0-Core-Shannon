@@ -24685,10 +24685,29 @@ void DecodiumBridge::scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& mo
             int const holdElapsedMs = holdPeriodMs > 0
                 ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(holdPeriodMs))
                 : 0;
-            bridgeLog(QStringLiteral("time-sync auto TX: active QSO %1 decode still pending, skip stale fallback tx elapsed=%2ms latest=%3ms")
+            bridgeLog(QStringLiteral("time-sync auto TX: active QSO %1 decode still pending, re-check near slot cap elapsed=%2ms latest=%3ms")
                           .arg(modeSnapshot)
                           .arg(holdElapsedMs)
                           .arg(holdLatestStartMs));
+            // 1.0.380: invece di saltare e basta (regressione 1.0.375 = nessun retry
+            // quando il partner non risponde in FT8/FT4), ri-arma un ultimo controllo
+            // vicino al cap dello slot. Se nel frattempo arriva una risposta, m_currentTx
+            // sara' avanzato e checkAndStartPeriodicTx trasmette il TX giusto; se il partner
+            // tace, ritrasmette il TX corrente (retry sotto cap) invece di fermarsi.
+            int const recheckDelayMs = qMax(50, holdLatestStartMs - holdElapsedMs - 200);
+            QTimer::singleShot(recheckDelayMs, this, [this, modeSnapshot, sessionId]() {
+                if (sessionId != m_periodTimerSessionId
+                    || m_mode != modeSnapshot
+                    || m_manualTxHold
+                    || m_transmitting
+                    || m_tuning
+                    || !shouldDeferAutoTxUntilTimeSyncDecode(modeSnapshot)) {
+                    return;
+                }
+                bridgeLog(QStringLiteral("time-sync auto TX: re-check after decode wait -> TX now, no reply yet (%1)")
+                              .arg(modeSnapshot));
+                checkAndStartPeriodicTx();
+            });
             return;
         }
 
