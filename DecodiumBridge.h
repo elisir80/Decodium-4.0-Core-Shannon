@@ -155,6 +155,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int txWatchdogTime READ txWatchdogTime WRITE setTxWatchdogTime NOTIFY txWatchdogTimeChanged)
     Q_PROPERTY(int txWatchdogCount READ txWatchdogCount WRITE setTxWatchdogCount NOTIFY txWatchdogCountChanged)
     Q_PROPERTY(bool filterCqOnly READ filterCqOnly WRITE setFilterCqOnly NOTIFY filterCqOnlyChanged)
+    // 1.0.383 — livello di inclusione del filtro "CQ Only": 0=solo CQ, 1=CQ+73, 2=CQ+73+RR73, 3=CQ+73+RR73+RRR.
+    // Attivo solo quando filterCqOnly e' ON. Default 0 = comportamento storico (solo CQ).
+    Q_PROPERTY(int cqFilterLevel READ cqFilterLevel WRITE setCqFilterLevel NOTIFY cqFilterLevelChanged)
     Q_PROPERTY(bool filterMyCallOnly READ filterMyCallOnly WRITE setFilterMyCallOnly NOTIFY filterMyCallOnlyChanged)
     Q_PROPERTY(bool filtersBypassed READ filtersBypassed WRITE setFiltersBypassed NOTIFY filtersBypassedChanged)
     Q_PROPERTY(int contestType READ contestType WRITE setContestType NOTIFY contestTypeChanged)
@@ -563,7 +566,7 @@ public:
     bool autoCqRepeat()      const { return m_autoCqRepeat; }
     void setAutoCqRepeat(bool v);
     int  maxCallerRetries()  const { return m_maxCallerRetries; }
-    void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store
+    Q_INVOKABLE void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store. Q_INVOKABLE: il QML chiama setMaxCallerRetries() come metodo (1.0.383 fix: senza Q_INVOKABLE falliva con TypeError silenzioso → non persisteva, restava sempre 10)
     int  txDisabledMask() const { return m_txDisabledMask; }
     Q_INVOKABLE bool isTxDisabled(int n) const { return n >= 1 && n <= 6 && (m_txDisabledMask & (1 << (n - 1))); }
     Q_INVOKABLE void setTxDisabled(int n, bool disabled);
@@ -629,6 +632,21 @@ public:
     void setTxWatchdogCount(int v);
     bool filterCqOnly() const { return m_filterCqOnly; }
     void setFilterCqOnly(bool v) { if (m_filterCqOnly!=v){m_filterCqOnly=v;emit filterCqOnlyChanged();} }
+    int  cqFilterLevel() const { return m_cqFilterLevel; }
+    void setCqFilterLevel(int v) { int const c = qBound(0, v, 3); if (m_cqFilterLevel!=c){m_cqFilterLevel=c;emit cqFilterLevelChanged();} }
+    // 1.0.383 — true se l'entry deve passare il filtro CQ secondo m_cqFilterLevel.
+    // CQ passa sempre; i livelli aggiungono progressivamente 73 / RR73 / RRR (match esatto ultimo token).
+    bool passesCqFilter(bool isCQ, const QString& msg) const {
+        if (isCQ) return true;
+        if (m_cqFilterLevel <= 0) return false;
+        QString const t = msg.trimmed();
+        int const sp = t.lastIndexOf(QLatin1Char(' '));
+        QString const last = (sp >= 0 ? t.mid(sp + 1) : t).toUpper();
+        if (m_cqFilterLevel >= 1 && last == QLatin1String("73"))   return true;
+        if (m_cqFilterLevel >= 2 && last == QLatin1String("RR73")) return true;
+        if (m_cqFilterLevel >= 3 && last == QLatin1String("RRR"))  return true;
+        return false;
+    }
     bool filterMyCallOnly() const { return m_filterMyCallOnly; }
     void setFilterMyCallOnly(bool v) { if (m_filterMyCallOnly!=v){m_filterMyCallOnly=v;emit filterMyCallOnlyChanged();} }
     bool filtersBypassed() const { return m_filtersBypassed; }
@@ -1472,6 +1490,7 @@ signals:
     void txWatchdogTimeChanged();
     void txWatchdogCountChanged();
     void filterCqOnlyChanged();
+    void cqFilterLevelChanged();
     void filterMyCallOnlyChanged();
     void filtersBypassedChanged();
     void contestTypeChanged();
@@ -2429,6 +2448,7 @@ private:
     int     m_txWatchdogTime {6};
     int     m_txWatchdogCount {3};
     bool    m_filterCqOnly {false};
+    int     m_cqFilterLevel {0};   // 1.0.383 — 0=CQ, 1=+73, 2=+RR73, 3=+RRR (vedi passesCqFilter)
     bool    m_filterMyCallOnly {false};
     bool    m_filtersBypassed {false};
     int     m_contestType {0};

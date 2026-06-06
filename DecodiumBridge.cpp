@@ -5575,7 +5575,7 @@ void DecodiumBridge::setFiltersBypassed(bool v)
     emit settingValueChanged(QStringLiteral("FiltersBypassed"), m_filtersBypassed);
 
     if (legacyBackendAvailable()) {
-        m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly);
+        m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly && m_cqFilterLevel == 0);
     }
     if (usingLegacyBackendForTx()) {
         m_legacyBandActivityRevision = -1;
@@ -7091,7 +7091,21 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
     connect(this, &DecodiumBridge::filterCqOnlyChanged, this, [this]() {
         if (legacyBackendAvailable()) {
-            m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly);
+            m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly && m_cqFilterLevel == 0);
+        }
+        if (usingLegacyBackendForTx()) {
+            m_legacyBandActivityRevision = -1;
+            m_legacyRxFrequencyRevision = -1;
+            m_legacyAllTxtRevisionKey.clear();
+            syncLegacyBackendDecodeList();
+        }
+    });
+    // 1.0.383 — il livello del filtro CQ cambia cosa il legacy backend deve emettere
+    // (CQ-only solo a livello 0; ai livelli >0 emette tutto e filtra il layer UI) e
+    // richiede un resync della decode list legacy, come per filterCqOnlyChanged.
+    connect(this, &DecodiumBridge::cqFilterLevelChanged, this, [this]() {
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly && m_cqFilterLevel == 0);
         }
         if (usingLegacyBackendForTx()) {
             m_legacyBandActivityRevision = -1;
@@ -8599,7 +8613,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
         m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
         m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
         m_legacyBackend->setDecodeDepthBits(legacyCompatibleDecodeDepthBits());
-        m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly);
+        m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly && m_cqFilterLevel == 0);
         bridgeLog(QStringLiteral("Legacy backend audio restored: inDev=%1 inChan=%2 outDev=%3 outChan=%4")
                       .arg(m_audioInputDevice,
                            QString::number(m_audioInputChannel),
@@ -8644,7 +8658,7 @@ void DecodiumBridge::syncLegacyBackendDialogState()
     m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
     m_legacyBackend->setAudioOutputChannel(qBound(0, m_audioOutputChannel, 3));
     m_legacyBackend->setDecodeDepthBits(legacyCompatibleDecodeDepthBits());
-    m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly);
+    m_legacyBackend->setCqOnly(!m_filtersBypassed && m_filterCqOnly && m_cqFilterLevel == 0);
     m_legacyBackend->setRxInputLevel(qRound(qBound(0.0, m_rxInputLevel, 100.0)));
     int const legacyTxAttn = legacyTxAttenuationFromLevel(m_txOutputLevel);
     m_legacyBackend->setTxOutputAttenuation(legacyTxAttn);
@@ -9521,7 +9535,8 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                 if (applyCqOnly
                     && !m_filtersBypassed
                     && m_filterCqOnly
-                    && !entry.value(QStringLiteral("isCQ")).toBool()) {
+                    && !passesCqFilter(entry.value(QStringLiteral("isCQ")).toBool(),
+                                       entry.value(QStringLiteral("message")).toString())) {
                     continue;
                 }
                 if (!m_filtersBypassed
@@ -21740,6 +21755,7 @@ void DecodiumBridge::saveSettings()
     s.setValue("TxWatchdog",      legacyTxWatchdogMinutes);
     s.setValue("TXWatchdog",      legacyTxWatchdogMinutes);
     s.setValue("filterCqOnly",    m_filterCqOnly);
+    s.setValue("cqFilterLevel",   m_cqFilterLevel);  // 1.0.383
     s.setValue("filterMyCallOnly",m_filterMyCallOnly);
     s.setValue("filtersBypassed", m_filtersBypassed);
     s.setValue("FiltersBypassed", m_filtersBypassed);
@@ -26840,6 +26856,7 @@ void DecodiumBridge::loadSettings()
                                         kDefaultTxWatchdogCount).toInt(),
                                 50);
     m_filterCqOnly     = s.value("filterCqOnly",      false).toBool();
+    m_cqFilterLevel    = qBound(0, s.value("cqFilterLevel", 0).toInt(), 3);  // 1.0.383
     m_filterMyCallOnly = s.value("filterMyCallOnly",  false).toBool();
     m_filtersBypassed  = s.value(QStringLiteral("filtersBypassed"),
                                   s.value(QStringLiteral("FiltersBypassed"), false)).toBool();
@@ -27134,6 +27151,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit txWatchdogTimeChanged();
     emit txWatchdogCountChanged();
     emit filterCqOnlyChanged();
+    emit cqFilterLevelChanged();
     emit filterMyCallOnlyChanged();
     emit contestTypeChanged();
     emit zapEnabledChanged();
@@ -31402,7 +31420,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], entry.value("mode").toString());
         }
 
-        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !isCQ;
+        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
         if (filteredByCqOnly || filteredByMyCallOnly) {
             if (!legacyUiMirrorActive && filteredByCqOnly && !filteredByMyCallOnly) {
@@ -32044,7 +32062,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         maybeEnqueueMamCallerFromDecode(f);
         maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], QStringLiteral("FT2"));
 
-        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !isCQ;
+        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
         if (filteredByCqOnly || filteredByMyCallOnly) {
             if (filteredByCqOnly && !filteredByMyCallOnly) {
@@ -32330,7 +32348,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         }
         maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], entry.value("mode").toString());
 
-        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !isCQ;
+        bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
         if (filteredByCqOnly || filteredByMyCallOnly) {
             if (filteredByCqOnly && !filteredByMyCallOnly) {

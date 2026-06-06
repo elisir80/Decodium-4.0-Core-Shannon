@@ -4645,6 +4645,27 @@ Dialog {
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
+                        // 1.0.383 — livello di inclusione del filtro CQ (attivo solo con "CQ Only" ON).
+                        Text { text: qsTr("CQ filter:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        DecoComboBox {
+                            id: cqFilterLevelCombo
+                            enabled: bridge.filterCqOnly
+                            opacity: enabled ? 1.0 : 0.5
+                            model: ["CQ", "CQ/73", "CQ/73/RR73", "CQ/73/RR73/RRR"]
+                            Layout.fillWidth: true; implicitHeight: controlHeight
+                            currentIndex: bridge ? bridge.cqFilterLevel : 0
+                            onActivated: {
+                                if (bridge && bridge.cqFilterLevel !== currentIndex) {
+                                    bridge.cqFilterLevel = currentIndex
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: cqFilterLevelCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup: SettingsComboPopup { combo: cqFilterLevelCombo }
+                        }
                         Text { text: qsTr("My Call Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
                             checked: bridge.filterMyCallOnly
