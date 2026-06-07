@@ -36,6 +36,7 @@ ApplicationWindow {
     property int savedPeriod1PanelWidth: 400
     property int savedRxFreqPanelWidth: 400
     property int savedLiveMapPanelWidth: 360
+    property int savedDxClusterColumnWidth: Math.max(320, Number(bridge.getSetting("uiDxClusterColumnWidth", 380)))  // 1.0.385 — larghezza 4ª colonna DX Cluster
     property double startupCompletedStartedMs: 0
 
     function startupElapsedMs() {
@@ -257,7 +258,16 @@ ApplicationWindow {
             slot2Width = Math.min(savedSlot2, maxSlot2Width)
         }
 
-        var remainingWidth = Math.max(slot0Min + slot1Min, totalWidth - slot2Width)
+        // 1.0.385 — la 4ª colonna (DX Cluster) occupa larghezza solo se non collassata.
+        var slot3Width = 0
+        if (!classicSlotCollapsed(3)) {
+            var slot3Min = classicMinWidthForSlot(3)
+            var savedSlot3 = safeStoredPanelWidth(savedDxClusterColumnWidth, 380, slot3Min)
+            var maxSlot3Width = Math.max(slot3Min, totalWidth - slot0Min - slot1Min - slot2Width)
+            slot3Width = Math.min(savedSlot3, maxSlot3Width)
+        }
+
+        var remainingWidth = Math.max(slot0Min + slot1Min, totalWidth - slot2Width - slot3Width)
         var savedCombined = Math.max(1, savedSlot0 + savedSlot1)
         var slot0Width = Math.round(remainingWidth * (savedSlot0 / savedCombined))
         slot0Width = Math.max(slot0Min, Math.min(slot0Width, remainingWidth - slot1Min))
@@ -268,6 +278,8 @@ ApplicationWindow {
         colSlot1.targetPanelWidth = slot1Width
         if (!classicSlotCollapsed(2))
             colSlot2.targetPanelWidth = slot2Width
+        if (!classicSlotCollapsed(3) && typeof colSlot3 !== "undefined" && colSlot3)
+            colSlot3.targetPanelWidth = slot3Width
     }
 
     function persistDecodePanelWidths() {
@@ -292,6 +304,16 @@ ApplicationWindow {
                 savedLiveMapPanelWidth = Math.round(slot2Width)
                 colSlot2.targetPanelWidth = savedLiveMapPanelWidth
                 bridge.setSetting("uiLiveMapPanelWidth", savedLiveMapPanelWidth)
+            }
+        }
+
+        // 1.0.385 — persisti la larghezza della 4ª colonna (DX Cluster)
+        if (typeof colSlot3 !== "undefined" && colSlot3) {
+            var slot3Width = !colSlot3.slotCollapsed ? colSlot3.width : colSlot3.targetPanelWidth
+            if (slot3Width >= 320) {
+                savedDxClusterColumnWidth = Math.round(slot3Width)
+                colSlot3.targetPanelWidth = savedDxClusterColumnWidth
+                bridge.setSetting("uiDxClusterColumnWidth", savedDxClusterColumnWidth)
             }
         }
 
@@ -1128,8 +1150,11 @@ ApplicationWindow {
     // "waterfall" in coda (indice 4 -> topSlot) per riflettere ESATTAMENTE il layout
     // attuale -> ZERO regressione; una mappa salvata a 3/4 elementi riceve gli id mancanti
     // (incluso "waterfall") appesi in coda nell'ordine di default -> migrazione indolore.
-    readonly property string uiClassicColumnOrderDefault: "fullspectrum,signalrx,livemap,txpanel,waterfall"
-    readonly property var uiClassicColumnKnownIds: ["fullspectrum","signalrx","livemap","txpanel","waterfall"]
+    // 1.0.385 — DX Cluster come 6° pannello con una 4ª COLONNA dedicata (colSlot3, indice 3).
+    // La colonna collassa a 0 quando il Cluster è spento → default invariato (3 colonne).
+    // TX passa all'indice 4, Waterfall all'indice 5.
+    readonly property string uiClassicColumnOrderDefault: "fullspectrum,signalrx,livemap,dxcluster,txpanel,waterfall"
+    readonly property var uiClassicColumnKnownIds: ["fullspectrum","signalrx","livemap","dxcluster","txpanel","waterfall"]
     property var uiClassicColumnOrder: parseClassicColumnOrder(String(bridge.getSetting("uiClassicColumnOrder", "") || ""))
 
     // Parsa il CSV in lista di panelId; ripristina/completa col default se assente/corrotto.
@@ -1156,10 +1181,12 @@ ApplicationWindow {
             seen[id] = true
             out.push(id)
         }
-        // Aggiungi gli id mancanti in coda nell'ordine di default (mantiene permutazione completa)
+        // 1.0.385 — inserisci gli id mancanti alla LORO posizione di default (non in coda):
+        // così una mappa salvata a 5 id (senza "dxcluster") riceve dxcluster all'indice 3
+        // e TX/Waterfall restano correttamente a 4/5, mantenendo permutazione completa.
         for (var j = 0; j < def.length; ++j) {
             if (!seen[def[j]]) {
-                out.push(def[j])
+                out.splice(Math.min(j, out.length), 0, def[j])
                 seen[def[j]] = true
             }
         }
@@ -1184,8 +1211,11 @@ ApplicationWindow {
                             && typeof colSlot1 !== "undefined") ? colSlot1 : null
             case 2: return (typeof decodePanelsSplit !== "undefined" && decodePanelsSplit
                             && typeof colSlot2 !== "undefined") ? colSlot2 : null
-            case 3: return (typeof txSlot !== "undefined") ? txSlot : null
-            case 4: return (typeof waterfallPanel !== "undefined") ? waterfallPanel : null
+            // 1.0.385 — 4ª colonna dedicata al DX Cluster
+            case 3: return (typeof decodePanelsSplit !== "undefined" && decodePanelsSplit
+                            && typeof colSlot3 !== "undefined") ? colSlot3 : null
+            case 4: return (typeof txSlot !== "undefined") ? txSlot : null
+            case 5: return (typeof waterfallPanel !== "undefined") ? waterfallPanel : null
             default: return null
         }
     }
@@ -1205,6 +1235,8 @@ ApplicationWindow {
             return (typeof txPanelHostWrapper !== "undefined") ? txPanelHostWrapper : null
         if (panelId === "waterfall")
             return (typeof waterfallPanelHost !== "undefined") ? waterfallPanelHost : null
+        if (panelId === "dxcluster")
+            return (typeof dxClusterPanelHost !== "undefined") ? dxClusterPanelHost : null
         return null
     }
 
@@ -1257,6 +1289,7 @@ ApplicationWindow {
             // Nel topSlot (slot 4, ad ALTEZZA) questa minWidth non viene usata dallo
             // SplitView verticale -> nessun effetto sul layout di default.
             case "waterfall":    return 280
+            case "dxcluster":    return 320   // 1.0.385 — 4ª colonna DX Cluster
             default:             return 260
         }
     }
@@ -1265,8 +1298,15 @@ ApplicationWindow {
     // in tal caso lo slot collassa (preferredWidth/minimumWidth -> 0), come faceva
     // liveMapPanelHost.visible quando era figlio diretto dello SplitView.
     function classicSlotCollapsed(idx) {
-        return classicIdInSlot(idx) === "livemap"
-               && !(mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
+        var id = classicIdInSlot(idx)
+        if (id === "livemap")
+            return !(mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
+        // 1.0.385 — la 4ª colonna del DX Cluster collassa a 0 quando il Cluster è spento
+        // (default). Espansa sia quando dockato (inline) sia quando staccato (mostra il
+        // placeholder "Aggancia DX Cluster" come target di dock).
+        if (id === "dxcluster")
+            return !mainWindow.dxClusterPanelVisible
+        return false
     }
 
     // SWAP dei panelId in due posizioni della mappa + ri-assegna parent + persiste.
@@ -1387,12 +1427,15 @@ ApplicationWindow {
         // hidden anche se il binding torna true). Forzo show()/hide() esplicito
         // sulla Window per garantire riapertura affidabile dal footer toggle.
         if (typeof dxClusterFloatingWindow !== 'undefined') {
-            if (dxClusterPanelVisible) {
+            // 1.0.385 — la finestra flottante si mostra solo se il Cluster è STACCATO;
+            // se è dockato (4ª colonna) la finestra resta nascosta e mostra l'inline.
+            if (dxClusterPanelVisible && dxClusterDetached) {
                 raiseDxClusterPanel()
             } else {
                 dxClusterFloatingWindow.hide()
             }
         }
+        Qt.callLater(mainWindow.restoreDecodePanelWidths)
     }
     onDecoSyncMonitorVisibleChanged: persistUiSetting("uiDecoSyncMonitorVisible", decoSyncMonitorVisible)
     function syncLiveMapFloatingVisibility(activate) {
@@ -1473,6 +1516,23 @@ ApplicationWindow {
 	        mainWindow.rxFreqMinimized = false
 	        rxFreqFloatingWindow.hide()
 	        Qt.callLater(mainWindow.restoreDecodePanelWidths)
+    }
+    // 1.0.385 — DX Cluster: stacca nella finestra flottante (colonna mostra il placeholder
+    // di dock) / aggancia nella 4ª colonna (colSlot3) nascondendo la finestra.
+    function detachDxClusterPanel() {
+        mainWindow.dxClusterPanelVisible = true
+        mainWindow.dxClusterDetached = true
+        mainWindow.dxClusterMinimized = false
+        raiseDxClusterPanel()
+        Qt.callLater(mainWindow.restoreDecodePanelWidths)
+    }
+    function dockDxClusterPanel() {
+        mainWindow.dxClusterPanelVisible = true
+        mainWindow.dxClusterDetached = false
+        mainWindow.dxClusterMinimized = false
+        if (typeof dxClusterFloatingWindow !== "undefined" && dxClusterFloatingWindow)
+            dxClusterFloatingWindow.hide()
+        Qt.callLater(mainWindow.restoreDecodePanelWidths)
     }
     onLiveMapPanelVisibleChanged: {
         persistUiSetting("WorldMapDisplayed", liveMapPanelVisible)
@@ -5526,7 +5586,7 @@ ApplicationWindow {
                     // waterfall-specifica; quando invece ospita un ALTRO pannello (Waterfall
                     // spostata in una colonna) lo slot resta visibile e senza vincoli di altezza
                     // waterfall, lasciando che il pannello ospite gestisca la propria visibilità.
-                    readonly property bool hostsWaterfall: mainWindow.classicIdInSlot(4) === "waterfall"
+                    readonly property bool hostsWaterfall: mainWindow.classicIdInSlot(5) === "waterfall"
                     visible: hostsWaterfall ? (mainWindow.waterfallPanelVisible || waterfallDetached) : true
                     SplitView.minimumHeight: !hostsWaterfall ? 0 : (!mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0))  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
@@ -5574,7 +5634,7 @@ ApplicationWindow {
                         property: "SplitView.preferredHeight"
                         value: 40
                         when: mainWindow.waterfallPanelVisible && waterfallDetached
-                              && mainWindow.classicIdInSlot(4) === "waterfall"
+                              && mainWindow.classicIdInSlot(5) === "waterfall"
                         restoreMode: Binding.RestoreBindingOrValue
                     }
 
@@ -5583,7 +5643,7 @@ ApplicationWindow {
                         property: "SplitView.preferredHeight"
                         value: 0
                         when: !mainWindow.waterfallPanelVisible
-                              && mainWindow.classicIdInSlot(4) === "waterfall"
+                              && mainWindow.classicIdInSlot(5) === "waterfall"
                         restoreMode: Binding.RestoreBindingOrValue
                     }
 
@@ -5596,7 +5656,7 @@ ApplicationWindow {
                     // resta possibile via la finestra flottante (zona = waterfallPanel) comunque.
                     Rectangle {
                         anchors.fill: parent
-                        visible: waterfallDetached && mainWindow.classicIdInSlot(4) === "waterfall"
+                        visible: waterfallDetached && mainWindow.classicIdInSlot(5) === "waterfall"
                         color: waterfallPanel.isDockHighlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                         radius: 8
                         border.color: waterfallPanel.isDockHighlighted ? secondaryCyan : glassBorder
@@ -7798,6 +7858,107 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                             }
                         }
                         }
+
+                        // ========== SLOT 3 (DX Cluster) — 1.0.385 4ª colonna dedicata ==========
+                        // Collassa a 0 quando il Cluster è spento (default). Quando il Cluster
+                        // è acceso: se dockato mostra il pannello inline, se staccato mostra il
+                        // placeholder "Aggancia DX Cluster" come target per agganciarlo.
+                        Item {
+                            id: colSlot3
+                            property int targetPanelWidth: mainWindow.savedDxClusterColumnWidth
+                            readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(3)
+                            SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
+                            SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(3)
+                            onWidthChanged: {
+                                if (!slotCollapsed && width >= 320 && Math.abs(targetPanelWidth - width) >= 1) {
+                                    targetPanelWidth = Math.round(width)
+                                    if (!mainWindow.windowStateRestoreInProgress)
+                                        mainWindow.scheduleWindowStateSave()
+                                }
+                            }
+
+                            // Pannello inline (Cluster dockato)
+                            Rectangle {
+                                id: dxClusterPanelHost
+                                anchors.fill: parent
+                                visible: mainWindow.dxClusterPanelVisible && !mainWindow.dxClusterDetached
+                                color: "transparent"
+
+                                DxClusterPanel {
+                                    anchors.fill: parent
+                                    embedded: true
+                                    onCloseRequested: mainWindow.dxClusterPanelVisible = false
+                                }
+
+                                // Maniglia di drag colonna (riusa colDragHandleComponent)
+                                Loader {
+                                    z: 50
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    anchors.leftMargin: 6
+                                    anchors.topMargin: 6
+                                    width: 16
+                                    height: 16
+                                    active: dxClusterPanelHost.visible
+                                    sourceComponent: colDragHandleComponent
+                                    onLoaded: if (item) item.panelId = "dxcluster"
+                                }
+
+                                // Pulsante "stacca" → ri-flotta il Cluster in finestra (1.0.385)
+                                Rectangle {
+                                    z: 50
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    anchors.leftMargin: 26
+                                    anchors.topMargin: 6
+                                    width: 16; height: 16; radius: 3
+                                    color: dxcDetachMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+                                                                     : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.12)
+                                    border.color: dxcDetachMA.containsMouse ? secondaryCyan : "transparent"
+                                    border.width: 1
+                                    Text { anchors.centerIn: parent; text: "⤢"; font.pixelSize: 11
+                                           color: dxcDetachMA.containsMouse ? secondaryCyan : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6) }
+                                    MouseArea {
+                                        id: dxcDetachMA
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: mainWindow.detachDxClusterPanel()
+                                        ToolTip.visible: containsMouse
+                                        ToolTip.text: qsTr("Stacca il DX Cluster in finestra")
+                                    }
+                                }
+                            }
+
+                            // Placeholder/dock-zone (Cluster staccato → finestra flottante)
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                visible: mainWindow.dxClusterPanelVisible && mainWindow.dxClusterDetached
+                                radius: 8
+                                color: dxcDockMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2)
+                                                               : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
+                                border.color: dxcDockMA.containsMouse ? secondaryCyan : glassBorder
+                                border.width: dxcDockMA.containsMouse ? 3 : 1
+                                Column {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "⤓"; font.pixelSize: 26; color: secondaryCyan }
+                                    Text {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        text: dxcDockMA.containsMouse ? qsTr("Aggancia DX Cluster qui") : qsTr("DX Cluster staccato")
+                                        font.pixelSize: 12; color: textPrimary; font.bold: true
+                                    }
+                                }
+                                MouseArea {
+                                    id: dxcDockMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: mainWindow.dockDxClusterPanel()
+                                }
+                            }
+                        }
                     }
 
                     // ════════ Drag-layer pannelli interscambiabili (Stadio 1+2) ════════
@@ -7822,7 +7983,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         // Indice (0..4) dello slot target sotto il puntatore.
                         property int dropSlotIndex: -1
                         // Stadio 3: numero di slot interscambiabili (3 colonne + TX area + Waterfall top).
-                        readonly property int slotCount: 5
+                        readonly property int slotCount: 6   // 1.0.385 — +4ª colonna DX Cluster
 
                         // Rettangolo (in spazio contentArea) dello slot di indice idx.
                         // contentArea è l'antenato comune di colSlot0/1/2 (via decodePanel),
@@ -7903,6 +8064,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 if (panelId === "livemap")      return "Live Map"
                                 if (panelId === "txpanel")      return "TX Panel"
                                 if (panelId === "waterfall")    return "Waterfall"
+                                if (panelId === "dxcluster")    return "DX Cluster"
                                 return panelId
                             }
                             function updateAt(panelX, panelY) {
@@ -8128,7 +8290,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                 // possibile via la finestra flottante (zona = txPanelContainer) in ogni caso.
                 Rectangle {
                     anchors.fill: parent
-                    visible: txPanelDetached && mainWindow.classicIdInSlot(3) === "txpanel"
+                    visible: txPanelDetached && mainWindow.classicIdInSlot(4) === "txpanel"
                     color: txPanelDockHighlighted ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
                     radius: 12
                     border.color: txPanelDockHighlighted ? bridge.themeManager.ledRed : glassBorder
@@ -12929,7 +13091,7 @@ NumberAnimation {
         height: Math.max(300, Number(bridge.getSetting("uiDxClusterPanelHeight", 360)))
         minimumWidth: 500
         minimumHeight: 300
-        visible: mainWindow.dxClusterPanelVisible
+        visible: mainWindow.dxClusterPanelVisible && mainWindow.dxClusterDetached   // 1.0.385 — solo se staccato
         flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
              | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
              | Qt.WindowCloseButtonHint
@@ -12945,8 +13107,8 @@ NumberAnimation {
             // deve aprirsi da sola solo perche' e' floating/detached. La scelta
             // dell'utente e' `uiDxClusterPanelVisible`: se e' false o assente
             // resta chiusa anche quando esiste una vecchia WindowState salvata.
-            if (!mainWindow.dxClusterPanelVisible) {
-                dxClusterFloatingWindow.hide()
+            if (!mainWindow.dxClusterPanelVisible || !mainWindow.dxClusterDetached) {
+                dxClusterFloatingWindow.hide()   // 1.0.385 — dockato o spento → niente finestra
             } else if (!mainWindow.dxClusterMinimized) {
                 dxClusterFloatingWindow.show()
                 dxClusterFloatingWindow.raise()
