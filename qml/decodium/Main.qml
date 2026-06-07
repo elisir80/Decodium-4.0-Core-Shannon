@@ -3813,6 +3813,43 @@ ApplicationWindow {
                     }
                 } // End Grouped buttons Item
 
+                // 1.0.384 — Profili pronti: selettore rapido in toolbar (accanto a Setup).
+                // Applica in blocco i toggle FT2/decode; la sezione descrittiva è in Settings.
+                Item {
+                    id: readyProfileToolbarSlot
+                    width: 132
+                    height: 74
+                    Rectangle {
+                        width: parent.width
+                        height: 28
+                        anchors.top: parent.top
+                        anchors.topMargin: 6
+                        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                        border.color: glassBorder
+                        radius: 4
+                        DecoComboBox {
+                            id: readyProfileCombo
+                            anchors.fill: parent
+                            anchors.margins: 2
+                            font.pixelSize: 10
+                            readonly property var ids: ["balanced", "weak", "contest", "cpu"]
+                            model: [qsTr("Bilanciato"), qsTr("Weak-signal / DX"), qsTr("Contest"), qsTr("CPU-limited")]
+                            displayText: currentIndex < 0 ? qsTr("Profili…") : model[currentIndex]
+                            Component.onCompleted: currentIndex = bridge ? ids.indexOf(bridge.activeReadyProfile) : -1
+                            onActivated: if (bridge && currentIndex >= 0) bridge.applyReadyProfile(ids[currentIndex])
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.")
+                            Connections {
+                                target: bridge
+                                function onActiveReadyProfileChanged() {
+                                    readyProfileCombo.currentIndex = readyProfileCombo.ids.indexOf(bridge.activeReadyProfile)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // slot 5 — subito dopo il blocco pulsanti toolbar (= "after toolbar", DEFAULT)
                 Item {
                     id: clockSlot5

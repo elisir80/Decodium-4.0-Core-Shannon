@@ -451,6 +451,11 @@ class DecodiumBridge : public QObject
     // 1.0.179 — Smooth Decode Flow scheduler
     Q_PROPERTY(bool smoothDecodeFlow READ smoothDecodeFlow WRITE setSmoothDecodeFlow NOTIFY smoothDecodeFlowChanged)
 
+    // 1.0.384 — Profili pronti: applicano in blocco un set coerente di toggle FT2/decode.
+    // activeReadyProfile = id del profilo attualmente in vigore ("" = personalizzato/nessuno,
+    // si svuota appena l'utente cambia manualmente un toggle gestito dal profilo).
+    Q_PROPERTY(QString activeReadyProfile READ activeReadyProfile NOTIFY activeReadyProfileChanged)
+
     // 1.0.180 — UI Revolution: gate per effetti UI moderni
     Q_PROPERTY(QString uiQuality READ uiQuality WRITE setUiQuality NOTIFY uiQualityChanged)
     Q_PROPERTY(bool uiFramelessPopouts READ uiFramelessPopouts WRITE setUiFramelessPopouts NOTIFY uiFramelessPopoutsChanged)
@@ -632,6 +637,10 @@ public:
     void setTxWatchdogCount(int v);
     bool filterCqOnly() const { return m_filterCqOnly; }
     void setFilterCqOnly(bool v) { if (m_filterCqOnly!=v){m_filterCqOnly=v;emit filterCqOnlyChanged();} }
+    // 1.0.384 — Profili pronti
+    QString activeReadyProfile() const { return m_activeReadyProfile; }
+    Q_INVOKABLE void applyReadyProfile(const QString& id);
+    void clearActiveReadyProfileOnManualChange();  // 1.0.384 — vedi connect in costruttore
     int  cqFilterLevel() const { return m_cqFilterLevel; }
     void setCqFilterLevel(int v) { int const c = qBound(0, v, 3); if (m_cqFilterLevel!=c){m_cqFilterLevel=c;emit cqFilterLevelChanged();} }
     // 1.0.383 — true se l'entry deve passare il filtro CQ secondo m_cqFilterLevel.
@@ -1490,6 +1499,7 @@ signals:
     void txWatchdogTimeChanged();
     void txWatchdogCountChanged();
     void filterCqOnlyChanged();
+    void activeReadyProfileChanged();   // 1.0.384
     void cqFilterLevelChanged();
     void filterMyCallOnlyChanged();
     void filtersBypassedChanged();
@@ -2449,6 +2459,8 @@ private:
     int     m_txWatchdogCount {3};
     bool    m_filterCqOnly {false};
     int     m_cqFilterLevel {0};   // 1.0.383 — 0=CQ, 1=+73, 2=+RR73, 3=+RRR (vedi passesCqFilter)
+    QString m_activeReadyProfile;  // 1.0.384 — id profilo pronto attivo ("" = personalizzato)
+    bool    m_applyingReadyProfile {false};  // 1.0.384 — guard: evita auto-clear durante applyReadyProfile
     bool    m_filterMyCallOnly {false};
     bool    m_filtersBypassed {false};
     int     m_contestType {0};

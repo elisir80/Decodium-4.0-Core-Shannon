@@ -5604,6 +5604,66 @@ void DecodiumBridge::setFt2Conservative(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Conservative mode %1").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.384 — Profili pronti: applica in blocco un set coerente di toggle FT2/decode.
+// I valori non esplicitati dall'utente sono inferiti per l'intento del profilo (vedi matrice
+// nelle note di release). Usa i setter esistenti (persistono + emettono) sotto guard
+// m_applyingReadyProfile, cosi' l'auto-clear di activeReadyProfile non scatta durante l'apply.
+void DecodiumBridge::applyReadyProfile(const QString& id)
+{
+    struct ReadyProfile {
+        bool conservative, fullDecodeAutoCq, quickGiveUpStrong, adaptiveDecode, apHashCache,
+             skipFineSlot, mamMultiStream, partnerMemory, tx2Resend, smoothFlow;
+        int  callerRetries, mamStreams;
+    };
+    ReadyProfile p;
+    QString normId = id;
+    if (id == QLatin1String("weak")) {
+        //         cons   full   strong adapt  ap     skip   mam    pmem   tx2    smooth  retr streams
+        p = ReadyProfile{ true,  true,  true,  false, true,  false, false, true,  true,  true,   7,   2 };
+    } else if (id == QLatin1String("contest")) {
+        p = ReadyProfile{ false, true,  true,  true,  true,  true,  true,  true,  true,  true,   3,   2 };
+    } else if (id == QLatin1String("cpu")) {
+        p = ReadyProfile{ false, false, false, true,  false, false, false, false, true,  true,  10,   2 };
+    } else {
+        normId = QStringLiteral("balanced");
+        p = ReadyProfile{ true,  true,  true,  true,  true,  false, false, true,  true,  true,   5,   2 };
+    }
+
+    m_applyingReadyProfile = true;
+    setFt2Conservative(p.conservative);
+    setFt2FullDecodeInAutoCq(p.fullDecodeAutoCq);
+    setFt2QuickGiveUpStrong(p.quickGiveUpStrong);
+    setFt2AdaptiveDecode(p.adaptiveDecode);
+    setFt2ApHashCache(p.apHashCache);
+    setFt2AsyncSkipRedundantSyncDecode(p.skipFineSlot);
+    if (p.mamMultiStream) setMamMaxStreams(p.mamStreams);
+    setMamMultiStream(p.mamMultiStream);
+    setFt2PartnerMemoryEnabled(p.partnerMemory);
+    setFt2Tx2ResendOnStall(p.tx2Resend);
+    setSmoothDecodeFlow(p.smoothFlow);
+    setMaxCallerRetries(p.callerRetries);
+    m_applyingReadyProfile = false;
+
+    if (m_activeReadyProfile != normId) {
+        m_activeReadyProfile = normId;
+        QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+            .setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
+        emit activeReadyProfileChanged();
+    }
+    bridgeLog(QStringLiteral("[Profile] applicato profilo pronto '%1'").arg(normId));
+}
+
+// 1.0.384 — svuota activeReadyProfile quando l'utente modifica a mano un toggle gestito
+// da un profilo (non durante l'apply del profilo stesso, grazie alla guard).
+void DecodiumBridge::clearActiveReadyProfileOnManualChange()
+{
+    if (m_applyingReadyProfile || m_activeReadyProfile.isEmpty()) return;
+    m_activeReadyProfile.clear();
+    QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        .setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
+    emit activeReadyProfileChanged();
+}
+
 // 1.0.311 — cap ripetizioni 73/RR73 in FT2 (1-8). Persistito nello store canonico Decodium3.
 void DecodiumBridge::setFt2SignoffRetryCap(int v)
 {
@@ -7114,6 +7174,26 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             syncLegacyBackendDecodeList();
         }
     });
+    // 1.0.384 — appena l'utente cambia a mano uno dei toggle gestiti da un profilo pronto,
+    // l'etichetta del profilo attivo torna a "personalizzato" (guard durante l'apply).
+    {
+        const QList<void (DecodiumBridge::*)()> profileToggleSignals = {
+            &DecodiumBridge::ft2ConservativeChanged,
+            &DecodiumBridge::ft2FullDecodeInAutoCqChanged,
+            &DecodiumBridge::ft2QuickGiveUpStrongChanged,
+            &DecodiumBridge::ft2AdaptiveDecodeChanged,
+            &DecodiumBridge::ft2ApHashCacheChanged,
+            &DecodiumBridge::ft2AsyncSkipRedundantSyncDecodeChanged,
+            &DecodiumBridge::mamMultiStreamChanged,
+            &DecodiumBridge::mamMaxStreamsChanged,
+            &DecodiumBridge::ft2PartnerMemoryEnabledChanged,
+            &DecodiumBridge::ft2Tx2ResendOnStallChanged,
+            &DecodiumBridge::smoothDecodeFlowChanged,
+            &DecodiumBridge::maxCallerRetriesChanged,
+        };
+        for (auto sig : profileToggleSignals)
+            connect(this, sig, this, &DecodiumBridge::clearActiveReadyProfileOnManualChange);
+    }
     connect(this, &DecodiumBridge::filterMyCallOnlyChanged, this, [this]() {
         if (usingLegacyBackendForTx()) {
             m_legacyBandActivityRevision = -1;
@@ -26857,6 +26937,7 @@ void DecodiumBridge::loadSettings()
                                 50);
     m_filterCqOnly     = s.value("filterCqOnly",      false).toBool();
     m_cqFilterLevel    = qBound(0, s.value("cqFilterLevel", 0).toInt(), 3);  // 1.0.383
+    m_activeReadyProfile = s.value(QStringLiteral("ActiveReadyProfile"), QString()).toString();  // 1.0.384
     m_filterMyCallOnly = s.value("filterMyCallOnly",  false).toBool();
     m_filtersBypassed  = s.value(QStringLiteral("filtersBypassed"),
                                   s.value(QStringLiteral("FiltersBypassed"), false)).toBool();
@@ -27152,6 +27233,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit txWatchdogCountChanged();
     emit filterCqOnlyChanged();
     emit cqFilterLevelChanged();
+    emit activeReadyProfileChanged();
     emit filterMyCallOnlyChanged();
     emit contestTypeChanged();
     emit zapEnabledChanged();

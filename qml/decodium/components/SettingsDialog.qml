@@ -2974,6 +2974,66 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
 
+                        // ── Profili pronti (1.0.384) ──
+                        // Applicano in blocco un set coerente di toggle FT2/decode.
+                        // Selettore rapido equivalente anche in toolbar (accanto a Setup).
+                        Text { text: qsTr("PROFILI PRONTI"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+                        Item {
+                            Layout.columnSpan: 4
+                            Layout.fillWidth: true
+                            implicitHeight: readyProfilesColumn.implicitHeight
+                            ColumnLayout {
+                                id: readyProfilesColumn
+                                width: parent.width
+                                spacing: 8
+                                Repeater {
+                                    model: [
+                                        { pid: "balanced", name: qsTr("Bilanciato (QSO quotidiano) — default"),
+                                          desc: qsTr("Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.") },
+                                        { pid: "weak", name: qsTr("Weak-signal / caccia DX"),
+                                          desc: qsTr("Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).") },
+                                        { pid: "contest", name: qsTr("Contest / alta densità"),
+                                          desc: qsTr("close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.") },
+                                        { pid: "cpu", name: qsTr("CPU-limited (Decodium Console / mini PC)"),
+                                          desc: qsTr("adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.") }
+                                    ]
+                                    delegate: Rectangle {
+                                        id: profileEntry
+                                        required property var modelData
+                                        readonly property bool isActive: bridge && bridge.activeReadyProfile === modelData.pid
+                                        Layout.fillWidth: true
+                                        implicitHeight: profileEntryCol.implicitHeight + 16
+                                        radius: 6
+                                        color: isActive ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.18) : bgMedium
+                                        border.color: isActive ? primaryBlue : glassBorder
+                                        border.width: 1
+                                        ColumnLayout {
+                                            id: profileEntryCol
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.margins: 8
+                                            spacing: 3
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 6
+                                                Text { text: modelData.name; color: textPrimary; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                                                Text { text: qsTr("● attivo"); color: primaryBlue; font.pixelSize: 11; font.bold: true; visible: profileEntry.isActive }
+                                            }
+                                            Text { text: modelData.desc; color: textSecondary; font.pixelSize: 11; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                                        }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: if (bridge) bridge.applyReadyProfile(modelData.pid)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         // ── Sequenza Automatica ──
                         Text { text: qsTr("AUTO SEQUENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
