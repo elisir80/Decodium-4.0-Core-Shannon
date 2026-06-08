@@ -2522,6 +2522,14 @@ extern "C" void ftx_ft8_prepare_pass_c (int ndepth, int ipass, int ndecodes,
   else
     {
       local_imetric = 2;
+      if (ipass == 5 || ipass == 7)
+        {
+          local_imetric = 3;
+        }
+      if (ipass >= 8)
+        {
+          local_imetric = 4;
+        }
       if (ndecodes == 0 && ndepth <= 2)
         {
           local_run_pass = 0;

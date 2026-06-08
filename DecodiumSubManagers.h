@@ -46,6 +46,13 @@ public:
         m_samples.append(sample);
     }
 
+    void feedSamples(const QVector<short>& samples)
+    {
+        if (!m_recording || samples.isEmpty()) return;
+        QMutexLocker lock(&m_mutex);
+        m_samples += samples;
+    }
+
 public slots:
     Q_INVOKABLE void startRecording()
     {

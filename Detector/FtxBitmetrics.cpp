@@ -925,6 +925,7 @@ void run_ft2_bitmetrics (Complex const* cd, float* bitmetrics, int* badsync)
 
 void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
                          float scale, bool weak_deep,
+                         bool equalize_tone_power,
                          float* s8_out, int* nsync_out,
                          float* llra, float* llrb, float* llrc,
                          float* llrd, float* llre)
@@ -936,12 +937,16 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
   auto const& one = one9_table ();
 
   std::array<std::array<Complex, 8>, NN> cs {};
+  std::array<std::array<Complex, 8>, NN> cs_reverse {};
   std::array<float, 512> s2 {};
   std::array<float, 174> bmeta {};
   std::array<float, 174> bmetb {};
   std::array<float, 174> bmetc {};
   std::array<float, 174> bmetd {};
   std::array<float, 174> bmete {};
+
+  bool const reverse_metric = (imetric == 3);
+  int const metric_shape = reverse_metric ? 1 : (imetric == 4 ? 2 : imetric);
 
   for (int k = 0; k < NN; ++k)
     {
@@ -955,13 +960,75 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
             }
         }
 
-      std::array<Complex, 8> tones {};
-      std::array<float, 8> mags {};
-      fft_symbol_8tones_ft8 (csymb.data (), tones, mags);
+      std::array<Complex, 8> forward_tones {};
+      std::array<float, 8> forward_mags {};
+      fft_symbol_8tones_ft8 (csymb.data (), forward_tones, forward_mags);
+
+      std::array<Complex, 32> csymb_reverse {};
+      for (int i = 0; i < NSS; ++i)
+        {
+          csymb_reverse[static_cast<size_t> (i)] =
+              std::conj (csymb[static_cast<size_t> (NSS - 1 - i)]);
+        }
+      std::array<Complex, 8> reverse_tones {};
+      std::array<float, 8> reverse_mags {};
+      fft_symbol_8tones_ft8 (csymb_reverse.data (), reverse_tones, reverse_mags);
+
+      auto const& tones = reverse_metric ? reverse_tones : forward_tones;
+      auto const& mags = reverse_metric ? reverse_mags : forward_mags;
       for (int tone = 0; tone < 8; ++tone)
         {
           cs[static_cast<size_t> (k)][static_cast<size_t> (tone)] = tones[static_cast<size_t> (tone)] / 1.0e3f;
+          cs_reverse[static_cast<size_t> (k)][static_cast<size_t> (tone)] =
+              reverse_tones[static_cast<size_t> (tone)] / 1.0e3f;
           s8_out[tone + 8 * k] = mags[static_cast<size_t> (tone)];
+        }
+    }
+
+  if (equalize_tone_power)
+    {
+      std::array<float, 8> tone_power {};
+      for (int tone = 0; tone < 8; ++tone)
+        {
+          for (int symbol = 0; symbol < 7; ++symbol)
+            {
+              tone_power[static_cast<size_t> (tone)] += s8_out[tone + 8 * symbol];
+            }
+          for (int symbol = 17; symbol < NN; ++symbol)
+            {
+              tone_power[static_cast<size_t> (tone)] += s8_out[tone + 8 * symbol];
+            }
+        }
+      int quiet_tone = 0;
+      for (int tone = 1; tone < 8; ++tone)
+        {
+          if (tone_power[static_cast<size_t> (tone)] < tone_power[static_cast<size_t> (quiet_tone)])
+            {
+              quiet_tone = tone;
+            }
+        }
+      float const quiet_power = tone_power[static_cast<size_t> (quiet_tone)];
+      if (quiet_power > 1.0e-12f)
+        {
+          for (int tone = 0; tone < 8; ++tone)
+            {
+              if (tone == quiet_tone)
+                {
+                  continue;
+                }
+              float const ratio = tone_power[static_cast<size_t> (tone)] / quiet_power;
+              if (ratio <= 1.5f)
+                {
+                  continue;
+                }
+              float const complex_scale = 1.0f / std::sqrt (ratio);
+              for (int symbol = 0; symbol < NN; ++symbol)
+                {
+                  s8_out[tone + 8 * symbol] /= ratio;
+                  cs[static_cast<size_t> (symbol)][static_cast<size_t> (tone)] *= complex_scale;
+                  cs_reverse[static_cast<size_t> (symbol)][static_cast<size_t> (tone)] *= complex_scale;
+                }
+            }
         }
     }
 
@@ -1046,7 +1113,7 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
                     }
                   if (use_weak_transform)
                     {
-                      if (imetric == 1)
+                      if (metric_shape == 1)
                         {
                           if (srr > 2.3f)
                             {
@@ -1067,7 +1134,7 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
                           value = std::pow (0.5f * value, 3.0f);
                         }
                     }
-                  else if (imetric == 2)
+                  else if (metric_shape == 2)
                     {
                       value *= value;
                     }
@@ -1137,6 +1204,99 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
       bmete[static_cast<size_t> (i)] = temp[static_cast<size_t> (best)];
     }
 
+  std::array<float, 174> bmet_reverse {};
+  bool const use_reverse_extra = (imetric == 4);
+  if (use_reverse_extra)
+    {
+      std::array<float, 174> rbmeta {};
+      std::array<float, 174> rbmetb {};
+      std::array<float, 174> rbmetc {};
+      for (int nsym = 1; nsym <= 3; ++nsym)
+        {
+          int const nt = 1 << (3 * nsym);
+          for (int ihalf = 1; ihalf <= 2; ++ihalf)
+            {
+              for (int k = 1; k <= 29; k += nsym)
+                {
+                  int const ks = (ihalf == 1) ? (k + 7) : (k + 43);
+                  for (int i = 0; i < nt; ++i)
+                    {
+                      int const i1 = i / 64;
+                      int const i2 = (i & 63) / 8;
+                      int const i3 = i & 7;
+                      float value = 0.0f;
+                      if (nsym == 1)
+                        {
+                          value = abs1 (cs_reverse[static_cast<size_t> (ks - 1)][static_cast<size_t> (graymap[static_cast<size_t> (i3)])]);
+                        }
+                      else if (nsym == 2)
+                        {
+                          value = abs1 (cs_reverse[static_cast<size_t> (ks - 1)][static_cast<size_t> (graymap[static_cast<size_t> (i2)])] +
+                                        cs_reverse[static_cast<size_t> (ks)][static_cast<size_t> (graymap[static_cast<size_t> (i3)])]);
+                        }
+                      else
+                        {
+                          value = abs1 (cs_reverse[static_cast<size_t> (ks - 1)][static_cast<size_t> (graymap[static_cast<size_t> (i1)])] +
+                                        cs_reverse[static_cast<size_t> (ks)][static_cast<size_t> (graymap[static_cast<size_t> (i2)])] +
+                                        cs_reverse[static_cast<size_t> (ks + 1)][static_cast<size_t> (graymap[static_cast<size_t> (i3)])]);
+                        }
+                      if (use_weak_transform)
+                        {
+                          value = std::pow (0.5f * value, 3.0f);
+                        }
+                      s2[static_cast<size_t> (i)] = value;
+                    }
+
+                  int const i32 = 1 + (k - 1) * 3 + (ihalf - 1) * 87;
+                  int ibmax = 2;
+                  if (nsym == 2) ibmax = 5;
+                  if (nsym == 3) ibmax = 8;
+                  for (int ib = 0; ib <= ibmax; ++ib)
+                    {
+                      if (i32 + ib > 174)
+                        {
+                          continue;
+                        }
+                      float max1 = -1.0e30f;
+                      float max0 = -1.0e30f;
+                      for (int i = 0; i < nt; ++i)
+                        {
+                          float const value = s2[static_cast<size_t> (i)];
+                          if (one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)]) max1 = std::max (max1, value);
+                          else max0 = std::max (max0, value);
+                        }
+                      float const bm = max1 - max0;
+                      int const out_index = i32 + ib - 1;
+                      if (nsym == 1) rbmeta[static_cast<size_t> (out_index)] = bm;
+                      else if (nsym == 2) rbmetb[static_cast<size_t> (out_index)] = bm;
+                      else rbmetc[static_cast<size_t> (out_index)] = bm;
+                    }
+                }
+            }
+        }
+
+      for (int i = 0; i < 174; ++i)
+        {
+          std::array<float, 3> const temp {{
+              rbmeta[static_cast<size_t> (i)],
+              rbmetb[static_cast<size_t> (i)],
+              rbmetc[static_cast<size_t> (i)]
+            }};
+          int best = 0;
+          float best_abs = std::abs (temp[0]);
+          for (int j = 1; j < 3; ++j)
+            {
+              float const current_abs = std::abs (temp[static_cast<size_t> (j)]);
+              if (current_abs > best_abs)
+                {
+                  best = j;
+                  best_abs = current_abs;
+                }
+            }
+          bmet_reverse[static_cast<size_t> (i)] = temp[static_cast<size_t> (best)];
+        }
+    }
+
   if (use_weak_transform)
     {
       normalizebmet_rms_cpp (bmeta.data (), 174);
@@ -1144,6 +1304,10 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
       normalizebmet_rms_cpp (bmetc.data (), 174);
       normalizebmet_rms_cpp (bmetd.data (), 174);
       normalizebmet_rms_cpp (bmete.data (), 174);
+      if (use_reverse_extra)
+        {
+          normalizebmet_rms_cpp (bmet_reverse.data (), 174);
+        }
     }
   else
     {
@@ -1152,6 +1316,10 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
       normalizebmet_cpp (bmetc.data (), 174);
       normalizebmet_cpp (bmetd.data (), 174);
       normalizebmet_cpp (bmete.data (), 174);
+      if (use_reverse_extra)
+        {
+          normalizebmet_cpp (bmet_reverse.data (), 174);
+        }
     }
 
   for (int i = 0; i < 174; ++i)
@@ -1160,7 +1328,9 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
       llrb[i] = scale * bmetb[static_cast<size_t> (i)];
       llrc[i] = scale * bmetc[static_cast<size_t> (i)];
       llrd[i] = scale * bmetd[static_cast<size_t> (i)];
-      llre[i] = scale * bmete[static_cast<size_t> (i)];
+      llre[i] = scale * (use_reverse_extra
+                         ? bmet_reverse[static_cast<size_t> (i)]
+                         : bmete[static_cast<size_t> (i)]);
     }
 }
 
@@ -1218,7 +1388,7 @@ extern "C" void ftx_ft8_bitmetrics_c (Complex const* cd0, int np2, int ibest, in
                                       float* llra, float* llrb, float* llrc,
                                       float* llrd, float* llre)
 {
-  run_ft8_bitmetrics (cd0, np2, ibest, imetric, 3.2f, false,
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, 3.2f, false, false,
                       s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
 }
 
@@ -1228,7 +1398,7 @@ extern "C" void ftx_ft8_bitmetrics_scaled_c (Complex const* cd0, int np2, int ib
                                              float* llra, float* llrb, float* llrc,
                                              float* llrd, float* llre)
 {
-  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, false,
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, false, false,
                       s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
 }
 
@@ -1238,7 +1408,28 @@ extern "C" void ftx_ft8_bitmetrics_deep_c (Complex const* cd0, int np2, int ibes
                                             float* llra, float* llrb, float* llrc,
                                             float* llrd, float* llre)
 {
-  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, true,
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, true, false,
+                      s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
+}
+
+extern "C" void ftx_ft8_bitmetrics_equalized_c (Complex const* cd0, int np2, int ibest, int imetric,
+                                                float scale,
+                                                float* s8_out, int* nsync_out,
+                                                float* llra, float* llrb, float* llrc,
+                                                float* llrd, float* llre)
+{
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, false, true,
+                      s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
+}
+
+extern "C" void ftx_ft8_bitmetrics_deep_equalized_c (Complex const* cd0, int np2, int ibest,
+                                                     int imetric, float scale,
+                                                     float* s8_out, int* nsync_out,
+                                                     float* llra, float* llrb,
+                                                     float* llrc, float* llrd,
+                                                     float* llre)
+{
+  run_ft8_bitmetrics (cd0, np2, ibest, imetric, scale, true, true,
                       s8_out, nsync_out, llra, llrb, llrc, llrd, llre);
 }
 

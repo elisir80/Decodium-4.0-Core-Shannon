@@ -629,7 +629,7 @@ void osd174_91_cpp (float const* llr_in, int k, signed char const* apmask_in, in
     }
   else if (ndeep_local == 2)
     {
-      nord = 1; npre1 = 1; npre2 = 0; nt = 40; ntheta = 10;
+      nord = 1; npre1 = 1; npre2 = 0; nt = 40; ntheta = 12;
     }
   else if (ndeep_local == 3)
     {
@@ -637,11 +637,11 @@ void osd174_91_cpp (float const* llr_in, int k, signed char const* apmask_in, in
     }
   else if (ndeep_local == 4)
     {
-      nord = 2; npre1 = 1; npre2 = 1; nt = 40; ntheta = 12; ntau = 17;
+      nord = 2; npre1 = 1; npre2 = 0; nt = 40; ntheta = 12; ntau = 19;
     }
   else if (ndeep_local == 5)
     {
-      nord = 3; npre1 = 1; npre2 = 1; nt = 40; ntheta = 12; ntau = 15;
+      nord = 2; npre1 = 1; npre2 = 1; nt = 40; ntheta = 12; ntau = 19;
     }
   else if (ndeep_local >= 6)
     {
