@@ -1301,11 +1301,10 @@ ApplicationWindow {
         var id = classicIdInSlot(idx)
         if (id === "livemap")
             return !(mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
-        // 1.0.385 — la 4ª colonna del DX Cluster collassa a 0 quando il Cluster è spento
-        // (default). Espansa sia quando dockato (inline) sia quando staccato (mostra il
-        // placeholder "Aggancia DX Cluster" come target di dock).
+        // 1.0.385/386 — la 4ª colonna del DX Cluster esiste SOLO quando è dockato.
+        // Se spento o staccato (finestra flottante) la colonna sparisce del tutto.
         if (id === "dxcluster")
-            return !mainWindow.dxClusterPanelVisible
+            return !(mainWindow.dxClusterPanelVisible && !mainWindow.dxClusterDetached)
         return false
     }
 
@@ -1533,6 +1532,24 @@ ApplicationWindow {
         if (typeof dxClusterFloatingWindow !== "undefined" && dxClusterFloatingWindow)
             dxClusterFloatingWindow.hide()
         Qt.callLater(mainWindow.restoreDecodePanelWidths)
+    }
+    // 1.0.386 — inserisce la colonna DX Cluster SUBITO DOPO il pannello refId
+    // ("fullspectrum" o "signalrx") riordinando la mappa, poi aggancia.
+    function dockDxClusterNextTo(refId) {
+        var arr = uiClassicColumnOrder.slice()
+        var ci = arr.indexOf("dxcluster")
+        if (ci >= 0)
+            arr.splice(ci, 1)
+        var ri = arr.indexOf(refId)
+        if (ri < 0)
+            ri = arr.indexOf("signalrx")   // fallback
+        if (ri < 0)
+            ri = 0
+        arr.splice(ri + 1, 0, "dxcluster")
+        uiClassicColumnOrder = arr
+        applyClassicColumnOrder()
+        persistClassicColumnOrder()
+        dockDxClusterPanel()
     }
     onLiveMapPanelVisibleChanged: {
         persistUiSetting("WorldMapDisplayed", liveMapPanelVisible)
@@ -7930,34 +7947,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                 }
                             }
 
-                            // Placeholder/dock-zone (Cluster staccato → finestra flottante)
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                visible: mainWindow.dxClusterPanelVisible && mainWindow.dxClusterDetached
-                                radius: 8
-                                color: dxcDockMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2)
-                                                               : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.4)
-                                border.color: dxcDockMA.containsMouse ? secondaryCyan : glassBorder
-                                border.width: dxcDockMA.containsMouse ? 3 : 1
-                                Column {
-                                    anchors.centerIn: parent
-                                    spacing: 6
-                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "⤓"; font.pixelSize: 26; color: secondaryCyan }
-                                    Text {
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        text: dxcDockMA.containsMouse ? qsTr("Aggancia DX Cluster qui") : qsTr("DX Cluster staccato")
-                                        font.pixelSize: 12; color: textPrimary; font.bold: true
-                                    }
-                                }
-                                MouseArea {
-                                    id: dxcDockMA
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: mainWindow.dockDxClusterPanel()
-                                }
-                            }
                         }
                     }
 
@@ -13131,10 +13120,74 @@ NumberAnimation {
             close.accepted = true
         }
 
-        DxClusterPanel {
+        Item {
             anchors.fill: parent
-            onCloseRequested: mainWindow.dxClusterPanelVisible = false
-            // positionCommitted non piu' usato: la Window OS gestisce drag/resize nativi
+
+            // 1.0.386 — barra "Inserisci nel layout": aggancia il Cluster come 4ª colonna
+            // accanto a Full Spectrum o a Signal RX (l'inserimento è esplicito; staccato
+            // la colonna sparisce del tutto).
+            Rectangle {
+                id: dxcDockBar
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 30
+                color: "#16213e"
+                border.color: glassBorder
+                Row {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
+                    Text {
+                        text: qsTr("Inserisci nel layout:")
+                        color: textPrimary
+                        font.pixelSize: 11
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Repeater {
+                        model: [
+                            { ref: "fullspectrum", label: qsTr("◧ accanto a Full Spectrum") },
+                            { ref: "signalrx",     label: qsTr("◧ accanto a Signal RX") }
+                        ]
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: dxcBtnText.implicitWidth + 16
+                            height: 20
+                            radius: 3
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: dxcBtnMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.30)
+                                                          : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.14)
+                            border.color: secondaryCyan
+                            border.width: 1
+                            Text {
+                                id: dxcBtnText
+                                anchors.centerIn: parent
+                                text: modelData.label
+                                color: textPrimary
+                                font.pixelSize: 11
+                                font.bold: true
+                            }
+                            MouseArea {
+                                id: dxcBtnMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: mainWindow.dockDxClusterNextTo(modelData.ref)
+                            }
+                        }
+                    }
+                }
+            }
+
+            DxClusterPanel {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: dxcDockBar.bottom
+                anchors.bottom: parent.bottom
+                onCloseRequested: mainWindow.dxClusterPanelVisible = false
+                // positionCommitted non piu' usato: la Window OS gestisce drag/resize nativi
+            }
         }
     }
 
