@@ -864,6 +864,25 @@ find_package (Boost 1.62 REQUIRED COMPONENTS log_setup log)
 #
 # OpenMP
 #
+if (APPLE)
+  find_path (DECODIUM_LIBOMP_INCLUDE_DIR omp.h
+    HINTS
+      /opt/homebrew/opt/libomp/include
+      /usr/local/opt/libomp/include
+    )
+  find_library (DECODIUM_LIBOMP_LIBRARY omp
+    HINTS
+      /opt/homebrew/opt/libomp/lib
+      /usr/local/opt/libomp/lib
+    )
+  if (DECODIUM_LIBOMP_INCLUDE_DIR AND DECODIUM_LIBOMP_LIBRARY)
+    set (OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I${DECODIUM_LIBOMP_INCLUDE_DIR}" CACHE STRING "" FORCE)
+    set (OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${DECODIUM_LIBOMP_INCLUDE_DIR}" CACHE STRING "" FORCE)
+    set (OpenMP_C_LIB_NAMES "omp" CACHE STRING "" FORCE)
+    set (OpenMP_CXX_LIB_NAMES "omp" CACHE STRING "" FORCE)
+    set (OpenMP_omp_LIBRARY "${DECODIUM_LIBOMP_LIBRARY}" CACHE FILEPATH "" FORCE)
+  endif ()
+endif ()
 find_package (OpenMP)
 
 #
@@ -936,17 +955,22 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -fexceptions -frt
 
 if (NOT APPLE)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pragmas")
-  if (${OPENMP_FOUND})
-    if (OpenMP_C_FLAGS)
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_C_FLAGS}")
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    endif ()
-  endif ()
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fdata-sections -ffunction-sections")
   set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -fdata-sections -ffunction-sections")
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fdata-sections -ffunction-sections")
   set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -fdata-sections -ffunction-sections")
 endif (NOT APPLE)
+
+if (OPENMP_FOUND)
+  if (OpenMP_C_FLAGS)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  endif ()
+  if (OpenMP_CXX_FLAGS)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  elseif (OpenMP_C_FLAGS)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_C_FLAGS}")
+  endif ()
+endif ()
 
 if (WIN32)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -1450,11 +1474,19 @@ set_target_properties (wsjtx PROPERTIES
   )
 
 target_include_directories (wsjtx PRIVATE ${FFTW3_INCLUDE_DIRS})
-if (${OPENMP_FOUND} AND NOT APPLE)
-  if (OpenMP_C_FLAGS)
+if (OPENMP_FOUND)
+  if (OpenMP_CXX_FLAGS)
     set_target_properties (wsjtx PROPERTIES
-      COMPILE_FLAGS "${OpenMP_C_FLAGS}"
-      LINK_FLAGS "${OpenMP_C_FLAGS}"
+      COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+      )
+  endif ()
+  if (TARGET OpenMP::OpenMP_CXX)
+    target_link_libraries (wsjtx OpenMP::OpenMP_CXX)
+  elseif (APPLE AND DECODIUM_LIBOMP_LIBRARY)
+    target_link_libraries (wsjtx ${DECODIUM_LIBOMP_LIBRARY})
+  elseif (OpenMP_CXX_FLAGS)
+    set_target_properties (wsjtx PROPERTIES
+      LINK_FLAGS "${OpenMP_CXX_FLAGS}"
       )
   endif ()
   if (WIN32)
@@ -1658,6 +1690,13 @@ target_link_libraries (decodium_qml
   ${FFTW3_LIBRARIES}
   ${LIBM_LIBRARIES}
 )
+if (OPENMP_FOUND)
+  if (TARGET OpenMP::OpenMP_CXX)
+    target_link_libraries (decodium_qml OpenMP::OpenMP_CXX)
+  elseif (APPLE AND DECODIUM_LIBOMP_LIBRARY)
+    target_link_libraries (decodium_qml ${DECODIUM_LIBOMP_LIBRARY})
+  endif ()
+endif ()
 if (APPLE)
   target_link_libraries (decodium_qml Qt6::DBus)
 endif ()

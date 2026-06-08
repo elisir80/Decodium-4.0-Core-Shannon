@@ -51,6 +51,8 @@ constexpr int kFt8SequenceCount {2};
 constexpr int kFt8CarrySamples {47 * 3456};
 constexpr int kFt8A7Np2 {2812};
 constexpr int kFt8A7DownsampleSize {3200};
+constexpr int kFt8VarDownsampleOffset {800};
+constexpr int kFt8VarDownsampleSize {4801};
 constexpr int kFt8A7MaxMsg {206};
 constexpr float kFt8A7Fs2 {200.0f};
 constexpr int kFt8A8Nsym {79};
@@ -92,6 +94,36 @@ std::atomic<bool>& stage4_supplemental_requested ()
   return value;
 }
 
+std::atomic<bool>& stage4_low_threshold_requested ()
+{
+  static std::atomic<bool> value {false};
+  return value;
+}
+
+std::atomic<bool>& stage4_subpass_requested ()
+{
+  static std::atomic<bool> value {false};
+  return value;
+}
+
+std::atomic<int>& stage4_decode_cycles ()
+{
+  static std::atomic<int> value {1};
+  return value;
+}
+
+std::atomic<int>& stage4_rx_freq_sensitivity ()
+{
+  static std::atomic<int> value {1};
+  return value;
+}
+
+std::atomic<int>& stage4_candidate_thin ()
+{
+  static std::atomic<int> value {100};
+  return value;
+}
+
 long long steady_clock_ms ()
 {
   using namespace std::chrono;
@@ -116,6 +148,7 @@ extern "C"
                            float* candidate, int* ncand, float* sbase);
   void ftx_sync8_search_stage4_c (float const* dd, int npts, float nfa, float nfb,
                                    float syncmin, float nfqso, int maxcand, int ipass,
+                                   int candidate_thin,
                                    float* candidate, int* ncand, float* sbase);
   void ftx_subtract_ft8_c (float* dd0, int const* itone, float f0, float dt, int lrefinedt);
   void ftx_prepare_ft8_ap_c (char const mycall[12], char const hiscall[12], int ncontest,
@@ -191,12 +224,25 @@ extern "C"
                       char const dxgrid[6], float* f1a, float* xdt, float* fbest,
                       float* xsnr, float* plog, char msgbest[37]);
   void ftx_ft8_downsample_c (float const* dd, int* newdat, float f0, fftwf_complex* c1);
+  void ftx_ft8var_downsample_c (float const* dd, int* newdat, float const* f0,
+                                int const* nqso, fftwf_complex* c0, fftwf_complex* c2,
+                                fftwf_complex* c3, int const* lhighsens,
+                                int* lsubtracted, int* npos, float const* freqsub);
   void ftx_ft8_bitmetrics_scaled_c (std::complex<float> const* cd0, int np2, int ibest, int imetric,
                                     float scale, float* s8_out, int* nsync_out,
                                     float* llra, float* llrb, float* llrc, float* llrd, float* llre);
   void ftx_ft8_bitmetrics_deep_c (std::complex<float> const* cd0, int np2, int ibest, int imetric,
                                   float scale, float* s8_out, int* nsync_out,
                                   float* llra, float* llrb, float* llrc, float* llrd, float* llre);
+  void ftx_ft8_bitmetrics_equalized_c (std::complex<float> const* cd0, int np2, int ibest,
+                                       int imetric, float scale, float* s8_out,
+                                       int* nsync_out, float* llra, float* llrb,
+                                       float* llrc, float* llrd, float* llre);
+  void ftx_ft8_bitmetrics_deep_equalized_c (std::complex<float> const* cd0, int np2,
+                                            int ibest, int imetric, float scale,
+                                            float* s8_out, int* nsync_out,
+                                            float* llra, float* llrb, float* llrc,
+                                            float* llrd, float* llre);
   int ftx_ft8_a8_search_candidate_c (std::complex<float> const* cd,
                                      std::complex<float> const* cwave,
                                      int nzz, int nwave, float f1,
@@ -236,6 +282,10 @@ extern "C"
                                          int nharderrors, int unpack_ok, int quirky, int ncontest);
   int ftx_ft8_compute_snr_c (float const* s8, int rows, int cols, int const* itone,
                              float xbase, int nagain, int nsync, float* xsnr_out);
+  void ftx_ft8var_chkfalse8_c (char msg37[37], int const* i3_in, int const* n3_in,
+                               int* nbadcrc_io, int const* iaptype_in,
+                               int const* lcall1hash_in, char const mycall12[12],
+                               char const hiscall12[12], char const hisgrid4[4]);
   void legacy_pack77_reset_context_c ();
   void legacy_pack77_set_context_c (char const mycall[13], char const hiscall[13]);
   void legacy_pack77_pack_c (char const msg0[37], int* i3, int* n3,
@@ -2321,6 +2371,17 @@ struct AsyncCollector
                signed char const* message77)
   {
     (void) sync;
+    if (decodeds)
+      {
+        for (int i = 0; i < count; ++i)
+          {
+            if (std::equal (decoded.begin (), decoded.end (),
+                            decodeds + i * kFt8DecodedChars))
+              {
+                return;
+              }
+          }
+      }
     if (count >= kFt8MaxLines)
       {
         return;
@@ -2437,6 +2498,12 @@ struct Ft8Request
   int lapcqonly {};
   int napwid {};
   int ldiskdat {};
+  int ncandthin {100};
+  int nft8cycles {1};
+  int nft8rxfsens {1};
+  bool lft8lowth {false};
+  bool lft8subpass {false};
+  bool supplemental {false};
   FixedChars<12> mycall {blank_fixed<12> ()};
   FixedChars<12> hiscall {blank_fixed<12> ()};
   FixedChars<6> hisgrid {blank_fixed<6> ()};
@@ -2674,8 +2741,7 @@ Ft8A7Entry const* find_ft8_repeated_hint (Ft8A7Slot const* hints, Ft8Request con
                                           float freq_tolerance = 7.0f,
                                           float dt_tolerance = 0.55f)
 {
-  if (!hints || request.ndepth < 4
-      || !stage4_supplemental_requested ().load (std::memory_order_relaxed))
+  if (!hints || request.ndepth < 4 || !request.supplemental)
     {
       return nullptr;
     }
@@ -2712,8 +2778,7 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
                                  int ifa, int ifb, std::array<float, 4 * kFt8MaxCand>& candidate,
                                  int& ncand)
 {
-  if (!hints || request.ndepth < 4
-      || !stage4_supplemental_requested ().load (std::memory_order_relaxed))
+  if (!hints || request.ndepth < 4 || !request.supplemental)
     {
       return;
     }
@@ -2790,8 +2855,7 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
                               float const* llra, float const* llrb,
                               float const* llrc, float const* llrd)
 {
-  if (!hints || !s8 || request.ndepth < 4
-      || !stage4_supplemental_requested ().load (std::memory_order_relaxed))
+  if (!hints || !s8 || request.ndepth < 4 || !request.supplemental)
     {
       return false;
     }
@@ -2873,10 +2937,11 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
   return true;
 }
 
-int ft8_candidate_sync_threshold (int imetric, int ndepth)
+int ft8_candidate_sync_threshold (int imetric, Ft8Request const& request)
 {
+  int const ndepth = request.ndepth;
   int syncmin = 6;
-  if (imetric == 2)
+  if (imetric >= 2)
     {
       syncmin = 7;
     }
@@ -2896,17 +2961,20 @@ int ft8_candidate_sync_threshold (int imetric, int ndepth)
     {
       syncmin = 7;
     }
-  if (ndepth >= 4 && stage4_supplemental_requested ().load (std::memory_order_relaxed))
+  if (ndepth >= 4 && request.supplemental)
     {
       syncmin = std::min (syncmin, 4);
+    }
+  if (request.lft8lowth)
+    {
+      syncmin = std::min (syncmin, request.lft8subpass ? 4 : 5);
     }
   return syncmin;
 }
 
 int ft8_candidate_budget (Ft8Request const& request)
 {
-  bool const supplemental = stage4_supplemental_requested ().load (std::memory_order_relaxed);
-  if (request.ndepth >= 4 && supplemental)
+  if (request.ndepth >= 4 && request.supplemental)
     {
       return kFt8MaxCand;
     }
@@ -2919,6 +2987,96 @@ int ft8_candidate_budget (Ft8Request const& request)
       return kFt8DeepMaxCand;
     }
   return kFt8DefaultMaxCand;
+}
+
+int select_ft8_focus_frequency (Ft8Stage4State const& state, Ft8Request const& request,
+                                int ifa, int ifb, int ndecodes,
+                                std::array<int, 8> const& blocked,
+                                int blocked_count, bool overlap_only)
+{
+  if (request.nfqso != 0 || request.nzhsym < 50 || request.ndepth < 3)
+    {
+      return 0;
+    }
+
+  std::array<float, 4 * kFt8MaxCand> candidate {};
+  std::array<float, kFt8Nh1> sbase {};
+  float syncmin = 0.0f;
+  int imetric = 0;
+  int lsubtract = 0;
+  int run_pass = 0;
+  ftx_ft8_prepare_pass_c (3, 2, ndecodes, &syncmin, &imetric, &lsubtract, &run_pass);
+  (void) imetric;
+  (void) lsubtract;
+  if (run_pass == 0)
+    {
+      return 0;
+    }
+
+  int ncand = 0;
+  ftx_sync8_search_stage4_c (state.dd.data (), kFt8NMax,
+                             static_cast<float> (ifa), static_cast<float> (ifb),
+                             syncmin, 0.0f, ft8_candidate_budget (request), 2,
+                             request.ncandthin, candidate.data (), &ncand, sbase.data ());
+
+  auto already_decoded_near = [&] (float freq) {
+    int const limit = std::min (ndecodes, kFt8MaxEarly);
+    for (int index = 0; index < limit; ++index)
+      {
+        if (std::fabs (freq - state.f1_save[static_cast<size_t> (index)]) <= 3.0f)
+          {
+            return true;
+          }
+      }
+    return false;
+  };
+  auto decoded_neighbor = [&] (float freq, float min_delta, float max_delta, bool cq_only) {
+    int const limit = std::min (ndecodes, kFt8MaxEarly);
+    for (int index = 0; index < limit; ++index)
+      {
+        if (cq_only && !ft8sd_hint_is_cq (state.allmessages[static_cast<size_t> (index)]))
+          {
+            continue;
+          }
+        float const delta = std::fabs (freq - state.f1_save[static_cast<size_t> (index)]);
+        if (delta >= min_delta && delta <= max_delta)
+          {
+            return true;
+          }
+      }
+    return false;
+  };
+  auto blocked_near = [&] (float freq) {
+    int const limit = std::min (blocked_count, static_cast<int> (blocked.size ()));
+    for (int index = 0; index < limit; ++index)
+      {
+        if (std::abs (static_cast<int> (std::lround (freq)) - blocked[static_cast<size_t> (index)]) <= 20)
+          {
+            return true;
+          }
+      }
+    return false;
+  };
+
+  for (int icand = 0; icand < ncand; ++icand)
+    {
+      float const freq = candidate[static_cast<size_t> (icand * 4)];
+      if (freq < static_cast<float> (ifa) || freq > static_cast<float> (ifb))
+        {
+          continue;
+        }
+      if (freq < 100.0f || already_decoded_near (freq) || blocked_near (freq))
+        {
+          continue;
+        }
+      if (overlap_only && !decoded_neighbor (freq, 3.0f, 16.0f, true))
+        {
+          continue;
+        }
+      return std::max (0, static_cast<int> (std::lround (freq)));
+    }
+
+  return 0;
 }
 
 float ft8_cq_signature_score (float const* s8, int rows)
@@ -2961,7 +3119,40 @@ float ft8_cq_signature_score (float const* s8, int rows)
   return score;
 }
 
-void plan_ft8_ldpc_decode (Ft8Request const& request, float f1, int pass_iaptype,
+void downsample_ft8_stage4_candidate (float const* dd0, int* newdat, int decode_pass,
+                                      bool use_var_downsample, float sync, float f1,
+                                      std::array<std::complex<float>, kFt8A7DownsampleSize>& cd0)
+{
+  if (!use_var_downsample)
+    {
+      ftx_ft8_downsample_c (dd0, newdat, f1,
+                            reinterpret_cast<fftwf_complex*> (cd0.data ()));
+      return;
+    }
+
+  thread_local std::array<std::complex<float>, kFt8VarDownsampleSize> cd_var {};
+  std::fill (cd_var.begin (), cd_var.end (), std::complex<float> {});
+
+  int nqso = 1;
+  int lhighsens =
+      (sync < 1.9f
+       || ((decode_pass == 2 || decode_pass == 4 || decode_pass == 6) && sync < 3.15f))
+          ? 1
+          : 0;
+  int lsubtracted = 0;
+  int npos = 0;
+  ftx_ft8var_downsample_c (dd0, newdat, &f1, &nqso,
+                           reinterpret_cast<fftwf_complex*> (cd_var.data ()),
+                           nullptr, nullptr, &lhighsens, &lsubtracted, &npos, nullptr);
+
+  for (int i = 0; i < kFt8A7DownsampleSize; ++i)
+    {
+      cd0[static_cast<size_t> (i)] =
+          cd_var[static_cast<size_t> (kFt8VarDownsampleOffset + i)];
+    }
+}
+
+void plan_ft8_ldpc_decode (Ft8Request const& request, float f1, float sync, int pass_iaptype,
                            int& Keff, int& maxosd, int& norder)
 {
   norder = 2;
@@ -2986,13 +3177,21 @@ void plan_ft8_ldpc_decode (Ft8Request const& request, float f1, int pass_iaptype
   if (request.ndepth >= 4
       && pass_iaptype > 0
 	      && request.nzhsym < 47
-      && !stage4_supplemental_requested ().load (std::memory_order_relaxed))
+      && !request.supplemental)
     {
       // JTDX gets many of its weakest live decodes through AP-assisted OSD.
       // Spend the extra saved BP state only on AP passes; applying maxosd=3
       // to every normal pass runs into the live deadline.
       maxosd = std::max (maxosd, 3);
       norder = std::max (norder, 3);
+    }
+  if (request.lft8lowth
+      && pass_iaptype > 0
+      && request.nzhsym >= 47
+      && !request.supplemental)
+    {
+      maxosd = std::max (maxosd, 3);
+      norder = std::max (norder, request.lft8subpass ? 3 : 2);
     }
   if (request.ndepth == 3
       && (std::fabs (static_cast<float> (request.nfqso) - f1) <= static_cast<float> (request.napwid)
@@ -3001,11 +3200,32 @@ void plan_ft8_ldpc_decode (Ft8Request const& request, float f1, int pass_iaptype
     {
       maxosd = 2;
     }
+  if (request.lft8subpass
+      && request.nft8cycles >= 3
+      && sync >= 5.0f
+      && request.nzhsym >= 50
+      && !request.supplemental)
+    {
+      maxosd = std::max (maxosd, 3);
+      norder = std::max (norder, 3);
+    }
+  int const overrideMaxOsd = stage4_ldpc_maxosd_override ().load (std::memory_order_relaxed);
+  int const overrideNOrder = stage4_ldpc_norder_override ().load (std::memory_order_relaxed);
+  if (overrideMaxOsd >= 0)
+    {
+      maxosd = std::min (maxosd, overrideMaxOsd);
+    }
+  if (overrideNOrder > 0)
+    {
+      norder = std::min (norder, overrideNOrder);
+    }
   Keff = 91;
 }
 
-bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& request, int imetric,
-                                int lsubtract, std::array<int, 58> const& apsym,
+bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& request,
+                                int decode_pass, bool use_var_downsample,
+                                bool equalized_pipeline, int imetric, int lsubtract,
+                                std::array<int, 58> const& apsym,
                                 std::array<int, 10> const& aph10,
                                 float const* candidate_values, float candidate_cq_flag, float const* sbase,
                                 int sbase_size, float& sync, float& f1, float& xdt,
@@ -3062,8 +3282,9 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   std::array<float, 174> llre {};
 
   int local_newdat = *newdat;
-  ftx_ft8_downsample_c (dd0, &local_newdat, f1,
-                        reinterpret_cast<fftwf_complex*> (cd0.data ()));
+  downsample_ft8_stage4_candidate (dd0, &local_newdat, decode_pass,
+                                   use_var_downsample, sync, f1, cd0);
+  *newdat = local_newdat;
   if (stage4_should_cancel ())
     {
       return false;
@@ -3075,8 +3296,8 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   f1 += delfbest;
 
   int second_pass_newdat = 0;
-  ftx_ft8_downsample_c (dd0, &second_pass_newdat, f1,
-                        reinterpret_cast<fftwf_complex*> (cd0.data ()));
+  downsample_ft8_stage4_candidate (dd0, &second_pass_newdat, decode_pass,
+                                   use_var_downsample, sync, f1, cd0);
   if (stage4_should_cancel ())
     {
       return false;
@@ -3086,26 +3307,56 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                               &ibest, &sync, &xdt);
   xdt += 0.5f;
 
-  int nsync = 0;
   bool const deep_bitmetrics =
       request.ndepth >= 4
-      && stage4_supplemental_requested ().load (std::memory_order_relaxed);
-  if (deep_bitmetrics)
+      && request.supplemental;
+  bool const try_equalized_metrics =
+      !equalized_pipeline
+      &&
+      request.nzhsym >= 41
+      && request.ndepth >= 3
+      && !request.supplemental;
+  int const metric_attempts = equalized_pipeline ? 1 : (try_equalized_metrics ? 2 : 1);
+  for (int metric_attempt = 0; metric_attempt < metric_attempts; ++metric_attempt)
     {
-      ftx_ft8_bitmetrics_deep_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
-                                 s8.data (), &nsync, llra.data (), llrb.data (),
-                                 llrc.data (), llrd.data (), llre.data ());
-    }
-  else
-    {
-      ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
-                                   s8.data (), &nsync, llra.data (), llrb.data (),
-                                   llrc.data (), llrd.data (), llre.data ());
-    }
-  *newdat = local_newdat;
+      bool const equalized_metrics = equalized_pipeline || metric_attempt != 0;
+      int nsync = 0;
+      if (deep_bitmetrics)
+        {
+          if (equalized_metrics)
+            {
+              ftx_ft8_bitmetrics_deep_equalized_c (cd0.data (), kFt8A7Np2, ibest,
+                                                   imetric, 2.83f, s8.data (),
+                                                   &nsync, llra.data (), llrb.data (),
+                                                   llrc.data (), llrd.data (), llre.data ());
+            }
+          else
+            {
+              ftx_ft8_bitmetrics_deep_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
+                                         s8.data (), &nsync, llra.data (), llrb.data (),
+                                         llrc.data (), llrd.data (), llre.data ());
+            }
+        }
+      else
+        {
+          if (equalized_metrics)
+            {
+              ftx_ft8_bitmetrics_equalized_c (cd0.data (), kFt8A7Np2, ibest,
+                                              imetric, 2.83f, s8.data (), &nsync,
+                                              llra.data (), llrb.data (), llrc.data (),
+                                              llrd.data (), llre.data ());
+            }
+          else
+            {
+              ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, imetric, 2.83f,
+                                           s8.data (), &nsync, llra.data (), llrb.data (),
+                                           llrc.data (), llrd.data (), llre.data ());
+            }
+        }
+      *newdat = local_newdat;
 
   float const cq_signature_score = ft8_cq_signature_score (s8.data (), 8);
-  int const sync_threshold = ft8_candidate_sync_threshold (imetric, request.ndepth);
+  int const sync_threshold = ft8_candidate_sync_threshold (imetric, request);
   (void) candidate_cq_flag;
   Ft8A7Entry const* repeated_hint =
       find_ft8_repeated_hint (sd_hints, request, f1, xdt - 0.5f);
@@ -3117,7 +3368,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       request.nzhsym >= 50
       && request.ndepth >= 4
       && request.lft8apon != 0
-      && !stage4_supplemental_requested ().load (std::memory_order_relaxed)
+      && !request.supplemental
       && ((nsync == 4 && cq_signature_score >= 6.6f)
           || (nsync == 5 && cq_signature_score >= 6.1f)
           || (nsync == 6 && cq_signature_score >= 5.6f));
@@ -3130,7 +3381,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                        llra.data (), llrb.data (), llrc.data (),
                                        llrd.data ()))
         {
-          return false;
+          continue;
         }
       nharderrors = kFt8StrictHardErrors;
       dmin = 0.0f;
@@ -3148,7 +3399,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       request.nzhsym >= 47
       && request.ndepth >= 4
       && request.lft8apon != 0
-      && !stage4_supplemental_requested ().load (std::memory_order_relaxed);
+      && !request.supplemental;
   if (live_full_ap)
     {
       npasses = std::min (npasses, 8);
@@ -3200,7 +3451,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
         }
       if (request.nzhsym >= 50
           && pass_iaptype == 1
-          && !stage4_supplemental_requested ().load (std::memory_order_relaxed)
+          && !request.supplemental
           && cq_signature_score < 3.1f)
         {
           continue;
@@ -3214,7 +3465,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       int Keff = 91;
       int maxosd = 2;
       int norder = 2;
-      plan_ft8_ldpc_decode (request, f1, pass_iaptype, Keff, maxosd, norder);
+      plan_ft8_ldpc_decode (request, f1, sync, pass_iaptype, Keff, maxosd, norder);
 
       int ntype = 0;
       int pass_nharderrors = -1;
@@ -3242,6 +3493,33 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                              request.ncontest) == 0)
         {
           continue;
+        }
+      if (pass_iaptype == 1 && !is_strict_standard_ft8_message (candidate_msg))
+        {
+          continue;
+        }
+      int const candidate_n3 = 4 * int (message77[71]) + 2 * int (message77[72]) + int (message77[73]);
+      int const candidate_i3 = 4 * int (message77[74]) + 2 * int (message77[75]) + int (message77[76]);
+      bool const candidate_risky =
+          pass_iaptype > 0
+          || (static_cast<float> (pass_nharderrors) + pass_dmin) > 36.6f;
+      if (candidate_risky)
+        {
+          std::array<char, kFt8DecodedChars> checked_msg {};
+          std::copy_n (candidate_msg.begin (), kFt8DecodedChars, checked_msg.begin ());
+          int checked_badcrc = 0;
+          int const lcall1hash = !checked_msg.empty () && checked_msg[0] == '<' ? 1 : 0;
+          std::array<char, 4> hisgrid4 {};
+          std::copy_n (request.hisgrid.begin (), hisgrid4.size (), hisgrid4.begin ());
+          ftx_ft8var_chkfalse8_c (checked_msg.data (), &candidate_i3, &candidate_n3,
+                                  &checked_badcrc, &pass_iaptype, &lcall1hash,
+                                  request.mycall.data (), request.hiscall.data (),
+                                  hisgrid4.data ());
+          if (checked_badcrc != 0)
+            {
+              continue;
+            }
+          candidate_msg = fixed_from_chars<kFt8DecodedChars> (checked_msg.data ());
         }
       if (pass_nharderrors > kFt8StrictHardErrors
           && !is_strict_standard_ft8_message (candidate_msg))
@@ -3307,6 +3585,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       ipass = 0;
       iaptype = 0;
       return true;
+    }
     }
 
   return false;
@@ -3409,6 +3688,12 @@ extern "C" void ftx_ft8_decode_candidate_stage4_c (
   request.lapcqonly = *lapcqonly;
   request.napwid = *napwid;
   request.ldiskdat = 0;
+  request.ncandthin = stage4_candidate_thin ().load (std::memory_order_relaxed);
+  request.nft8cycles = stage4_decode_cycles ().load (std::memory_order_relaxed);
+  request.nft8rxfsens = stage4_rx_freq_sensitivity ().load (std::memory_order_relaxed);
+  request.lft8lowth = stage4_low_threshold_requested ().load (std::memory_order_relaxed);
+  request.lft8subpass = stage4_subpass_requested ().load (std::memory_order_relaxed);
+  request.supplemental = stage4_supplemental_requested ().load (std::memory_order_relaxed);
   request.mycall = fixed_from_chars<12> (mycall12);
   request.hiscall = fixed_from_chars<12> (hiscall12);
   request.hisgrid = blank_fixed<6> ();
@@ -3432,7 +3717,7 @@ extern "C" void ftx_ft8_decode_candidate_stage4_c (
   int iaptype_out = 0;
   float xsnr_out = 0.0f;
 
-  decode_main_candidate_cpp (dd0, newdat, request, *imetric, *lsubtract,
+  decode_main_candidate_cpp (dd0, newdat, request, 1, false, false, *imetric, *lsubtract,
                              apsym_array, aph10_array, candidate_values, 0.0f, sbase,
                              *sbase_size, sync_out, f1_out, xdt_out, xbase_out,
                              nharderrors_out, dmin_out, nbadcrc_out, ipass_out,
@@ -3457,7 +3742,7 @@ extern "C" void ftx_ft8_decode_candidate_stage4_c (
 void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
                       std::array<int, 58> const& apsym, std::array<int, 10> const& aph10,
                       int ifa, int ifb, int& ndecodes, std::array<float, kFt8Nh1>& sbase,
-                      AsyncCollector& collector)
+                      AsyncCollector& collector, bool equalized_pipeline)
 {
   std::array<float, 4 * kFt8MaxCand> candidate {};
   std::array<int, kFt8Nn> itone {};
@@ -3471,6 +3756,29 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
     {
       npass = 2;
     }
+  if (request.ndepth >= 3)
+    {
+      if (request.nft8cycles >= 2)
+        {
+          npass = std::max (npass, 6);
+        }
+      if (request.nft8cycles >= 3)
+        {
+          npass = std::max (npass, 9);
+        }
+      if (request.lft8subpass)
+        {
+          npass = std::max (npass, 8);
+        }
+    }
+
+  std::array<float, kFt8NMax> dd_cycle_base {};
+  bool const needs_shifted_cycle_base =
+      request.nzhsym >= 50 && request.ndepth >= 4 && npass >= 7;
+  if (needs_shifted_cycle_base)
+    {
+      dd_cycle_base = state.dd;
+    }
 
   for (int ipass = 1; ipass <= npass; ++ipass)
     {
@@ -3480,14 +3788,28 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
         }
       std::array<float, kFt8NMax> dd_before_shift {};
       bool shifted_pass = false;
-      if (request.nzhsym >= 50 && request.ndepth >= 4 && ipass == 4)
+      if (request.nzhsym >= 50 && request.ndepth >= 4 && (ipass == 4 || ipass == 7))
         {
           dd_before_shift = state.dd;
-          for (int i = 0; i < kFt8NMax - 1; ++i)
+          auto const& shift_source = needs_shifted_cycle_base ? dd_cycle_base : dd_before_shift;
+          if (ipass == 7)
             {
-              state.dd[static_cast<size_t> (i)] =
-                  0.5f * (dd_before_shift[static_cast<size_t> (i)]
-                          + dd_before_shift[static_cast<size_t> (i + 1)]);
+              state.dd[0] = shift_source[0];
+              for (int i = 1; i < kFt8NMax; ++i)
+                {
+                  state.dd[static_cast<size_t> (i)] =
+                      0.5f * (shift_source[static_cast<size_t> (i - 1)]
+                              + shift_source[static_cast<size_t> (i)]);
+                }
+            }
+          else
+            {
+              for (int i = 0; i < kFt8NMax - 1; ++i)
+                {
+                  state.dd[static_cast<size_t> (i)] =
+                      0.5f * (shift_source[static_cast<size_t> (i)]
+                              + shift_source[static_cast<size_t> (i + 1)]);
+                }
             }
           shifted_pass = true;
         }
@@ -3498,6 +3820,19 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       int run_pass = 0;
       ftx_ft8_prepare_pass_c (request.ndepth, ipass, ndecodes,
                               &syncmin, &imetric, &lsubtract, &run_pass);
+      if (request.lft8lowth)
+        {
+          float threshold_scale = request.lft8subpass ? 0.82f : 0.90f;
+          if (request.nft8rxfsens >= 3)
+            {
+              threshold_scale *= 0.95f;
+            }
+          if (ipass >= 4)
+            {
+              threshold_scale *= request.lft8subpass ? 0.90f : 0.95f;
+            }
+          syncmin *= threshold_scale;
+        }
       if (run_pass == 0)
         {
           if (shifted_pass)
@@ -3511,7 +3846,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       ftx_sync8_search_stage4_c (state.dd.data (), kFt8NMax,
                                  static_cast<float> (ifa), static_cast<float> (ifb),
                                  syncmin, static_cast<float> (request.nfqso),
-                                 ft8_candidate_budget (request), ipass,
+                                 ft8_candidate_budget (request), ipass, request.ncandthin,
                                  candidate.data (), &ncand, sbase.data ());
       append_ft8_hint_candidates (&state.a7[static_cast<size_t> (jseq)], request,
                                   ifa, ifb, candidate, ncand);
@@ -3538,8 +3873,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           int iaptype = 0;
           FixedChars<kFt8DecodedChars> msg37 = blank_fixed<kFt8DecodedChars> ();
 
-          decode_main_candidate_cpp (state.dd.data (), &pass_newdat, request, imetric,
-                                     lsubtract, apsym, aph10,
+          bool const use_var_downsample =
+              request.lft8lowth || request.lft8subpass || request.nft8cycles > 1
+              || request.nft8rxfsens > 1;
+          decode_main_candidate_cpp (state.dd.data (), &pass_newdat, request, ipass,
+                                     use_var_downsample, equalized_pipeline, imetric, lsubtract, apsym, aph10,
                                      candidate.data () + icand * 4,
                                      candidate[static_cast<size_t> (icand * 4 + 3)],
                                      sbase.data (),
@@ -4175,6 +4513,19 @@ extern "C" void ftx_ft8_stage4_set_supplemental_c (int supplemental)
   stage4_supplemental_requested ().store (supplemental != 0, std::memory_order_relaxed);
 }
 
+extern "C" void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,
+                                                     int cycles, int rx_freq_sensitivity,
+                                                     int candidate_thin)
+{
+  stage4_low_threshold_requested ().store (low_thresholds != 0, std::memory_order_relaxed);
+  stage4_subpass_requested ().store (subpass != 0, std::memory_order_relaxed);
+  stage4_decode_cycles ().store (std::max (1, std::min (cycles, 3)), std::memory_order_relaxed);
+  stage4_rx_freq_sensitivity ().store (std::max (1, std::min (rx_freq_sensitivity, 3)),
+                                       std::memory_order_relaxed);
+  stage4_candidate_thin ().store (std::max (1, std::min (candidate_thin, 100)),
+                                  std::memory_order_relaxed);
+}
+
 extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
                                                int* nqsoprogress, int* nfqso, int* nftx,
                                                int* nutc, int* nfa, int* nfb,
@@ -4233,9 +4584,22 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
   request.lapcqonly = *lapcqonly;
   request.napwid = *napwid;
   request.ldiskdat = *ldiskdat;
+  request.ncandthin = stage4_candidate_thin ().load (std::memory_order_relaxed);
+  request.nft8cycles = stage4_decode_cycles ().load (std::memory_order_relaxed);
+  request.nft8rxfsens = stage4_rx_freq_sensitivity ().load (std::memory_order_relaxed);
+  request.lft8lowth = stage4_low_threshold_requested ().load (std::memory_order_relaxed);
+  request.lft8subpass = stage4_subpass_requested ().load (std::memory_order_relaxed);
+  request.supplemental = stage4_supplemental_requested ().load (std::memory_order_relaxed);
   request.mycall = fixed_from_chars<12> (mycall);
   request.hiscall = fixed_from_chars<12> (hiscall);
   request.hisgrid = fixed_from_chars<6> (hisgrid);
+
+  int const requested_ndepth = request.ndepth;
+  bool const requested_supplemental = request.supplemental;
+  if (requested_supplemental)
+    {
+      request.ndepth = std::min (request.ndepth, 3);
+    }
 
   Ft8Stage4State& state = stage4_state ();
   if (request.nutc != state.early_nutc)
@@ -4349,10 +4713,168 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
     {
       return;
     }
-  run_main_passes (state, request, jseq, apsym, aph10, ifa, ifb, ndecodes, sbase, collector);
+  bool const primary_equalized_pipeline = request.nzhsym >= 41 && request.nzhsym < 50;
+  bool const run_supplemental_rescue =
+      requested_supplemental
+      && request.nzhsym >= 50
+      && requested_ndepth >= 4;
+  Ft8Request primary_request = request;
+  primary_request.supplemental = false;
+  if (run_supplemental_rescue)
+    {
+      primary_request.ndepth = std::min (primary_request.ndepth, 3);
+    }
+  Ft8Stage4State state_before_main = state;
+  run_main_passes (state, primary_request, jseq, apsym, aph10, ifa, ifb, ndecodes, sbase, collector,
+                   primary_equalized_pipeline);
   if (stage4_should_cancel ())
     {
       return;
+    }
+  auto merge_saved_decodes = [&] (Ft8Stage4State const& source_state, int source_ndecodes) {
+    int merged_ndecodes = ndecodes;
+    int added = 0;
+    for (int id = 0; id < source_ndecodes && id < kFt8MaxEarly; ++id)
+      {
+        FixedChars<kFt8DecodedChars> const& decoded =
+            source_state.allmessages[static_cast<size_t> (id)];
+        bool duplicate = false;
+        for (int existing = 0; existing < merged_ndecodes; ++existing)
+          {
+            if (messages_equal (decoded, state.allmessages[static_cast<size_t> (existing)]))
+              {
+                duplicate = true;
+                break;
+              }
+          }
+        if (duplicate)
+          {
+            continue;
+          }
+        int const saved_slot =
+            ftx_ft8_store_saved_decode_c (merged_ndecodes, kFt8MaxEarly,
+                                          source_state.allsnrs[static_cast<size_t> (id)],
+                                          source_state.f1_save[static_cast<size_t> (id)],
+                                          source_state.xdt_save[static_cast<size_t> (id)],
+                                          source_state.itone_save.data () + id * kFt8Nn,
+                                          kFt8Nn, state.allsnrs.data (), state.f1_save.data (),
+                                          state.xdt_save.data (), state.itone_save.data ());
+        if (saved_slot == 0)
+          {
+            continue;
+          }
+        merged_ndecodes = saved_slot;
+        state.allmessages[static_cast<size_t> (merged_ndecodes - 1)] = decoded;
+        save_a7_entry (state.a7, jseq, source_state.xdt_save[static_cast<size_t> (id)],
+                       source_state.f1_save[static_cast<size_t> (id)], decoded);
+        ++added;
+      }
+    if (merged_ndecodes > ndecodes)
+      {
+        ndecodes = merged_ndecodes;
+      }
+    return added;
+  };
+
+  if (run_supplemental_rescue)
+    {
+      Ft8Stage4State rescue_state = state_before_main;
+      Ft8Request rescue_request = request;
+      rescue_request.supplemental = true;
+      rescue_request.ndepth = std::max (requested_ndepth, 4);
+      int rescue_ndecodes = state_before_main.ndec_early;
+      std::array<float, kFt8Nh1> rescue_sbase {};
+      run_main_passes (rescue_state, rescue_request, jseq, apsym, aph10, ifa, ifb,
+                       rescue_ndecodes, rescue_sbase, collector, false);
+      if (stage4_should_cancel ())
+        {
+          return;
+        }
+      merge_saved_decodes (rescue_state, rescue_ndecodes);
+
+      std::array<int, 8> blocked_focus {};
+      int blocked_focus_count = 0;
+      auto block_focus_frequency = [&] (int freq) {
+        if (blocked_focus_count < static_cast<int> (blocked_focus.size ()))
+          {
+            blocked_focus[static_cast<size_t> (blocked_focus_count)] = freq;
+            ++blocked_focus_count;
+          }
+      };
+      auto run_focused_window = [&] (int focused_nfqso, bool subpass_profile) {
+        Ft8Stage4State focused_state = subpass_profile ? state : state_before_main;
+        Ft8Request focused_request = primary_request;
+        focused_request.nfqso = focused_nfqso;
+        focused_request.ndepth = std::min (focused_request.ndepth, 3);
+        focused_request.supplemental = false;
+        if (subpass_profile)
+          {
+            focused_request.lft8lowth = true;
+            focused_request.lft8subpass = true;
+            focused_request.nft8cycles = std::max (focused_request.nft8cycles, 2);
+            focused_request.nft8rxfsens = std::max (focused_request.nft8rxfsens, 2);
+          }
+        int focused_ndecodes = subpass_profile ? ndecodes : state_before_main.ndec_early;
+        std::array<float, kFt8Nh1> focused_sbase {};
+        int const focus_ifa = std::max (ifa, focused_nfqso - 30);
+        int const focus_ifb = std::min (ifb, focused_nfqso + 30);
+        run_main_passes (focused_state, focused_request, jseq, apsym, aph10,
+                         focus_ifa, focus_ifb, focused_ndecodes, focused_sbase,
+                         collector, false);
+        if (stage4_should_cancel ())
+          {
+            return -1;
+          }
+        return merge_saved_decodes (focused_state, focused_ndecodes);
+      };
+
+      for (int focus_attempt = 0; focus_attempt < 5; ++focus_attempt)
+        {
+          int const focused_nfqso =
+              select_ft8_focus_frequency (state, primary_request, ifa, ifb, ndecodes,
+                                          blocked_focus, blocked_focus_count, false);
+          if (focused_nfqso <= 0)
+            {
+              break;
+            }
+          int added = run_focused_window (focused_nfqso, false);
+          if (stage4_should_cancel ())
+            {
+              return;
+            }
+          if (added == 0)
+            {
+              added = run_focused_window (focused_nfqso, true);
+              if (stage4_should_cancel ())
+                {
+                  return;
+                }
+            }
+          if (added <= 0)
+            {
+              block_focus_frequency (focused_nfqso);
+            }
+        }
+
+      for (int overlap_attempt = 0; overlap_attempt < 2; ++overlap_attempt)
+        {
+          int const focused_nfqso =
+              select_ft8_focus_frequency (state, primary_request, ifa, ifb, ndecodes,
+                                          blocked_focus, blocked_focus_count, true);
+          if (focused_nfqso <= 0)
+            {
+              break;
+            }
+          int const added = run_focused_window (focused_nfqso, true);
+          if (stage4_should_cancel ())
+            {
+              return;
+            }
+          if (added <= 0)
+            {
+              block_focus_frequency (focused_nfqso);
+            }
+        }
     }
 
   state.ndec_early = 0;
@@ -4363,7 +4885,7 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
       state.early_sbase_valid = true;
     }
 
-  run_ap_passes (state, request, jseq, sbase, collector);
+  run_ap_passes (state, primary_request, jseq, sbase, collector);
 }
 
 extern "C" void ftx_ft8_emit_results_c (int* nutc, int* ncontest, int* nagain,

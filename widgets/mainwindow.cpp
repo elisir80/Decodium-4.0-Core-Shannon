@@ -1352,9 +1352,19 @@ namespace
   // In AutoCQ, keep RR73/73 on air up to 10 cycles before forced close.
   constexpr int kAutoCqSignoffRetryCount {10};
   constexpr int kLateAutoLogGraceWindowSeconds {45};
+  constexpr int kMaxEmbeddedDecodeThreads {24};
   constexpr int kDecDataSampleCount {static_cast<int> (sizeof (dec_data.d2) / sizeof (dec_data.d2[0]))};
   constexpr int kMaxCwSymbols {static_cast<int> (sizeof (icw) / sizeof (icw[0]))};
   constexpr int kFoxWaveSampleCount {FOXCOM_WAVE_SIZE};
+
+  int embedded_decode_thread_count ()
+  {
+    int const configured = int (dec_data.params.nmt);
+    if (configured <= 0) {
+      return qBound (1, QThread::idealThreadCount (), kMaxEmbeddedDecodeThreads);
+    }
+    return qBound (1, configured, kMaxEmbeddedDecodeThreads);
+  }
   struct AllTxtWriterState
   {
     QMutex mutex;
@@ -12966,6 +12976,7 @@ void MainWindow::requestInProcessFt2Decode ()
   request.nfa = qBound (0, int (dec_data.params.nfa), 5000);
   request.nfb = qMax (request.nfa + 50, qBound (0, int (dec_data.params.nfb), 5000));
   request.ndepth = qMax (1, int (dec_data.params.ndepth));
+  request.threadCount = embedded_decode_thread_count ();
   request.ncontest = qBound (0, int (dec_data.params.nexp_decode & 7), 16);
   request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
@@ -13009,6 +13020,7 @@ void MainWindow::requestInProcessFt4Decode ()
   request.nfa = qBound (0, int (dec_data.params.nfa), 5000);
   request.nfb = qMax (request.nfa + 50, qBound (0, int (dec_data.params.nfb), 5000));
   request.ndepth = qBound (1, int (dec_data.params.ndepth), 4);
+  request.threadCount = embedded_decode_thread_count ();
   request.ncontest = qBound (0, int (dec_data.params.nexp_decode & 7), 16);
   request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
@@ -13155,6 +13167,7 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   request.nfb = qMax (request.nfa + 50, qBound (0, int (dec_data.params.nfb), 5000));
   request.nzhsym = qBound (41, int (dec_data.params.nzhsym), 50);
   request.ndepth = ft8BaseDepthFromLegacyMask (int (dec_data.params.ndepth));
+  request.threadCount = embedded_decode_thread_count ();
   request.emedelay = dec_data.params.emedelay;
   request.ncontest = qBound (0, int (dec_data.params.nexp_decode & 7), 16);
   request.nagain = dec_data.params.nagain ? 1 : 0;
@@ -13163,6 +13176,11 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   request.lapcqonly = dec_data.params.lapcqonly ? 1 : 0;
   request.napwid = qBound (0, int (dec_data.params.napwid), 200);
   request.ldiskdat = dec_data.params.ndiskdat ? 1 : 0;
+  request.ncandthin = qBound (1, int (dec_data.params.ncandthin), 100);
+  request.nft8Cycles = qBound (1, int (dec_data.params.nft8cycles), 3);
+  request.nft8RxFreqSensitivity = qBound (1, int (dec_data.params.nft8rxfsens), 3);
+  request.lowThresholds = dec_data.params.lft8lowth;
+  request.subpass = dec_data.params.lft8subpass;
   int const snapshotSamples = qBound (0, m_ft8LiveAudioSnapshotSamples,
                                       qMin (kFt8SlotSamples, m_ft8LiveAudioSnapshot.size ()));
   bool const useLiveAudioSnapshot =

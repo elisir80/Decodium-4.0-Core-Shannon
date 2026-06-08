@@ -1726,6 +1726,67 @@ int main(int argc, char* argv[])
         });
     }
 
+    QString const rxRecordSecondsText = qEnvironmentVariable("DECODIUM_RX_RECORD_SECONDS").trimmed();
+    if (!rxRecordSecondsText.isEmpty()) {
+        bool secondsOk = false;
+        int const requestedSeconds = rxRecordSecondsText.toInt(&secondsOk);
+        if (!secondsOk || requestedSeconds <= 0) {
+            L("[RX-RECORD] ignored: DECODIUM_RX_RECORD_SECONDS must be a positive integer");
+        } else {
+            bool delayOk = false;
+            int const requestedDelayMs = qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_START_DELAY_MS", &delayOk);
+            int const startDelayMs = delayOk ? qBound(0, requestedDelayMs, 600000) : 5000;
+            bool alignOk = false;
+            int const requestedAlignMs = qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_ALIGN_PERIOD_MS", &alignOk);
+            int const alignPeriodMs = alignOk ? qBound(0, requestedAlignMs, 60000) : 0;
+            bool quitDelayOk = false;
+            int const requestedQuitDelayMs = qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_QUIT_DELAY_MS", &quitDelayOk);
+            int const quitDelayMs = quitDelayOk ? qBound(0, requestedQuitDelayMs, 120000) : 1500;
+            int const seconds = qBound(1, requestedSeconds, 3600);
+            QString const quitText = qEnvironmentVariable("DECODIUM_RX_RECORD_QUIT").trimmed().toLower();
+            bool const quitAfter =
+                quitText == QStringLiteral("1")
+                || quitText == QStringLiteral("true")
+                || quitText == QStringLiteral("yes");
+            L(QStringLiteral("[RX-RECORD] armed: delay_ms=%1 align_period_ms=%2 seconds=%3 quit=%4 quit_delay_ms=%5")
+                  .arg(startDelayMs)
+                  .arg(alignPeriodMs)
+                  .arg(seconds)
+                  .arg(quitAfter ? 1 : 0)
+                  .arg(quitDelayMs)
+                  .toUtf8()
+                  .constData());
+            QTimer::singleShot(startDelayMs, &bridge, [&bridge, seconds, quitAfter, quitDelayMs, alignPeriodMs, &app]() {
+                int alignDelayMs = 0;
+                if (alignPeriodMs > 0) {
+                    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+                    qint64 const remainder = nowMs % alignPeriodMs;
+                    alignDelayMs = remainder == 0 ? 0 : int(alignPeriodMs - remainder);
+                    qInfo().noquote() << "[RX-RECORD] align_delay_ms="
+                                      << alignDelayMs
+                                      << "period_ms=" << alignPeriodMs;
+                }
+                QTimer::singleShot(alignDelayMs, &bridge, [&bridge, seconds, quitAfter, quitDelayMs, &app]() {
+                qInfo().noquote() << "[RX-RECORD] start_utc="
+                                  << QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)
+                                  << "seconds=" << seconds;
+                bridge.setRecordRxEnabled(true);
+                QTimer::singleShot(seconds * 1000, &bridge, [&bridge, quitAfter, quitDelayMs, &app]() {
+                    qInfo().noquote() << "[RX-RECORD] stop_utc="
+                                      << QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+                    bridge.setRecordRxEnabled(false);
+                    if (quitAfter) {
+                        QTimer::singleShot(quitDelayMs, &app, [&app]() {
+                            qInfo() << "[RX-RECORD] quit";
+                            app.quit();
+                        });
+                    }
+                });
+                });
+            });
+        }
+    }
+
     installMainThreadWatchdog(&app, &bridge);
 
     int r = app.exec();

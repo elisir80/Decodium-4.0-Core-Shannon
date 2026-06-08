@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -34,7 +35,20 @@ extern "C"
   void ftx_ft8_cpp_dsp_rollout_stage_reset_c ();
   void ftx_ft8_stage4_reset_c ();
   void ftx_ft8_stage4_set_ldpc_osd_c (int maxosd, int norder);
+  void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
+  void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,
+                                            int cycles, int rx_freq_sensitivity,
+                                            int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
+  int ftx_encode_ft8_candidate_c (char const* message37, char* msgsent_out,
+                                  int* itone_out, signed char* codeword_out);
+  void ftx_ft8_prepare_pass_c (int ndepth, int ipass, int ndecodes,
+                               float* syncmin, int* imetric,
+                               int* lsubtract, int* run_pass);
+  void ftx_sync8_search_stage4_c (float const* dd, int npts, float nfa, float nfb,
+                                  float syncmin, float nfqso, int maxcand, int ipass,
+                                  int candidate_thin, float* candidate, int* ncand,
+                                  float* sbase);
 }
 
 namespace
@@ -117,6 +131,132 @@ namespace
         .arg (line.nap, 2)
         .arg (line.qual, 0, 'f', 3)
         .arg (line.decoded.trimmed ());
+  }
+
+  void dump_candidates (QTextStream& out, std::vector<short> const& samples,
+                        int nfa, int nfb, int nfqso, int ndepth,
+                        int lowThresholds, int subpass, int cycles,
+                        int rxFreqSensitivity, int candidateThin,
+                        int windowHz)
+  {
+    constexpr int kMaxCandidates {960};
+    constexpr int kSbaseSize {1920};
+    std::array<float, kFt8SampleCount> dd {};
+    for (size_t i = 0; i < dd.size () && i < samples.size (); ++i)
+      {
+        dd[i] = static_cast<float> (samples[i]);
+      }
+
+    int npass = 5;
+    if (ndepth <= 2)
+      {
+        npass = 3;
+      }
+    if (ndepth == 1)
+      {
+        npass = 2;
+      }
+    if (ndepth >= 3)
+      {
+        if (cycles >= 2)
+          {
+            npass = std::max (npass, 6);
+          }
+        if (cycles >= 3)
+          {
+            npass = std::max (npass, 9);
+          }
+        if (subpass != 0)
+          {
+            npass = std::max (npass, 8);
+          }
+      }
+
+    out << "\nCandidate dump around " << nfqso << " Hz +/- " << windowHz << " Hz\n";
+    auto ddCycleBase = dd;
+    for (int ipass = 1; ipass <= npass; ++ipass)
+      {
+        auto passDd = dd;
+        if (ndepth >= 4 && (ipass == 4 || ipass == 7))
+          {
+            passDd = ddCycleBase;
+            if (ipass == 7)
+              {
+                for (int i = static_cast<int> (passDd.size ()) - 1; i >= 1; --i)
+                  {
+                    passDd[static_cast<size_t> (i)] =
+                        0.5f * (ddCycleBase[static_cast<size_t> (i - 1)]
+                                + ddCycleBase[static_cast<size_t> (i)]);
+                  }
+              }
+            else
+              {
+                for (int i = 0; i + 1 < static_cast<int> (passDd.size ()); ++i)
+                  {
+                    passDd[static_cast<size_t> (i)] =
+                        0.5f * (ddCycleBase[static_cast<size_t> (i)]
+                                + ddCycleBase[static_cast<size_t> (i + 1)]);
+                  }
+              }
+          }
+        float syncmin = 0.0f;
+        int imetric = 0;
+        int lsubtract = 0;
+        int runPass = 0;
+        ftx_ft8_prepare_pass_c (ndepth, ipass, 0, &syncmin, &imetric, &lsubtract,
+                                &runPass);
+        if (lowThresholds != 0)
+          {
+            float thresholdScale = subpass != 0 ? 0.82f : 0.90f;
+            if (rxFreqSensitivity >= 3)
+              {
+                thresholdScale *= 0.95f;
+              }
+            if (ipass >= 4)
+              {
+                thresholdScale *= subpass != 0 ? 0.90f : 0.95f;
+              }
+            syncmin *= thresholdScale;
+          }
+        if (runPass == 0)
+          {
+            continue;
+          }
+
+        std::array<float, 4 * kMaxCandidates> candidates {};
+        std::array<float, kSbaseSize> sbase {};
+        int ncand = 0;
+        ftx_sync8_search_stage4_c (passDd.data (), static_cast<int> (passDd.size ()),
+                                   static_cast<float> (nfa), static_cast<float> (nfb),
+                                   syncmin, static_cast<float> (nfqso), kMaxCandidates,
+                                   ipass, qBound (1, candidateThin, 100),
+                                   candidates.data (), &ncand, sbase.data ());
+
+        out << "pass " << ipass << ": syncmin=" << syncmin
+            << " imetric=" << imetric
+            << " lsubtract=" << lsubtract
+            << " ncand=" << ncand << '\n';
+        int printed = 0;
+        for (int i = 0; i < ncand; ++i)
+          {
+            float const freq = candidates[static_cast<size_t> (i * 4 + 0)];
+            if (std::fabs (freq - static_cast<float> (nfqso)) > static_cast<float> (windowHz))
+              {
+                continue;
+              }
+            out << "  cand " << i
+                << " f=" << freq
+                << " dt=" << candidates[static_cast<size_t> (i * 4 + 1)]
+                << " sync=" << candidates[static_cast<size_t> (i * 4 + 2)]
+                << " cq=" << candidates[static_cast<size_t> (i * 4 + 3)]
+                << '\n';
+            ++printed;
+          }
+        if (printed == 0)
+          {
+            out << "  (no candidates in window)\n";
+          }
+      }
   }
 
   QList<int> parse_stages (QString const& raw)
@@ -285,6 +425,10 @@ namespace
                            int ndepth, float emedelay, int ncontest, int nagain,
                            int lft8apon, int lapcqonly, int napwid, int ldiskdat,
                            int supplemental, int maxosd, int norder,
+                           int maxIter,
+                           int lowThresholds, int subpass, int cycles,
+                           int rxFreqSensitivity, int candidateThin,
+                           bool skipEarlyPasses,
                            QByteArray const& mycall, QByteArray const& hiscall,
                            QByteArray const& hisgrid)
   {
@@ -362,9 +506,12 @@ namespace
 
     QMutexLocker locker {&decodium::fortran::runtime_mutex ()};
     ftx_ft8_stage4_reset_c ();
+    ftx_ft8_stage4_set_decode_options_c (lowThresholds, subpass, cycles,
+                                         rxFreqSensitivity, candidateThin);
     ftx_ft8_stage4_set_supplemental_c (supplemental);
     ftx_ft8_stage4_set_ldpc_osd_c (maxosd, norder);
-    if (nzhsym >= 50)
+    ftx_ft8_stage4_set_ldpc_max_iter_c (maxIter);
+    if (nzhsym >= 50 && !skipEarlyPasses)
       {
         invoke_decode (41);
         invoke_decode (47);
@@ -372,6 +519,8 @@ namespace
     nout = invoke_decode (nzhsym);
     ftx_ft8_stage4_set_supplemental_c (0);
     ftx_ft8_stage4_set_ldpc_osd_c (-1, 0);
+    ftx_ft8_stage4_set_ldpc_max_iter_c (30);
+    ftx_ft8_stage4_set_decode_options_c (0, 0, 1, 1, 100);
     ftx_ft8_stage4_reset_c ();
     locker.unlock ();
 
@@ -614,6 +763,62 @@ int main (int argc, char * argv[])
           QStringLiteral ("value"),
           QStringLiteral ("0")
       };
+      QCommandLineOption const max_iter_option {
+          QStringLiteral ("max-iter"),
+          QStringLiteral ("LDPC BP max iterations."),
+          QStringLiteral ("value"),
+          QStringLiteral ("30")
+      };
+      QCommandLineOption const low_thresholds_option {
+          QStringLiteral ("low-thresholds"),
+          QStringLiteral ("Enable FT8 low-threshold candidate/decode gates (0/1)."),
+          QStringLiteral ("value"),
+          QStringLiteral ("0")
+      };
+      QCommandLineOption const subpass_option {
+          QStringLiteral ("subpass"),
+          QStringLiteral ("Enable FT8 low-threshold subpass mode (0/1)."),
+          QStringLiteral ("value"),
+          QStringLiteral ("0")
+      };
+      QCommandLineOption const cycles_option {
+          QStringLiteral ("cycles"),
+          QStringLiteral ("FT8 decode cycles (1..3)."),
+          QStringLiteral ("value"),
+          QStringLiteral ("1")
+      };
+      QCommandLineOption const rxfsens_option {
+          QStringLiteral ("rxfsens"),
+          QStringLiteral ("FT8 RX-frequency sensitivity (1..3)."),
+          QStringLiteral ("value"),
+          QStringLiteral ("1")
+      };
+      QCommandLineOption const candthin_option {
+          QStringLiteral ("candthin"),
+          QStringLiteral ("FT8 candidate thinning percentage (1..100)."),
+          QStringLiteral ("value"),
+          QStringLiteral ("100")
+      };
+      QCommandLineOption const no_early_option {
+          QStringLiteral ("no-early"),
+          QStringLiteral ("Skip synthetic 41/47 early passes before the requested stage.")
+      };
+      QCommandLineOption const dump_candidates_option {
+          QStringLiteral ("dump-candidates"),
+          QStringLiteral ("Print sync candidates before decode.")
+      };
+      QCommandLineOption const dump_center_option {
+          QStringLiteral ("dump-center"),
+          QStringLiteral ("Candidate dump center in Hz; defaults to --nfqso."),
+          QStringLiteral ("hz"),
+          QString {}
+      };
+      QCommandLineOption const dump_window_option {
+          QStringLiteral ("dump-window"),
+          QStringLiteral ("Candidate dump half-window in Hz."),
+          QStringLiteral ("hz"),
+          QStringLiteral ("30")
+      };
       QCommandLineOption const mycall_option {
           QStringLiteral ("mycall"),
           QStringLiteral ("Optional mycall override."),
@@ -630,6 +835,12 @@ int main (int argc, char * argv[])
           QStringLiteral ("hisgrid"),
           QStringLiteral ("Optional hisgrid override."),
           QStringLiteral ("grid"),
+          QString {}
+      };
+      QCommandLineOption const encode_message_option {
+          QStringLiteral ("encode-message"),
+          QStringLiteral ("Print FT8 packed bits and tones for a message, then exit."),
+          QStringLiteral ("message"),
           QString {}
       };
 
@@ -652,12 +863,53 @@ int main (int argc, char * argv[])
       parser.addOption (supplemental_option);
       parser.addOption (maxosd_option);
       parser.addOption (norder_option);
+      parser.addOption (max_iter_option);
+      parser.addOption (low_thresholds_option);
+      parser.addOption (subpass_option);
+      parser.addOption (cycles_option);
+      parser.addOption (rxfsens_option);
+      parser.addOption (candthin_option);
+      parser.addOption (no_early_option);
+      parser.addOption (dump_candidates_option);
+      parser.addOption (dump_center_option);
+      parser.addOption (dump_window_option);
       parser.addOption (mycall_option);
       parser.addOption (hiscall_option);
       parser.addOption (hisgrid_option);
+      parser.addOption (encode_message_option);
       parser.addPositionalArgument (QStringLiteral ("wav-file"),
                                     QStringLiteral ("Path to a 12000 Hz mono 16-bit FT8 WAV file."));
       parser.process (app);
+
+      if (parser.isSet (encode_message_option))
+        {
+          QByteArray const message = to_fortran_field (parser.value (encode_message_option).toLatin1 (), 37);
+          std::array<char, 37> msgsent {};
+          std::array<int, 79> itone {};
+          std::array<signed char, 174> codeword {};
+          QTextStream out {stdout};
+          if (ftx_encode_ft8_candidate_c (message.constData (), msgsent.data (),
+                                          itone.data (), codeword.data ()) == 0)
+            {
+              out << "encode failed\n";
+              return 1;
+            }
+          out << "msgsent: " << trim_fortran_field (msgsent.data (), 37) << '\n';
+          out << "bits77: ";
+          for (int i = 0; i < 77; ++i)
+            {
+              out << int (codeword[static_cast<size_t> (i)]);
+            }
+          out << '\n';
+          out << "itone: ";
+          for (int i = 0; i < 79; ++i)
+            {
+              if (i != 0) out << ',';
+              out << itone[static_cast<size_t> (i)];
+            }
+          out << '\n';
+          return 0;
+        }
 
       QStringList const positional = parser.positionalArguments ();
       if (positional.size () != 1)
@@ -684,6 +936,22 @@ int main (int argc, char * argv[])
       int const supplemental = parse_int_option (parser, supplemental_option, QStringLiteral ("supplemental"));
       int const maxosd = parse_int_option (parser, maxosd_option, QStringLiteral ("maxosd"));
       int const norder = parse_int_option (parser, norder_option, QStringLiteral ("norder"));
+      int const maxIter = parse_int_option (parser, max_iter_option, QStringLiteral ("max-iter"));
+      int const lowThresholds = parse_int_option (parser, low_thresholds_option,
+                                                  QStringLiteral ("low-thresholds"));
+      int const subpass = parse_int_option (parser, subpass_option, QStringLiteral ("subpass"));
+      int const cycles = parse_int_option (parser, cycles_option, QStringLiteral ("cycles"));
+      int const rxFreqSensitivity = parse_int_option (parser, rxfsens_option,
+                                                      QStringLiteral ("rxfsens"));
+      int const candidateThin = parse_int_option (parser, candthin_option,
+                                                  QStringLiteral ("candthin"));
+      bool const skipEarlyPasses = parser.isSet (no_early_option);
+      bool const dumpCandidates = parser.isSet (dump_candidates_option);
+      int const dumpCenter = parser.isSet (dump_center_option)
+          ? parse_int_option (parser, dump_center_option, QStringLiteral ("dump-center"))
+          : nfqso;
+      int const dumpWindowHz = parse_int_option (parser, dump_window_option,
+                                                 QStringLiteral ("dump-window"));
 
       QString const wav_path = QFileInfo {positional.constFirst ()}.absoluteFilePath ();
       WavData const wav = read_wav_file (wav_path);
@@ -723,7 +991,21 @@ int main (int argc, char * argv[])
           << " supplemental=" << supplemental
           << " maxosd=" << maxosd
           << " norder=" << norder
+          << " maxIter=" << maxIter
+          << " lowThresholds=" << lowThresholds
+          << " subpass=" << subpass
+          << " cycles=" << cycles
+          << " rxfsens=" << rxFreqSensitivity
+          << " candthin=" << candidateThin
+          << " noEarly=" << (skipEarlyPasses ? 1 : 0)
           << '\n';
+
+      if (dumpCandidates)
+        {
+          dump_candidates (out, wav.samples, nfa, nfb, dumpCenter, depth,
+                           lowThresholds, subpass, cycles, rxFreqSensitivity,
+                           candidateThin, qMax (1, dumpWindowHz));
+        }
 
       std::vector<DecodeResult> results;
       results.reserve (static_cast<size_t> (stages.size ()));
@@ -733,6 +1015,10 @@ int main (int argc, char * argv[])
                                          nfa, nfb, nzhsym, depth, emedelay, ncontest,
                                          nagain, lft8apon, lapcqonly, napwid, ldiskdat,
                                          supplemental, maxosd, norder,
+                                         maxIter,
+                                         lowThresholds, subpass, cycles,
+                                         rxFreqSensitivity, candidateThin,
+                                         skipEarlyPasses,
                                          parser.value (mycall_option).toLatin1 (),
                                          parser.value (hiscall_option).toLatin1 (),
                                          parser.value (hisgrid_option).toLatin1 ()));

@@ -34,9 +34,14 @@ struct DecodeRequest
   int lapcqonly {0};
   int napwid {50};
   int ldiskdat {0};
+  int ncandthin {100};
+  int nft8Cycles {1};
+  int nft8RxFreqSensitivity {1};
   int maxDecodeMs {0};
   int availableSamples {0};
   bool hasFreshAudio {true};
+  bool lowThresholds {false};
+  bool subpass {false};
   bool supplemental {false};
   bool coherentAvgEnabled {false};
   bool neuralSyncEnabled {false};

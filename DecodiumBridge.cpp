@@ -93,6 +93,7 @@
 #include <QProcess>
 #include <QRunnable>
 #include <QTimeZone>
+#include <QtEndian>
 #include <QTimer>
 #include <QScopeGuard>
 #include <QThread>
@@ -859,6 +860,8 @@ static constexpr bool kDecodiumUpdateCheckerEnabled = false;
 
 namespace {
 
+constexpr int kMaxFtDecodeThreads {24};
+
 QTimeZone decodiumUtcTimeZone()
 {
     return QTimeZone(QByteArrayLiteral("UTC"));
@@ -867,7 +870,7 @@ QTimeZone decodiumUtcTimeZone()
 void applyFtOpenMpThreadLimit(int threads)
 {
 #ifdef _OPENMP
-    int const bounded = qBound(1, threads, 8);
+    int const bounded = qBound(1, threads, kMaxFtDecodeThreads);
     omp_set_dynamic(0);
     omp_set_max_active_levels(1);
     omp_set_num_threads(bounded);
@@ -980,7 +983,7 @@ int autoFtThreadCountForCores(int cores)
 {
     int const boundedCores = qMax(1, cores);
     int const reserve = ftAutoUiReserveForCores(boundedCores);
-    return qBound(1, boundedCores - reserve, 8);
+    return qBound(1, boundedCores - reserve, kMaxFtDecodeThreads);
 }
 
 #ifdef Q_OS_WIN
@@ -10508,7 +10511,7 @@ void DecodiumBridge::setPskReporterEnabled(bool v)
 
 void DecodiumBridge::setFtThreads(int v)
 {
-    const int clamped = std::clamp(v, 1, 8);
+    const int clamped = std::clamp(v, 1, kMaxFtDecodeThreads);
     if (m_ftThreads == clamped && !m_ftThreadsAuto) return;
     m_ftThreads = clamped;
     m_ftThreadsAuto = false;
@@ -10549,7 +10552,7 @@ void DecodiumBridge::setFtThreadsAuto(bool enabled)
 
 void DecodiumBridge::cycleFtThreads()
 {
-    setFtThreads(m_ftThreads >= 8 ? 1 : m_ftThreads + 1);
+    setFtThreads(m_ftThreads >= kMaxFtDecodeThreads ? 1 : m_ftThreads + 1);
 }
 
 qint64 DecodiumBridge::correctedUtcEpochMs() const
@@ -26962,7 +26965,7 @@ void DecodiumBridge::loadSettings()
                       .arg(uiReserve)
                       .arg(m_ftThreads));
     } else {
-        m_ftThreads = std::clamp(s.value("ftThreads", 3).toInt(), 1, 8);
+        m_ftThreads = std::clamp(s.value("ftThreads", 3).toInt(), 1, kMaxFtDecodeThreads);
     }
     m_lowCpuModeEnabled = s.value(QStringLiteral("LowCpuMode"),
                                   s.value(QStringLiteral("lowCpuModeEnabled"), false)).toBool();
@@ -27959,10 +27962,10 @@ bool DecodiumBridge::cpuPressureSevereActive() const
 int DecodiumBridge::effectiveFtThreadLimit() const
 {
     int const cores = qMax(1, QThread::idealThreadCount());
-    int const configured = qBound(1, m_ftThreads, 8);
+    int const configured = qBound(1, m_ftThreads, kMaxFtDecodeThreads);
     int const normalLimit = m_ftThreadsAuto
         ? autoFtThreadCountForCores(cores)
-        : qMin(configured, qMax(1, cores - 1));
+        : configured;
     if (cpuPressureSevereActive()) {
         return 1;
     }
@@ -33132,7 +33135,7 @@ void DecodiumBridge::onSpectrumTimer()
 
 void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
 {
-    if (!m_legacyPcmSpectrumFeed || pcmSamples.isEmpty()) {
+    if (pcmSamples.isEmpty()) {
         return;
     }
 
@@ -33141,11 +33144,34 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
         return;
     }
 
-    m_lastLegacyPcmSampleMs = QDateTime::currentMSecsSinceEpoch();
-    auto const* samples = reinterpret_cast<qint16 const*>(pcmSamples.constData());
+    bool const feedRecorder = m_wavManager && m_wavManager->recording();
+    bool const feedSpectrum = m_legacyPcmSpectrumFeed;
+    if (!feedRecorder && !feedSpectrum) {
+        return;
+    }
+
+    QVector<short> recorderSamples;
+    if (feedRecorder) {
+        recorderSamples.reserve(sampleCount);
+    }
+
+    auto const* bytes = reinterpret_cast<uchar const*>(pcmSamples.constData());
     for (int i = 0; i < sampleCount; ++i) {
-        m_wfRing[m_wfRingPos % WF_RING_SIZE] = samples[i];
-        ++m_wfRingPos;
+        qint16 const sample = qFromLittleEndian<qint16>(bytes + i * static_cast<int>(sizeof(qint16)));
+        if (feedRecorder) {
+            recorderSamples.append(sample);
+        }
+        if (feedSpectrum) {
+            m_wfRing[m_wfRingPos % WF_RING_SIZE] = sample;
+            ++m_wfRingPos;
+        }
+    }
+
+    if (feedRecorder) {
+        m_wavManager->feedSamples(recorderSamples);
+    }
+    if (feedSpectrum) {
+        m_lastLegacyPcmSampleMs = QDateTime::currentMSecsSinceEpoch();
     }
 }
 

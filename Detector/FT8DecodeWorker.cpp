@@ -23,6 +23,9 @@ extern "C"
   void ftx_ft8_stage4_set_cancel_c (int cancel);
   void ftx_ft8_stage4_set_deadline_ms_c (long long deadline_ms);
   void ftx_ft8_stage4_set_ldpc_osd_c (int maxosd, int norder);
+  void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,
+                                            int cycles, int rx_freq_sensitivity,
+                                            int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
   void ftx_ft8_async_decode_stage4_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nftx,
@@ -42,12 +45,13 @@ namespace
   constexpr int kBitsPerMessage {77};
   constexpr int kDecodedChars {37};
   constexpr int kFt8StableDspStage {4};
+  constexpr int kMaxDecodeThreads {24};
 
   void apply_decode_thread_limit (int threads)
   {
 #ifdef _OPENMP
     omp_set_dynamic (0);
-    omp_set_num_threads (std::max (1, std::min (threads, 8)));
+    omp_set_num_threads (std::max (1, std::min (threads, kMaxDecodeThreads)));
 #else
     (void) threads;
 #endif
@@ -218,6 +222,20 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       return;
     }
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
+  // The promoted C++ Stage4 path does not implement the full JTDX ft8b
+  // subpass engine.  Passing JTDX-style cycles/subpass settings into this
+  // shorter core increases live decode time enough to hit deadlines and has
+  // measured lower yield on crowded slots.  Keep the live core on the proven
+  // baseline profile until the full subpass path is ported.
+  constexpr bool effectiveLowThresholds {false};
+  constexpr bool effectiveSubpass {false};
+  constexpr int effectiveCycles {1};
+  constexpr int effectiveRxFreqSensitivity {1};
+  ftx_ft8_stage4_set_decode_options_c (effectiveLowThresholds ? 1 : 0,
+                                       effectiveSubpass ? 1 : 0,
+                                       effectiveCycles,
+                                       effectiveRxFreqSensitivity,
+                                       qBound (1, request.ncandthin, 100));
   bool const supplementalRequested = request.supplemental || request.ndepth >= 4;
   ftx_ft8_stage4_set_supplemental_c (supplementalRequested ? 1 : 0);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
@@ -285,6 +303,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   qint64 const decodeMs = decodeTimer.elapsed ();
   ftx_ft8_stage4_set_deadline_ms_c (0);
   ftx_ft8_stage4_set_ldpc_osd_c (-1, 0);
+  ftx_ft8_stage4_set_decode_options_c (0, 0, 1, 1, 100);
   ftx_ft8_stage4_set_supplemental_c (0);
   ftx_ft8_stage4_set_ldpc_max_iter_c (30);
 
@@ -313,7 +332,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 low=%12 subpass=%13 cycles=%14 requested_low=%15 requested_subpass=%16 requested_cycles=%17 thread=0x%18")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -325,6 +344,12 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (ndepth)
                  .arg (nfa)
                  .arg (nfb)
+                 .arg (effectiveLowThresholds ? 1 : 0)
+                 .arg (effectiveSubpass ? 1 : 0)
+                 .arg (effectiveCycles)
+                 .arg (request.lowThresholds ? 1 : 0)
+                 .arg (request.subpass ? 1 : 0)
+                 .arg (request.nft8Cycles)
                  .arg (current_thread_id_hex ());
     }
   Q_EMIT decodeReady (request.serial, rows);

@@ -67,6 +67,7 @@ extern "C"
                                      int* apmask, int* iaptype_out);
   void ftx_sync8_search_stage4_c (float const* dd, int npts, float nfa, float nfb,
                                   float syncmin, float nfqso, int maxcand, int ipass,
+                                  int candidate_thin,
                                   float* candidate, int* ncand, float* sbase);
   void ftx_ft8_decode_candidate_stage4_c (
       float* dd0, int* newdat, int* nQSOProgress, int* nfqso, int* nftx, int* ndepth,
@@ -417,7 +418,7 @@ namespace
             ftx_sync8_search_stage4_c (pass_dd.data (), static_cast<int> (pass_dd.size ()),
                                        1450.0f,
                                        1550.0f,
-                                       syncmin, kCarrierHz, 460, pass,
+                                       syncmin, kCarrierHz, 460, pass, 100,
                                        candidates.data (), &ncand, sbase.data ());
             std::cerr << "FT8 debug pass=" << pass << " ncand=" << ncand
                       << " syncmin=" << syncmin << '\n';
