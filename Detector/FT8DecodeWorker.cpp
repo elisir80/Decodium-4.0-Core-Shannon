@@ -46,7 +46,7 @@ namespace
   constexpr int kBitsPerMessage {77};
   constexpr int kDecodedChars {37};
   constexpr int kFt8StableDspStage {4};
-  constexpr int kMaxDecodeThreads {24};
+  [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
   void apply_decode_thread_limit (int threads)
   {
