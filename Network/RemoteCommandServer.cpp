@@ -4080,13 +4080,8 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
           return result;
         }
 
-      auto const mode = state.mode.trimmed().toUpper();
-      if (mode != QStringLiteral("FT2"))
-        {
-          result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_state"), QStringLiteral("mode is not FT2"));
-          return result;
-        }
-
+      // Risposta a un chiamante consentita in qualsiasi modo della famiglia FT:
+      // lo scheduling usa state.periodMs, che riflette il ciclo del modo attivo.
       qint64 periodMs = state.periodMs;
       if (periodMs <= 0)
         {

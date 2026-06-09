@@ -31978,10 +31978,9 @@ void MainWindow::onRemoteSelectCallerDue(QString const& commandId, QString const
 {
   Q_UNUSED(commandId);
 
-  if (m_mode.compare("FT2", Qt::CaseInsensitive) != 0)
-    {
-      return;
-    }
+  // La risposta a un chiamante via comando remoto e' consentita in qualsiasi
+  // modo/banda (la logica sotto equivale al doppio clic su un decode). Restano
+  // esclusi solo i modi beacon WSPR/FST4W, gestiti piu' in basso.
 
   auto mapCall = call.trimmed().toUpper();
   mapCall.remove('<');
@@ -32017,7 +32016,7 @@ void MainWindow::onRemoteSelectCallerDue(QString const& commandId, QString const
         }
     }
 
-  showStatusMessage(tr("Remote FT2 caller queued: %1").arg(mapCall));
+  showStatusMessage(tr("Remote caller queued: %1").arg(mapCall));
 }
 
 void MainWindow::onRemoteSetModeRequested(QString const& commandId, QString const& mode)
