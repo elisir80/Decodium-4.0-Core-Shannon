@@ -4100,6 +4100,25 @@ Dialog {
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
+                        // 1.0.388 — Priorità processo Windows (scheduling CPU)
+                        Text { text: qsTr("Priorità processo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        DecoComboBox {
+                            id: processPriorityCombo
+                            Layout.preferredWidth: 180
+                            Layout.columnSpan: 1
+                            model: [qsTr("Normale"), qsTr("Sopra il normale"), qsTr("Alta (consigliata)"), qsTr("Tempo reale ⚠️")]
+                            currentIndex: bridge ? bridge.processPriority : 1
+                            onActivated: {
+                                if (bridge && bridge.processPriority !== currentIndex)
+                                    bridge.processPriority = currentIndex
+                            }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Priorità di scheduling CPU del processo (Windows).\n\nNormale / Sopra il normale (default) = sicure.\nAlta = più fluidità per audio/decode, rischio basso (consigliata se noti scatti).\nTempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).\n\nSe non sei sicuro usa 'Alta'.")
+                        }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+
                         // 1.0.180 — Style (richiede restart)
                         Text { text: qsTr("UI Style (restart):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
                         DecoComboBox {

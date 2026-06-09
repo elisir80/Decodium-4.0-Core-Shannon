@@ -5611,6 +5611,44 @@ void DecodiumBridge::setFt2Conservative(bool v)
 // I valori non esplicitati dall'utente sono inferiti per l'intento del profilo (vedi matrice
 // nelle note di release). Usa i setter esistenti (persistono + emettono) sotto guard
 // m_applyingReadyProfile, cosi' l'auto-clear di activeReadyProfile non scatta durante l'apply.
+// 1.0.388 — priorità processo scelta dall'utente. Sovrascrive il profilo interattivo
+// di default (ABOVE_NORMAL). "Tempo reale" è rischioso (può rendere il sistema non
+// responsivo) e richiede privilegi admin: senza elevazione Windows lo declassa a HIGH.
+void DecodiumBridge::applyProcessPriority()
+{
+#ifdef Q_OS_WIN
+    DWORD targetClass;
+    switch (m_processPriority) {
+        case 0:  targetClass = NORMAL_PRIORITY_CLASS;       break;
+        case 2:  targetClass = HIGH_PRIORITY_CLASS;         break;
+        case 3:  targetClass = REALTIME_PRIORITY_CLASS;     break;
+        default: targetClass = ABOVE_NORMAL_PRIORITY_CLASS; break;  // 1 = default
+    }
+    HANDLE const process = GetCurrentProcess();
+    if (SetPriorityClass(process, targetClass)) {
+        bridgeLog(QStringLiteral("[Priority] process priority -> livello %1 (class 0x%2)")
+                      .arg(m_processPriority)
+                      .arg(static_cast<qulonglong>(targetClass), 0, 16));
+    } else {
+        bridgeLog(QStringLiteral("[Priority] SetPriorityClass FALLITO livello %1 err=%2 (Tempo reale richiede admin)")
+                      .arg(m_processPriority)
+                      .arg(static_cast<qulonglong>(GetLastError())));
+    }
+#endif
+}
+
+void DecodiumBridge::setProcessPriority(int v)
+{
+    int const clamped = qBound(0, v, 3);
+    if (m_processPriority != clamped) {
+        m_processPriority = clamped;
+        QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+            .setValue(QStringLiteral("ProcessPriority"), m_processPriority);
+        emit processPriorityChanged();
+    }
+    applyProcessPriority();
+}
+
 void DecodiumBridge::applyReadyProfile(const QString& id)
 {
     struct ReadyProfile {
@@ -26778,6 +26816,10 @@ void DecodiumBridge::loadSettings()
     m_alcTarget = qBound(5, s.value(QStringLiteral("AlcTarget"), 20).toInt(), 60);
     // 1.0.326 B2 — MaxCallerRetries persist (default 10, range 1-99)
     m_maxCallerRetries = qBound(1, s.value(QStringLiteral("MaxCallerRetries"), 10).toInt(), 99);
+    // 1.0.388 — priorità processo (default 1 = Sopra il normale). Applicata sotto, dopo
+    // il profilo interattivo di startup, così la scelta utente vince.
+    m_processPriority  = qBound(0, s.value(QStringLiteral("ProcessPriority"), 1).toInt(), 3);
+    applyProcessPriority();
     // 1.0.317 — opt-in FT8 fast sequence (grace 400ms + late-decode accept). Default OFF.
     m_ft8FastSequence = s.value(QStringLiteral("Ft8FastSequence"), false).toBool();
     // 1.0.367 — finestra TX FT2 async conservativa. Default ON = stabilità (no frame troncati).
