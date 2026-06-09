@@ -172,8 +172,9 @@ Item {
     // ordine separato + Repeater + Component-per-pulsante + Loader + MouseArea
     // unica con holdTimer (click-vs-drag) + ghost proxy + snap magnetico.
     // Il Mode selector NON è nel modello (resta primo elemento fisso).
-    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,async,hound,waitpounce"
-    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","async","hound","waitpounce"]
+    // 1.0.388 — aggiunto "cqfilter" (selettore livello filtro CQ) accanto a "tune", movibile come gli altri.
+    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,cqfilter,async,hound,waitpounce"
+    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","cqfilter","async","hound","waitpounce"]
     property var uiTxPanelOrder: parseTxPanelOrder(String(bridge.getSetting("uiTxPanelOrder", "") || ""))
 
     // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
@@ -602,6 +603,7 @@ Item {
                                     case "halt":      return comp_halt
                                     case "clear":     return comp_clear
                                     case "tune":      return comp_tune
+                                    case "cqfilter":  return comp_cqfilter
                                     case "async":     return comp_async
                                     case "hound":     return comp_hound
                                     case "waitpounce":return comp_waitpounce
@@ -1168,6 +1170,45 @@ Item {
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
                                     boldLabel: true
+                                }
+                            }
+                        }
+
+                        // CQ filter cycler (1.0.388): OFF → CQ → CQ·73 → CQ·RR73 → CQ·RRR → OFF.
+                        // Gestisce sia filterCqOnly (on/off) sia cqFilterLevel (0..3).
+                        Component {
+                            id: comp_cqfilter
+                            Rectangle {
+                                property bool hovered: false
+                                readonly property bool btnVisible: true
+                                readonly property bool filterOn: engine && engine.filterCqOnly
+                                readonly property int lvl: engine ? engine.cqFilterLevel : 0
+                                readonly property string lbl: "CQ" + (filterOn ? ["", "·73", "·RR73", "·RRR"][lvl] : "")
+                                readonly property real prefWidth: txPanel.toolbarActionWidth(lbl, "▾")
+                                readonly property string tip: filterOn
+                                    ? qsTr("Filtro CQ attivo (%1). Click: cambia livello / spegne.")
+                                          .arg(["solo CQ", "CQ+73", "CQ+73+RR73", "CQ+73+RR73+RRR"][lvl])
+                                    : qsTr("Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.")
+                                function activate(mouse) {
+                                    if (!engine) return
+                                    if (!engine.filterCqOnly) { engine.filterCqOnly = true; engine.cqFilterLevel = 0 }
+                                    else if (engine.cqFilterLevel < 3) { engine.cqFilterLevel = engine.cqFilterLevel + 1 }
+                                    else { engine.filterCqOnly = false }
+                                }
+                                radius: 5
+                                color: filterOn ? Qt.alpha(secondaryCyan, 0.4)
+                                                : (hovered ? Qt.alpha(secondaryCyan, 0.18) : Qt.alpha(secondaryCyan, 0.08))
+                                border.color: filterOn ? secondaryCyan
+                                              : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, hovered ? 1.0 : 0.4)
+                                border.width: filterOn ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: parent.lbl
+                                    glyph: "▾"
+                                    foreground: secondaryCyan
+                                    glyphSize: txPanel.toolbarGlyphSize
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: parent.filterOn
                                 }
                             }
                         }

@@ -1275,6 +1275,21 @@ ApplicationWindow {
         return (idx >= 0 && idx < uiClassicColumnOrder.length) ? uiClassicColumnOrder[idx] : ""
     }
 
+    // 1.0.388 — indice della colonna decode (0..3) che deve avere SplitView.fillWidth:
+    // il primo slot che ospita un pannello NON collassabile (così c'è sempre esattamente
+    // un riempitore visibile e lo spazio liberato da un pannello staccato viene assorbito).
+    // Preferisce Full Spectrum; ripiega su qualunque slot non-livemap/non-dxcluster.
+    function classicDecodeFillSlot() {
+        var i
+        for (i = 0; i < 4; ++i)
+            if (classicIdInSlot(i) === "fullspectrum") return i
+        for (i = 0; i < 4; ++i) {
+            var id = classicIdInSlot(i)
+            if (id !== "livemap" && id !== "dxcluster") return i
+        }
+        return 0
+    }
+
     // Larghezza minima dello slot = minimo "naturale" del pannello che lo occupa
     // (segue il pannello, non lo slot, anche se la larghezza-valore è per-slot).
     // Read-only su mappa+occupante: non re-immette nulla nella width -> no binding loop.
@@ -4864,14 +4879,35 @@ ApplicationWindow {
                     width: 86
                     height: 74
                     radius: 8
+                    // 1.0.388 — bypass attivo = ROSSO (era arancione) con lampeggio fade
+                    readonly property color bypassRed: (bridge.themeManager ? bridge.themeManager.ledRed : "#e53935")
                     color: bridge.filtersBypassed
-                           ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.26)
+                           ? Qt.rgba(bypassRed.r, bypassRed.g, bypassRed.b, 0.26)
                            : bypassFiltersMA.containsMouse
-                             ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.14)
+                             ? Qt.rgba(bypassRed.r, bypassRed.g, bypassRed.b, 0.14)
                              : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.85)
-                    border.color: bridge.filtersBypassed ? accentOrange
-                                  : bypassFiltersMA.containsMouse ? accentOrange : glassBorder
+                    border.color: bridge.filtersBypassed ? bypassRed
+                                  : bypassFiltersMA.containsMouse ? bypassRed : glassBorder
                     border.width: bridge.filtersBypassed || bypassFiltersMA.containsMouse ? 2 : 1
+
+                    // Overlay rosso che pulsa in fade-in/fade-out quando il bypass è attivo.
+                    // 1.0.388: usa OpacityAnimator (pattern affidabile come il pulse del MON)
+                    // su un FILL rosso, così il lampeggio è ben visibile.
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: Qt.rgba(parent.bypassRed.r, parent.bypassRed.g, parent.bypassRed.b, 0.45)
+                        border.color: parent.bypassRed
+                        border.width: 2
+                        visible: bridge.filtersBypassed
+                        opacity: 1.0
+                        SequentialAnimation on opacity {
+                            running: bridge.filtersBypassed && bridge.uiQuality !== "Low"
+                            loops: Animation.Infinite
+                            OpacityAnimator { to: 0.15; duration: 650 }
+                            OpacityAnimator { to: 1.0; duration: 650 }
+                        }
+                    }
 
                     Column {
                         anchors.centerIn: parent
@@ -4881,21 +4917,21 @@ ApplicationWindow {
                             text: "⌀"
                             font.pixelSize: 24
                             font.bold: true
-                            color: bridge.filtersBypassed ? accentOrange : textSecondary
+                            color: bridge.filtersBypassed ? parent.parent.bypassRed : textSecondary
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Bypass"
                             font.pixelSize: 9
                             font.bold: true
-                            color: bridge.filtersBypassed ? accentOrange : textSecondary
+                            color: bridge.filtersBypassed ? parent.parent.bypassRed : textSecondary
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Filters"
                             font.pixelSize: 9
                             font.bold: true
-                            color: bridge.filtersBypassed ? accentOrange : textSecondary
+                            color: bridge.filtersBypassed ? parent.parent.bypassRed : textSecondary
                         }
                     }
 
@@ -6560,6 +6596,12 @@ ApplicationWindow {
                             // ha trascinato il separatore.
                             property bool userDraggedSplit: false
                             readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(0)
+                            // 1.0.388 — slot collassato = invisibile (lo SplitView lo esclude del
+                            // tutto: niente colonna, niente maniglia, niente spazio residuo).
+                            visible: !slotCollapsed
+                            // fillWidth segue lo slot che ospita Full Spectrum (mai collassabile,
+                            // sempre presente) → c'è sempre esattamente un riempitore valido.
+                            SplitView.fillWidth: mainWindow.classicDecodeFillSlot() === 0
                             SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(0)
                             function applyCenterSplit() {
@@ -7297,7 +7339,8 @@ NumberAnimation {
                             id: colSlot1
                             property int targetPanelWidth: mainWindow.savedRxFreqPanelWidth
                             readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(1)
-                            SplitView.fillWidth: true
+                            visible: !slotCollapsed   // 1.0.388 — vedi colSlot0
+                            SplitView.fillWidth: mainWindow.classicDecodeFillSlot() === 1
                             SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(1)
                             onWidthChanged: {
@@ -7820,6 +7863,8 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                             id: colSlot2
                             property int targetPanelWidth: mainWindow.savedLiveMapPanelWidth
                             readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(2)
+                            visible: !slotCollapsed   // 1.0.388 — vedi colSlot0
+                            SplitView.fillWidth: mainWindow.classicDecodeFillSlot() === 2
                             SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(2)
                             onWidthChanged: {
@@ -7877,13 +7922,17 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         }
 
                         // ========== SLOT 3 (DX Cluster) — 1.0.385 4ª colonna dedicata ==========
-                        // Collassa a 0 quando il Cluster è spento (default). Quando il Cluster
-                        // è acceso: se dockato mostra il pannello inline, se staccato mostra il
-                        // placeholder "Aggancia DX Cluster" come target per agganciarlo.
+                        // Esiste SOLO quando il Cluster è dockato. Quando è spento o staccato
+                        // (finestra flottante) lo slot va `visible:false`: 1.0.388 — con
+                        // preferredWidth/minimumWidth=0 lo SplitView teneva comunque la
+                        // larghezza trascinata a mano (colonna non spariva); `visible:false`
+                        // lo esclude del tutto dal layout → niente colonna, niente handle.
                         Item {
                             id: colSlot3
                             property int targetPanelWidth: mainWindow.savedDxClusterColumnWidth
                             readonly property bool slotCollapsed: mainWindow.classicSlotCollapsed(3)
+                            visible: !slotCollapsed
+                            SplitView.fillWidth: mainWindow.classicDecodeFillSlot() === 3
                             SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(3)
                             onWidthChanged: {
@@ -7921,20 +7970,29 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     onLoaded: if (item) item.panelId = "dxcluster"
                                 }
 
-                                // Pulsante "stacca" → ri-flotta il Cluster in finestra (1.0.385)
+                                // Pulsante "Stacca" leggibile → ri-flotta il Cluster in finestra
+                                // (1.0.388: era un'icona 16px poco leggibile, ora pill con testo)
                                 Rectangle {
                                     z: 50
                                     anchors.left: parent.left
                                     anchors.top: parent.top
-                                    anchors.leftMargin: 26
+                                    anchors.leftMargin: 28
                                     anchors.topMargin: 6
-                                    width: 16; height: 16; radius: 3
-                                    color: dxcDetachMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
-                                                                     : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.12)
-                                    border.color: dxcDetachMA.containsMouse ? secondaryCyan : "transparent"
+                                    height: 20
+                                    width: dxcDetachLabel.implicitWidth + 16
+                                    radius: 4
+                                    color: dxcDetachMA.containsMouse ? secondaryCyan
+                                                                     : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.92)
+                                    border.color: secondaryCyan
                                     border.width: 1
-                                    Text { anchors.centerIn: parent; text: "⤢"; font.pixelSize: 11
-                                           color: dxcDetachMA.containsMouse ? secondaryCyan : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.6) }
+                                    Text {
+                                        id: dxcDetachLabel
+                                        anchors.centerIn: parent
+                                        text: "⤢ " + qsTr("Stacca")
+                                        font.pixelSize: 11
+                                        font.bold: true
+                                        color: dxcDetachMA.containsMouse ? bgDeep : textPrimary
+                                    }
                                     MouseArea {
                                         id: dxcDetachMA
                                         anchors.fill: parent

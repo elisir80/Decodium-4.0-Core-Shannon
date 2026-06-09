@@ -179,6 +179,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool holdTxFreq       READ holdTxFreq       WRITE setHoldTxFreq       NOTIFY holdTxFreqChanged)
     Q_PROPERTY(bool autoCqRepeat     READ autoCqRepeat     WRITE setAutoCqRepeat     NOTIFY autoCqRepeatChanged)
     Q_PROPERTY(int  maxCallerRetries READ maxCallerRetries WRITE setMaxCallerRetries NOTIFY maxCallerRetriesChanged)
+    // 1.0.388 — priorità processo Windows scelta dall'utente: 0=Normale, 1=Sopra il normale
+    // (default, = profilo interattivo attuale), 2=Alta, 3=Tempo reale (⚠️ rischioso, serve admin).
+    Q_PROPERTY(int processPriority READ processPriority WRITE setProcessPriority NOTIFY processPriorityChanged)
     Q_PROPERTY(int  txDisabledMask   READ txDisabledMask   NOTIFY txDisabledMaskChanged)
     Q_PROPERTY(int  autoCqMaxCycles  READ autoCqMaxCycles  WRITE setAutoCqMaxCycles  NOTIFY autoCqMaxCyclesChanged)
     Q_PROPERTY(int  autoCqPauseSec   READ autoCqPauseSec   WRITE setAutoCqPauseSec   NOTIFY autoCqPauseSecChanged)
@@ -570,6 +573,9 @@ public:
     void setHoldTxFreq(bool v);
     bool autoCqRepeat()      const { return m_autoCqRepeat; }
     void setAutoCqRepeat(bool v);
+    int  processPriority() const { return m_processPriority; }
+    void setProcessPriority(int v);          // 1.0.388 — implementato in .cpp (SetPriorityClass)
+    void applyProcessPriority();             // 1.0.388 — applica m_processPriority al processo
     int  maxCallerRetries()  const { return m_maxCallerRetries; }
     Q_INVOKABLE void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store. Q_INVOKABLE: il QML chiama setMaxCallerRetries() come metodo (1.0.383 fix: senza Q_INVOKABLE falliva con TypeError silenzioso → non persisteva, restava sempre 10)
     int  txDisabledMask() const { return m_txDisabledMask; }
@@ -1344,6 +1350,7 @@ signals:
     void txDisabledMaskChanged();
     void autoCqRepeatChanged();
     void maxCallerRetriesChanged();
+    void processPriorityChanged();   // 1.0.388
     void autoCqMaxCyclesChanged();
     void autoCqPauseSecChanged();
     void avgDecodeEnabledChanged();
@@ -2437,6 +2444,7 @@ private:
     bool    m_quickPeerSignaled {false};
     bool    m_qsoLogged {false};   // flag anti-doppio log per QSO corrente
     int  m_maxCallerRetries {10};  // invii totali per step prima di fermarsi
+    int  m_processPriority {1};    // 1.0.388 — 0=Normale,1=Sopra il normale,2=Alta,3=Tempo reale
     int  m_txDisabledMask {0};     // bitmask: bit N-1 set = TX(N) saltato in auto-seq (1.0.130)
     int  m_autoCqMaxCycles  {0};   // 0 = infinito, >0 = max cicli CQ
     int  m_autoCqPauseSec   {0};   // pausa (s) tra cicli CQ (0 = nessuna pausa)
