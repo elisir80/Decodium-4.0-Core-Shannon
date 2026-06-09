@@ -23964,9 +23964,23 @@ bool DecodiumBridge::decodeIsFreshForCqAutoReply(const QString& utcToken, QStrin
     }
 
     int const afterArmSeconds = signedUtcSecondDelta(m_cqAutoReplyArmSecond, decodeSeconds);
-    if (afterArmSeconds < 0) {
+    // 1.0.391 - tolleranza predates per FT2 async. L'arm e' fissato all'attivazione AutoCQ
+    // (armCqAutoReplyWindow: autocq-enabled ~13168 / tx6-rearm manuale ~13057) e troncato al
+    // SECONDO UTC. In FT2 gli slot cadono su confini a passo 3.75s (sub-secondo), quindi lo
+    // slot-start della risposta del partner, troncato al secondo, puo' cadere PRIMA del
+    // secondo di arm di ~1 periodo -> la risposta LEGITTIMA al nostro CQ veniva scartata come
+    // stale (caso reale ZL3DMH<-ZL1BW: predates CQ arm by 4s ~= un periodo FT2 -> bloccato a
+    // ripetere CQ, 0 QSO). Accetto i decode che precedono l'arm fino a ~1 periodo + 2s; la
+    // staleness REALE resta coperta dal controllo di eta' (ageSeconds > maxAgeSeconds) sotto,
+    // riferito a ora. FT8/FT4 (e FT2 sync) invariati: tolleranza 0 -> reject identico.
+    int const armPeriodMs = periodMsForMode(m_mode);
+    int const armPeriodSeconds = qMax(1, (armPeriodMs + 999) / 1000);
+    int const predatesToleranceSeconds =
+        (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) ? (armPeriodSeconds + 2) : 0;
+    if (afterArmSeconds < -predatesToleranceSeconds) {
         if (reason) {
-            *reason = QStringLiteral("decode predates CQ arm by %1s").arg(-afterArmSeconds);
+            *reason = QStringLiteral("decode predates CQ arm by %1s (toll %2s)")
+                          .arg(-afterArmSeconds).arg(predatesToleranceSeconds);
         }
         return false;
     }
