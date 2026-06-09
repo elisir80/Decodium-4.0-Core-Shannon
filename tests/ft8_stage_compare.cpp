@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
+#include <complex>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -19,6 +21,8 @@
 #include <QTextStream>
 #include <QtEndian>
 
+#include <fftw3.h>
+
 #include "Detector/FortranRuntimeGuard.hpp"
 
 extern "C"
@@ -34,14 +38,54 @@ extern "C"
   void ftx_ft8_cpp_dsp_rollout_stage_override_c (int stage);
   void ftx_ft8_cpp_dsp_rollout_stage_reset_c ();
   void ftx_ft8_stage4_reset_c ();
+  void ftx_ft8_stage4_set_deadline_ms_c (long long deadline_ms);
   void ftx_ft8_stage4_set_ldpc_osd_c (int maxosd, int norder);
   void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
   void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,
                                             int cycles, int rx_freq_sensitivity,
                                             int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
+  void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,
+                                       float freq, float dt, int nutc);
+  void ftx_ft8_downsample_c (float const* dd, int* newdat, float f0, fftwf_complex* c1);
+  void ftx_ft8_a7_search_initial_c (std::complex<float> const* cd0, int np2, float fs2,
+                                    float xdt_in, int* ibest_out, float* delfbest_out);
+  void ftx_ft8_a7_refine_search_c (std::complex<float> const* cd0, int np2, float fs2,
+                                   int ibest_in, int* ibest_out, float* sync_out,
+                                   float* xdt_out);
+  void ftx_ft8_bitmetrics_deep_c (std::complex<float> const* cd0, int np2, int ibest,
+                                  int imetric, float scale, float* s8_out, int* nsync_out,
+                                  float* llra, float* llrb, float* llrc, float* llrd,
+                                  float* llre);
+  void ftx_ft8_bitmetrics_deep_equalized_c (std::complex<float> const* cd0, int np2,
+                                            int ibest, int imetric, float scale,
+                                            float* s8_out, int* nsync_out,
+                                            float* llra, float* llrb,
+                                            float* llrc, float* llrd, float* llre);
+  void ftx_prepare_ft8_ap_c (char const mycall[12], char const hiscall[12], int ncontest,
+                             int* apsym, int* aph10);
+  int ftx_ft8_prepare_decode_pass_c (int ipass, int nQSOProgress, int lapcqonly,
+                                     int ncontest, int nfqso, int nftx, float f1,
+                                     int napwid, int const* apsym, int const* aph10,
+                                     float const* llra, float const* llrb,
+                                     float const* llrc, float const* llrd,
+                                     float const* llre, float* llrz,
+                                     int* apmask, int* iaptype_out);
+  void ftx_decode174_91_c (float const* llr_in, int Keff, int maxosd, int norder,
+                           signed char const* apmask_in, signed char* message91_out,
+                           signed char* cw_out, int* ntype_out, int* nharderror_out,
+                           float* dmin_out);
+  void ftx_osd174_91_c (float const* llr_in, int Keff, signed char const* apmask_in,
+                        int norder, signed char* message91_out, signed char* cw_out,
+                        int* nharderror_out, float* dmin_out);
+  void ftx_ldpc174_91_metrics_c (signed char const* cw, float const* llr,
+                                 int* nharderrors_out, float* dmin_out);
   int ftx_encode_ft8_candidate_c (char const* message37, char* msgsent_out,
                                   int* itone_out, signed char* codeword_out);
+  int legacy_pack77_unpack77bits_c (signed char const* message77, int received,
+                                    char* msg37, int* quirky);
+  void ftx_ft8_stage4_seed_hash_call_c (char const* call);
+  void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_ft8_prepare_pass_c (int ndepth, int ipass, int ndecodes,
                                float* syncmin, int* imetric,
                                int* lsubtract, int* run_pass);
@@ -57,6 +101,12 @@ namespace
   constexpr int kFt8MaxLines {200};
   constexpr int kBitsPerMessage {77};
   constexpr int kDecodedChars {37};
+
+  long long steady_clock_ms ()
+  {
+    using namespace std::chrono;
+    return duration_cast<milliseconds> (steady_clock::now ().time_since_epoch ()).count ();
+  }
 
   struct WavData
   {
@@ -122,6 +172,36 @@ namespace
     return line.decoded.trimmed ();
   }
 
+  int infer_nutc_from_path (QString const& path, int fallback)
+  {
+    QString const stem = QFileInfo {path}.completeBaseName ();
+    for (int pos = stem.size () - 6; pos >= 0; --pos)
+      {
+        QString const token = stem.mid (pos, 6);
+        bool digits = true;
+        for (QChar const ch : token)
+          {
+            if (!ch.isDigit ())
+              {
+                digits = false;
+                break;
+              }
+          }
+        if (!digits)
+          {
+            continue;
+          }
+        int const hh = token.mid (0, 2).toInt ();
+        int const mm = token.mid (2, 2).toInt ();
+        int const ss = token.mid (4, 2).toInt ();
+        if (hh >= 0 && hh < 24 && mm >= 0 && mm < 60 && ss >= 0 && ss < 60)
+          {
+            return token.toInt ();
+          }
+      }
+    return fallback;
+  }
+
   QString describe_line (DecodeLine const& line)
   {
     return QStringLiteral ("snr=%1 dt=%2 freq=%3 nap=%4 qual=%5 decoded=\"%6\"")
@@ -134,18 +214,48 @@ namespace
   }
 
   void dump_candidates (QTextStream& out, std::vector<short> const& samples,
-                        int nfa, int nfb, int nfqso, int ndepth,
+                        int nfa, int nfb, int nfqso, int nftx, int ndepth,
+                        int ncontest, int lft8apon, int lapcqonly, int napwid,
                         int lowThresholds, int subpass, int cycles,
                         int rxFreqSensitivity, int candidateThin,
-                        int windowHz)
+                        int windowHz, QString const& probeMessage,
+                        QByteArray const& mycall, QByteArray const& hiscall,
+                        bool probeOsd5, bool probeMetricsOnly,
+                        int dumpPassFilter, int dumpMaxCandidates)
   {
     constexpr int kMaxCandidates {960};
     constexpr int kSbaseSize {1920};
+    constexpr int kNp2 {2812};
+    constexpr float kFs2 {200.0f};
+    constexpr float kScale {2.83f};
     std::array<float, kFt8SampleCount> dd {};
     for (size_t i = 0; i < dd.size () && i < samples.size (); ++i)
       {
         dd[i] = static_cast<float> (samples[i]);
       }
+
+    bool const probe = !probeMessage.trimmed ().isEmpty ();
+    std::array<char, kDecodedChars> probeMsgSent {};
+    std::array<int, 79> probeTones {};
+    std::array<signed char, 174> probeCodeword {};
+    if (probe)
+      {
+        QByteArray const probeField = to_fortran_field (probeMessage.toLatin1 (), kDecodedChars);
+        if (ftx_encode_ft8_candidate_c (probeField.constData (), probeMsgSent.data (),
+                                        probeTones.data (), probeCodeword.data ()) == 0)
+          {
+            fail (QStringLiteral ("cannot encode probe message \"%1\"").arg (probeMessage));
+          }
+        out << "Probe message: " << trim_fortran_field (probeMsgSent.data (), kDecodedChars)
+            << '\n';
+      }
+
+    QByteArray const mycall12 = to_fortran_field (mycall, 12);
+    QByteArray const hiscall12 = to_fortran_field (hiscall, 12);
+    std::array<int, 58> apsym {};
+    std::array<int, 10> aph10 {};
+    ftx_prepare_ft8_ap_c (mycall12.constData (), hiscall12.constData (), ncontest,
+                          apsym.data (), aph10.data ());
 
     int npass = 5;
     if (ndepth <= 2)
@@ -176,6 +286,10 @@ namespace
     auto ddCycleBase = dd;
     for (int ipass = 1; ipass <= npass; ++ipass)
       {
+        if (dumpPassFilter > 0 && ipass != dumpPassFilter)
+          {
+            continue;
+          }
         auto passDd = dd;
         if (ndepth >= 4 && (ipass == 4 || ipass == 7))
           {
@@ -239,6 +353,10 @@ namespace
         int printed = 0;
         for (int i = 0; i < ncand; ++i)
           {
+            if (dumpMaxCandidates > 0 && printed >= dumpMaxCandidates)
+              {
+                break;
+              }
             float const freq = candidates[static_cast<size_t> (i * 4 + 0)];
             if (std::fabs (freq - static_cast<float> (nfqso)) > static_cast<float> (windowHz))
               {
@@ -250,6 +368,179 @@ namespace
                 << " sync=" << candidates[static_cast<size_t> (i * 4 + 2)]
                 << " cq=" << candidates[static_cast<size_t> (i * 4 + 3)]
                 << '\n';
+            if (probe)
+              {
+                std::array<std::complex<float>, 3200> cd0 {};
+                int newdat = 1;
+                float refinedFreq = freq;
+                float refinedDt = candidates[static_cast<size_t> (i * 4 + 1)];
+                ftx_ft8_downsample_c (passDd.data (), &newdat, refinedFreq,
+                                      reinterpret_cast<fftwf_complex*> (cd0.data ()));
+                int ibest = 0;
+                float delfbest = 0.0f;
+                ftx_ft8_a7_search_initial_c (cd0.data (), kNp2, kFs2, refinedDt,
+                                             &ibest, &delfbest);
+                refinedFreq += delfbest;
+                int secondNewdat = 0;
+                ftx_ft8_downsample_c (passDd.data (), &secondNewdat, refinedFreq,
+                                      reinterpret_cast<fftwf_complex*> (cd0.data ()));
+                float refinedSync = 0.0f;
+                ftx_ft8_a7_refine_search_c (cd0.data (), kNp2, kFs2, ibest,
+                                            &ibest, &refinedSync, &refinedDt);
+
+                auto probe_metrics = [&] (char const* prefix, bool equalized) {
+                  std::array<float, 8 * 79> s8 {};
+                  std::array<float, 174> llra {};
+                  std::array<float, 174> llrb {};
+                  std::array<float, 174> llrc {};
+                  std::array<float, 174> llrd {};
+                  std::array<float, 174> llre {};
+                  int nsync = 0;
+                  if (equalized)
+                    {
+                      ftx_ft8_bitmetrics_deep_equalized_c (
+                          cd0.data (), kNp2, ibest, imetric, kScale, s8.data (), &nsync,
+                          llra.data (), llrb.data (), llrc.data (), llrd.data (), llre.data ());
+                    }
+                  else
+                    {
+                      ftx_ft8_bitmetrics_deep_c (
+                          cd0.data (), kNp2, ibest, imetric, kScale, s8.data (), &nsync,
+                          llra.data (), llrb.data (), llrc.data (), llrd.data (), llre.data ());
+                    }
+
+                  auto measure = [&] (char const* label, float const* llr) {
+                    int nhard = -1;
+                    float dmin = 0.0f;
+                    ftx_ldpc174_91_metrics_c (probeCodeword.data (), llr, &nhard, &dmin);
+                    out << "    " << prefix << ' ' << label
+                        << " nhard=" << nhard
+                        << " dmin=" << dmin << '\n';
+                  };
+                  out << "    " << prefix
+                      << " refined_f=" << refinedFreq
+                      << " refined_dt=" << refinedDt
+                      << " sync=" << refinedSync
+                      << " nsync=" << nsync
+                      << " ibest=" << ibest << '\n';
+                  measure ("llra", llra.data ());
+                  measure ("llrb", llrb.data ());
+                  measure ("llrc", llrc.data ());
+                  measure ("llrd", llrd.data ());
+                  measure ("llre", llre.data ());
+
+                  auto unpack_message91 = [] (signed char const* message91) {
+                    std::array<signed char, kBitsPerMessage> message77 {};
+                    std::copy_n (message91, kBitsPerMessage, message77.begin ());
+                    std::array<char, kDecodedChars> text {};
+                    int quirky = 0;
+                    if (legacy_pack77_unpack77bits_c (message77.data (), 1, text.data (),
+                                                      &quirky) == 0)
+                      {
+                        return QByteArrayLiteral ("<unpack failed>");
+                      }
+                    return trim_fortran_field (text.data (), kDecodedChars);
+                  };
+
+                  int const passLimit = lft8apon != 0 ? 8 : 5;
+                  for (int decodePass = 1; decodePass <= passLimit; ++decodePass)
+                    {
+                      std::array<float, 174> llrz {};
+                      std::array<int, 174> apmaskInt {};
+                      std::array<signed char, 174> apmask {};
+                      int iaptype = 0;
+                      if (ftx_ft8_prepare_decode_pass_c (
+                              decodePass, 0, lapcqonly, ncontest, nfqso, nftx, refinedFreq,
+                              napwid, apsym.data (), aph10.data (), llra.data (), llrb.data (),
+                              llrc.data (), llrd.data (), llre.data (), llrz.data (),
+                              apmaskInt.data (), &iaptype) == 0)
+                        {
+                          continue;
+                        }
+                      std::transform (apmaskInt.begin (), apmaskInt.end (), apmask.begin (),
+                                      [] (int value) {
+                                        return static_cast<signed char> (value != 0);
+                                      });
+                      int nhard = -1;
+                      float dmin = 0.0f;
+                      ftx_ldpc174_91_metrics_c (probeCodeword.data (), llrz.data (),
+                                                &nhard, &dmin);
+                      out << "    " << prefix << " pass" << decodePass
+                          << " iap=" << iaptype
+                          << " exp_nhard=" << nhard
+                          << " exp_dmin=" << dmin << '\n';
+                      if (probeMetricsOnly)
+                        {
+                          continue;
+                        }
+
+                      for (int order : {3, 4, 5})
+                        {
+                          if (order == 5 && !probeOsd5)
+                            {
+                              continue;
+                            }
+                          std::array<signed char, 91> osdMessage {};
+                          std::array<signed char, 174> osdCw {};
+                          int osdHard = -1;
+                          float osdDmin = 0.0f;
+                          ftx_osd174_91_c (llrz.data (), 91, apmask.data (), order,
+                                           osdMessage.data (), osdCw.data (), &osdHard,
+                                           &osdDmin);
+                          int osdVsExpected = 0;
+                          for (int bit = 0; bit < 174; ++bit)
+                            {
+                              if (osdCw[static_cast<size_t> (bit)]
+                                  != probeCodeword[static_cast<size_t> (bit)])
+                                {
+                                  ++osdVsExpected;
+                                }
+                            }
+                          out << "      osd order=" << order
+                              << " nhard=" << osdHard
+                              << " dmin=" << osdDmin
+                              << " cw_delta=" << osdVsExpected
+                              << " text=\"" << unpack_message91 (osdMessage.data ()) << "\"\n";
+                        }
+
+                      for (float scaleFactor : {0.5f, 1.0f, 1.5f, 2.0f, 3.0f})
+                        {
+                          std::array<float, 174> scaledLlr {};
+                          for (int bit = 0; bit < 174; ++bit)
+                            {
+                              scaledLlr[static_cast<size_t> (bit)] =
+                                  llrz[static_cast<size_t> (bit)] * scaleFactor;
+                            }
+                          std::array<signed char, 91> message91 {};
+                          std::array<signed char, 174> decodedCw {};
+                          int ntype = 0;
+                          int decodeHard = -1;
+                          float decodeDmin = 0.0f;
+                          ftx_decode174_91_c (scaledLlr.data (), 91, 3, 4, apmask.data (),
+                                              message91.data (), decodedCw.data (), &ntype,
+                                              &decodeHard, &decodeDmin);
+                          int decodedVsExpected = 0;
+                          for (int bit = 0; bit < 174; ++bit)
+                            {
+                              if (decodedCw[static_cast<size_t> (bit)]
+                                  != probeCodeword[static_cast<size_t> (bit)])
+                                {
+                                  ++decodedVsExpected;
+                                }
+                            }
+                          out << "      decode scale=" << scaleFactor
+                              << " ntype=" << ntype
+                              << " nhard=" << decodeHard
+                              << " dmin=" << decodeDmin
+                              << " cw_delta=" << decodedVsExpected
+                              << " text=\"" << unpack_message91 (message91.data ()) << "\"\n";
+                        }
+                    }
+                };
+
+                probe_metrics ("base", false);
+                probe_metrics ("eq", true);
+              }
             ++printed;
           }
         if (printed == 0)
@@ -307,6 +598,76 @@ namespace
         fail (QStringLiteral ("invalid --%1 value").arg (name));
       }
     return value;
+  }
+
+  void seed_known_cq_entry (QString const& raw)
+  {
+    QString normalized = raw.simplified ().toUpper ();
+    normalized.replace (QLatin1Char (','), QLatin1Char (' '));
+    normalized.replace (QLatin1Char (':'), QLatin1Char (' '));
+    QStringList const parts = normalized.split (QLatin1Char (' '), Qt::SkipEmptyParts);
+    if (parts.size () < 3 || parts.size () > 5)
+      {
+        fail (QStringLiteral ("invalid --seed-known-cq value \"%1\"; expected CALL GRID FREQ [DT] [NUTC]")
+                  .arg (raw));
+      }
+
+    bool ok_freq = false;
+    float const freq = parts.at (2).toFloat (&ok_freq);
+    if (!ok_freq || freq <= 0.0f)
+      {
+        fail (QStringLiteral ("invalid --seed-known-cq frequency in \"%1\"").arg (raw));
+      }
+
+    float dt = 0.0f;
+    int nutc = -1;
+    if (parts.size () >= 4)
+      {
+        bool ok_value = false;
+        int const value = parts.at (3).toInt (&ok_value);
+        if (ok_value && parts.size () == 4)
+          {
+            nutc = value;
+          }
+        else
+          {
+            dt = parts.at (3).toFloat (&ok_value);
+            if (!ok_value)
+              {
+                fail (QStringLiteral ("invalid --seed-known-cq DT in \"%1\"").arg (raw));
+              }
+          }
+      }
+    if (parts.size () >= 5)
+      {
+        bool ok_time = false;
+        nutc = parts.at (4).toInt (&ok_time);
+        if (!ok_time)
+          {
+            fail (QStringLiteral ("invalid --seed-known-cq NUTC in \"%1\"").arg (raw));
+          }
+      }
+
+    QByteArray const call = to_fortran_field (parts.at (0).toLatin1 (), 12);
+    QByteArray const grid = to_fortran_field (parts.at (1).toLatin1 (), 4);
+    ftx_ft8_stage4_seed_known_cq_c (call.constData (), grid.constData (), freq, dt, nutc);
+  }
+
+  void seed_hash_call_entry (QString const& raw)
+  {
+    QString call = raw.simplified ().toUpper ();
+    if (call.startsWith (QLatin1Char ('<')) && call.endsWith (QLatin1Char ('>')) && call.size () > 2)
+      {
+        call = call.mid (1, call.size () - 2);
+      }
+    if (call.isEmpty () || call.contains (QLatin1Char (' ')))
+      {
+        fail (QStringLiteral ("invalid --seed-hash-call value \"%1\"; expected one CALL")
+                  .arg (raw));
+      }
+
+    QByteArray const call13 = to_fortran_field (call.toLatin1 (), 13);
+    ftx_ft8_stage4_seed_hash_call_c (call13.constData ());
   }
 
   WavData read_wav_file (QString const& file_name)
@@ -425,12 +786,14 @@ namespace
                            int ndepth, float emedelay, int ncontest, int nagain,
                            int lft8apon, int lapcqonly, int napwid, int ldiskdat,
                            int supplemental, int maxosd, int norder,
-                           int maxIter,
+                           int maxIter, int maxDecodeMs,
                            int lowThresholds, int subpass, int cycles,
                            int rxFreqSensitivity, int candidateThin,
                            bool skipEarlyPasses,
                            QByteArray const& mycall, QByteArray const& hiscall,
-                           QByteArray const& hisgrid)
+                           QByteArray const& hisgrid,
+                           bool resetStage4Before = true,
+                           bool resetStage4After = true)
   {
     std::vector<short> iwave = samples;
     std::array<int, kFt8MaxLines> snrs {};
@@ -505,9 +868,15 @@ namespace
     };
 
     QMutexLocker locker {&decodium::fortran::runtime_mutex ()};
-    ftx_ft8_stage4_reset_c ();
+    if (resetStage4Before)
+      {
+        ftx_ft8_stage4_reset_c ();
+      }
+    ftx_ft8_stage4_apply_hash_seed_cache_c ();
     ftx_ft8_stage4_set_decode_options_c (lowThresholds, subpass, cycles,
                                          rxFreqSensitivity, candidateThin);
+    ftx_ft8_stage4_set_deadline_ms_c (
+        maxDecodeMs > 0 ? steady_clock_ms () + maxDecodeMs : 0);
     ftx_ft8_stage4_set_supplemental_c (supplemental);
     ftx_ft8_stage4_set_ldpc_osd_c (maxosd, norder);
     ftx_ft8_stage4_set_ldpc_max_iter_c (maxIter);
@@ -521,7 +890,11 @@ namespace
     ftx_ft8_stage4_set_ldpc_osd_c (-1, 0);
     ftx_ft8_stage4_set_ldpc_max_iter_c (30);
     ftx_ft8_stage4_set_decode_options_c (0, 0, 1, 1, 100);
-    ftx_ft8_stage4_reset_c ();
+    ftx_ft8_stage4_set_deadline_ms_c (0);
+    if (resetStage4After)
+      {
+        ftx_ft8_stage4_reset_c ();
+      }
     locker.unlock ();
 
     if (result.lines.empty () && nout > 0)
@@ -769,6 +1142,12 @@ int main (int argc, char * argv[])
           QStringLiteral ("value"),
           QStringLiteral ("30")
       };
+      QCommandLineOption const max_ms_option {
+          QStringLiteral ("max-ms"),
+          QStringLiteral ("Stage4 decode deadline in milliseconds; 0 disables the deadline."),
+          QStringLiteral ("value"),
+          QStringLiteral ("0")
+      };
       QCommandLineOption const low_thresholds_option {
           QStringLiteral ("low-thresholds"),
           QStringLiteral ("Enable FT8 low-threshold candidate/decode gates (0/1)."),
@@ -807,6 +1186,10 @@ int main (int argc, char * argv[])
           QStringLiteral ("dump-candidates"),
           QStringLiteral ("Print sync candidates before decode.")
       };
+      QCommandLineOption const dump_only_option {
+          QStringLiteral ("dump-only"),
+          QStringLiteral ("Exit after candidate dump/probe.")
+      };
       QCommandLineOption const dump_center_option {
           QStringLiteral ("dump-center"),
           QStringLiteral ("Candidate dump center in Hz; defaults to --nfqso."),
@@ -818,6 +1201,32 @@ int main (int argc, char * argv[])
           QStringLiteral ("Candidate dump half-window in Hz."),
           QStringLiteral ("hz"),
           QStringLiteral ("30")
+      };
+      QCommandLineOption const dump_pass_option {
+          QStringLiteral ("dump-pass"),
+          QStringLiteral ("Only dump/probe one sync pass."),
+          QStringLiteral ("pass"),
+          QStringLiteral ("0")
+      };
+      QCommandLineOption const dump_max_candidates_option {
+          QStringLiteral ("dump-max-candidates"),
+          QStringLiteral ("Maximum matching candidates to dump/probe per pass; 0 means unlimited."),
+          QStringLiteral ("count"),
+          QStringLiteral ("0")
+      };
+      QCommandLineOption const probe_message_option {
+          QStringLiteral ("probe-message"),
+          QStringLiteral ("Measure candidate LLRs against an expected FT8 message."),
+          QStringLiteral ("message"),
+          QString {}
+      };
+      QCommandLineOption const probe_osd5_option {
+          QStringLiteral ("probe-osd5"),
+          QStringLiteral ("Include slow OSD order 5 in --probe-message diagnostics.")
+      };
+      QCommandLineOption const probe_metrics_only_option {
+          QStringLiteral ("probe-metrics-only"),
+          QStringLiteral ("Skip OSD/BP decode attempts in --probe-message diagnostics.")
       };
       QCommandLineOption const mycall_option {
           QStringLiteral ("mycall"),
@@ -843,6 +1252,18 @@ int main (int argc, char * argv[])
           QStringLiteral ("message"),
           QString {}
       };
+      QCommandLineOption const seed_known_cq_option {
+          QStringLiteral ("seed-known-cq"),
+          QStringLiteral ("Seed the known CQ AP cache as: CALL GRID FREQ [NUTC]."),
+          QStringLiteral ("entry"),
+          QString {}
+      };
+      QCommandLineOption const seed_hash_call_option {
+          QStringLiteral ("seed-hash-call"),
+          QStringLiteral ("Seed the pack77 hash call context with one callsign."),
+          QStringLiteral ("call"),
+          QString {}
+      };
 
       parser.addOption (stages_option);
       parser.addOption (nqsoprogress_option);
@@ -864,6 +1285,7 @@ int main (int argc, char * argv[])
       parser.addOption (maxosd_option);
       parser.addOption (norder_option);
       parser.addOption (max_iter_option);
+      parser.addOption (max_ms_option);
       parser.addOption (low_thresholds_option);
       parser.addOption (subpass_option);
       parser.addOption (cycles_option);
@@ -871,14 +1293,23 @@ int main (int argc, char * argv[])
       parser.addOption (candthin_option);
       parser.addOption (no_early_option);
       parser.addOption (dump_candidates_option);
+      parser.addOption (dump_only_option);
       parser.addOption (dump_center_option);
       parser.addOption (dump_window_option);
+      parser.addOption (dump_pass_option);
+      parser.addOption (dump_max_candidates_option);
+      parser.addOption (probe_message_option);
+      parser.addOption (probe_osd5_option);
+      parser.addOption (probe_metrics_only_option);
       parser.addOption (mycall_option);
       parser.addOption (hiscall_option);
       parser.addOption (hisgrid_option);
       parser.addOption (encode_message_option);
+      parser.addOption (seed_known_cq_option);
+      parser.addOption (seed_hash_call_option);
       parser.addPositionalArgument (QStringLiteral ("wav-file"),
-                                    QStringLiteral ("Path to a 12000 Hz mono 16-bit FT8 WAV file."));
+                                    QStringLiteral ("Path to a 12000 Hz mono 16-bit FT8 WAV file."),
+                                    QStringLiteral ("wav-file [wav-file ...]"));
       parser.process (app);
 
       if (parser.isSet (encode_message_option))
@@ -912,7 +1343,7 @@ int main (int argc, char * argv[])
         }
 
       QStringList const positional = parser.positionalArguments ();
-      if (positional.size () != 1)
+      if (positional.isEmpty ())
         {
           parser.showHelp (2);
         }
@@ -937,6 +1368,7 @@ int main (int argc, char * argv[])
       int const maxosd = parse_int_option (parser, maxosd_option, QStringLiteral ("maxosd"));
       int const norder = parse_int_option (parser, norder_option, QStringLiteral ("norder"));
       int const maxIter = parse_int_option (parser, max_iter_option, QStringLiteral ("max-iter"));
+      int const maxDecodeMs = parse_int_option (parser, max_ms_option, QStringLiteral ("max-ms"));
       int const lowThresholds = parse_int_option (parser, low_thresholds_option,
                                                   QStringLiteral ("low-thresholds"));
       int const subpass = parse_int_option (parser, subpass_option, QStringLiteral ("subpass"));
@@ -947,16 +1379,36 @@ int main (int argc, char * argv[])
                                                   QStringLiteral ("candthin"));
       bool const skipEarlyPasses = parser.isSet (no_early_option);
       bool const dumpCandidates = parser.isSet (dump_candidates_option);
+      bool const dumpOnly = parser.isSet (dump_only_option);
       int const dumpCenter = parser.isSet (dump_center_option)
           ? parse_int_option (parser, dump_center_option, QStringLiteral ("dump-center"))
           : nfqso;
       int const dumpWindowHz = parse_int_option (parser, dump_window_option,
                                                  QStringLiteral ("dump-window"));
-
-      QString const wav_path = QFileInfo {positional.constFirst ()}.absoluteFilePath ();
-      WavData const wav = read_wav_file (wav_path);
+      int const dumpPassFilter = parse_int_option (parser, dump_pass_option,
+                                                   QStringLiteral ("dump-pass"));
+      int const dumpMaxCandidates = parse_int_option (parser, dump_max_candidates_option,
+                                                      QStringLiteral ("dump-max-candidates"));
 
       QTextStream out {stdout};
+      QStringList const knownCqSeeds = parser.values (seed_known_cq_option);
+      for (QString const& seed : knownCqSeeds)
+        {
+          seed_known_cq_entry (seed);
+          out << "seeded known CQ: " << seed << '\n';
+        }
+      QStringList const hashSeeds = parser.values (seed_hash_call_option);
+      for (QString const& seed : hashSeeds)
+        {
+          seed_hash_call_entry (seed);
+          out << "seeded hash call: " << seed << '\n';
+        }
+      for (int fileIndex = 0; fileIndex < positional.size (); ++fileIndex)
+        {
+      QString const wav_path = QFileInfo {positional.at (fileIndex)}.absoluteFilePath ();
+      int const effective_nutc = nutc != 0 ? nutc : infer_nutc_from_path (wav_path, nutc);
+      WavData const wav = read_wav_file (wav_path);
+
       out << "file: " << wav_path << '\n';
       out << "samples: source=" << wav.source_samples
           << " compare=" << wav.samples.size ()
@@ -976,7 +1428,7 @@ int main (int argc, char * argv[])
       out << "decoder params: nqsoprogress=" << nqsoprogress
           << " nfqso=" << nfqso
           << " nftx=" << nftx
-          << " nutc=" << nutc
+          << " nutc=" << effective_nutc
           << " nfa=" << nfa
           << " nfb=" << nfb
           << " nzhsym=" << nzhsym
@@ -992,6 +1444,7 @@ int main (int argc, char * argv[])
           << " maxosd=" << maxosd
           << " norder=" << norder
           << " maxIter=" << maxIter
+          << " maxMs=" << maxDecodeMs
           << " lowThresholds=" << lowThresholds
           << " subpass=" << subpass
           << " cycles=" << cycles
@@ -1002,26 +1455,41 @@ int main (int argc, char * argv[])
 
       if (dumpCandidates)
         {
-          dump_candidates (out, wav.samples, nfa, nfb, dumpCenter, depth,
+          dump_candidates (out, wav.samples, nfa, nfb, dumpCenter, nftx, depth,
+                           ncontest, lft8apon, lapcqonly, napwid,
                            lowThresholds, subpass, cycles, rxFreqSensitivity,
-                           candidateThin, qMax (1, dumpWindowHz));
+                           candidateThin, qMax (1, dumpWindowHz),
+                           parser.value (probe_message_option),
+                           parser.value (mycall_option).toLatin1 (),
+                           parser.value (hiscall_option).toLatin1 (),
+                           parser.isSet (probe_osd5_option),
+                           parser.isSet (probe_metrics_only_option),
+                           dumpPassFilter, dumpMaxCandidates);
+          if (dumpOnly)
+            {
+              return EXIT_SUCCESS;
+            }
         }
 
       std::vector<DecodeResult> results;
       results.reserve (static_cast<size_t> (stages.size ()));
+      bool const sequenceState = positional.size () > 1 && stages.size () == 1;
       for (int stage : stages)
         {
-          results.push_back (run_decode (wav.samples, stage, nqsoprogress, nfqso, nftx, nutc,
+          bool const resetBefore = !(sequenceState && fileIndex > 0);
+          bool const resetAfter = !(sequenceState && fileIndex + 1 < positional.size ());
+          results.push_back (run_decode (wav.samples, stage, nqsoprogress, nfqso, nftx, effective_nutc,
                                          nfa, nfb, nzhsym, depth, emedelay, ncontest,
                                          nagain, lft8apon, lapcqonly, napwid, ldiskdat,
                                          supplemental, maxosd, norder,
-                                         maxIter,
+                                         maxIter, maxDecodeMs,
                                          lowThresholds, subpass, cycles,
                                          rxFreqSensitivity, candidateThin,
                                          skipEarlyPasses,
                                          parser.value (mycall_option).toLatin1 (),
                                          parser.value (hiscall_option).toLatin1 (),
-                                         parser.value (hisgrid_option).toLatin1 ()));
+                                         parser.value (hisgrid_option).toLatin1 (),
+                                         resetBefore, resetAfter));
         }
 
       out << '\n';
@@ -1034,6 +1502,8 @@ int main (int argc, char * argv[])
       for (size_t i = 1; i < results.size (); ++i)
         {
           print_comparison (out, results.front (), results[i]);
+        }
+
         }
 
       return EXIT_SUCCESS;

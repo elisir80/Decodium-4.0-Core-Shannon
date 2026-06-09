@@ -3626,6 +3626,11 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   connect (&m_saveWAVWatcher, &QFutureWatcher<QString>::finished, [this] {
       // extract the promise from the future
       auto const& result = m_saveWAVWatcher.future ().result ();
+      if (qEnvironmentVariableIsSet ("DECODIUM_FORCE_SAVE_ALL")) {
+        debugToFile (result.isEmpty ()
+                     ? QStringLiteral ("ft8SaveWav done ok")
+                     : QStringLiteral ("ft8SaveWav error %1").arg (result));
+      }
       if (!result.isEmpty ())   // error
         {
           MessageBox::critical_message (this, tr("Error Writing WAV File"), result);
@@ -6613,6 +6618,11 @@ void MainWindow::fixStop()
       m_hsymStop=50;
       m_earlyDecode2=47;
     }
+    if (!m_diskData) {
+      // Keep the final live pass at the slot edge. Delaying one more chunk can
+      // cross the FT8 boundary and timestamp the old audio as the next slot.
+      m_hsymStop = qMax (m_hsymStop, 52);
+    }
   } else if (m_mode=="FT2") {
     m_hsymStop=12;
   } else if (m_mode=="FT4") {
@@ -6654,7 +6664,7 @@ void MainWindow::dataSink(qint64 frames)
     }
 
   bool const snapshotFt8LiveAudio =
-      m_mode == "FT8" && !m_diskData && m_embeddedShellMode && !m_multithreadFT8;
+      m_mode == "FT8" && !m_diskData && m_embeddedShellMode;
   if (snapshotFt8LiveAudio) {
     int constexpr kFt8SlotSamples {15 * RX_SAMPLE_RATE};
     if (m_ft8LiveAudioSnapshot.size () != kFt8SlotSamples) {
@@ -6832,8 +6842,10 @@ void MainWindow::dataSink(qint64 frames)
   }
   // end of ft8md
   
+  bool const embeddedFt8LiveDecode =
+      m_mode == "FT8" && m_embeddedShellMode && !m_diskData;
   bool const embeddedFt8SingleThreadDecode =
-      m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8;
+      embeddedFt8LiveDecode && !m_multithreadFT8;
 
   bool bCallDecoder=false;
 
@@ -6842,7 +6854,7 @@ void MainWindow::dataSink(qint64 frames)
   if(m_ihsym==m_hsymStop) bCallDecoder=true;
 
   if(m_mode=="FT8" && !m_diskData && !embeddedFt8SingleThreadDecode
-     && !(m_multithreadFT8 && m_ft8DecoderStart>1)) {  //ft8md Try to call MTD two times when "Very early" has been selected
+     && (embeddedFt8LiveDecode || !(m_multithreadFT8 && m_ft8DecoderStart>1))) {  //ft8md Try to call MTD two times when "Very early" has been selected
     if(m_ihsym==m_earlyDecode) bCallDecoder=true;
     if(m_ihsym==m_earlyDecode2 && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) bCallDecoder=true;
   }
@@ -6948,20 +6960,32 @@ void MainWindow::dataSink(qint64 frames)
     dec_data.params.nagain=0;
     dec_data.params.nagainfil=0;	
     dec_data.params.nzhsym=m_hsymStop;
-    if(m_mode=="FT8" and m_ihsym==m_earlyDecode and !m_diskData && !embeddedFt8SingleThreadDecode && !(m_multithreadFT8 && m_ft8DecoderStart>1)) dec_data.params.nzhsym=m_earlyDecode;
+    if(m_mode=="FT8" and m_ihsym==m_earlyDecode and !m_diskData && !embeddedFt8SingleThreadDecode
+       && (embeddedFt8LiveDecode || !(m_multithreadFT8 && m_ft8DecoderStart>1))) dec_data.params.nzhsym=m_earlyDecode;
     if(m_mode=="FT8" and m_ihsym==m_earlyDecode2 and !m_diskData && !embeddedFt8SingleThreadDecode && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) dec_data.params.nzhsym=m_earlyDecode2;
     QDateTime now {QDateTime::currentDateTimeUtc ()};
     m_dateTime = now.toString ("yyyy-MMM-dd hh:mm");
     if(m_mode!="WSPR") {
       if (m_mode=="FT8" && m_multithreadFT8 && m_ihsym>47) last=now;  // ft8md
       if (!m_diskData) {
-        m_dateTimeSeqStart = qt_truncate_date_time_to (now, m_TRperiod * 1.e3);
+        int const periodMs = qMax (1000, qRound (m_TRperiod * 1000.0));
+        QDateTime sequenceStart = qt_truncate_date_time_to (now, periodMs);
+        bool const embeddedFt8FullSlot =
+            m_mode == "FT8"
+            && m_embeddedShellMode
+            && dec_data.params.nzhsym >= m_hsymStop
+            && m_ihsym == m_hsymStop;
+        int const msInPeriod = now.time ().msecsSinceStartOfDay () % periodMs;
+        if (embeddedFt8FullSlot && msInPeriod < 1500) {
+          sequenceStart = sequenceStart.addMSecs (-periodMs);
+        }
+        m_dateTimeSeqStart = sequenceStart;
       }
       decode(); //Start decoder
     }
 
     if(m_mode=="FT8" and !embeddedFt8SingleThreadDecode
-       and !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2))
+       and (embeddedFt8LiveDecode || !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2)))
        && (m_ihsym==m_earlyDecode or m_ihsym==m_earlyDecode2)) return;
     if (!m_diskData)
       {
@@ -6970,7 +6994,11 @@ void MainWindow::dataSink(qint64 frames)
         if (!(m_mode=="FT8" && (m_multithreadFT8 || liveEmbeddedFt8)))
           Q_EMIT reset_audio_input_stream (true); // reports dropped samples
       }
-    if(!m_diskData and (m_saveAll or m_saveDecoded or m_mode=="WSPR")) {
+    bool const diagnosticSaveAll =
+        m_mode == "FT8"
+        && !m_diskData
+        && qEnvironmentVariableIsSet ("DECODIUM_FORCE_SAVE_ALL");
+    if(!m_diskData and (m_saveAll or diagnosticSaveAll or m_saveDecoded or m_mode=="WSPR")) {
       //Always save unless "Save None"; may delete later
       if(m_TRperiod < 60) {
         int n=fmod(double(now.time().second()),m_TRperiod);
@@ -6987,6 +7015,11 @@ void MainWindow::dataSink(qint64 frames)
       if(m_mode=="FT4") samples=21*3456;
       // the following is potential a threading hazard - not a good
       // idea to pass pointer to be processed in another thread
+      if (diagnosticSaveAll) {
+        debugToFile (QString {"ft8SaveWav start path:%1 samples:%2"}
+                       .arg (m_fnameWE + ".wav")
+                       .arg (samples));
+      }
       m_saveWAVWatcher.setFuture (QtConcurrent::run (std::bind (&MainWindow::save_wave_file,
             this, m_fnameWE, &dec_data.d2[0], samples, m_config.my_callsign(),
             m_config.my_grid(), m_mode, m_nSubMode, m_freqNominalPeriod, m_hisCall, m_hisGrid)));
@@ -11730,7 +11763,6 @@ void MainWindow::decode()                                       //decode()
     bool const ft8MayPreempt =
         (m_mode == "FT8"
          && m_embeddedShellMode
-         && !m_multithreadFT8
          && m_ft8DecodePending
          && m_ft8DecodeWorker
          && m_ft8DecodeThread.isRunning ()
@@ -11772,7 +11804,10 @@ void MainWindow::decode()                                       //decode()
         }
       if (pendingUtc == m_ft8DecodePendingUtc)
         {
-          return;
+          if (!queueEmbeddedFt8FullSlot)
+            {
+              return;
+            }
         }
 
       if (m_ft8DecodeDeepFollowupPending)
@@ -11814,6 +11849,9 @@ void MainWindow::decode()                                       //decode()
   }
   if (preferUniformCqDecode) {
     dec_data.params.lapcqonly = true;
+  }
+  if (m_mode == "FT8" && !m_diskData && !preferUniformCqDecode) {
+    dec_data.params.lapcqonly = false;
   }
   if(!m_dataAvailable or m_TRperiod==0.0) return;
   ui->DecodeButton->setChecked (true);
@@ -13184,7 +13222,7 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   int const snapshotSamples = qBound (0, m_ft8LiveAudioSnapshotSamples,
                                       qMin (kFt8SlotSamples, m_ft8LiveAudioSnapshot.size ()));
   bool const useLiveAudioSnapshot =
-      m_embeddedShellMode && !m_diskData && !m_multithreadFT8 && snapshotSamples > 0;
+      m_embeddedShellMode && !m_diskData && snapshotSamples > 0;
   request.availableSamples = useLiveAudioSnapshot
       ? snapshotSamples
       : qBound (0, int (dec_data.params.kin), kFt8SlotSamples);
@@ -13204,7 +13242,7 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
     int const minimumFreshSamples = qRound (expectedSamples * 0.88);
     request.hasFreshAudio = request.availableSamples >= minimumFreshSamples;
   }
-  if (m_embeddedShellMode && !m_diskData && !m_multithreadFT8) {
+  if (m_embeddedShellMode && !m_diskData) {
     if (request.ndepth >= 4) {
       if (request.nzhsym == 47) {
         request.lft8apon = 1;
@@ -13233,27 +13271,36 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
 
 decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodium::ft8::DecodeRequest request) const
 {
-  if (!(m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+  if (!(m_embeddedShellMode && !m_diskData)) {
     return request;
   }
 
   int const baseDepth = request.ndepth;
   if (request.nzhsym >= 50) {
     request.ndepth = qMin (request.ndepth, 3);
-    if (baseDepth >= 4) {
-      request.maxDecodeMs = 3800;
-    } else if (baseDepth >= 3) {
-      request.maxDecodeMs = 3200;
+    if (baseDepth >= 3) {
+      request.maxDecodeMs = 6500;
     } else {
-      request.maxDecodeMs = 2600;
+      request.maxDecodeMs = 3600;
     }
+    request.lowThresholds = false;
+    request.subpass = false;
+    request.nft8Cycles = 1;
+    request.nft8RxFreqSensitivity = 1;
+    request.lft8apon = baseDepth >= 3 ? 1 : 0;
   } else {
     request.ndepth = qMin (request.ndepth, 2);
     request.maxDecodeMs = baseDepth >= 4 ? 2400 : 1800;
+    request.lowThresholds = false;
+    request.subpass = false;
+    request.nft8Cycles = 1;
+    request.nft8RxFreqSensitivity = 1;
+    request.lft8apon = 0;
   }
 
-  // Fast live pass: no supplemental/OSD helpers. A cancellable deep follow-up
-  // is queued separately when there is enough slack before the next slot.
+  // Main live pass: keep the baseline decoder deterministic and timely.
+  // Optional weak-signal helpers run only in the cancellable follow-up, which
+  // may overrun the next FT8 boundary slightly without driving sequencing.
   request.supplemental = false;
   request.neuralSyncEnabled = false;
   request.turboFeedbackEnabled = false;
@@ -13263,14 +13310,15 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodi
 
 decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8DeepFollowupRequest (decodium::ft8::DecodeRequest request) const
 {
-  if (!(m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+  if (!(m_embeddedShellMode && !m_diskData)) {
     return request;
   }
 
-  request.supplemental = request.ndepth >= 4;
-  if (request.ndepth >= 4) {
-    request.maxDecodeMs = 6500;
-  } else if (request.ndepth >= 3) {
+  request.ndepth = qMin (request.ndepth, 3);
+  request.supplemental = false;
+  request.osdFollowup = request.ndepth >= 3;
+  request.turboFeedbackEnabled = false;
+  if (request.ndepth >= 3) {
     request.maxDecodeMs = 5200;
   } else {
     request.maxDecodeMs = 0;
@@ -13280,7 +13328,7 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8DeepFollowupRequest (de
 
 bool MainWindow::shouldPrepareEmbeddedFt8DeepFollowup (decodium::ft8::DecodeRequest const& request) const
 {
-  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8)) {
+  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData)) {
     return false;
   }
   if (!request.hasFreshAudio || request.nzhsym < 50 || request.maxDecodeMs < 0) {
@@ -13333,26 +13381,37 @@ bool MainWindow::dispatchQueuedEmbeddedFt8DeepFollowup ()
   m_ft8DeepFollowupQueued = false;
   m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
 
-  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData && !m_multithreadFT8)
+  if (!(m_mode == "FT8" && m_embeddedShellMode && !m_diskData)
       || !request.hasFreshAudio || request.maxDecodeMs <= 0) {
     return false;
   }
 
-  int const slackMs = msUntilNextEmbeddedFt8FullDecodeTrigger ();
-  int const safetyMs = m_transmitting ? 2200 : 900;
-  if (m_transmitting || slackMs < request.maxDecodeMs + safetyMs) {
+  int const periodMs = qMax (1000, qRound (m_TRperiod * 1000.0));
+  int const msInPeriod = QDateTime::currentDateTimeUtc ().time ().msecsSinceStartOfDay () % periodMs;
+  int constexpr kFt8DeepLatestOverrunMs = 6000;
+  int constexpr kFt8DeepDispatchSafetyMs = 250;
+  int constexpr kFt8DeepMinUsefulBudgetMs = 2400;
+  int constexpr kFt8DeepMaxLiveBudgetMs = 5200;
+  int const lateBudgetMs = kFt8DeepLatestOverrunMs - msInPeriod - kFt8DeepDispatchSafetyMs;
+  int const nextTriggerBudgetMs = msUntilNextEmbeddedFt8FullDecodeTrigger () - kFt8DeepDispatchSafetyMs;
+  int const budgetMs = qBound (0,
+                               qMin (request.maxDecodeMs,
+                                     qMin (lateBudgetMs, nextTriggerBudgetMs)),
+                               kFt8DeepMaxLiveBudgetMs);
+  if (m_transmitting || budgetMs < kFt8DeepMinUsefulBudgetMs) {
     debugToFile (QString {"ft8Decode   skip deep follow-up utc:%1 maxMs:%2 slackMs:%3 tx:%4"}
                    .arg (request.nutc)
                    .arg (request.maxDecodeMs)
-                   .arg (slackMs)
+                   .arg (nextTriggerBudgetMs)
                    .arg (m_transmitting ? 1 : 0));
     return false;
   }
 
+  request.maxDecodeMs = budgetMs;
   debugToFile (QString {"ft8Decode   start deep follow-up utc:%1 maxMs:%2 slackMs:%3"}
                  .arg (request.nutc)
                  .arg (request.maxDecodeMs)
-                 .arg (slackMs));
+                 .arg (nextTriggerBudgetMs));
   dispatchFt8DecodeRequest (std::move (request), true);
   return true;
 }
@@ -15754,7 +15813,10 @@ void MainWindow::pskPost (DecodedText const& decodedtext)
 
 void MainWindow::killFile ()
 {
-  if (m_fnameWE.size () && !(m_saveAll || (m_saveDecoded && m_bDecoded))) {
+  bool const diagnosticSaveAll =
+      m_mode == "FT8"
+      && qEnvironmentVariableIsSet ("DECODIUM_FORCE_SAVE_ALL");
+  if (m_fnameWE.size () && !(m_saveAll || diagnosticSaveAll || (m_saveDecoded && m_bDecoded))) {
     QFile f1 {m_fnameWE + ".wav"};
     if(f1.exists()) f1.remove();
     if(m_mode=="WSPR" or m_mode=="FST4W") {
@@ -29053,6 +29115,28 @@ void MainWindow::processFst4DecodedRows (quint64 serial, QStringList const& rows
 void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
 {
   if (serial != m_ft8DecodeSerial) {
+    bool const timelyLateLiveFt8 =
+        m_TRperiod <= 0.0
+        || msUntilNextEmbeddedFt8FullDecodeTrigger () > 3500;
+    bool const acceptLateLiveFt8 =
+        m_mode == "FT8"
+        && !m_diskData
+        && !rows.isEmpty ()
+        && timelyLateLiveFt8
+        && serial < m_ft8DecodeSerial
+        && (m_ft8DecodeSerial - serial) <= 4;
+    if (acceptLateLiveFt8) {
+      debugToFile (QString {"ft8Decode   accept late serial:%1 current:%2 rows:%3"}
+                     .arg (serial)
+                     .arg (m_ft8DecodeSerial)
+                     .arg (rows.size ()));
+      for (auto const& row : rows) {
+        if (!row.trimmed ().isEmpty ()) {
+          m_decodedTransportQueue.enqueue (row.toUtf8 ());
+        }
+      }
+      readFromStdout ();
+    }
     return;
   }
 

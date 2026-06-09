@@ -28,6 +28,7 @@ extern "C"
                                             int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
+  void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_ft8_async_decode_stage4_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nftx,
                                       int* nutc, int* nfa, int* nfb, int* nzhsym, int* ndepth,
                                       float* emedelay, int* ncontest, int* nagain,
@@ -221,11 +222,12 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
+  ftx_ft8_stage4_apply_hash_seed_cache_c ();
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
   // The promoted C++ Stage4 path does not implement the full JTDX ft8b
-  // subpass engine.  Passing JTDX-style cycles/subpass settings into this
+  // subpass engine. Passing JTDX-style cycles/subpass settings into this
   // shorter core increases live decode time enough to hit deadlines and has
-  // measured lower yield on crowded slots.  Keep the live core on the proven
+  // measured lower yield on crowded slots. Keep the live core on the proven
   // baseline profile until the full subpass path is ported.
   constexpr bool effectiveLowThresholds {false};
   constexpr bool effectiveSubpass {false};
@@ -240,7 +242,9 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   ftx_ft8_stage4_set_supplemental_c (supplementalRequested ? 1 : 0);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
   ftx_ft8_stage4_set_ldpc_max_iter_c (request.turboFeedbackEnabled ? 50 : 30);
-  bool const wantOsd = (supplementalRequested && request.ndepth >= 3) || request.neuralSyncEnabled;
+  bool const wantOsd = request.osdFollowup
+                       || (supplementalRequested && request.ndepth >= 3)
+                       || request.neuralSyncEnabled;
   if (supplementalRequested && request.ndepth >= 4)
     {
       ftx_ft8_stage4_set_ldpc_osd_c (3, 4);
