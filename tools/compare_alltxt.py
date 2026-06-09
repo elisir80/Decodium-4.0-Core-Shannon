@@ -64,6 +64,13 @@ def parse_time_token(value: str) -> dt.time:
     return dt.datetime.strptime(raw, "%H%M%S").time()
 
 
+def normalize_message(message: str) -> str:
+    tokens = message.upper().split()
+    while tokens and tokens[-1] in MODE_MARKERS:
+        tokens.pop()
+    return " ".join(tokens)
+
+
 def parse_row(line: str, fallback_date: dt.date) -> Row | None:
     time_match = TIME_RE.match(line)
     if not time_match:
@@ -92,7 +99,9 @@ def parse_row(line: str, fallback_date: dt.date) -> Row | None:
     if message_start >= len(parts):
         return None
 
-    message = " ".join(parts[message_start:]).strip()
+    message = normalize_message(" ".join(parts[message_start:]))
+    if not message:
+        return None
     return Row(
         timestamp=dt.datetime.combine(row_date, row_time),
         snr=snr,

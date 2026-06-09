@@ -38,7 +38,7 @@ namespace
   constexpr int kDecodedChars {37};
   constexpr int kFt2StableDspStage {7};
   char constexpr kFt2DspStageEnv[] {"DECODIUM_FT2_CPP_DSP_STAGE"};
-  constexpr int kMaxDecodeThreads {24};
+  [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
   void apply_decode_thread_limit (int threads)
   {

@@ -2219,9 +2219,23 @@ private:
     bool m_ft8EarlyDecode41Sent {false};
     bool m_ft8EarlyDecode47Sent {false};
     QSet<quint64> m_ft8EarlyDecodeSerials;
-    // 1.0.299 — serial dei deep follow-up lanciati durante TX: aggiornano SOLO la
-    // decode-list (UI), MAI l'auto-seq (niente doppio advanceQsoState/checkAndStartPeriodicTx).
+    // Serial dei deep follow-up list-only: aggiornano SOLO la decode-list (UI),
+    // MAI l'auto-seq (niente doppio advanceQsoState/checkAndStartPeriodicTx).
     QSet<quint64> m_ft8DeepInTxSerials;
+    struct Ft8PendingDeepFollowup {
+        QVector<short> audio;
+        int nutc {0};
+        qint64 slotIndex {-1};
+        int decodeDepth {1};
+        int decodeQsoProgress {0};
+        int cqHint {0};
+        bool ft8ApEnabled {false};
+        bool inTx {false};
+        quint64 sessionId {0};
+        QString utcToken;
+        qint64 latestCompleteMs {0};
+    };
+    QHash<quint64, Ft8PendingDeepFollowup> m_ft8PendingDeepFollowups;
     QHash<quint64, quint64> m_decodeSessionBySerial;
     qint64 m_ft4EarlyDecodeSlot {-1};
     bool m_ft4EarlyDecodeSent {false};
@@ -2963,6 +2977,7 @@ private:
     bool persistDecodeHistoryEntry(QVariantMap const& entry);
     void enqueuePersistDecode(QVariantMap const& entry);
     void stopPersistenceWorker();
+    void seedFt8KnownCqCacheFromAllTxt();
 
     void refreshDecodeListDxcc();
     QStringList parseFt8Row(const QString& row) const;
@@ -3018,7 +3033,8 @@ private:
     void queueFt8DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint, int nzhsym,
-                               bool ft8ApEnabled, bool suppressUiRows);
+                               bool ft8ApEnabled, bool suppressUiRows,
+                               bool listOnlyRows = false, int maxDecodeMsOverride = 0);
     void queueFt4DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint);

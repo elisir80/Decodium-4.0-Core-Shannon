@@ -43,6 +43,7 @@ struct DecodeRequest
   bool lowThresholds {false};
   bool subpass {false};
   bool supplemental {false};
+  bool osdFollowup {false};
   bool coherentAvgEnabled {false};
   bool neuralSyncEnabled {false};
   bool turboFeedbackEnabled {false};
