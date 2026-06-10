@@ -23990,6 +23990,11 @@ bool DecodiumBridge::decodeIsFreshForCqAutoReply(const QString& utcToken, QStrin
     int const ageSeconds = signedUtcSecondDelta(decodeSeconds, nowSeconds);
     int const periodMs = periodMsForMode(m_mode);
     int const periodSeconds = qMax(1, (periodMs + 999) / 1000);
+    // NOTA asimmetria intenzionale: la tolleranza predates sopra vale per FT2 async
+    // anche SENZA m_autoCqRepeat, mentre il maxAge stretto (6s) richiede autoCqRepeat.
+    // Nel TX6-rearm manuale async quindi un decode fino a ~20s di eta' che precede
+    // l'arm di <=6s viene accettato: e' il flusso "il partner mi ha chiamato pochi
+    // secondi fa, ri-armo il CQ e gli rispondo" — voluto, non stringere.
     int const maxAgeSeconds =
         (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled && m_autoCqRepeat)
             ? qMax(6, periodSeconds + 2)

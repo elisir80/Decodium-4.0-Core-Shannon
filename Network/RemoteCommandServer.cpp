@@ -44,6 +44,17 @@ QString normalize_grid(QString grid)
   return grid.trimmed().toUpper();
 }
 
+bool plausible_target_call(QString const& call)
+{
+  // Sanity gate sul call remoto: charset radioamatoriale, lunghezza ragionevole
+  // e adiacenza lettera-cifra (come Radio::is_callsign). Loose di proposito:
+  // accetta compound (IU8LMC/P) e special event, rigetta stringhe arbitrarie
+  // che finirebbero in dxCallEntry/genStdMsgs con auto TX attivo.
+  static QRegularExpression const charset_re {QStringLiteral("^[A-Z0-9/]{3,13}$")};
+  static QRegularExpression const adjacency_re {QStringLiteral("[0-9][A-Z]|[A-Z][0-9]")};
+  return call.contains(charset_re) && call.contains(adjacency_re);
+}
+
 bool is_loopback_origin_host(QString const& host)
 {
   auto normalized = host.trimmed().toLower();
@@ -4077,6 +4088,11 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
       if (targetCall.isEmpty())
         {
           result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_request"), QStringLiteral("target_call is required"));
+          return result;
+        }
+      if (!plausible_target_call(targetCall))
+        {
+          result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_request"), QStringLiteral("target_call is not a plausible callsign"));
           return result;
         }
 
