@@ -26332,6 +26332,22 @@ void MainWindow::postDecode (bool is_new, DecodedText decoded_text)      //avt 1
   if (is_new && m_remoteCommandServer)
     {
       m_remoteCommandServer->publishBandActivityLine(decode);
+      // Cache call -> tempo decode per derivare la parity dello slot quando
+      // arriva un select_caller remoto (vedi onRemoteSelectCallerDue).
+      QString deCall;
+      QString deGrid;
+      decoded_text.deCallAndGrid(deCall, deGrid);
+      if (!deCall.isEmpty())
+        {
+          if (m_remoteCallerDecodeTimes.size() >= 500)
+            {
+              // Trim grezzo: svuota e riparti, evita crescita illimitata in sessioni lunghe.
+              m_remoteCallerDecodeTimes.clear();
+            }
+          m_remoteCallerDecodeTimes.insert(deCall.toUpper(),
+                                           qMakePair(decoded_text.timeInSeconds(),
+                                                     QDateTime::currentMSecsSinceEpoch()));
+        }
     }
 
   if (!is_new) return;    //avt 8/22/23
@@ -32088,7 +32104,51 @@ void MainWindow::onRemoteSelectCallerDue(QString const& commandId, QString const
   on_dxCallEntry_editingFinished();
   on_genStdMsgsPushButton_clicked();
 
-  if (m_mode != "WSPR" && m_mode != "FST4W")
+  // Il doppio clic locale imposta m_txFirst dalla parity dello slot del decode
+  // (vedi mainwindow.cpp doubleClickOnCall). Il comando remoto non porta il tempo
+  // del decode, quindi lo recuperiamo dalla cache popolata in postDecode: senza
+  // questo, in FT8/FT4 ~50% delle risposte remote trasmette NEL periodo del
+  // chiamante (doubling) e il QSO non parte mai.
+  if (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2")
+    {
+      auto const it = m_remoteCallerDecodeTimes.constFind(mapCall);
+      if (it != m_remoteCallerDecodeTimes.constEnd()
+          && (QDateTime::currentMSecsSinceEpoch() - it->second) <= 300000)
+        {
+          int clickedNmod;
+          if (m_TRperiod < 5.0)
+            {
+              int period = (int)round(double(it->first) / m_TRperiod);
+              clickedNmod = period % 2;
+            }
+          else
+            {
+              clickedNmod = fmod(double(it->first), 2.0 * m_TRperiod);
+            }
+          bool clickedTxFirst = (clickedNmod != 0);
+          if (SpecOp::HOUND == m_specOp) clickedTxFirst = false;
+          if (SpecOp::FOX == m_specOp) clickedTxFirst = true;
+          if (m_txFirst != clickedTxFirst)
+            {
+              debugToFile(QString {"remoteSelectCaller slot override old:%1 new:%2 call:%3"}
+                            .arg(m_txFirst ? 1 : 0)
+                            .arg(clickedTxFirst ? 1 : 0)
+                            .arg(mapCall));
+            }
+          m_txFirst = clickedTxFirst;
+          ui->txFirstCheckBox->setChecked(m_txFirst);
+        }
+      else
+        {
+          debugToFile(QString {"remoteSelectCaller no decode time cached for:%1 (parity unchanged)"}
+                        .arg(mapCall));
+        }
+    }
+
+  // Auto TX solo nei modi QSO: esclusi i beacon (WSPR/FST4W) e i modi di
+  // test/calibrazione (ECHO/FREQCAL), dove auto_tx_mode keyerebbe TX ciclico.
+  if (m_mode != "WSPR" && m_mode != "FST4W"
+      && m_mode != "Echo" && m_mode != "FreqCal")
     {
       if (!m_auto)
         {

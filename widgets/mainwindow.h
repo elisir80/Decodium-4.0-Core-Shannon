@@ -1539,6 +1539,7 @@ private:
   QPointer<RemoteCommandServer> m_remoteCommandServer;
   QCheckBox * m_autoSpotCheckBox {nullptr};
   bool m_remoteWaterfallStreamingEnabled {false};
+  QHash<QString, QPair<unsigned, qint64>> m_remoteCallerDecodeTimes; // call -> (timeInSeconds del decode, wallclock ms)
   QString m_mapLastClickCall;
   qint64 m_mapLastClickMs {0};
   QString m_pendingAsyncL2MessageLine;

@@ -4082,6 +4082,15 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
 
       // Risposta a un chiamante consentita in qualsiasi modo della famiglia FT:
       // lo scheduling usa state.periodMs, che riflette il ciclo del modo attivo.
+      // Restano esclusi i modi beacon/test, dove auto TX ciclico non ha senso.
+      auto const currentMode = state.mode.trimmed().toUpper();
+      if (currentMode == QStringLiteral("WSPR") || currentMode == QStringLiteral("FST4W")
+          || currentMode == QStringLiteral("ECHO") || currentMode == QStringLiteral("FREQCAL"))
+        {
+          result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_state"), QStringLiteral("select_caller not available in beacon/test modes"));
+          return result;
+        }
+
       qint64 periodMs = state.periodMs;
       if (periodMs <= 0)
         {
