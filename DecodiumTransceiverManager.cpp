@@ -906,8 +906,22 @@ void DecodiumTransceiverManager::abortConnectingRigAfterTimeout(Transceiver* xcv
     }
 
     thread->requestInterruption();
+    // Tenta lo stop graceful PRIMA del terminate: se il worker ha raggiunto il
+    // suo event loop (es. start() lento ma completato dopo lo scadere del
+    // watchdog), lo stop accodato chiude socket/sessione (HRD, rete) e il
+    // retry di connessione successivo non trova la porta occupata. NON usare
+    // BlockingQueuedConnection qui: se il worker e' davvero appeso dentro
+    // start() il main thread resterebbe bloccato indefinitamente. Se lo stop
+    // accodato non viene mai processato, si termina come prima (con grace
+    // estesa 250->1500ms per dare tempo allo stop di girare).
+    if (xcv) {
+        QMetaObject::invokeMethod(xcv, [xcv]() {
+            xcv->stop();
+        }, Qt::QueuedConnection);
+    }
     thread->quit();
-    if (!thread->wait(250)) {
+    if (!thread->wait(1500)) {
+        qWarning().noquote() << "[CATDBG] Connect watchdog: graceful stop timed out, terminating thread";
         thread->terminate();
         thread->wait(1000);
     }
