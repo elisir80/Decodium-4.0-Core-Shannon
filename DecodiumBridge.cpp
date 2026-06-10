@@ -32146,17 +32146,26 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             m_decodeUtcTokenBySerial.insert(deepSerial, pendingDeep.utcToken);
             m_decodeSessionBySerial.insert(deepSerial, m_decodeSessionId);
 
-            bridgeLog(QStringLiteral("FT8 final deep followup dispatch: triggerSerial=%1 serial=%2 depth=%3 ft8ap=%4 maxMs=%5 listOnly=1%6")
+            // 1.0.392 - fix regressione upstream 1.0.389: il deep follow-up FUORI TX
+            // deve passare per il processing completo (auto-seq, resume, MAM, alert)
+            // come in 1.0.299: la reply del partner debole spesso esiste SOLO nel
+            // deep (AP/depth-4, il fast gira a depth<=2 senza AP). Le righe gia'
+            // decodificate dal fast sono dedupate da recentDecodeDedupKeys ->
+            // skippedDuplicateDecodeKeys, quindi niente doppio autoSequenceStep.
+            // List-only resta SOLO per il follow-up in TX (niente avanzamenti di
+            // stato mentre trasmettiamo).
+            bridgeLog(QStringLiteral("FT8 final deep followup dispatch: triggerSerial=%1 serial=%2 depth=%3 ft8ap=%4 maxMs=%5 listOnly=%6%7")
                           .arg(serial)
                           .arg(deepSerial)
                           .arg(pendingDeep.decodeDepth)
                           .arg(pendingDeep.ft8ApEnabled ? 1 : 0)
                           .arg(budgetMs)
+                          .arg(pendingDeep.inTx ? 1 : 0)
                           .arg(pendingDeep.inTx ? QStringLiteral(" inTx=1") : QString()));
             queueFt8DecodeRequest(pendingDeep.audio, deepSerial, pendingDeep.nutc,
                                   pendingDeep.slotIndex, pendingDeep.decodeDepth,
                                   pendingDeep.decodeQsoProgress, pendingDeep.cqHint,
-                                  50, pendingDeep.ft8ApEnabled, false, true, budgetMs);
+                                  50, pendingDeep.ft8ApEnabled, false, pendingDeep.inTx, budgetMs);
         }
     }
 }
