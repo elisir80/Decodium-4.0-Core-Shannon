@@ -1956,7 +1956,13 @@ static int replyTxPeriodForClickedDecode(QString const& mode, QString const& tim
     if (pMs <= 0) {
         return fallbackTxPeriod != 0 ? 1 : 0;
     }
-    int const dxPidx = (msgSecond * 1000) / pMs;
+    // P0 fix (log ZL3DMH/ZL1BW 2026-06-11): la label e' troncata ai secondi
+    // interi -> lo slot FT2 :18.75 diventa "18" e 18000/3750=4 (pari) invece
+    // di 5 (dispari): parita' di mira sbagliata in 12 posizioni su 16 -> la
+    // risposta atterra nello stesso sub-slot del CQer (sordita' reciproca,
+    // 93% di overlap RF misurato). Round-to-nearest: identico al fix FT4
+    // documentato sopra; corregge tutte le 16 posizioni e copre anche MSK144.
+    int const dxPidx = (msgSecond * 1000 + pMs / 2) / pMs;
     return dxPidx % 2;
 }
 
@@ -25616,6 +25622,42 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         bool const isOurPeriod = bridgeTxPeriodIsEven(m_txPeriod) ? isEven : !isEven;
         if (!isOurPeriod) return;
 
+        // P0-2 (log ZL 2026-06-11): il phase-lock breaker viveva solo nel ramo
+        // TX2-5; TX1 (risposta double-click period-gated) e TX6 (CQ) non
+        // valutavano MAI la parita' vs l'anchor del partner (ZL1BW: 11 slot
+        // TX1 in collisione, zero valutazioni). Qui il gate e' m_txPeriod:
+        // la correzione giusta e' FLIPPARLO, non un defer.
+        // P0-3: chi RISPONDE (TX1) cede SEMPRE - il CQer non decodifica nulla
+        // durante la collisione, non ha anchor e non puo' mai cedere lui. Il
+        // CQer (TX6) cede solo da call minore (caso simmetrico CQ-vs-CQ, dove
+        // entrambi decodificano il CQ altrui e hanno l'anchor).
+        if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled
+            && m_ft2AsyncPartnerSlotMs > 0 && m_ft2AsyncPartnerSlotSetMs > 0
+            && m_txRetryCount >= 2
+            && (QDateTime::currentMSecsSinceEpoch() - m_ft2AsyncPartnerSlotSetMs) <= 60000) {
+            qint64 const pgPartnerSlot = m_ft2AsyncPartnerSlotMs / static_cast<qint64>(pMs);
+            qint64 const pgOurSlot = correctedUtcEpochMs() / static_cast<qint64>(pMs);
+            bool const pgSameParity = ((((pgOurSlot - pgPartnerSlot) % 2) + 2) % 2) == 0;
+            if (pgSameParity) {
+                QString const pgMyCall = m_callsign.trimmed().toUpper();
+                QString const pgDxCall = m_dxCall.trimmed().toUpper();
+                bool const pgYield = (m_currentTx == 1)
+                    || pgDxCall.isEmpty()
+                    || pgMyCall < pgDxCall;
+                if (pgYield) {
+                    int const pgNewPeriod = (m_txPeriod != 0) ? 0 : 1;
+                    bridgeLog(QStringLiteral("FT2 phase-lock breaker (period-gated): stessa fase del partner per %1 retry su TX%2 -> flip txPeriod %3->%4 (ourSlot=%5 partnerSlot=%6)")
+                                  .arg(m_txRetryCount).arg(m_currentTx)
+                                  .arg(m_txPeriod).arg(pgNewPeriod)
+                                  .arg(pgOurSlot).arg(pgPartnerSlot));
+                    setTxPeriod(pgNewPeriod);
+                    return;
+                }
+                bridgeLog(QStringLiteral("FT2 phase-lock breaker (period-gated): stessa fase su TX%1 ma tengo la parita' (CQer call maggiore, retry=%2)")
+                              .arg(m_currentTx).arg(m_txRetryCount));
+            }
+        }
+
         int const elapsedMs = static_cast<int>(msNow % static_cast<qint64>(pMs));
         // 1.0.318 — P2 fix: questo call site usa effectiveRelaxLatestCap() (helper 1.0.326 B4)
         int const latestStartMs = latestD3CompatibleSyncTxStartMs(m_mode, pMs, effectiveRelaxLatestCap());
@@ -25740,8 +25782,15 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                     // deadlock resta come pre-fix (non peggioriamo nulla).
                     QString const tieMyCall = m_callsign.trimmed().toUpper();
                     QString const tieDxCall = m_dxCall.trimmed().toUpper();
+                    // P0-3 (log ZL 2026-06-11): a TX<=2 siamo ancora in aggancio -
+                    // il partner non ha mai risposto a noi (se avesse risposto
+                    // saremmo a TX3+). In collisione e' LUI a non sentirci: il
+                    // CQer non ha anchor e non puo' cedere -> cediamo noi SEMPRE,
+                    // anche da call maggiore (deadlock#1: ZL3DMH "teneva" 3 volte
+                    // contro un CQer sordo). Call-order resta per TX3-5 simmetrico.
                     bool const iYield = tieDxCall.isEmpty()
-                        || tieMyCall < tieDxCall;
+                        || tieMyCall < tieDxCall
+                        || m_currentTx <= 2;
                     if (!iYield) {
                         bridgeLog(QStringLiteral("FT2 phase-lock breaker: stessa fase ma tengo la parita' (tie-break call maggiore, retry=%1)")
                                       .arg(m_txRetryCount));
