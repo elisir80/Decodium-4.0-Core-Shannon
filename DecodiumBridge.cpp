@@ -25282,7 +25282,16 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         bool const retryCapAlreadyExceeded =
             m_currentTx == m_lastNtx
             && m_txRetryCount > m_maxCallerRetries;
-        if (retryCapAlreadyExceeded || waitAgeMs >= waitLimitMs || m_ft2AutoCqAwaitingPartnerSinceMs <= 0) {
+        // Sprint1 (1.0.393): se il phase-lock breaker ha appena corretto la
+        // parita', concedi il tentativo in fase opposta + la risposta prima
+        // di rilasciare il partner: in loopback (round 3, 01:59:15) il release
+        // a 22.5s scattava 3.8s DOPO il firing del breaker, vanificando la
+        // correzione. Grace = fino a defer + 2 periodi.
+        bool const parityJustCorrected = m_ft2ParityDeferUntilMs > 0
+            && waitPeriodMs > 0
+            && correctedUtcEpochMs() < m_ft2ParityDeferUntilMs + 4 * static_cast<qint64>(waitPeriodMs);
+        if (!parityJustCorrected
+            && (retryCapAlreadyExceeded || waitAgeMs >= waitLimitMs || m_ft2AutoCqAwaitingPartnerSinceMs <= 0)) {
             bridgeLog(QStringLiteral("FT2 AutoCQ one-shot: releasing stale partner wait TX%1 partner=%2 age=%3ms limit=%4ms retry=%5/%6")
                           .arg(m_ft2AutoCqAwaitingPartnerTx)
                           .arg(m_ft2AutoCqAwaitingPartnerBase.isEmpty()
@@ -25647,7 +25656,76 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 waitFactor = 1.5;
             }
             qint64 const waitMs = static_cast<qint64>(periodMs * waitFactor);
-            if (m_currentTx == m_lastNtx && elapsed < waitMs) return;
+            if (m_currentTx == m_lastNtx && elapsed < waitMs) {
+                // Sprint1-4 (1.0.393): il rinvio era un return MUTO -> impossibile
+                // quantificare dai log gli slot persi in retry. 1 riga per periodo.
+                if (msNow - m_ft2RetryDeferLogMs >= periodMs) {
+                    m_ft2RetryDeferLogMs = msNow;
+                    bridgeLog(QStringLiteral("FT2 async retry guard: defer TX%1 elapsed=%2ms wait=%3ms snr=%4 factor=%5")
+                                  .arg(m_currentTx).arg(elapsed).arg(waitMs)
+                                  .arg(m_currentPartnerSnrDb).arg(waitFactor));
+                }
+                return;
+            }
+        }
+        // Sprint1-2 (1.0.393): il phase-lock breaker 1.0.364 vive solo in
+        // scheduleFt2AsyncTxAtNextSafeSlot (path "TX too late"), MAI eseguito in
+        // esercizio (0 firing in 46h di log: il TX async non e' mai late). Il
+        // retry same-step attende periodi INTERI -> PRESERVA la parita': due
+        // stazioni in fase restano in deadlock fino al TX watchdog (13 casi/46h,
+        // caso reale R+49 ripetuto 5 volte). Replica del check QUI, nel path che
+        // keya davvero: con retry>=3 e ancora fresca (<=60s, rinfrescata da
+        // Sprint1-1), se lo slot in cui stiamo per trasmettere ha la STESSA
+        // parita' dello slot del partner, rinvia al boundary successivo (fase
+        // opposta). Auto-stabilizzante come l'originale; costa max 1 periodo.
+        if (m_ft2ParityDeferUntilMs > 0
+            && correctedUtcEpochMs() < m_ft2ParityDeferUntilMs) {
+            return;
+        }
+        // NB: m_ft2ParityDeferUntilMs NON viene azzerato alla scadenza: resta
+        // come timestamp "fase corretta a X" per la grace anti-release sotto
+        // (releasing stale partner wait). Un valore vecchio e' inerte: il
+        // check sopra e' false e la grace (defer+2 periodi) e' gia' passata.
+        // Soglia >=2 (non >=3): il give-up same-step puo' scattare a 3 retry
+        // e vincere la corsa col breaker (osservato in loopback 2026-06-11:
+        // collisione organica, BRAVO ha mollato esattamente al 3o tentativo).
+        // A >=2 il breaker scatta al 3o TX, PRIMA del give-up; falso positivo
+        // = 1 periodo perso, accettabile.
+        if (m_ft2AsyncPartnerSlotMs > 0 && m_txRetryCount >= 2
+            && m_ft2AsyncPartnerSlotSetMs > 0
+            && (msNow - m_ft2AsyncPartnerSlotSetMs) <= 60000) {
+            int const ft2LockPeriodMs = periodMsForMode(QStringLiteral("FT2"));
+            if (ft2LockPeriodMs > 0) {
+                qint64 const lockNowMs = correctedUtcEpochMs();
+                qint64 const ourSlot = lockNowMs / static_cast<qint64>(ft2LockPeriodMs);
+                qint64 const partnerSlot = m_ft2AsyncPartnerSlotMs / static_cast<qint64>(ft2LockPeriodMs);
+                qint64 const parity = (((ourSlot - partnerSlot) % 2) + 2) % 2;
+                if (parity == 0) {
+                    // Tie-break anti-danza (loopback 2026-06-11 round 2): se ENTRAMBE
+                    // le stazioni montano il breaker, sfasano insieme e restano in
+                    // collisione (shift simultaneo osservato: parita' identica al
+                    // firing successivo). SOLO il call minore cede; il maggiore tiene
+                    // SEMPRE (round 5: la clausola "maggiore cede ai retry dispari"
+                    // faceva cedere ENTRAMBI sui dispari -> collisione ricreata,
+                    // :16:45-48 BRAVO shiftato DENTRO lo slot di ALPHA). Contro
+                    // versioni vecchie senza breaker: se siamo il maggiore il
+                    // deadlock resta come pre-fix (non peggioriamo nulla).
+                    QString const tieMyCall = m_callsign.trimmed().toUpper();
+                    QString const tieDxCall = m_dxCall.trimmed().toUpper();
+                    bool const iYield = tieDxCall.isEmpty()
+                        || tieMyCall < tieDxCall;
+                    if (!iYield) {
+                        bridgeLog(QStringLiteral("FT2 phase-lock breaker: stessa fase ma tengo la parita' (tie-break call maggiore, retry=%1)")
+                                      .arg(m_txRetryCount));
+                    } else {
+                    m_ft2ParityDeferUntilMs = (ourSlot + 1) * static_cast<qint64>(ft2LockPeriodMs);
+                    bridgeLog(QStringLiteral("FT2 phase-lock breaker (path diretto): stessa fase del partner per %1 retry -> rinvio al prossimo slot (ourSlot=%2 partnerSlot=%3 deferUntilMs=%4)")
+                                  .arg(m_txRetryCount).arg(ourSlot).arg(partnerSlot)
+                                  .arg(m_ft2ParityDeferUntilMs));
+                    return;
+                    }
+                }
+            }
         }
         int elapsedMs = -1;
         int latestStartMs = 0;
@@ -25718,6 +25796,19 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                 effectiveMaxCallerRetries = qMax(effectiveMaxCallerRetries, 18);
             } else if (m_mode == QStringLiteral("FT8") || m_mode == QStringLiteral("FT4")) {
                 effectiveMaxCallerRetries = qMax(effectiveMaxCallerRetries, 14);
+            }
+        }
+        // Sprint1 (1.0.393): se il phase-lock breaker ha appena corretto la
+        // parita', il tentativo successivo e' il PRIMO in fase giusta: concedi
+        // +1 retry oltre il cap. Senza questo (round 4 loopback, 02:09:22) il
+        // cap contava il tentativo corretto come ennesimo e haltava il QSO
+        // esattamente al boundary del defer del breaker.
+        if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled
+            && m_ft2ParityDeferUntilMs > 0) {
+            int const parityGraceP = periodMsForMode(QStringLiteral("FT2"));
+            if (parityGraceP > 0
+                && correctedUtcEpochMs() < m_ft2ParityDeferUntilMs + 4 * static_cast<qint64>(parityGraceP)) {
+                effectiveMaxCallerRetries += 1;
             }
         }
         // m_txRetryCount is set to 1 by the first successful send of a TX step.
@@ -32199,7 +32290,20 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     }
 
     if (rows.isEmpty()) {
-        bridgeLog("FT2 async decode attempt vuoto");
+        // Sprint1-4 (1.0.393): 22k righe in 46h (~13% del log) bruciavano
+        // l'orizzonte di rotazione 5MB e il logger e' sincrono. Aggregato 60s.
+        ++m_ft2EmptyAsyncAttempts;
+        qint64 const emptyNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (m_ft2EmptyAsyncAttemptLogMs == 0
+            || emptyNowMs - m_ft2EmptyAsyncAttemptLogMs >= 60000) {
+            bridgeLog(QStringLiteral("FT2 async decode: %1 attempt vuoti aggregati (finestra %2s)")
+                          .arg(m_ft2EmptyAsyncAttempts)
+                          .arg(m_ft2EmptyAsyncAttemptLogMs == 0
+                                   ? 0
+                                   : (emptyNowMs - m_ft2EmptyAsyncAttemptLogMs) / 1000));
+            m_ft2EmptyAsyncAttemptLogMs = emptyNowMs;
+            m_ft2EmptyAsyncAttempts = 0;
+        }
         return;
     }
 
@@ -32309,21 +32413,30 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled && !rows.isEmpty()) {
             qint64 const decodeNowMs = QDateTime::currentMSecsSinceEpoch();
             // Burst detection: gap > 1500ms = nuovo burst (nuovo frame partner)
-            if (m_ft2AsyncLastDecodeMs == 0
-                || (decodeNowMs - m_ft2AsyncLastDecodeMs) > 1500) {
+            bool const newBurst = m_ft2AsyncLastDecodeMs == 0
+                || (decodeNowMs - m_ft2AsyncLastDecodeMs) > 1500;
+            if (newBurst) {
                 m_ft2AsyncFirstDecodeMs = decodeNowMs;
-                // FIX A: ancora la stima al TEMPO-SEGNALE. Lo slot del frame del
-                // partner = boundary del periodo che ha contenuto il frame,
-                // ricavato dal clock UTC corretto + DT. Il decode async arriva
-                // verso/poco dopo la fine del frame, quindi lo slot di
-                // appartenenza e' quello iniziato ~meta'-payload fa.
+            }
+            // FIX A: ancora la stima al TEMPO-SEGNALE. Lo slot del frame del
+            // partner = boundary del periodo che ha contenuto il frame,
+            // ricavato dal clock UTC corretto + DT. Il decode async arriva
+            // verso/poco dopo la fine del frame, quindi lo slot di
+            // appartenenza e' quello iniziato ~meta'-payload fa.
+            // FIX A v2 (1.0.356): base = slot calcolato al DISPATCH
+            // (m_ft2AsyncDispatchSlotStartMs, dalla finestra audio), NON al
+            // correctedUtcEpochMs() di QUI: il callback ready arriva 0.2-2.6s dopo
+            // il dispatch e ricalcolare lo slot ora faceva oscillare la stima di
+            // ~mezzo periodo. Lo slot al dispatch e' stabile e corretto.
+            // Sprint1-1 (1.0.393): prima l'ancora si aggiornava SOLO a inizio
+            // burst; su banda affollata i decode di terzi tengono il gap <1500ms
+            // e l'ancora restava congelata per minuti (signalEnd -1.6..-10.8s nei
+            // log reali), rendendo incalcolabili la strategia S1 e il phase-lock
+            // breaker. Ora si rinfresca anche ad ogni decode DIRETTO a noi
+            // (partnerDtValid), stessa base stabile: la parita' e' quella vera
+            // dell'ultimo frame, non quella di minuti fa.
+            if (newBurst || partnerDtValid) {
                 int const ft2PeriodMs = periodMsForMode(QStringLiteral("FT2"));
-                // FIX A v2 (1.0.356): ancora lo slot del partner allo slot calcolato
-                // al DISPATCH (m_ft2AsyncDispatchSlotStartMs, dalla finestra audio),
-                // NON al correctedUtcEpochMs() di QUI: il callback ready arriva 0.2-2.6s
-                // dopo il dispatch (latenza decode variabile) e ricalcolare lo slot ora
-                // faceva oscillare la stima di ~mezzo periodo (signalEnd swing fino a
-                // 1.9s nei log reali). Lo slot al dispatch e' stabile e corretto.
                 if (ft2PeriodMs > 0 && m_ft2AsyncDispatchSlotStartMs > 0) {
                     qint64 slotStartMs = m_ft2AsyncDispatchSlotStartMs;
                     if (partnerDtValid) {
@@ -32332,10 +32445,18 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                         // su un boundary errato. Limita a +/-0.8s (range fisico FT2).
                         slotStartMs += static_cast<qint64>(qBound(-0.8, partnerDtSec, 0.8) * 1000.0);
                     }
+                    qint64 const prevAnchorMs = m_ft2AsyncPartnerSlotMs;
                     m_ft2AsyncPartnerSlotMs = slotStartMs;
-                } else {
+                    m_ft2AsyncPartnerSlotSetMs = decodeNowMs;
+                    if (partnerDtValid && !newBurst && prevAnchorMs != slotStartMs) {
+                        bridgeLog(QStringLiteral("FT2 async anchor refresh: partnerSlot %1 -> %2 (dt=%3)")
+                                      .arg(prevAnchorMs).arg(slotStartMs)
+                                      .arg(partnerDtSec, 0, 'f', 2));
+                    }
+                } else if (newBurst) {
                     // Fallback: slot del dispatch non disponibile -> wall-clock estimate.
                     m_ft2AsyncPartnerSlotMs = 0;
+                    m_ft2AsyncPartnerSlotSetMs = 0;
                 }
             }
             m_ft2AsyncLastDecodeMs = decodeNowMs;
@@ -32620,6 +32741,11 @@ void DecodiumBridge::onAsyncDecodeTimer()
     // indici negativi nel modulo (che produrrebbero OOB).
     uint64_t const pos = m_asyncAudioPos.load(std::memory_order_acquire);
     if (pos < 45000) return;  // non abbastanza audio ancora
+    // Sprint1-3 (1.0.393): se l'audio non e' avanzato dall'ultimo dispatch (RX
+    // fermo durante il nostro TX, o device in stallo) la finestra sarebbe
+    // IDENTICA: ridecodificarla a piena profondita' costa 300-700ms di CPU per
+    // zero righe nuove. Skip finche' il writer non avanza.
+    if (m_ft2AsyncLastDispatchAudioPos == pos) return;
 
     decodium::ft2::AsyncDecodeRequest req;
     req.audio.resize(45000);
@@ -32663,6 +32789,7 @@ void DecodiumBridge::onAsyncDecodeTimer()
 
     m_asyncDecodePending = true;
     m_lastFt2AsyncDecodeDispatchMs = nowMs;
+    m_ft2AsyncLastDispatchAudioPos = pos;
     auto* worker = m_ft2Worker;
     QMetaObject::invokeMethod(m_ft2Worker, [worker, req]() {
         worker->decodeAsync(req);

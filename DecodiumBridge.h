@@ -2172,6 +2172,13 @@ private:
     // gonfiato dalla latenza di decode variabile). onFt2AsyncDecodeReady lo usa come
     // ancora dello slot del partner. Single-flight => corrisponde al ready in arrivo.
     qint64                m_ft2AsyncDispatchSlotStartMs {0};
+    // Sprint1 (1.0.393): ancora rinfrescata + breaker nel path diretto + skip stale.
+    qint64                m_ft2AsyncPartnerSlotSetMs {0}; // wall-ms ultimo refresh dell'ancora (freshness gate breaker)
+    qint64                m_ft2ParityDeferUntilMs {0};    // corrected-ms: rinvio TX anti same-phase (0 = nessun rinvio)
+    quint64               m_ft2AsyncLastDispatchAudioPos {0}; // pos audio all'ultimo dispatch (skip se invariato)
+    int                   m_ft2EmptyAsyncAttempts {0};    // contatore attempt vuoti per log aggregato
+    qint64                m_ft2EmptyAsyncAttemptLogMs {0};
+    qint64                m_ft2RetryDeferLogMs {0};       // throttle 1/slot del log retry guard
     int                   m_ft2AsyncAudioQuietRuns {0};   // consecutive RMS<threshold samples
     bool                  m_ft2AsyncSmartTxPending {false};
     quint64               m_ft2AsyncSmartTxSerial {0};
