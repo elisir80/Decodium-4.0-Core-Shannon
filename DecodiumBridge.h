@@ -433,6 +433,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
+    Q_PROPERTY(bool ft2NarrowAsyncDecode READ ft2NarrowAsyncDecode WRITE setFt2NarrowAsyncDecode NOTIFY ft2NarrowAsyncDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
     // 1.0.355 — opt-in: salta decode sync di fine-slot quando l'async ha gia' coperto lo slot
     Q_PROPERTY(bool ft2AsyncSkipRedundantSyncDecode READ ft2AsyncSkipRedundantSyncDecode WRITE setFt2AsyncSkipRedundantSyncDecode NOTIFY ft2AsyncSkipRedundantSyncDecodeChanged)
@@ -1381,6 +1382,7 @@ signals:
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2AdaptiveDecodeChanged();      // 1.0.292
+    void ft2NarrowAsyncDecodeChanged();   // Sprint2-1
     void ft2ApHashCacheChanged();         // 1.0.293
     void ft2AsyncSkipRedundantSyncDecodeChanged();  // 1.0.355
     void mamMultiStreamChanged();      // 1.0.364+ — MAM multi-stream FASE 3
@@ -1950,6 +1952,13 @@ private:
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
+    // Sprint2-1: fast pass narrow-band quando attendi una reply (opt-in).
+    bool m_ft2NarrowAsyncDecode {false};
+    int  m_ft2NarrowPassCounter {0};
+    qint64 m_ft2NarrowLogMs {0};
+    // Sprint2-2: gate RX-health sul rearm AutoCQ (default ON).
+    bool m_autoCqRxHealthGate {true};
+    qint64 m_autoCqRxHealthLogMs {0};
     bool m_ft2ApHashCache {false};         // 1.0.293/294: AP hash cache; cache-rescued decodes are display/audit only for AutoSeq/TX
     bool m_ft2AsyncSkipRedundantSyncDecode {false};  // 1.0.355: salta decode sync fine-slot se async ha gia' coperto lo slot
     qint64 m_ft2AsyncDecodeProducedSlotMs {0};       // 1.0.355: indice slot corrected-UTC dell'ultimo decode async accettato
@@ -2854,6 +2863,8 @@ public:
     Q_INVOKABLE void setFt2QuickGiveUpStrong(bool v);
     Q_INVOKABLE bool ft2AdaptiveDecode() const { return m_ft2AdaptiveDecode; }
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
+    Q_INVOKABLE bool ft2NarrowAsyncDecode() const { return m_ft2NarrowAsyncDecode; }
+    Q_INVOKABLE void setFt2NarrowAsyncDecode(bool v);
     Q_INVOKABLE bool ft2ApHashCache() const { return m_ft2ApHashCache; }
     Q_INVOKABLE void setFt2ApHashCache(bool v);
     // 1.0.355 — opt-in: salta decode sync ridondante di fine-slot (riduce latenza aggancio)

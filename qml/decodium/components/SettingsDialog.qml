@@ -3532,6 +3532,32 @@ Dialog {
                                     ToolTip.text: qsTr("In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.\n\nWhen waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.\n\nUseful mainly on modest PCs.\n\nDefault: OFF.")
                                 }
 
+                                // Sprint2-1 — FT2: narrow async decode (fast pass attorno a nfqso)
+                                Text {
+                                    text: qsTr("FT2: narrow reply decode (experimental):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2NarrowAsyncDecodeCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2NarrowAsyncDecode : false
+                                    onCheckedChanged: {
+                                        if (bridge) bridge.setFt2NarrowAsyncDecode(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.\n\nThe reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.\n\nDefault: OFF.")
+                                }
+
                                 // 1.0.293/294 — FT2: AP hashed-callsign cache (Phase 1: display-only rescue)
                                 Text {
                                     text: qsTr("FT2: AP cache rescue (experimental):")

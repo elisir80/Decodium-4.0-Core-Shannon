@@ -5841,6 +5841,16 @@ void DecodiumBridge::setFt2AdaptiveDecode(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Adaptive decode %1").arg(v ? "ON" : "OFF"));
 }
 
+void DecodiumBridge::setFt2NarrowAsyncDecode(bool v)
+{
+    if (m_ft2NarrowAsyncDecode == v) return;
+    m_ft2NarrowAsyncDecode = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2NarrowAsyncDecode"), v);
+    emit ft2NarrowAsyncDecodeChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Narrow async decode %1").arg(v ? "ON" : "OFF"));
+}
+
 void DecodiumBridge::setFt2ApHashCache(bool v)
 {
     if (m_ft2ApHashCache == v) return;
@@ -25270,6 +25280,24 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
     // e il path single-QSO sottostante resta byte-identico.
     if (mamMultiStreamSequencerActive()) { mamDispatchPeriod(); return; }
+    // Sprint2-2: AutoCQ col RX morto = chiamare nel vuoto fino al TX watchdog
+    // (caso reale 9 giu: 10+ min di CQ con rms=0). Se il watchdog audio segnala
+    // RX unhealthy da >=15s, sospendi il REARM del CQ (solo TX6 in fase pura,
+    // mai un QSO in corso ne' il TX manuale); riprende da solo al recovery.
+    if (m_autoCqRxHealthGate && m_autoCqRepeat && m_currentTx == 6
+        && m_qsoProgress <= 1
+        && m_audioUnhealthyStartMs > 0) {
+        qint64 const rxGateNowMs = QDateTime::currentMSecsSinceEpoch();
+        qint64 const rxDeadMs = rxGateNowMs - m_audioUnhealthyStartMs;
+        if (rxDeadMs >= 15000) {
+            if (rxGateNowMs - m_autoCqRxHealthLogMs >= 60000) {
+                m_autoCqRxHealthLogMs = rxGateNowMs;
+                bridgeLog(QStringLiteral("AutoCQ sospeso: RX audio unhealthy da %1s (gate RX-health, riprende al recovery)")
+                              .arg(rxDeadMs / 1000));
+            }
+            return;
+        }
+    }
     bool const awaitingFt2PartnerAtEntry = ft2AutoCqAwaitingPartnerDecode();
     if (awaitingFt2PartnerAtEntry && !m_ft2DeferredLogPending) {
         qint64 const waitAgeMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
@@ -27142,6 +27170,8 @@ void DecodiumBridge::loadSettings()
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
+    m_ft2NarrowAsyncDecode = s.value(QStringLiteral("Ft2NarrowAsyncDecode"), false).toBool();
+    m_autoCqRxHealthGate = s.value(QStringLiteral("AutoCqRxHealthGate"), true).toBool();
     // 1.0.326 — ALC calibration target (default 20, range 5-60; FT8/data tipicamente 15-25)
     m_alcTarget = qBound(5, s.value(QStringLiteral("AlcTarget"), 20).toInt(), 60);
     // 1.0.326 B2 — MaxCallerRetries persist (default 10, range 1-99)
@@ -32774,8 +32804,31 @@ void DecodiumBridge::onAsyncDecodeTimer()
     }
     req.nqsoprogress = legacyDecodeQsoProgress();
     req.nfqso = nfqso;
-    req.nfa   = m_nfa;
-    req.nfb   = m_nfb;
+    // Sprint2-1 (opt-in): quando ATTENDI una reply la decisione TX serve solo
+    // vicino a nfqso, ma ogni tentativo async scandagliava 200-4000Hz a piena
+    // profondita' (decode_ms mediana 447ms, p99 2.7s -> 43.7% delle reply
+    // azionabili solo allo slot successivo). Pass stretto nfqso+/-150Hz con
+    // full-band 1 ogni 4 cicli per non perdere la band activity.
+    int reqNfa = m_nfa;
+    int reqNfb = m_nfb;
+    if (m_ft2NarrowAsyncDecode) {
+        bool const narrowExpectingReply = m_txEnabled || m_autoCqRepeat || !m_dxCall.isEmpty();
+        if (narrowExpectingReply && (++m_ft2NarrowPassCounter % 4) != 0) {
+            int const narrowLo = qMax(m_nfa, nfqso - 150);
+            int const narrowHi = qMin(m_nfb, nfqso + 150);
+            if (narrowHi - narrowLo >= 100) {
+                reqNfa = narrowLo;
+                reqNfb = narrowHi;
+                if (nowMs - m_ft2NarrowLogMs >= 30000) {
+                    m_ft2NarrowLogMs = nowMs;
+                    bridgeLog(QStringLiteral("FT2 narrow async pass attivo: %1-%2Hz (full-band 1/4 cicli)")
+                                  .arg(narrowLo).arg(narrowHi));
+                }
+            }
+        }
+    }
+    req.nfa   = reqNfa;
+    req.nfb   = reqNfb;
     int const asyncDepth = effectiveDecodeDepth();
     req.ndepth   = (m_transmitting || m_tuning) ? qMin(asyncDepth, 2) : asyncDepth;
     req.threadCount = effectiveFtThreadLimit();
