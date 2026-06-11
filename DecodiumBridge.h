@@ -1959,6 +1959,9 @@ private:
     // Sprint2-2: gate RX-health sul rearm AutoCQ (default ON).
     bool m_autoCqRxHealthGate {true};
     qint64 m_autoCqRxHealthLogMs {0};
+    // Sprint3-C: deadline cooperativa sul decode async (0 = off).
+    int m_ft2AsyncDeadlineMs {2500};
+    quint64 m_ft2AsyncDispatchSeq {0};
     bool m_ft2ApHashCache {false};         // 1.0.293/294: AP hash cache; cache-rescued decodes are display/audit only for AutoSeq/TX
     bool m_ft2AsyncSkipRedundantSyncDecode {false};  // 1.0.355: salta decode sync fine-slot se async ha gia' coperto lo slot
     qint64 m_ft2AsyncDecodeProducedSlotMs {0};       // 1.0.355: indice slot corrected-UTC dell'ultimo decode async accettato

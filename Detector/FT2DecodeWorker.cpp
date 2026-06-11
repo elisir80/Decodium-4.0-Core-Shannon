@@ -349,6 +349,10 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   auto mycall = to_fortran_field (request.mycall, 12);
   auto hiscall = to_fortran_field (request.hiscall, 12);
 
+  // Sprint3-A - AP cache anche sul pass SYNC di fine slot (il weak-recovery
+  // depth 4|16): stesso pattern del decodeAsync, azzerata subito dopo.
+  ftx_ft2_set_ap_hash_cache_c (request.apHashCache.constData (),
+                               static_cast<int> (request.apHashCache.size ()));
   QElapsedTimer decodeTimer;
   decodeTimer.start ();
   ftx_ft2_async_decode_stage7_c (iwave, &nqsoprogress, &nfqso, &nfa, &nfb,
@@ -356,6 +360,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
                                  &snrs[0], &dts[0], &freqs[0], &naps[0], &quals[0],
                                  &bits77[0], &decodeds[0], &nout);
   qint64 const decodeMs = decodeTimer.elapsed ();
+  ftx_ft2_set_ap_hash_cache_c (nullptr, 0);
 
   if (m_shuttingDown.load (std::memory_order_relaxed)
       || request.serial != m_latestDecodeSerial.load (std::memory_order_relaxed))

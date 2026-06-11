@@ -27172,6 +27172,7 @@ void DecodiumBridge::loadSettings()
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
     m_ft2NarrowAsyncDecode = s.value(QStringLiteral("Ft2NarrowAsyncDecode"), false).toBool();
     m_autoCqRxHealthGate = s.value(QStringLiteral("AutoCqRxHealthGate"), true).toBool();
+    m_ft2AsyncDeadlineMs = s.value(QStringLiteral("Ft2AsyncDecodeDeadlineMs"), 2500).toInt();
     // 1.0.326 — ALC calibration target (default 20, range 5-60; FT8/data tipicamente 15-25)
     m_alcTarget = qBound(5, s.value(QStringLiteral("AlcTarget"), 20).toInt(), 60);
     // 1.0.326 B2 — MaxCallerRetries persist (default 10, range 1-99)
@@ -32293,6 +32294,18 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 
 void DecodiumBridge::onFt2DecodeReady(quint64 serial, QStringList rows)
 {
+    // Sprint3-A: il pass sync non passava da onFt2AsyncDecodeReady -> le sue
+    // righe non seminavano la AP cache. Stesso pattern (e stessa funzione di
+    // hash) del seed async; anti-loop: salta i decode cache-confirmed (nap=7).
+    if (m_ft2ApHashCache && m_mode == QStringLiteral("FT2")) {
+        qint64 const apNowMs = QDateTime::currentMSecsSinceEpoch();
+        for (const auto& row : rows) {
+            QStringList const f = parseFt8Row(row);
+            if (f.size() < 6 || f[5].trimmed() == QLatin1String("7")) continue;
+            for (quint32 const h28 : decodium::ft2MessageCallHashes(f[4]))
+                m_hashedCallsignCache.add(h28, apNowMs);
+        }
+    }
     onFt8DecodeReady(serial, rows); // stessa logica di parsing
 }
 
@@ -32394,9 +32407,25 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
             bool const apCacheRescuedDecode =
                 f.size() > 5 && f[5].trimmed() == QLatin1String("7");
             if (apCacheRescuedDecode) {
-                bridgeLog(QStringLiteral("FT2 autoSeq: AP-cache-rescued decode is display-only, not feeding AutoSeq/TX: %1")
-                              .arg(f[4]));
-                continue;
+                // Sprint3-B: il rescue resta display-only (Fase 1) TRANNE il caso
+                // stretto mid-QSO: messaggio diretto a NOI dal partner ATTIVO
+                // (m_dxCall). Un falso accept costa 1 slot; il beneficio e' il
+                // partner in QSB che non blocca piu' il sequencer (-3dB utile).
+                // Mai per nuovi caller.
+                QString const rescuedPeer = directedPeerTokenFromMessage(
+                    f[4], myCallUpper, myBaseUpper);
+                QString const activeDx = m_dxCall.trimmed().toUpper();
+                bool const rescuedFromActivePartner =
+                    !activeDx.isEmpty()
+                    && !rescuedPeer.isEmpty()
+                    && normalizedBaseCall(rescuedPeer) == normalizedBaseCall(activeDx);
+                if (!rescuedFromActivePartner) {
+                    bridgeLog(QStringLiteral("FT2 autoSeq: AP-cache-rescued decode is display-only, not feeding AutoSeq/TX: %1")
+                                  .arg(f[4]));
+                    continue;
+                }
+                bridgeLog(QStringLiteral("FT2 autoSeq: AP-rescued decode dal partner attivo %1 -> feed al sequencer: %2")
+                              .arg(activeDx, f[4]));
             }
             QString localHashPartner;
             bool const directedToLiteralCall = messageContainsCallToken(f[4], myCallUpper, myBaseUpper);
@@ -32843,6 +32872,20 @@ void DecodiumBridge::onAsyncDecodeTimer()
     m_asyncDecodePending = true;
     m_lastFt2AsyncDecodeDispatchMs = nowMs;
     m_ft2AsyncLastDispatchAudioPos = pos;
+    // Sprint3-C: decode async oltre la deadline (p99 osservato 2.7s, max 9.7s)
+    // blocca il single-flight su audio ormai vecchio di uno slot. Cancel
+    // COOPERATIVO (stage7_should_cancel per-pass): i pass completati emettono
+    // comunque. Solo path async; il sync weak-recovery resta integro.
+    if (m_ft2AsyncDeadlineMs > 0) {
+        quint64 const dispatchSeq = ++m_ft2AsyncDispatchSeq;
+        QTimer::singleShot(m_ft2AsyncDeadlineMs, this, [this, dispatchSeq]() {
+            if (m_asyncDecodePending && dispatchSeq == m_ft2AsyncDispatchSeq && m_ft2Worker) {
+                m_ft2Worker->cancelCurrentDecode();
+                bridgeLog(QStringLiteral("FT2 async decode deadline: cancel cooperativo a %1ms (dispatch #%2)")
+                              .arg(m_ft2AsyncDeadlineMs).arg(dispatchSeq));
+            }
+        });
+    }
     auto* worker = m_ft2Worker;
     QMetaObject::invokeMethod(m_ft2Worker, [worker, req]() {
         worker->decodeAsync(req);
@@ -35453,6 +35496,9 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.ncontest = m_ncontest;
         req.mycall = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
+        // Sprint3-A: AP cache anche sul pass sync weak-recovery (prima solo async).
+        if (m_ft2ApHashCache)
+            req.apHashCache = m_hashedCallsignCache.snapshotValid(nowMs);
         // 1.0.291 — log diagnostico THROTTLED (1 riga su cambio-stato o ogni 10s):
         // chiarisce PERCHÉ il sync decode si riduce — flag #1 in memoria, pressione CPU,
         // txPending — e azzera lo spam "depth reduced" che annegava il diagnostic log.

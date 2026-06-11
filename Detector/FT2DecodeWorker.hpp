@@ -43,6 +43,7 @@ struct DecodeRequest
   int ncontest {0};
   QByteArray mycall;
   QByteArray hiscall;
+  QVector<quint32> apHashCache;  // Sprint3-A — AP cache anche sul pass sync (weak-recovery)
 };
 
 class FT2DecodeWorker final : public QObject
