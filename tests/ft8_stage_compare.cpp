@@ -47,6 +47,9 @@ extern "C"
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,
                                        float freq, float dt, int nutc);
+  void ftx_ft8_stage4_seed_known_cq_call_c (char const* call,
+                                            float freq, float dt, int nutc);
+  void ftx_ft8_a7_save_c (int jseq, float dt, float freq, char const* msg37);
   void ftx_ft8_downsample_c (float const* dd, int* newdat, float f0, fftwf_complex* c1);
   void ftx_ft8_a7_search_initial_c (std::complex<float> const* cd0, int np2, float fs2,
                                     float xdt_in, int* ibest_out, float* delfbest_out);
@@ -82,6 +85,7 @@ extern "C"
                                  int* nharderrors_out, float* dmin_out);
   int ftx_encode_ft8_candidate_c (char const* message37, char* msgsent_out,
                                   int* itone_out, signed char* codeword_out);
+  void ftx_subtract_ft8_c (float* dd0, int const* itone, float f0, float dt, int lrefinedt);
   int legacy_pack77_unpack77bits_c (signed char const* message77, int received,
                                     char* msg37, int* quirky);
   void ftx_ft8_stage4_seed_hash_call_c (char const* call);
@@ -653,6 +657,58 @@ namespace
     ftx_ft8_stage4_seed_known_cq_c (call.constData (), grid.constData (), freq, dt, nutc);
   }
 
+  void seed_known_cq_call_entry (QString const& raw)
+  {
+    QString normalized = raw.simplified ().toUpper ();
+    normalized.replace (QLatin1Char (','), QLatin1Char (' '));
+    normalized.replace (QLatin1Char (':'), QLatin1Char (' '));
+    QStringList const parts = normalized.split (QLatin1Char (' '), Qt::SkipEmptyParts);
+    if (parts.size () < 2 || parts.size () > 4)
+      {
+        fail (QStringLiteral ("invalid --seed-known-cq-call value \"%1\"; expected CALL FREQ [DT] [NUTC]")
+                  .arg (raw));
+      }
+
+    bool ok_freq = false;
+    float const freq = parts.at (1).toFloat (&ok_freq);
+    if (!ok_freq || freq <= 0.0f)
+      {
+        fail (QStringLiteral ("invalid --seed-known-cq-call frequency in \"%1\"").arg (raw));
+      }
+
+    float dt = 0.0f;
+    int nutc = -1;
+    if (parts.size () >= 3)
+      {
+        bool ok_value = false;
+        int const value = parts.at (2).toInt (&ok_value);
+        if (ok_value && parts.size () == 3)
+          {
+            nutc = value;
+          }
+        else
+          {
+            dt = parts.at (2).toFloat (&ok_value);
+            if (!ok_value)
+              {
+                fail (QStringLiteral ("invalid --seed-known-cq-call DT in \"%1\"").arg (raw));
+              }
+          }
+      }
+    if (parts.size () >= 4)
+      {
+        bool ok_time = false;
+        nutc = parts.at (3).toInt (&ok_time);
+        if (!ok_time)
+          {
+            fail (QStringLiteral ("invalid --seed-known-cq-call NUTC in \"%1\"").arg (raw));
+          }
+      }
+
+    QByteArray const call = to_fortran_field (parts.at (0).toLatin1 (), 12);
+    ftx_ft8_stage4_seed_known_cq_call_c (call.constData (), freq, dt, nutc);
+  }
+
   void seed_hash_call_entry (QString const& raw)
   {
     QString call = raw.simplified ().toUpper ();
@@ -668,6 +724,59 @@ namespace
 
     QByteArray const call13 = to_fortran_field (call.toLatin1 (), 13);
     ftx_ft8_stage4_seed_hash_call_c (call13.constData ());
+  }
+
+  int sequence_index_for_utc (int nutc)
+  {
+    return std::abs ((nutc / 5) % 2);
+  }
+
+  void seed_a7_hint_entry (QString const& raw)
+  {
+    QStringList const parts = raw.split (QLatin1Char ('|'));
+    if (parts.size () < 4 || parts.size () > 5)
+      {
+        fail (QStringLiteral ("invalid --seed-a7-hint value \"%1\"; expected MESSAGE|FREQ|DT|NUTC[|HITS]")
+                  .arg (raw));
+      }
+
+    bool ok_freq = false;
+    bool ok_dt = false;
+    bool ok_nutc = false;
+    float const freq = parts.at (1).trimmed ().toFloat (&ok_freq);
+    float const dt = parts.at (2).trimmed ().toFloat (&ok_dt);
+    int const nutc = parts.at (3).trimmed ().toInt (&ok_nutc);
+    if (!ok_freq || freq <= 0.0f)
+      {
+        fail (QStringLiteral ("invalid --seed-a7-hint frequency in \"%1\"").arg (raw));
+      }
+    if (!ok_dt)
+      {
+        fail (QStringLiteral ("invalid --seed-a7-hint DT in \"%1\"").arg (raw));
+      }
+    if (!ok_nutc)
+      {
+        fail (QStringLiteral ("invalid --seed-a7-hint NUTC in \"%1\"").arg (raw));
+      }
+
+    int hits = 1;
+    if (parts.size () == 5)
+      {
+        bool ok_hits = false;
+        hits = parts.at (4).trimmed ().toInt (&ok_hits);
+        if (!ok_hits || hits < 1)
+          {
+            fail (QStringLiteral ("invalid --seed-a7-hint HITS in \"%1\"").arg (raw));
+          }
+      }
+
+    QByteArray const message = to_fortran_field (parts.at (0).trimmed ().toUpper ().toLatin1 (),
+                                                 kDecodedChars);
+    int const jseq = sequence_index_for_utc (nutc);
+    for (int hit = 0; hit < hits; ++hit)
+      {
+        ftx_ft8_a7_save_c (jseq, dt, freq, message.constData ());
+      }
   }
 
   WavData read_wav_file (QString const& file_name)
@@ -835,6 +944,9 @@ namespace
     };
 
     auto invoke_decode = [&] (int nzhsym_step) {
+      ftx_ft8_stage4_set_deadline_ms_c (
+          maxDecodeMs > 0 ? steady_clock_ms () + maxDecodeMs : 0);
+
       int step_nqsoprogress = nqsoprogress;
       int step_nfqso = nfqso;
       int step_nftx = nftx;
@@ -875,8 +987,6 @@ namespace
     ftx_ft8_stage4_apply_hash_seed_cache_c ();
     ftx_ft8_stage4_set_decode_options_c (lowThresholds, subpass, cycles,
                                          rxFreqSensitivity, candidateThin);
-    ftx_ft8_stage4_set_deadline_ms_c (
-        maxDecodeMs > 0 ? steady_clock_ms () + maxDecodeMs : 0);
     ftx_ft8_stage4_set_supplemental_c (supplemental);
     ftx_ft8_stage4_set_ldpc_osd_c (maxosd, norder);
     ftx_ft8_stage4_set_ldpc_max_iter_c (maxIter);
@@ -902,6 +1012,75 @@ namespace
         collect_step_lines (nout);
       }
     return result;
+  }
+
+  void apply_pre_subtractions (std::vector<short>& samples, QStringList const& entries,
+                               QTextStream& out)
+  {
+    if (entries.isEmpty ())
+      {
+        return;
+      }
+
+    std::array<float, kFt8SampleCount> dd {};
+    for (size_t i = 0; i < dd.size () && i < samples.size (); ++i)
+      {
+        dd[i] = static_cast<float> (samples[i]);
+      }
+
+    for (QString const& raw : entries)
+      {
+        QStringList const parts = raw.split (QLatin1Char ('|'));
+        if (parts.size () < 3 || parts.size () > 4)
+          {
+            fail (QStringLiteral ("invalid --pre-subtract value \"%1\"; expected MESSAGE|FREQ|DT[|REFINE]")
+                      .arg (raw));
+          }
+
+        bool ok_freq = false;
+        bool ok_dt = false;
+        float const freq = parts.at (1).trimmed ().toFloat (&ok_freq);
+        float const callback_dt = parts.at (2).trimmed ().toFloat (&ok_dt);
+        if (!ok_freq || !ok_dt)
+          {
+            fail (QStringLiteral ("invalid --pre-subtract frequency/dt in \"%1\"").arg (raw));
+          }
+
+        int refine = 1;
+        if (parts.size () == 4)
+          {
+            bool ok_refine = false;
+            refine = parts.at (3).trimmed ().toInt (&ok_refine);
+            if (!ok_refine)
+              {
+                fail (QStringLiteral ("invalid --pre-subtract refine in \"%1\"").arg (raw));
+              }
+          }
+
+        QByteArray const message = to_fortran_field (parts.at (0).trimmed ().toLatin1 (),
+                                                     kDecodedChars);
+        std::array<char, kDecodedChars> msgsent {};
+        std::array<int, 79> itone {};
+        std::array<signed char, 174> codeword {};
+        if (ftx_encode_ft8_candidate_c (message.constData (), msgsent.data (),
+                                        itone.data (), codeword.data ()) == 0)
+          {
+            fail (QStringLiteral ("cannot encode --pre-subtract message \"%1\"")
+                      .arg (parts.at (0).trimmed ()));
+          }
+
+        ftx_subtract_ft8_c (dd.data (), itone.data (), freq, callback_dt + 0.5f, refine);
+        out << "pre-subtracted: " << trim_fortran_field (msgsent.data (), kDecodedChars)
+            << " freq=" << freq
+            << " dt=" << callback_dt
+            << " refine=" << refine << '\n';
+      }
+
+    for (size_t i = 0; i < samples.size () && i < dd.size (); ++i)
+      {
+        long const rounded = std::lround (dd[i]);
+        samples[i] = static_cast<short> (std::clamp<long> (rounded, -32768L, 32767L));
+      }
   }
 
   QHash<QString, QString> line_map (DecodeResult const& result)
@@ -1258,10 +1437,28 @@ int main (int argc, char * argv[])
           QStringLiteral ("entry"),
           QString {}
       };
+      QCommandLineOption const seed_known_cq_call_option {
+          QStringLiteral ("seed-known-cq-call"),
+          QStringLiteral ("Seed the known CQ call-only cache as: CALL FREQ [DT] [NUTC]."),
+          QStringLiteral ("entry"),
+          QString {}
+      };
       QCommandLineOption const seed_hash_call_option {
           QStringLiteral ("seed-hash-call"),
           QStringLiteral ("Seed the pack77 hash call context with one callsign."),
           QStringLiteral ("call"),
+          QString {}
+      };
+      QCommandLineOption const seed_a7_hint_option {
+          QStringLiteral ("seed-a7-hint"),
+          QStringLiteral ("Seed the A7 repeated-hint cache as MESSAGE|FREQ|DT|NUTC[|HITS]."),
+          QStringLiteral ("entry"),
+          QString {}
+      };
+      QCommandLineOption const pre_subtract_option {
+          QStringLiteral ("pre-subtract"),
+          QStringLiteral ("Subtract a known FT8 signal before decode as MESSAGE|FREQ|DT[|REFINE]."),
+          QStringLiteral ("entry"),
           QString {}
       };
 
@@ -1306,7 +1503,10 @@ int main (int argc, char * argv[])
       parser.addOption (hisgrid_option);
       parser.addOption (encode_message_option);
       parser.addOption (seed_known_cq_option);
+      parser.addOption (seed_known_cq_call_option);
       parser.addOption (seed_hash_call_option);
+      parser.addOption (seed_a7_hint_option);
+      parser.addOption (pre_subtract_option);
       parser.addPositionalArgument (QStringLiteral ("wav-file"),
                                     QStringLiteral ("Path to a 12000 Hz mono 16-bit FT8 WAV file."),
                                     QStringLiteral ("wav-file [wav-file ...]"));
@@ -1397,17 +1597,30 @@ int main (int argc, char * argv[])
           seed_known_cq_entry (seed);
           out << "seeded known CQ: " << seed << '\n';
         }
+      QStringList const knownCqCallSeeds = parser.values (seed_known_cq_call_option);
+      for (QString const& seed : knownCqCallSeeds)
+        {
+          seed_known_cq_call_entry (seed);
+          out << "seeded known CQ call: " << seed << '\n';
+        }
       QStringList const hashSeeds = parser.values (seed_hash_call_option);
       for (QString const& seed : hashSeeds)
         {
           seed_hash_call_entry (seed);
           out << "seeded hash call: " << seed << '\n';
         }
+      QStringList const a7Seeds = parser.values (seed_a7_hint_option);
+      for (QString const& seed : a7Seeds)
+        {
+          seed_a7_hint_entry (seed);
+          out << "seeded A7 hint: " << seed << '\n';
+        }
       for (int fileIndex = 0; fileIndex < positional.size (); ++fileIndex)
         {
       QString const wav_path = QFileInfo {positional.at (fileIndex)}.absoluteFilePath ();
       int const effective_nutc = nutc != 0 ? nutc : infer_nutc_from_path (wav_path, nutc);
-      WavData const wav = read_wav_file (wav_path);
+      ftx_ft8_stage4_apply_hash_seed_cache_c ();
+      WavData wav = read_wav_file (wav_path);
 
       out << "file: " << wav_path << '\n';
       out << "samples: source=" << wav.source_samples
@@ -1425,6 +1638,7 @@ int main (int argc, char * argv[])
           out << "note: source WAV is longer than FT8 compare buffer; truncating to first "
               << kFt8SampleCount << " samples\n";
         }
+      apply_pre_subtractions (wav.samples, parser.values (pre_subtract_option), out);
       out << "decoder params: nqsoprogress=" << nqsoprogress
           << " nfqso=" << nfqso
           << " nftx=" << nftx
@@ -1476,7 +1690,8 @@ int main (int argc, char * argv[])
       bool const sequenceState = positional.size () > 1 && stages.size () == 1;
       for (int stage : stages)
         {
-          bool const resetBefore = !(sequenceState && fileIndex > 0);
+          bool const resetBefore = !(sequenceState && fileIndex > 0)
+              && !(fileIndex == 0 && !a7Seeds.isEmpty ());
           bool const resetAfter = !(sequenceState && fileIndex + 1 < positional.size ());
           results.push_back (run_decode (wav.samples, stage, nqsoprogress, nfqso, nftx, effective_nutc,
                                          nfa, nfb, nzhsym, depth, emedelay, ncontest,

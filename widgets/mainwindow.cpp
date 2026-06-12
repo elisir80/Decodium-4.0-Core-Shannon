@@ -2348,7 +2348,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   m_gen_message_is_cq {false},
   m_send_RR73 {false},
   m_XIT {0},
-  m_ncandthin {100}, 	//ft8md
+  m_ncandthin {30}, 	//ft8md
   m_nFT8Cycles {3},     //ft8md
   m_nFT8RXfSens {3}   , //ft8md
   m_ft8threads {0},     //ft8md
@@ -6849,16 +6849,34 @@ void MainWindow::dataSink(qint64 frames)
   bool const embeddedFt8SingleThreadDecode =
       embeddedFt8LiveDecode && !m_multithreadFT8;
 
-  bool bCallDecoder=false;
+  if(embeddedFt8LiveDecode) {
+    m_earlyDecode2 = 47;
+  } else if(m_multithreadFT8 && m_ft8DecoderStart==1) {
+    m_earlyDecode2 = 46; // ft8md
+  }
 
-  if(m_multithreadFT8 && m_ft8DecoderStart==1) m_earlyDecode2 = 46; // ft8md
+  bool const ft8EmbeddedEarlyDecode =
+      embeddedFt8LiveDecode;
+  bool const ft8LegacyFirstEarlyDecode =
+      !embeddedFt8SingleThreadDecode
+      && (embeddedFt8LiveDecode || !(m_multithreadFT8 && m_ft8DecoderStart > 1));
+  bool const ft8LegacySecondEarlyDecode =
+      !embeddedFt8SingleThreadDecode
+      && !(m_multithreadFT8 && m_ft8DecoderStart != 1);
+  bool const ft8FirstEarlyDecodeTrigger =
+      m_mode == "FT8" && !m_diskData && m_ihsym == m_earlyDecode
+      && (ft8EmbeddedEarlyDecode || ft8LegacyFirstEarlyDecode);
+  bool const ft8SecondEarlyDecodeTrigger =
+      m_mode == "FT8" && !m_diskData && m_ihsym == m_earlyDecode2
+      && (ft8EmbeddedEarlyDecode || ft8LegacySecondEarlyDecode);
+
+  bool bCallDecoder=false;
 
   if(m_ihsym==m_hsymStop) bCallDecoder=true;
 
-  if(m_mode=="FT8" && !m_diskData && !embeddedFt8SingleThreadDecode
-     && (embeddedFt8LiveDecode || !(m_multithreadFT8 && m_ft8DecoderStart>1))) {  //ft8md Try to call MTD two times when "Very early" has been selected
-    if(m_ihsym==m_earlyDecode) bCallDecoder=true;
-    if(m_ihsym==m_earlyDecode2 && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) bCallDecoder=true;
+  if(m_mode=="FT8" && !m_diskData) {  //ft8md Try to call MTD two times when "Very early" has been selected
+    if(ft8FirstEarlyDecodeTrigger) bCallDecoder=true;
+    if(ft8SecondEarlyDecodeTrigger) bCallDecoder=true;
   }
 
   if(bCallDecoder) {
@@ -6962,9 +6980,8 @@ void MainWindow::dataSink(qint64 frames)
     dec_data.params.nagain=0;
     dec_data.params.nagainfil=0;	
     dec_data.params.nzhsym=m_hsymStop;
-    if(m_mode=="FT8" and m_ihsym==m_earlyDecode and !m_diskData && !embeddedFt8SingleThreadDecode
-       && (embeddedFt8LiveDecode || !(m_multithreadFT8 && m_ft8DecoderStart>1))) dec_data.params.nzhsym=m_earlyDecode;
-    if(m_mode=="FT8" and m_ihsym==m_earlyDecode2 and !m_diskData && !embeddedFt8SingleThreadDecode && !(m_multithreadFT8 && m_ft8DecoderStart!=1)) dec_data.params.nzhsym=m_earlyDecode2;
+    if(ft8FirstEarlyDecodeTrigger) dec_data.params.nzhsym=m_earlyDecode;
+    if(ft8SecondEarlyDecodeTrigger) dec_data.params.nzhsym=m_earlyDecode2;
     QDateTime now {QDateTime::currentDateTimeUtc ()};
     m_dateTime = now.toString ("yyyy-MMM-dd hh:mm");
     if(m_mode!="WSPR") {
@@ -6986,9 +7003,10 @@ void MainWindow::dataSink(qint64 frames)
       decode(); //Start decoder
     }
 
-    if(m_mode=="FT8" and !embeddedFt8SingleThreadDecode
-       and (embeddedFt8LiveDecode || !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2)))
-       && (m_ihsym==m_earlyDecode or m_ihsym==m_earlyDecode2)) return;
+    if((ft8FirstEarlyDecodeTrigger || ft8SecondEarlyDecodeTrigger)
+       || (m_mode=="FT8" and !embeddedFt8SingleThreadDecode
+           and (embeddedFt8LiveDecode || !(m_diskData or (m_multithreadFT8 && m_ft8DecoderStart<2)))
+           && (m_ihsym==m_earlyDecode or m_ihsym==m_earlyDecode2))) return;
     if (!m_diskData)
       {
         bool const liveEmbeddedFt8 =
@@ -13182,15 +13200,30 @@ void MainWindow::queueInProcessFt8Decode ()
 static int ft8BaseDepthFromLegacyMask (int rawDepth)
 {
   // NDepth is a legacy bit mask: bits 0..2 hold the base decode depth, while
-  // upper bits enable averaging, correlation, AP DX call, etc. The C++ FT8
-  // worker accepts only the base depth; clamping values like 51 to 4
-  // accidentally forces the slowest live decode path on every slot.
+  // upper bits enable averaging, correlation, AP DX call, etc. Averaging or
+  // correlation explicitly request the promoted depth-4 FT8 profile.
   int depth = rawDepth & 7;
   if (depth <= 0)
     {
       depth = rawDepth;
     }
+  if ((rawDepth & 0xF0) != 0)
+    {
+      depth = 4;
+    }
   return qBound (1, depth, 4);
+}
+
+static bool ft8HasApTarget (QByteArray const& hiscall)
+{
+  for (char const ch : hiscall)
+    {
+      if (ch != '\0' && ch != ' ')
+        {
+          return true;
+        }
+    }
+  return false;
 }
 
 decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
@@ -13244,8 +13277,12 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
     int const minimumFreshSamples = qRound (expectedSamples * 0.88);
     request.hasFreshAudio = request.availableSamples >= minimumFreshSamples;
   }
+  request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
+  request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
+  request.hisgrid = QByteArray (dec_data.params.hisgrid, int (sizeof dec_data.params.hisgrid));
   if (m_embeddedShellMode && !m_diskData) {
-    if (request.ndepth >= 4) {
+    bool const hasApTarget = ft8HasApTarget (request.hiscall);
+    if (request.ndepth >= 4 && hasApTarget) {
       if (request.nzhsym == 47) {
         request.lft8apon = 1;
       } else if (request.nzhsym >= 50) {
@@ -13253,9 +13290,6 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
       }
     }
   }
-  request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
-  request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
-  request.hisgrid = QByteArray (dec_data.params.hisgrid, int (sizeof dec_data.params.hisgrid));
   if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr) {
     bool neural = false, turbo = false, coherent = false;
     QMetaObject::invokeMethod (bridge, "effectiveNeuralSync", Qt::DirectConnection,
@@ -13278,6 +13312,7 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodi
   }
 
   int const baseDepth = request.ndepth;
+  bool const hasApTarget = ft8HasApTarget (request.hiscall);
   if (request.nzhsym >= 50) {
     request.ndepth = qMin (request.ndepth, 3);
     if (baseDepth >= 3) {
@@ -13289,7 +13324,7 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodi
     request.subpass = false;
     request.nft8Cycles = 1;
     request.nft8RxFreqSensitivity = 1;
-    request.lft8apon = baseDepth >= 3 ? 1 : 0;
+    request.lft8apon = (baseDepth >= 3 && (request.lft8apon || hasApTarget)) ? 1 : 0;
   } else {
     request.ndepth = qMin (request.ndepth, 2);
     request.maxDecodeMs = baseDepth >= 4 ? 2400 : 1800;
@@ -13316,9 +13351,12 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8DeepFollowupRequest (de
     return request;
   }
 
-  request.ndepth = qMin (request.ndepth, 3);
-  request.supplemental = false;
+  int const requestedDepth = request.ndepth;
+  bool const hasApTarget = ft8HasApTarget (request.hiscall);
+  request.ndepth = requestedDepth >= 4 ? 4 : qMin (requestedDepth, 3);
+  request.supplemental = requestedDepth >= 4;
   request.osdFollowup = request.ndepth >= 3;
+  request.lft8apon = hasApTarget ? request.lft8apon : 0;
   request.turboFeedbackEnabled = false;
   if (request.ndepth >= 3) {
     request.maxDecodeMs = 5200;

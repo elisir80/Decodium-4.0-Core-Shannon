@@ -3128,7 +3128,7 @@ void Decode77Context::saveHashCall (QString const& call)
     }
   m_hash22.prepend (h22.value);
   m_calls22.prepend (cw);
-  while (m_hash22.size () > 1000)
+  while (m_hash22.size () > 4096)
     {
       m_hash22.removeLast ();
       m_calls22.removeLast ();

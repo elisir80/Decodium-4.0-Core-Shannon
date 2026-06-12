@@ -6629,19 +6629,32 @@ void DecodiumBridge::seedFt8KnownCqCacheFromAllTxt()
                   return lhs.order < rhs.order;
               });
 
+    bool const knownCqSourceAllowed =
+        info.absolutePath().contains(QStringLiteral("JTDX"), Qt::CaseInsensitive)
+        || info.fileName().startsWith(QStringLiteral("JTDX"), Qt::CaseInsensitive);
+    QString const seedKnownCqText =
+        qEnvironmentVariable("DECODIUM_FT8_SEED_KNOWN_CQ_REPLAY").trimmed().toLower();
+    bool const seedKnownCqReplay =
+        knownCqSourceAllowed
+        && (seedKnownCqText == QStringLiteral("1")
+            || seedKnownCqText == QStringLiteral("true")
+            || seedKnownCqText == QStringLiteral("yes"));
+
     int seeded = 0;
 
-    for (KnownCqSeed const& seed : orderedSeeds) {
-        QString const& call = seed.call;
-        QString const& grid = seed.grid;
-        QByteArray callField = fixedField(call, 12);
-        QByteArray gridField = fixedField(grid, 4);
+    if (seedKnownCqReplay) {
+        for (KnownCqSeed const& seed : orderedSeeds) {
+            QString const& call = seed.call;
+            QString const& grid = seed.grid;
+            QByteArray callField = fixedField(call, 12);
+            QByteArray gridField = fixedField(grid, 4);
 
-        for (int hit = 0; hit < seed.hits; ++hit) {
-            ftx_ft8_stage4_seed_known_cq_c(callField.constData(), gridField.constData(),
-                                           seed.freq, seed.dt, seed.nutc);
+            for (int hit = 0; hit < seed.hits; ++hit) {
+                ftx_ft8_stage4_seed_known_cq_c(callField.constData(), gridField.constData(),
+                                               seed.freq, seed.dt, seed.nutc);
+            }
+            ++seeded;
         }
-        ++seeded;
     }
 
     QList<QString> hashCalls = hashCallOrders.keys();
@@ -6649,8 +6662,8 @@ void DecodiumBridge::seedFt8KnownCqCacheFromAllTxt()
               [&hashCallOrders] (QString const& lhs, QString const& rhs) {
                   return hashCallOrders.value(lhs) < hashCallOrders.value(rhs);
               });
-    if (hashCalls.size() > 1000) {
-        hashCalls = hashCalls.mid(hashCalls.size() - 1000);
+    if (hashCalls.size() > 4096) {
+        hashCalls = hashCalls.mid(hashCalls.size() - 4096);
     }
 
     int hashSeeded = 0;
@@ -31821,7 +31834,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     qint64 const elapsedMs = startedAtMs > 0
         ? QDateTime::currentMSecsSinceEpoch() - startedAtMs
         : -1;
-    if (decodeMode == QStringLiteral("FT8") && elapsedMs > 6500) {
+    if (decodeMode == QStringLiteral("FT8") && elapsedMs > 7000) {
         bridgeLog("onFt8DecodeReady: slow FT8 serial=" + QString::number(serial) +
                   " rows=" + QString::number(rows.size()) +
                   " elapsedMs=" + QString::number(elapsedMs) +
@@ -32336,7 +32349,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     Ft8PendingDeepFollowup pendingDeep = m_ft8PendingDeepFollowups.take(serial);
     if (!pendingDeep.audio.isEmpty()) {
         static constexpr int kFt8DeepDispatchSafetyMs = 250;
-        static constexpr int kFt8DeepMaxLiveBudgetMs = 5200;
+        static constexpr int kFt8DeepMaxLiveBudgetMs = 5700;
         static constexpr int kFt8DeepMinUsefulBudgetMs = 2400;
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
@@ -32345,6 +32358,14 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                                     - correctedNowMs
                                     - kFt8DeepDispatchSafetyMs),
                    kFt8DeepMaxLiveBudgetMs);
+        qInfo().noquote()
+            << QStringLiteral("[FT8DISPATCH] triggerSerial=%1 followupBudgetMs=%2 latestMs=%3 nowMs=%4 pendingDepth=%5 ft8ap=%6")
+                   .arg(serial)
+                   .arg(budgetMs)
+                   .arg(pendingDeep.latestCompleteMs)
+                   .arg(correctedNowMs)
+                   .arg(pendingDeep.decodeDepth)
+                   .arg(pendingDeep.ft8ApEnabled ? 1 : 0);
         bool const stalePending = pendingDeep.sessionId != m_decodeSessionId
             || m_mode != QStringLiteral("FT8");
         bool const busyForTx = m_transmitting || m_tuning;
@@ -35491,7 +35512,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         bool const explicitDeepFollowup = m_deepSearchEnabled || m_avgDecodeEnabled;
         qint64 deepFollowupLatestCompleteMs = 0;
         if (modeSnapshot == QStringLiteral("FT8") && decodePeriodMs > 0 && slotIndexForUtc >= 0) {
-            static constexpr int kFt8DeepLatestOverrunMs = 6000;
+            static constexpr int kFt8DeepLatestOverrunMs = 6500;
             deepFollowupLatestCompleteMs =
                 (slotIndexForUtc + 1) * static_cast<qint64>(decodePeriodMs)
                 + kFt8DeepLatestOverrunMs;
@@ -35503,6 +35524,20 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             && !cpuPressureActive()
             && explicitDeepFollowup
             && deepFollowupLatestCompleteMs > correctedUtcEpochMs();
+        qInfo().noquote()
+            << QStringLiteral("[FT8DISPATCH] serial=%1 effectiveDepth=%2 baseDepth=%3 deepSearch=%4 avg=%5 ft8ap=%6 txPending=%7 txAudio=%8 deepInTx=%9 runFollowup=%10 latestMs=%11 nowMs=%12")
+                   .arg(serial)
+                   .arg(decodeDepth)
+                   .arg(m_ndepth)
+                   .arg(m_deepSearchEnabled ? 1 : 0)
+                   .arg(m_avgDecodeEnabled ? 1 : 0)
+                   .arg(m_ft8ApEnabled ? 1 : 0)
+                   .arg(txStartPending ? 1 : 0)
+                   .arg(txAudioActive ? 1 : 0)
+                   .arg(m_ft8DeepDecodeInTx ? 1 : 0)
+                   .arg(runDeepFollowup ? 1 : 0)
+                   .arg(deepFollowupLatestCompleteMs)
+                   .arg(correctedUtcEpochMs());
         bridgeLog("FT8 final fast pass: serial=" + QString::number(serial) +
                   " depth=" + QString::number(fastDepth) +
                   " ft8ap=0" +
