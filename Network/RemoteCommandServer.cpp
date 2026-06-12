@@ -4021,7 +4021,7 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
   qint64 const nowUtcMs = currentUtcMs();
   pruneSeenIds(nowUtcMs);
 
-  if (!authToken_.isEmpty())
+  if (!authToken_.isEmpty() && !bindAddress_.isLoopback())
     {
       QString token = tokenOverride.trimmed();
       if (token.isEmpty())
