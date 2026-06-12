@@ -31,6 +31,7 @@ target_link_libraries (ft4_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 
 add_executable (ft8_stage_compare ft8_stage_compare.cpp)
 target_link_libraries (ft8_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+target_link_options (ft8_stage_compare PRIVATE -Wl,--stack,67108864)
 
 add_executable (ft2_stage_compare ft2_stage_compare.cpp)
 target_link_libraries (ft2_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
