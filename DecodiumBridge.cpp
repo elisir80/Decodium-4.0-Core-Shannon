@@ -5529,6 +5529,54 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
         }
     }
 
+    // Ghost-gate 4o livello (caso C58BTM, loopback 2026-06-11): i ghost LDPC
+    // in formato strict superano structural+DXCC+grid. Un chiamante DEBOLE
+    // (<=-10) MAI sentito prima deve confermarsi con un SECONDO decode (slot
+    // diverso) entro 120s prima di raggiungere lista/auto-seq: i ghost sono
+    // one-shot (token casuali ogni volta), una stazione reale ripete la
+    // chiamata ogni slot. Esenzione: call gia' vista in banda (AP cache).
+    // Solo FT2; costo per un chiamante reale debole = 1 periodo (7.5s).
+    if (m_mode == QStringLiteral("FT2")) {
+        bool snrOk = false;
+        int const snrVal = fields.value(1).trimmed().toInt(&snrOk);
+        if (snrOk && snrVal <= -10) {
+            qint64 const pendNowMs = QDateTime::currentMSecsSinceEpoch();
+            bool seenInBand = false;
+            if (m_ft2ApHashCache) {
+                for (quint32 const h28 : decodium::ft2MessageCallHashes(peerBase)) {
+                    if (m_hashedCallsignCache.containsHash28(h28, pendNowMs)) {
+                        seenInBand = true;
+                        break;
+                    }
+                }
+            }
+            if (!seenInBand) {
+                QString const timeToken = fields.value(0).trimmed();
+                auto const it = m_directedWeakPeerSeen.constFind(peerBase);
+                bool const confirmed = it != m_directedWeakPeerSeen.constEnd()
+                    && it.value().first != timeToken
+                    && (pendNowMs - it.value().second) <= 120000;
+                if (confirmed) {
+                    m_directedWeakPeerSeen.remove(peerBase);
+                    bridgeLog(QStringLiteral("[GhostFilter] weak first-contact CONFERMATO al 2o decode context=%1 peer=%2 snr=%3")
+                                  .arg(context, peerBase).arg(snrVal));
+                } else {
+                    if (it == m_directedWeakPeerSeen.constEnd()
+                        || (pendNowMs - it.value().second) > 120000) {
+                        if (m_directedWeakPeerSeen.size() > 64) {
+                            m_directedWeakPeerSeen.clear();
+                        }
+                        m_directedWeakPeerSeen.insert(peerBase,
+                                                      qMakePair(timeToken, pendNowMs));
+                        bridgeLog(QStringLiteral("[GhostFilter] weak first-contact: attendo conferma al 2o decode context=%1 peer=%2 snr=%3 msg=%4")
+                                      .arg(context, peerBase).arg(snrVal).arg(msg));
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+
     return false;
 }
 

@@ -2430,6 +2430,8 @@ private:
     mutable QString m_legacyAllTxtConsumedPath;
     mutable qint64 m_legacyAllTxtConsumedSize {-1};
     mutable QSet<QString> m_loggedDirectedGhostMsgs;  // 1.0.378: dedup log ghost grid-mismatch (filtro gira a render-time)
+    // Ghost-gate conferma 2 decode: peerBase -> (timeToken del 1o avvistamento, wall-ms).
+    mutable QHash<QString, QPair<QString, qint64>> m_directedWeakPeerSeen;
     bool m_syncingLegacyBackendState {false};
     bool m_syncingLegacyBackendDecodeList {false};
     bool m_legacyStateRefreshBurstQueued {false};
