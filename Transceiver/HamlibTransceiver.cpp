@@ -1639,6 +1639,25 @@ void HamlibTransceiver::do_ptt (bool on)
 }
 
 // pass in false if any post_action is needed for a rig -- don't know of any as of 2024-04-14
+void HamlibTransceiver::send_morse (QString const& text, int wpm) noexcept
+{
+  try
+    {
+      if (!m_->rig_ || text.isEmpty ()) return;
+      CAT_TRACE ("send_morse: '" << text << "' wpm=" << wpm);
+      if (wpm > 0)
+        {
+          value_t v; v.i = wpm;
+          rig_set_level (m_->rig_.data (), RIG_VFO_CURR, RIG_LEVEL_KEYSPD, v);
+        }
+      rig_send_morse (m_->rig_.data (), RIG_VFO_CURR, text.toLatin1 ().constData ());
+    }
+  catch (...)
+    {
+      // slot noexcept: non propagare eccezioni fuori dal thread del transceiver
+    }
+}
+
 void HamlibTransceiver::do_tune (bool on)
 {
   CAT_TRACE ("Tune: " << on << " " << state ());

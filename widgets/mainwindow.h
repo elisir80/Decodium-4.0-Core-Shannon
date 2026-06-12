@@ -712,6 +712,7 @@ private slots:
   void onRemoteSelectCallerDue(QString const& commandId, QString const& call, QString const& grid);
   void onRemoteSetModeRequested(QString const& commandId, QString const& mode);
   void onRemoteSetBandRequested(QString const& commandId, QString const& band);
+  void onRemoteSendCw(QString const& commandId, QString const& text, qint64 dialFrequencyHz, int wpm);
   void onRemoteSetDialFrequencyRequested(QString const& commandId, qint64 dialFrequencyHz);
   void onRemoteSetRxFrequencyRequested(QString const& commandId, int rxFrequencyHz);
   void onRemoteSetTxFrequencyRequested(QString const& commandId, int txFrequencyHz);

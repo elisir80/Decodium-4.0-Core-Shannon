@@ -236,6 +236,10 @@ public:
   Q_SLOT virtual void start (unsigned sequence_number) noexcept = 0;
   Q_SLOT virtual void stop () noexcept = 0;
 
+  // Trasmissione CW: invia 'text' al keyer della radio a 'wpm' parole/min.
+  // Default no-op: i transceiver che non supportano il keying CAT lo ignorano.
+  Q_SLOT virtual void send_morse (QString const& /*text*/, int /*wpm*/) noexcept {}
+
   //
   // asynchronous status updates
   //

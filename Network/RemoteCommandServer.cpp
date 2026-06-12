@@ -4227,6 +4227,33 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
       return result;
     }
 
+  if (commandType == QStringLiteral("send_cw"))
+    {
+      auto text = object.value(QStringLiteral("text")).toString().trimmed();
+      if (text.isEmpty())
+        {
+          result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_request"), QStringLiteral("text is required"));
+          return result;
+        }
+      qint64 dialHz = 0;
+      auto const fv = object.value(QStringLiteral("dial_frequency_hz"));
+      if (fv.isDouble()) dialHz = static_cast<qint64>(fv.toDouble());
+      int wpm = object.value(QStringLiteral("wpm")).toInt(22);
+      if (wpm < 5)  wpm = 5;
+      if (wpm > 60) wpm = 60;
+      seenCommandIds_.insert(commandId, nowUtcMs);
+      Q_EMIT sendCwRequested(commandId, text, dialHz, wpm);
+      result.accepted = true;
+      result.payload = QJsonObject {
+        {"event", QStringLiteral("command_ack")},
+        {"command_id", commandId},
+        {"type", QStringLiteral("send_cw")},
+        {"status", QStringLiteral("accepted_immediate")},
+        {"server_now_ms", nowUtcMs},
+      };
+      return result;
+    }
+
   if (commandType == QStringLiteral("set_dial_frequency"))
     {
       if (!object.contains(QStringLiteral("dial_frequency_hz")))

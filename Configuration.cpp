@@ -640,6 +640,7 @@ public:
   void transceiver_ptt (bool);
   void transceiver_audio (bool);
   void transceiver_tune (bool);
+  void transceiver_send_morse (QString const&, int);   // CW keying
   void transceiver_period (double);
   void transceiver_blocksize (qint32);
   void transceiver_modulator_start (QString, unsigned, double, double, double, bool, bool, double, double);
@@ -842,6 +843,7 @@ private:
   Q_SIGNAL void set_transceiver (Transceiver::TransceiverState const&,
                                  unsigned sequence_number) const;
   Q_SIGNAL void stop_transceiver () const;
+  Q_SIGNAL void send_morse_to_rig (QString const& text, int wpm) const;  // CW keying
 
   Configuration * const self_;	// back pointer to public interface
 
@@ -1579,6 +1581,11 @@ void Configuration::transceiver_ptt (bool on)
       LOG_TRACE (on << ' ' << m_->cached_rig_state_);
     }
   m_->transceiver_ptt (on);
+}
+
+void Configuration::transceiver_send_morse (QString const& text, int wpm)
+{
+  m_->transceiver_send_morse (text, wpm);
 }
 
 void Configuration::transceiver_audio (bool on)
@@ -6473,6 +6480,7 @@ bool Configuration::impl::open_rig (bool force)
           // setup thread safe startup and close down semantics
           rig_connections_ << connect (this, &Configuration::impl::start_transceiver, rig.get (), &Transceiver::start);
           rig_connections_ << connect (this, &Configuration::impl::stop_transceiver, rig.get (), &Transceiver::stop);
+          rig_connections_ << connect (this, &Configuration::impl::send_morse_to_rig, rig.get (), &Transceiver::send_morse);
 
           auto p = rig.release ();	// take ownership
 
@@ -6622,6 +6630,12 @@ void Configuration::impl::transceiver_ptt (bool on)
       LOG_TRACE ("emitting set_transceiver: requested state:" << cached_rig_state_);
     }
   Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
+}
+
+void Configuration::impl::transceiver_send_morse (QString const& text, int wpm)
+{
+  cached_rig_state_.online (true);
+  Q_EMIT send_morse_to_rig (text, wpm);   // -> Transceiver::send_morse (thread del rig)
 }
 
 void Configuration::impl::transceiver_audio (bool on)

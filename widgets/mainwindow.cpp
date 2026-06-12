@@ -3389,6 +3389,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
                     this, &MainWindow::onRemoteSetModeRequested);
             connect(m_remoteCommandServer, &RemoteCommandServer::setBandRequested,
                     this, &MainWindow::onRemoteSetBandRequested);
+            connect(m_remoteCommandServer, &RemoteCommandServer::sendCwRequested,
+                    this, &MainWindow::onRemoteSendCw);
             connect(m_remoteCommandServer, &RemoteCommandServer::setDialFrequencyRequested,
                     this, &MainWindow::onRemoteSetDialFrequencyRequested);
             connect(m_remoteCommandServer, &RemoteCommandServer::setRxFrequencyRequested,
@@ -32161,6 +32163,19 @@ void MainWindow::onRemoteSelectCallerDue(QString const& commandId, QString const
     }
 
   showStatusMessage(tr("Remote caller queued: %1").arg(mapCall));
+}
+
+void MainWindow::onRemoteSendCw(QString const& commandId, QString const& text, qint64 dialFrequencyHz, int wpm)
+{
+  Q_UNUSED(commandId);
+  // Imposta la frequenza dial (se fornita) e invia il testo al keyer CW della radio
+  // tramite Hamlib. NB: la radio dev'essere in modo CW (impostalo da CAT o a mano).
+  if (dialFrequencyHz > 0)
+    {
+      m_config.transceiver_frequency(dialFrequencyHz);
+    }
+  m_config.transceiver_send_morse(text, wpm);
+  showStatusMessage(tr("Remote CW: %1 (%2 WPM)").arg(text).arg(wpm));
 }
 
 void MainWindow::onRemoteSetModeRequested(QString const& commandId, QString const& mode)

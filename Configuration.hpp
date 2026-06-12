@@ -416,6 +416,7 @@ public:
   // the "Emulate Split" mode requires PTT information to coordinate
   // frequency changes.
   Q_SLOT void transceiver_ptt (bool = true);
+  Q_SLOT void transceiver_send_morse (QString const& text, int wpm = 22);  // CW keying
 //  Q_SLOT void transceiver_tune (bool = true);
 
   // Set/unset Audio streaming for TCI.

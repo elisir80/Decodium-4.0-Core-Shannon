@@ -84,6 +84,7 @@ Q_SIGNALS:
   void selectCallerDue(QString const& commandId, QString const& call, QString const& grid);
   void setModeRequested(QString const& commandId, QString const& mode);
   void setBandRequested(QString const& commandId, QString const& band);
+  void sendCwRequested(QString const& commandId, QString const& text, qint64 dialFrequencyHz, int wpm);
   void setDialFrequencyRequested(QString const& commandId, qint64 dialFrequencyHz);
   void setRxFrequencyRequested(QString const& commandId, int rxFrequencyHz);
   void setTxFrequencyRequested(QString const& commandId, int txFrequencyHz);

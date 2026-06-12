@@ -23,6 +23,8 @@ public:
                               QObject * parent = nullptr);
   ~HamlibTransceiver ();
 
+  void send_morse (QString const&, int) noexcept override;  // keying CW via Hamlib
+
 private:
   void load_user_settings ();
   int do_start () override;
