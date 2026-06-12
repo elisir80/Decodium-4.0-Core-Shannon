@@ -51,14 +51,15 @@ constexpr float kFt8CqSignalRepeatScore {0.65f};
 constexpr int kFt8CallGridMemory {96};
 constexpr int kFt8CallGridMaxAge {4};
 constexpr int kFt8KnownCallGridMemory {1024};
+constexpr int kFt8KnownCqCallMemory {512};
 constexpr int kFt8KnownCallGridMaxAgeSeconds {3 * 3600};
 constexpr int kFt8KnownCallGridMinFastReplayHits {3};
-constexpr int kFt8KnownCallGridFastReplayMaxAgeSeconds {10 * 60};
+constexpr int kFt8KnownCallGridFastReplayMaxAgeSeconds {150};
 constexpr float kFt8KnownCallGridFastReplayMaxFreqDelta {2.5f};
 constexpr float kFt8KnownCallGridFastReplayMaxDtDelta {0.10f};
 constexpr float kFt8KnownCallGridFastReplayMinCqScore {3.0f};
 constexpr int kFt8KnownCallGridFastReplayMinSync {9};
-constexpr int kFt8HashCallSeedMemory {1000};
+constexpr int kFt8HashCallSeedMemory {4096};
 constexpr int kFt8MaxLines {200};
 constexpr int kFt8Bits {77};
 constexpr int kFt8DecodedChars {37};
@@ -157,6 +158,16 @@ bool stage4_should_cancel ()
 
   long long const deadline = stage4_deadline_ms ().load (std::memory_order_relaxed);
   return deadline > 0 && steady_clock_ms () >= deadline;
+}
+
+long long stage4_remaining_ms ()
+{
+  long long const deadline = stage4_deadline_ms ().load (std::memory_order_relaxed);
+  if (deadline <= 0)
+    {
+      return 9000000000000LL;
+    }
+  return deadline - steady_clock_ms ();
 }
 
 extern "C"
@@ -536,12 +547,12 @@ bool is_standard_call (char const* data, int width)
     {
       return false;
     }
-  if (call.size () > 6 && call.find ('/') == std::string::npos)
+  if (call.size () > 7 && call.find ('/') == std::string::npos)
     {
       return false;
     }
 
-  std::string base = call.substr (0, std::min<size_t> (6, call.size ()));
+  std::string base = call;
   size_t const slash = call.find ('/');
   if (slash != std::string::npos && slash >= 1 && slash + 1 < call.size ())
     {
@@ -549,7 +560,7 @@ bool is_standard_call (char const* data, int width)
       size_t const right = call.size () - slash - 1;
       base = left <= right ? call.substr (slash + 1) : call.substr (0, slash);
     }
-  if (base.size () > 6)
+  if (base.size () > 7)
     {
       return false;
     }
@@ -564,13 +575,12 @@ bool is_standard_call (char const* data, int width)
     }
 
   int digit_index = -1;
-  if (base.size () >= 2 && is_digit (base[1]))
+  for (size_t index = 1; index < base.size () && index <= 3; ++index)
     {
-      digit_index = 1;
-    }
-  if (base.size () >= 3 && is_digit (base[2]))
-    {
-      digit_index = 2;
+      if (is_digit (base[index]))
+        {
+          digit_index = static_cast<int> (index);
+        }
     }
   if (digit_index < 0 || digit_index + 1 >= static_cast<int> (base.size ()))
     {
@@ -616,6 +626,12 @@ bool is_standard_call_word (std::string const& word)
 
 bool is_cq_modifier (std::string const& word)
 {
+  bool const alpha_modifier =
+      word.size () >= 2
+      && word.size () <= 4
+      && std::all_of (word.begin (), word.end (), [] (char ch) {
+           return ch >= 'A' && ch <= 'Z';
+         });
   return word == "DX"
       || word == "NA"
       || word == "SA"
@@ -629,7 +645,9 @@ bool is_cq_modifier (std::string const& word)
       || word == "IOTA"
       || word == "FD"
       || word == "WW"
-      || word == "TEST";
+      || word == "LCT"
+      || word == "TEST"
+      || alpha_modifier;
 }
 
 bool is_report_token (std::string const& word)
@@ -658,6 +676,7 @@ bool is_standard_ft8_exchange_tail (std::string const& word)
 }
 
 std::vector<std::string> split_words (std::string const& text);
+bool is_packable_cq_call_message (std::string const& call);
 
 bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded)
 {
@@ -674,7 +693,15 @@ bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded
         {
           callIndex = 2;
         }
-      if (callIndex >= words.size () || !is_standard_call_word (words[callIndex]))
+      if (callIndex >= words.size ())
+        {
+          return false;
+        }
+      bool const plain_packable_cq_call =
+          callIndex == 1
+          && words.size () == 2
+          && is_packable_cq_call_message (words[callIndex]);
+      if (!is_standard_call_word (words[callIndex]) && !plain_packable_cq_call)
         {
           return false;
         }
@@ -695,6 +722,196 @@ bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded
       return false;
     }
   return words.size () == 3;
+}
+
+bool is_directed_pair_only_message (FixedChars<kFt8DecodedChars> const& decoded)
+{
+  std::vector<std::string> const words = split_words (trim_fixed (decoded));
+  return words.size () == 2
+      && words[0] != "CQ"
+      && is_standard_call_word (words[0])
+      && is_standard_call_word (words[1]);
+}
+
+bool is_hash_call_placeholder_word (std::string const& word)
+{
+  if (word == "<...>")
+    {
+      return true;
+    }
+  if (word.size () <= 2 || word.front () != '<' || word.back () != '>')
+    {
+      return false;
+    }
+  std::string const inner = word.substr (1, word.size () - 2);
+  return is_standard_call_word (inner);
+}
+
+bool is_resolved_hash_call_word (std::string const& word)
+{
+  if (word.size () < 3 || word.size () > 13)
+    {
+      return false;
+    }
+  if (word == "CQ" || word == "DE" || word == "QRZ" || word == "RRR"
+      || word == "RR73" || word == "73" || word == "TU")
+    {
+      return false;
+    }
+  if (is_grid4 (word) || is_report_token (word))
+    {
+      return false;
+    }
+
+  auto valid_core = [] (std::string const& core) {
+    if (core.size () < 3 || core.size () > 9)
+      {
+        return false;
+      }
+    size_t first_digit = std::string::npos;
+    size_t last_digit = std::string::npos;
+    for (size_t index = 0; index < core.size (); ++index)
+      {
+        if (core[index] >= '0' && core[index] <= '9')
+          {
+            if (first_digit == std::string::npos)
+              {
+                first_digit = index;
+              }
+            last_digit = index;
+          }
+      }
+    if (first_digit == std::string::npos || first_digit < 1
+        || last_digit + 1 >= core.size ())
+      {
+        return false;
+      }
+    if (first_digit > 3 || (last_digit - first_digit + 1) > 4)
+      {
+        return false;
+      }
+    bool prefix_has_letter = false;
+    for (size_t index = 0; index < first_digit; ++index)
+      {
+        char const ch = core[index];
+        if (ch < 'A' || ch > 'Z')
+          {
+            return false;
+          }
+        prefix_has_letter = true;
+      }
+    for (size_t index = first_digit; index <= last_digit; ++index)
+      {
+        char const ch = core[index];
+        if (ch < '0' || ch > '9')
+          {
+            return false;
+          }
+      }
+    int suffix_letters = 0;
+    for (size_t index = last_digit + 1; index < core.size (); ++index)
+      {
+        char const ch = core[index];
+        if (ch < 'A' || ch > 'Z')
+          {
+            return false;
+          }
+        ++suffix_letters;
+      }
+    return prefix_has_letter && suffix_letters >= 1 && suffix_letters <= 5;
+  };
+
+  size_t const slash = word.find ('/');
+  if (slash == std::string::npos)
+    {
+      return valid_core (word);
+    }
+  if (slash == 0 || slash + 1 >= word.size ()
+      || word.find ('/', slash + 1) != std::string::npos)
+    {
+      return false;
+    }
+  std::string const left = word.substr (0, slash);
+  std::string const right = word.substr (slash + 1);
+  auto valid_affix = [] (std::string const& affix) {
+    if (affix.empty () || affix.size () > 4)
+      {
+        return false;
+      }
+    return std::all_of (affix.begin (), affix.end (), [] (char ch) {
+      return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9');
+    });
+  };
+  return (valid_core (left) && valid_affix (right))
+      || (valid_core (right) && valid_affix (left));
+}
+
+bool is_standard_or_hash_call_word (std::string const& word)
+{
+  return is_standard_call_word (word)
+      || is_hash_call_placeholder_word (word)
+      || is_resolved_hash_call_word (word);
+}
+
+bool ft8_word_has_valid_punctuation (std::string const& word)
+{
+  if (word.find (';') != std::string::npos
+      || word.find (':') != std::string::npos
+      || word.find (',') != std::string::npos)
+    {
+      return false;
+    }
+  if (word.find ('.') != std::string::npos && word != "<...>")
+    {
+      return false;
+    }
+  bool const has_report_sign =
+      word.find ('-') != std::string::npos || word.find ('+') != std::string::npos;
+  return !has_report_sign || is_report_token (word);
+}
+
+bool is_plausible_ft8_message_for_emit (FixedChars<kFt8DecodedChars> const& decoded)
+{
+  std::vector<std::string> const words = split_words (trim_fixed (decoded));
+  if (words.size () < 2 || words.size () > 4)
+    {
+      return false;
+    }
+  for (std::string const& word : words)
+    {
+      if (!ft8_word_has_valid_punctuation (word))
+        {
+          return false;
+        }
+    }
+
+  if (words[0] == "CQ")
+    {
+      size_t call_index = 1;
+      if (words.size () >= 3 && is_cq_modifier (words[1]))
+        {
+          call_index = 2;
+        }
+      if (call_index >= words.size ()
+          || !is_standard_or_hash_call_word (words[call_index]))
+        {
+          return false;
+        }
+      return call_index + 1 == words.size ()
+          || (call_index + 2 == words.size () && is_grid4 (words[call_index + 1]));
+    }
+
+  if (!is_standard_or_hash_call_word (words[0])
+      || !is_standard_or_hash_call_word (words[1]))
+    {
+      return false;
+    }
+  if (words.size () == 2)
+    {
+      return true;
+    }
+  return words.size () == 3
+      && (is_grid4 (words[2]) || is_report_token (words[2]));
 }
 
 FixedChars<kFt8DecodedChars> normalize_resolved_hash_call_tokens (
@@ -757,6 +974,11 @@ FixedChars<kFt8DecodedChars> normalize_resolved_hash_call_tokens (
   return fixed_from_string<kFt8DecodedChars> (normalized);
 }
 
+bool has_unresolved_hash_placeholder (FixedChars<kFt8DecodedChars> const& decoded)
+{
+  return trim_fixed (decoded).find ("<...>") != std::string::npos;
+}
+
 std::vector<std::string> split_words (std::string const& text)
 {
   std::istringstream stream {text};
@@ -781,9 +1003,21 @@ std::vector<std::string>& pack77_hash_seed_cache ()
   return cache;
 }
 
+std::vector<std::string>& pack77_hash_external_seed_cache ()
+{
+  static std::vector<std::string> cache;
+  return cache;
+}
+
 bool debug_known_cq_replay ()
 {
   static bool const enabled = std::getenv ("DECODIUM_DEBUG_KNOWN_CQ") != nullptr;
+  return enabled;
+}
+
+bool debug_ft8_focus_replay ()
+{
+  static bool const enabled = std::getenv ("DECODIUM_DEBUG_FT8_FOCUS") != nullptr;
   return enabled;
 }
 
@@ -859,7 +1093,21 @@ void remember_pack77_hash_call_seed (std::string const& call)
     }
 }
 
-void seed_pack77_hash_call (std::string const& raw_call, bool remember)
+void remember_pack77_hash_external_seed (std::string const& call)
+{
+  std::lock_guard<std::mutex> lock {pack77_hash_seed_mutex ()};
+  auto& cache = pack77_hash_external_seed_cache ();
+  cache.erase (std::remove (cache.begin (), cache.end (), call), cache.end ());
+  cache.push_back (call);
+  if (cache.size () > kFt8HashCallSeedMemory)
+    {
+      cache.erase (cache.begin (),
+                   cache.begin () + static_cast<std::ptrdiff_t> (cache.size ()
+                                                                 - kFt8HashCallSeedMemory));
+    }
+}
+
+void seed_pack77_hash_call (std::string const& raw_call, bool remember, bool external_seed = false)
 {
   std::string const call = sanitize_pack77_hash_call_seed (raw_call);
   if (!looks_like_pack77_hash_call_seed (call))
@@ -871,6 +1119,10 @@ void seed_pack77_hash_call (std::string const& raw_call, bool remember)
   if (remember)
     {
       remember_pack77_hash_call_seed (call);
+      if (external_seed)
+        {
+          remember_pack77_hash_external_seed (call);
+        }
     }
 }
 
@@ -885,11 +1137,30 @@ void seed_pack77_hashes_from_message (FixedChars<kFt8DecodedChars> const& decode
 void apply_pack77_hash_seed_cache ()
 {
   std::vector<std::string> seeds;
+  std::vector<std::string> external_seeds;
   {
     std::lock_guard<std::mutex> lock {pack77_hash_seed_mutex ()};
     seeds = pack77_hash_seed_cache ();
+    external_seeds = pack77_hash_external_seed_cache ();
   }
   for (std::string const& call : seeds)
+    {
+      apply_pack77_hash_call_seed (call);
+    }
+  for (std::string const& call : external_seeds)
+    {
+      apply_pack77_hash_call_seed (call);
+    }
+}
+
+void apply_pack77_hash_external_seed_cache ()
+{
+  std::vector<std::string> external_seeds;
+  {
+    std::lock_guard<std::mutex> lock {pack77_hash_seed_mutex ()};
+    external_seeds = pack77_hash_external_seed_cache ();
+  }
+  for (std::string const& call : external_seeds)
     {
       apply_pack77_hash_call_seed (call);
     }
@@ -2519,16 +2790,13 @@ void copy_audio_to_float (short const* source, std::array<float, kFt8NMax>& dest
     }
 }
 
-void restore_carried_audio (std::array<float, kFt8NMax>& dd,
-                            std::array<float, kFt8NMax> const& dd1,
-                            short const* iwave, int carried_samples)
+void restore_carried_audio (std::array<float, kFt8NMax>& dest,
+                            std::array<float, kFt8NMax> const& carried,
+                            short const* source, int carried_samples)
 {
-  int const carry_count = std::max (0, std::min ({carried_samples, kFt8CarrySamples, kFt8NMax}));
-  std::copy_n (dd1.begin (), carry_count, dd.begin ());
-  for (int i = carry_count; i < kFt8NMax; ++i)
-    {
-      dd[static_cast<size_t> (i)] = static_cast<float> (iwave[i]);
-    }
+  copy_audio_to_float (source, dest);
+  int const ncopy = std::clamp (carried_samples, 0, kFt8CarrySamples);
+  std::copy_n (carried.begin (), ncopy, dest.begin ());
 }
 
 double current_sequence_seconds ()
@@ -2587,6 +2855,10 @@ struct AsyncCollector
     (void) sync;
     FixedChars<kFt8DecodedChars> const normalized_decoded =
         normalize_resolved_hash_call_tokens (decoded);
+    if (!is_plausible_ft8_message_for_emit (normalized_decoded))
+      {
+        return;
+      }
     if (decodeds)
       {
         for (int i = 0; i < count; ++i)
@@ -2624,6 +2896,97 @@ struct AsyncCollector
         *nout = count;
       }
   }
+
+  void resolve_hash_placeholders ()
+  {
+    if (!decodeds || !bits77 || count <= 0)
+      {
+        return;
+      }
+
+    for (int i = 0; i < count; ++i)
+      {
+        FixedChars<kFt8DecodedChars> decoded =
+            fixed_from_chars<kFt8DecodedChars> (decodeds + i * kFt8DecodedChars);
+        decoded = normalize_resolved_hash_call_tokens (decoded);
+        seed_pack77_hashes_from_message (decoded);
+      }
+    apply_pack77_hash_seed_cache ();
+
+    for (int iteration = 0; iteration < 2; ++iteration)
+      {
+        int changed = 0;
+        for (int i = 0; i < count; ++i)
+          {
+            FixedChars<kFt8DecodedChars> current =
+                fixed_from_chars<kFt8DecodedChars> (decodeds + i * kFt8DecodedChars);
+            if (!has_unresolved_hash_placeholder (current))
+              {
+                continue;
+              }
+
+            signed char const* bits = bits77 + i * kFt8Bits;
+            bool has_bits = false;
+            for (int bit = 0; bit < kFt8Bits; ++bit)
+              {
+                if (bits[bit] != 0)
+                  {
+                    has_bits = true;
+                    break;
+                  }
+              }
+            if (!has_bits)
+              {
+                continue;
+              }
+
+            FixedChars<kFt8DecodedChars> unpacked =
+                blank_fixed<kFt8DecodedChars> ();
+            int quirky = 0;
+            if (legacy_pack77_unpack77bits_c (bits, 1, unpacked.data (), &quirky) == 0)
+              {
+                continue;
+              }
+            FixedChars<kFt8DecodedChars> const normalized_unpacked =
+                normalize_resolved_hash_call_tokens (unpacked);
+            if (has_unresolved_hash_placeholder (unpacked)
+                || !is_plausible_ft8_message_for_emit (unpacked))
+              {
+                continue;
+              }
+
+            bool duplicate = false;
+            for (int other = 0; other < count; ++other)
+              {
+                if (other == i)
+                  {
+                    continue;
+                  }
+                if (std::equal (unpacked.begin (), unpacked.end (),
+                                decodeds + other * kFt8DecodedChars))
+                  {
+                    duplicate = true;
+                    break;
+                  }
+              }
+            if (duplicate)
+              {
+                continue;
+              }
+
+            std::copy (unpacked.begin (), unpacked.end (),
+                       decodeds + i * kFt8DecodedChars);
+            seed_pack77_hashes_from_message (normalized_unpacked);
+            ++changed;
+          }
+
+        if (changed == 0)
+          {
+            break;
+          }
+        apply_pack77_hash_seed_cache ();
+      }
+  }
 };
 
 struct Ft8A7Entry
@@ -2631,7 +2994,9 @@ struct Ft8A7Entry
   float dt {0.0f};
   float freq {0.0f};
   int age {0};
+  int hits {1};
   FixedChars<kFt8DecodedChars> message {blank_fixed<kFt8DecodedChars> ()};
+  FixedChars<kFt8DecodedChars> replay_message {blank_fixed<kFt8DecodedChars> ()};
 };
 
 struct Ft8A7Slot
@@ -2710,6 +3075,21 @@ struct Ft8KnownCallGridEntry
 struct Ft8KnownCallGridState
 {
   std::array<Ft8KnownCallGridEntry, kFt8KnownCallGridMemory> entries {};
+};
+
+struct Ft8KnownCqCallEntry
+{
+  bool valid {false};
+  int nutc {-1};
+  float freq {0.0f};
+  float dt {0.0f};
+  int hits {0};
+  FixedChars<12> call {blank_fixed<12> ()};
+};
+
+struct Ft8KnownCqCallState
+{
+  std::array<Ft8KnownCqCallEntry, kFt8KnownCqCallMemory> entries {};
 };
 
 struct Ft8Stage4State
@@ -2815,8 +3195,16 @@ Ft8KnownCallGridState& known_call_grid_history ()
   return state;
 }
 
+Ft8KnownCqCallState& known_cq_call_history ()
+{
+  static Ft8KnownCqCallState state;
+  return state;
+}
+
 void save_known_call_grid (Ft8KnownCallGridState& state, std::string const& call,
                            std::string const& grid, float freq, float dt, int nutc);
+void save_known_cq_call (Ft8KnownCqCallState& state, std::string const& call,
+                         float freq, float dt, int nutc);
 int ft8_utc_delta_seconds (int newer, int older);
 
 int sequence_index_for_utc (int nutc)
@@ -2826,8 +3214,12 @@ int sequence_index_for_utc (int nutc)
 
 bool a7_entries_match (Ft8A7Entry const& lhs, Ft8A7Entry const& rhs)
 {
+  FixedChars<kFt8DecodedChars> const& lhs_message =
+      trim_fixed (lhs.replay_message).empty () ? lhs.message : lhs.replay_message;
+  FixedChars<kFt8DecodedChars> const& rhs_message =
+      trim_fixed (rhs.replay_message).empty () ? rhs.message : rhs.replay_message;
   return std::fabs (lhs.freq - rhs.freq) <= 3.0f
-         && std::equal (lhs.message.begin (), lhs.message.end (), rhs.message.begin ());
+         && std::equal (lhs_message.begin (), lhs_message.end (), rhs_message.begin ());
 }
 
 void append_a7_retained_entry (std::array<Ft8A7Entry, kFt8MaxEarly>& retained,
@@ -2842,6 +3234,7 @@ void append_a7_retained_entry (std::array<Ft8A7Entry, kFt8MaxEarly>& retained,
     {
       if (a7_entries_match (retained[static_cast<size_t> (i)], entry))
         {
+          entry.hits = std::min (retained[static_cast<size_t> (i)].hits + entry.hits, 16);
           retained[static_cast<size_t> (i)] = entry;
           return;
         }
@@ -2944,7 +3337,11 @@ void save_a7_entry (std::array<Ft8A7Slot, kFt8SequenceCount>& a7slots, int jseq,
   entry.dt = dt;
   entry.freq = freq;
   entry.age = 0;
+  entry.hits = 1;
   entry.message = fixed_from_string<kFt8DecodedChars> (saved);
+  entry.replay_message = is_strict_standard_ft8_message (decoded)
+      ? decoded
+      : entry.message;
   slot.current[static_cast<size_t> (slot.current_count)] = entry;
   ++slot.current_count;
 
@@ -3000,6 +3397,11 @@ bool ft8sd_hint_is_cq (FixedChars<kFt8DecodedChars> const& message)
       || starts_with (message, "QRZ ");
 }
 
+FixedChars<kFt8DecodedChars> ft8_a7_replay_message (Ft8A7Entry const& hint)
+{
+  return trim_fixed (hint.replay_message).empty () ? hint.message : hint.replay_message;
+}
+
 bool ft8_message_has_word (FixedChars<kFt8DecodedChars> const& message, std::string const& word)
 {
   if (word.empty ())
@@ -3012,7 +3414,8 @@ bool ft8_message_has_word (FixedChars<kFt8DecodedChars> const& message, std::str
 
 bool ft8_hint_matches_context (Ft8A7Entry const& hint, Ft8Request const& request)
 {
-  if (hint.freq <= -98.0f || hint.age > 3 || !is_strict_standard_ft8_message (hint.message))
+  FixedChars<kFt8DecodedChars> const message = ft8_a7_replay_message (hint);
+  if (hint.freq <= -98.0f || hint.age > 3 || !is_strict_standard_ft8_message (message))
     {
       return false;
     }
@@ -3023,20 +3426,21 @@ bool ft8_hint_matches_context (Ft8A7Entry const& hint, Ft8Request const& request
       // When the operator or auto-seq already has a current partner, never use
       // a retained FT8 hint from another callsign.  This keeps the very-deep
       // path from reviving stale stations.
-      if (!ft8_message_has_word (hint.message, dxcall))
+      if (!ft8_message_has_word (message, dxcall))
         {
           return false;
         }
       std::string const mycall = trim_fixed (request.mycall);
-      return ft8sd_hint_is_cq (hint.message)
+      return ft8sd_hint_is_cq (message)
           || mycall.empty ()
-          || ft8_message_has_word (hint.message, mycall);
+          || ft8_message_has_word (message, mycall);
     }
 
   // Without a current partner, replay directed messages only while they are
-  // fresh.  JTDX's ft8sd path can reuse a just-decoded message at the same
-  // signal position; older directed traffic is too easy to revive incorrectly.
-  return ft8sd_hint_is_cq (hint.message) || hint.age <= 1;
+  // fresh unless the same complete message has repeated in this A7 bucket.
+  // Repetition is tracked per frequency/message, so older hints still need to
+  // match the current signal position before they can be used.
+  return ft8sd_hint_is_cq (message) || hint.age <= 1 || hint.hits >= 2;
 }
 
 bool ft8_live_advanced_history_enabled (Ft8Request const& request)
@@ -3058,6 +3462,21 @@ bool ft8_history_replay_enabled (Ft8Request const& request)
          || ft8_live_advanced_history_enabled (request);
 }
 
+bool ft8_lightweight_repeated_hint_enabled (Ft8Request const& request)
+{
+  return request.nzhsym >= 50
+         && request.ndepth >= 3
+         && !request.supplemental
+         && request.ncontest == 0
+         && trim_fixed (request.hiscall).empty ();
+}
+
+bool ft8_repeated_hint_replay_enabled (Ft8Request const& request)
+{
+  return ft8_history_replay_enabled (request)
+         || ft8_lightweight_repeated_hint_enabled (request);
+}
+
 bool ft8_known_cq_replay_enabled (Ft8Request const& request)
 {
   return ft8_history_replay_enabled (request)
@@ -3069,12 +3488,39 @@ bool ft8_known_cq_replay_enabled (Ft8Request const& request)
              && trim_fixed (request.hiscall).empty ());
 }
 
+bool ft8_lightweight_known_cq_grid_enabled (Ft8Request const& request)
+{
+  return request.nzhsym >= 50
+         && request.ndepth >= 3
+         && !request.supplemental
+         && request.ncontest == 0
+         && trim_fixed (request.hiscall).empty ();
+}
+
+bool ft8_targeted_low_subpass_enabled (Ft8Request const& request)
+{
+  return request.nzhsym >= 50
+         && request.ndepth >= 3
+         && !request.supplemental
+         && request.lft8apon != 0
+         && request.ncontest == 0
+         && trim_fixed (request.hiscall).empty ();
+}
+
+Ft8Request ft8_targeted_low_subpass_request (Ft8Request request)
+{
+  request.lft8lowth = true;
+  request.lft8subpass = true;
+  request.nft8cycles = std::max (request.nft8cycles, 3);
+  return request;
+}
+
 Ft8A7Entry const* find_ft8_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
                                           float f1, float callback_dt,
                                           float freq_tolerance = 7.0f,
                                           float dt_tolerance = 0.55f)
 {
-  if (!hints || !ft8_history_replay_enabled (request))
+  if (!hints || !ft8_repeated_hint_replay_enabled (request))
     {
       return nullptr;
     }
@@ -3096,11 +3542,12 @@ Ft8A7Entry const* find_ft8_repeated_hint (Ft8A7Slot const* hints, Ft8Request con
         {
           continue;
         }
+      FixedChars<kFt8DecodedChars> const hint_message = ft8_a7_replay_message (hint);
 
       float const freq_delta = std::fabs (hint.freq - f1);
       float const dt_delta = std::fabs (hint.dt - callback_dt);
       bool const no_dx_context = trim_fixed (request.hiscall).empty ();
-      bool const directed_replay = no_dx_context && !ft8sd_hint_is_cq (hint.message);
+      bool const directed_replay = no_dx_context && !ft8sd_hint_is_cq (hint_message);
       float const max_freq_delta = directed_replay ? std::min (freq_tolerance, 3.0f) : freq_tolerance;
       float const max_dt_delta = directed_replay ? std::min (dt_tolerance, 0.22f) : dt_tolerance;
       if (freq_delta > max_freq_delta || dt_delta > max_dt_delta)
@@ -3122,7 +3569,7 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
                                  int ifa, int ifb, float* candidate,
                                  int& ncand)
 {
-  if (!hints || !candidate || !ft8_history_replay_enabled (request))
+  if (!hints || !candidate || !ft8_repeated_hint_replay_enabled (request))
     {
       return;
     }
@@ -3139,6 +3586,7 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
         {
           continue;
         }
+      FixedChars<kFt8DecodedChars> const hint_message = ft8_a7_replay_message (hint);
       if (hint.freq < static_cast<float> (ifa) - 4.0f
           || hint.freq > static_cast<float> (ifb) + 4.0f)
         {
@@ -3146,13 +3594,21 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
         }
 
       bool duplicate = false;
+      bool const directed_grid_hint = !ft8sd_hint_is_cq (hint_message)
+          && [&] {
+               std::vector<std::string> const words =
+                   split_words (trim_fixed (hint_message));
+               return words.size () == 3 && is_grid4 (words[2]);
+             } ();
       for (int i = 0; i < ncand; ++i)
         {
           float const freq = candidate[static_cast<size_t> (i * 4 + 0)];
           float const dt = candidate[static_cast<size_t> (i * 4 + 1)] - 0.5f;
           if (std::fabs (freq - hint.freq) <= 2.0f && std::fabs (dt - hint.dt) <= 0.20f)
             {
-              duplicate = true;
+              float const existing_cq =
+                  candidate[static_cast<size_t> (i * 4 + 3)];
+              duplicate = !(directed_grid_hint && existing_cq >= 1.5f);
               break;
             }
         }
@@ -3165,7 +3621,7 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
       hinted_candidates[static_cast<size_t> (appended * 4 + 1)] = hint.dt + 0.5f;
       hinted_candidates[static_cast<size_t> (appended * 4 + 2)] = 0.55f;
       hinted_candidates[static_cast<size_t> (appended * 4 + 3)] =
-          ft8sd_hint_is_cq (hint.message) ? 2.0f : 0.0f;
+          ft8sd_hint_is_cq (hint_message) ? 2.0f : 0.0f;
       ++appended;
     }
   if (appended <= 0)
@@ -3191,6 +3647,162 @@ void append_ft8_hint_candidates (Ft8A7Slot const* hints, Ft8Request const& reque
         }
     }
   ncand = keep + appended;
+}
+
+[[maybe_unused]] void prepend_live_cq_companion_candidates (Ft8Request const& request, int ipass,
+                                                           int ifa, int ifb, float* candidate,
+                                                           int& ncand)
+{
+  if (!candidate
+      || request.nzhsym < 50
+      || request.ndepth < 3
+      || request.supplemental
+      || request.lft8apon == 0
+      || request.ncontest != 0
+      || !trim_fixed (request.hiscall).empty ()
+      || ipass > 2)
+    {
+      return;
+    }
+
+  constexpr int kMaxCompanions = 16;
+  struct CompanionCandidate
+  {
+    std::array<float, 4> values {};
+    float score {1.0e30f};
+  };
+  std::array<CompanionCandidate, 64> companion_pool {};
+  int pool_count = 0;
+  int const scan_limit = std::min (ncand, 96);
+
+  (void) ifa;
+  (void) ifb;
+  auto duplicate_pool = [&] (float freq, float dt) {
+    for (int index = 0; index < pool_count; ++index)
+      {
+        float const existing_freq =
+            companion_pool[static_cast<size_t> (index)].values[0];
+        float const existing_dt =
+            companion_pool[static_cast<size_t> (index)].values[1];
+        if (std::fabs (existing_freq - freq) <= 0.75f
+            && std::fabs (existing_dt - dt) <= 0.08f)
+          {
+            return true;
+          }
+    }
+    return false;
+  };
+
+  for (int index = 0; index < scan_limit; ++index)
+    {
+      float const freq = candidate[static_cast<size_t> (index * 4 + 0)];
+      float const dt = candidate[static_cast<size_t> (index * 4 + 1)];
+      float const sync = candidate[static_cast<size_t> (index * 4 + 2)];
+      float const cq = candidate[static_cast<size_t> (index * 4 + 3)];
+      if (cq < 1.75f || sync < 3.0f)
+        {
+          continue;
+        }
+
+      for (int other = index + 1; other < scan_limit; ++other)
+        {
+          float const other_freq = candidate[static_cast<size_t> (other * 4 + 0)];
+          float const other_dt = candidate[static_cast<size_t> (other * 4 + 1)];
+          float const other_sync = candidate[static_cast<size_t> (other * 4 + 2)];
+          float const other_cq = candidate[static_cast<size_t> (other * 4 + 3)];
+          float const delta = std::fabs (other_freq - freq);
+          if (other_cq < 1.75f
+              || other_sync < 1.0f
+              || std::fabs (other_dt - dt) > 0.08f
+              || delta < 2.6f
+              || delta > 3.7f)
+            {
+              continue;
+            }
+          int const promote = other_freq >= freq ? other : index;
+          float const promote_freq = candidate[static_cast<size_t> (promote * 4 + 0)];
+          float const promote_dt = candidate[static_cast<size_t> (promote * 4 + 1)];
+          if (duplicate_pool (promote_freq, promote_dt))
+            {
+              continue;
+            }
+          float const pair_sync = std::min (sync, other_sync);
+          float const pair_cq = std::min (cq, other_cq);
+          CompanionCandidate entry;
+          for (int field = 0; field < 4; ++field)
+            {
+              entry.values[static_cast<size_t> (field)] =
+                  candidate[static_cast<size_t> (promote * 4 + field)];
+            }
+          entry.score = std::fabs (delta - 3.125f)
+                        - 0.035f * std::min (pair_sync, 12.0f)
+                        - 0.10f * std::min (pair_cq, 3.0f)
+                        + 0.001f * static_cast<float> (std::min (index, other));
+          if (pool_count < static_cast<int> (companion_pool.size ()))
+            {
+              companion_pool[static_cast<size_t> (pool_count++)] = entry;
+            }
+          else
+            {
+              int worst = 0;
+              for (int item = 1; item < pool_count; ++item)
+                {
+                  if (companion_pool[static_cast<size_t> (item)].score
+                      > companion_pool[static_cast<size_t> (worst)].score)
+                    {
+                      worst = item;
+                    }
+                }
+              if (entry.score < companion_pool[static_cast<size_t> (worst)].score)
+                {
+                  companion_pool[static_cast<size_t> (worst)] = entry;
+                }
+            }
+        }
+    }
+
+  if (pool_count <= 0)
+    {
+      return;
+    }
+  std::sort (companion_pool.begin (), companion_pool.begin () + pool_count,
+             [] (CompanionCandidate const& lhs, CompanionCandidate const& rhs) {
+               return lhs.score < rhs.score;
+             });
+  int const companion_count = std::min (pool_count, kMaxCompanions);
+  if (companion_count <= 0)
+    {
+      return;
+    }
+  if (debug_ft8_focus_replay ())
+    {
+      std::cerr << "[FT8COMP] utc=" << request.nutc
+                << " pass=" << ipass
+                << " count=" << companion_count
+                << " first_freq=" << companion_pool[0].values[0]
+                << " first_dt=" << companion_pool[0].values[1]
+                << " ncand_before=" << ncand
+                << '\n';
+    }
+
+  int const keep = std::min (ncand, kFt8MaxCand - companion_count);
+  for (int index = keep - 1; index >= 0; --index)
+    {
+      for (int field = 0; field < 4; ++field)
+        {
+          candidate[static_cast<size_t> ((index + companion_count) * 4 + field)] =
+              candidate[static_cast<size_t> (index * 4 + field)];
+        }
+    }
+  for (int index = 0; index < companion_count; ++index)
+    {
+      for (int field = 0; field < 4; ++field)
+        {
+          candidate[static_cast<size_t> (index * 4 + field)] =
+              companion_pool[static_cast<size_t> (index)].values[static_cast<size_t> (field)];
+        }
+    }
+  ncand = keep + companion_count;
 }
 
 void append_known_cq_candidates (Ft8KnownCallGridState const& state,
@@ -3231,7 +3843,7 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
                 << " ncand=" << ncand << '\n';
     }
   if (!candidate
-      || !ft8_history_replay_enabled (request)
+      || !ft8_known_cq_replay_enabled (request)
       || request.lft8apon == 0
       || !trim_fixed (request.hiscall).empty ()
       || request.nutc <= 0)
@@ -3244,6 +3856,33 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
     float freq {0.0f};
     float dt {0.0f};
     float score {0.0f};
+  };
+
+  auto local_support_score = [&] (Ft8KnownCallGridEntry const& entry) {
+    float best_score = 1.0e30f;
+    for (int index = 0; index < ncand; ++index)
+      {
+        float const candidate_freq = candidate[static_cast<size_t> (index * 4 + 0)];
+        float const candidate_dt =
+            candidate[static_cast<size_t> (index * 4 + 1)] - 0.5f;
+        float const candidate_sync = candidate[static_cast<size_t> (index * 4 + 2)];
+        float const candidate_cq = candidate[static_cast<size_t> (index * 4 + 3)];
+        float const freq_delta = std::fabs (candidate_freq - entry.freq);
+        float const dt_delta = std::fabs (candidate_dt - entry.dt);
+        bool const has_signal_evidence =
+            candidate_sync >= 0.32f || candidate_cq >= 1.0f;
+        if (!has_signal_evidence || freq_delta > 5.5f || dt_delta > 0.35f)
+          {
+            continue;
+          }
+
+        float const support =
+            freq_delta + 10.0f * dt_delta
+            - 0.08f * std::min (candidate_sync, 10.0f)
+            - 0.25f * std::min (candidate_cq, 3.0f);
+        best_score = std::min (best_score, support);
+      }
+    return best_score;
   };
 
   std::array<CandidateHint, 96> hints {};
@@ -3274,6 +3913,10 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
             }
           continue;
         }
+      if (age_seconds > kFt8KnownCallGridFastReplayMaxAgeSeconds)
+        {
+          continue;
+        }
       if (entry.freq < static_cast<float> (ifa) - 3.0f
           || entry.freq > static_cast<float> (ifb) + 3.0f
           || entry.dt < -2.5f
@@ -3291,10 +3934,24 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
           continue;
         }
 
+      float const support_score = local_support_score (entry);
+      if (support_score >= 1.0e20f)
+        {
+          if (debug_known_cq_replay ())
+            {
+              std::cerr << "[KNOWNCQ] skip unsupported call=" << trim_fixed (entry.call)
+                        << " grid=" << trim_fixed (entry.grid)
+                        << " freq=" << entry.freq
+                        << " dt=" << entry.dt << '\n';
+            }
+          continue;
+        }
+
       CandidateHint hint;
       hint.freq = entry.freq;
       hint.dt = entry.dt;
-      hint.score = 0.0005f * static_cast<float> (age_seconds)
+      hint.score = support_score
+                   + 0.0005f * static_cast<float> (age_seconds)
                    - 0.10f * static_cast<float> (std::min (entry.hits, 20));
       if (debug_known_cq_replay ())
         {
@@ -3303,7 +3960,8 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
                     << " freq=" << entry.freq
                     << " dt=" << entry.dt
                     << " age=" << age_seconds
-                    << " hits=" << entry.hits << '\n';
+                    << " hits=" << entry.hits
+                    << " support=" << support_score << '\n';
         }
 
       int insert_at = hint_count;
@@ -3341,31 +3999,23 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
                return lhs.score < rhs.score;
              });
 
-  int const append_limit = ft8_live_advanced_history_enabled (request) ? 72 : 96;
+  int const append_limit = ft8_live_advanced_history_enabled (request) ? 24 : 16;
   int const appended = std::min ({hint_count, append_limit, kFt8MaxCand - ncand});
   if (appended <= 0)
     {
       return;
     }
 
-  int const keep = std::min (ncand, kFt8MaxCand - appended);
-  for (int i = keep - 1; i >= 0; --i)
-    {
-      for (int j = 0; j < 4; ++j)
-        {
-          candidate[static_cast<size_t> ((i + appended) * 4 + j)] =
-              candidate[static_cast<size_t> (i * 4 + j)];
-        }
-    }
   for (int i = 0; i < appended; ++i)
     {
       CandidateHint const& hint = hints[static_cast<size_t> (i)];
-      candidate[static_cast<size_t> (i * 4 + 0)] = hint.freq;
-      candidate[static_cast<size_t> (i * 4 + 1)] = hint.dt + 0.5f;
-      candidate[static_cast<size_t> (i * 4 + 2)] = 0.55f;
-      candidate[static_cast<size_t> (i * 4 + 3)] = 3.0f;
+      int const index = ncand + i;
+      candidate[static_cast<size_t> (index * 4 + 0)] = hint.freq;
+      candidate[static_cast<size_t> (index * 4 + 1)] = hint.dt + 0.5f;
+      candidate[static_cast<size_t> (index * 4 + 2)] = 0.55f;
+      candidate[static_cast<size_t> (index * 4 + 3)] = 3.0f;
     }
-  ncand = keep + appended;
+  ncand += appended;
 }
 
 bool ft8sd1_replay_accepts (float const* s8, std::array<int, kFt8Nn> const& expected_tones)
@@ -3464,7 +4114,8 @@ bool try_ft8sd_known_message (FixedChars<kFt8DecodedChars> const& hint_message,
                               float const* llra, float const* llrb,
                               float const* llrc, float const* llrd,
                               int hard_limit_override = -1,
-                              float dmin_limit_override = -1.0f)
+                              float dmin_limit_override = -1.0f,
+                              bool allow_metrics_fallback = true)
 {
   std::array<int, kFt8Nn> expected_tones {};
   std::array<signed char, 174> expected_codeword {};
@@ -3485,6 +4136,11 @@ bool try_ft8sd_known_message (FixedChars<kFt8DecodedChars> const& hint_message,
         sd_message = hint_message;
         sd_tones = expected_tones;
         return true;
+      }
+
+    if (!allow_metrics_fallback)
+      {
+        return false;
       }
 
     float hint_pow = 0.0f;
@@ -3589,7 +4245,7 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
                               float const* llra, float const* llrb,
                               float const* llrc, float const* llrd)
 {
-  if (!hints || !s8 || !ft8_history_replay_enabled (request))
+  if (!hints || !s8 || !ft8_repeated_hint_replay_enabled (request))
     {
       return false;
     }
@@ -3602,9 +4258,606 @@ bool try_ft8sd_repeated_hint (Ft8A7Slot const* hints, Ft8Request const& request,
     }
 
   Ft8A7Entry const& hint = *matched_hint;
-  return try_ft8sd_known_message (hint.message, request, s8, nsync, xbase,
+  FixedChars<kFt8DecodedChars> const hint_message = ft8_a7_replay_message (hint);
+  float const freq_delta = std::fabs (hint.freq - f1);
+  float const dt_delta = std::fabs (hint.dt - callback_dt);
+  bool const directed_replay =
+      trim_fixed (request.hiscall).empty () && !ft8sd_hint_is_cq (hint_message);
+  bool const repeated_directed_metrics =
+      ft8_lightweight_repeated_hint_enabled (request)
+      && directed_replay
+      && hint.hits >= 2
+      && hint.age <= 3
+      && nsync >= 8
+      && freq_delta <= 1.5f
+      && dt_delta <= 0.18f;
+  bool const allow_metrics_fallback =
+      ft8_history_replay_enabled (request) || repeated_directed_metrics;
+  int const hard_limit = repeated_directed_metrics ? 58 : -1;
+  float const dmin_limit = repeated_directed_metrics ? 170.0f : -1.0f;
+  bool const replay_ok =
+      try_ft8sd_known_message (hint_message, request, s8, nsync, xbase,
+                               msg37, xsnr, itone, message77,
+                               llra, llrb, llrc, llrd, hard_limit, dmin_limit,
+                               allow_metrics_fallback);
+  if (!replay_ok)
+    {
+      return false;
+    }
+  if (is_directed_pair_only_message (hint_message)
+      && is_directed_pair_only_message (msg37)
+      && trim_fixed (hint_message) == trim_fixed (msg37))
+    {
+      return false;
+    }
+  return true;
+}
+
+struct Ft8TerminalPairHint
+{
+  FixedChars<12> call_1 {blank_fixed<12> ()};
+  FixedChars<12> call_2 {blank_fixed<12> ()};
+};
+
+bool append_terminal_pair_hint (std::vector<Ft8TerminalPairHint>& hints,
+                                std::string const& call_1,
+                                std::string const& call_2)
+{
+  if (call_1.empty () || call_2.empty () || call_1 == call_2
+      || !is_standard_call_word (call_1)
+      || !is_standard_call_word (call_2))
+    {
+      return false;
+    }
+  for (Ft8TerminalPairHint const& hint : hints)
+    {
+      if (trim_fixed (hint.call_1) == call_1
+          && trim_fixed (hint.call_2) == call_2)
+        {
+          return false;
+        }
+    }
+  Ft8TerminalPairHint hint;
+  hint.call_1 = fixed_from_string<12> (call_1);
+  hint.call_2 = fixed_from_string<12> (call_2);
+  hints.push_back (hint);
+  return true;
+}
+
+bool terminal_pair_context_message (Ft8A7Entry const& entry,
+                                    std::string const& source_call_1,
+                                    std::string const& source_call_2)
+{
+  std::vector<std::string> const words =
+      split_words (trim_fixed (ft8_a7_replay_message (entry)));
+  if (words.size () != 3
+      || words[0] != source_call_1
+      || words[1] != source_call_2)
+    {
+      return false;
+    }
+  bool const r_report =
+      words[2].size () == 4
+      && words[2][0] == 'R'
+      && (words[2][1] == '-' || words[2][1] == '+');
+  return is_grid4 (words[2])
+         || (is_report_token (words[2]) && !r_report && words[2] != "73");
+}
+
+bool terminal_pair_has_prior_context (Ft8Stage4State const& state,
+                                      std::string const& source_call_1,
+                                      std::string const& source_call_2)
+{
+  for (Ft8A7Slot const& slot : state.a7)
+    {
+      int const current_limit = std::min (slot.current_count, kFt8MaxEarly);
+      for (int index = 0; index < current_limit; ++index)
+        {
+          if (terminal_pair_context_message (
+                  slot.current[static_cast<size_t> (index)],
+                  source_call_1, source_call_2))
+            {
+              return true;
+            }
+        }
+      int const previous_limit = std::min (slot.previous_count, kFt8MaxEarly);
+      for (int index = 0; index < previous_limit; ++index)
+        {
+          if (terminal_pair_context_message (
+                  slot.previous[static_cast<size_t> (index)],
+                  source_call_1, source_call_2))
+            {
+              return true;
+            }
+        }
+    }
+  return false;
+}
+
+void append_reverse_terminal_hints_from_entry (
+    std::vector<Ft8TerminalPairHint>& hints, Ft8Stage4State const& state,
+    Ft8A7Entry const& entry)
+{
+  if (entry.freq <= -98.0f)
+    {
+      return;
+    }
+  std::vector<std::string> const words =
+      split_words (trim_fixed (ft8_a7_replay_message (entry)));
+  bool const is_r_report =
+      words.size () == 3
+      && words[2].size () == 4
+      && words[2][0] == 'R'
+      && (words[2][1] == '-' || words[2][1] == '+')
+      && std::isdigit (static_cast<unsigned char> (words[2][2]))
+      && std::isdigit (static_cast<unsigned char> (words[2][3]));
+  if (words.size () != 3
+      || words[0] == "CQ"
+      || !is_r_report
+      || words[0].find ('<') != std::string::npos
+      || words[1].find ('<') != std::string::npos)
+    {
+      return;
+    }
+  if (!terminal_pair_has_prior_context (state, words[0], words[1]))
+    {
+      return;
+    }
+  append_terminal_pair_hint (hints, words[1], words[0]);
+}
+
+void append_reverse_terminal_hints_from_slot (
+    std::vector<Ft8TerminalPairHint>& hints, Ft8Stage4State const& state,
+    Ft8A7Slot const& slot)
+{
+  int const current_limit = std::min (slot.current_count, kFt8MaxEarly);
+  for (int index = current_limit - 1; index >= 0; --index)
+    {
+      append_reverse_terminal_hints_from_entry (
+          hints, state, slot.current[static_cast<size_t> (index)]);
+      if (hints.size () >= 12)
+        {
+          return;
+        }
+    }
+}
+
+bool try_reverse_terminal_pair_rescue (
+    Ft8Request const& request, int jseq, float const* s8, int nsync,
+    float xbase, FixedChars<kFt8DecodedChars>& msg37, float& xsnr,
+    std::array<int, kFt8Nn>& itone,
+    std::array<signed char, kFt8Bits>& message77,
+    float const* llra, float const* llrb, float const* llrc, float const* llrd)
+{
+  if (!s8 || !llra || !llrb || !llrc || !llrd
+      || jseq < 0 || jseq >= kFt8SequenceCount
+      || request.nzhsym < 50
+      || request.ndepth < 3
+      || request.supplemental
+      || request.lft8apon == 0
+      || request.ncontest != 0
+      || nsync < 10
+      || stage4_remaining_ms () < 3500
+      || !trim_fixed (request.hiscall).empty ())
+    {
+      return false;
+    }
+
+  std::vector<Ft8TerminalPairHint> hints;
+  Ft8Stage4State& state = stage4_state ();
+  append_reverse_terminal_hints_from_slot (
+      hints, state, state.a7[static_cast<size_t> (1 - jseq)]);
+  if (hints.empty ())
+    {
+      return false;
+    }
+
+  FixedChars<kFt8DecodedChars> best_message = blank_fixed<kFt8DecodedChars> ();
+  int best_hard = 174;
+  float best_dmin = 1.0e30f;
+  int second_hard = 174;
+  float second_dmin = 1.0e30f;
+  FixedChars<4> blank_grid = blank_fixed<4> ();
+
+  auto remember_candidate = [&] (FixedChars<kFt8DecodedChars> const& candidate_message,
+                                 int hard, float metric) {
+    if (hard < best_hard || (hard == best_hard && metric < best_dmin))
+      {
+        second_hard = best_hard;
+        second_dmin = best_dmin;
+        best_hard = hard;
+        best_dmin = metric;
+        best_message = candidate_message;
+        return;
+      }
+    if (hard < second_hard || (hard == second_hard && metric < second_dmin))
+      {
+        second_hard = hard;
+        second_dmin = metric;
+      }
+  };
+
+  for (Ft8TerminalPairHint const& hint : hints)
+    {
+      for (int const imsg : {3})
+        {
+          FixedChars<kFt8DecodedChars> candidate_message =
+              blank_fixed<kFt8DecodedChars> ();
+          if (ftx_prepare_ft8_a7_candidate_c (imsg, hint.call_1.data (),
+                                              hint.call_2.data (),
+                                              blank_grid.data (),
+                                              candidate_message.data ()) == 0
+              || !is_strict_standard_ft8_message (candidate_message))
+            {
+              continue;
+            }
+
+          FixedChars<kFt8DecodedChars> msgsent = blank_fixed<kFt8DecodedChars> ();
+          std::array<int, kFt8Nn> expected_tones {};
+          std::array<signed char, 174> expected_codeword {};
+          if (ftx_encode_ft8_candidate_c (candidate_message.data (), msgsent.data (),
+                                          expected_tones.data (),
+                                          expected_codeword.data ()) == 0)
+            {
+              continue;
+            }
+
+          float power = 0.0f;
+          float metric = 1.0e30f;
+          int hard = 174;
+          ftx_ft8a7_measure_candidate_c (s8, 8, kFt8Nn,
+                                         expected_tones.data (),
+                                         expected_codeword.data (),
+                                         llra, llrb, llrc, llrd,
+                                         &power, &metric, &hard);
+          if (power <= 0.0f)
+            {
+              continue;
+            }
+          remember_candidate (candidate_message, hard, metric);
+        }
+    }
+
+  if (trim_fixed (best_message).empty ()
+      || best_hard > 35
+      || best_dmin > 70.0f
+      || (second_hard < 174
+          && best_hard + 4 > second_hard
+          && best_dmin + 16.0f > second_dmin))
+    {
+      return false;
+    }
+
+  return try_ft8sd_known_message (best_message, request, s8, nsync, xbase,
                                   msg37, xsnr, itone, message77,
-                                  llra, llrb, llrc, llrd);
+                                  llra, llrb, llrc, llrd,
+                                  35, 70.0f, true);
+}
+
+bool try_ft8_a7_report_variant_hint (
+    Ft8Request const& request, FixedChars<kFt8DecodedChars> const& hint_message,
+    FixedChars<12> const& call_1, FixedChars<12> const& call_2,
+    FixedChars<4> const& grid4, float const* s8, int nsync, float xbase,
+    FixedChars<kFt8DecodedChars>& msg37, float& xsnr,
+    std::array<int, kFt8Nn>& itone,
+    std::array<signed char, kFt8Bits>& message77,
+    float const* llra, float const* llrb, float const* llrc, float const* llrd)
+{
+  if (!s8 || !llra || !llrb || !llrc || !llrd)
+    {
+      return false;
+    }
+  if (nsync < 18)
+    {
+      return false;
+    }
+
+  std::vector<std::string> const hint_words = split_words (trim_fixed (hint_message));
+  if (hint_words.size () != 3
+      || hint_words[0] == "CQ"
+      || hint_words[0].find ('<') != std::string::npos
+      || hint_words[1].find ('<') != std::string::npos
+      || !is_standard_call_word (hint_words[0])
+      || !is_standard_call_word (hint_words[1])
+      || !is_report_token (hint_words[2])
+      || hint_words[2] == "73"
+      || hint_words[2] == "RRR"
+      || hint_words[2] == "RR73")
+    {
+      return false;
+    }
+
+  std::array<float, kFt8A7MaxMsg> dmm;
+  dmm.fill (1.0e30f);
+  FixedChars<kFt8DecodedChars> best_message = blank_fixed<kFt8DecodedChars> ();
+  std::array<int, kFt8Nn> best_tones {};
+  int best_hard = 174;
+  float best_power = 0.0f;
+  float best_dmin = 1.0e30f;
+
+  for (int imsg = 7; imsg <= kFt8A7MaxMsg; ++imsg)
+    {
+      if (stage4_should_cancel ())
+        {
+          return false;
+        }
+
+      FixedChars<kFt8DecodedChars> candidate_message =
+          blank_fixed<kFt8DecodedChars> ();
+      if (ftx_prepare_ft8_a7_candidate_c (imsg, call_1.data (),
+                                          call_2.data (), grid4.data (),
+                                          candidate_message.data ()) == 0
+          || !is_strict_standard_ft8_message (candidate_message)
+          || messages_equal (candidate_message, hint_message))
+        {
+          continue;
+        }
+
+      std::vector<std::string> const candidate_words =
+          split_words (trim_fixed (candidate_message));
+      if (candidate_words.size () != 3
+          || !is_report_token (candidate_words[2])
+          || candidate_words[2] == "73"
+          || candidate_words[2] == "RRR"
+          || candidate_words[2] == "RR73")
+        {
+          continue;
+        }
+
+      FixedChars<kFt8DecodedChars> msgsent = blank_fixed<kFt8DecodedChars> ();
+      std::array<int, kFt8Nn> candidate_tones {};
+      std::array<signed char, 174> candidate_codeword {};
+      if (ftx_encode_ft8_candidate_c (candidate_message.data (), msgsent.data (),
+                                      candidate_tones.data (),
+                                      candidate_codeword.data ()) == 0)
+        {
+          continue;
+        }
+
+      float power = 0.0f;
+      float metric = 1.0e30f;
+      int hard = 174;
+      ftx_ft8a7_measure_candidate_c (s8, 8, kFt8Nn,
+                                     candidate_tones.data (),
+                                     candidate_codeword.data (),
+                                     llra, llrb, llrc, llrd,
+                                     &power, &metric, &hard);
+      dmm[static_cast<size_t> (imsg - 1)] = metric;
+      if (power <= 0.0f)
+        {
+          continue;
+        }
+      if (metric < best_dmin)
+        {
+          best_dmin = metric;
+          best_power = power;
+          best_hard = hard;
+          best_message = msgsent;
+          best_tones = candidate_tones;
+        }
+    }
+
+  if (trim_fixed (best_message).empty ())
+    {
+      return false;
+    }
+
+  float accepted_dmin = 1.0e30f;
+  float second_dmin = 1.0e30f;
+  float candidate_snr = -25.0f;
+  int const accept =
+      ftx_ft8_a7_finalize_metrics_c (dmm.data (), kFt8A7MaxMsg, best_power,
+                                     xbase, &accepted_dmin, &second_dmin,
+                                     &candidate_snr);
+  bool const strong_metric_fallback =
+      best_hard <= 44
+      && accepted_dmin <= 110.0f;
+  if (best_hard > 44 || (accept == 0 && !strong_metric_fallback))
+    {
+      if (debug_known_cq_replay ())
+        {
+          std::cerr << "[KNOWNCQ] reject report variant hint="
+                    << trim_fixed (hint_message)
+                    << " best=" << trim_fixed (best_message)
+                    << " nsync=" << nsync
+                    << " nhard=" << best_hard
+                    << " dmin=" << accepted_dmin
+                    << " dmin2=" << second_dmin
+                    << " accept=" << accept << '\n';
+        }
+      return false;
+    }
+
+  float snr_estimate = candidate_snr;
+  ftx_ft8_compute_snr_c (s8, 8, kFt8Nn, best_tones.data (), xbase,
+                         request.nagain, nsync, &snr_estimate);
+  if (debug_known_cq_replay ())
+    {
+      std::cerr << "[KNOWNCQ] accept report variant hint="
+                << trim_fixed (hint_message)
+                << " best=" << trim_fixed (best_message)
+                << " nsync=" << nsync
+                << " nhard=" << best_hard
+                << " dmin=" << accepted_dmin
+                << " dmin2=" << second_dmin
+                << " snr=" << snr_estimate << '\n';
+    }
+  return try_ft8sd_known_message (best_message, request, s8, nsync, xbase,
+                                  msg37, xsnr, itone, message77,
+                                  llra, llrb, llrc, llrd,
+                                  45, 125.0f, true);
+}
+
+bool try_ft8_a7_fast_repeated_hint (Ft8Stage4State& state,
+                                    Ft8Request const& request,
+                                    Ft8A7Entry const& hint,
+                                    int& newdat_a7,
+                                    std::array<float, kFt8Nh1> const& sbase,
+                                    FixedChars<kFt8DecodedChars>& msg37,
+                                    float& xsnr, float& xdt, float& f1,
+                                    std::array<int, kFt8Nn>& itone,
+                                    std::array<signed char, kFt8Bits>& message77,
+                                    bool allow_single_hit,
+                                    bool allow_relaxed_single_hit_exact = false)
+{
+  if (request.nzhsym < 50
+      || request.ndepth < 3
+      || request.lft8apon == 0
+      || request.ncontest != 0
+      || !trim_fixed (request.hiscall).empty ()
+      || (hint.hits < 2 && !allow_single_hit)
+      || !ft8_hint_matches_context (hint, request))
+    {
+      return false;
+    }
+
+  FixedChars<kFt8DecodedChars> const hint_message = ft8_a7_replay_message (hint);
+  bool const directed_replay = !ft8sd_hint_is_cq (hint_message);
+  if (!is_strict_standard_ft8_message (hint_message)
+      || is_directed_pair_only_message (hint_message))
+    {
+      return false;
+    }
+
+  float xbase = 0.0f;
+  FixedChars<12> call_1 = blank_fixed<12> ();
+  FixedChars<12> call_2 = blank_fixed<12> ();
+  FixedChars<4> grid4 = blank_fixed<4> ();
+  int const request_status =
+      ftx_ft8_prepare_a7_request_c (hint.freq, hint.dt, hint.message.data (),
+                                    sbase.data (), kFt8Nh1, &f1, &xdt, &xbase,
+                                    call_1.data (), call_2.data (), grid4.data ());
+  if (request_status != 1)
+    {
+      return false;
+    }
+
+  std::array<std::complex<float>, kFt8A7DownsampleSize> cd0 {};
+  ftx_ft8_downsample_c (state.dd.data (), &newdat_a7, f1,
+                        reinterpret_cast<fftwf_complex*> (cd0.data ()));
+  if (stage4_should_cancel ())
+    {
+      return false;
+    }
+
+  int ibest = 0;
+  float delfbest = 0.0f;
+  ftx_ft8_a7_search_initial_c (cd0.data (), kFt8A7Np2, kFt8A7Fs2,
+                               xdt, &ibest, &delfbest);
+  if (std::fabs (delfbest) > 0.0f)
+    {
+      std::array<float, 5> tweak {};
+      tweak[0] = -delfbest;
+      int const npts = kFt8A7Np2;
+      float const fsample = kFt8A7Fs2;
+      std::array<std::complex<float>, kFt8A7DownsampleSize> adjusted {};
+      ftx_twkfreq1_c (cd0.data (), &npts, &fsample, tweak.data (), adjusted.data ());
+      cd0 = adjusted;
+    }
+  f1 += delfbest;
+
+  int second_pass_newdat = 0;
+  ftx_ft8_downsample_c (state.dd.data (), &second_pass_newdat, f1,
+                        reinterpret_cast<fftwf_complex*> (cd0.data ()));
+  if (stage4_should_cancel ())
+    {
+      return false;
+    }
+
+  float sync = 0.0f;
+  ftx_ft8_a7_refine_search_c (cd0.data (), kFt8A7Np2, kFt8A7Fs2,
+                              ibest, &ibest, &sync, &xdt);
+
+  std::array<float, 8 * kFt8Nn> s8 {};
+  std::array<float, 174> llra {};
+  std::array<float, 174> llrb {};
+  std::array<float, 174> llrc {};
+  std::array<float, 174> llrd {};
+  std::array<float, 174> llre {};
+  int nsync = 0;
+  ftx_ft8_bitmetrics_scaled_c (cd0.data (), kFt8A7Np2, ibest, 1,
+                               kFt8BitMetricScale, s8.data (), &nsync,
+                               llra.data (), llrb.data (), llrc.data (),
+                               llrd.data (), llre.data ());
+
+  if (directed_replay && nsync < 8)
+    {
+      return false;
+    }
+
+  int const hard_limit = directed_replay ? 58 : -1;
+  float const dmin_limit = directed_replay ? 170.0f : -1.0f;
+  bool const single_hit_direct =
+      directed_replay && hint.hits < 2 && allow_single_hit;
+  if (!single_hit_direct
+      && try_ft8sd_known_message (hint_message, request, s8.data (), nsync, xbase,
+                                  msg37, xsnr, itone, message77,
+                                  llra.data (), llrb.data (), llrc.data (),
+                                  llrd.data (), hard_limit, dmin_limit, true))
+    {
+      return true;
+    }
+
+  if (single_hit_direct && allow_relaxed_single_hit_exact)
+    {
+      std::vector<std::string> const words =
+          split_words (trim_fixed (hint_message));
+      bool const report_tail =
+          words.size () == 3
+          && words[0].find ('<') == std::string::npos
+          && words[1].find ('<') == std::string::npos
+          && is_report_token (words[2])
+          && words[2] != "73"
+          && words[2] != "RRR"
+          && words[2] != "RR73";
+      if (report_tail
+          && try_ft8sd_known_message (hint_message, request, s8.data (), nsync,
+                                      xbase, msg37, xsnr, itone, message77,
+                                      llra.data (), llrb.data (), llrc.data (),
+                                      llrd.data (), hard_limit, dmin_limit, true))
+        {
+          return true;
+        }
+    }
+
+  if (!directed_replay)
+    {
+      return false;
+    }
+
+  if (try_ft8_a7_report_variant_hint (request, hint_message, call_1, call_2,
+                                      grid4, s8.data (), nsync, xbase,
+                                      msg37, xsnr, itone, message77,
+                                      llra.data (), llrb.data (),
+                                      llrc.data (), llrd.data ()))
+    {
+      return true;
+    }
+
+  for (int const terminal_imsg : {4, 3, 2})
+    {
+      FixedChars<kFt8DecodedChars> terminal_message =
+          blank_fixed<kFt8DecodedChars> ();
+      if (ftx_prepare_ft8_a7_candidate_c (terminal_imsg, call_1.data (),
+                                          call_2.data (), grid4.data (),
+                                          terminal_message.data ()) == 0)
+        {
+          continue;
+        }
+      if (!is_strict_standard_ft8_message (terminal_message)
+          || messages_equal (terminal_message, hint_message))
+        {
+          continue;
+        }
+      if (try_ft8sd_known_message (terminal_message, request, s8.data (), nsync,
+                                   xbase, msg37, xsnr, itone, message77,
+                                   llra.data (), llrb.data (), llrc.data (),
+                                   llrd.data (), hard_limit, dmin_limit, true))
+        {
+          return true;
+        }
+    }
+  return false;
 }
 
 Ft8CallGridEntry const* find_call_grid_cq_history (Ft8CallGridHistoryState const& state,
@@ -4172,6 +5425,10 @@ void save_call_grid_history (Ft8CallGridHistoryState& state, Ft8Request const& r
     {
       return;
     }
+  if (!ft8sd_hint_is_cq (decoded))
+    {
+      return;
+    }
   save_known_call_grid (known_call_grid_history (), call, grid, freq, callback_dt,
                         request.nutc);
 
@@ -4281,6 +5538,90 @@ void save_known_call_grid (Ft8KnownCallGridState& state, std::string const& call
   entry.grid = fixed_from_string<4> (grid);
 }
 
+bool is_packable_cq_call_message (std::string const& call)
+{
+  if (call.empty () || call.size () > 12)
+    {
+      return false;
+    }
+  for (char const ch : call)
+    {
+      if (!((ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '/'))
+        {
+          return false;
+        }
+    }
+
+  FixedChars<kFt8DecodedChars> const message =
+      fixed_from_string<kFt8DecodedChars> ("CQ " + call);
+  FixedChars<kFt8DecodedChars> msgsent = blank_fixed<kFt8DecodedChars> ();
+  std::array<int, kFt8Nn> tones {};
+  std::array<signed char, 174> codeword {};
+  if (ftx_encode_ft8_candidate_c (message.data (), msgsent.data (),
+                                  tones.data (), codeword.data ()) == 0)
+    {
+      return false;
+    }
+  return trim_fixed (msgsent) == "CQ " + call;
+}
+
+bool is_cq_call_only_message (FixedChars<kFt8DecodedChars> const& decoded)
+{
+  std::vector<std::string> const words = split_words (trim_fixed (decoded));
+  return words.size () == 2
+      && words[0] == "CQ"
+      && is_packable_cq_call_message (words[1]);
+}
+
+void save_known_cq_call (Ft8KnownCqCallState& state, std::string const& call,
+                         float freq, float dt, int nutc)
+{
+  if (!is_packable_cq_call_message (call) || freq <= 0.0f || nutc <= 0)
+    {
+      return;
+    }
+
+  int replace_index = -1;
+  float replace_score = -1.0e30f;
+  for (int i = 0; i < static_cast<int> (state.entries.size ()); ++i)
+    {
+      Ft8KnownCqCallEntry& entry = state.entries[static_cast<size_t> (i)];
+      if (!entry.valid)
+        {
+          replace_index = i;
+          break;
+        }
+      if (trim_fixed (entry.call) == call)
+        {
+          replace_index = i;
+          break;
+        }
+
+      int const age_seconds = nutc > 0 ? ft8_utc_delta_seconds (nutc, entry.nutc) : 0;
+      float const score = static_cast<float> (age_seconds)
+                          - 18.0f * static_cast<float> (std::min (entry.hits, 20));
+      if (score > replace_score)
+        {
+          replace_score = score;
+          replace_index = i;
+        }
+    }
+
+  if (replace_index < 0)
+    {
+      return;
+    }
+
+  Ft8KnownCqCallEntry& entry = state.entries[static_cast<size_t> (replace_index)];
+  bool const same_entry = entry.valid && trim_fixed (entry.call) == call;
+  entry.valid = true;
+  entry.nutc = nutc;
+  entry.freq = freq;
+  entry.dt = dt;
+  entry.hits = same_entry ? std::min (entry.hits + 1, 999) : 1;
+  entry.call = fixed_from_string<12> (call);
+}
+
 Ft8CallGridEntry const* find_call_grid_cq_history (Ft8CallGridHistoryState const& state,
                                                    Ft8Request const& request,
                                                    int jseq, float freq,
@@ -4350,9 +5691,20 @@ FixedChars<kFt8DecodedChars> known_call_grid_cq_message (Ft8KnownCallGridEntry c
       "CQ " + trim_fixed (entry.call) + " " + trim_fixed (entry.grid));
 }
 
+FixedChars<kFt8DecodedChars> known_cq_call_message (Ft8KnownCqCallEntry const& entry)
+{
+  return fixed_from_string<kFt8DecodedChars> ("CQ " + trim_fixed (entry.call));
+}
+
 struct Ft8KnownCqReplayMatch
 {
   Ft8KnownCallGridEntry const* entry {};
+  float score {0.0f};
+};
+
+struct Ft8KnownCqCallReplayMatch
+{
+  Ft8KnownCqCallEntry const* entry {};
   float score {0.0f};
 };
 
@@ -4377,7 +5729,50 @@ void insert_known_cq_replay_match (std::array<Ft8KnownCqReplayMatch, 12>& matche
         }
     }
 
-  if (count < 1)
+  if (count < static_cast<int> (matches.size ()))
+    {
+      matches[static_cast<size_t> (count++)] = {entry, score};
+      return;
+    }
+
+  int worst = 0;
+  for (int i = 1; i < count; ++i)
+    {
+      if (matches[static_cast<size_t> (i)].score
+          > matches[static_cast<size_t> (worst)].score)
+        {
+          worst = i;
+        }
+    }
+  if (score < matches[static_cast<size_t> (worst)].score)
+    {
+      matches[static_cast<size_t> (worst)] = {entry, score};
+    }
+}
+
+void insert_known_cq_call_replay_match (
+    std::array<Ft8KnownCqCallReplayMatch, 12>& matches,
+    int& count,
+    Ft8KnownCqCallEntry const* entry,
+    float score)
+{
+  if (!entry)
+    {
+      return;
+    }
+  for (int i = 0; i < count; ++i)
+    {
+      if (matches[static_cast<size_t> (i)].entry == entry)
+        {
+          if (score < matches[static_cast<size_t> (i)].score)
+            {
+              matches[static_cast<size_t> (i)].score = score;
+            }
+          return;
+        }
+    }
+
+  if (count < static_cast<int> (matches.size ()))
     {
       matches[static_cast<size_t> (count++)] = {entry, score};
       return;
@@ -4402,10 +5797,14 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
                                         Ft8Request const& request,
                                         float freq, float callback_dt,
                                         float cq_score, int nsync,
-                                        std::array<Ft8KnownCqReplayMatch, 12>& matches)
+                                        std::array<Ft8KnownCqReplayMatch, 12>& matches,
+                                        bool locked_known_cq_candidate = false)
 {
   int count = 0;
-  if (!ft8_known_cq_replay_enabled (request)
+  bool const known_cq_enabled = ft8_known_cq_replay_enabled (request);
+  bool const lightweight_grid =
+      !known_cq_enabled && ft8_lightweight_known_cq_grid_enabled (request);
+  if ((!known_cq_enabled && !lightweight_grid)
       || (cq_score < 0.75f && nsync < 3))
     {
       return 0;
@@ -4413,11 +5812,18 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
 
   bool const history_replay = ft8_history_replay_enabled (request);
   if (!history_replay
+      && !locked_known_cq_candidate
+      && !lightweight_grid
       && (cq_score < kFt8KnownCallGridFastReplayMinCqScore
           || nsync < kFt8KnownCallGridFastReplayMinSync))
     {
       return 0;
     }
+  if (lightweight_grid && nsync < 5)
+    {
+      return 0;
+    }
+  bool const low_cq_lightweight_grid = lightweight_grid && cq_score < 5.5f;
 
   bool const allow_wide_fast = false;
 
@@ -4427,8 +5833,19 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
         {
           continue;
         }
-      if (!history_replay && entry.hits < kFt8KnownCallGridMinFastReplayHits
+      if (!history_replay
+          && !locked_known_cq_candidate
+          && !lightweight_grid
+          && entry.hits < kFt8KnownCallGridMinFastReplayHits
           && !allow_wide_fast)
+        {
+          continue;
+        }
+      if (lightweight_grid && entry.hits < kFt8KnownCallGridMinFastReplayHits)
+        {
+          continue;
+        }
+      if (low_cq_lightweight_grid && (entry.hits < 4 || nsync < 7))
         {
           continue;
         }
@@ -4448,14 +5865,20 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
       float const dt_delta = std::fabs (entry.dt - callback_dt);
       float const strict_freq_delta = history_replay
           ? 4.5f
-          : kFt8KnownCallGridFastReplayMaxFreqDelta;
+          : (locked_known_cq_candidate || lightweight_grid
+                 ? 4.5f
+                 : kFt8KnownCallGridFastReplayMaxFreqDelta);
       float const strict_dt_delta = history_replay
           ? 0.55f
-          : kFt8KnownCallGridFastReplayMaxDtDelta;
+          : (locked_known_cq_candidate
+                 ? 0.75f
+                 : (lightweight_grid ? 0.20f : kFt8KnownCallGridFastReplayMaxDtDelta));
       bool const strict_match =
           freq_delta <= strict_freq_delta
           && dt_delta <= strict_dt_delta
-          && (history_replay || entry.hits >= kFt8KnownCallGridMinFastReplayHits);
+          && (history_replay
+              || locked_known_cq_candidate
+              || entry.hits >= kFt8KnownCallGridMinFastReplayHits);
       bool const wide_match =
           allow_wide_fast
           && age_seconds <= 15 * 60
@@ -4498,6 +5921,178 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
                return lhs.score < rhs.score;
              });
   return count;
+}
+
+bool ft8_known_cq_call_replay_enabled (Ft8Request const& request)
+{
+  return request.nzhsym >= 50
+         && request.ndepth >= 3
+         && !request.supplemental
+         && request.ncontest == 0
+         && trim_fixed (request.hiscall).empty ();
+}
+
+int collect_known_cq_call_matches (Ft8KnownCqCallState const& state,
+                                   Ft8Request const& request,
+                                   float freq, float callback_dt,
+                                   float cq_score, int nsync,
+                                   std::array<Ft8KnownCqCallReplayMatch, 12>& matches)
+{
+  int count = 0;
+  if (debug_known_cq_replay ())
+    {
+      int valid_entries = 0;
+      for (Ft8KnownCqCallEntry const& entry : state.entries)
+        {
+          if (entry.valid)
+            {
+              if (valid_entries < 12)
+                {
+                  std::cerr << "[KNOWNCQCALL] entry call=" << trim_fixed (entry.call)
+                            << " freq=" << entry.freq
+                            << " dt=" << entry.dt
+                            << " nutc=" << entry.nutc
+                            << " hits=" << entry.hits << '\n';
+                }
+              ++valid_entries;
+            }
+        }
+      std::cerr << "[KNOWNCQCALL] collect-enter valid=" << valid_entries
+                << " score=" << cq_score
+                << " nsync=" << nsync
+                << " cand_freq=" << freq
+                << " cand_dt=" << callback_dt
+                << " nutc=" << request.nutc << '\n';
+    }
+  if (!ft8_known_cq_call_replay_enabled (request)
+      || request.nutc <= 0
+      || cq_score < 1.25f
+      || nsync < 4)
+    {
+      return 0;
+    }
+
+  for (Ft8KnownCqCallEntry const& entry : state.entries)
+    {
+      if (!entry.valid || entry.freq <= 0.0f || entry.nutc <= 0)
+        {
+          continue;
+        }
+      int const age_seconds = ft8_utc_delta_seconds (request.nutc, entry.nutc);
+      if (age_seconds <= 0 || age_seconds > kFt8KnownCallGridMaxAgeSeconds)
+        {
+          continue;
+        }
+      if (age_seconds > kFt8KnownCallGridFastReplayMaxAgeSeconds)
+        {
+          continue;
+        }
+
+      float const freq_delta = std::fabs (entry.freq - freq);
+      float const dt_delta = std::fabs (entry.dt - callback_dt);
+      bool const strong_cq_evidence = nsync >= 8 && cq_score >= 1.8f;
+      float const freq_limit = strong_cq_evidence ? 4.0f : 2.5f;
+      float const dt_limit = strong_cq_evidence ? 0.45f : 0.22f;
+      if (freq_delta > freq_limit || dt_delta > dt_limit)
+        {
+          if (debug_known_cq_replay ())
+            {
+              std::cerr << "[KNOWNCQCALL] skip-window call=" << trim_fixed (entry.call)
+                        << " df=" << freq_delta
+                        << " ddt=" << dt_delta
+                        << " freq_limit=" << freq_limit
+                        << " dt_limit=" << dt_limit << '\n';
+            }
+          continue;
+        }
+
+      float const score = freq_delta
+                          + 7.0f * dt_delta
+                          + 0.00045f * static_cast<float> (age_seconds)
+                          - 0.08f * static_cast<float> (std::min (entry.hits, 20));
+      if (debug_known_cq_replay ())
+        {
+          std::cerr << "[KNOWNCQCALL] candidate call=" << trim_fixed (entry.call)
+                    << " df=" << freq_delta
+                    << " ddt=" << dt_delta
+                    << " score=" << score
+                    << " cq=" << cq_score
+                    << " nsync=" << nsync << '\n';
+        }
+      insert_known_cq_call_replay_match (matches, count, &entry, score);
+    }
+
+  std::sort (matches.begin (), matches.begin () + count,
+             [] (Ft8KnownCqCallReplayMatch const& lhs,
+                 Ft8KnownCqCallReplayMatch const& rhs) {
+               return lhs.score < rhs.score;
+             });
+  return count;
+}
+
+bool try_known_cq_call_replay (Ft8Request const& request, float const* s8,
+                               int nsync, float f1, float xdt, float xbase,
+                               float cq_score,
+                               FixedChars<kFt8DecodedChars>& msg37,
+                               float& xsnr, std::array<int, kFt8Nn>& itone,
+                               std::array<signed char, kFt8Bits>& message77,
+                               float const* llra, float const* llrb,
+                               float const* llrc, float const* llrd)
+{
+  if (!s8)
+    {
+      return false;
+    }
+
+  std::array<Ft8KnownCqCallReplayMatch, 12> matches {};
+  int const count =
+      collect_known_cq_call_matches (known_cq_call_history (), request, f1,
+                                     xdt - 0.5f, cq_score, nsync, matches);
+  for (int index = 0; index < count; ++index)
+    {
+      Ft8KnownCqCallEntry const& entry =
+          *matches[static_cast<size_t> (index)].entry;
+      FixedChars<kFt8DecodedChars> const cq_message =
+          known_cq_call_message (entry);
+      float const callback_dt = xdt - 0.5f;
+      float const freq_delta = std::fabs (entry.freq - f1);
+      float const dt_delta = std::fabs (entry.dt - callback_dt);
+      bool const allow_strict_metrics =
+          nsync >= 12
+          && cq_score >= 4.0f
+          && freq_delta <= 1.0f
+          && dt_delta <= 0.45f;
+      bool const allow_repeated_tight_metrics =
+          allow_strict_metrics
+          && entry.hits >= kFt8KnownCallGridMinFastReplayHits
+          && nsync >= 15
+          && dt_delta <= 0.12f;
+      int const hard_limit = allow_repeated_tight_metrics ? 62
+          : (allow_strict_metrics ? 56 : -1);
+      float const dmin_limit = allow_repeated_tight_metrics ? 140.0f
+          : (allow_strict_metrics ? 180.0f : -1.0f);
+      if (try_ft8sd_known_message (cq_message, request, s8, nsync, xbase,
+                                   msg37, xsnr, itone, message77,
+                                   llra, llrb, llrc, llrd, hard_limit, dmin_limit,
+                                   allow_strict_metrics))
+        {
+          if (debug_known_cq_replay ())
+            {
+              std::cerr << "[KNOWNCQCALL] accept hint=" << trim_fixed (cq_message)
+                        << " nsync=" << nsync << '\n';
+            }
+          return true;
+        }
+      if (debug_known_cq_replay ())
+        {
+          std::cerr << "[KNOWNCQCALL] reject hint=" << trim_fixed (cq_message)
+                    << " nsync=" << nsync
+                    << " strict_metrics=" << (allow_strict_metrics ? 1 : 0)
+                    << " df=" << freq_delta
+                    << " ddt=" << dt_delta << '\n';
+        }
+    }
+  return false;
 }
 
 Ft8CqSignalEntry const* find_cq_signal_history (Ft8CqSignalHistoryState const& state,
@@ -4771,7 +6366,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   // (un worker seriale) e l'unpack vi auto-salva i call completi decodificati, quindi
   // senza reset accumula attraverso candidati e slot come JTDX, risolvendo i call
   // hashati (compound/special). set_context aggiorna solo my/dx call senza azzerare.
-  // Gli hash sono mappe immutabili (cap 1000), nessun rischio di stato stantio.
+  // Gli hash sono mappe immutabili (cap 4096), nessun rischio di stato stantio.
   legacy_pack77_set_context_c (mycall13.data (), hiscall13.data ());
 
   ftx_ft8_prepare_candidate_c (candidate_values[2], candidate_values[0], candidate_values[1],
@@ -4873,22 +6468,22 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                     history_llre.data ());
     }
   int const sync_threshold = ft8_candidate_sync_threshold (imetric, request);
-  (void) candidate_cq_flag;
+  float const cq_replay_score = std::max (cq_signature_score, candidate_cq_flag);
   Ft8A7Entry const* repeated_hint =
       find_ft8_repeated_hint (sd_hints, request, f1, xdt - 0.5f);
   bool const weak_repeated_hint_window =
       repeated_hint != nullptr
       && nsync >= 1
       && sync >= 0.20f;
-  bool const advanced_live_cq = ft8_live_advanced_history_enabled (request);
-  bool const cq_sync_override =
-      advanced_live_cq
-      && ((nsync == 4 && cq_signature_score >= 6.9f)
-          || (nsync == 5 && cq_signature_score >= 6.4f)
-          || (nsync == 6 && cq_signature_score >= 5.9f));
+	  bool const advanced_live_cq = ft8_live_advanced_history_enabled (request);
+	  bool const cq_sync_override =
+	      advanced_live_cq
+	      && ((nsync == 4 && cq_signature_score >= 6.9f)
+	          || (nsync == 5 && cq_signature_score >= 6.4f)
+	          || (nsync == 6 && cq_signature_score >= 5.9f));
 
-  if (nsync <= sync_threshold && !cq_sync_override)
-    {
+	  if (nsync <= sync_threshold && !cq_sync_override)
+	    {
       bool replay_ok =
           try_call_grid_cq_replay (call_grid_history_state, request, s8.data (),
                                    nsync, sync, f1, xdt, xbase,
@@ -4897,12 +6492,22 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                    llrc.data (), llrd.data (), jseq);
       if (!replay_ok)
         {
+          replay_ok =
+              try_known_cq_call_replay (request, s8.data (), nsync, f1, xdt,
+                                        xbase, cq_replay_score, msg37,
+                                        xsnr, itone, message77,
+                                        llra.data (), llrb.data (), llrc.data (),
+                                        llrd.data ());
+        }
+      if (!replay_ok)
+        {
           std::array<Ft8KnownCqReplayMatch, 12> known_cq_matches {};
           int const known_cq_count =
               collect_known_call_grid_cq_matches (known_call_grid_history (), request, f1,
                                                   callback_dt_for_history,
                                                   cq_signature_score, nsync,
-                                                  known_cq_matches);
+                                                  known_cq_matches,
+                                                  locked_known_cq_candidate);
           bool const history_replay = ft8_history_replay_enabled (request);
           int const known_hard_limit = history_replay
               ? (nsync >= 5 ? 84 : 92)
@@ -4949,17 +6554,32 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
     }
   bool const cq_only_decode = cq_sync_override && nsync <= sync_threshold;
 
-  int npasses = ftx_ft8_select_npasses_c (request.lft8apon, request.lapcqonly,
+  bool const has_direct_ap_context =
+      trim_length (request.hiscall.data (), 12) > 0
+      || trim_length (request.hisgrid.data (), 6) > 0;
+  bool const live_cq_ap_candidate =
+      request.nzhsym >= 50
+      && request.ndepth >= 3
+      && request.lft8apon != 0
+      && !request.supplemental
+      && !has_direct_ap_context
+      && request.ncontest == 0
+      && nsync >= 10
+      && sync >= 0.75f
+      && (candidate_cq_flag >= 1.75f || cq_signature_score >= 4.8f);
+  int const candidate_lft8apon =
+      (has_direct_ap_context || live_cq_ap_candidate) ? request.lft8apon : 0;
+  int npasses = ftx_ft8_select_npasses_c (candidate_lft8apon, request.lapcqonly,
                                           request.ncontest, request.nzhsym,
                                           request.nqsoprogress);
   bool const live_full_ap =
       request.nzhsym >= 47
       && request.ndepth >= 4
-      && request.lft8apon != 0
+      && candidate_lft8apon != 0
       && !request.supplemental;
-  if (live_full_ap)
+  if (live_full_ap || live_cq_ap_candidate)
     {
-      npasses = std::min (npasses, 8);
+      npasses = 8;
     }
   int pass_first = 1;
   int pass_last = std::max (0, npasses);
@@ -4988,14 +6608,29 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
             }
           int pass_iaptype = 0;
           int pass_ready = 0;
-          if (live_full_ap && pass_index >= 6 && pass_index <= 8)
+          bool const use_live_cq_generic_ap =
+              live_cq_ap_candidate && pass_index == 7;
+          if ((live_full_ap || live_cq_ap_candidate)
+              && pass_index >= 6 && pass_index <= 8)
             {
-              pass_ready = ftx_ft8_prepare_cq_ap_pass_c (pass_index, request.nqsoprogress,
-                                                         request.lapcqonly, request.ncontest,
-                                                         request.nfqso, request.nftx, f1,
-                                                         request.napwid, apsym.data (), aph10.data (),
-                                                         active_llra, active_llrb, active_llrc,
-                                                         llrz.data (), apmask.data (), &pass_iaptype);
+              if (use_live_cq_generic_ap)
+                {
+                  pass_ready = ftx_ft8_prepare_decode_pass_c (
+                      pass_index, request.nqsoprogress, request.lapcqonly,
+                      request.ncontest, request.nfqso, request.nftx, f1,
+                      request.napwid, apsym.data (), aph10.data (),
+                      active_llra, active_llrb, active_llrc, active_llrd,
+                      active_llre, llrz.data (), apmask.data (), &pass_iaptype);
+                }
+              else
+                {
+                  pass_ready = ftx_ft8_prepare_cq_ap_pass_c (pass_index, request.nqsoprogress,
+                                                             request.lapcqonly, request.ncontest,
+                                                             request.nfqso, request.nftx, f1,
+                                                             request.napwid, apsym.data (), aph10.data (),
+                                                             active_llra, active_llrb, active_llrc,
+                                                             llrz.data (), apmask.data (), &pass_iaptype);
+                }
             }
           else
             {
@@ -5039,6 +6674,102 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
           ftx_decode174_91_c (llrz.data (), Keff, maxosd, norder, apmask_bits.data (),
                               message91.data (), cw.data (), &ntype,
                               &pass_nharderrors, &pass_dmin);
+          bool const can_retry_local_cq_history_osd =
+              (pass_nharderrors < 0 || pass_nharderrors > kFt8MaxHardErrors)
+              && call_grid_history_state
+              && decode_pass <= 2
+              && pass_iaptype == 0
+              && request.nzhsym >= 50
+              && request.ndepth >= 3
+              && !request.supplemental
+              && nsync >= 8
+              && sync >= 0.75f
+              && stage4_remaining_ms () >= 900
+              && (maxosd < 3 || norder < 4)
+              && find_call_grid_cq_history (*call_grid_history_state, request, jseq,
+                                            f1, callback_dt_for_history, sync,
+                                            nsync, cq_signature_score) != nullptr;
+          if (can_retry_local_cq_history_osd)
+            {
+              ftx_decode174_91_c (llrz.data (), Keff, 3, 4, apmask_bits.data (),
+                                  message91.data (), cw.data (), &ntype,
+                                  &pass_nharderrors, &pass_dmin);
+            }
+          bool const can_retry_strong_cq_osd =
+              decode_pass == 1
+              && pass_index == 3
+              && request.nzhsym >= 50
+              && request.ndepth >= 3
+              && !request.supplemental
+              && pass_iaptype == 0
+              && candidate_values[2] >= 1.0f
+              && candidate_cq_flag >= 1.5f
+              && cq_signature_score >= 3.4f
+              && nsync >= 15;
+          if ((pass_nharderrors < 0 || pass_nharderrors > kFt8MaxHardErrors)
+              && can_retry_strong_cq_osd
+              && (maxosd < 3 || norder < 4))
+            {
+              // A narrow CQ-only OSD rescue recovers strong sync-search CQ
+              // candidates that BP misses, without making the full pass OSD-heavy.
+              ftx_decode174_91_c (llrz.data (), Keff, 3, 4, apmask_bits.data (),
+                                  message91.data (), cw.data (), &ntype,
+                                  &pass_nharderrors, &pass_dmin);
+            }
+          bool const can_retry_live_cq_ap_osd =
+              live_cq_ap_candidate
+              && decode_pass <= 2
+              && pass_index >= 6
+              && pass_index <= 8
+              && pass_iaptype == 1
+              && nsync >= 14
+              && candidate_cq_flag >= 1.75f
+              && sync >= 2.5f
+              && (maxosd < 3 || norder < 4);
+          if ((pass_nharderrors < 0 || pass_nharderrors > kFt8MaxHardErrors)
+              && can_retry_live_cq_ap_osd)
+            {
+              std::array<float, 174> generic_llrz {};
+              std::array<int, 174> generic_apmask {};
+              int generic_iaptype = 0;
+              int const generic_ready =
+                  ftx_ft8_prepare_decode_pass_c (pass_index, request.nqsoprogress,
+                                                 request.lapcqonly, request.ncontest,
+                                                 request.nfqso, request.nftx, f1,
+                                                 request.napwid, apsym.data (), aph10.data (),
+                                                 active_llra, active_llrb, active_llrc,
+                                                 active_llrd, active_llre,
+                                                 generic_llrz.data (),
+                                                 generic_apmask.data (), &generic_iaptype);
+              if (generic_ready != 0 && generic_iaptype == 1)
+                {
+                  std::array<signed char, 174> generic_apmask_bits {};
+                  std::transform (generic_apmask.begin (), generic_apmask.end (),
+                                  generic_apmask_bits.begin (),
+                                  [] (int value) {
+                                    return static_cast<signed char> (value != 0 ? 1 : 0);
+                                  });
+                  std::array<signed char, 91> generic_message91 {};
+                  std::array<signed char, 174> generic_cw {};
+                  int generic_ntype = 0;
+                  int generic_hard = -1;
+                  float generic_dmin = 0.0f;
+                  ftx_decode174_91_c (generic_llrz.data (), Keff, 3, 4,
+                                      generic_apmask_bits.data (),
+                                      generic_message91.data (), generic_cw.data (),
+                                      &generic_ntype, &generic_hard, &generic_dmin);
+                  if (generic_hard >= 0 && generic_hard <= kFt8MaxHardErrors)
+                    {
+                      llrz = generic_llrz;
+                      apmask_bits = generic_apmask_bits;
+                      message91 = generic_message91;
+                      cw = generic_cw;
+                      ntype = generic_ntype;
+                      pass_nharderrors = generic_hard;
+                      pass_dmin = generic_dmin;
+                    }
+                }
+            }
           if (stage4_should_cancel ())
             {
               return false;
@@ -5055,16 +6786,30 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       int const unpack_ok = legacy_pack77_unpack77bits_c (message77.data (), 1,
                                                           candidate_msg.data (), &quirky);
       candidate_msg = normalize_resolved_hash_call_tokens (candidate_msg);
-      if (ftx_ft8_validate_candidate_meta_c (message77.data (), cw.data (),
-                                             pass_nharderrors, unpack_ok, quirky,
-                                             request.ncontest) == 0)
+      if (has_unresolved_hash_placeholder (candidate_msg))
         {
-          continue;
+          apply_pack77_hash_external_seed_cache ();
+          FixedChars<kFt8DecodedChars> retry_msg = blank_fixed<kFt8DecodedChars> ();
+          int retry_quirky = 0;
+          int const retry_ok = legacy_pack77_unpack77bits_c (message77.data (), 1,
+                                                             retry_msg.data (),
+                                                             &retry_quirky);
+          if (retry_ok != 0)
+            {
+              candidate_msg = normalize_resolved_hash_call_tokens (retry_msg);
+              quirky = retry_quirky;
+            }
         }
-      if (pass_iaptype == 1 && !is_strict_standard_ft8_message (candidate_msg))
-        {
-          continue;
-        }
+	      if (ftx_ft8_validate_candidate_meta_c (message77.data (), cw.data (),
+	                                             pass_nharderrors, unpack_ok, quirky,
+	                                             request.ncontest) == 0)
+	        {
+	          continue;
+	        }
+	      if (pass_iaptype == 1 && !is_strict_standard_ft8_message (candidate_msg))
+	        {
+	          continue;
+	        }
       int const candidate_n3 = 4 * int (message77[71]) + 2 * int (message77[72]) + int (message77[73]);
       int const candidate_i3 = 4 * int (message77[74]) + 2 * int (message77[75]) + int (message77[76]);
       bool const candidate_risky =
@@ -5082,18 +6827,22 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                   &checked_badcrc, &pass_iaptype, &lcall1hash,
                                   request.mycall.data (), request.hiscall.data (),
                                   hisgrid4.data ());
-          if (checked_badcrc != 0)
-            {
-              continue;
-            }
+	          if (checked_badcrc != 0)
+	            {
+	              continue;
+	            }
           candidate_msg = fixed_from_chars<kFt8DecodedChars> (checked_msg.data ());
           candidate_msg = normalize_resolved_hash_call_tokens (candidate_msg);
         }
-      if (pass_nharderrors > kFt8StrictHardErrors
-          && !is_strict_standard_ft8_message (candidate_msg))
-        {
-          continue;
-        }
+	      if (pass_nharderrors > kFt8StrictHardErrors
+	          && !is_strict_standard_ft8_message (candidate_msg))
+	        {
+	          continue;
+	        }
+	      if (!is_plausible_ft8_message_for_emit (candidate_msg))
+	        {
+	          continue;
+	        }
 
       std::array<int, kFt8Nn> candidate_itone {};
       if (ftx_ft8_message77_to_itone_c (message77.data (), candidate_itone.data ()) == 0)
@@ -5112,7 +6861,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 	          // subtract-research successive — e' la radice del gap su banda affollata,
 	          // come JTDX. Costo: 3x subtract-eval solo sui forti in deep (trascurabile,
 	          // protetto dal deadline per-candidato). Vedi NOTA_UPSTREAM_FT8_PARITA_JTDX.md.
-	          int const refine_dt = (request.ndepth >= 4) ? 1 : 0;
+	          int const refine_dt = (request.ndepth >= 3) ? 1 : 0;
 	          ftx_subtract_ft8_c (dd0, candidate_itone.data (), f1, xdt, refine_dt);
 	        }
 
@@ -5168,12 +6917,31 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
         }
       return true;
     }
+  if (try_known_cq_call_replay (request, s8.data (), nsync, f1, xdt, xbase,
+                                cq_replay_score, msg37, xsnr, itone,
+                                message77, llra.data (), llrb.data (),
+                                llrc.data (), llrd.data ()))
+    {
+      nharderrors = kFt8StrictHardErrors;
+      dmin = 0.0f;
+      nbadcrc = 0;
+      ipass = 0;
+      iaptype = 0;
+      if (signal_history_state && ft8sd_hint_is_cq (msg37))
+        {
+          save_cq_signal_history (*signal_history_state, request, jseq, f1,
+                                  callback_dt_for_history, cq_signature_score,
+                                  current_cs, true);
+        }
+      return true;
+    }
   std::array<Ft8KnownCqReplayMatch, 12> known_cq_matches {};
   int const known_cq_count =
       collect_known_call_grid_cq_matches (known_call_grid_history (), request, f1,
                                           callback_dt_for_history,
                                           cq_signature_score, nsync,
-                                          known_cq_matches);
+                                          known_cq_matches,
+                                          locked_known_cq_candidate);
   if (known_cq_count > 0)
     {
       bool const history_replay = ft8_history_replay_enabled (request);
@@ -5227,6 +6995,20 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                   callback_dt_for_history, cq_signature_score,
                                   current_cs, true);
         }
+      return true;
+    }
+  if (decode_pass == 1
+      && sync >= 1.45f
+      && candidate_cq_flag >= 1.5f
+      && try_reverse_terminal_pair_rescue (
+          request, jseq, s8.data (), nsync, xbase, msg37, xsnr, itone,
+          message77, llra.data (), llrb.data (), llrc.data (), llrd.data ()))
+    {
+      nharderrors = kFt8StrictHardErrors;
+      dmin = 0.0f;
+      nbadcrc = 0;
+      ipass = 0;
+      iaptype = 0;
       return true;
     }
   if (!equalized_metrics && signal_history_state)
@@ -5388,6 +7170,14 @@ extern "C" void ftx_ft8_decode_candidate_stage4_c (
   std::copy (message77_array.begin (), message77_array.end (), message77_out);
 }
 
+void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& request,
+                                 int jseq,
+                                 std::array<float, kFt8Nh1> const& sbase,
+                                 int ifa, int ifb,
+                                 float const* support_candidates,
+                                 int support_count,
+                                 AsyncCollector& collector);
+
 void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
                       std::array<int, 58> const& apsym, std::array<int, 10> const& aph10,
                       int ifa, int ifb, int& ndecodes, std::array<float, kFt8Nh1>& sbase,
@@ -5433,15 +7223,25 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
   if (needs_shifted_cycle_base)
     {
       dd_cycle_base.assign (state.dd.begin (), state.dd.end ());
-    }
+  }
+  long long const main_start_ms = debug_ft8_focus_replay () ? steady_clock_ms () : 0;
 
-  bool known_cq_candidates_appended = false;
   for (int ipass = 1; ipass <= npass; ++ipass)
     {
       if (stage4_should_cancel ())
         {
+          if (debug_ft8_focus_replay ())
+            {
+              std::cerr << "[FT8MAIN] utc=" << request.nutc
+                        << " pass=" << ipass
+                        << " canceled=1 before=1 ndecodes=" << ndecodes
+                        << " elapsed_ms=" << (steady_clock_ms () - main_start_ms)
+                        << '\n';
+            }
           return;
         }
+      int const pass_start_decodes = ndecodes;
+      long long const pass_start_ms = debug_ft8_focus_replay () ? steady_clock_ms () : 0;
       std::vector<float> dd_before_shift;
       bool shifted_pass = false;
       if (request.nzhsym >= 50 && request.ndepth >= 4 && (ipass == 4 || ipass == 7))
@@ -5506,12 +7306,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                  sbase.data ());
       append_ft8_hint_candidates (&state.a7[static_cast<size_t> (jseq)], request,
                                   ifa, ifb, candidate.data (), ncand);
-      if (!known_cq_candidates_appended)
-        {
-          append_known_cq_candidates (known_call_grid_history (), request, ifa, ifb,
-                                      candidate.data (), ncand);
-          known_cq_candidates_appended = true;
-        }
+      append_known_cq_candidates (known_call_grid_history (), request, ifa, ifb,
+                                  candidate.data (), ncand);
+
+      int subtract_rescue_used = 0;
+      int cq_companion_rescue_used = 0;
 
       for (int icand = 0; icand < ncand; ++icand)
         {
@@ -5520,6 +7319,17 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               if (shifted_pass)
                 {
                   std::copy (dd_before_shift.begin (), dd_before_shift.end (), state.dd.begin ());
+                }
+              if (debug_ft8_focus_replay ())
+                {
+                  std::cerr << "[FT8MAIN] utc=" << request.nutc
+                            << " pass=" << ipass
+                            << " canceled=1 icand=" << icand
+                            << " ncand=" << ncand
+                            << " added=" << (ndecodes - pass_start_decodes)
+                            << " ndecodes=" << ndecodes
+                            << " elapsed_ms=" << (steady_clock_ms () - main_start_ms)
+                            << '\n';
                 }
               return;
             }
@@ -5535,10 +7345,22 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           int iaptype = 0;
           FixedChars<kFt8DecodedChars> msg37 = blank_fixed<kFt8DecodedChars> ();
 
+          bool const locked_known_cq_candidate =
+              candidate[static_cast<size_t> (icand * 4 + 3)] >= 2.9f;
+          Ft8Request targeted_candidate_request {};
+          Ft8Request const* active_candidate_request = &request;
+          if (locked_known_cq_candidate && ft8_targeted_low_subpass_enabled (request))
+            {
+              targeted_candidate_request = ft8_targeted_low_subpass_request (request);
+              active_candidate_request = &targeted_candidate_request;
+            }
           bool const use_var_downsample =
-              request.lft8lowth || request.lft8subpass || request.nft8cycles > 1
-              || request.nft8rxfsens > 1;
-          decode_main_candidate_cpp (state.dd.data (), &pass_newdat, request, ipass,
+              active_candidate_request->lft8lowth
+              || active_candidate_request->lft8subpass
+              || active_candidate_request->nft8cycles > 1
+              || active_candidate_request->nft8rxfsens > 1;
+          decode_main_candidate_cpp (state.dd.data (), &pass_newdat,
+                                     *active_candidate_request, ipass,
                                      use_var_downsample, equalized_pipeline, imetric, lsubtract, apsym, aph10,
                                      candidate.data () + icand * 4,
                                      candidate[static_cast<size_t> (icand * 4 + 3)],
@@ -5565,9 +7387,106 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           ftx_ft8_finalize_main_result_c (xsnr, xdt, request.emedelay, nharderrors,
                                           dmin, &nsnr, &callback_dt, &qual);
 
+          bool const can_retry_cq_companion =
+              nbadcrc != 0
+              && cq_companion_rescue_used < 8
+              && ipass <= 3
+              && request.nzhsym >= 50
+              && request.ndepth >= 3
+              && !request.supplemental
+              && request.lft8apon != 0
+              && request.ncontest == 0
+              && trim_fixed (request.hiscall).empty ()
+              && candidate[static_cast<size_t> (icand * 4 + 2)] >= (ipass >= 3 ? 1.6f : 2.5f)
+              && candidate[static_cast<size_t> (icand * 4 + 3)] >= 1.75f;
+          if (can_retry_cq_companion)
+            {
+              for (float const offset : {3.125f, -3.125f})
+                {
+                  float companion_values[4] {
+                    candidate[static_cast<size_t> (icand * 4 + 0)] + offset,
+                    candidate[static_cast<size_t> (icand * 4 + 1)],
+                    candidate[static_cast<size_t> (icand * 4 + 2)] * 0.92f,
+                    candidate[static_cast<size_t> (icand * 4 + 3)]
+                  };
+                  if (companion_values[0] < static_cast<float> (ifa)
+                      || companion_values[0] > static_cast<float> (ifb))
+                    {
+                      continue;
+                    }
+                  float companion_sync = 0.0f;
+                  float companion_f1 = 0.0f;
+                  float companion_xdt = 0.0f;
+                  float companion_xbase = 0.0f;
+                  float companion_dmin = 0.0f;
+                  float companion_xsnr = 0.0f;
+                  int companion_nharderrors = -1;
+                  int companion_nbadcrc = 1;
+                  int companion_pass = 0;
+                  int companion_iaptype = 0;
+                  FixedChars<kFt8DecodedChars> companion_msg37 =
+                      blank_fixed<kFt8DecodedChars> ();
+                  std::array<int, kFt8Nn> companion_itone {};
+                  std::array<signed char, kFt8Bits> companion_message77 {};
+                  int companion_newdat = pass_newdat;
+                  decode_main_candidate_cpp (
+                      state.dd.data (), &companion_newdat,
+                      *active_candidate_request, ipass,
+                      use_var_downsample, equalized_pipeline, imetric, lsubtract,
+                      apsym, aph10, companion_values,
+                      companion_values[3], sbase.data (), kFt8Nh1,
+                      companion_sync, companion_f1, companion_xdt,
+                      companion_xbase, companion_nharderrors, companion_dmin,
+                      companion_nbadcrc, companion_pass, companion_iaptype,
+                      companion_msg37, companion_xsnr, companion_itone,
+                      companion_message77, &state.a7[static_cast<size_t> (jseq)],
+                      &cq_signal_history (), &call_grid_history (), jseq);
+                  if (stage4_should_cancel ())
+                    {
+                      if (shifted_pass)
+                        {
+                          std::copy (dd_before_shift.begin (), dd_before_shift.end (),
+                                     state.dd.begin ());
+                        }
+                      return;
+                    }
+                  if (companion_nbadcrc != 0)
+                    {
+                      continue;
+                    }
+                  companion_xdt -= 0.5f;
+                  ftx_ft8_finalize_main_result_c (
+                      companion_xsnr, companion_xdt, request.emedelay,
+                      companion_nharderrors, companion_dmin, &nsnr,
+                      &callback_dt, &qual);
+                  sync = companion_sync;
+                  f1 = companion_f1;
+                  xdt = companion_xdt;
+                  xbase = companion_xbase;
+                  dmin = companion_dmin;
+                  xsnr = companion_xsnr;
+                  nharderrors = companion_nharderrors;
+                  nbadcrc = companion_nbadcrc;
+                  candidate_pass = companion_pass;
+                  iaptype = companion_iaptype;
+                  msg37 = companion_msg37;
+                  itone = companion_itone;
+                  message77 = companion_message77;
+                  ++cq_companion_rescue_used;
+                  break;
+                }
+            }
+
           if (nbadcrc == 0)
             {
               msg37 = normalize_resolved_hash_call_tokens (msg37);
+              bool const replay_decode = candidate_pass == 0 && iaptype == 0;
+              bool const replay_call_only_cq =
+                  replay_decode && is_cq_call_only_message (msg37);
+              if (!replay_call_only_cq && ft8sd_hint_is_cq (msg37) && nsnr <= -24)
+                {
+                  continue;
+                }
               bool duplicate = false;
               for (int id = 0; id < ndecodes; ++id)
                 {
@@ -5578,11 +7497,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                     }
                 }
 
-              if (!duplicate)
-                {
-                  int const saved_slot =
-                      ftx_ft8_store_saved_decode_c (ndecodes, kFt8MaxEarly, nsnr, f1, xdt + 0.5f,
-                                                   itone.data (), kFt8Nn, state.allsnrs.data (),
+		              if (!duplicate)
+		                {
+			                  int const saved_slot =
+			                      ftx_ft8_store_saved_decode_c (ndecodes, kFt8MaxEarly, nsnr, f1, xdt + 0.5f,
+			                                                   itone.data (), kFt8Nn, state.allsnrs.data (),
                                                    state.f1_save.data (), state.xdt_save.data (),
                                                    state.itone_save.data ());
                   if (saved_slot == 0)
@@ -5595,13 +7514,244 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
 
               if (!duplicate)
                 {
-	                  collector.append (sync, nsnr, callback_dt, f1, msg37, iaptype, qual,
-	                                    message77.data ());
-	                  save_a7_entry (state.a7, jseq, callback_dt, f1, msg37);
-                  save_call_grid_history (call_grid_history (), request, jseq,
-                                          callback_dt, f1, msg37);
-                  seed_pack77_hashes_from_message (msg37);
-                }
+			                  collector.append (sync, nsnr, callback_dt, f1, msg37, iaptype, qual,
+			                                    message77.data ());
+	                  if (!replay_decode)
+	                    {
+		                    save_a7_entry (state.a7, jseq, callback_dt, f1, msg37);
+                      save_call_grid_history (call_grid_history (), request, jseq,
+                                              callback_dt, f1, msg37);
+                      seed_pack77_hashes_from_message (msg37);
+                    }
+
+                  bool const can_rescue_after_subtract =
+                      lsubtract != 0
+                      && request.ndepth >= 3
+                      && request.nzhsym >= 50
+                      && subtract_rescue_used < 24;
+                  if (can_rescue_after_subtract)
+                    {
+                      Ft8Request targeted_rescue_request {};
+                      Ft8Request const* active_rescue_request = &request;
+                      if (ft8_targeted_low_subpass_enabled (request))
+                        {
+                          targeted_rescue_request = ft8_targeted_low_subpass_request (request);
+                          active_rescue_request = &targeted_rescue_request;
+                        }
+                      apply_pack77_hash_external_seed_cache ();
+                      std::array<float, 4 * 96> rescue_candidate {};
+                      std::array<float, kFt8Nh1> rescue_sbase {};
+                      int rescue_count = 0;
+                      int local_crowded_candidates = 0;
+                      float local_best_cq = 0.0f;
+                      for (int local_index = 0; local_index < ncand; ++local_index)
+                        {
+                          float const local_freq =
+                              candidate[static_cast<size_t> (local_index * 4 + 0)];
+                          float const local_delta = std::fabs (local_freq - f1);
+                          if (local_delta <= 2.0f || local_delta > 45.0f)
+                            {
+                              continue;
+                            }
+                          float const local_sync =
+                              candidate[static_cast<size_t> (local_index * 4 + 2)];
+                          float const local_cq =
+                              candidate[static_cast<size_t> (local_index * 4 + 3)];
+                          if (local_sync >= 1.0f || local_cq >= 1.5f)
+                            {
+                              ++local_crowded_candidates;
+                              local_best_cq = std::max (local_best_cq, local_cq);
+                            }
+                        }
+                      bool const use_late_cluster_rescue =
+                          ipass == 1
+                          && request.nzhsym >= 50
+                          && request.ndepth >= 3
+                          && !request.supplemental
+                          && (local_crowded_candidates >= 3 || local_best_cq >= 2.0f);
+                      int const rescue_decode_pass =
+                          use_late_cluster_rescue ? std::min (5, npass)
+                                                  : std::min (ipass + 1, npass);
+                      float rescue_syncmin = 0.0f;
+                      int rescue_imetric = 0;
+                      int rescue_lsubtract = 0;
+                      int rescue_run_pass = 0;
+                      ftx_ft8_prepare_pass_c (request.ndepth, rescue_decode_pass, ndecodes,
+                                              &rescue_syncmin, &rescue_imetric,
+                                              &rescue_lsubtract, &rescue_run_pass);
+                      if (active_rescue_request->lft8lowth)
+                        {
+                          float threshold_scale =
+                              active_rescue_request->lft8subpass ? 0.82f : 0.90f;
+                          if (active_rescue_request->nft8rxfsens >= 3)
+                            {
+                              threshold_scale *= 0.95f;
+                            }
+                          if (rescue_decode_pass >= 4)
+                            {
+                              threshold_scale *=
+                                  active_rescue_request->lft8subpass ? 0.90f : 0.95f;
+                            }
+                          rescue_syncmin *= threshold_scale;
+                        }
+                      int const rescue_ifa =
+                          std::max (ifa, static_cast<int> (std::floor (f1 - 45.0f)));
+                      int const rescue_ifb =
+                          std::min (ifb, static_cast<int> (std::ceil (f1 + 45.0f)));
+                      if (rescue_run_pass != 0 && rescue_ifb > rescue_ifa)
+                        {
+                          ftx_sync8_search_stage4_c (
+                              state.dd.data (), kFt8NMax,
+                              static_cast<float> (rescue_ifa),
+                              static_cast<float> (rescue_ifb), rescue_syncmin,
+                              static_cast<float> (request.nfqso), 96, rescue_decode_pass,
+                              request.ncandthin, rescue_candidate.data (), &rescue_count,
+                              rescue_sbase.data ());
+                        }
+
+                      int const rescue_candidate_limit =
+                          use_late_cluster_rescue ? 4 : 8;
+                      int const rescue_limit =
+                          std::min ({rescue_count, rescue_candidate_limit,
+                                      24 - subtract_rescue_used});
+                      for (int rescue_index = 0; rescue_index < rescue_limit; ++rescue_index)
+                        {
+                          if (stage4_should_cancel ())
+                            {
+                              if (shifted_pass)
+                                {
+                                  std::copy (dd_before_shift.begin (), dd_before_shift.end (),
+                                             state.dd.begin ());
+                                }
+                              if (debug_ft8_focus_replay ())
+                                {
+                                  std::cerr << "[FT8MAIN] utc=" << request.nutc
+                                            << " pass=" << ipass
+                                            << " canceled=1 rescue=1"
+                                            << " rescue_index=" << rescue_index
+                                            << " ncand=" << ncand
+                                            << " added=" << (ndecodes - pass_start_decodes)
+                                            << " ndecodes=" << ndecodes
+                                            << " elapsed_ms="
+                                            << (steady_clock_ms () - main_start_ms)
+                                            << '\n';
+                                }
+                              return;
+                            }
+	                          float const rescue_freq =
+	                              rescue_candidate[static_cast<size_t> (rescue_index * 4 + 0)];
+	                          if (std::fabs (rescue_freq - f1) <= 2.0f)
+	                            {
+	                              continue;
+	                            }
+
+                          float rescue_sync = 0.0f;
+                          float rescue_f1 = 0.0f;
+                          float rescue_xdt = 0.0f;
+                          float rescue_xbase = 0.0f;
+                          float rescue_dmin = 0.0f;
+                          float rescue_xsnr = 0.0f;
+                          int rescue_nharderrors = -1;
+                          int rescue_nbadcrc = 1;
+                          int rescue_candidate_pass = 0;
+                          int rescue_iaptype = 0;
+                          FixedChars<kFt8DecodedChars> rescue_msg37 =
+                              blank_fixed<kFt8DecodedChars> ();
+                          std::array<int, kFt8Nn> rescue_itone {};
+                          std::array<signed char, kFt8Bits> rescue_message77 {};
+                          int rescue_newdat = 1;
+                          bool const rescue_use_var_downsample =
+                              active_rescue_request->lft8lowth
+                              || active_rescue_request->lft8subpass
+                              || active_rescue_request->nft8cycles > 1
+                              || active_rescue_request->nft8rxfsens > 1;
+                          decode_main_candidate_cpp (
+                              state.dd.data (), &rescue_newdat, *active_rescue_request,
+                              rescue_decode_pass, rescue_use_var_downsample,
+                              equalized_pipeline, rescue_imetric,
+                              rescue_lsubtract,
+                              apsym, aph10,
+                              rescue_candidate.data () + rescue_index * 4,
+                              rescue_candidate[static_cast<size_t> (rescue_index * 4 + 3)],
+                              rescue_sbase.data (), kFt8Nh1, rescue_sync, rescue_f1,
+                              rescue_xdt, rescue_xbase, rescue_nharderrors,
+                              rescue_dmin, rescue_nbadcrc, rescue_candidate_pass,
+                              rescue_iaptype, rescue_msg37, rescue_xsnr,
+                              rescue_itone, rescue_message77,
+                              &state.a7[static_cast<size_t> (jseq)],
+                              &cq_signal_history (), &call_grid_history (), jseq);
+                          if (rescue_nbadcrc != 0)
+                            {
+                              continue;
+                            }
+
+                          rescue_xdt -= 0.5f;
+                          int rescue_nsnr = 0;
+                          float rescue_callback_dt = 0.0f;
+                          float rescue_qual = 0.0f;
+                          ftx_ft8_finalize_main_result_c (
+                              rescue_xsnr, rescue_xdt, request.emedelay,
+                              rescue_nharderrors, rescue_dmin, &rescue_nsnr,
+                              &rescue_callback_dt, &rescue_qual);
+                          rescue_msg37 = normalize_resolved_hash_call_tokens (rescue_msg37);
+                          bool const rescue_replay_decode =
+                              rescue_candidate_pass == 0 && rescue_iaptype == 0;
+                          bool const rescue_replay_call_only_cq =
+                              rescue_replay_decode
+                              && is_cq_call_only_message (rescue_msg37);
+                          if (!rescue_replay_call_only_cq
+                              && ft8sd_hint_is_cq (rescue_msg37)
+                              && rescue_nsnr <= -24)
+                            {
+                              continue;
+                            }
+
+                          bool rescue_duplicate = false;
+                          for (int id = 0; id < ndecodes; ++id)
+                            {
+                              if (messages_equal (
+                                      rescue_msg37,
+                                      state.allmessages[static_cast<size_t> (id)]))
+                                {
+                                  rescue_duplicate = true;
+                                  break;
+                                }
+                            }
+                          if (rescue_duplicate)
+                            {
+                              continue;
+                            }
+
+                          int const rescue_saved_slot =
+                              ftx_ft8_store_saved_decode_c (
+                                  ndecodes, kFt8MaxEarly, rescue_nsnr,
+                                  rescue_f1, rescue_xdt + 0.5f, rescue_itone.data (),
+                                  kFt8Nn, state.allsnrs.data (), state.f1_save.data (),
+                                  state.xdt_save.data (), state.itone_save.data ());
+                          if (rescue_saved_slot == 0)
+                            {
+                              continue;
+                            }
+                          ndecodes = rescue_saved_slot;
+                          state.allmessages[static_cast<size_t> (ndecodes - 1)] =
+                              rescue_msg37;
+                          collector.append (rescue_sync, rescue_nsnr,
+                                            rescue_callback_dt, rescue_f1,
+                                            rescue_msg37, rescue_iaptype, rescue_qual,
+                                            rescue_message77.data ());
+                          if (!rescue_replay_decode)
+                            {
+                              save_a7_entry (state.a7, jseq, rescue_callback_dt,
+                                             rescue_f1, rescue_msg37);
+                              save_call_grid_history (call_grid_history (), request, jseq,
+                                                      rescue_callback_dt, rescue_f1,
+                                                      rescue_msg37);
+                              seed_pack77_hashes_from_message (rescue_msg37);
+                            }
+	                          ++subtract_rescue_used;
+	                        }
+	                    }
+	                }
             }
 
           if (request.nzhsym == 41
@@ -5618,8 +7768,32 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
         {
           std::copy (dd_before_shift.begin (), dd_before_shift.end (), state.dd.begin ());
         }
-    }
-}
+      if (debug_ft8_focus_replay ())
+        {
+          std::cerr << "[FT8MAIN] utc=" << request.nutc
+                    << " pass=" << ipass
+                    << " ncand=" << ncand
+                    << " added=" << (ndecodes - pass_start_decodes)
+                    << " ndecodes=" << ndecodes
+                    << " elapsed_ms=" << (steady_clock_ms () - main_start_ms)
+	                    << " pass_ms=" << (steady_clock_ms () - pass_start_ms)
+	                    << '\n';
+	        }
+      if (ipass == 2
+          && request.nzhsym >= 50
+          && !request.supplemental
+          && !equalized_pipeline)
+        {
+          run_fast_a7_repeated_hints (state, request, jseq, sbase,
+                                      ifa, ifb, candidate.data (), ncand,
+                                      collector);
+          if (stage4_should_cancel ())
+            {
+              return;
+            }
+        }
+	    }
+	}
 
 void run_ap_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
                     std::array<float, kFt8Nh1> const& sbase, AsyncCollector& collector)
@@ -5641,10 +7815,75 @@ void run_ap_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
         }
       for (int i = 0; i < previous_limit; ++i)
         {
+          if (slot.previous[static_cast<size_t> (i)].freq == -99.0f)
+            {
+              previous_limit = i;
+              break;
+            }
+        }
+
+      std::array<int, kFt8MaxEarly> previous_order {};
+      for (int i = 0; i < previous_limit; ++i)
+        {
+          previous_order[static_cast<size_t> (i)] = i;
+        }
+      auto a7_priority = [&] (int index) {
+        Ft8A7Entry const& hint = slot.previous[static_cast<size_t> (index)];
+        if (!ft8_hint_matches_context (hint, request))
+          {
+            return 100000 + index;
+          }
+        FixedChars<kFt8DecodedChars> const message = ft8_a7_replay_message (hint);
+        int score = std::max (0, hint.age) * 1000;
+        score -= std::min (std::max (hint.hits, 0), 16) * 100;
+        if (is_directed_pair_only_message (message))
+          {
+            score += 80;
+          }
+        if (ft8sd_hint_is_cq (message))
+          {
+            score += 40;
+          }
+        return score;
+      };
+      std::stable_sort (previous_order.begin (),
+                        previous_order.begin () + previous_limit,
+                        [&] (int lhs, int rhs) {
+                          int const lhs_score = a7_priority (lhs);
+                          int const rhs_score = a7_priority (rhs);
+                          if (lhs_score != rhs_score)
+                            {
+                              return lhs_score < rhs_score;
+                          }
+                          return lhs < rhs;
+                        });
+      if (debug_ft8_focus_replay ())
+        {
+          int const debug_limit = std::min (previous_limit, 16);
+          for (int debug_index = 0; debug_index < debug_limit; ++debug_index)
+            {
+              int const hint_index = previous_order[static_cast<size_t> (debug_index)];
+              Ft8A7Entry const& hint = slot.previous[static_cast<size_t> (hint_index)];
+              std::cerr << "[FT8A7] utc=" << request.nutc
+                        << " order=" << debug_index
+                        << " index=" << hint_index
+                        << " score=" << a7_priority (hint_index)
+                        << " hits=" << hint.hits
+                        << " age=" << hint.age
+                        << " freq=" << hint.freq
+                        << " dt=" << hint.dt
+                        << " msg=" << trim_fixed (ft8_a7_replay_message (hint))
+                        << '\n';
+            }
+        }
+
+      for (int order_index = 0; order_index < previous_limit; ++order_index)
+        {
           if (stage4_should_cancel ())
             {
               return;
             }
+          int const i = previous_order[static_cast<size_t> (order_index)];
           Ft8A7Entry const& previous = slot.previous[static_cast<size_t> (i)];
 
           float f1 = 0.0f;
@@ -5671,10 +7910,47 @@ void run_ap_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
               continue;
             }
 
+          std::array<int, kFt8Nn> fast_itone {};
+          std::array<signed char, kFt8Bits> fast_message77 {};
           int nharderrors = -1;
           float dmin = 0.0f;
           float xsnr = 0.0f;
           FixedChars<kFt8DecodedChars> msg37 = blank_fixed<kFt8DecodedChars> ();
+          if (try_ft8_a7_fast_repeated_hint (state, request, previous,
+                                             newdat_a7, sbase, msg37, xsnr,
+                                             xdt, f1, fast_itone,
+                                             fast_message77, false))
+            {
+              if (stage4_should_cancel ())
+                {
+                  return;
+                }
+              msg37 = normalize_resolved_hash_call_tokens (msg37);
+              if (is_directed_pair_only_message (previous.message)
+                  && is_directed_pair_only_message (msg37)
+                  && trim_fixed (previous.message) == trim_fixed (msg37))
+                {
+                  continue;
+                }
+              int nsnr = 0;
+              int iaptype = 0;
+              float qual = 0.0f;
+              ftx_ft8_finalize_a7_result_c (xsnr, &nsnr, &iaptype, &qual);
+              if (ftx_ft8_should_keep_a8_after_a7_c (msg37.data (), request.hiscall.data ()) == 0)
+                {
+                  la8 = false;
+                }
+              collector.append (kSyncAp, nsnr, xdt, f1, msg37, iaptype, qual,
+                                fast_message77.data ());
+              save_a7_entry (state.a7, jseq, xdt, f1, msg37);
+              save_call_grid_history (call_grid_history (), request, jseq, xdt, f1, msg37);
+              seed_pack77_hashes_from_message (msg37);
+              continue;
+            }
+          if (stage4_should_cancel ())
+            {
+              return;
+            }
           ftx_ft8_a7d_c (state.dd.data (), &newdat_a7, call_1.data (), call_2.data (), grid4.data (),
                          &xdt, &f1, &xbase, &nharderrors, &dmin, msg37.data (), &xsnr);
           if (stage4_should_cancel ())
@@ -5685,6 +7961,12 @@ void run_ap_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
           if (nharderrors >= 0)
             {
               msg37 = normalize_resolved_hash_call_tokens (msg37);
+              if (is_directed_pair_only_message (previous.message)
+                  && is_directed_pair_only_message (msg37)
+                  && trim_fixed (previous.message) == trim_fixed (msg37))
+                {
+                  continue;
+                }
               int nsnr = 0;
               int iaptype = 0;
               float qual = 0.0f;
@@ -5743,6 +8025,232 @@ void run_ap_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq,
   save_a7_entry (state.a7, jseq, xdt, save_freq, msg37);
   save_call_grid_history (call_grid_history (), request, jseq, xdt, save_freq, msg37);
   seed_pack77_hashes_from_message (msg37);
+}
+
+void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& request,
+                                 int jseq,
+                                 std::array<float, kFt8Nh1> const& sbase,
+                                 int ifa, int ifb,
+                                 float const* support_candidates,
+                                 int support_count,
+                                 AsyncCollector& collector)
+{
+  constexpr float kSyncAp = 10.0f;
+  constexpr int kMaxFastA7Attempts = 8;
+
+  if (debug_ft8_focus_replay ())
+    {
+      std::cerr << "[FT8A7FAST] utc=" << request.nutc
+                << " enter=1 lft8apon=" << request.lft8apon
+                << " ncontest=" << request.ncontest
+                << " nzhsym=" << request.nzhsym
+                << " previous_count="
+                << state.a7[static_cast<size_t> (jseq)].previous_count
+                << '\n';
+    }
+
+  if (ftx_ft8_should_run_a7_c (request.lft8apon, request.ncontest,
+                               request.nzhsym,
+                               state.a7[static_cast<size_t> (jseq)].previous_count) == 0)
+    {
+      return;
+    }
+
+  Ft8A7Slot& slot = state.a7[static_cast<size_t> (jseq)];
+  int previous_limit = std::min (slot.previous_count, kFt8MaxEarly);
+  for (int i = 0; i < previous_limit; ++i)
+    {
+      if (slot.previous[static_cast<size_t> (i)].freq == -99.0f)
+        {
+          previous_limit = i;
+          break;
+        }
+    }
+
+  std::array<int, kFt8MaxEarly> previous_order {};
+  for (int i = 0; i < previous_limit; ++i)
+    {
+      previous_order[static_cast<size_t> (i)] = i;
+    }
+	  auto direct_report_replay_tail = [] (FixedChars<kFt8DecodedChars> const& message) {
+	    std::vector<std::string> const words = split_words (trim_fixed (message));
+	    return words.size () == 3
+	           && words[0].find ('<') == std::string::npos
+	           && words[1].find ('<') == std::string::npos
+           && is_report_token (words[2])
+           && words[2] != "73"
+	           && words[2] != "RRR"
+	           && words[2] != "RR73";
+	  };
+  auto local_support_score = [&] (Ft8A7Entry const& hint) {
+    if (!support_candidates || support_count <= 0)
+      {
+        return 1.0e30f;
+      }
+    float best_score = 1.0e30f;
+    int const limit = std::min (support_count, kFt8MaxCand);
+    for (int index = 0; index < limit; ++index)
+      {
+        float const candidate_freq =
+            support_candidates[static_cast<size_t> (index * 4 + 0)];
+        float const candidate_dt =
+            support_candidates[static_cast<size_t> (index * 4 + 1)];
+        float const candidate_sync =
+            support_candidates[static_cast<size_t> (index * 4 + 2)];
+        float const candidate_cq =
+            support_candidates[static_cast<size_t> (index * 4 + 3)];
+        float const freq_delta = std::fabs (candidate_freq - hint.freq);
+        float const dt_delta = std::fabs (candidate_dt - hint.dt);
+        if (freq_delta > 5.5f || dt_delta > 0.35f
+            || (candidate_sync < 0.80f && candidate_cq < 1.0f))
+          {
+            continue;
+          }
+        float const score =
+            freq_delta + 10.0f * dt_delta
+            - 0.12f * std::min (candidate_sync, 10.0f)
+            - 0.25f * std::min (candidate_cq, 3.0f);
+        best_score = std::min (best_score, score);
+      }
+    return best_score;
+  };
+  auto a7_priority = [&] (int index) {
+    Ft8A7Entry const& hint = slot.previous[static_cast<size_t> (index)];
+    if (!ft8_hint_matches_context (hint, request))
+      {
+        return 100000 + index;
+      }
+    FixedChars<kFt8DecodedChars> const message = ft8_a7_replay_message (hint);
+    int score = std::max (0, hint.age) * 1000;
+    score -= std::min (std::max (hint.hits, 0), 16) * 100;
+    if (is_directed_pair_only_message (message))
+      {
+        score += 80;
+      }
+    if (ft8sd_hint_is_cq (message))
+      {
+        score += 40;
+      }
+    float const support = local_support_score (hint);
+    if (support >= 1.0e20f)
+      {
+        score += 2000;
+      }
+    else
+      {
+        score += static_cast<int> (std::lround (support * 40.0f)) - 600;
+      }
+	    if (support >= 1.0e20f
+	        && !ft8sd_hint_is_cq (message)
+	        && !is_directed_pair_only_message (message)
+	        && hint.age <= 1
+	        && direct_report_replay_tail (message))
+	      {
+	        score -= 1750;
+	      }
+	    return score;
+	  };
+  std::stable_sort (previous_order.begin (), previous_order.begin () + previous_limit,
+                    [&] (int lhs, int rhs) {
+                      int const lhs_score = a7_priority (lhs);
+                      int const rhs_score = a7_priority (rhs);
+                      if (lhs_score != rhs_score)
+                        {
+                          return lhs_score < rhs_score;
+                        }
+                      return lhs < rhs;
+                    });
+  if (debug_ft8_focus_replay ())
+    {
+      int const debug_limit = std::min (previous_limit, 16);
+      for (int debug_index = 0; debug_index < debug_limit; ++debug_index)
+        {
+          int const hint_index = previous_order[static_cast<size_t> (debug_index)];
+          Ft8A7Entry const& hint = slot.previous[static_cast<size_t> (hint_index)];
+          std::cerr << "[FT8A7FAST] utc=" << request.nutc
+                    << " order=" << debug_index
+                    << " index=" << hint_index
+                    << " score=" << a7_priority (hint_index)
+                    << " hits=" << hint.hits
+                    << " age=" << hint.age
+                    << " freq=" << hint.freq
+                    << " dt=" << hint.dt
+                    << " msg=" << trim_fixed (ft8_a7_replay_message (hint))
+                    << '\n';
+        }
+    }
+
+  int newdat_a7 = 1;
+  int attempts = 0;
+  for (int order_index = 0; order_index < previous_limit; ++order_index)
+    {
+      if (stage4_should_cancel () || attempts >= kMaxFastA7Attempts)
+        {
+          return;
+        }
+      int const hint_index = previous_order[static_cast<size_t> (order_index)];
+      Ft8A7Entry const& previous = slot.previous[static_cast<size_t> (hint_index)];
+      FixedChars<kFt8DecodedChars> const hint_message = ft8_a7_replay_message (previous);
+      bool const pair_only = is_directed_pair_only_message (hint_message);
+      bool const strict_message = is_strict_standard_ft8_message (hint_message);
+      bool const cq_replay = ft8sd_hint_is_cq (hint_message);
+      float const support = local_support_score (previous);
+      bool const recent_supported_cq =
+          cq_replay && previous.age <= 1 && support < 1.0e20f && support <= 2.5f;
+      bool const recent_supported_direct =
+          !cq_replay && !pair_only && previous.age <= 1
+          && support < 1.0e20f && support <= 2.5f;
+      bool const recent_unsupported_direct_report =
+          !cq_replay && !pair_only && previous.age <= 1
+          && support >= 1.0e20f && direct_report_replay_tail (hint_message);
+      int const min_hits = cq_replay ? (recent_supported_cq ? 1 : 3)
+                                     : ((recent_supported_direct
+                                         || recent_unsupported_direct_report)
+                                            ? 1 : 6);
+      if (previous.freq < static_cast<float> (ifa) - 4.0f
+          || previous.freq > static_cast<float> (ifb) + 4.0f
+          || previous.hits < min_hits
+          || pair_only
+          || !strict_message
+          || !ft8_hint_matches_context (previous, request))
+        {
+          continue;
+        }
+
+      float f1 = 0.0f;
+      float xdt = 0.0f;
+      float xsnr = 0.0f;
+      FixedChars<kFt8DecodedChars> msg37 = blank_fixed<kFt8DecodedChars> ();
+      ++attempts;
+      std::array<int, kFt8Nn> fast_itone {};
+      std::array<signed char, kFt8Bits> fast_message77 {};
+      if (!try_ft8_a7_fast_repeated_hint (state, request, previous,
+                                          newdat_a7, sbase, msg37, xsnr,
+                                          xdt, f1, fast_itone,
+                                          fast_message77,
+                                          recent_supported_cq
+                                          || recent_supported_direct
+                                          || recent_unsupported_direct_report,
+                                          recent_unsupported_direct_report))
+        {
+          continue;
+        }
+      if (stage4_should_cancel ())
+        {
+          return;
+        }
+
+      msg37 = normalize_resolved_hash_call_tokens (msg37);
+      int nsnr = 0;
+      int iaptype = 0;
+      float qual = 0.0f;
+      ftx_ft8_finalize_a7_result_c (xsnr, &nsnr, &iaptype, &qual);
+      collector.append (kSyncAp, nsnr, xdt, f1, msg37, iaptype, qual,
+                        fast_message77.data ());
+      save_a7_entry (state.a7, jseq, xdt, f1, msg37);
+      save_call_grid_history (call_grid_history (), request, jseq, xdt, f1, msg37);
+      seed_pack77_hashes_from_message (msg37);
+    }
 }
 
 } // namespace
@@ -6189,7 +8697,26 @@ extern "C" void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* gr
                 << " dt=" << dt
                 << " nutc=" << nutc << '\n';
     }
-  seed_pack77_hash_call (call_string, true);
+  seed_pack77_hash_call (call_string, true, true);
+}
+
+extern "C" void ftx_ft8_stage4_seed_known_cq_call_c (char const* call,
+                                                     float freq, float dt, int nutc)
+{
+  if (!call)
+    {
+      return;
+    }
+  std::string const call_string = trim_fixed (fixed_from_chars<12> (call));
+  save_known_cq_call (known_cq_call_history (), call_string, freq, dt, nutc);
+  if (debug_known_cq_replay ())
+    {
+      std::cerr << "[KNOWNCQ] seed-call-only call=" << call_string
+                << " freq=" << freq
+                << " dt=" << dt
+                << " nutc=" << nutc << '\n';
+    }
+  seed_pack77_hash_call (call_string, true, true);
 }
 
 extern "C" void ftx_ft8_stage4_seed_hash_call_c (char const* call)
@@ -6198,7 +8725,7 @@ extern "C" void ftx_ft8_stage4_seed_hash_call_c (char const* call)
     {
       return;
     }
-  seed_pack77_hash_call (trim_block (call, 13), true);
+  seed_pack77_hash_call (trim_block (call, 13), true, true);
 }
 
 extern "C" void ftx_ft8_stage4_apply_hash_seed_cache_c ()
@@ -6377,11 +8904,12 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
         {
           return;
         }
-      std::array<float, kFt8Nh1> blank_sbase {};
-      auto const& ap_sbase = state.early_sbase_valid ? state.early_sbase : blank_sbase;
-      run_ap_passes (state, request, jseq, ap_sbase, collector);
-      return;
-    }
+	      std::array<float, kFt8Nh1> blank_sbase {};
+	      auto const& ap_sbase = state.early_sbase_valid ? state.early_sbase : blank_sbase;
+	      run_ap_passes (state, request, jseq, ap_sbase, collector);
+	      collector.resolve_hash_placeholders ();
+	      return;
+	    }
 
   if (stage_action == 3)
     {
@@ -6395,11 +8923,12 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
                                           state.xdt_save.data (), state.lsubtracted.data (),
                                           1, refine != 0 ? 1 : 0);
       state.dd1 = state.dd;
-      std::array<float, kFt8Nh1> blank_sbase {};
-      auto const& ap_sbase = state.early_sbase_valid ? state.early_sbase : blank_sbase;
-      run_ap_passes (state, request, jseq, ap_sbase, collector);
-      return;
-    }
+	      std::array<float, kFt8Nh1> blank_sbase {};
+	      auto const& ap_sbase = state.early_sbase_valid ? state.early_sbase : blank_sbase;
+	      run_ap_passes (state, request, jseq, ap_sbase, collector);
+	      collector.resolve_hash_placeholders ();
+	      return;
+	    }
 
   if (stage_action == 4)
     {
@@ -6432,7 +8961,7 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
   bool const run_supplemental_rescue =
       requested_supplemental
       && request.nzhsym >= 50
-      && requested_ndepth >= 4;
+      && requested_ndepth >= 3;
   Ft8Request primary_request = request;
   primary_request.supplemental = false;
   if (run_supplemental_rescue)
@@ -6522,11 +9051,13 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             ++blocked_focus_count;
           }
       };
-      auto run_focused_window = [&] (int focused_nfqso, bool subpass_profile,
-                                     bool current_slot_state, bool deep_supplemental) {
-        Ft8Stage4State focused_state = current_slot_state ? state : state_before_main;
-        Ft8Request focused_request = primary_request;
-        focused_request.nfqso = focused_nfqso;
+		      auto run_focused_window = [&] (int focused_nfqso, bool subpass_profile,
+		                                     bool current_slot_state, bool deep_supplemental,
+		                                     char const* focus_tag) {
+	        long long const focus_start_ms = debug_ft8_focus_replay () ? steady_clock_ms () : 0;
+	        Ft8Stage4State focused_state = current_slot_state ? state : state_before_main;
+	        Ft8Request focused_request = primary_request;
+	        focused_request.nfqso = focused_nfqso;
         if (deep_supplemental)
           {
             focused_request.ndepth = std::max (requested_ndepth, 4);
@@ -6544,19 +9075,40 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             focused_request.nft8cycles = std::max (focused_request.nft8cycles, 2);
             focused_request.nft8rxfsens = std::max (focused_request.nft8rxfsens, 2);
           }
-        int focused_ndecodes = current_slot_state ? ndecodes : state_before_main.ndec_early;
+	        int focused_ndecodes = current_slot_state ? ndecodes : state_before_main.ndec_early;
         std::array<float, kFt8Nh1> focused_sbase {};
         int const focus_ifa = std::max (ifa, focused_nfqso - 30);
         int const focus_ifb = std::min (ifb, focused_nfqso + 30);
         run_main_passes (focused_state, focused_request, jseq, apsym, aph10,
                          focus_ifa, focus_ifb, focused_ndecodes, focused_sbase,
                          collector, false);
-        if (stage4_should_cancel ())
-          {
-            return -1;
-          }
-        return merge_saved_decodes (focused_state, focused_ndecodes);
-      };
+	        if (stage4_should_cancel ())
+	          {
+	            if (debug_ft8_focus_replay ())
+	              {
+	                std::cerr << "[FT8FOCUS] utc=" << request.nutc
+	                          << " tag=" << focus_tag
+	                          << " freq=" << focused_nfqso
+	                          << " canceled=1 elapsed_ms="
+	                          << (steady_clock_ms () - focus_start_ms) << '\n';
+	              }
+	            return -1;
+	          }
+	        int const added = merge_saved_decodes (focused_state, focused_ndecodes);
+	        if (debug_ft8_focus_replay ())
+	          {
+	            std::cerr << "[FT8FOCUS] utc=" << request.nutc
+	                      << " tag=" << focus_tag
+	                      << " freq=" << focused_nfqso
+	                      << " subpass=" << (subpass_profile ? 1 : 0)
+		                      << " current=" << (current_slot_state ? 1 : 0)
+		                      << " deep=" << (deep_supplemental ? 1 : 0)
+			                      << " added=" << added
+	                      << " elapsed_ms=" << (steady_clock_ms () - focus_start_ms)
+	                      << '\n';
+	          }
+	        return added;
+		      };
 
       for (int focus_attempt = 0; focus_attempt < 2; ++focus_attempt)
         {
@@ -6567,14 +9119,14 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             {
               break;
             }
-          int added = run_focused_window (focused_nfqso, false, false, false);
+		          int added = run_focused_window (focused_nfqso, false, false, false, "primary");
           if (stage4_should_cancel ())
             {
               return;
             }
           if (added == 0)
             {
-              added = run_focused_window (focused_nfqso, true, true, false);
+		              added = run_focused_window (focused_nfqso, true, true, false, "primary-subpass");
               if (stage4_should_cancel ())
                 {
                   return;
@@ -6595,14 +9147,14 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             {
               break;
             }
-          int added = run_focused_window (focused_nfqso, true, true, false);
+		          int added = run_focused_window (focused_nfqso, true, true, false, "overlap-subpass-current");
           if (stage4_should_cancel ())
             {
               return;
             }
           if (added <= 0)
             {
-              added = run_focused_window (focused_nfqso, true, false, false);
+		              added = run_focused_window (focused_nfqso, true, false, false, "overlap-subpass-prior");
               if (stage4_should_cancel ())
                 {
                   return;
@@ -6625,14 +9177,14 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             {
               break;
             }
-          int added = run_focused_window (focused_nfqso, true, false, false);
+		          int added = run_focused_window (focused_nfqso, true, false, false, "close-cq-subpass-prior");
           if (stage4_should_cancel ())
             {
               return;
             }
           if (added <= 0)
             {
-              added = run_focused_window (focused_nfqso, true, true, false);
+		              added = run_focused_window (focused_nfqso, true, true, false, "close-cq-subpass-current");
               if (stage4_should_cancel ())
                 {
                   return;
@@ -6640,7 +9192,7 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             }
           if (added <= 0)
             {
-              added = run_focused_window (focused_nfqso, true, false, true);
+		              added = run_focused_window (focused_nfqso, true, false, true, "close-cq-deep-prior");
               if (stage4_should_cancel ())
                 {
                   return;
@@ -6662,7 +9214,7 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
             {
               break;
             }
-          int added = run_focused_window (focused_nfqso, false, false, true);
+		          int added = run_focused_window (focused_nfqso, false, false, true, "call-grid-deep-prior");
           if (stage4_should_cancel ())
             {
               return;
@@ -6682,8 +9234,9 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
       state.early_sbase_valid = true;
     }
 
-  run_ap_passes (state, primary_request, jseq, sbase, collector);
-}
+	  run_ap_passes (state, primary_request, jseq, sbase, collector);
+	  collector.resolve_hash_placeholders ();
+	}
 
 extern "C" void ftx_ft8_emit_results_c (int* nutc, int* ncontest, int* nagain,
                                         int* b_superfox, char const* mycall,
