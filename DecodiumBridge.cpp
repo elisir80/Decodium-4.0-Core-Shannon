@@ -32361,6 +32361,43 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         }
     }
 
+    // F1 subpass harvest: al RISULTATO del deep, lancia un terzo decode subpass=1
+    // list-only nel gap prima del boundary (recupero deboli tardivo, mai auto-seq/TX).
+    // Cap auto-dimensionato al gap (F1a conservativo: niente preemption).
+    {
+        Ft8PendingDeepFollowup pendingHarvest = m_ft8PendingSubpassHarvest.take(serial);
+        if (!pendingHarvest.audio.isEmpty() && m_ft8SubpassHarvest
+            && m_mode == QStringLiteral("FT8")
+            && pendingHarvest.sessionId == m_decodeSessionId) {
+            bool const harvestBusyTx = m_transmitting || m_tuning;
+            bool const harvestPressure = m_lowCpuModeEnabled || cpuPressureActive();
+            int const harvestPeriodMs = periodMsForMode(QStringLiteral("FT8"));
+            int const harvestIntoSlotMs = harvestPeriodMs > 0
+                ? static_cast<int>(correctedUtcEpochMs() % harvestPeriodMs) : 0;
+            static constexpr int kHarvestBoundaryMarginMs = 1500;
+            static constexpr int kHarvestMinUsefulMs = 4000;
+            static constexpr int kHarvestMaxMs = 6500;  // F1a: cap basso, finisce prima del boundary
+            int const harvestGapMs = qMax(0, harvestPeriodMs - harvestIntoSlotMs - kHarvestBoundaryMarginMs);
+            int const harvestCapMs = qMin(harvestGapMs, kHarvestMaxMs);
+            if (!harvestBusyTx && !harvestPressure && harvestCapMs >= kHarvestMinUsefulMs) {
+                quint64 const harvestSerial = ++m_decodeSerial;
+                m_decodeStartMsBySerial.insert(harvestSerial, QDateTime::currentMSecsSinceEpoch());
+                m_decodeModeBySerial.insert(harvestSerial, QStringLiteral("FT8"));
+                m_decodeUtcTokenBySerial.insert(harvestSerial, pendingHarvest.utcToken);
+                m_decodeSessionBySerial.insert(harvestSerial, m_decodeSessionId);
+                bridgeLog(QStringLiteral("FT8 subpass harvest dispatch: serial=%1 capMs=%2 gapMs=%3 intoSlotMs=%4")
+                              .arg(harvestSerial).arg(harvestCapMs).arg(harvestGapMs).arg(harvestIntoSlotMs));
+                queueFt8DecodeRequest(pendingHarvest.audio, harvestSerial, pendingHarvest.nutc,
+                                      pendingHarvest.slotIndex, pendingHarvest.decodeDepth,
+                                      pendingHarvest.decodeQsoProgress, pendingHarvest.cqHint,
+                                      50, pendingHarvest.ft8ApEnabled, false, true, harvestCapMs, true);
+            } else {
+                bridgeLog(QStringLiteral("FT8 subpass harvest skipped: tx=%1 pressure=%2 gapMs=%3 capMs=%4")
+                              .arg(harvestBusyTx ? 1 : 0).arg(harvestPressure ? 1 : 0)
+                              .arg(harvestGapMs).arg(harvestCapMs));
+            }
+        }
+    }
     Ft8PendingDeepFollowup pendingDeep = m_ft8PendingDeepFollowups.take(serial);
     if (!pendingDeep.audio.isEmpty()) {
         static constexpr int kFt8DeepDispatchSafetyMs = 250;
@@ -32421,6 +32458,13 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                                   pendingDeep.slotIndex, pendingDeep.decodeDepth,
                                   pendingDeep.decodeQsoProgress, pendingDeep.cqHint,
                                   50, pendingDeep.ft8ApEnabled, false, pendingDeep.inTx, budgetMs);
+            if (m_ft8SubpassHarvest) {
+                // F1: prepara l'harvest subpass (terzo decode nel gap dopo il deep).
+                Ft8PendingDeepFollowup harvest = pendingDeep;
+                harvest.sessionId = m_decodeSessionId;
+                m_ft8PendingSubpassHarvest.clear();  // al piu' 1 pending (single-flight)
+                m_ft8PendingSubpassHarvest.insert(deepSerial, std::move(harvest));
+            }
         }
     }
 }
@@ -35044,7 +35088,7 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
                                            int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                            int decodeQsoProgress, int cqHint, int nzhsym,
                                            bool ft8ApEnabled, bool suppressUiRows,
-                                           bool listOnlyRows, int maxDecodeMsOverride)
+                                           bool listOnlyRows, int maxDecodeMsOverride, bool subpassRequested)
 {
     if (!m_ft8Worker) {
         return;
@@ -35082,7 +35126,7 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.hisgrid = m_dxGrid.toLocal8Bit();
     int const boundedDepth = qBound(1, req.ndepth, 4);
     req.supplemental = !txAudioActive && boundedDepth >= 4;
-    req.subpass = m_ft8SubpassHarvest && !txAudioActive && boundedDepth >= 4;  // F0 opt-in
+    req.subpass = subpassRequested && !txAudioActive && boundedDepth >= 4;  // F1: solo l'harvest chiede subpass
     req.coherentAvgEnabled = !txAudioActive && m_coherentAvgEnabled;
     req.neuralSyncEnabled = !txAudioActive && m_neuralSyncEnabled;
     req.turboFeedbackEnabled = !txAudioActive && m_turboFeedbackEnabled;

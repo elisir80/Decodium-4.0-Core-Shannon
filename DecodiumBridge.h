@@ -2258,6 +2258,7 @@ private:
         qint64 latestCompleteMs {0};
     };
     QHash<quint64, Ft8PendingDeepFollowup> m_ft8PendingDeepFollowups;
+    QHash<quint64, Ft8PendingDeepFollowup> m_ft8PendingSubpassHarvest;  // F1: harvest subpass pending (key=deepSerial), al piu' 1 entry
     QHash<quint64, quint64> m_decodeSessionBySerial;
     qint64 m_ft4EarlyDecodeSlot {-1};
     bool m_ft4EarlyDecodeSent {false};
@@ -3062,7 +3063,7 @@ private:
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint, int nzhsym,
                                bool ft8ApEnabled, bool suppressUiRows,
-                               bool listOnlyRows = false, int maxDecodeMsOverride = 0);
+                               bool listOnlyRows = false, int maxDecodeMsOverride = 0, bool subpassRequested = false);
     void queueFt4DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint);
