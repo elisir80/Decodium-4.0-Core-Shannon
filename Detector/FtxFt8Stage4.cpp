@@ -1021,6 +1021,15 @@ bool debug_ft8_focus_replay ()
   return enabled;
 }
 
+int ft8_freqpart_bins ()
+{
+  static int const bins = [] {
+    char const* v = std::getenv ("DECODIUM_FT8_FREQPART_BINS");
+    return v ? std::max (0, std::min (32, std::atoi (v))) : 0;
+  }();
+  return bins;
+}
+
 std::string sanitize_pack77_hash_call_seed (std::string word)
 {
   while (!word.empty () && (word.front () == '<' || word.front () == ';' || word.front () == ','))
@@ -7313,8 +7322,23 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       int subtract_rescue_used = 0;
       int cq_companion_rescue_used = 0;
 
-      for (int icand = 0; icand < ncand; ++icand)
+      std::vector<int> freqpart_order;
+      if (ft8_freqpart_bins () > 0 && ncand > 1)
         {
+          int const fp_bins = ft8_freqpart_bins ();
+          int const fp_span = std::max (1, ifb - ifa);
+          freqpart_order.reserve (static_cast<size_t> (ncand));
+          for (int fp_b = 0; fp_b < fp_bins; ++fp_b)
+            for (int fp_i = 0; fp_i < ncand; ++fp_i)
+              {
+                int fp_bin = static_cast<int> ((candidate[static_cast<size_t> (fp_i * 4)] - ifa) * fp_bins / fp_span);
+                fp_bin = std::max (0, std::min (fp_bins - 1, fp_bin));
+                if (fp_bin == fp_b) freqpart_order.push_back (fp_i);
+              }
+        }
+      for (int fp_k = 0; fp_k < ncand; ++fp_k)
+        {
+          int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
           if (stage4_should_cancel ())
             {
               if (shifted_pass)
