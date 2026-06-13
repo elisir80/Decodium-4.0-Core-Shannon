@@ -32349,7 +32349,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     Ft8PendingDeepFollowup pendingDeep = m_ft8PendingDeepFollowups.take(serial);
     if (!pendingDeep.audio.isEmpty()) {
         static constexpr int kFt8DeepDispatchSafetyMs = 250;
-        static constexpr int kFt8DeepMaxLiveBudgetMs = 5700;
+        static constexpr int kFt8DeepMaxLiveBudgetMs = 6500;
         static constexpr int kFt8DeepMinUsefulBudgetMs = 2400;
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
@@ -35512,7 +35512,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         bool const explicitDeepFollowup = m_deepSearchEnabled || m_avgDecodeEnabled;
         qint64 deepFollowupLatestCompleteMs = 0;
         if (modeSnapshot == QStringLiteral("FT8") && decodePeriodMs > 0 && slotIndexForUtc >= 0) {
-            static constexpr int kFt8DeepLatestOverrunMs = 6500;
+            static constexpr int kFt8DeepLatestOverrunMs = 6800;
             deepFollowupLatestCompleteMs =
                 (slotIndexForUtc + 1) * static_cast<qint64>(decodePeriodMs)
                 + kFt8DeepLatestOverrunMs;
