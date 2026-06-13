@@ -7225,6 +7225,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       dd_cycle_base.assign (state.dd.begin (), state.dd.end ());
   }
   long long const main_start_ms = debug_ft8_focus_replay () ? steady_clock_ms () : 0;
+  int subpass_zero_streak = 0;  // Fase 1a accelerazione: early-terminate del subpass
 
   for (int ipass = 1; ipass <= npass; ++ipass)
     {
@@ -7779,6 +7780,23 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
 	                    << " pass_ms=" << (steady_clock_ms () - pass_start_ms)
 	                    << '\n';
 	        }
+      // Fase 1a (accelerazione): early-terminate del subpass a yield esaurito.
+      // Profiling: ~94% dei decode nei primi 2 pass; pass 3-8 = ~74% tempo per ~6% yield.
+      // Stop dopo 2 pass consecutivi a zero-add. SOLO subpass: decode normale/deep INTATTO.
+      if (request.lft8subpass)
+        {
+          if (ndecodes - pass_start_decodes == 0) ++subpass_zero_streak;
+          else subpass_zero_streak = 0;
+          if (subpass_zero_streak >= 2)
+            {
+              if (debug_ft8_focus_replay ())
+                std::cerr << "[FT8MAIN] utc=" << request.nutc
+                          << " subpass_early_terminate pass=" << ipass
+                          << " ndecodes=" << ndecodes
+                          << " elapsed_ms=" << (steady_clock_ms () - main_start_ms) << std::endl;
+              break;
+            }
+        }
       if (ipass == 2
           && request.nzhsym >= 50
           && !request.supplemental
