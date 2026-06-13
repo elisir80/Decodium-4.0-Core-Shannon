@@ -5946,6 +5946,20 @@ void DecodiumBridge::setFt8DeepDecodeInTx(bool v)
 // 1.0.304 (#9) — resume-on-reply opt-in. Alla Halt con un QSO attivo memorizza il partner;
 // se quello ri-risponde (suo call + mio call) entro 2 min riprende il QSO. Default OFF:
 // l'hard-stop v4 dell'Halt resta il comportamento di default (feedback tester 2026-05).
+// F0 subpass-harvest: abilita l'engine subpass ft8b (lft8subpass), gia' implementato in
+// FtxFt8Stage4.cpp ma hardcoded OFF nel worker. Opt-in, default OFF. F0 = solo plumbing:
+// il flag arriva al worker via req.subpass. Entro il budget live ~5849ms non da' guadagno
+// (A/B config E) ma e' benigno; il vero recupero deboli arrivera' col worker harvest (F1).
+void DecodiumBridge::setFt8SubpassHarvest(bool v)
+{
+    if (m_ft8SubpassHarvest == v) return;
+    m_ft8SubpassHarvest = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft8SubpassHarvest"), v);
+    emit ft8SubpassHarvestChanged();
+    bridgeLog(QStringLiteral("[FT8] Subpass harvest %1").arg(v ? "ON" : "OFF"));
+}
+
 void DecodiumBridge::setResumeQsoOnReply(bool v)
 {
     if (m_resumeQsoOnReply == v) return;
@@ -27310,6 +27324,7 @@ void DecodiumBridge::loadSettings()
     m_mamMaxStreams  = qBound(2, s.value(QStringLiteral("MamMaxStreams"), 3).toInt(), 5);
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
+    m_ft8SubpassHarvest     = s.value(QStringLiteral("Ft8SubpassHarvest"),     false).toBool();
     // 1.0.304 (#9) — resume-on-reply, opt-in default OFF
     m_resumeQsoOnReply      = s.value(QStringLiteral("ResumeQsoOnReply"),      false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
@@ -35067,6 +35082,7 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.hisgrid = m_dxGrid.toLocal8Bit();
     int const boundedDepth = qBound(1, req.ndepth, 4);
     req.supplemental = !txAudioActive && boundedDepth >= 4;
+    req.subpass = m_ft8SubpassHarvest && !txAudioActive && boundedDepth >= 4;  // F0 opt-in
     req.coherentAvgEnabled = !txAudioActive && m_coherentAvgEnabled;
     req.neuralSyncEnabled = !txAudioActive && m_neuralSyncEnabled;
     req.turboFeedbackEnabled = !txAudioActive && m_turboFeedbackEnabled;

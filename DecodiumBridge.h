@@ -431,6 +431,7 @@ class DecodiumBridge : public QObject
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     Q_PROPERTY(bool ft2FullDecodeInAutoCq READ ft2FullDecodeInAutoCq WRITE setFt2FullDecodeInAutoCq NOTIFY ft2FullDecodeInAutoCqChanged)
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
+    Q_PROPERTY(bool ft8SubpassHarvest READ ft8SubpassHarvest WRITE setFt8SubpassHarvest NOTIFY ft8SubpassHarvestChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2NarrowAsyncDecode READ ft2NarrowAsyncDecode WRITE setFt2NarrowAsyncDecode NOTIFY ft2NarrowAsyncDecodeChanged)
@@ -1380,6 +1381,7 @@ signals:
     void ft2ConservativeTimingChanged(); // 1.0.367 — finestra TX FT2 async stretta (no frame troncati)
     void ft2FullDecodeInAutoCqChanged();  // 1.0.289
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
+    void ft8SubpassHarvestChanged();      // F0 subpass harvest opt-in
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2NarrowAsyncDecodeChanged();   // Sprint2-1
@@ -1966,6 +1968,7 @@ private:
     bool m_ft2AsyncSkipRedundantSyncDecode {false};  // 1.0.355: salta decode sync fine-slot se async ha gia' coperto lo slot
     qint64 m_ft2AsyncDecodeProducedSlotMs {0};       // 1.0.355: indice slot corrected-UTC dell'ultimo decode async accettato
     bool m_ft8DeepDecodeInTx {false};      // 1.0.299: deep depth-4 follow-up (decode-list-only) anche durante TX/QSO. Opt-in.
+    bool m_ft8SubpassHarvest {false};       // F0: abilita engine subpass ft8b (lft8subpass). Opt-in, default OFF.
     // 1.0.293 — cache band-wide degli hash28 dei call visti in banda (single-thread, GUI-confined).
     HashedCallsignCache m_hashedCallsignCache;
     qint64 m_lastApHashLogMs {0};          // throttle del log hit-rate
@@ -2876,7 +2879,9 @@ public:
     Q_INVOKABLE bool ft2AsyncSkipRedundantSyncDecode() const { return m_ft2AsyncSkipRedundantSyncDecode; }
     Q_INVOKABLE void setFt2AsyncSkipRedundantSyncDecode(bool v);
     Q_INVOKABLE bool ft8DeepDecodeInTx() const { return m_ft8DeepDecodeInTx; }
+    Q_INVOKABLE bool ft8SubpassHarvest() const { return m_ft8SubpassHarvest; }
     Q_INVOKABLE void setFt8DeepDecodeInTx(bool v);
+    Q_INVOKABLE void setFt8SubpassHarvest(bool v);
 
     // 1.0.179 — Smooth Decode Flow scheduler: spalma il rilascio dei decode
     // FT8/FT4 dal batch (15-30 row insieme) in stream progressivo con

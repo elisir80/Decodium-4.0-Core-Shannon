@@ -1206,7 +1206,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   // recovers repeatable JTDX-only decodes while staying under the existing
   // live deadline. Keep early and supplemental passes on the cheaper profile.
   constexpr bool effectiveLowThresholds {false};
-  constexpr bool effectiveSubpass {false};
+  bool const effectiveSubpass {request.subpass};  // F0: era hardcoded false; ora pilotato dal toggle ft8SubpassHarvest
   bool const fullLiveDecode =
       request.ndepth >= 3
       && !request.supplemental
