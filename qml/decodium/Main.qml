@@ -3363,6 +3363,45 @@ ApplicationWindow {
                                 ToolTip.visible: monitorMA.containsMouse
                                 ToolTip.text: bridge.monitoring ? "Stop monitoring" : "Start monitoring"
                             }
+
+                            // Gallager — toggle scavo profondo weak-signal (ft8SubpassHarvest)
+                            Rectangle {
+                                Layout.preferredWidth: 38
+                                Layout.preferredHeight: 16
+                                color: bridge.ft8SubpassHarvest ? Qt.rgba(0.55, 0.43, 0.92, 0.18) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                                border.color: bridge.ft8SubpassHarvest ? "#8f74e8" : glassBorder
+                                border.width: 1
+                                radius: 2
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    spacing: 2
+                                    Text {
+                                        text: "◆"
+                                        font.pixelSize: 8
+                                        color: bridge.ft8SubpassHarvest ? "#bda9ff" : secondaryCyan
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "GAL"
+                                        font.pixelSize: 7
+                                        font.bold: true
+                                        color: bridge.ft8SubpassHarvest ? "#bda9ff" : textPrimary
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: gallagerMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: bridge.ft8SubpassHarvest = !bridge.ft8SubpassHarvest
+                                }
+
+                                ToolTip.visible: gallagerMA.containsMouse
+                                ToolTip.text: "Gallager — scavo profondo dei segnali deboli.\nAttiva un secondo passaggio di decodifica (subpass LDPC\nparallelizzato sui core, dal nome di R. Gallager, padre dell'LDPC)\nche recupera stazioni vicine al rumore perse dal decode normale.\nRichiede una CPU multi-core: su PC datati può appesantire l'audio\n→ in tal caso lascialo spento."
+                            }
                         }
                     }
                 } // End Sliders Item

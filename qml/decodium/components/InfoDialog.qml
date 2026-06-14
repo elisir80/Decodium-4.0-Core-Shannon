@@ -215,7 +215,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "4.0 Core Shannon"
+                        text: "4.0 Core Gallager"
                         font.pixelSize: 16
                         color: secondaryCyan
                     }
@@ -326,7 +326,7 @@ Dialog {
                             { year: "2025", title: "Decodium 1.0", desc: "First public release with Neural Sync, Coherent Averaging, modern UI, integrated CAT control, and PSK Reporter." },
                             { year: "2025", title: "Decodium 1.5", desc: "Release with decoder improvements, new UI, macro management, and the astronomy window." },
                             { year: "2026", title: "Decodium 2.0", desc: "Version optimized for older computers: bitshift, memcpy, and magnitude-squared optimizations. Yaesu CAT fix with DTR/RTS." },
-                            { year: "2026", title: "Decodium 4.0 Core Shannon", desc: "Complete architectural refactor. New modular UI, PSK Reporter, Cloudlog, live DX Cluster, ADIF, and LotW integration. Named after Claude Shannon, father of information theory." }
+                            { year: "2026", title: "Decodium 4.0 Core Gallager", desc: "Complete architectural refactor. New modular UI, PSK Reporter, Cloudlog, live DX Cluster, ADIF, and LotW integration. Named after Robert Gallager, inventor of LDPC codes." }
                         ]
 
                         Rectangle {
@@ -601,7 +601,7 @@ Dialog {
 
                                 onClicked: {
                                     var subject = encodeURIComponent(feedbackSubject.text || "Decodium Feedback")
-                                    var body = encodeURIComponent(feedbackMessage.text + "\n\n--\nDecodium 4.0 Core Shannon\nCallsign: " + (bridge ? bridge.callsign : "N/A"))
+                                    var body = encodeURIComponent(feedbackMessage.text + "\n\n--\nDecodium 4.0 Core Gallager\nCallsign: " + (bridge ? bridge.callsign : "N/A"))
                                     Qt.openUrlExternally("mailto:iu8lmc@gmail.com,9h1sr@gmail.com?subject=" + subject + "&body=" + body)
                                 }
                             }

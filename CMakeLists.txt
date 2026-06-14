@@ -62,7 +62,7 @@ project (wsjtx
   VERSION 4.0.0.0
   LANGUAGES C CXX
   )
-set (PROJECT_DESCRIPTION "Decodium 4.0 Core Shannon: Digital Modes for Weak Signal Communications in Amateur Radio")
+set (PROJECT_DESCRIPTION "Decodium 4.0 Core Gallager: Digital Modes for Weak Signal Communications in Amateur Radio")
 set (CMAKE_PROJECT_DESCRIPTION ${PROJECT_DESCRIPTION})
 set (CMAKE_AUTOUIC ON)
 if (APPLE)
@@ -116,7 +116,7 @@ add_definitions (-DFORK_RELEASE_VERSION=\"${FORK_RELEASE_VERSION}\")
 #
 # project information
 #
-set (PROJECT_BUNDLE_NAME "Decodium 4.0 Core Shannon")
+set (PROJECT_BUNDLE_NAME "Decodium 4.0 Core Gallager")
 set (PROJECT_VENDOR "IU8LMC")
 set (PROJECT_CONTACT "IU8LMC <qrz.com/db/IU8LMC>")
 set (PROJECT_COPYRIGHT "See Help | Copyright info")

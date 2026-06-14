@@ -145,7 +145,7 @@ ApplicationWindow {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Core Shannon"
+            text: "Core Gallager"
             color: "#aaaacc"
             font.pixelSize: 18
         }

@@ -1193,7 +1193,7 @@ int main(int argc, char* argv[])
     }
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("\nDecodium 4.0 Core Shannon: Digital Modes for Weak Signal Communications in Amateur Radio"));
+    parser.setApplicationDescription(QStringLiteral("\nDecodium 4.0 Core Gallager: Digital Modes for Weak Signal Communications in Amateur Radio"));
     auto const helpOption = parser.addHelpOption();
     auto const versionOption = parser.addVersionOption();
 

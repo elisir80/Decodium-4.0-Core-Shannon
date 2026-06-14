@@ -1,4 +1,4 @@
-/* Decodium 4.0 Core Shannon — Splash Screen
+/* Decodium 4.0 Core Gallager — Splash Screen
  * Schermata di avvio con logo, versione e animazione di caricamento.
  * Si chiude automaticamente dopo splashDuration ms oppure al click.
  */
@@ -128,7 +128,7 @@ Rectangle {
             }
 
             Text {
-                text: "Core Shannon"
+                text: "Core Gallager"
                 font.pixelSize: 16; font.italic: true
                 color: secondaryCyan
             }
@@ -252,7 +252,7 @@ Rectangle {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Named after Claude E. Shannon · Father of Information Theory"
+            text: "Named after Robert G. Gallager · Father of LDPC Codes"
             font.pixelSize: 10; font.italic: true
             color: Qt.rgba(0.53, 0.6, 0.67, 0.7)
         }
