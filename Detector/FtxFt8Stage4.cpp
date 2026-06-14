@@ -7284,7 +7284,6 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
             }
           shifted_pass = true;
         }
-      int pass_newdat = 1;
       float syncmin = 0.0f;
       int imetric = 0;
       int lsubtract = 0;
@@ -7325,9 +7324,6 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       append_known_cq_candidates (known_call_grid_history (), request, ifa, ifb,
                                   candidate.data (), ncand);
 
-      int subtract_rescue_used = 0;
-      int cq_companion_rescue_used = 0;
-
       std::vector<int> freqpart_order;
       std::vector<int> freqpart_binid;
       if (ft8_freqpart_bins () > 0 && ncand > 1)
@@ -7346,33 +7342,29 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
         }
       bool const fp_isolate = ft8_freqpart_isolate () && !freqpart_order.empty () && !shifted_pass;
       std::vector<float> fp_dd_snapshot, fp_dd_accum;
-      int fp_cur_bin = -1;
       if (fp_isolate)
         {
           fp_dd_snapshot.assign (state.dd.begin (), state.dd.end ());
           fp_dd_accum = fp_dd_snapshot;
-          fp_cur_bin = freqpart_binid[0];
         }
-      Ft8CqSignalHistoryState fp_cq_hist;
-      Ft8CallGridHistoryState fp_cg_hist;
-      Ft8CqSignalHistoryState& fp_cq_ref = fp_isolate ? fp_cq_hist : cq_signal_history ();
-      Ft8CallGridHistoryState& fp_cg_ref = fp_isolate ? fp_cg_hist : call_grid_history ();
-      std::array<Ft8A7Slot, kFt8SequenceCount> fp_a7_snapshot = state.a7;
-      std::array<Ft8A7Slot, kFt8SequenceCount> fp_a7_arr = state.a7;
-      std::array<Ft8A7Slot, kFt8SequenceCount>& fp_a7_ref = fp_isolate ? fp_a7_arr : state.a7;
-      for (int fp_k = 0; fp_k < ncand; ++fp_k)
+      auto fp_process_bin = [&] (int fp_b)
         {
-          int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
-          if (fp_isolate && freqpart_binid[static_cast<size_t> (fp_k)] != fp_cur_bin)
+          std::vector<float> fp_dd_bin;
+          if (fp_isolate) fp_dd_bin = fp_dd_snapshot;
+          float* const fp_dd = fp_isolate ? fp_dd_bin.data () : state.dd.data ();
+          int pass_newdat = 1;
+          Ft8CqSignalHistoryState fp_cq_hist;
+          Ft8CallGridHistoryState fp_cg_hist;
+          Ft8CqSignalHistoryState& fp_cq_ref = fp_isolate ? fp_cq_hist : cq_signal_history ();
+          Ft8CallGridHistoryState& fp_cg_ref = fp_isolate ? fp_cg_hist : call_grid_history ();
+          std::array<Ft8A7Slot, kFt8SequenceCount> fp_a7_arr = state.a7;
+          std::array<Ft8A7Slot, kFt8SequenceCount>& fp_a7_ref = fp_isolate ? fp_a7_arr : state.a7;
+          int subtract_rescue_used = 0;
+          int cq_companion_rescue_used = 0;
+          for (int fp_k = 0; fp_k < ncand; ++fp_k)
             {
-              for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
-                fp_dd_accum[fp_s] += state.dd[fp_s] - fp_dd_snapshot[fp_s];
-              std::copy (fp_dd_snapshot.begin (), fp_dd_snapshot.end (), state.dd.begin ());
-              fp_cur_bin = freqpart_binid[static_cast<size_t> (fp_k)];
-              fp_cq_hist.reset ();
-              fp_cg_hist.reset ();
-              fp_a7_arr = fp_a7_snapshot;
-            }
+              int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
+              if (fp_isolate && freqpart_binid[static_cast<size_t> (fp_k)] != fp_b) continue;
           if (stage4_should_cancel ())
             {
               if (shifted_pass)
@@ -7418,7 +7410,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               || active_candidate_request->lft8subpass
               || active_candidate_request->nft8cycles > 1
               || active_candidate_request->nft8rxfsens > 1;
-          decode_main_candidate_cpp (state.dd.data (), &pass_newdat,
+          decode_main_candidate_cpp (fp_dd, &pass_newdat,
                                      *active_candidate_request, ipass,
                                      use_var_downsample, equalized_pipeline, imetric, lsubtract, apsym, aph10,
                                      candidate.data () + icand * 4,
@@ -7489,7 +7481,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                   std::array<signed char, kFt8Bits> companion_message77 {};
                   int companion_newdat = pass_newdat;
                   decode_main_candidate_cpp (
-                      state.dd.data (), &companion_newdat,
+                      fp_dd, &companion_newdat,
                       *active_candidate_request, ipass,
                       use_var_downsample, equalized_pipeline, imetric, lsubtract,
                       apsym, aph10, companion_values,
@@ -7660,7 +7652,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                       if (rescue_run_pass != 0 && rescue_ifb > rescue_ifa)
                         {
                           ftx_sync8_search_stage4_c (
-                              state.dd.data (), kFt8NMax,
+                              fp_dd, kFt8NMax,
                               static_cast<float> (rescue_ifa),
                               static_cast<float> (rescue_ifb), rescue_syncmin,
                               static_cast<float> (request.nfqso), 96, rescue_decode_pass,
@@ -7725,7 +7717,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                               || active_rescue_request->nft8cycles > 1
                               || active_rescue_request->nft8rxfsens > 1;
                           decode_main_candidate_cpp (
-                              state.dd.data (), &rescue_newdat, *active_rescue_request,
+                              fp_dd, &rescue_newdat, *active_rescue_request,
                               rescue_decode_pass, rescue_use_var_downsample,
                               equalized_pipeline, rescue_imetric,
                               rescue_lsubtract,
@@ -7823,12 +7815,15 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               return;
             }
         }
+          if (fp_isolate)
+            for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
+              fp_dd_accum[fp_s] += fp_dd_bin[fp_s] - fp_dd_snapshot[fp_s];
+        };
+      int const fp_nbins = fp_isolate ? ft8_freqpart_bins () : 1;
+      for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
+        fp_process_bin (fp_b);
       if (fp_isolate)
-        {
-          for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
-            fp_dd_accum[fp_s] += state.dd[fp_s] - fp_dd_snapshot[fp_s];
-          std::copy (fp_dd_accum.begin (), fp_dd_accum.end (), state.dd.begin ());
-        }
+        std::copy (fp_dd_accum.begin (), fp_dd_accum.end (), state.dd.begin ());
       if (shifted_pass)
         {
           std::copy (dd_before_shift.begin (), dd_before_shift.end (), state.dd.begin ());
