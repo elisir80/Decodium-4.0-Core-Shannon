@@ -37,6 +37,8 @@ extern "C"
                                             int cycles, int rx_freq_sensitivity,
                                             int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
+  void ftx_ft8_stage4_set_force_fresh_slot_c (int force);
+  void ftx_ft8_stage4_set_freqpart_c (int bins);
   void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
   void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,
                                        float freq, float dt, int nutc);
@@ -45,6 +47,7 @@ extern "C"
   void ftx_ft8_stage4_seed_hash_call_c (char const* call);
   void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_ft8_a7_save_c (int jseq, float dt, float freq, char const* msg37);
+  int ftx_ft8_freqpart_bins_used_c ();
   void ftx_ft8_async_decode_stage4_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nftx,
                                       int* nutc, int* nfa, int* nfb, int* nzhsym, int* ndepth,
                                       float* emedelay, int* ncontest, int* nagain,
@@ -1225,6 +1228,10 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       request.supplemental || request.ndepth >= 4 || fullLiveFocusedRescue;
   bool const osdSupplementalRequested = request.supplemental || request.ndepth >= 4;
   ftx_ft8_stage4_set_supplemental_c (supplementalRequested ? 1 : 0);
+  // Harvest subpass: dig FRESH (reset slot state, a7 preserved) so the
+  // parallelized subpass re-scans for weak signals, not the deep residual.
+  ftx_ft8_stage4_set_force_fresh_slot_c (effectiveSubpass ? 1 : 0);
+  ftx_ft8_stage4_set_freqpart_c (effectiveSubpass ? 8 : 0);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
   ftx_ft8_stage4_set_ldpc_max_iter_c (request.turboFeedbackEnabled ? 50 : 30);
   bool const wantOsd = request.osdFollowup
@@ -1322,7 +1329,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 thread=0x%21")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 thread=0x%21 freqpart=%22")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -1343,7 +1350,8 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (request.nft8Cycles)
                  .arg (requestedDepth)
                  .arg (supplementalRequested ? 1 : 0)
-                 .arg (current_thread_id_hex ());
+                 .arg (current_thread_id_hex ())
+                 .arg (ftx_ft8_freqpart_bins_used_c ());
     }
   Q_EMIT decodeReady (request.serial, rows);
 }

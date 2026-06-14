@@ -143,6 +143,24 @@ std::atomic<int>& stage4_candidate_thin ()
   return value;
 }
 
+std::atomic<int>& freqpart_bins_used ()
+{
+  static std::atomic<int> value {0};
+  return value;
+}
+
+std::atomic<int>& stage4_force_fresh_slot ()
+{
+  static std::atomic<int> value {0};
+  return value;
+}
+
+std::atomic<int>& stage4_freqpart_request ()
+{
+  static std::atomic<int> value {0};
+  return value;
+}
+
 long long steady_clock_ms ()
 {
   using namespace std::chrono;
@@ -1023,17 +1041,17 @@ bool debug_ft8_focus_replay ()
 
 int ft8_freqpart_bins ()
 {
-  static int const bins = [] {
+  static int const env_bins = [] {
     char const* v = std::getenv ("DECODIUM_FT8_FREQPART_BINS");
     return v ? std::max (0, std::min (32, std::atoi (v))) : 0;
   }();
-  return bins;
+  return std::max (env_bins, stage4_freqpart_request ().load (std::memory_order_relaxed));
 }
 
 bool ft8_freqpart_isolate ()
 {
-  static bool const enabled = std::getenv ("DECODIUM_FT8_FREQPART_ISOLATE") != nullptr;
-  return enabled;
+  static bool const env_enabled = std::getenv ("DECODIUM_FT8_FREQPART_ISOLATE") != nullptr;
+  return env_enabled || stage4_freqpart_request ().load (std::memory_order_relaxed) > 0;
 }
 
 std::string sanitize_pack77_hash_call_seed (std::string word)
@@ -7855,6 +7873,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
         fp_process_bin (fp_b);
       if (fp_isolate)
         {
+          freqpart_bins_used ().store (fp_nbins, std::memory_order_relaxed);
           for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
             {
               std::vector<float> const& fp_bin = fp_dd_bins[static_cast<size_t> (fp_b)];
@@ -7881,12 +7900,13 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
 	        }
       // Fase 1a (accelerazione): early-terminate del subpass a yield esaurito.
       // Profiling: ~94% dei decode nei primi 2 pass; pass 3-8 = ~74% tempo per ~6% yield.
-      // Stop dopo 2 pass consecutivi a zero-add. SOLO subpass: decode normale/deep INTATTO.
+      // Stop dopo 4 pass consecutivi a zero-add (era 2): i deboli arrivano a pass 5+
+      // dopo zeri a 3-4; con freqpart il dig piu' lungo resta nel budget. SOLO subpass.
       if (request.lft8subpass)
         {
           if (ndecodes - pass_start_decodes == 0) ++subpass_zero_streak;
           else subpass_zero_streak = 0;
-          if (subpass_zero_streak >= 2)
+          if (subpass_zero_streak >= 4)
             {
               if (debug_ft8_focus_replay ())
                 std::cerr << "[FT8MAIN] utc=" << request.nutc
@@ -8871,6 +8891,16 @@ extern "C" void ftx_ft8_stage4_set_supplemental_c (int supplemental)
   stage4_supplemental_requested ().store (supplemental != 0, std::memory_order_relaxed);
 }
 
+extern "C" void ftx_ft8_stage4_set_force_fresh_slot_c (int force)
+{
+  stage4_force_fresh_slot ().store (force != 0, std::memory_order_relaxed);
+}
+
+extern "C" void ftx_ft8_stage4_set_freqpart_c (int bins)
+{
+  stage4_freqpart_request ().store (std::max (0, std::min (32, bins)), std::memory_order_relaxed);
+}
+
 extern "C" void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,
                                                      int cycles, int rx_freq_sensitivity,
                                                      int candidate_thin)
@@ -8882,6 +8912,11 @@ extern "C" void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int sub
                                        std::memory_order_relaxed);
   stage4_candidate_thin ().store (std::max (1, std::min (candidate_thin, 100)),
                                   std::memory_order_relaxed);
+}
+
+extern "C" int ftx_ft8_freqpart_bins_used_c ()
+{
+  return freqpart_bins_used ().load (std::memory_order_relaxed);
 }
 
 extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
@@ -8908,6 +8943,7 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
       return;
     }
 
+  freqpart_bins_used ().store (0, std::memory_order_relaxed);
   AsyncCollector collector;
   collector.syncs = syncs;
   collector.snrs = snrs;
@@ -8960,7 +8996,8 @@ extern "C" void ftx_ft8_async_decode_stage4_c (short const* iwave,
     }
 
   Ft8Stage4State& state = stage4_state ();
-  if (request.nutc != state.early_nutc)
+  if (request.nutc != state.early_nutc
+      || stage4_force_fresh_slot ().load (std::memory_order_relaxed))
     {
       // Early/full FT8 passes may be interrupted by the live deadline. Never
       // carry saved early decodes, tones, or subtractions into the next UTC
