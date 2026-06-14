@@ -6,6 +6,7 @@
 #include <QByteArray>
 #include <QStringList>
 #include <QVector>
+#include <atomic>
 
 namespace decodium
 {
@@ -37,9 +38,13 @@ public:
   explicit FT4DecodeWorker (QObject * parent = nullptr);
 
   void decode (DecodeRequest const& request);
+  void markLatestDecodeSerial (quint64 serial);
 
 Q_SIGNALS:
   void decodeReady (quint64 serial, QStringList rows);
+
+private:
+  std::atomic<quint64> m_latestDecodeSerial {0};
 };
 
 }

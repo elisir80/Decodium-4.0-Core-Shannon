@@ -11611,7 +11611,9 @@ void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousM
     removeQueuedDecodeCalls(m_ft2Worker);
     removeQueuedDecodeCalls(m_ft4Worker);
 
+    quint64 const staleDecodeSerial = std::numeric_limits<quint64>::max();
     if (m_ft8Worker) {
+        m_ft8Worker->markLatestDecodeSerial(staleDecodeSerial);
         m_ft8Worker->cancelCurrentDecode();
         auto* worker = m_ft8Worker;
         QMetaObject::invokeMethod(worker, [worker]() {
@@ -11619,7 +11621,11 @@ void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousM
         }, Qt::QueuedConnection);
     }
     if (m_ft2Worker) {
+        m_ft2Worker->markLatestDecodeSerial(staleDecodeSerial);
         m_ft2Worker->cancelCurrentDecode();
+    }
+    if (m_ft4Worker) {
+        m_ft4Worker->markLatestDecodeSerial(staleDecodeSerial);
     }
 }
 
@@ -35219,6 +35225,7 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     }
 
     auto* worker = m_ft8Worker;
+    worker->markLatestDecodeSerial(serial);
     QMetaObject::invokeMethod(worker, [worker, req]() {
         worker->decode(req);
     }, Qt::QueuedConnection);
@@ -35341,6 +35348,7 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
                    : QString()));
 
     if (m_ft8Worker && mark41) {
+        m_ft8Worker->markLatestDecodeSerial(serial);
         m_ft8Worker->cancelCurrentDecode();
         bridgeLog(QStringLiteral("FT8 early visible decode: preempting stale FT8 decode for live slot serial=%1")
                       .arg(serial));
@@ -35381,6 +35389,7 @@ void DecodiumBridge::queueFt4DecodeRequest(const QVector<short>& audioSnapshot, 
               " depth=" + QString::number(decodeDepth));
 
     auto* worker = m_ft4Worker;
+    worker->markLatestDecodeSerial(serial);
     QMetaObject::invokeMethod(worker, [worker, req]() {
         worker->decode(req);
     }, Qt::QueuedConnection);
@@ -35584,8 +35593,10 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             m_decodeModeBySerial.remove(it.key());
             m_decodeUtcTokenBySerial.remove(it.key());
             m_decodeSessionBySerial.remove(it.key());
+            m_ft8EarlyDecodeSerials.remove(it.key());
             m_ft8DeepInTxSerials.remove(it.key());  // 1.0.299: anti-leak se il deep e' stato cancellato
             m_ft8PendingDeepFollowups.remove(it.key());
+            m_ft8PendingSubpassHarvest.remove(it.key());
             it = m_decodeStartMsBySerial.erase(it);
         } else {
             ++it;
@@ -35607,6 +35618,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
 
     if (modeSnapshot == "FT8") {
         if (m_ft8Worker) {
+            m_ft8Worker->markLatestDecodeSerial(serial);
             m_ft8Worker->cancelCurrentDecode();
             bridgeLog(QStringLiteral("FT8 final decode: preempting in-flight early/deep decode before live final serial=%1")
                           .arg(serial));
@@ -35794,6 +35806,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             emit decodingChanged();
             return;
         }
+        worker->markLatestDecodeSerial(serial);
         QMetaObject::invokeMethod(worker, [worker, req]() {
             worker->decode(req);
         }, Qt::QueuedConnection);
@@ -35908,6 +35921,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             emit decodingChanged();
             return;
         }
+        worker->markLatestDecodeSerial(serial);
         QMetaObject::invokeMethod(worker, [worker, req]() {
             worker->decode(req);
         }, Qt::QueuedConnection);

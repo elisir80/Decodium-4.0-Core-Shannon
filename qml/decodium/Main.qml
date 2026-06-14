@@ -976,6 +976,55 @@ ApplicationWindow {
         persistUiSetting("uiToolbarOrder", uiToolbarOrder.join(","))
     }
 
+    function headerToolbarButtonVisible(id) {
+        switch (id) {
+        case "setup": return uiBtnSetupVisible
+        case "rec": return uiBtnRecVisible
+        case "wav": return uiBtnWavVisible
+        case "log": return uiBtnLogVisible
+        case "macro": return uiBtnMacroVisible
+        case "astro": return uiBtnAstroVisible
+        case "layout": return uiBtnFooterResetVisible
+        case "history": return uiBtnFooterHistoryVisible
+        case "cat": return uiBtnCatVisible
+        case "sep1":
+        case "sep2": return true
+        default: return false
+        }
+    }
+
+    function headerToolbarButtonWidth(id) {
+        switch (id) {
+        case "setup": return 50
+        case "rec": return 50
+        case "wav": return 45
+        case "log": return 45
+        case "macro": return 50
+        case "astro": return 48
+        case "layout": return 64
+        case "history": return 68
+        case "cat": return 48
+        case "sep1":
+        case "sep2": return 1
+        default: return 0
+        }
+    }
+
+    function headerToolbarPreferredWidth() {
+        var total = 4
+        var visibleCount = 0
+        for (var i = 0; i < uiToolbarOrder.length; ++i) {
+            var id = uiToolbarOrder[i]
+            if (!headerToolbarButtonVisible(id))
+                continue
+            total += headerToolbarButtonWidth(id)
+            if (visibleCount > 0)
+                total += 1
+            ++visibleCount
+        }
+        return visibleCount > 0 ? Math.max(1, total) : 0
+    }
+
     // === Posizione World Clock fra i blocchi dell'header (snap magnetico via maniglia) ===
     // L'orologio resta IN LINEA nel Flow header (non finestra OS, non overlay x/y): viene
     // re-parentato in uno dei 6 host-slot fissi inseriti nei gap STABILI fra i blocchi
@@ -3421,8 +3470,10 @@ ApplicationWindow {
                 // l'orologio non è più appaiato qui ma vive negli host-slot — vedi clockSlots).
                 Item {
                     id: headerUtilityButtons
-                    width: 520
+                    readonly property int computedWidth: Math.ceil(mainWindow.headerToolbarPreferredWidth())
+                    width: computedWidth
                     height: 74
+                    visible: computedWidth > 0
 
                     Rectangle {
                         width: parent.width

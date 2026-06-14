@@ -60,6 +60,7 @@ public:
   explicit FT8DecodeWorker (QObject * parent = nullptr);
 
   void decode (DecodeRequest const& request);
+  void markLatestDecodeSerial (quint64 serial);
   void resetDecoderState ();
   void cancelCurrentDecode ();
   void beginShutdown ();
@@ -70,6 +71,7 @@ Q_SIGNALS:
   void turboIterations (int itersUsed);
 
 private:
+  std::atomic<quint64> m_latestDecodeSerial {0};
   std::atomic<bool> m_shuttingDown {false};
 };
 

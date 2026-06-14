@@ -353,6 +353,15 @@ Item {
                                  Math.round(chars * charPx + qsoInfoPad * 2)))
     }
 
+    function bandButtonWidth(label) {
+        var text = String(label || "")
+        if (text.indexOf("cm") >= 0)
+            return text.length > 5 ? 66 : 56
+        if (text.indexOf(".") >= 0)
+            return 58
+        return Math.max(38, Math.min(68, text.length * 8 + 16))
+    }
+
     // State colors based on QSO progress (bridge::QSOProgress enum)
     // 0=IDLE, 1=CALLING_CQ, 2=REPLYING, 3=REPORT, 4=ROGER_REPORT, 5=SIGNOFF, 6=IDLE_QSO
     property color stateColor: {
@@ -390,30 +399,42 @@ Item {
         property int glyphSize: 14
         property int labelSize: 10
         property bool boldLabel: false
-        implicitWidth: contentRow.implicitWidth
-        implicitHeight: contentRow.implicitHeight
+        implicitWidth: contentLayout.implicitWidth
+        implicitHeight: contentLayout.implicitHeight
+        clip: true
 
-        Row {
-            id: contentRow
-            anchors.centerIn: parent
-            spacing: glyph.length > 0 ? 4 : 0
+        RowLayout {
+            id: contentLayout
+            anchors.fill: parent
+            anchors.leftMargin: 3
+            anchors.rightMargin: 3
+            anchors.topMargin: 1
+            anchors.bottomMargin: 1
+            spacing: glyph.length > 0 ? 3 : 0
 
             Text {
                 visible: glyph.length > 0
+                Layout.preferredWidth: Math.max(glyphSize + 4, 15)
+                Layout.fillHeight: true
                 text: glyph
                 color: foreground
                 font.pixelSize: glyphSize
                 font.family: decodiumMonoFontFamily
-                anchors.verticalCenter: parent.verticalCenter
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
             }
 
             Text {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 text: label
                 color: foreground
                 font.pixelSize: labelSize
                 font.family: decodiumMonoFontFamily
                 font.bold: boldLabel
-                anchors.verticalCenter: parent.verticalCenter
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
             }
         }
     }
@@ -498,7 +519,7 @@ Item {
 
                                     visible: txPanel.bandIsEnabled(bandLambda)  // 1.0.308 (#4 fix)
 
-                                    width: Math.max(38, Math.min(68, bandLabel.length * 8 + 14))
+                                    width: txPanel.bandButtonWidth(bandLabel)
                                     height: 26
                                     radius: 3
 
@@ -510,11 +531,16 @@ Item {
                                     border.width: isSelected ? 2 : 1
 
                                     Text {
-                                        anchors.centerIn: parent
+                                        anchors.fill: parent
+                                        anchors.margins: 2
                                         text: bandRect.bandLabel
+                                        font.family: decodiumMonoFontFamily
                                         font.pixelSize: 10
                                         font.bold: bandRect.isSelected
                                         color: bandRect.isSelected ? "#ffffff" : textPrimary
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
                                     }
 
                                     MouseArea {
@@ -2078,6 +2104,15 @@ Item {
         Layout.maximumWidth: 220
         Layout.minimumWidth: 104
         Layout.preferredHeight: 44
+        padding: 0
+        leftPadding: 0
+        rightPadding: 0
+        topPadding: 0
+        bottomPadding: 0
+        leftInset: 0
+        rightInset: 0
+        topInset: 0
+        bottomInset: 0
         opacity: isDisabled ? 0.4 : 1.0
 
         background: Rectangle {
@@ -2102,6 +2137,9 @@ Item {
         }
 
         contentItem: Item {
+            implicitWidth: txPanel.compactTxButtonWidth
+            implicitHeight: 44
+
             Column {
                 anchors.centerIn: parent
                 width: parent.width - 14
@@ -2116,6 +2154,7 @@ Item {
                         if (isCQ) return accentGreen
                         return textSecondary
                     }
+                    font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     font.bold: isSelected || isTransmitting
                     font.strikeout: txButton.isDisabled

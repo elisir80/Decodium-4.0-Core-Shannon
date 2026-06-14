@@ -188,10 +188,20 @@ FT4DecodeWorker::FT4DecodeWorker (QObject * parent)
 {
 }
 
+void FT4DecodeWorker::markLatestDecodeSerial (quint64 serial)
+{
+  m_latestDecodeSerial.store (serial, std::memory_order_relaxed);
+}
+
 void FT4DecodeWorker::decode (DecodeRequest const& request)
 {
   QElapsedTimer totalTimer;
   totalTimer.start ();
+  quint64 latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (latestSerial != 0 && request.serial != latestSerial)
+    {
+      return;
+    }
   apply_decode_thread_limit (request.threadCount);
   int const activeThreads = active_decode_thread_limit ();
   log_ft4_dsp_rollout_once ();
@@ -199,6 +209,12 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
   waitTimer.start ();
   QMutexLocker runtime_lock {&decodium::fortran::runtime_mutex ()};
   qint64 const waitMs = waitTimer.elapsed ();
+
+  latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (latestSerial != 0 && request.serial != latestSerial)
+    {
+      return;
+    }
 
   short int iwave[kFt4SampleCount] {};
   int const copyCount = std::min (static_cast<int>(request.audio.size ()), static_cast<int>(kFt4SampleCount));
@@ -238,6 +254,12 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
                     static_cast<fortran_charlen_t> (12),
                     static_cast<fortran_charlen_t> (kFt4MaxLines * kDecodedChars));
   qint64 const decodeMs = decodeTimer.elapsed ();
+
+  latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (latestSerial != 0 && request.serial != latestSerial)
+    {
+      return;
+    }
 
   LOG_DEBUG ("FT4 decode completed: stage=" << ft4_dsp_rollout_stage ()
              << " nout=" << nout);

@@ -1170,6 +1170,11 @@ FT8DecodeWorker::FT8DecodeWorker (QObject * parent)
 {
 }
 
+void FT8DecodeWorker::markLatestDecodeSerial (quint64 serial)
+{
+  m_latestDecodeSerial.store (serial, std::memory_order_relaxed);
+}
+
 void FT8DecodeWorker::cancelCurrentDecode ()
 {
   set_ft8_stage4_cancel (true);
@@ -1185,7 +1190,9 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
 {
   QElapsedTimer totalTimer;
   totalTimer.start ();
-  if (m_shuttingDown.load (std::memory_order_relaxed))
+  quint64 latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || (latestSerial != 0 && request.serial != latestSerial))
     {
       return;
     }
@@ -1198,7 +1205,9 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   QMutexLocker runtime_lock {&decodium::fortran::runtime_mutex ()};
   qint64 const waitMs = waitTimer.elapsed ();
 
-  if (m_shuttingDown.load (std::memory_order_relaxed))
+  latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || (latestSerial != 0 && request.serial != latestSerial))
     {
       return;
     }
@@ -1309,7 +1318,9 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   ftx_ft8_stage4_set_supplemental_c (0);
   ftx_ft8_stage4_set_ldpc_max_iter_c (30);
 
-  if (m_shuttingDown.load (std::memory_order_relaxed))
+  latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || (latestSerial != 0 && request.serial != latestSerial))
     {
       return;
     }
