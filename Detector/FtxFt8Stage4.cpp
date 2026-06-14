@@ -7357,6 +7357,9 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       Ft8CallGridHistoryState fp_cg_hist;
       Ft8CqSignalHistoryState& fp_cq_ref = fp_isolate ? fp_cq_hist : cq_signal_history ();
       Ft8CallGridHistoryState& fp_cg_ref = fp_isolate ? fp_cg_hist : call_grid_history ();
+      std::array<Ft8A7Slot, kFt8SequenceCount> fp_a7_snapshot = state.a7;
+      std::array<Ft8A7Slot, kFt8SequenceCount> fp_a7_arr = state.a7;
+      std::array<Ft8A7Slot, kFt8SequenceCount>& fp_a7_ref = fp_isolate ? fp_a7_arr : state.a7;
       for (int fp_k = 0; fp_k < ncand; ++fp_k)
         {
           int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
@@ -7368,6 +7371,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               fp_cur_bin = freqpart_binid[static_cast<size_t> (fp_k)];
               fp_cq_hist.reset ();
               fp_cg_hist.reset ();
+              fp_a7_arr = fp_a7_snapshot;
             }
           if (stage4_should_cancel ())
             {
@@ -7423,7 +7427,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                      kFt8Nh1, sync, f1, xdt, xbase, nharderrors,
                                      dmin, nbadcrc, candidate_pass, iaptype,
                                      msg37, xsnr, itone, message77,
-                                     &state.a7[static_cast<size_t> (jseq)],
+                                     &fp_a7_ref[static_cast<size_t> (jseq)],
                                      &fp_cq_ref, &fp_cg_ref, jseq);
           if (stage4_should_cancel ())
             {
@@ -7494,7 +7498,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                       companion_xbase, companion_nharderrors, companion_dmin,
                       companion_nbadcrc, companion_pass, companion_iaptype,
                       companion_msg37, companion_xsnr, companion_itone,
-                      companion_message77, &state.a7[static_cast<size_t> (jseq)],
+                      companion_message77, &fp_a7_ref[static_cast<size_t> (jseq)],
                       &fp_cq_ref, &fp_cg_ref, jseq);
                   if (stage4_should_cancel ())
                     {
@@ -7573,7 +7577,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
 			                                    message77.data ());
 	                  if (!replay_decode)
 	                    {
-		                    save_a7_entry (state.a7, jseq, callback_dt, f1, msg37);
+		                    save_a7_entry (fp_a7_ref, jseq, callback_dt, f1, msg37);
                       save_call_grid_history (fp_cg_ref, request, jseq,
                                               callback_dt, f1, msg37);
                       seed_pack77_hashes_from_message (msg37);
@@ -7733,7 +7737,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                               rescue_dmin, rescue_nbadcrc, rescue_candidate_pass,
                               rescue_iaptype, rescue_msg37, rescue_xsnr,
                               rescue_itone, rescue_message77,
-                              &state.a7[static_cast<size_t> (jseq)],
+                              &fp_a7_ref[static_cast<size_t> (jseq)],
                               &fp_cq_ref, &fp_cg_ref, jseq);
                           if (rescue_nbadcrc != 0)
                             {
@@ -7796,7 +7800,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                             rescue_message77.data ());
                           if (!rescue_replay_decode)
                             {
-                              save_a7_entry (state.a7, jseq, rescue_callback_dt,
+                              save_a7_entry (fp_a7_ref, jseq, rescue_callback_dt,
                                              rescue_f1, rescue_msg37);
                               save_call_grid_history (fp_cg_ref, request, jseq,
                                                       rescue_callback_dt, rescue_f1,
