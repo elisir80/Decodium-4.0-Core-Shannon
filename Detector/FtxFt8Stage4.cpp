@@ -1030,6 +1030,12 @@ int ft8_freqpart_bins ()
   return bins;
 }
 
+bool ft8_freqpart_isolate ()
+{
+  static bool const enabled = std::getenv ("DECODIUM_FT8_FREQPART_ISOLATE") != nullptr;
+  return enabled;
+}
+
 std::string sanitize_pack77_hash_call_seed (std::string word)
 {
   while (!word.empty () && (word.front () == '<' || word.front () == ';' || word.front () == ','))
@@ -7323,22 +7329,40 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       int cq_companion_rescue_used = 0;
 
       std::vector<int> freqpart_order;
+      std::vector<int> freqpart_binid;
       if (ft8_freqpart_bins () > 0 && ncand > 1)
         {
           int const fp_bins = ft8_freqpart_bins ();
           int const fp_span = std::max (1, ifb - ifa);
           freqpart_order.reserve (static_cast<size_t> (ncand));
+          freqpart_binid.reserve (static_cast<size_t> (ncand));
           for (int fp_b = 0; fp_b < fp_bins; ++fp_b)
             for (int fp_i = 0; fp_i < ncand; ++fp_i)
               {
                 int fp_bin = static_cast<int> ((candidate[static_cast<size_t> (fp_i * 4)] - ifa) * fp_bins / fp_span);
                 fp_bin = std::max (0, std::min (fp_bins - 1, fp_bin));
-                if (fp_bin == fp_b) freqpart_order.push_back (fp_i);
+                if (fp_bin == fp_b) { freqpart_order.push_back (fp_i); freqpart_binid.push_back (fp_b); }
               }
+        }
+      bool const fp_isolate = ft8_freqpart_isolate () && !freqpart_order.empty () && !shifted_pass;
+      std::vector<float> fp_dd_snapshot, fp_dd_accum;
+      int fp_cur_bin = -1;
+      if (fp_isolate)
+        {
+          fp_dd_snapshot.assign (state.dd.begin (), state.dd.end ());
+          fp_dd_accum = fp_dd_snapshot;
+          fp_cur_bin = freqpart_binid[0];
         }
       for (int fp_k = 0; fp_k < ncand; ++fp_k)
         {
           int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
+          if (fp_isolate && freqpart_binid[static_cast<size_t> (fp_k)] != fp_cur_bin)
+            {
+              for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
+                fp_dd_accum[fp_s] += state.dd[fp_s] - fp_dd_snapshot[fp_s];
+              std::copy (fp_dd_snapshot.begin (), fp_dd_snapshot.end (), state.dd.begin ());
+              fp_cur_bin = freqpart_binid[static_cast<size_t> (fp_k)];
+            }
           if (stage4_should_cancel ())
             {
               if (shifted_pass)
@@ -7788,6 +7812,12 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                 }
               return;
             }
+        }
+      if (fp_isolate)
+        {
+          for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
+            fp_dd_accum[fp_s] += state.dd[fp_s] - fp_dd_snapshot[fp_s];
+          std::copy (fp_dd_accum.begin (), fp_dd_accum.end (), state.dd.begin ());
         }
       if (shifted_pass)
         {
