@@ -7353,6 +7353,10 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           fp_dd_accum = fp_dd_snapshot;
           fp_cur_bin = freqpart_binid[0];
         }
+      Ft8CqSignalHistoryState fp_cq_hist;
+      Ft8CallGridHistoryState fp_cg_hist;
+      Ft8CqSignalHistoryState& fp_cq_ref = fp_isolate ? fp_cq_hist : cq_signal_history ();
+      Ft8CallGridHistoryState& fp_cg_ref = fp_isolate ? fp_cg_hist : call_grid_history ();
       for (int fp_k = 0; fp_k < ncand; ++fp_k)
         {
           int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
@@ -7362,6 +7366,8 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                 fp_dd_accum[fp_s] += state.dd[fp_s] - fp_dd_snapshot[fp_s];
               std::copy (fp_dd_snapshot.begin (), fp_dd_snapshot.end (), state.dd.begin ());
               fp_cur_bin = freqpart_binid[static_cast<size_t> (fp_k)];
+              fp_cq_hist.reset ();
+              fp_cg_hist.reset ();
             }
           if (stage4_should_cancel ())
             {
@@ -7418,7 +7424,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                      dmin, nbadcrc, candidate_pass, iaptype,
                                      msg37, xsnr, itone, message77,
                                      &state.a7[static_cast<size_t> (jseq)],
-                                     &cq_signal_history (), &call_grid_history (), jseq);
+                                     &fp_cq_ref, &fp_cg_ref, jseq);
           if (stage4_should_cancel ())
             {
               if (shifted_pass)
@@ -7489,7 +7495,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                       companion_nbadcrc, companion_pass, companion_iaptype,
                       companion_msg37, companion_xsnr, companion_itone,
                       companion_message77, &state.a7[static_cast<size_t> (jseq)],
-                      &cq_signal_history (), &call_grid_history (), jseq);
+                      &fp_cq_ref, &fp_cg_ref, jseq);
                   if (stage4_should_cancel ())
                     {
                       if (shifted_pass)
@@ -7568,7 +7574,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
 	                  if (!replay_decode)
 	                    {
 		                    save_a7_entry (state.a7, jseq, callback_dt, f1, msg37);
-                      save_call_grid_history (call_grid_history (), request, jseq,
+                      save_call_grid_history (fp_cg_ref, request, jseq,
                                               callback_dt, f1, msg37);
                       seed_pack77_hashes_from_message (msg37);
                     }
@@ -7728,7 +7734,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                               rescue_iaptype, rescue_msg37, rescue_xsnr,
                               rescue_itone, rescue_message77,
                               &state.a7[static_cast<size_t> (jseq)],
-                              &cq_signal_history (), &call_grid_history (), jseq);
+                              &fp_cq_ref, &fp_cg_ref, jseq);
                           if (rescue_nbadcrc != 0)
                             {
                               continue;
@@ -7792,7 +7798,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                             {
                               save_a7_entry (state.a7, jseq, rescue_callback_dt,
                                              rescue_f1, rescue_msg37);
-                              save_call_grid_history (call_grid_history (), request, jseq,
+                              save_call_grid_history (fp_cg_ref, request, jseq,
                                                       rescue_callback_dt, rescue_f1,
                                                       rescue_msg37);
                               seed_pack77_hashes_from_message (rescue_msg37);
