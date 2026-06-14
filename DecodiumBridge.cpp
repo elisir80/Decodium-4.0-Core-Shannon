@@ -63,6 +63,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QElapsedTimer>
+#include <QEvent>
 #include <QFormLayout>
 #include <QFontDatabase>
 #include <QLabel>
@@ -11577,6 +11578,51 @@ void DecodiumBridge::resetEarlyDecodeSchedule()
     }
 }
 
+void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousMode,
+                                                        const QString& nextMode)
+{
+    if (!isFtx77MessageMode(previousMode) && !isFtx77MessageMode(nextMode)) {
+        return;
+    }
+
+    bridgeLog(QStringLiteral("mode-change FTx worker reset: %1 -> %2").arg(previousMode, nextMode));
+
+    m_asyncDecodePending = false;
+    m_ft8EarlyDecodeSerials.clear();
+    m_ft8DeepInTxSerials.clear();
+    m_ft8PendingDeepFollowups.clear();
+    m_ft8PendingSubpassHarvest.clear();
+    m_decodeStartMsBySerial.clear();
+    m_decodeModeBySerial.clear();
+    m_decodeUtcTokenBySerial.clear();
+    m_decodeSessionBySerial.clear();
+    if (m_decoding) {
+        m_decoding = false;
+        emit decodingChanged();
+    }
+
+    auto removeQueuedDecodeCalls = [](QObject* worker) {
+        if (worker) {
+            QCoreApplication::removePostedEvents(worker, QEvent::MetaCall);
+        }
+    };
+
+    removeQueuedDecodeCalls(m_ft8Worker);
+    removeQueuedDecodeCalls(m_ft2Worker);
+    removeQueuedDecodeCalls(m_ft4Worker);
+
+    if (m_ft8Worker) {
+        m_ft8Worker->cancelCurrentDecode();
+        auto* worker = m_ft8Worker;
+        QMetaObject::invokeMethod(worker, [worker]() {
+            worker->resetDecoderState();
+        }, Qt::QueuedConnection);
+    }
+    if (m_ft2Worker) {
+        m_ft2Worker->cancelCurrentDecode();
+    }
+}
+
 void DecodiumBridge::resetRxPeriodAccumulation(bool reserveAudioBuffer)
 {
     m_periodTicks = 0;
@@ -12298,6 +12344,7 @@ void DecodiumBridge::setMode(const QString& v) {
             }
         }
         clearDecodeWindowsForModeChange(previousMode, m_mode);
+        resetFtxDecodeWorkersForModeChange(previousMode, m_mode);
 
         emit modeChanged();
         if (legacyBackendAvailable()) {
@@ -33064,7 +33111,7 @@ void DecodiumBridge::onAsyncDecodeTimer()
         });
     }
     auto* worker = m_ft2Worker;
-    QMetaObject::invokeMethod(m_ft2Worker, [worker, req]() {
+    QMetaObject::invokeMethod(worker, [worker, req]() {
         worker->decodeAsync(req);
     }, Qt::QueuedConnection);
 }
@@ -35171,8 +35218,9 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
                   " ft8ap=" + QString::number(req.lft8apon));
     }
 
-    QMetaObject::invokeMethod(m_ft8Worker, [this, req]() {
-        m_ft8Worker->decode(req);
+    auto* worker = m_ft8Worker;
+    QMetaObject::invokeMethod(worker, [worker, req]() {
+        worker->decode(req);
     }, Qt::QueuedConnection);
 }
 
@@ -35332,8 +35380,9 @@ void DecodiumBridge::queueFt4DecodeRequest(const QVector<short>& audioSnapshot, 
               " slot=" + QString::number(slotIndexForUtc) +
               " depth=" + QString::number(decodeDepth));
 
-    QMetaObject::invokeMethod(m_ft4Worker, [this, req]() {
-        m_ft4Worker->decode(req);
+    auto* worker = m_ft4Worker;
+    QMetaObject::invokeMethod(worker, [worker, req]() {
+        worker->decode(req);
     }, Qt::QueuedConnection);
 }
 
@@ -35711,9 +35760,15 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }
         // markLatestDecodeSerial() DEVE essere chiamato prima di decode(),
         // altrimenti il controllo seriale in FT2DecodeWorker::decode() scarta sempre la richiesta.
-        m_ft2Worker->markLatestDecodeSerial(serial);
-        QMetaObject::invokeMethod(m_ft2Worker, [this, req]() {
-            m_ft2Worker->decode(req);
+        auto* worker = m_ft2Worker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        worker->markLatestDecodeSerial(serial);
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "FT4") {
@@ -35733,8 +35788,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                           .arg(decodeDepth)
                           .arg(req.ndepth));
         }
-        QMetaObject::invokeMethod(m_ft4Worker, [this, req]() {
-            m_ft4Worker->decode(req);
+        auto* worker = m_ft4Worker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "Q65") {
@@ -35841,8 +35902,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.mycall = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
         req.hisgrid = m_dxGrid.toLocal8Bit();
-        QMetaObject::invokeMethod(m_ft8Worker, [this, req]() {
-            m_ft8Worker->decode(req);
+        auto* worker = m_ft8Worker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
     }
 

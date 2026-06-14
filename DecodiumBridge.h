@@ -3059,6 +3059,8 @@ private:
                                          quint64 sessionId, qint64 deadlineMs);
     void maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, int periodMs);
     void maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, int periodMs);
+    void resetFtxDecodeWorkersForModeChange(const QString& previousMode,
+                                            const QString& nextMode);
     void queueFt8DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint, int nzhsym,

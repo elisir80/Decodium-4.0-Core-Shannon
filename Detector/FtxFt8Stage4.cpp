@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <complex>
@@ -1050,6 +1051,254 @@ bool debug_ft8_focus_replay ()
 {
   static bool const enabled = std::getenv ("DECODIUM_DEBUG_FT8_FOCUS") != nullptr;
   return enabled;
+}
+
+struct Ft8ExpectedTarget
+{
+  int nutc {};
+  float freq {};
+  float dt {};
+  std::string message;
+};
+
+std::string trim_ascii_string (std::string text)
+{
+  while (!text.empty ()
+         && std::isspace (static_cast<unsigned char> (text.front ())) != 0)
+    {
+      text.erase (text.begin ());
+    }
+  while (!text.empty ()
+         && std::isspace (static_cast<unsigned char> (text.back ())) != 0)
+    {
+      text.pop_back ();
+    }
+  return text;
+}
+
+std::string normalize_expected_target_text (std::string text)
+{
+  text = trim_ascii_string (text);
+  std::string out;
+  bool pending_space = false;
+  for (char ch : text)
+    {
+      unsigned char const uch = static_cast<unsigned char> (ch);
+      if (std::isspace (uch) != 0)
+        {
+          pending_space = !out.empty ();
+          continue;
+        }
+      if (pending_space)
+        {
+          out.push_back (' ');
+          pending_space = false;
+        }
+      out.push_back (static_cast<char> (std::toupper (uch)));
+    }
+  return out;
+}
+
+std::vector<Ft8ExpectedTarget> parse_ft8_expected_targets ()
+{
+  std::vector<Ft8ExpectedTarget> targets;
+  char const* env = std::getenv ("DECODIUM_FT8_EXPECTED_TARGETS");
+  if (!env || *env == '\0')
+    {
+      env = std::getenv ("DECODIUM_FT8_TARGET_TRACE");
+    }
+  if (!env || *env == '\0')
+    {
+      return targets;
+    }
+
+  std::istringstream entries {env};
+  std::string entry;
+  while (std::getline (entries, entry, ';'))
+    {
+      entry = trim_ascii_string (entry);
+      if (entry.empty ())
+        {
+          continue;
+        }
+      size_t const p1 = entry.find (',');
+      size_t const p2 = p1 == std::string::npos ? std::string::npos : entry.find (',', p1 + 1);
+      size_t const p3 = p2 == std::string::npos ? std::string::npos : entry.find (',', p2 + 1);
+      if (p1 == std::string::npos || p2 == std::string::npos || p3 == std::string::npos)
+        {
+          continue;
+        }
+
+      Ft8ExpectedTarget target;
+      target.nutc = std::atoi (trim_ascii_string (entry.substr (0, p1)).c_str ());
+      target.freq = static_cast<float> (std::atof (trim_ascii_string (entry.substr (p1 + 1, p2 - p1 - 1)).c_str ()));
+      target.dt = static_cast<float> (std::atof (trim_ascii_string (entry.substr (p2 + 1, p3 - p2 - 1)).c_str ()));
+      target.message = normalize_expected_target_text (entry.substr (p3 + 1));
+      if (target.nutc > 0 && target.freq > 0.0f && !target.message.empty ())
+        {
+          targets.push_back (target);
+        }
+    }
+  return targets;
+}
+
+std::vector<Ft8ExpectedTarget> const& ft8_expected_targets ()
+{
+  static std::vector<Ft8ExpectedTarget> const targets = parse_ft8_expected_targets ();
+  return targets;
+}
+
+float ft8_expected_target_freq_window ()
+{
+  static float const value = [] {
+    char const* env = std::getenv ("DECODIUM_FT8_TARGET_FREQ_WINDOW");
+    float const parsed = env ? static_cast<float> (std::atof (env)) : 4.0f;
+    return (parsed > 0.1f && parsed <= 25.0f) ? parsed : 4.0f;
+  }();
+  return value;
+}
+
+float ft8_expected_target_dt_window ()
+{
+  static float const value = [] {
+    char const* env = std::getenv ("DECODIUM_FT8_TARGET_DT_WINDOW");
+    float const parsed = env ? static_cast<float> (std::atof (env)) : 0.65f;
+    return (parsed > 0.05f && parsed <= 3.0f) ? parsed : 0.65f;
+  }();
+  return value;
+}
+
+bool ft8_expected_target_matches_signal (Ft8ExpectedTarget const& target, int nutc,
+                                         float freq, float callback_dt)
+{
+  return target.nutc == nutc
+      && std::fabs (freq - target.freq) <= ft8_expected_target_freq_window ()
+      && std::fabs (callback_dt - target.dt) <= ft8_expected_target_dt_window ();
+}
+
+Ft8ExpectedTarget const* find_ft8_expected_target (int nutc, float freq,
+                                                   float callback_dt)
+{
+  for (Ft8ExpectedTarget const& target : ft8_expected_targets ())
+    {
+      if (ft8_expected_target_matches_signal (target, nutc, freq, callback_dt))
+        {
+          return &target;
+        }
+    }
+  return nullptr;
+}
+
+std::mutex& ft8_expected_target_trace_mutex ()
+{
+  static std::mutex mutex;
+  return mutex;
+}
+
+template <typename Writer>
+void trace_ft8_expected_target (Ft8ExpectedTarget const& target, char const* stage,
+                                Writer&& writer)
+{
+  std::lock_guard<std::mutex> lock {ft8_expected_target_trace_mutex ()};
+  std::cerr << "[FT8TARGET] stage=" << stage
+            << " utc=" << target.nutc
+            << " target_freq=" << target.freq
+            << " target_dt=" << target.dt
+            << " target_msg=\"" << target.message << '"';
+  writer (std::cerr);
+  std::cerr << '\n';
+}
+
+bool ft8_expected_message_matches (Ft8ExpectedTarget const& target,
+                                   std::string const& decoded)
+{
+  return normalize_expected_target_text (decoded) == target.message;
+}
+
+void trace_ft8_expected_candidate_list (int nutc, int ipass, int ifa, int ifb,
+                                        float syncmin, int imetric, int lsubtract,
+                                        int run_pass, float const* candidate,
+                                        int ncand, bool shifted_pass,
+                                        bool fp_isolate, int fp_bins)
+{
+  if (!candidate || ft8_expected_targets ().empty ())
+    {
+      return;
+    }
+
+  for (Ft8ExpectedTarget const& target : ft8_expected_targets ())
+    {
+      if (target.nutc != nutc)
+        {
+          continue;
+        }
+
+      int best_index = -1;
+      int in_window = 0;
+      float best_score = 1.0e30f;
+      float best_freq = 0.0f;
+      float best_raw_dt = 0.0f;
+      float best_callback_dt = 0.0f;
+      float best_sync = 0.0f;
+      float best_cq = 0.0f;
+      float const freq_window = ft8_expected_target_freq_window ();
+      float const dt_window = ft8_expected_target_dt_window ();
+      for (int index = 0; index < ncand; ++index)
+        {
+          float const freq = candidate[static_cast<size_t> (index * 4)];
+          float const raw_dt = candidate[static_cast<size_t> (index * 4 + 1)];
+          float const callback_dt = raw_dt - 0.5f;
+          float const df = std::fabs (freq - target.freq);
+          float const ddt = std::fabs (callback_dt - target.dt);
+          if (df <= freq_window && ddt <= dt_window)
+            {
+              ++in_window;
+            }
+          float const score = df / std::max (freq_window, 0.1f)
+                              + ddt / std::max (dt_window, 0.05f);
+          if (score < best_score)
+            {
+              best_score = score;
+              best_index = index;
+              best_freq = freq;
+              best_raw_dt = raw_dt;
+              best_callback_dt = callback_dt;
+              best_sync = candidate[static_cast<size_t> (index * 4 + 2)];
+              best_cq = candidate[static_cast<size_t> (index * 4 + 3)];
+            }
+        }
+
+      trace_ft8_expected_target (target, "candidate-list",
+                                 [&] (std::ostream& out) {
+        out << " pass=" << ipass
+            << " ifa=" << ifa
+            << " ifb=" << ifb
+            << " syncmin=" << syncmin
+            << " imetric=" << imetric
+            << " lsubtract=" << lsubtract
+            << " run_pass=" << run_pass
+            << " ncand=" << ncand
+            << " in_window=" << in_window
+            << " shifted=" << (shifted_pass ? 1 : 0)
+            << " fp_isolate=" << (fp_isolate ? 1 : 0)
+            << " fp_bins=" << fp_bins;
+        if (best_index >= 0)
+          {
+            out << " best_index=" << best_index
+                << " best_freq=" << best_freq
+                << " best_dt_raw=" << best_raw_dt
+                << " best_dt_cb=" << best_callback_dt
+                << " best_df=" << (best_freq - target.freq)
+                << " best_ddt=" << (best_callback_dt - target.dt)
+                << " best_sync=" << best_sync
+                << " best_cq=" << best_cq;
+          }
+        else
+          {
+            out << " best_index=-1";
+          }
+      });
+    }
 }
 
 int ft8_freqpart_bins ()
@@ -6553,6 +6802,13 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   float const cq_replay_score = std::max (cq_signature_score, candidate_cq_flag);
   Ft8A7Entry const* repeated_hint =
       find_ft8_repeated_hint (sd_hints, request, f1, xdt - 0.5f);
+  Ft8ExpectedTarget const* trace_target =
+      find_ft8_expected_target (request.nutc, f1, callback_dt_for_history);
+  if (!trace_target)
+    {
+      trace_target = find_ft8_expected_target (request.nutc, candidate_values[0],
+                                               candidate_values[1] - 0.5f);
+    }
   bool const weak_repeated_hint_window =
       repeated_hint != nullptr
       && nsync >= 1
@@ -6563,6 +6819,29 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 	      && ((nsync == 4 && cq_signature_score >= 6.9f)
 	          || (nsync == 5 && cq_signature_score >= 6.4f)
 	          || (nsync == 6 && cq_signature_score >= 5.9f));
+      if (trace_target)
+        {
+          trace_ft8_expected_target (*trace_target, "candidate-metrics",
+                                     [&] (std::ostream& out) {
+            out << " decode_pass=" << decode_pass
+                << " metric_attempt=" << metric_attempt
+                << " equalized_metrics=" << (equalized_metrics ? 1 : 0)
+                << " candidate_freq=" << candidate_values[0]
+                << " candidate_dt_raw=" << candidate_values[1]
+                << " candidate_dt_cb=" << (candidate_values[1] - 0.5f)
+                << " refined_freq=" << f1
+                << " refined_dt=" << callback_dt_for_history
+                << " sync=" << sync
+                << " nsync=" << nsync
+                << " threshold=" << sync_threshold
+                << " cq_signature=" << cq_signature_score
+                << " candidate_cq=" << candidate_cq_flag
+                << " cq_override=" << (cq_sync_override ? 1 : 0)
+                << " repeated_hint=" << (repeated_hint ? 1 : 0)
+                << " use_var_downsample=" << (use_var_downsample ? 1 : 0)
+                << " equalized_pipeline=" << (equalized_pipeline ? 1 : 0);
+          });
+        }
 
 	  if (nsync <= sync_threshold && !cq_sync_override)
 	    {
@@ -6619,7 +6898,31 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
         }
       if (!replay_ok)
         {
+          if (trace_target)
+            {
+              trace_ft8_expected_target (*trace_target, "low-nsync-reject",
+                                         [&] (std::ostream& out) {
+                out << " decode_pass=" << decode_pass
+                    << " metric_attempt=" << metric_attempt
+                    << " nsync=" << nsync
+                    << " threshold=" << sync_threshold
+                    << " sync=" << sync
+                    << " cq_signature=" << cq_signature_score
+                    << " candidate_cq=" << candidate_cq_flag;
+              });
+            }
           continue;
+        }
+      if (trace_target)
+        {
+          trace_ft8_expected_target (*trace_target, "replay-success",
+                                     [&] (std::ostream& out) {
+            out << " decode_pass=" << decode_pass
+                << " metric_attempt=" << metric_attempt
+                << " msg=\"" << trim_fixed (msg37) << '"'
+                << " expected_match="
+                << (ft8_expected_message_matches (*trace_target, trim_fixed (msg37)) ? 1 : 0);
+          });
         }
       nharderrors = kFt8StrictHardErrors;
       dmin = 0.0f;
@@ -6726,10 +7029,31 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
             }
           if (pass_ready == 0)
             {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "ap-pass-skip",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=not_ready";
+                  });
+                }
               continue;
             }
           if (cq_only_decode && pass_iaptype != 1)
             {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "ap-pass-skip",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " iaptype=" << pass_iaptype
+                        << " reason=cq_only";
+                  });
+                }
               continue;
             }
           if (request.nzhsym >= 50
@@ -6737,6 +7061,18 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
               && !request.supplemental
               && cq_signature_score < 3.1f)
             {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "ap-pass-skip",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " iaptype=" << pass_iaptype
+                        << " reason=cq_signature"
+                        << " cq_signature=" << cq_signature_score;
+                  });
+                }
               continue;
             }
 
@@ -6856,6 +7192,21 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
             {
               return false;
             }
+          if (trace_target)
+            {
+              trace_ft8_expected_target (*trace_target, "ldpc-result",
+                                         [&] (std::ostream& out) {
+                out << " decode_pass=" << decode_pass
+                    << " metric_attempt=" << metric_attempt
+                    << " pass_index=" << pass_index
+                    << " iaptype=" << pass_iaptype
+                    << " hard=" << pass_nharderrors
+                    << " dmin=" << pass_dmin
+                    << " maxosd=" << maxosd
+                    << " norder=" << norder
+                    << " ntype=" << ntype;
+              });
+            }
           if (pass_nharderrors < 0 || pass_nharderrors > kFt8MaxHardErrors)
             {
               continue;
@@ -6886,10 +7237,34 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 	                                             pass_nharderrors, unpack_ok, quirky,
 	                                             request.ncontest) == 0)
 	        {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=meta"
+                        << " unpack_ok=" << unpack_ok
+                        << " quirky=" << quirky
+                        << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                  });
+                }
 	          continue;
 	        }
 	      if (pass_iaptype == 1 && !is_strict_standard_ft8_message (candidate_msg))
 	        {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=ap_nonstandard"
+                        << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                  });
+                }
 	          continue;
 	        }
       int const candidate_n3 = 4 * int (message77[71]) + 2 * int (message77[72]) + int (message77[73]);
@@ -6911,6 +7286,18 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                   hisgrid4.data ());
 	          if (checked_badcrc != 0)
 	            {
+                  if (trace_target)
+                    {
+                      trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                                 [&] (std::ostream& out) {
+                        out << " decode_pass=" << decode_pass
+                            << " metric_attempt=" << metric_attempt
+                            << " pass_index=" << pass_index
+                            << " reason=false8"
+                            << " iaptype=" << pass_iaptype
+                            << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                      });
+                    }
 	              continue;
 	            }
           candidate_msg = fixed_from_chars<kFt8DecodedChars> (checked_msg.data ());
@@ -6919,16 +7306,50 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 	      if (pass_nharderrors > kFt8StrictHardErrors
 	          && !is_strict_standard_ft8_message (candidate_msg))
 	        {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=hard_nonstandard"
+                        << " hard=" << pass_nharderrors
+                        << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                  });
+                }
 	          continue;
 	        }
 	      if (!is_plausible_ft8_message_for_emit (candidate_msg))
 	        {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=plausible"
+                        << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                  });
+                }
 	          continue;
 	        }
 
       std::array<int, kFt8Nn> candidate_itone {};
       if (ftx_ft8_message77_to_itone_c (message77.data (), candidate_itone.data ()) == 0)
         {
+          if (trace_target)
+            {
+              trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                         [&] (std::ostream& out) {
+                out << " decode_pass=" << decode_pass
+                    << " metric_attempt=" << metric_attempt
+                    << " pass_index=" << pass_index
+                    << " reason=itone"
+                    << " msg=\"" << trim_fixed (candidate_msg) << '"';
+              });
+            }
           continue;
         }
 
@@ -6951,6 +7372,17 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
 	      if (ftx_ft8_compute_snr_c (s8.data (), 8, kFt8Nn, candidate_itone.data (),
 	                                 xbase, request.nagain, nsync, &pass_xsnr) == 0)
 	        {
+              if (trace_target)
+                {
+                  trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                             [&] (std::ostream& out) {
+                    out << " decode_pass=" << decode_pass
+                        << " metric_attempt=" << metric_attempt
+                        << " pass_index=" << pass_index
+                        << " reason=snr"
+                        << " msg=\"" << trim_fixed (candidate_msg) << '"';
+                  });
+                }
 	          continue;
 	        }
 
@@ -6959,9 +7391,37 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       if (ftx_ft8_finalize_decode_pass_c (0, pass_index, pass_iaptype,
                                           &selected_pass, &selected_iaptype) == 0)
         {
+          if (trace_target)
+            {
+              trace_ft8_expected_target (*trace_target, "post-ldpc-reject",
+                                         [&] (std::ostream& out) {
+                out << " decode_pass=" << decode_pass
+                    << " metric_attempt=" << metric_attempt
+                    << " pass_index=" << pass_index
+                    << " reason=finalize"
+                    << " msg=\"" << trim_fixed (candidate_msg) << '"';
+              });
+            }
           continue;
         }
 
+      if (trace_target)
+        {
+          trace_ft8_expected_target (*trace_target, "decode-success",
+                                     [&] (std::ostream& out) {
+            out << " decode_pass=" << decode_pass
+                << " metric_attempt=" << metric_attempt
+                << " pass_index=" << pass_index
+                << " selected_pass=" << selected_pass
+                << " iaptype=" << selected_iaptype
+                << " hard=" << pass_nharderrors
+                << " dmin=" << pass_dmin
+                << " snr=" << pass_xsnr
+                << " msg=\"" << trim_fixed (candidate_msg) << '"'
+                << " expected_match="
+                << (ft8_expected_message_matches (*trace_target, trim_fixed (candidate_msg)) ? 1 : 0);
+          });
+        }
       nharderrors = pass_nharderrors;
       dmin = pass_dmin;
       nbadcrc = 0;
@@ -7414,6 +7874,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               }
         }
       bool const fp_isolate = ft8_freqpart_isolate () && !freqpart_order.empty () && !shifted_pass;
+      trace_ft8_expected_candidate_list (request.nutc, ipass, ifa, ifb, syncmin,
+                                         imetric, lsubtract, run_pass,
+                                         candidate.data (), ncand, shifted_pass,
+                                         fp_isolate,
+                                         fp_isolate ? ft8_freqpart_bins () : 0);
       std::vector<float> fp_dd_snapshot, fp_dd_accum;
       if (fp_isolate)
         {
@@ -7524,6 +7989,34 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           float qual = 0.0f;
           ftx_ft8_finalize_main_result_c (xsnr, xdt, request.emedelay, nharderrors,
                                           dmin, &nsnr, &callback_dt, &qual);
+          Ft8ExpectedTarget const* const attempt_target =
+              find_ft8_expected_target (request.nutc, f1, callback_dt)
+              ? find_ft8_expected_target (request.nutc, f1, callback_dt)
+              : find_ft8_expected_target (
+                    request.nutc,
+                    candidate[static_cast<size_t> (icand * 4 + 0)],
+                    candidate[static_cast<size_t> (icand * 4 + 1)] - 0.5f);
+          if (attempt_target)
+            {
+              trace_ft8_expected_target (*attempt_target, "candidate-attempt-exit",
+                                         [&] (std::ostream& out) {
+                out << " pass=" << ipass
+                    << " icand=" << icand
+                    << " ncand=" << ncand
+                    << " f1=" << f1
+                    << " callback_dt=" << callback_dt
+                    << " nsnr=" << nsnr
+                    << " qual=" << qual
+                    << " nbadcrc=" << nbadcrc
+                    << " hard=" << nharderrors
+                    << " dmin=" << dmin
+                    << " candidate_pass=" << candidate_pass
+                    << " iaptype=" << iaptype
+                    << " msg=\"" << trim_fixed (msg37) << '"'
+                    << " expected_match="
+                    << (ft8_expected_message_matches (*attempt_target, trim_fixed (msg37)) ? 1 : 0);
+              });
+            }
 
           bool const can_retry_cq_companion =
               nbadcrc != 0
@@ -7657,7 +8150,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                 {
 			                  { std::lock_guard<std::mutex> fp_lk (fp_commit_mtx); collector.append (sync, nsnr, callback_dt, f1, msg37, iaptype, qual,
 			                                    message77.data ()); }
-	                  if (!replay_decode)
+                  if (!replay_decode)
 	                    {
 		                    save_a7_entry (fp_a7_ref, jseq, callback_dt, f1, msg37);
                       save_call_grid_history (fp_cg_ref, request, jseq,
