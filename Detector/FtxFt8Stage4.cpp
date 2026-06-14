@@ -161,6 +161,18 @@ std::atomic<int>& stage4_freqpart_request ()
   return value;
 }
 
+std::atomic<float>& stage4_syncmin_scale_request ()
+{
+  static std::atomic<float> value {1.0f};
+  return value;
+}
+
+std::atomic<int>& stage4_decode_syncmin_request ()
+{
+  static std::atomic<int> value {-1};
+  return value;
+}
+
 long long steady_clock_ms ()
 {
   using namespace std::chrono;
@@ -1052,6 +1064,28 @@ bool ft8_freqpart_isolate ()
 {
   static bool const env_enabled = std::getenv ("DECODIUM_FT8_FREQPART_ISOLATE") != nullptr;
   return env_enabled || stage4_freqpart_request ().load (std::memory_order_relaxed) > 0;
+}
+
+float ft8_syncmin_scale_override ()
+{
+  static float const env_scale = [] {
+    char const* v = std::getenv ("DECODIUM_FT8_SYNCMIN_SCALE");
+    if (!v) return -1.0f;
+    float const s = static_cast<float> (std::atof (v));
+    return (s > 0.0f && s <= 2.0f) ? s : -1.0f;
+  }();
+  if (env_scale > 0.0f) return env_scale;
+  return stage4_syncmin_scale_request ().load (std::memory_order_relaxed);
+}
+
+int ft8_decode_syncmin_override ()
+{
+  static int const env_ov = [] {
+    char const* v = std::getenv ("DECODIUM_FT8_DECODE_SYNCMIN");
+    return v ? std::max (0, std::min (10, std::atoi (v))) : -2;
+  }();
+  if (env_ov != -2) return env_ov;
+  return stage4_decode_syncmin_request ().load (std::memory_order_relaxed);
 }
 
 std::string sanitize_pack77_hash_call_seed (std::string word)
@@ -4976,6 +5010,10 @@ int ft8_candidate_sync_threshold (int imetric, Ft8Request const& request)
     {
       syncmin = std::min (syncmin, request.lft8subpass ? 4 : 5);
     }
+  {
+    int const ov = ft8_decode_syncmin_override ();
+    if (ov >= 0) syncmin = std::min (syncmin, ov);
+  }
   return syncmin;
 }
 
@@ -7331,6 +7369,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
             }
           syncmin *= threshold_scale;
         }
+      syncmin *= ft8_syncmin_scale_override ();
       if (run_pass == 0)
         {
           if (shifted_pass)
@@ -8899,6 +8938,16 @@ extern "C" void ftx_ft8_stage4_set_force_fresh_slot_c (int force)
 extern "C" void ftx_ft8_stage4_set_freqpart_c (int bins)
 {
   stage4_freqpart_request ().store (std::max (0, std::min (32, bins)), std::memory_order_relaxed);
+}
+
+extern "C" void ftx_ft8_stage4_set_syncmin_scale_c (float scale)
+{
+  stage4_syncmin_scale_request ().store ((scale > 0.0f && scale <= 2.0f) ? scale : 1.0f, std::memory_order_relaxed);
+}
+
+extern "C" void ftx_ft8_stage4_set_decode_syncmin_c (int gate)
+{
+  stage4_decode_syncmin_request ().store ((gate >= 0 && gate <= 10) ? gate : -1, std::memory_order_relaxed);
 }
 
 extern "C" void ftx_ft8_stage4_set_decode_options_c (int low_thresholds, int subpass,

@@ -39,6 +39,8 @@ extern "C"
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   void ftx_ft8_stage4_set_force_fresh_slot_c (int force);
   void ftx_ft8_stage4_set_freqpart_c (int bins);
+  void ftx_ft8_stage4_set_syncmin_scale_c (float scale);
+  void ftx_ft8_stage4_set_decode_syncmin_c (int gate);
   void ftx_ft8_stage4_set_ldpc_max_iter_c (int max_iter);
   void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,
                                        float freq, float dt, int nutc);
@@ -1232,6 +1234,9 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   // parallelized subpass re-scans for weak signals, not the deep residual.
   ftx_ft8_stage4_set_force_fresh_slot_c (effectiveSubpass ? 1 : 0);
   ftx_ft8_stage4_set_freqpart_c (effectiveSubpass ? 8 : 0);
+  // Harvest: detection piu' aggressiva (sweep S4) -> +mid-weak. Deep invariato.
+  ftx_ft8_stage4_set_syncmin_scale_c (effectiveSubpass ? 0.55f : 1.0f);
+  ftx_ft8_stage4_set_decode_syncmin_c (effectiveSubpass ? 2 : -1);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
   ftx_ft8_stage4_set_ldpc_max_iter_c (request.turboFeedbackEnabled ? 50 : 30);
   bool const wantOsd = request.osdFollowup
