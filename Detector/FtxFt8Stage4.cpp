@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <random>
 #include <sstream>
@@ -7299,12 +7300,17 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
     }
 
   std::vector<float> dd_cycle_base;
+  auto copy_state_dd_to = [&state] (std::vector<float>& target)
+    {
+      target.resize (state.dd.size ());
+      std::copy (state.dd.begin (), state.dd.end (), target.begin ());
+    };
   bool const needs_shifted_cycle_base =
       request.nzhsym >= 50 && request.ndepth >= 4 && npass >= 7;
   if (needs_shifted_cycle_base)
     {
-      dd_cycle_base.assign (state.dd.begin (), state.dd.end ());
-  }
+      copy_state_dd_to (dd_cycle_base);
+    }
   long long const main_start_ms = debug_ft8_focus_replay () ? steady_clock_ms () : 0;
   int subpass_zero_streak = 0;  // Fase 1a accelerazione: early-terminate del subpass
 
@@ -7328,7 +7334,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       bool shifted_pass = false;
       if (request.nzhsym >= 50 && request.ndepth >= 4 && (ipass == 4 || ipass == 7))
         {
-          dd_before_shift.assign (state.dd.begin (), state.dd.end ());
+          copy_state_dd_to (dd_before_shift);
           float const* shift_source =
               needs_shifted_cycle_base ? dd_cycle_base.data () : dd_before_shift.data ();
           if (ipass == 7)
@@ -7411,7 +7417,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
       std::vector<float> fp_dd_snapshot, fp_dd_accum;
       if (fp_isolate)
         {
-          fp_dd_snapshot.assign (state.dd.begin (), state.dd.end ());
+          copy_state_dd_to (fp_dd_snapshot);
           fp_dd_accum = fp_dd_snapshot;
         }
       int const fp_nbins = fp_isolate ? ft8_freqpart_bins () : 1;
@@ -7431,11 +7437,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           std::array<Ft8A7Slot, kFt8SequenceCount>& fp_a7_ref = fp_isolate ? fp_a7_arr : state.a7;
           int subtract_rescue_used = 0;
           int cq_companion_rescue_used = 0;
-          Ft8KnownCallGridState fp_known_cg;
+          std::unique_ptr<Ft8KnownCallGridState> fp_known_cg;
           if (fp_isolate)
             {
-              fp_known_cg = known_call_grid_history ();
-              known_call_grid_override () = &fp_known_cg;
+              fp_known_cg = std::make_unique<Ft8KnownCallGridState> (known_call_grid_history ());
+              known_call_grid_override () = fp_known_cg.get ();
             }
           struct KnownCgOverrideGuard
           {

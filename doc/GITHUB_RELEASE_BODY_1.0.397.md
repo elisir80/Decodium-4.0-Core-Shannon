@@ -63,6 +63,10 @@ This release consolidates the `1.0.396` FT8 decoder line, the local JTDX-parity 
   - `VERSION`, usato per i nomi file asset senza prefisso `v`;
   - `RELEASE_REF`, usato per pubblicare gli asset sulla release `v1.0.397`.
 - Questo evita la creazione accidentale di una release parallela `1.0.397` quando il tag operativo e' `v1.0.397`.
+- Corretti i build release Linux, Windows e macOS:
+  - l'override temporaneo della cache FT8 known call-grid in `FtxFt8Stage4.cpp` non conserva piu' l'indirizzo di una variabile locale;
+  - le copie snapshot di `state.dd` evitano il falso positivo `-Wnonnull` di GCC 16 nei runner MinGW;
+  - `wsjt_qt` propaga il link a `OpenMP::OpenMP_CXX`, evitando simboli `___kmpc_*` mancanti nei tool opzionali costruiti dai runner macOS.
 
 ### Validazione locale
 
@@ -141,4 +145,7 @@ This release consolidates the `1.0.396` FT8 decoder line, the local JTDX-parity 
 
 - Updates `fork_release_version.txt` to `1.0.397`.
 - Adjusts the macOS release workflows so manually dispatched builds upload to `v1.0.397` instead of creating a parallel non-prefixed release.
-
+- Fixes the Linux, Windows and macOS release builds:
+  - the temporary FT8 known call-grid override in `FtxFt8Stage4.cpp` no longer stores the address of a local stack object;
+  - `state.dd` snapshot copies avoid the GCC 16 MinGW `-Wnonnull` false positive;
+  - `wsjt_qt` now propagates `OpenMP::OpenMP_CXX`, avoiding missing `___kmpc_*` symbols in optional tools built by the macOS runners.
