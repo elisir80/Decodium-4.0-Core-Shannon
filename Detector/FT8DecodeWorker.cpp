@@ -1233,7 +1233,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   // Harvest subpass: dig FRESH (reset slot state, a7 preserved) so the
   // parallelized subpass re-scans for weak signals, not the deep residual.
   ftx_ft8_stage4_set_force_fresh_slot_c (effectiveSubpass ? 1 : 0);
-  ftx_ft8_stage4_set_freqpart_c (effectiveSubpass ? 8 : 0);
+  ftx_ft8_stage4_set_freqpart_c (effectiveSubpass ? 4 : 0);
   // Harvest: detection piu' aggressiva (sweep S4) -> +mid-weak. Deep invariato.
   ftx_ft8_stage4_set_syncmin_scale_c (effectiveSubpass ? 0.55f : 1.0f);
   ftx_ft8_stage4_set_decode_syncmin_c (effectiveSubpass ? 2 : -1);
