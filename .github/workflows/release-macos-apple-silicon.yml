@@ -154,12 +154,14 @@ jobs:
           elif [[ -z "${VERSION}" ]]; then
             VERSION="0.0.0-ci-${GITHUB_SHA::7}"
           fi
+          RELEASE_REF="${VERSION}"
           VERSION="${VERSION#v}"
           if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
             echo "Invalid release version: ${VERSION}" >&2
             exit 1
           fi
           printf 'version=%s\n' "${VERSION}" >> "$GITHUB_OUTPUT"
+          printf 'release_ref=%s\n' "${RELEASE_REF}" >> "$GITHUB_OUTPUT"
           echo "Using version: ${VERSION}"
 
       - name: Download build artifacts
@@ -185,6 +187,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_REF="${{ steps.version.outputs.release_ref }}"
           REPO="${GITHUB_REPOSITORY}"
 
           NOTES_FILE="$(mktemp)"
@@ -206,11 +209,11 @@ jobs:
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-arm64-sha256.txt"
           )
 
-          if gh release view "${VERSION}" --repo "${REPO}" >/dev/null 2>&1; then
-            gh release upload "${VERSION}" "${ASSETS[@]}" --repo "${REPO}" --clobber
-            gh release edit "${VERSION}" --repo "${REPO}" --notes-file "${NOTES_FILE}"
+          if gh release view "${RELEASE_REF}" --repo "${REPO}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_REF}" "${ASSETS[@]}" --repo "${REPO}" --clobber
+            gh release edit "${RELEASE_REF}" --repo "${REPO}" --notes-file "${NOTES_FILE}"
           else
-            gh release create "${VERSION}" "${ASSETS[@]}" \
+            gh release create "${RELEASE_REF}" "${ASSETS[@]}" \
               --repo "${REPO}" \
               --title "Decodium 4 FT2 ${VERSION} (macOS Apple Silicon)" \
               --notes-file "${NOTES_FILE}"

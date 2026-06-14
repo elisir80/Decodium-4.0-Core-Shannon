@@ -1283,6 +1283,7 @@ set (LANGUAGES
   hu				# Hungarian
   it				# Italian
   ja				# Japanese
+  lv				# Latvian
   #no				# Norwegian
   #pt				# Portuguese
   ru				# Russian
