@@ -3204,8 +3204,18 @@ Ft8CallGridHistoryState& call_grid_history ()
   return state;
 }
 
+Ft8KnownCallGridState*& known_call_grid_override ()
+{
+  thread_local Ft8KnownCallGridState* pointer = nullptr;
+  return pointer;
+}
+
 Ft8KnownCallGridState& known_call_grid_history ()
 {
+  if (Ft8KnownCallGridState* const pointer = known_call_grid_override ())
+    {
+      return *pointer;
+    }
   static Ft8KnownCallGridState state;
   return state;
 }
@@ -7347,6 +7357,9 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           fp_dd_snapshot.assign (state.dd.begin (), state.dd.end ());
           fp_dd_accum = fp_dd_snapshot;
         }
+      int const fp_nbins = fp_isolate ? ft8_freqpart_bins () : 1;
+      std::vector<std::vector<float>> fp_dd_bins (static_cast<size_t> (fp_isolate ? fp_nbins : 0));
+      std::mutex fp_commit_mtx;
       auto fp_process_bin = [&] (int fp_b)
         {
           std::vector<float> fp_dd_bin;
@@ -7361,6 +7374,17 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           std::array<Ft8A7Slot, kFt8SequenceCount>& fp_a7_ref = fp_isolate ? fp_a7_arr : state.a7;
           int subtract_rescue_used = 0;
           int cq_companion_rescue_used = 0;
+          Ft8KnownCallGridState fp_known_cg;
+          if (fp_isolate)
+            {
+              fp_known_cg = known_call_grid_history ();
+              known_call_grid_override () = &fp_known_cg;
+            }
+          struct KnownCgOverrideGuard
+          {
+            bool active;
+            ~KnownCgOverrideGuard () { if (active) { known_call_grid_override () = nullptr; } }
+          } fp_known_cg_guard {fp_isolate};
           for (int fp_k = 0; fp_k < ncand; ++fp_k)
             {
               int const icand = freqpart_order.empty () ? fp_k : freqpart_order[static_cast<size_t> (fp_k)];
@@ -7539,6 +7563,8 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                   continue;
                 }
               bool duplicate = false;
+              {
+                std::lock_guard<std::mutex> fp_lk (fp_commit_mtx);
               for (int id = 0; id < ndecodes; ++id)
                 {
                   if (messages_equal (msg37, state.allmessages[static_cast<size_t> (id)]))
@@ -7562,11 +7588,12 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                   ndecodes = saved_slot;
                   state.allmessages[static_cast<size_t> (ndecodes - 1)] = msg37;
                 }
+              }
 
               if (!duplicate)
                 {
-			                  collector.append (sync, nsnr, callback_dt, f1, msg37, iaptype, qual,
-			                                    message77.data ());
+			                  { std::lock_guard<std::mutex> fp_lk (fp_commit_mtx); collector.append (sync, nsnr, callback_dt, f1, msg37, iaptype, qual,
+			                                    message77.data ()); }
 	                  if (!replay_decode)
 	                    {
 		                    save_a7_entry (fp_a7_ref, jseq, callback_dt, f1, msg37);
@@ -7758,6 +7785,8 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                             }
 
                           bool rescue_duplicate = false;
+                          {
+                            std::lock_guard<std::mutex> fp_lk (fp_commit_mtx);
                           for (int id = 0; id < ndecodes; ++id)
                             {
                               if (messages_equal (
@@ -7786,10 +7815,11 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                           ndecodes = rescue_saved_slot;
                           state.allmessages[static_cast<size_t> (ndecodes - 1)] =
                               rescue_msg37;
-                          collector.append (rescue_sync, rescue_nsnr,
+                          }
+                          { std::lock_guard<std::mutex> fp_lk (fp_commit_mtx); collector.append (rescue_sync, rescue_nsnr,
                                             rescue_callback_dt, rescue_f1,
                                             rescue_msg37, rescue_iaptype, rescue_qual,
-                                            rescue_message77.data ());
+                                            rescue_message77.data ()); }
                           if (!rescue_replay_decode)
                             {
                               save_a7_entry (fp_a7_ref, jseq, rescue_callback_dt,
@@ -7816,14 +7846,24 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
             }
         }
           if (fp_isolate)
-            for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
-              fp_dd_accum[fp_s] += fp_dd_bin[fp_s] - fp_dd_snapshot[fp_s];
+            {
+              fp_dd_bins[static_cast<size_t> (fp_b)] = std::move (fp_dd_bin);
+            }
         };
-      int const fp_nbins = fp_isolate ? ft8_freqpart_bins () : 1;
+#pragma omp parallel for schedule (dynamic) if (fp_isolate)
       for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
         fp_process_bin (fp_b);
       if (fp_isolate)
-        std::copy (fp_dd_accum.begin (), fp_dd_accum.end (), state.dd.begin ());
+        {
+          for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
+            {
+              std::vector<float> const& fp_bin = fp_dd_bins[static_cast<size_t> (fp_b)];
+              if (fp_bin.size () != fp_dd_accum.size ()) continue;
+              for (size_t fp_s = 0; fp_s < fp_dd_accum.size (); ++fp_s)
+                fp_dd_accum[fp_s] += fp_bin[fp_s] - fp_dd_snapshot[fp_s];
+            }
+          std::copy (fp_dd_accum.begin (), fp_dd_accum.end (), state.dd.begin ());
+        }
       if (shifted_pass)
         {
           std::copy (dd_before_shift.begin (), dd_before_shift.end (), state.dd.begin ());
