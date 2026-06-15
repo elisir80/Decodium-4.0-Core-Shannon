@@ -2268,6 +2268,7 @@ private:
     qint64 m_ft4EarlyDecodeSlot {-1};
     bool m_ft4EarlyDecodeSent {false};
     qint64 m_lastEarlyDecodeSkipLogMs {0};
+    qint64 m_lastFt8BacklogDrainLogMs {0};
     QVector<short> m_pendingTimeSyncDecodeAudio;
     qint64 m_pendingTimeSyncDecodeSlot {-1};
     QString m_pendingTimeSyncDecodeMode;
@@ -3064,6 +3065,9 @@ private:
                                          quint64 sessionId, qint64 deadlineMs);
     void maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, int periodMs);
     void maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, int periodMs);
+    bool ft8LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs, quint64 ignoreSerial,
+                                    QString* detail = nullptr) const;
+    void drainFt8LiveDecodeBacklog(quint64 keepSerial, const QString& reason);
     void resetFtxDecodeWorkersForModeChange(const QString& previousMode,
                                             const QString& nextMode);
     void queueFt8DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,

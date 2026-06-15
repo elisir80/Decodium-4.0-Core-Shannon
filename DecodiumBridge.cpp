@@ -11561,6 +11561,97 @@ bool DecodiumBridge::isTimeSyncDecodeMode(const QString& mode) const
         || normalized == QStringLiteral("FT8");
 }
 
+bool DecodiumBridge::ft8LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs,
+                                                quint64 ignoreSerial,
+                                                QString* detail) const
+{
+    int pendingFt8 = 0;
+    qint64 oldestAgeMs = 0;
+    quint64 oldestSerial = 0;
+    QString oldestKind;
+
+    for (auto it = m_decodeStartMsBySerial.constBegin(); it != m_decodeStartMsBySerial.constEnd(); ++it) {
+        quint64 const serial = it.key();
+        if (serial == ignoreSerial) {
+            continue;
+        }
+        if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT8")) {
+            continue;
+        }
+
+        ++pendingFt8;
+        qint64 const ageMs = qMax<qint64>(0, nowMs - it.value());
+        if (ageMs > oldestAgeMs) {
+            oldestAgeMs = ageMs;
+            oldestSerial = serial;
+            if (m_ft8EarlyDecodeSerials.contains(serial)) {
+                oldestKind = QStringLiteral("early");
+            } else if (m_ft8DeepInTxSerials.contains(serial)) {
+                oldestKind = QStringLiteral("list-only");
+            } else if (m_ft8PendingDeepFollowups.contains(serial)) {
+                oldestKind = QStringLiteral("fast-pending-deep");
+            } else if (m_ft8PendingSubpassHarvest.contains(serial)) {
+                oldestKind = QStringLiteral("deep-pending-harvest");
+            } else {
+                oldestKind = QStringLiteral("live");
+            }
+        }
+    }
+
+    bool const tooOld = oldestAgeMs >= minAgeMs;
+    bool const tooQueued = pendingFt8 >= 5 && oldestAgeMs >= 4000;
+    bool const active = tooOld || tooQueued;
+    if (detail) {
+        *detail = QStringLiteral("pending=%1 oldestSerial=%2 oldestAgeMs=%3 oldestKind=%4 minAgeMs=%5")
+            .arg(pendingFt8)
+            .arg(oldestSerial)
+            .arg(oldestAgeMs)
+            .arg(oldestKind)
+            .arg(minAgeMs);
+    }
+    return active;
+}
+
+void DecodiumBridge::drainFt8LiveDecodeBacklog(quint64 keepSerial, const QString& reason)
+{
+    int removedMeta = 0;
+    QList<quint64> const serials = m_decodeStartMsBySerial.keys();
+    for (quint64 const serial : serials) {
+        if (serial == keepSerial) {
+            continue;
+        }
+        if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT8")) {
+            continue;
+        }
+        m_decodeStartMsBySerial.remove(serial);
+        m_decodeModeBySerial.remove(serial);
+        m_decodeUtcTokenBySerial.remove(serial);
+        m_decodeSessionBySerial.remove(serial);
+        m_ft8EarlyDecodeSerials.remove(serial);
+        m_ft8DeepInTxSerials.remove(serial);
+        ++removedMeta;
+    }
+
+    m_ft8PendingDeepFollowups.clear();
+    m_ft8PendingSubpassHarvest.clear();
+    m_ft8DeepFollowupCooldownSlots = qMax(m_ft8DeepFollowupCooldownSlots, 6);
+
+    if (m_ft8Worker) {
+        m_ft8Worker->cancelCurrentDecode();
+        QCoreApplication::removePostedEvents(m_ft8Worker, QEvent::MetaCall);
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (nowMs - m_lastFt8BacklogDrainLogMs >= 2000) {
+        m_lastFt8BacklogDrainLogMs = nowMs;
+        bridgeLog(QStringLiteral("FT8 live backlog drain: keepSerial=%1 removed=%2 cooldown=%3 %4")
+                      .arg(keepSerial)
+                      .arg(removedMeta)
+                      .arg(m_ft8DeepFollowupCooldownSlots)
+                      .arg(reason));
+    }
+}
+
 void DecodiumBridge::resetEarlyDecodeSchedule()
 {
     m_ft8EarlyDecodeSlot = -1;
@@ -35309,6 +35400,15 @@ void DecodiumBridge::maybeDispatchFt8EarlyDecode(qint64 utcSlot, int msInSlot, i
         return;
     }
 
+    QString ft8BacklogDetail;
+    qint64 const backlogNowMs = QDateTime::currentMSecsSinceEpoch();
+    if (ft8LiveDecodeBacklogActive(backlogNowMs, 9000, 0, &ft8BacklogDetail)) {
+        if (mark41) m_ft8EarlyDecode41Sent = true;
+        if (mark47) m_ft8EarlyDecode47Sent = true;
+        drainFt8LiveDecodeBacklog(0, QStringLiteral("early-skip %1").arg(ft8BacklogDetail));
+        return;
+    }
+
     int const effectiveDepth = effectiveDecodeDepth();
     // Early preview = la passata TIMELY (gira intra-slot, prima della fine slot).
     // Con Deep Search la portiamo a depth 3 (syncmin 6 vs 8, budget candidati 2400
@@ -35631,6 +35731,15 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
               " cqhint=" + QString::number(cqHint) +
               " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0));
 
+    bool ft8RuntimeBacklog = false;
+    QString ft8BacklogDetail;
+    if (modeSnapshot == QStringLiteral("FT8")) {
+        ft8RuntimeBacklog = ft8LiveDecodeBacklogActive(nowMs, 12000, serial, &ft8BacklogDetail);
+        if (ft8RuntimeBacklog) {
+            drainFt8LiveDecodeBacklog(serial, QStringLiteral("final-dispatch %1").arg(ft8BacklogDetail));
+        }
+    }
+
     if (modeSnapshot == "FT8") {
         if (m_ft8Worker) {
             m_ft8Worker->markLatestDecodeSerial(serial);
@@ -35674,6 +35783,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             && (!txStartPending || deepFollowupInTx)
             && !m_lowCpuModeEnabled
             && !ft8CpuPressure
+            && !ft8RuntimeBacklog
             && deepThreadsOk
             && !deepCooldownActive
             && explicitDeepFollowup
@@ -35691,6 +35801,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             && !txAudioActive
             && !txStartPending
             && !ft8CpuPressure
+            && !ft8RuntimeBacklog
             && deepFollowupLatestCompleteMs > ft8DispatchNowMs
             && conservativeFullPassBudgetMs >= kFt8ConservativeFullPassMinMs;
         qInfo().noquote()
@@ -35753,6 +35864,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                       QString::number(deepFollowupLatestCompleteMs) +
                       " txPending=" + QString::number(txStartPending ? 1 : 0) +
                       " cpuPressure=" + QString::number(ft8CpuPressure ? 1 : 0) +
+                      " backlog=" + QString::number(ft8RuntimeBacklog ? 1 : 0) +
                       " threads=" + QString::number(ftThreadLimit) +
                       " threadsOk=" + QString::number(deepThreadsOk ? 1 : 0) +
                       " cooldownActive=" + QString::number(deepCooldownActive ? 1 : 0) +

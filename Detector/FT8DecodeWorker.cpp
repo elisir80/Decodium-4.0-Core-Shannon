@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <future>
 #include <mutex>
 
 #include <QDebug>
@@ -71,6 +72,8 @@ namespace
   constexpr qint64 kHashSeedRefreshTailBytes {512 * 1024};
   constexpr int kHashSeedMaxCalls {4096};
   constexpr qint64 kHashSeedRefreshIntervalMs {10000};
+  constexpr int kHashSeedRefreshMaxFiles {6};
+  constexpr qint64 kHashSeedRefreshSoftBudgetMs {160};
   constexpr int kExternalA7SeedLimit {96};
   constexpr int kExternalA7PairSeedLimit {48};
   constexpr int kExternalA7InsertLimit {104};
@@ -275,6 +278,27 @@ namespace
     int nutc {0};
     int hits {1};
     int priority {0};
+  };
+
+  struct HashSeedSnapshot
+  {
+    QStringList calls;
+    int filesRead {0};
+    QStringList sources;
+    qint64 elapsedMs {0};
+  };
+
+  struct HashContextRefresh
+  {
+    QStringList calls;
+    QHash<QString, KnownCqSeed> cqSeeds;
+    QHash<QString, KnownCqCallSeed> cqCallSeeds;
+    QHash<QString, A7MessageSeed> a7Seeds;
+    int currentNutc {0};
+    bool seedKnownCqReplay {false};
+    bool seedExternalA7 {false};
+    int filesRead {0};
+    qint64 elapsedMs {0};
   };
 
   void remember_known_cq_seed (QHash<QString, KnownCqSeed>& seeds, QString call,
@@ -874,35 +898,136 @@ namespace
       }
   }
 
-  void seed_ft8_pack77_hashes_from_local_logs_once ()
+  bool external_known_cq_seed_enabled ();
+  bool external_known_cq_source_allowed (QString const& path);
+  bool external_a7_seed_enabled ();
+
+  HashSeedSnapshot collect_initial_hash_seed_snapshot ()
   {
-    static std::once_flag once;
-    std::call_once (once, [] {
-      QStringList calls;
-      int filesRead = 0;
-      QStringList sources;
-      for (QString const& path : local_hash_seed_paths ())
-        {
-          if (collect_hash_seed_calls_from_tail (path, calls))
-            {
-              ++filesRead;
-              sources.append (hash_seed_source_label (path));
-            }
-        }
-      for (QString const& call : calls)
-        {
-          QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
-          ftx_ft8_stage4_seed_hash_call_c (field.constData ());
-        }
-      if (filesRead > 0 && !calls.isEmpty ())
-        {
-          LOG_INFO ("FT8 pack77 hash seed initialized: calls=" << calls.size ()
-                    << " files=" << filesRead
-                    << " sources="
-                    << sources.join (QStringLiteral (",")).toStdString ());
-          log_hash_seed_probe (calls);
-        }
+    QElapsedTimer timer;
+    timer.start ();
+    HashSeedSnapshot snapshot;
+    for (QString const& path : local_hash_seed_paths ())
+      {
+        if (collect_hash_seed_calls_from_tail (path, snapshot.calls))
+          {
+            ++snapshot.filesRead;
+            snapshot.sources.append (hash_seed_source_label (path));
+          }
+      }
+    snapshot.elapsedMs = timer.elapsed ();
+    return snapshot;
+  }
+
+  HashContextRefresh collect_hash_context_refresh_snapshot (int currentNutc)
+  {
+    QElapsedTimer timer;
+    timer.start ();
+    HashContextRefresh refresh;
+    refresh.currentNutc = currentNutc;
+    refresh.seedKnownCqReplay = external_known_cq_seed_enabled ();
+    refresh.seedExternalA7 = external_a7_seed_enabled ();
+
+    for (QString const& path : local_hash_seed_paths ())
+      {
+        collect_hash_seed_calls_from_tail (path, refresh.calls, kHashSeedRefreshTailBytes);
+        if (refresh.seedKnownCqReplay && external_known_cq_source_allowed (path))
+          {
+            collect_known_cq_call_seeds_from_tail (path, refresh.cqCallSeeds,
+                                                   kHashSeedRefreshTailBytes,
+                                                   currentNutc);
+            collect_known_cq_seeds_from_tail (path, refresh.cqSeeds,
+                                              kHashSeedRefreshTailBytes,
+                                              currentNutc);
+          }
+        if (refresh.seedExternalA7)
+          {
+            collect_a7_message_seeds_from_tail (path, refresh.a7Seeds,
+                                                kHashSeedRefreshTailBytes,
+                                                currentNutc);
+          }
+        ++refresh.filesRead;
+        if (refresh.filesRead >= kHashSeedRefreshMaxFiles
+            || timer.elapsed () >= kHashSeedRefreshSoftBudgetMs)
+          {
+            break;
+          }
+      }
+
+    refresh.elapsedMs = timer.elapsed ();
+    return refresh;
+  }
+
+  struct HashSeedAsyncState
+  {
+    std::mutex mutex;
+    bool initialStarted {false};
+    bool initialApplied {false};
+    std::future<HashSeedSnapshot> initialFuture;
+    qint64 lastRefreshStartMs {0};
+    std::future<HashContextRefresh> refreshFuture;
+  };
+
+  HashSeedAsyncState& hash_seed_async_state ()
+  {
+    static HashSeedAsyncState state;
+    return state;
+  }
+
+  template<typename T>
+  bool future_ready (std::future<T>& future)
+  {
+    using namespace std::chrono_literals;
+    return future.valid () && future.wait_for (0ms) == std::future_status::ready;
+  }
+
+  void start_ft8_pack77_hash_seed_collection_once ()
+  {
+    HashSeedAsyncState& state = hash_seed_async_state ();
+    std::lock_guard<std::mutex> lock {state.mutex};
+    if (state.initialStarted)
+      {
+        return;
+      }
+    state.initialStarted = true;
+    state.initialFuture = std::async (std::launch::async, [] {
+      return collect_initial_hash_seed_snapshot ();
     });
+  }
+
+  void apply_ready_ft8_pack77_hash_seed_collection ()
+  {
+    HashSeedSnapshot snapshot;
+    bool haveSnapshot = false;
+    {
+      HashSeedAsyncState& state = hash_seed_async_state ();
+      std::lock_guard<std::mutex> lock {state.mutex};
+      if (!state.initialApplied && future_ready (state.initialFuture))
+        {
+          snapshot = state.initialFuture.get ();
+          state.initialApplied = true;
+          haveSnapshot = true;
+        }
+    }
+    if (!haveSnapshot)
+      {
+        return;
+      }
+
+    for (QString const& call : snapshot.calls)
+      {
+        QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
+        ftx_ft8_stage4_seed_hash_call_c (field.constData ());
+      }
+    if (snapshot.filesRead > 0 && !snapshot.calls.isEmpty ())
+      {
+        LOG_INFO ("FT8 pack77 hash seed initialized: calls=" << snapshot.calls.size ()
+                  << " files=" << snapshot.filesRead
+                  << " elapsed_ms=" << snapshot.elapsedMs
+                  << " sources="
+                  << snapshot.sources.join (QStringLiteral (",")).toStdString ());
+        log_hash_seed_probe (snapshot.calls);
+      }
   }
 
   bool external_known_cq_seed_enabled ()
@@ -972,50 +1097,58 @@ namespace
            || value == QStringLiteral ("yes");
   }
 
-  void refresh_ft8_hash_context_from_recent_logs (int currentNutc)
+  void start_ft8_hash_context_refresh_from_recent_logs (int currentNutc)
   {
-    static qint64 lastRefreshMs = 0;
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
-    if (lastRefreshMs > 0 && nowMs - lastRefreshMs < kHashSeedRefreshIntervalMs)
+    HashSeedAsyncState& state = hash_seed_async_state ();
+    std::lock_guard<std::mutex> lock {state.mutex};
+    if (state.refreshFuture.valid ())
+      {
+        if (!future_ready (state.refreshFuture))
+          {
+            return;
+          }
+        return;
+      }
+    if (state.lastRefreshStartMs > 0
+        && nowMs - state.lastRefreshStartMs < kHashSeedRefreshIntervalMs)
       {
         return;
       }
-    lastRefreshMs = nowMs;
+    state.lastRefreshStartMs = nowMs;
+    state.refreshFuture = std::async (std::launch::async, [currentNutc] {
+      return collect_hash_context_refresh_snapshot (currentNutc);
+    });
+  }
 
-    QStringList calls;
-    QHash<QString, KnownCqSeed> cqSeeds;
-    QHash<QString, KnownCqCallSeed> cqCallSeeds;
-    QHash<QString, A7MessageSeed> a7Seeds;
-    bool const seedKnownCqReplay = external_known_cq_seed_enabled ();
-    bool const seedExternalA7 = external_a7_seed_enabled ();
-    for (QString const& path : local_hash_seed_paths ())
+  void apply_ready_ft8_hash_context_refresh ()
+  {
+    HashContextRefresh refresh;
+    bool haveRefresh = false;
+    {
+      HashSeedAsyncState& state = hash_seed_async_state ();
+      std::lock_guard<std::mutex> lock {state.mutex};
+      if (future_ready (state.refreshFuture))
+        {
+          refresh = state.refreshFuture.get ();
+          haveRefresh = true;
+        }
+    }
+    if (!haveRefresh)
       {
-        collect_hash_seed_calls_from_tail (path, calls, kHashSeedRefreshTailBytes);
-        if (seedKnownCqReplay && external_known_cq_source_allowed (path))
-          {
-            collect_known_cq_call_seeds_from_tail (path, cqCallSeeds,
-                                                   kHashSeedRefreshTailBytes,
-                                                   currentNutc);
-            collect_known_cq_seeds_from_tail (path, cqSeeds, kHashSeedRefreshTailBytes,
-                                              currentNutc);
-          }
-        if (seedExternalA7)
-          {
-            collect_a7_message_seeds_from_tail (path, a7Seeds, kHashSeedRefreshTailBytes,
-                                                currentNutc);
-          }
+        return;
       }
 
-    for (QString const& call : calls)
+    for (QString const& call : refresh.calls)
       {
         QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
         ftx_ft8_stage4_seed_hash_call_c (field.constData ());
       }
-    if (seedKnownCqReplay)
+    if (refresh.seedKnownCqReplay)
       {
-        for (KnownCqSeed const& seed : cqSeeds)
+        for (KnownCqSeed const& seed : refresh.cqSeeds)
           {
-            if (!stable_recent_known_cq_seed (seed, currentNutc))
+            if (!stable_recent_known_cq_seed (seed, refresh.currentNutc))
               {
                 continue;
               }
@@ -1031,9 +1164,9 @@ namespace
                                                 seed.dt, seed.nutc);
               }
           }
-        for (KnownCqCallSeed const& seed : cqCallSeeds)
+        for (KnownCqCallSeed const& seed : refresh.cqCallSeeds)
           {
-            if (!stable_recent_known_cq_call_seed (seed, currentNutc))
+            if (!stable_recent_known_cq_call_seed (seed, refresh.currentNutc))
               {
                 continue;
               }
@@ -1047,22 +1180,22 @@ namespace
               }
           }
       }
-    if (!seedExternalA7)
+    if (!refresh.seedExternalA7)
       {
         return;
       }
-    QList<A7MessageSeed> a7SeedList = a7Seeds.values ();
+    QList<A7MessageSeed> a7SeedList = refresh.a7Seeds.values ();
 	    std::sort (a7SeedList.begin (), a7SeedList.end (),
-	               [currentNutc] (A7MessageSeed const& lhs, A7MessageSeed const& rhs) {
+	               [&refresh] (A7MessageSeed const& lhs, A7MessageSeed const& rhs) {
                  if (lhs.priority != rhs.priority)
                    {
                      return lhs.priority > rhs.priority;
                    }
-	                 int const lhsAge = currentNutc > 0
-	                     ? ft8_nutc_delta_seconds (currentNutc, lhs.nutc)
+	                 int const lhsAge = refresh.currentNutc > 0
+	                     ? ft8_nutc_delta_seconds (refresh.currentNutc, lhs.nutc)
 	                     : 0;
-                 int const rhsAge = currentNutc > 0
-                     ? ft8_nutc_delta_seconds (currentNutc, rhs.nutc)
+                 int const rhsAge = refresh.currentNutc > 0
+                     ? ft8_nutc_delta_seconds (refresh.currentNutc, rhs.nutc)
                      : 0;
                  if (lhsAge != rhsAge)
                    {
@@ -1199,6 +1332,8 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   apply_decode_thread_limit (request.threadCount);
   int const activeThreads = active_decode_thread_limit ();
   set_ft8_stage4_cancel (false);
+  start_ft8_pack77_hash_seed_collection_once ();
+  start_ft8_hash_context_refresh_from_recent_logs (request.nutc);
   log_ft8_dsp_rollout_once ();
   QElapsedTimer waitTimer;
   waitTimer.start ();
@@ -1211,8 +1346,8 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
-  seed_ft8_pack77_hashes_from_local_logs_once ();
-  refresh_ft8_hash_context_from_recent_logs (request.nutc);
+  apply_ready_ft8_pack77_hash_seed_collection ();
+  apply_ready_ft8_hash_context_refresh ();
   ftx_ft8_stage4_apply_hash_seed_cache_c ();
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
   // The promoted C++ Stage4 path still avoids the full JTDX ft8b subpass
