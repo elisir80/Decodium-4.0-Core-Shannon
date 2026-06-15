@@ -2109,10 +2109,10 @@ Item {
         rightPadding: 0
         topPadding: 0
         bottomPadding: 0
-        leftInset: 0
-        rightInset: 0
-        topInset: 0
-        bottomInset: 0
+        // fork: NON azzerare gli *Inset (li azzerava la "UI alignment" 1.0.399 di
+        // Salvatore) -> ripristina l'elevation/ripple di Material cosi' i pulsanti TX
+        // tornano a differire per stile UI (Material vs Fusion/Universal). Ri-applicare
+        // se Salvatore ri-merge l'azzeramento degli inset.
         opacity: isDisabled ? 0.4 : 1.0
 
         background: Rectangle {
