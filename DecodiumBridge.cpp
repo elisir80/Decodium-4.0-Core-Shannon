@@ -35646,20 +35646,20 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         // (li' il clamp di queueFt8DecodeRequest forza depth 2 e l'audio TX gira).
         bool const deepFollowupInTx = txStartPending && !txAudioActive && m_ft8DeepDecodeInTx;
         bool const explicitDeepFollowup = m_deepSearchEnabled || m_avgDecodeEnabled;
-        // P0 (1.0.403): guardie deep follow-up. Toccano SOLO il pass opzionale
-        // (early depth-3 + fast depth-2 = produzione, mai influenzati).
-        // (1) deepThreadsOk: richiede multi-core reale. Su 1-2 thread le 3 decodifiche
-        //     pesanti/slot sul runtime_mutex single-flight non stanno nei 15s -> i
-        //     fast pass venivano scartati = utente non riceve (caso Raffaele ft_threads=1).
-        // (2) cooldown anti-backlog: se un deep recente e' tornato troppo tardi
-        //     (budgetMs < min, vedi onFt8DecodeReady) lo saltiamo per qualche slot
-        //     cosi' la pipeline early+fast drena e i fast pass tornano consegnati.
+        // P0 (1.0.403): guardie deep follow-up. Sui PC veloci resta il path
+        // fast + deep/AP. Sui PC sotto soglia thread, pero', fast-only depth-2
+        // lasciava l'FT8 quasi cieco: in quel caso usiamo un solo pass finale
+        // pieno, cappato, invece di due pass accodati.
         static constexpr int kFt8DeepFollowupMinThreads = 3;
+        static constexpr int kFt8ConservativeFullPassSafetyMs = 250;
+        static constexpr int kFt8ConservativeFullPassMaxMs = 6500;
+        static constexpr int kFt8ConservativeFullPassMinMs = 2400;
         bool const deepCooldownActive = m_ft8DeepFollowupCooldownSlots > 0;
         if (m_ft8DeepFollowupCooldownSlots > 0) {
             --m_ft8DeepFollowupCooldownSlots;
         }
-        bool const deepThreadsOk = effectiveFtThreadLimit() >= kFt8DeepFollowupMinThreads;
+        int const ftThreadLimit = effectiveFtThreadLimit();
+        bool const deepThreadsOk = ftThreadLimit >= kFt8DeepFollowupMinThreads;
         qint64 deepFollowupLatestCompleteMs = 0;
         if (modeSnapshot == QStringLiteral("FT8") && decodePeriodMs > 0 && slotIndexForUtc >= 0) {
             static constexpr int kFt8DeepLatestOverrunMs = 6800;
@@ -35667,15 +35667,32 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                 (slotIndexForUtc + 1) * static_cast<qint64>(decodePeriodMs)
                 + kFt8DeepLatestOverrunMs;
         }
+        qint64 const ft8DispatchNowMs = correctedUtcEpochMs();
+        bool const ft8CpuPressure = cpuPressureActive();
         bool const runDeepFollowup =
             !txAudioActive
             && (!txStartPending || deepFollowupInTx)
             && !m_lowCpuModeEnabled
-            && !cpuPressureActive()
+            && !ft8CpuPressure
             && deepThreadsOk
             && !deepCooldownActive
             && explicitDeepFollowup
-            && deepFollowupLatestCompleteMs > correctedUtcEpochMs();
+            && deepFollowupLatestCompleteMs > ft8DispatchNowMs;
+        int const conservativeFullPassBudgetMs =
+            qBound(0,
+                   static_cast<int>(deepFollowupLatestCompleteMs
+                                    - ft8DispatchNowMs
+                                    - kFt8ConservativeFullPassSafetyMs),
+                   kFt8ConservativeFullPassMaxMs);
+        bool const runConservativeFullPass =
+            !runDeepFollowup
+            && explicitDeepFollowup
+            && !deepThreadsOk
+            && !txAudioActive
+            && !txStartPending
+            && !ft8CpuPressure
+            && deepFollowupLatestCompleteMs > ft8DispatchNowMs
+            && conservativeFullPassBudgetMs >= kFt8ConservativeFullPassMinMs;
         qInfo().noquote()
             << QStringLiteral("[FT8DISPATCH] serial=%1 effectiveDepth=%2 baseDepth=%3 deepSearch=%4 avg=%5 ft8ap=%6 txPending=%7 txAudio=%8 deepInTx=%9 runFollowup=%10 latestMs=%11 nowMs=%12")
                    .arg(serial)
@@ -35689,15 +35706,27 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                    .arg(m_ft8DeepDecodeInTx ? 1 : 0)
                    .arg(runDeepFollowup ? 1 : 0)
                    .arg(deepFollowupLatestCompleteMs)
-                   .arg(correctedUtcEpochMs());
-        bridgeLog("FT8 final fast pass: serial=" + QString::number(serial) +
-                  " depth=" + QString::number(fastDepth) +
-                  " ft8ap=0" +
-                  (runDeepFollowup ? " followup=1" : " followup=0") +
-                  (txStartPending ? " txPending=1" : QString()) +
-                  " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
-        queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, fastDepth,
-                              decodeQsoProgress, cqHint, 50, false, false);
+                   .arg(ft8DispatchNowMs);
+        if (runConservativeFullPass) {
+            bridgeLog("FT8 final conservative full pass: serial=" + QString::number(serial) +
+                      " depth=" + QString::number(decodeDepth) +
+                      " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0) +
+                      " threads=" + QString::number(ftThreadLimit) +
+                      " maxMs=" + QString::number(conservativeFullPassBudgetMs) +
+                      " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
+            queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, decodeDepth,
+                                  decodeQsoProgress, cqHint, 50, m_ft8ApEnabled, false,
+                                  false, conservativeFullPassBudgetMs);
+        } else {
+            bridgeLog("FT8 final fast pass: serial=" + QString::number(serial) +
+                      " depth=" + QString::number(fastDepth) +
+                      " ft8ap=0" +
+                      (runDeepFollowup ? " followup=1" : " followup=0") +
+                      (txStartPending ? " txPending=1" : QString()) +
+                      " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
+            queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, fastDepth,
+                                  decodeQsoProgress, cqHint, 50, false, false);
+        }
 
         if (runDeepFollowup) {
             Ft8PendingDeepFollowup pending;
@@ -35719,14 +35748,15 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                       " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0) +
                       " latestMs=" + QString::number(deepFollowupLatestCompleteMs) +
                       (deepFollowupInTx ? " inTx=1" : QString()));
-        } else if (explicitDeepFollowup && !txAudioActive) {
+        } else if (explicitDeepFollowup && !txAudioActive && !runConservativeFullPass) {
             bridgeLog("FT8 final deep followup skipped: latestMs=" +
                       QString::number(deepFollowupLatestCompleteMs) +
                       " txPending=" + QString::number(txStartPending ? 1 : 0) +
-                      " cpuPressure=" + QString::number(cpuPressureActive() ? 1 : 0) +
-                      " threads=" + QString::number(effectiveFtThreadLimit()) +
+                      " cpuPressure=" + QString::number(ft8CpuPressure ? 1 : 0) +
+                      " threads=" + QString::number(ftThreadLimit) +
                       " threadsOk=" + QString::number(deepThreadsOk ? 1 : 0) +
-                      " cooldownActive=" + QString::number(deepCooldownActive ? 1 : 0));
+                      " cooldownActive=" + QString::number(deepCooldownActive ? 1 : 0) +
+                      " conservativeBudgetMs=" + QString::number(conservativeFullPassBudgetMs));
         }
 
     } else if (modeSnapshot == "FT2") {
