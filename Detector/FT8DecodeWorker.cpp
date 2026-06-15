@@ -1192,7 +1192,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   totalTimer.start ();
   quint64 latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
+      || latestSerial == ~quint64(0)) // P0 1.0.404: scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX, o shutdown); il normale avanzamento di serial NON scarta piu' i pass per-slot. Fix lista FT8 vuota: il gate per-serial 1.0.399 scartava il fast/final pass quando l'early predecode dello slot successivo sovrascriveva latestSerial. Backstop mode/band intatto: cancelCurrentDecode + removePostedEvents purgano le code; harvest subpass non piu' speciale (anch'esso si ferma su invalidazione).
     {
       return;
     }
@@ -1207,7 +1207,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
+      || latestSerial == ~quint64(0)) // P0 1.0.404: scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX, o shutdown); il normale avanzamento di serial NON scarta piu' i pass per-slot. Fix lista FT8 vuota: il gate per-serial 1.0.399 scartava il fast/final pass quando l'early predecode dello slot successivo sovrascriveva latestSerial. Backstop mode/band intatto: cancelCurrentDecode + removePostedEvents purgano le code; harvest subpass non piu' speciale (anch'esso si ferma su invalidazione).
     {
       return;
     }
@@ -1320,7 +1320,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
+      || latestSerial == ~quint64(0)) // P0 1.0.404: scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX, o shutdown); il normale avanzamento di serial NON scarta piu' i pass per-slot. Fix lista FT8 vuota: il gate per-serial 1.0.399 scartava il fast/final pass quando l'early predecode dello slot successivo sovrascriveva latestSerial. Backstop mode/band intatto: cancelCurrentDecode + removePostedEvents purgano le code; harvest subpass non piu' speciale (anch'esso si ferma su invalidazione).
     {
       return;
     }
