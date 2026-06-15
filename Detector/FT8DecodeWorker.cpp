@@ -1192,7 +1192,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   totalTimer.start ();
   quint64 latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial))
+      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
     {
       return;
     }
@@ -1207,7 +1207,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial))
+      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
     {
       return;
     }
@@ -1320,7 +1320,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || (latestSerial != 0 && request.serial != latestSerial))
+      || (latestSerial != 0 && request.serial != latestSerial && !request.subpass)) // fork: harvest subpass esente dal serial-gate (Salvatore 1.0.399)
     {
       return;
     }
