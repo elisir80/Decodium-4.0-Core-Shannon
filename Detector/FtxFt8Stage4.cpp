@@ -3613,7 +3613,7 @@ void prepare_a7_tables (std::array<Ft8A7Slot, kFt8SequenceCount>& a7slots, int& 
 }
 
 void save_a7_entry (std::array<Ft8A7Slot, kFt8SequenceCount>& a7slots, int jseq, float dt, float freq,
-                    FixedChars<kFt8DecodedChars> const& decoded)
+                    FixedChars<kFt8DecodedChars> const& decoded, int seed_hits = 1)
 {
   std::string const decoded_trimmed = trim_fixed (decoded);
   if (decoded_trimmed.find ('/') != std::string::npos
@@ -3664,7 +3664,7 @@ void save_a7_entry (std::array<Ft8A7Slot, kFt8SequenceCount>& a7slots, int jseq,
   entry.dt = dt;
   entry.freq = freq;
   entry.age = 0;
-  entry.hits = 1;
+  entry.hits = std::max (1, seed_hits);
   entry.message = fixed_from_string<kFt8DecodedChars> (saved);
   entry.replay_message = is_strict_standard_ft8_message (decoded)
       ? decoded
@@ -5106,14 +5106,49 @@ bool try_ft8_a7_fast_repeated_hint (Ft8Stage4State& state,
                                kFt8BitMetricScale, s8.data (), &nsync,
                                llra.data (), llrb.data (), llrc.data (),
                                llrd.data (), llre.data ());
+  if (debug_ft8_focus_replay ())
+    {
+      std::cerr << "[FT8A7FAST] utc=" << request.nutc
+                << " hint=" << trim_fixed (hint_message)
+                << " directed=" << (directed_replay ? 1 : 0)
+                << " nsync=" << nsync
+                << " sync=" << sync
+                << " f1=" << f1
+                << " xdt=" << xdt
+                << " hits=" << hint.hits
+                << '\n';
+    }
 
-  if (directed_replay && nsync < 8)
+  std::vector<std::string> const hint_words = split_words (trim_fixed (hint_message));
+  bool const exact_report_tail =
+      hint_words.size () == 3
+      && hint_words[0].find ('<') == std::string::npos
+      && hint_words[1].find ('<') == std::string::npos
+      && is_report_token (hint_words[2])
+      && hint_words[2] != "73"
+      && hint_words[2] != "RRR"
+      && hint_words[2] != "RR73";
+  bool const exact_recent_report_tail =
+      directed_replay
+      && allow_single_hit
+      && hint.hits >= 2
+      && hint.age <= 1
+      && exact_report_tail;
+  int const directed_nsync_limit = exact_recent_report_tail ? 6 : 7;
+  if (directed_replay && nsync < directed_nsync_limit)
     {
       return false;
     }
-
-  int const hard_limit = directed_replay ? 58 : -1;
-  float const dmin_limit = directed_replay ? 170.0f : -1.0f;
+  bool const relaxed_repeated_report =
+      exact_recent_report_tail
+      && nsync >= directed_nsync_limit
+      && exact_report_tail;
+  int const hard_limit = directed_replay
+      ? (relaxed_repeated_report ? 86 : 58)
+      : -1;
+  float const dmin_limit = directed_replay
+      ? (relaxed_repeated_report ? 185.0f : 170.0f)
+      : -1.0f;
   bool const single_hit_direct =
       directed_replay && hint.hits < 2 && allow_single_hit;
   if (!single_hit_direct
@@ -5127,16 +5162,8 @@ bool try_ft8_a7_fast_repeated_hint (Ft8Stage4State& state,
 
   if (single_hit_direct && allow_relaxed_single_hit_exact)
     {
-      std::vector<std::string> const words =
-          split_words (trim_fixed (hint_message));
       bool const report_tail =
-          words.size () == 3
-          && words[0].find ('<') == std::string::npos
-          && words[1].find ('<') == std::string::npos
-          && is_report_token (words[2])
-          && words[2] != "73"
-          && words[2] != "RRR"
-          && words[2] != "RR73";
+          exact_report_tail;
       if (report_tail
           && try_ft8sd_known_message (hint_message, request, s8.data (), nsync,
                                       xbase, msg37, xsnr, itone, message77,
@@ -5176,10 +5203,13 @@ bool try_ft8_a7_fast_repeated_hint (Ft8Stage4State& state,
         {
           continue;
         }
+      int const terminal_hard_limit = directed_replay ? 58 : hard_limit;
+      float const terminal_dmin_limit = directed_replay ? 170.0f : dmin_limit;
       if (try_ft8sd_known_message (terminal_message, request, s8.data (), nsync,
                                    xbase, msg37, xsnr, itone, message77,
                                    llra.data (), llrb.data (), llrc.data (),
-                                   llrd.data (), hard_limit, dmin_limit, true))
+                                   llrd.data (), terminal_hard_limit,
+                                   terminal_dmin_limit, true))
         {
           return true;
         }
@@ -7856,6 +7886,21 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                   ifa, ifb, candidate.data (), ncand);
       append_known_cq_candidates (known_call_grid_history (), request, ifa, ifb,
                                   candidate.data (), ncand);
+      if (ipass == 1
+          && request.nzhsym >= 50
+          && request.ndepth >= 3
+          && request.lft8apon != 0
+          && !request.supplemental
+          && !equalized_pipeline)
+        {
+          run_fast_a7_repeated_hints (state, request, jseq, sbase,
+                                      ifa, ifb, candidate.data (), ncand,
+                                      collector);
+          if (stage4_should_cancel ())
+            {
+              return;
+            }
+        }
 
       std::vector<int> freqpart_order;
       std::vector<int> freqpart_binid;
@@ -8815,16 +8860,24 @@ void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& reques
       {
         score += static_cast<int> (std::lround (support * 40.0f)) - 600;
       }
-	    if (support >= 1.0e20f
-	        && !ft8sd_hint_is_cq (message)
-	        && !is_directed_pair_only_message (message)
-	        && hint.age <= 1
-	        && direct_report_replay_tail (message))
-	      {
-	        score -= 1750;
-	      }
-	    return score;
-	  };
+    if (!ft8sd_hint_is_cq (message)
+        && !is_directed_pair_only_message (message)
+        && hint.age <= 1
+        && hint.hits >= 3
+        && direct_report_replay_tail (message))
+      {
+        score -= 700;
+      }
+    if (support >= 1.0e20f
+        && !ft8sd_hint_is_cq (message)
+        && !is_directed_pair_only_message (message)
+        && hint.age <= 1
+        && direct_report_replay_tail (message))
+      {
+        score -= 1750;
+      }
+    return score;
+  };
   std::stable_sort (previous_order.begin (), previous_order.begin () + previous_limit,
                     [&] (int lhs, int rhs) {
                       int const lhs_score = a7_priority (lhs);
@@ -8874,7 +8927,14 @@ void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& reques
           cq_replay && previous.age <= 1 && support < 1.0e20f && support <= 2.5f;
       bool const recent_supported_direct =
           !cq_replay && !pair_only && previous.age <= 1
-          && support < 1.0e20f && support <= 2.5f;
+          && support < 1.0e20f
+          && (support <= 2.5f
+              || (previous.hits >= 2
+                  && direct_report_replay_tail (hint_message)
+                  && support <= 4.0f)
+              || (previous.hits >= 3
+                  && direct_report_replay_tail (hint_message)
+                  && support <= 25.0f));
       bool const recent_unsupported_direct_report =
           !cq_replay && !pair_only && previous.age <= 1
           && support >= 1.0e20f && direct_report_replay_tail (hint_message);
@@ -8899,14 +8959,39 @@ void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& reques
       ++attempts;
       std::array<int, kFt8Nn> fast_itone {};
       std::array<signed char, kFt8Bits> fast_message77 {};
-      if (!try_ft8_a7_fast_repeated_hint (state, request, previous,
-                                          newdat_a7, sbase, msg37, xsnr,
-                                          xdt, f1, fast_itone,
-                                          fast_message77,
-                                          recent_supported_cq
-                                          || recent_supported_direct
-                                          || recent_unsupported_direct_report,
-                                          recent_unsupported_direct_report))
+      bool replay_ok =
+          try_ft8_a7_fast_repeated_hint (state, request, previous,
+                                         newdat_a7, sbase, msg37, xsnr,
+                                         xdt, f1, fast_itone,
+                                         fast_message77,
+                                         recent_supported_cq
+                                         || recent_supported_direct
+                                         || recent_unsupported_direct_report,
+                                         recent_unsupported_direct_report);
+      if (!replay_ok
+          && recent_supported_direct
+          && direct_report_replay_tail (hint_message))
+        {
+          for (float const delta : {0.75f, -0.75f})
+            {
+              if (stage4_should_cancel ())
+                {
+                  return;
+                }
+              Ft8A7Entry adjusted = previous;
+              adjusted.freq = previous.freq + delta;
+              replay_ok =
+                  try_ft8_a7_fast_repeated_hint (state, request, adjusted,
+                                                 newdat_a7, sbase, msg37, xsnr,
+                                                 xdt, f1, fast_itone,
+                                                 fast_message77, true, false);
+              if (replay_ok)
+                {
+                  break;
+                }
+            }
+        }
+      if (!replay_ok)
         {
           continue;
         }
@@ -8922,7 +9007,8 @@ void run_fast_a7_repeated_hints (Ft8Stage4State& state, Ft8Request const& reques
       ftx_ft8_finalize_a7_result_c (xsnr, &nsnr, &iaptype, &qual);
       collector.append (kSyncAp, nsnr, xdt, f1, msg37, iaptype, qual,
                         fast_message77.data ());
-      save_a7_entry (state.a7, jseq, xdt, f1, msg37);
+      int const replay_seed_hits = direct_report_replay_tail (msg37) ? 3 : 1;
+      save_a7_entry (state.a7, jseq, xdt, f1, msg37, replay_seed_hits);
       save_call_grid_history (call_grid_history (), request, jseq, xdt, f1, msg37);
       seed_pack77_hashes_from_message (msg37);
     }
