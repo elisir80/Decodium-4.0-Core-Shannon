@@ -11567,6 +11567,7 @@ void DecodiumBridge::resetEarlyDecodeSchedule()
     m_ft8EarlyDecode41Sent = false;
     m_ft8EarlyDecode47Sent = false;
     m_ft8PendingDeepFollowups.clear();
+    m_ft8DeepFollowupCooldownSlots = 0;  // P0 (1.0.403): re-abilita il deep su nuova sessione RX
     m_ft4EarlyDecodeSlot = -1;
     m_ft4EarlyDecodeSent = false;
 
@@ -11592,6 +11593,7 @@ void DecodiumBridge::resetFtxDecodeWorkersForModeChange(const QString& previousM
     m_ft8DeepInTxSerials.clear();
     m_ft8PendingDeepFollowups.clear();
     m_ft8PendingSubpassHarvest.clear();
+    m_ft8DeepFollowupCooldownSlots = 0;  // P0 (1.0.403): re-abilita il deep su cambio modo
     m_decodeStartMsBySerial.clear();
     m_decodeModeBySerial.clear();
     m_decodeUtcTokenBySerial.clear();
@@ -12140,6 +12142,7 @@ void DecodiumBridge::resetTimeSyncDecodeMetrics()
     m_decodeModeBySerial.clear();
     m_decodeUtcTokenBySerial.clear();
     m_ft8PendingDeepFollowups.clear();
+    m_ft8DeepFollowupCooldownSlots = 0;  // P0 (1.0.403): re-abilita il deep su reset time-sync
     bool const sampleCountChanged = (m_dtLastSampleCount != 0);
     m_dtLastSampleCount = 0;
     m_totalDecodesForDt = 0;
@@ -32476,6 +32479,18 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         bool const busyForTx = m_transmitting || m_tuning;
         bool const pressure = m_lowCpuModeEnabled || cpuPressureActive();
         if (stalePending || busyForTx || pressure || budgetMs < kFt8DeepMinUsefulBudgetMs) {
+            // P0 (1.0.403): se il deep e' tornato troppo tardi per essere utile
+            // (budgetMs < min) e NON per stale/tx/pressure, e' un segnale di backlog
+            // sul runtime_mutex single-flight: il worker e' indietro. Raffreddiamo il
+            // deep per qualche slot cosi' la pipeline early+fast drena e i fast pass
+            // tornano a essere consegnati (la produzione non e' mai toccata).
+            if (budgetMs < kFt8DeepMinUsefulBudgetMs && !stalePending && !busyForTx && !pressure) {
+                static constexpr int kFt8DeepBacklogCooldownSlots = 6;
+                m_ft8DeepFollowupCooldownSlots = kFt8DeepBacklogCooldownSlots;
+                bridgeLog(QStringLiteral("FT8 deep follow-up backlog: cooldown %1 slot (worker indietro, budgetMs=%2)")
+                              .arg(kFt8DeepBacklogCooldownSlots)
+                              .arg(budgetMs));
+            }
             bridgeLog(QStringLiteral("FT8 final deep followup skipped after fast: budgetMs=%1 stale=%2 txBusy=%3 pressure=%4 latestMs=%5 nowMs=%6")
                           .arg(budgetMs)
                           .arg(stalePending ? 1 : 0)
@@ -35631,6 +35646,20 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         // (li' il clamp di queueFt8DecodeRequest forza depth 2 e l'audio TX gira).
         bool const deepFollowupInTx = txStartPending && !txAudioActive && m_ft8DeepDecodeInTx;
         bool const explicitDeepFollowup = m_deepSearchEnabled || m_avgDecodeEnabled;
+        // P0 (1.0.403): guardie deep follow-up. Toccano SOLO il pass opzionale
+        // (early depth-3 + fast depth-2 = produzione, mai influenzati).
+        // (1) deepThreadsOk: richiede multi-core reale. Su 1-2 thread le 3 decodifiche
+        //     pesanti/slot sul runtime_mutex single-flight non stanno nei 15s -> i
+        //     fast pass venivano scartati = utente non riceve (caso Raffaele ft_threads=1).
+        // (2) cooldown anti-backlog: se un deep recente e' tornato troppo tardi
+        //     (budgetMs < min, vedi onFt8DecodeReady) lo saltiamo per qualche slot
+        //     cosi' la pipeline early+fast drena e i fast pass tornano consegnati.
+        static constexpr int kFt8DeepFollowupMinThreads = 3;
+        bool const deepCooldownActive = m_ft8DeepFollowupCooldownSlots > 0;
+        if (m_ft8DeepFollowupCooldownSlots > 0) {
+            --m_ft8DeepFollowupCooldownSlots;
+        }
+        bool const deepThreadsOk = effectiveFtThreadLimit() >= kFt8DeepFollowupMinThreads;
         qint64 deepFollowupLatestCompleteMs = 0;
         if (modeSnapshot == QStringLiteral("FT8") && decodePeriodMs > 0 && slotIndexForUtc >= 0) {
             static constexpr int kFt8DeepLatestOverrunMs = 6800;
@@ -35643,6 +35672,8 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             && (!txStartPending || deepFollowupInTx)
             && !m_lowCpuModeEnabled
             && !cpuPressureActive()
+            && deepThreadsOk
+            && !deepCooldownActive
             && explicitDeepFollowup
             && deepFollowupLatestCompleteMs > correctedUtcEpochMs();
         qInfo().noquote()
@@ -35692,7 +35723,10 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             bridgeLog("FT8 final deep followup skipped: latestMs=" +
                       QString::number(deepFollowupLatestCompleteMs) +
                       " txPending=" + QString::number(txStartPending ? 1 : 0) +
-                      " cpuPressure=" + QString::number(cpuPressureActive() ? 1 : 0));
+                      " cpuPressure=" + QString::number(cpuPressureActive() ? 1 : 0) +
+                      " threads=" + QString::number(effectiveFtThreadLimit()) +
+                      " threadsOk=" + QString::number(deepThreadsOk ? 1 : 0) +
+                      " cooldownActive=" + QString::number(deepCooldownActive ? 1 : 0));
         }
 
     } else if (modeSnapshot == "FT2") {

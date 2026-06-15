@@ -2259,6 +2259,11 @@ private:
     };
     QHash<quint64, Ft8PendingDeepFollowup> m_ft8PendingDeepFollowups;
     QHash<quint64, Ft8PendingDeepFollowup> m_ft8PendingSubpassHarvest;  // F1: harvest subpass pending (key=deepSerial), al piu' 1 entry
+    // P0 (1.0.403): cooldown del deep follow-up FT8. Quando il deep torna troppo
+    // tardi (worker in saturazione su runtime_mutex single-flight) lo saltiamo per
+    // N slot cosi' la pipeline early+fast drena e i fast pass tornano consegnati.
+    // Tocca SOLO il pass opzionale: early/fast (produzione) non sono mai influenzati.
+    int m_ft8DeepFollowupCooldownSlots {0};
     QHash<quint64, quint64> m_decodeSessionBySerial;
     qint64 m_ft4EarlyDecodeSlot {-1};
     bool m_ft4EarlyDecodeSent {false};
