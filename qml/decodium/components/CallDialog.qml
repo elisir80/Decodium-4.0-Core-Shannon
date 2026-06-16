@@ -104,6 +104,36 @@ Window {
         }
     }
 
+    component DecoCheck : CheckBox {
+        id: dc
+        indicator: Rectangle {
+            implicitWidth: 18
+            implicitHeight: 18
+            x: 0
+            y: (dc.height - height) / 2
+            radius: 4
+            color: dc.checked ? Qt.alpha(callDialog.cAccent, 0.28) : callDialog.cFieldBg
+            border.color: !dc.enabled ? Qt.alpha(callDialog.cText, 0.15)
+                          : (dc.checked ? callDialog.cAccent : callDialog.cBorder)
+            border.width: 2
+            Text {
+                anchors.centerIn: parent
+                text: dc.checked ? "✓" : ""
+                color: callDialog.cText
+                font.pixelSize: 12
+                font.bold: true
+            }
+        }
+        contentItem: Text {
+            text: dc.text
+            color: dc.enabled ? callDialog.cText : callDialog.cMuted
+            font.pixelSize: 12
+            leftPadding: 24
+            wrapMode: Text.WordWrap
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         color: callDialog.color
@@ -125,17 +155,18 @@ Window {
                 }
                 Rectangle {
                     visible: bridge && bridge.targetCallActive
+                    readonly property bool armed: bridge && bridge.targetCallArmedWaiting
                     width: stateLabel.implicitWidth + 16
                     height: stateLabel.implicitHeight + 6
                     radius: 4
-                    color: Qt.alpha(callDialog.cGreen, 0.25)
-                    border.color: callDialog.cGreen
+                    color: Qt.alpha(armed ? callDialog.cOrange : callDialog.cGreen, 0.25)
+                    border.color: armed ? callDialog.cOrange : callDialog.cGreen
                     border.width: 1
                     Text {
                         id: stateLabel
                         anchors.centerIn: parent
-                        text: qsTr("ATTIVA")
-                        color: callDialog.cGreen
+                        text: parent.armed ? qsTr("⏳ ARMATO") : qsTr("ATTIVA")
+                        color: parent.armed ? callDialog.cOrange : callDialog.cGreen
                         font.pixelSize: 11
                         font.bold: true
                     }
@@ -359,6 +390,31 @@ Window {
                 }
             }
 
+            // ====== DX-WATCH ARMATO (1.0.408) ======
+            Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
+                DecoCheck {
+                    id: armedCheck
+                    Layout.fillWidth: true
+                    text: qsTr("DX-watch armato — non chiama subito: aspetta che il target sia decodificato")
+                    checked: bridge && bridge.armedWatchEnabled
+                    enabled: !bridge || !bridge.targetCallActive
+                    onToggled: if (bridge) bridge.armedWatchEnabled = checked
+                }
+                DecoCheck {
+                    id: reArmCheck
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 18
+                    text: qsTr("Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)")
+                    checked: bridge && bridge.armedReArm
+                    enabled: armedCheck.checked && (!bridge || !bridge.targetCallActive)
+                    opacity: enabled ? 1.0 : 0.5
+                    onToggled: if (bridge) bridge.armedReArm = checked
+                }
+            }
+
             // ====== TELEMETRIA RUNTIME ======
             Rectangle {
                 Layout.fillWidth: true
@@ -375,12 +431,16 @@ Window {
                     anchors.margins: 8
                     spacing: 4
                     Text {
-                        text: qsTr("Stato: chiamando %1").arg(bridge ? bridge.targetCallSign : "")
-                        color: callDialog.cAccent
+                        readonly property bool armed: bridge && bridge.targetCallArmedWaiting
+                        text: armed
+                              ? qsTr("⏳ In ascolto: aspetto %1 in decodifica…").arg(bridge ? bridge.targetCallSign : "")
+                              : qsTr("Stato: chiamando %1").arg(bridge ? bridge.targetCallSign : "")
+                        color: armed ? callDialog.cOrange : callDialog.cAccent
                         font.bold: true
                         font.pixelSize: 13
                     }
                     Text {
+                        visible: !(bridge && bridge.targetCallArmedWaiting)
                         text: bridge ? qsTr("Tentativo %1 / %2").arg(bridge.targetCallRetryCount).arg(
                                   bridge.targetCallMaxRetries === 0 ? qsTr("∞") : bridge.targetCallMaxRetries) : ""
                         color: callDialog.cText

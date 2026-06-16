@@ -13545,6 +13545,26 @@ void DecodiumBridge::setTargetCallPauseS(int v)
     }
 }
 
+void DecodiumBridge::setArmedWatchEnabled(bool v)
+{
+    if (m_armedWatchEnabled != v) {
+        m_armedWatchEnabled = v;
+        emit armedWatchEnabledChanged();
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/Armed"), v);
+        bridgeLog(QStringLiteral("[CALL] DX-watch armato %1").arg(v ? "ON" : "OFF"));
+    }
+}
+
+void DecodiumBridge::setArmedReArm(bool v)
+{
+    if (m_armedReArm != v) {
+        m_armedReArm = v;
+        emit armedReArmChanged();
+        QSettings("Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/ReArm"), v);
+        bridgeLog(QStringLiteral("[CALL] re-arm %1").arg(v ? "ON" : "OFF"));
+    }
+}
+
 void DecodiumBridge::startTargetCall()
 {
     if (m_targetCallSign.isEmpty()) {
@@ -13581,37 +13601,29 @@ void DecodiumBridge::startTargetCall()
         setAlt12Enabled(true);
     }
 
-    // Imposta dxCall + autoSeq + txEnabled per innescare TX1 nello slot successivo
+    // Imposta dxCall + autoSeq. Il TX (e il timeout) parte ORA se non armato,
+    // oppure da beginTargetCallCalling() quando il target compare se DX-watch armato.
     setDxCall(m_targetCallSign);
     if (!m_autoSeq) setAutoSeq(true);
-    if (!m_txEnabled) setTxEnabled(true);
 
     // Connect edge detector per contare retry alla fine di ogni TX
     connect(this, &DecodiumBridge::transmittingChanged,
             this, &DecodiumBridge::onTargetCallTransmittingChanged,
             Qt::UniqueConnection);
 
-    quint64 const sessionId = m_targetCallSessionId;
-    if (m_targetCallTimeoutS > 0) {
-        QTimer::singleShot(m_targetCallTimeoutS * 1000, this, [this, sessionId]() {
-            if (!m_targetCallActive || m_targetCallSessionId != sessionId) {
-                return;
-            }
-            bool const qsoAlreadyProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
-            if (qsoAlreadyProgressed) {
-                bridgeLog(QStringLiteral("targetCall timeout ignored: QSO already progressed tx=%1 progress=%2")
-                              .arg(m_currentTx)
-                              .arg(m_qsoProgress));
-                return;
-            }
-            if (m_transmitting) {
-                bridgeLog(QStringLiteral("targetCall timeout reached during TX; stop deferred to TX end"));
-                return;
-            }
-            bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), stopping")
-                          .arg(m_targetCallTimeoutS));
-            stopTargetCall();
-        });
+    m_armedReArmCount = 0;
+    if (m_armedWatchEnabled) {
+        // DX-watch ARMED: NON trasmette. Monitora i decode; beginTargetCallCalling()
+        // viene chiamata da tryArmedWatchSeesTarget() quando il target compare on-air.
+        // Nessun timeout in ARMED: non occupa il canale -> attesa sicura, l'operatore
+        // disarma con Stop. Il TX watchdog globale resta comunque sopra in CALLING.
+        m_targetCallArmedWaiting = true;
+        emit targetCallArmedWaitingChanged();
+        bridgeLog(QStringLiteral("[CALL] ARMED su %1: in ascolto, chiamo quando decodificato (reArm=%2)")
+                      .arg(m_targetCallSign).arg(m_armedReArm ? "ON" : "OFF"));
+    } else {
+        m_targetCallArmedWaiting = false;
+        beginTargetCallCalling();
     }
 
     QString const periodLabel = (m_targetCallPeriod == 0)
@@ -13653,6 +13665,120 @@ void DecodiumBridge::stopTargetCall()
     bridgeLog(QStringLiteral("stopTargetCall: retryCount=%1 qsoLogged=%2")
                   .arg(m_targetCallRetryCount)
                   .arg(m_qsoLogged ? "true" : "false"));
+}
+
+// ARMED -> CALLING: abilita il TX e arma il timeout di chiamata. Chiamata sia dal
+// path non-armato (startTargetCall) sia quando il target compare on-air in ARMED
+// (tryArmedWatchSeesTarget). Bumpa il sessionId per invalidare i timer della
+// sessione di chiamata precedente (re-arm).
+void DecodiumBridge::beginTargetCallCalling()
+{
+    if (!m_targetCallActive) return;
+    ++m_targetCallSessionId;
+    m_targetCallArmedWaiting = false;
+    emit targetCallArmedWaitingChanged();
+    m_targetCallStartedUtc = QDateTime::currentDateTimeUtc();  // anchor timeout CALLING
+    m_targetCallRetryCount = 0;
+    emit targetCallRetryCountChanged();
+    if (!m_txEnabled) setTxEnabled(true);
+
+    quint64 const sessionId = m_targetCallSessionId;
+    if (m_targetCallTimeoutS > 0) {
+        QTimer::singleShot(m_targetCallTimeoutS * 1000, this, [this, sessionId]() {
+            if (!m_targetCallActive || m_targetCallSessionId != sessionId || m_targetCallArmedWaiting) {
+                return;
+            }
+            bool const qsoAlreadyProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
+            if (qsoAlreadyProgressed) {
+                bridgeLog(QStringLiteral("targetCall timeout ignored: QSO already progressed tx=%1 progress=%2")
+                              .arg(m_currentTx)
+                              .arg(m_qsoProgress));
+                return;
+            }
+            if (m_transmitting) {
+                bridgeLog(QStringLiteral("targetCall timeout reached during TX; stop deferred to TX end"));
+                return;
+            }
+            bridgeLog(QStringLiteral("targetCall: timeout reached (%1s)")
+                          .arg(m_targetCallTimeoutS));
+            endTargetCallNoQso(QStringLiteral("timeout"));
+        });
+    }
+}
+
+// Fine di un tentativo di chiamata SENZA QSO (max retry / timeout). Con DX-watch
+// armato + re-arm: torna in ascolto (ARMED) fino a un cap; oltre il cap fa Halt
+// manuale (intervento operatore obbligatorio -> niente loop infinito stile WSJT-Z).
+// Senza re-arm (default one-shot) o QSO gia' loggato: stop normale.
+void DecodiumBridge::endTargetCallNoQso(const QString& reason)
+{
+    if (!m_targetCallActive) return;
+    constexpr int kArmedReArmCap = 3;
+    if (m_armedWatchEnabled && m_armedReArm && !m_qsoLogged) {
+        if (m_armedReArmCount < kArmedReArmCap) {
+            ++m_armedReArmCount;
+            setTxEnabled(false);
+            m_targetCallRetryCount = 0;
+            emit targetCallRetryCountChanged();
+            m_targetCallArmedWaiting = true;
+            emit targetCallArmedWaitingChanged();
+            bridgeLog(QStringLiteral("[CALL] %1 -> re-arm %2/%3: torno in ascolto su %4")
+                          .arg(reason)
+                          .arg(m_armedReArmCount)
+                          .arg(kArmedReArmCap)
+                          .arg(m_targetCallSign));
+            return;
+        }
+        bridgeLog(QStringLiteral("[CALL] %1 -> re-arm cap %2 raggiunto: Halt manuale (decisione operatore)")
+                      .arg(reason)
+                      .arg(kArmedReArmCap));
+        engageManualTxHold(QStringLiteral("armed reArm cap"), true);
+        stopTargetCall();
+        return;
+    }
+    bridgeLog(QStringLiteral("[CALL] %1 -> stop").arg(reason));
+    stopTargetCall();
+}
+
+// DX-watch armato: in ARMED scatta quando il target compare come MITTENTE in un
+// decode (CQ dal target, o target che lavora qualcuno). Clona il match di
+// tryResumeQsoOnReply ma sul mittente (non sulla risposta a noi). Inerte se non
+// armato/non in ascolto. Ritorna true se ha avviato la chiamata.
+bool DecodiumBridge::tryArmedWatchSeesTarget(const QStringList& rows)
+{
+    if (!m_targetCallActive || !m_targetCallArmedWaiting || m_targetCallSign.isEmpty())
+        return false;
+    QString const targetBase = normalizedBaseCall(m_targetCallSign.trimmed().toUpper());
+    if (targetBase.isEmpty()) return false;
+    for (QString const& row : rows) {
+        QStringList f = parseFt8Row(row);
+        if (f.size() < 5) continue;
+        QString const msg = f[4];
+        if (!shouldAcceptDecodedMessage(msg)) continue;
+        QStringList const parts = msg.trimmed().split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+        if (parts.size() < 2) continue;
+        // Mittente: in "CQ <call> ..." e' il primo call dopo CQ (parts[1] o, con
+        // modificatore tipo "CQ DX <call>", parts[2]); in "<to> <from> ..." e' parts[1].
+        bool senderIsTarget = false;
+        if (parts.at(0).compare(QStringLiteral("CQ"), Qt::CaseInsensitive) == 0) {
+            QString const c1 = normalizedBaseCall(normalizedUsableCallToken(parts.at(1)));
+            QString const c2 = parts.size() >= 3
+                ? normalizedBaseCall(normalizedUsableCallToken(parts.at(2)))
+                : QString();
+            senderIsTarget = (c1 == targetBase) || (c2 == targetBase);
+        } else {
+            QString const fromBase = normalizedBaseCall(normalizedUsableCallToken(parts.at(1)));
+            senderIsTarget = (fromBase == targetBase);
+        }
+        if (!senderIsTarget) continue;
+        if (shouldSuppressDirectedGhostDecode(f, QStringLiteral("armed-watch")))
+            continue;
+        bridgeLog(QStringLiteral("[CALL] ARMED: target %1 decodificato (msg='%2') -> inizio chiamata")
+                      .arg(targetBase, msg));
+        beginTargetCallCalling();
+        return true;
+    }
+    return false;
 }
 
 void DecodiumBridge::onTargetCallTransmittingChanged()
@@ -13700,15 +13826,15 @@ void DecodiumBridge::tickTargetCallOnTx()
                   .arg(m_targetCallPauseS));
 
     if (m_targetCallMaxRetries > 0 && m_targetCallRetryCount >= m_targetCallMaxRetries) {
-        bridgeLog(QStringLiteral("targetCall: max retries reached (%1), stopping").arg(m_targetCallMaxRetries));
-        stopTargetCall();
+        bridgeLog(QStringLiteral("targetCall: max retries reached (%1)").arg(m_targetCallMaxRetries));
+        endTargetCallNoQso(QStringLiteral("max retries"));
         return;
     }
 
     if (m_targetCallTimeoutS > 0 && elapsedS >= m_targetCallTimeoutS) {
-        bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), stopping")
+        bridgeLog(QStringLiteral("targetCall: timeout reached (%1s)")
                       .arg(m_targetCallTimeoutS));
-        stopTargetCall();
+        endTargetCallNoQso(QStringLiteral("timeout"));
         return;
     }
 
@@ -13730,9 +13856,9 @@ void DecodiumBridge::tickTargetCallOnTx()
                 ? qMax<qint64>(0, m_targetCallStartedUtc.secsTo(resumeNowUtc))
                 : 0;
             if (m_targetCallTimeoutS > 0 && resumeElapsedS >= m_targetCallTimeoutS) {
-                bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s), stopping")
+                bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s)")
                               .arg(m_targetCallTimeoutS));
-                stopTargetCall();
+                endTargetCallNoQso(QStringLiteral("timeout pausa"));
                 return;
             }
             bool const resumeQsoProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
@@ -27480,6 +27606,8 @@ void DecodiumBridge::loadSettings()
     m_targetCallTimeoutS      = qBound(10, s.value(QStringLiteral("CallFeature/TimeoutS"),   90).toInt(),  600);
     m_targetCallPeriod        = qBound(0,  s.value(QStringLiteral("CallFeature/Period"),     2).toInt(),    2);
     m_targetCallPauseS        = qBound(0,  s.value(QStringLiteral("CallFeature/PauseS"),     0).toInt(),  300);
+    m_armedWatchEnabled       = s.value(QStringLiteral("CallFeature/Armed"), false).toBool();
+    m_armedReArm              = s.value(QStringLiteral("CallFeature/ReArm"), false).toBool();
     bridgeLog(QStringLiteral("[FT2WS] Pack init Conservative=%1 PartnerMemory=%2 Tx2Resend=%3")
                   .arg(m_ft2Conservative ? "ON" : "OFF")
                   .arg(m_ft2PartnerMemoryEnabled ? "ON" : "OFF")
@@ -31962,6 +32090,8 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // riprende il QSO (re-ingaggio via processDecodeDoubleClick). Se ha ripreso, salta
     // l'auto-seq su QUESTA batch (più sotto) per evitare doppio advance sullo stesso decode.
     bool const resumedQso = ft8DeepInTxListOnly ? false : tryResumeQsoOnReply(rows);
+    // DX-watch armato: se il target compare on-air, ARMED -> CALLING. Inerte se non armato.
+    if (!resumedQso && !ft8DeepInTxListOnly) tryArmedWatchSeesTarget(rows);
 
     if (isTimeSyncDecodeMode(m_mode)) {
         if (serialMode.isEmpty()) {
@@ -32716,6 +32846,8 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     // engageManualTxHold ha salvato il partner; se ri-risponde, processDecodeDoubleClick lo
     // re-ingaggia. Se ha ripreso, salta l'auto-seq su questa batch (evita doppio advance).
     bool const resumedQso = tryResumeQsoOnReply(rows);
+    // DX-watch armato: se il target compare on-air, ARMED -> CALLING. Inerte se non armato.
+    if (!resumedQso) tryArmedWatchSeesTarget(rows);
 
     // FT2 async is latency sensitive: drive the QSO sequencer before the
     // heavier UI/list/DXCC work below, so a directed reply can arm the next

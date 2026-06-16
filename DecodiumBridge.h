@@ -199,6 +199,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int     targetCallPeriod     READ targetCallPeriod     WRITE setTargetCallPeriod     NOTIFY targetCallPeriodChanged)
     Q_PROPERTY(int     targetCallPauseS     READ targetCallPauseS     WRITE setTargetCallPauseS     NOTIFY targetCallPauseSChanged)
     Q_PROPERTY(int     targetCallRetryCount READ targetCallRetryCount NOTIFY targetCallRetryCountChanged)
+    Q_PROPERTY(bool    armedWatchEnabled      READ armedWatchEnabled      WRITE setArmedWatchEnabled      NOTIFY armedWatchEnabledChanged)
+    Q_PROPERTY(bool    armedReArm             READ armedReArm             WRITE setArmedReArm             NOTIFY armedReArmChanged)
+    Q_PROPERTY(bool    targetCallArmedWaiting READ targetCallArmedWaiting NOTIFY targetCallArmedWaitingChanged)
 
     // FT2-specific: async TX (no period sync) e dual carrier
     Q_PROPERTY(bool asyncTxEnabled     READ asyncTxEnabled     WRITE setAsyncTxEnabled     NOTIFY asyncTxEnabledChanged)
@@ -611,6 +614,11 @@ public:
     int     targetCallRetryCount() const { return m_targetCallRetryCount; }
     Q_INVOKABLE void startTargetCall();
     Q_INVOKABLE void stopTargetCall();
+    bool    armedWatchEnabled()      const { return m_armedWatchEnabled; }
+    void    setArmedWatchEnabled(bool v);
+    bool    armedReArm()             const { return m_armedReArm; }
+    void    setArmedReArm(bool v);
+    bool    targetCallArmedWaiting() const { return m_targetCallArmedWaiting; }
 
     bool asyncTxEnabled()      const { return m_asyncTxEnabled; }
     void setAsyncTxEnabled(bool /*v*/) { /* FT2 async TX PERMANENTE: sempre ON, non disattivabile.
@@ -1367,6 +1375,9 @@ signals:
     void targetCallPeriodChanged();
     void targetCallPauseSChanged();
     void targetCallRetryCountChanged();
+    void armedWatchEnabledChanged();
+    void armedReArmChanged();
+    void targetCallArmedWaitingChanged();
     // 1.0.263 (fork-only) — signal QML per re-dock + reset position di tutte le floating windows
     void windowLayoutResetRequested();
     void asyncTxEnabledChanged();
@@ -1600,6 +1611,11 @@ private slots:
 
 private:
     void tickTargetCallOnTx();   // CALL retry counter/timing enforcement on TX end
+    // DX-watch armato (estensione CALL): ARMED->CALLING quando il target compare
+    // come mittente in un decode; re-arm/stop a fine tentativo senza QSO.
+    bool tryArmedWatchSeesTarget(const QStringList& rows);
+    void beginTargetCallCalling();   // ARMED->CALLING: abilita TX + arma il timeout
+    void endTargetCallNoQso(const QString& reason); // re-arm (capped->Halt) o stop
 
     // 1.0.270 (Phase 5.3+) — cleanup retention DB: elimina decode + sessioni orfane
     // piu' vecchie di N giorni + VACUUM. Eseguito UNA VOLTA al boot del worker.
@@ -2496,6 +2512,11 @@ private:
     int     m_targetCallSavedTxPeriod {0};
     bool    m_targetCallSavedAlt12   {false};
     bool    m_targetCallWasTransmitting {false}; // edge detector per transmittingChanged
+    // DX-watch armato (opt-in, default OFF): ARMED prima di chiamare il target.
+    bool    m_armedWatchEnabled      {false};  // toggle: arma il watch invece di chiamare subito
+    bool    m_armedReArm             {false};  // a fine tentativo senza QSO torna in ascolto (capped)
+    bool    m_targetCallArmedWaiting {false};  // runtime: true=ARMED (attende target), false=CALLING/off
+    int     m_armedReArmCount        {0};      // re-arm consumati nella sessione (cap anti-loop DXCC)
 
     int  m_txWatchdogTicks  {0};   // tick watchdog a 250ms: period/count logic
     qint64 m_txWatchdogActiveSinceMs {0}; // wall-clock anchor for logs only
