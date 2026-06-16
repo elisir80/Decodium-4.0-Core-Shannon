@@ -80,7 +80,7 @@ Type: filesandordirs; Name: "{localappdata}\decodium4\cache\qmlcache"
 ; In questo modo installer e portable restano sempre allineati 1:1.
 ; Esclude pollution di build CMake (oggetti, autogen, static libs, test, tools sperimentali).
 Source: "{#BuildDir}\*"; DestDir: "{app}"; \
-  Excludes: "CMakeFiles\*,deploy\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake"; \
+  Excludes: "CMakeFiles\*,deploy\*,deploy_staging\*,map65\*,qmap\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake"; \
   Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; File licenza fuori dal bundle
