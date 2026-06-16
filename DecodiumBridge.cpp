@@ -28766,9 +28766,15 @@ int DecodiumBridge::effectiveFtThreadLimit() const
 {
     int const cores = qMax(1, QThread::idealThreadCount());
     int const configured = qBound(1, m_ftThreads, kMaxFtDecodeThreads);
+    // P0 (1.0.409): riserva UI ANCHE col conteggio thread MANUALE. Senza, un decode
+    // deep+AP con omp_set_num_threads(cores) + omp_set_dynamic(0) satura TUTTI i core
+    // logici per ~12s e affama il main thread GUI -> freeze totale della UI (root-cause
+    // agente-rx: CPU starvation OpenMP, non contesa mutex). Il ramo AUTO gia' riserva
+    // via autoFtThreadCountForCores; allineiamo il manuale cappando a cores-riserva.
+    int const uiReserveCap = qMax(1, cores - ftAutoUiReserveForCores(cores));
     int const normalLimit = m_ftThreadsAuto
         ? autoFtThreadCountForCores(cores)
-        : configured;
+        : qMin(configured, uiReserveCap);
     if (cpuPressureSevereActive()) {
         return 1;
     }
