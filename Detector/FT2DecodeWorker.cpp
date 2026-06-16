@@ -304,7 +304,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   QElapsedTimer totalTimer;
   totalTimer.start ();
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || request.serial != m_latestDecodeSerial.load (std::memory_order_relaxed))
+      || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;
     }
@@ -318,7 +318,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   qint64 const waitMs = waitTimer.elapsed ();
 
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || request.serial != m_latestDecodeSerial.load (std::memory_order_relaxed))
+      || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;
     }
@@ -363,7 +363,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   ftx_ft2_set_ap_hash_cache_c (nullptr, 0);
 
   if (m_shuttingDown.load (std::memory_order_relaxed)
-      || request.serial != m_latestDecodeSerial.load (std::memory_order_relaxed))
+      || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;
     }
