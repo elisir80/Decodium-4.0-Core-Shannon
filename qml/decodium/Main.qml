@@ -338,6 +338,7 @@ ApplicationWindow {
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
         savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
+        fsLoadColumns()
         startupLog("decode panel settings restored")
 
         var state = safeWindowState("mainWindow")
@@ -2247,6 +2248,239 @@ ApplicationWindow {
         return normalized.indexOf(" " + myCall + " ") >= 0
             ? Text.ElideMiddle
             : Text.ElideRight
+    }
+
+    // ===================================================================
+    // Full Spectrum — colonne configurabili (larghezza / visibilità /
+    // ordine) + flip cronologico newest-first. Modello-config UNICO
+    // condiviso dal pannello embedded (evenPeriodList) e dalla finestra
+    // staccata (period1FloatingList). Solo UI/QML: il modello dati C++
+    // (bandActivityModel) e la pipeline decode restano INTATTI.
+    // By IU8LMC
+    // ===================================================================
+    // Ordine + visibilità: drive del Repeater header/righe. SEMPRE riassegnato
+    // (mai mutato in place) per notificare i binding.
+    property var fsColumnOrder: fsDefaultOrder()
+    // Larghezze per-id (mappa). Cambia durante il drag SENZA ricreare i Repeater
+    // (così il MouseArea trascinato non viene distrutto a metà gesto).
+    property var fsColWidthMap: fsDefaultWidths()
+    // Bump per forzare la rivalutazione delle Layout.preferredWidth durante il drag.
+    property int fsColWidthVer: 0
+    // Flip cronologico: true = più recenti in alto (ListView BottomToTop).
+    property bool fsNewestFirst: false
+
+    function fsDefaultOrder() {
+        return [
+            { id: "utc",  vis: true },
+            { id: "db",   vis: true },
+            { id: "dt",   vis: true },
+            { id: "freq", vis: true },
+            { id: "msg",  vis: true },
+            { id: "dist", vis: true },
+            { id: "dxcc", vis: true },
+            { id: "az",   vis: true }
+        ]
+    }
+    function fsDefaultWidths() {
+        return { utc: 86, db: 38, dt: 48, freq: 45, msg: 140, dist: 58, dxcc: 200, az: 52 }
+    }
+    // Metadati statici per colonna (label, allineamento, flessibile, nascondibile, min px).
+    function fsColMeta(id) {
+        switch (id) {
+        case "utc":  return { label: "UTC",     align: "left",  fill: false, canHide: true,  minW: 44 }
+        case "db":   return { label: "dB",      align: "right", fill: false, canHide: true,  minW: 24 }
+        case "dt":   return { label: "DT",      align: "right", fill: false, canHide: true,  minW: 28 }
+        case "freq": return { label: "Freq",    align: "right", fill: false, canHide: true,  minW: 30 }
+        case "msg":  return { label: "Message", align: "left",  fill: true,  canHide: false, minW: 72 }
+        case "dist": return { label: "Dist",    align: "right", fill: false, canHide: true,  minW: 36 }
+        case "dxcc": return { label: "DXCC",    align: "right", fill: false, canHide: true,  minW: 90 }
+        case "az":   return { label: "Az",      align: "right", fill: false, canHide: true,  minW: 34 }
+        }
+        return { label: id, align: "left", fill: false, canHide: true, minW: 30 }
+    }
+
+    // Colonne effettivamente visibili (filtro vis + gate DXCC/Az quando il
+    // lookup DXCC è disattivato, come da comportamento storico).
+    readonly property var fsVisibleColumns: {
+        var out = []
+        var arr = fsColumnOrder || []
+        for (var i = 0; i < arr.length; ++i) {
+            var c = arr[i]
+            if (!c || !c.vis) continue
+            if ((c.id === "dxcc" || c.id === "az") && !mainWindow.showDxccInfo) continue
+            out.push(c)
+        }
+        return out
+    }
+
+    function fsColWidth(id) {
+        var m = fsColWidthMap || {}
+        var w = Number(m[id])
+        if (!isFinite(w) || w <= 0)
+            w = Number(fsDefaultWidths()[id]) || 48
+        return Math.max(fsColMeta(id).minW, Math.round(w))
+    }
+    function fsColVisible(id) {
+        var arr = fsColumnOrder || []
+        for (var i = 0; i < arr.length; ++i)
+            if (arr[i] && arr[i].id === id) return !!arr[i].vis
+        return false
+    }
+    function fsColIndex(id) {
+        var arr = fsColumnOrder || []
+        for (var i = 0; i < arr.length; ++i)
+            if (arr[i] && arr[i].id === id) return i
+        return -1
+    }
+    function fsCanMove(id, dir) {
+        var i = fsColIndex(id)
+        if (i < 0) return false
+        var j = i + dir
+        return j >= 0 && j < (fsColumnOrder ? fsColumnOrder.length : 0)
+    }
+
+    function fsLoadColumns() {
+        var order = fsDefaultOrder()
+        var widths = fsDefaultWidths()
+        try {
+            var rawO = safeBridgeSetting("uiFullSpectrumColumns", "")
+            if (rawO) {
+                var savedO = JSON.parse(rawO)
+                if (Array.isArray(savedO) && savedO.length) {
+                    var def = fsDefaultOrder()
+                    var known = {}
+                    for (var d = 0; d < def.length; ++d) known[def[d].id] = true
+                    var merged = []
+                    var seen = {}
+                    for (var s = 0; s < savedO.length; ++s) {
+                        var so = savedO[s]
+                        if (so && so.id && known[so.id] && !seen[so.id]) {
+                            var vis = (so.vis === false) ? false : true
+                            if (so.id === "msg") vis = true   // Message mai nascondibile
+                            merged.push({ id: so.id, vis: vis })
+                            seen[so.id] = true
+                        }
+                    }
+                    for (var k = 0; k < def.length; ++k)
+                        if (!seen[def[k].id]) merged.push(def[k])
+                    if (merged.length) order = merged
+                }
+            }
+        } catch (e1) { console.log("fsLoadColumns order parse error: " + e1) }
+        try {
+            var rawW = safeBridgeSetting("uiFullSpectrumColWidths", "")
+            if (rawW) {
+                var savedW = JSON.parse(rawW)
+                if (savedW && typeof savedW === "object") {
+                    var def2 = fsDefaultWidths()
+                    for (var key in def2) {
+                        var wv = Number(savedW[key])
+                        if (isFinite(wv) && wv > 0)
+                            widths[key] = Math.max(fsColMeta(key).minW, Math.round(wv))
+                    }
+                }
+            }
+        } catch (e2) { console.log("fsLoadColumns widths parse error: " + e2) }
+
+        fsColumnOrder = order
+        fsColWidthMap = widths
+        fsColWidthVer++
+        fsNewestFirst = settingBool("uiFullSpectrumNewestFirst", false)
+    }
+
+    function fsPersistOrder() {
+        if (!bridge) return
+        bridge.setSetting("uiFullSpectrumColumns", JSON.stringify(fsColumnOrder))
+        if (!windowStateRestoreInProgress) scheduleSave()
+    }
+    function fsPersistWidths() {
+        if (!bridge) return
+        bridge.setSetting("uiFullSpectrumColWidths", JSON.stringify(fsColWidthMap))
+        if (!windowStateRestoreInProgress) scheduleSave()
+    }
+
+    function fsSetColumnVisible(id, on) {
+        var meta = fsColMeta(id)
+        if (!meta.canHide && !on) return
+        var arr = (fsColumnOrder || []).slice()
+        var i = fsColIndex(id)
+        if (i < 0) return
+        arr[i] = { id: arr[i].id, vis: !!on }
+        fsColumnOrder = arr
+        fsPersistOrder()
+    }
+    function fsToggleColumnVisible(id) { fsSetColumnVisible(id, !fsColVisible(id)) }
+
+    function fsMoveColumn(id, dir) {
+        if (!fsCanMove(id, dir)) return
+        var arr = (fsColumnOrder || []).slice()
+        var i = fsColIndex(id)
+        var j = i + dir
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp
+        fsColumnOrder = arr
+        fsPersistOrder()
+    }
+
+    function fsSetColumnWidth(id, w) {
+        var meta = fsColMeta(id)
+        if (meta.fill) return
+        var m = {}
+        var src = fsColWidthMap || {}
+        for (var key in src) m[key] = src[key]
+        m[id] = Math.max(meta.minW, Math.round(w))
+        fsColWidthMap = m
+        fsColWidthVer++          // forza re-eval delle preferredWidth senza ricreare i Repeater
+    }
+
+    function fsResetColumns() {
+        fsColumnOrder = fsDefaultOrder()
+        fsColWidthMap = fsDefaultWidths()
+        fsColWidthVer++
+        fsPersistOrder()
+        fsPersistWidths()
+    }
+    function fsToggleNewestFirst() {
+        fsNewestFirst = !fsNewestFirst
+        persistUiSetting("uiFullSpectrumNewestFirst", fsNewestFirst)
+        if (typeof evenPeriodList !== "undefined" && evenPeriodList) evenPeriodList.forceTailFollow()
+        if (typeof period1FloatingList !== "undefined" && period1FloatingList) period1FloatingList.forceTailFollow()
+    }
+
+    // Risolutori contenuto cella. SEMPRE null-safe (guard !entry) per evitare il
+    // TypeError flood ~46/s durante i model-swap transient (lezione 1.0.205).
+    function fsCellText(entry, id) {
+        if (!entry) return ""
+        switch (id) {
+        case "utc":  return entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time)
+        case "db":   return entry.db || ""
+        case "dt":   return entry.dt || ""
+        case "freq": return entry.freq || ""
+        case "msg":  return entry.displayMessage || entry.message || ""
+        case "dist": return decodePanel.distanceText(entry)
+        case "dxcc": return entry.dxCountry || ""
+        case "az":   return formatBearingDegrees(entry.dxBearing)
+        }
+        return ""
+    }
+    function fsCellColor(entry, id) {
+        if (!entry) return boostedDecodeTextColor(textSecondary)
+        switch (id) {
+        case "msg":  return fullSpectrumTextColor(entry)
+        case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : (decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan))
+        case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
+        case "dxcc": return boostedDecodeTextColor(entry.dxCountry ? effectiveDecodeColor("colorDXEntity") : textSecondary)
+        case "az":   return boostedDecodeTextColor(secondaryCyan)
+        }
+        return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary)
+    }
+    function fsCellBold(entry, id) {
+        if (!entry) return false
+        switch (id) {
+        case "db":   return entry.isTx === true
+        case "freq": return (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry)
+        case "msg":  return decodePanel.decodeEntryBold(entry)
+        }
+        return false
     }
 
     // Dock zones positions
@@ -7015,56 +7249,102 @@ ApplicationWindow {
                                     }
                                 }
 
-                                // Column headers
+                                // Column headers — data-driven (larghezza/visibilità/ordine
+                                // configurabili). Tasto destro = menu colonne; trascina il
+                                // bordo destro di una colonna per ridimensionarla.
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 20
                                     color: Qt.rgba(76/255, 175/255, 80/255, 0.2)
                                     radius: 2
 
+                                    Menu {
+                                        id: fsHeaderMenuEmbedded
+                                        property string targetId: ""
+                                        MenuItem { text: "◀  Sposta a sinistra"; enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, -1) }
+                                        MenuItem { text: "Sposta a destra  ▶"; enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, 1) }
+                                        MenuItem { text: "Nascondi questa colonna"; enabled: mainWindow.fsColMeta(fsHeaderMenuEmbedded.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuEmbedded.targetId, false) }
+                                        MenuSeparator {}
+                                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
+                                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
+                                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
+                                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
+                                        MenuItem { text: "✓  Message"; enabled: false }
+                                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
+                                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
+                                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
+                                        MenuSeparator {}
+                                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + "Più recenti in alto"; onTriggered: mainWindow.fsToggleNewestFirst() }
+                                        MenuSeparator {}
+                                        MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
+                                    }
+
                                     RowLayout {
                                         anchors.fill: parent
                                         anchors.leftMargin: 8
                                         anchors.rightMargin: 8
-                                        spacing: 0
+                                        spacing: 6
 
-                                        Text { text: "UTC"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.preferredWidth: period1Panel.utcColumnWidth }
-                                        Text { text: "dB"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
-                                        Item { Layout.preferredWidth: period1Panel.dbDtGapWidth }
-                                        Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
-                                        Item { Layout.preferredWidth: period1Panel.dtFreqGapWidth }
-                                        Text { text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
-                                        Item { Layout.preferredWidth: period1Panel.gapColumnWidth }
-                                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.fillWidth: true }
-                                        Text { visible: period1Panel.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
-                                        Item {
-                                            visible: period1Panel.dxccColumnWidth > 0
-                                            Layout.preferredWidth: period1Panel.dxccColumnWidth
-                                            Layout.fillHeight: true
-                                            Text {
-                                                anchors.fill: parent
-                                                text: "DXCC"
-                                                font.family: mainWindow.decodedTextFontFamily
-                                                font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs)
-                                                font.bold: true
-                                                color: bridge.themeManager.successColor
-                                                horizontalAlignment: Text.AlignRight
-                                                verticalAlignment: Text.AlignVCenter
-                                            }
-                                        }
-                                        Item {
-                                            visible: period1Panel.azColumnWidth > 0
-                                            Layout.preferredWidth: period1Panel.azColumnWidth
-                                            Layout.fillHeight: true
-                                            Text {
-                                                anchors.fill: parent
-                                                text: "Az"
-                                                font.family: mainWindow.decodedTextFontFamily
-                                                font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs)
-                                                font.bold: true
-                                                color: bridge.themeManager.successColor
-                                                horizontalAlignment: Text.AlignRight
-                                                verticalAlignment: Text.AlignVCenter
+                                        Repeater {
+                                            model: mainWindow.fsVisibleColumns
+                                            delegate: Item {
+                                                id: fsHCell
+                                                readonly property var col: modelData
+                                                readonly property var meta: mainWindow.fsColMeta(col.id)
+                                                Layout.fillWidth: meta.fill
+                                                Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
+                                                Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                                Layout.fillHeight: true
+
+                                                Text {
+                                                    anchors.fill: parent
+                                                    anchors.rightMargin: fsHCell.meta.fill ? 0 : 5
+                                                    text: fsHCell.meta.label
+                                                    font.family: mainWindow.decodedTextFontFamily
+                                                    font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs)
+                                                    font.bold: true
+                                                    color: bridge.themeManager.successColor
+                                                    horizontalAlignment: fsHCell.meta.align === "right" ? Text.AlignRight : Text.AlignLeft
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    acceptedButtons: Qt.RightButton
+                                                    onClicked: { fsHeaderMenuEmbedded.targetId = fsHCell.col.id; fsHeaderMenuEmbedded.popup() }
+                                                }
+
+                                                MouseArea {
+                                                    visible: !fsHCell.meta.fill
+                                                    enabled: !fsHCell.meta.fill
+                                                    width: 9
+                                                    anchors.right: parent.right
+                                                    anchors.top: parent.top
+                                                    anchors.bottom: parent.bottom
+                                                    cursorShape: Qt.SplitHCursor
+                                                    acceptedButtons: Qt.LeftButton
+                                                    preventStealing: true
+                                                    property real pressSceneX: 0
+                                                    property int pressW: 0
+                                                    onPressed: function(m) {
+                                                        pressSceneX = mapToItem(null, m.x, m.y).x
+                                                        pressW = mainWindow.fsColWidth(fsHCell.col.id)
+                                                    }
+                                                    onPositionChanged: function(m) {
+                                                        if (!pressed) return
+                                                        var dx = mapToItem(null, m.x, m.y).x - pressSceneX
+                                                        mainWindow.fsSetColumnWidth(fsHCell.col.id, pressW + dx)
+                                                    }
+                                                    onReleased: mainWindow.fsPersistWidths()
+                                                    Rectangle {
+                                                        anchors.right: parent.right
+                                                        anchors.verticalCenter: parent.verticalCenter
+                                                        width: 1
+                                                        height: Math.round(parent.height * 0.6)
+                                                        color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.35)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -7095,6 +7375,7 @@ ApplicationWindow {
                                         cacheBuffer: 600
                                         reuseItems: true
                                         interactive: true
+                                        verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
                                         property bool followTail: true
                                         property bool tailFollowPending: false
 	                                        property bool tailFollowQueued: false
@@ -7103,8 +7384,9 @@ ApplicationWindow {
 	                                        // decode sono arrivati dopo la perdita di tail-follow.
 		                                        property int pendingNewDecodes: 0
 		                                        function isNearTail() {
-		                                            return contentHeight <= height + 2
-		                                                || contentY >= tailContentY() - 48
+		                                            if (contentHeight <= height + 2) return true
+		                                            if (mainWindow.fsNewestFirst) return contentY <= originY + 48
+		                                            return contentY >= tailContentY() - 48
 		                                        }
 	                                        function updateFollowTail() {
 	                                            if (tailFollowPending)
@@ -7114,6 +7396,7 @@ ApplicationWindow {
 	                                            if (followTail) evenPeriodList.pendingNewDecodes = 0
 	                                        }
 	                                        function tailContentY() {
+	                                            if (mainWindow.fsNewestFirst) return originY
 	                                            var bottom = originY + contentHeight - height
 	                                            return Math.max(originY, bottom)
 	                                        }
@@ -7249,6 +7532,7 @@ NumberAnimation {
                                         }
 
 	                                        delegate: Rectangle {
+	                                            id: fsRowEmbedded
 	                                            // 1.0.155: separator meno invasivo — riga sottile, no label.
 	                                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
 	                                            readonly property var entry: modelData || ({})
@@ -7326,53 +7610,40 @@ NumberAnimation {
                                                 }
                                             }
 
-	                                            RowLayout {
-	                                                visible: !parent.isPeriodSeparator
-	                                                anchors.fill: parent
-	                                                anchors.leftMargin: 6
-	                                                anchors.rightMargin: 6
-	                                                spacing: 0
+                                            RowLayout {
+                                                visible: !parent.isPeriodSeparator
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 6
+                                                anchors.rightMargin: 6
+                                                spacing: 6
 
-		                                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: period1Panel.utcColumnWidth }
-		                                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary)); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dbColumnWidth }
-                                                Item { Layout.preferredWidth: period1Panel.dbDtGapWidth }
-		                                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.dtColumnWidth }
-                                                Item { Layout.preferredWidth: period1Panel.dtFreqGapWidth }
-		                                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan); font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.freqColumnWidth }
-                                                Item { Layout.preferredWidth: period1Panel.gapColumnWidth }
-	                                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; Layout.minimumWidth: period1Panel.messageMinWidth; elide: messageElideMode(entry.displayMessage || entry.message) }
-		                                                Text { visible: period1Panel.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1Panel.distanceColumnWidth }
-                                                Item {
-                                                    visible: period1Panel.dxccColumnWidth > 0
-                                                    Layout.preferredWidth: period1Panel.dxccColumnWidth
-                                                    Layout.fillHeight: true
-                                                    clip: true
-                                                    Text {
-                                                        anchors.fill: parent
-	                                                        text: entry.dxCountry || ""
-                                                        font.family: mainWindow.decodedTextFontFamily
-                                                        font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-		                                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? mainWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
-                                                        horizontalAlignment: Text.AlignRight
-                                                        verticalAlignment: Text.AlignVCenter
-                                                        elide: Text.ElideRight
-                                                        fontSizeMode: Text.HorizontalFit
-                                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
-                                                        maximumLineCount: 1
-                                                    }
-                                                }
-                                                Item {
-                                                    visible: period1Panel.azColumnWidth > 0
-                                                    Layout.preferredWidth: period1Panel.azColumnWidth
-                                                    Layout.fillHeight: true
-                                                    Text {
-                                                        anchors.fill: parent
-	                                                        text: formatBearingDegrees(entry.dxBearing)
-                                                        font.family: mainWindow.decodedTextFontFamily
-                                                        font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-	                                                        color: mainWindow.boostedDecodeTextColor(secondaryCyan)
-                                                        horizontalAlignment: Text.AlignRight
-                                                        verticalAlignment: Text.AlignVCenter
+                                                Repeater {
+                                                    model: mainWindow.fsVisibleColumns
+                                                    delegate: Item {
+                                                        id: fsCellE
+                                                        readonly property var col: modelData
+                                                        readonly property var meta: mainWindow.fsColMeta(col.id)
+                                                        Layout.fillWidth: meta.fill
+                                                        Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
+                                                        Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                                        Layout.fillHeight: true
+                                                        clip: col.id === "dxcc"
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            text: mainWindow.fsCellText(fsRowEmbedded.entry, fsCellE.col.id)
+                                                            color: mainWindow.fsCellColor(fsRowEmbedded.entry, fsCellE.col.id)
+                                                            font.bold: mainWindow.fsCellBold(fsRowEmbedded.entry, fsCellE.col.id)
+                                                            font.strikeout: fsCellE.col.id === "msg" ? decodePanel.decodeEntryStrikeout(fsRowEmbedded.entry) : false
+                                                            font.family: mainWindow.decodedTextFontFamily
+                                                            font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
+                                                            horizontalAlignment: fsCellE.meta.align === "right" ? Text.AlignRight : Text.AlignLeft
+                                                            verticalAlignment: Text.AlignVCenter
+                                                            maximumLineCount: 1
+                                                            elide: fsCellE.col.id === "msg" ? messageElideMode(fsRowEmbedded.entry.displayMessage || fsRowEmbedded.entry.message)
+                                                                 : (fsCellE.col.id === "dxcc" ? Text.ElideRight : Text.ElideNone)
+                                                            fontSizeMode: fsCellE.col.id === "dxcc" ? Text.HorizontalFit : Text.FixedSize
+                                                            minimumPixelSize: fsCellE.col.id === "dxcc" ? Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65)) : 0
+                                                        }
                                                     }
                                                 }
                                             }
@@ -11762,24 +12033,93 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 	                    color: Qt.rgba(76/255, 175/255, 80/255, 0.2)
 	                    radius: 2
 
-	                    RowLayout {
-	                        anchors.fill: parent
-		                        anchors.leftMargin: 8
-		                        anchors.rightMargin: 8
-	                        spacing: 0
+                    Menu {
+                        id: fsHeaderMenuFloating
+                        property string targetId: ""
+                        MenuItem { text: "◀  Sposta a sinistra"; enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, -1) }
+                        MenuItem { text: "Sposta a destra  ▶"; enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, 1) }
+                        MenuItem { text: "Nascondi questa colonna"; enabled: mainWindow.fsColMeta(fsHeaderMenuFloating.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuFloating.targetId, false) }
+                        MenuSeparator {}
+                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
+                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
+                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
+                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
+                        MenuItem { text: "✓  Message"; enabled: false }
+                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
+                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
+                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
+                        MenuSeparator {}
+                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + "Più recenti in alto"; onTriggered: mainWindow.fsToggleNewestFirst() }
+                        MenuSeparator {}
+                        MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
+                    }
 
-	                        Text { text: "UTC"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
-	                        Text { text: "dB"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
-	                        Item { Layout.preferredWidth: period1FloatingWindow.dbDtGapWidth }
-	                        Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
-	                        Item { Layout.preferredWidth: period1FloatingWindow.dtFreqGapWidth }
-	                        Text { text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
-	                        Item { Layout.preferredWidth: period1FloatingWindow.gapColumnWidth }
-	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; Layout.fillWidth: true }
-	                        Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
-	                        Text { visible: mainWindow.showDxccInfo; text: "DXCC"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth }
-	                        Text { visible: mainWindow.showDxccInfo && period1FloatingWindow.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: bridge.themeManager.successColor; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
-	                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 6
+
+                        Repeater {
+                            model: mainWindow.fsVisibleColumns
+                            delegate: Item {
+                                id: fsHCellF
+                                readonly property var col: modelData
+                                readonly property var meta: mainWindow.fsColMeta(col.id)
+                                Layout.fillWidth: meta.fill
+                                Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
+                                Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                Layout.fillHeight: true
+                                Text {
+                                    anchors.fill: parent
+                                    anchors.rightMargin: fsHCellF.meta.fill ? 0 : 5
+                                    text: fsHCellF.meta.label
+                                    font.family: mainWindow.decodedTextFontFamily
+                                    font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs)
+                                    font.bold: true
+                                    color: bridge.themeManager.successColor
+                                    horizontalAlignment: fsHCellF.meta.align === "right" ? Text.AlignRight : Text.AlignLeft
+                                    verticalAlignment: Text.AlignVCenter
+                                    elide: Text.ElideRight
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.RightButton
+                                    onClicked: { fsHeaderMenuFloating.targetId = fsHCellF.col.id; fsHeaderMenuFloating.popup() }
+                                }
+                                MouseArea {
+                                    visible: !fsHCellF.meta.fill
+                                    enabled: !fsHCellF.meta.fill
+                                    width: 9
+                                    anchors.right: parent.right
+                                    anchors.top: parent.top
+                                    anchors.bottom: parent.bottom
+                                    cursorShape: Qt.SplitHCursor
+                                    acceptedButtons: Qt.LeftButton
+                                    preventStealing: true
+                                    property real pressSceneX: 0
+                                    property int pressW: 0
+                                    onPressed: function(m) {
+                                        pressSceneX = mapToItem(null, m.x, m.y).x
+                                        pressW = mainWindow.fsColWidth(fsHCellF.col.id)
+                                    }
+                                    onPositionChanged: function(m) {
+                                        if (!pressed) return
+                                        var dx = mapToItem(null, m.x, m.y).x - pressSceneX
+                                        mainWindow.fsSetColumnWidth(fsHCellF.col.id, pressW + dx)
+                                    }
+                                    onReleased: mainWindow.fsPersistWidths()
+                                    Rectangle {
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 1
+                                        height: Math.round(parent.height * 0.6)
+                                        color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.35)
+                                    }
+                                }
+                            }
+                        }
+                    }
 	                }
 
 	                // Content - Decode List
@@ -11801,14 +12141,16 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
                         reuseItems: true
                         interactive: true
+                        verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
                         property bool followTail: true
                         property bool tailFollowPending: false
 	                        property bool tailFollowQueued: false
 	                        // 1.0.231 — counter pending decodes (floating mode)
 		                        property int pendingNewDecodes: 0
 		                        function isNearTail() {
-		                            return contentHeight <= height + 2
-		                                || contentY >= tailContentY() - 48
+		                            if (contentHeight <= height + 2) return true
+		                            if (mainWindow.fsNewestFirst) return contentY <= originY + 48
+		                            return contentY >= tailContentY() - 48
 		                        }
                         function updateFollowTail() {
                             if (tailFollowPending)
@@ -11817,6 +12159,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                             if (followTail) period1FloatingList.pendingNewDecodes = 0
                         }
 	                        function tailContentY() {
+	                            if (mainWindow.fsNewestFirst) return originY
 	                            var bottom = originY + contentHeight - height
 	                            return Math.max(originY, bottom)
 	                        }
@@ -11940,6 +12283,7 @@ NumberAnimation {
                         }
 
 		                        delegate: Rectangle {
+                            id: fsRowFloating
 			                            width: parent ? parent.width : 100
 		                            readonly property bool isPeriodSeparator: !!(modelData && modelData.isSeparator === true)
 		                            readonly property var entry: modelData || ({})
@@ -11970,40 +12314,41 @@ NumberAnimation {
 	                                color: Qt.rgba(0.85, 0.25, 0.25, 0.55)
 	                            }
 
-	                            RowLayout {
-	                                visible: !parent.isPeriodSeparator
-	                                anchors.fill: parent
-	                                anchors.margins: 4
-		                                spacing: 0
-			                                Text { text: entry.formattedTime || decodePanel.formatUtcForDisplay(entry.time); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); Layout.preferredWidth: period1FloatingWindow.utcColumnWidth }
-			                                Text { text: entry.db || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary)); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dbColumnWidth }
-	                                Item { Layout.preferredWidth: period1FloatingWindow.dbDtGapWidth }
-			                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.dtColumnWidth }
-	                                Item { Layout.preferredWidth: period1FloatingWindow.dtFreqGapWidth }
-			                                Text { text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan); font.bold: (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.freqColumnWidth }
-	                                Item { Layout.preferredWidth: period1FloatingWindow.gapColumnWidth }
-		                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: mainWindow.fullSpectrumTextColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
-			                                Text { visible: period1FloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.distanceColumnWidth }
-	                                Item {
-	                                    visible: mainWindow.showDxccInfo
-	                                    Layout.preferredWidth: period1FloatingWindow.dxccColumnWidth
-	                                    Layout.fillHeight: true
-	                                    clip: true
-	                                    Text {
-	                                        anchors.fill: parent
-		                                        text: entry.dxCountry || ""
-	                                        font.family: mainWindow.decodedTextFontFamily
-	                                        font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
-	                                        fontSizeMode: Text.HorizontalFit
-	                                        minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
-	                                        maximumLineCount: 1
-			                                        color: mainWindow.boostedDecodeTextColor(entry.dxCountry ? mainWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
-	                                        horizontalAlignment: Text.AlignRight
-	                                        verticalAlignment: Text.AlignVCenter
-	                                        elide: Text.ElideRight
-	                                    }
-	                                }
-			                                Text { visible: mainWindow.showDxccInfo && period1FloatingWindow.azColumnWidth > 0; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: period1FloatingWindow.azColumnWidth }
+                            RowLayout {
+                                visible: !parent.isPeriodSeparator
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                spacing: 6
+
+                                Repeater {
+                                    model: mainWindow.fsVisibleColumns
+                                    delegate: Item {
+                                        id: fsCellF
+                                        readonly property var col: modelData
+                                        readonly property var meta: mainWindow.fsColMeta(col.id)
+                                        Layout.fillWidth: meta.fill
+                                        Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
+                                        Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                        Layout.fillHeight: true
+                                        clip: col.id === "dxcc"
+                                        Text {
+                                            anchors.fill: parent
+                                            text: mainWindow.fsCellText(fsRowFloating.entry, fsCellF.col.id)
+                                            color: mainWindow.fsCellColor(fsRowFloating.entry, fsCellF.col.id)
+                                            font.bold: mainWindow.fsCellBold(fsRowFloating.entry, fsCellF.col.id)
+                                            font.strikeout: fsCellF.col.id === "msg" ? decodePanel.decodeEntryStrikeout(fsRowFloating.entry) : false
+                                            font.family: mainWindow.decodedTextFontFamily
+                                            font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
+                                            horizontalAlignment: fsCellF.meta.align === "right" ? Text.AlignRight : Text.AlignLeft
+                                            verticalAlignment: Text.AlignVCenter
+                                            maximumLineCount: 1
+                                            elide: fsCellF.col.id === "msg" ? messageElideMode(fsRowFloating.entry.displayMessage || fsRowFloating.entry.message)
+                                                 : (fsCellF.col.id === "dxcc" ? Text.ElideRight : Text.ElideNone)
+                                            fontSizeMode: fsCellF.col.id === "dxcc" ? Text.HorizontalFit : Text.FixedSize
+                                            minimumPixelSize: fsCellF.col.id === "dxcc" ? Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65)) : 0
+                                        }
+                                    }
+                                }
                             }
 
 	                            MouseArea {
