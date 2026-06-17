@@ -4426,7 +4426,7 @@ Dialog {
 
                         Text { text: qsTr("Miles:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
-                            checked: bridge.getSetting("Miles", false)
+                            checked: boolSetting("Miles", false)
                             onCheckedChanged: bridge.setSetting("Miles", checked)
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }

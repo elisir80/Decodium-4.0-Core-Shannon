@@ -22,12 +22,28 @@ Rectangle {
     property var worldMap: worldMapLoader.item
     property bool gpuLiveMapEnabled: engine ? !!engine.getSetting("LiveMapUseGpu", true) : true
 
+    function coerceBool(value, fallback) {
+        if (value === undefined || value === null)
+            return !!fallback
+        if (typeof value === "boolean")
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off")
+            return false
+        return !!fallback
+    }
+
     function syncMapSettings() {
         if (!engine || !worldMap)
             return
         worldMap.setHomeGrid(engine.grid)
         worldMap.setGreylineEnabled(!!engine.getSetting("ShowGreyline", true))
-        worldMap.setDistanceInMiles(!!engine.getSetting("Miles", false))
+        worldMap.setDistanceInMiles(root.coerceBool(engine.getSetting("Miles", false), false))
     }
 
     function syncTxState() {
@@ -404,7 +420,7 @@ Rectangle {
             if (key === "ShowGreyline" || key === "MapShowGreyline") {
                 worldMap.setGreylineEnabled(!!value)
             } else if (key === "Miles") {
-                worldMap.setDistanceInMiles(!!value)
+                worldMap.setDistanceInMiles(root.coerceBool(value, false))
             } else if (key === "WorldMapDisplayed" && root.visible) {
                 root.scheduleRebuild()
             }

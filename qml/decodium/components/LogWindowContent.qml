@@ -156,6 +156,30 @@ Rectangle {
         }
     }
 
+    function selectedLogbookProfile() {
+        if (!logbookProfiles || logbookProfiles.length === 0)
+            return ({})
+        var idx = logbookCombo ? logbookCombo.currentIndex : -1
+        if (idx < 0 || idx >= logbookProfiles.length) {
+            for (var i = 0; i < logbookProfiles.length; ++i) {
+                var candidate = logbookProfiles[i] || ({})
+                if (candidate.active)
+                    return candidate
+            }
+            return logbookProfiles[0] || ({})
+        }
+        return logbookProfiles[idx] || ({})
+    }
+
+    function openDeleteLogbookDialog() {
+        var profile = selectedLogbookProfile()
+        if (!profile.path)
+            return
+        deleteLogbookDialog.profile = profile
+        deleteLogbookFileCheck.checked = true
+        deleteLogbookDialog.open()
+    }
+
     function statsFromRows(rows) {
         var calls = ({})
         var grids = ({})
@@ -236,6 +260,61 @@ Rectangle {
                 clearSelection()
                 refreshLogbookProfiles()
                 refreshLog()
+            }
+        }
+    }
+
+    Dialog {
+        id: deleteLogbookDialog
+        title: "Cancella logbook"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        property var profile: ({})
+
+        ColumnLayout {
+            width: 380
+            spacing: 10
+            Label {
+                Layout.fillWidth: true
+                text: "Stai per cancellare il logbook selezionato."
+                color: accentOrange
+                font.pixelSize: 13
+                font.bold: true
+                wrapMode: Text.WordWrap
+            }
+            Label {
+                Layout.fillWidth: true
+                text: "Nome: " + String(deleteLogbookDialog.profile.name || "Logbook")
+                      + "\nPath: " + String(deleteLogbookDialog.profile.path || "")
+                      + "\nQSO: " + String(deleteLogbookDialog.profile.qsoCount || 0)
+                color: textPrimary
+                font.pixelSize: 11
+                wrapMode: Text.WrapAnywhere
+            }
+            CheckBox {
+                id: deleteLogbookFileCheck
+                checked: true
+                text: "Cancella anche il file ADIF dal disco"
+            }
+            Label {
+                Layout.fillWidth: true
+                text: deleteLogbookFileCheck.checked
+                      ? "Operazione distruttiva: il file .adi verra' eliminato. Se questo e' l'ultimo logbook, Decodium creera' un nuovo logbook vuoto."
+                      : "Il file .adi restera' sul disco; verra' rimossa solo l'associazione da Decodium."
+                color: textSecondary
+                font.pixelSize: 10
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        onAccepted: {
+            if (appEngine && appEngine.logManager && deleteLogbookDialog.profile.path) {
+                if (appEngine.logManager.deleteLogbook(deleteLogbookDialog.profile.path, deleteLogbookFileCheck.checked)) {
+                    clearSelection()
+                    refreshLogbookProfiles()
+                    refreshLog()
+                }
             }
         }
     }
@@ -334,6 +413,23 @@ Rectangle {
                     Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 9; font.bold: true; color: accentOrange }
                     MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
                     ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Back up the active logbook"; ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    width: 32; height: 24; radius: 3
+                    color: deleteLogbookMA.containsMouse ? Qt.rgba(255, 70, 90, 0.28) : Qt.rgba(255, 70, 90, 0.08)
+                    border.color: Qt.rgba(255, 70, 90, 0.55)
+                    opacity: logbookProfiles.length > 0 ? 1.0 : 0.45
+                    Text { anchors.centerIn: parent; text: "Del"; font.pixelSize: 9; font.bold: true; color: "#ff465a" }
+                    MouseArea {
+                        id: deleteLogbookMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: logbookProfiles.length > 0
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: logContent.openDeleteLogbookDialog()
+                    }
+                    ToolTip.visible: deleteLogbookMA.containsMouse; ToolTip.text: "Delete selected logbook"; ToolTip.delay: 500
                 }
 
                 Rectangle {

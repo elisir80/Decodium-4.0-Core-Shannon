@@ -47,6 +47,7 @@ Window {
     property int decodeColorRevision: 0
     property bool showDxccInfo: bridge.getSetting("ShowDXCC", true)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
+    property bool displayDistanceInMiles: coerceBool(bridge.getSetting("Miles", false), false)
     readonly property real leftPanelWidth: width * 0.5
     readonly property bool compactBandColumns: leftPanelWidth < 460
     readonly property int bandUtcWidth: compactBandColumns ? 66 : 86
@@ -225,7 +226,33 @@ Window {
                 decodeWindow.highlightOrangeCallsigns = String(value || "")
             else if (key === "HighlightBlueCallsigns" || key === "BlueCallsigns")
                 decodeWindow.highlightBlueCallsigns = String(value || "")
+            else if (key === "Miles")
+                decodeWindow.displayDistanceInMiles = decodeWindow.coerceBool(value, false)
         }
+    }
+
+    function coerceBool(value, fallback) {
+        if (value === undefined || value === null)
+            return !!fallback
+        if (typeof value === "boolean")
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off")
+            return false
+        return !!fallback
+    }
+
+    function formatDistanceText(distanceKm, withSpace) {
+        var km = Number(distanceKm)
+        if (!isFinite(km) || km <= 0)
+            return ""
+        var value = displayDistanceInMiles ? km * 0.621371192 : km
+        return Math.round(value) + (withSpace ? " " : "") + (displayDistanceInMiles ? "mi" : "km")
     }
 
     // Shannon-compatible color scheme
@@ -1804,7 +1831,7 @@ Component.onCompleted: {
                                     Text {
                                         visible: !decodeWindow.compactRxColumns
                                         text: modelData.dxDistance > 0 ?
-                                              Math.round(modelData.dxDistance) + "km" : ""
+                                              decodeWindow.formatDistanceText(modelData.dxDistance, false) : ""
                                         font.pixelSize: 9
 	                                        color: decodeWindow.boostedDecodeTextColor((bridge && bridge.themeManager) ? bridge.themeManager.textSecondary : "#666688")
                                         Layout.preferredWidth: decodeWindow.rxDistanceWidth

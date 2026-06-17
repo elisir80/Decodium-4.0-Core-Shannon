@@ -5453,6 +5453,18 @@ void MainWindow::legacySetNextLogPromptFields(QString const& comment,
   }
 }
 
+void MainWindow::legacySetNextLogPromptTimes(QDateTime const& timeOnUtc,
+                                             QDateTime const& timeOffUtc,
+                                             bool valid)
+{
+  m_nextLogPromptTimesValid = valid && timeOnUtc.isValid ();
+  m_nextLogPromptOn = m_nextLogPromptTimesValid ? timeOnUtc.toUTC () : QDateTime {};
+  m_nextLogPromptOff = m_nextLogPromptTimesValid && timeOffUtc.isValid () ? timeOffUtc.toUTC () : m_nextLogPromptOn;
+  if (m_nextLogPromptTimesValid && m_nextLogPromptOff < m_nextLogPromptOn) {
+    m_nextLogPromptOff = m_nextLogPromptOn;
+  }
+}
+
 void MainWindow::legacySetWaterfallPalette(QString const& palette)
 {
   if (palette.isEmpty ())
@@ -15675,6 +15687,10 @@ void MainWindow::auto_sequence (DecodedText const& message, unsigned start_toler
       m_pendingAutoLogXSent = m_lateAutoLogXSent;
       m_pendingAutoLogXRcvd = m_lateAutoLogXRcvd;
       m_pendingAutoLogOn = m_lateAutoLogOn;
+      m_pendingAutoLogOff = QDateTime::currentDateTimeUtc ();
+      if (m_pendingAutoLogOn.isValid () && m_pendingAutoLogOff < m_pendingAutoLogOn) {
+        m_pendingAutoLogOff = m_pendingAutoLogOn;
+      }
       m_pendingAutoLogDialFreq = m_lateAutoLogDialFreq;
       removeCallerFromQueue (latePartnerBase);
       debugAutoCq ("late-signoff-log",
@@ -19684,6 +19700,10 @@ void MainWindow::capturePendingAutoLogSnapshot ()
   m_pendingAutoLogXSent = m_xSent;
   m_pendingAutoLogXRcvd = m_xRcvd;
   m_pendingAutoLogOn = m_dateTimeQSOOn;
+  m_pendingAutoLogOff = QDateTime::currentDateTimeUtc ();
+  if (m_pendingAutoLogOn.isValid () && m_pendingAutoLogOff < m_pendingAutoLogOn) {
+    m_pendingAutoLogOff = m_pendingAutoLogOn;
+  }
   m_pendingAutoLogDialFreq = m_freqNominal + ui->TxFreqSpinBox->value();
 }
 
@@ -19697,6 +19717,7 @@ void MainWindow::clearPendingAutoLogSnapshot ()
   m_pendingAutoLogXSent.clear ();
   m_pendingAutoLogXRcvd.clear ();
   m_pendingAutoLogOn = QDateTime {};
+  m_pendingAutoLogOff = QDateTime {};
   m_pendingAutoLogDialFreq = 0;
 }
 
@@ -19722,6 +19743,10 @@ void MainWindow::armLateAutoLogSnapshot ()
   m_lateAutoLogXSent = m_xSent;
   m_lateAutoLogXRcvd = m_xRcvd;
   m_lateAutoLogOn = m_dateTimeQSOOn;
+  m_lateAutoLogOff = QDateTime::currentDateTimeUtc ();
+  if (m_lateAutoLogOn.isValid () && m_lateAutoLogOff < m_lateAutoLogOn) {
+    m_lateAutoLogOff = m_lateAutoLogOn;
+  }
   m_lateAutoLogDialFreq = m_freqNominal + ui->TxFreqSpinBox->value ();
   m_lateAutoLogExpires = QDateTime::currentDateTimeUtc ().addSecs (kLateAutoLogGraceWindowSeconds);
 
@@ -19742,6 +19767,7 @@ void MainWindow::clearLateAutoLogSnapshot ()
   m_lateAutoLogXSent.clear ();
   m_lateAutoLogXRcvd.clear ();
   m_lateAutoLogOn = QDateTime {};
+  m_lateAutoLogOff = QDateTime {};
   m_lateAutoLogDialFreq = 0;
   m_lateAutoLogExpires = QDateTime {};
 }
@@ -21310,6 +21336,7 @@ void MainWindow::on_logQSOButton_clicked()                 //Log QSO button
   QString logXSent = m_xSent;
   QString logXRcvd = m_xRcvd;
   QDateTime logDateTimeQSOOn = m_dateTimeQSOOn;
+  QDateTime logDateTimeQSOOff;
   Frequency logDialFreq = m_freqNominal + ui->TxFreqSpinBox->value();
 
   auto applyPendingAutoLogSnapshot = [&] {
@@ -21321,6 +21348,7 @@ void MainWindow::on_logQSOButton_clicked()                 //Log QSO button
     if (!m_pendingAutoLogXSent.isEmpty()) logXSent = m_pendingAutoLogXSent;
     if (!m_pendingAutoLogXRcvd.isEmpty()) logXRcvd = m_pendingAutoLogXRcvd;
     if (m_pendingAutoLogOn.isValid()) logDateTimeQSOOn = m_pendingAutoLogOn;
+    if (m_pendingAutoLogOff.isValid()) logDateTimeQSOOff = m_pendingAutoLogOff;
     if (m_pendingAutoLogDialFreq > 0) logDialFreq = m_pendingAutoLogDialFreq;
     return true;
   };
@@ -21338,6 +21366,7 @@ void MainWindow::on_logQSOButton_clicked()                 //Log QSO button
     if (!m_lateAutoLogXSent.isEmpty()) logXSent = m_lateAutoLogXSent;
     if (!m_lateAutoLogXRcvd.isEmpty()) logXRcvd = m_lateAutoLogXRcvd;
     if (m_lateAutoLogOn.isValid()) logDateTimeQSOOn = m_lateAutoLogOn;
+    if (m_lateAutoLogOff.isValid()) logDateTimeQSOOff = m_lateAutoLogOff;
     if (m_lateAutoLogDialFreq > 0) logDialFreq = m_lateAutoLogDialFreq;
     return true;
   };
@@ -21451,8 +21480,18 @@ void MainWindow::on_logQSOButton_clicked()                 //Log QSO button
     logDateTimeQSOOn = now.addSecs (-(m_ntx - 2) * int(m_TRperiod) -
                                    int(fmod(double(now.time().second()),m_TRperiod)));
   }
-  auto dateTimeQSOOff = QDateTime::currentDateTimeUtc();
+  auto dateTimeQSOOff = logDateTimeQSOOff.isValid ()
+      ? logDateTimeQSOOff
+      : QDateTime::currentDateTimeUtc();
   if (dateTimeQSOOff < logDateTimeQSOOn) dateTimeQSOOff = logDateTimeQSOOn;
+  if (m_nextLogPromptTimesValid) {
+    logDateTimeQSOOn = m_nextLogPromptOn.isValid () ? m_nextLogPromptOn.toUTC () : logDateTimeQSOOn;
+    dateTimeQSOOff = m_nextLogPromptOff.isValid () ? m_nextLogPromptOff.toUTC () : logDateTimeQSOOn;
+    if (dateTimeQSOOff < logDateTimeQSOOn) dateTimeQSOOff = logDateTimeQSOOn;
+    m_nextLogPromptTimesValid = false;
+    m_nextLogPromptOn = QDateTime {};
+    m_nextLogPromptOff = QDateTime {};
+  }
   QString grid=logHisGrid;
   if(grid=="....") grid="";
 

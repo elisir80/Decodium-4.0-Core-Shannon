@@ -1011,6 +1011,7 @@ public:
     Q_INVOKABLE void setNextLogClusterSpotEnabled(bool enabled);
     Q_INVOKABLE void setNextLogComment(const QString& comment);
     Q_INVOKABLE void setNextLogGrid(const QString& grid);  // 1.0.302: locator editabile nel log QSO
+    Q_INVOKABLE void setNextLogTimes(const QString& timeOnUtc, const QString& timeOffUtc);
     bool dxClusterConnected() const { return m_dxCluster && m_dxCluster->connected(); }
     QVariantList dxClusterSpots() const { return m_dxCluster ? m_dxCluster->spots() : QVariantList{}; }
     QString dxClusterHost() const { return m_dxCluster ? m_dxCluster->host() : QString{}; }
@@ -1241,6 +1242,7 @@ public:
     Q_INVOKABLE bool createLogbook(const QString& name, bool backupCurrent = true);
     Q_INVOKABLE bool addLogbook(const QString& filename, const QString& name = QString());
     Q_INVOKABLE bool switchLogbook(const QString& path);
+    Q_INVOKABLE bool deleteLogbook(const QString& path, bool deleteFile = true);
     Q_INVOKABLE bool backupActiveLogbook();
     Q_INVOKABLE bool openActiveLogbookFolder() const;
     QString activeLogbookName() const { return m_activeLogbookName; }

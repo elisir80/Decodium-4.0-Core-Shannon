@@ -1155,6 +1155,15 @@ void DecodiumLegacyBackend::setNextLogPromptFields(const QString& comment,
     }
 }
 
+void DecodiumLegacyBackend::setNextLogPromptTimes(const QDateTime& timeOnUtc,
+                                                  const QDateTime& timeOffUtc,
+                                                  bool valid)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetNextLogPromptTimes(timeOnUtc, timeOffUtc, valid);
+    }
+}
+
 void DecodiumLegacyBackend::clearBandActivity()
 {
     if (m_mainWindow) {

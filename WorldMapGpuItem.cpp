@@ -1582,8 +1582,12 @@ void WorldMapGpuItem::setGreylineEnabled(bool enabled)
 
 void WorldMapGpuItem::setDistanceInMiles(bool enabled)
 {
+    if (m_distanceInMiles == enabled) {
+        return;
+    }
     m_distanceInMiles = enabled;
-    Q_UNUSED(m_distanceInMiles);
+    m_geometryDirty = true;
+    update();
 }
 
 void WorldMapGpuItem::setTransmitState(bool transmitting,

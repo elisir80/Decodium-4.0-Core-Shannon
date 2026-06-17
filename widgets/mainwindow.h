@@ -238,6 +238,9 @@ public:
                                     QString const& satellite,
                                     QString const& satMode,
                                     bool satelliteValid);
+  void legacySetNextLogPromptTimes(QDateTime const& timeOnUtc,
+                                   QDateTime const& timeOffUtc,
+                                   bool valid);
   void legacySetWaterfallPalette(QString const& palette);
   void legacyOpenSettings(int tabIndex = -1);
   void legacyOpenTimeSyncPanel();
@@ -1175,6 +1178,9 @@ private:
   bool    m_nextLogClusterSpotAvailable {false};
   bool    m_nextLogClusterSpotChecked {false};
   bool    m_nextLogPromptAlreadyAccepted {false};
+  bool    m_nextLogPromptTimesValid {false};
+  QDateTime m_nextLogPromptOn;
+  QDateTime m_nextLogPromptOff;
   bool    m_bCheckedContest;
   bool    m_bWarnedSplit=false;
   bool    m_bTUmsg;
@@ -1385,6 +1391,7 @@ private:
   QString m_pendingAutoLogXSent;
   QString m_pendingAutoLogXRcvd;
   QDateTime m_pendingAutoLogOn;
+  QDateTime m_pendingAutoLogOff;
   Radio::Frequency m_pendingAutoLogDialFreq {0};
   bool m_lateAutoLogValid {false};
   QString m_lateAutoLogCall;
@@ -1394,6 +1401,7 @@ private:
   QString m_lateAutoLogXSent;
   QString m_lateAutoLogXRcvd;
   QDateTime m_lateAutoLogOn;
+  QDateTime m_lateAutoLogOff;
   Radio::Frequency m_lateAutoLogDialFreq {0};
   QDateTime m_lateAutoLogExpires;
   QString m_appDir;

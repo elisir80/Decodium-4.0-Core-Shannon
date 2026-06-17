@@ -33,6 +33,7 @@ Item {
     // --- "last fetch" age (seconds) for the header meta, ticked by the timer ----
     property double lastFetchEpoch: 0
     property int lastAgeSec: 0
+    property bool displayDistanceInMiles: root.bridge ? root._coerceBool(root.bridge.getSetting("Miles", false), false) : false
 
     function _doFetch() {
         if (root.bridge && typeof root.bridge.fetchPskHeardBy === "function") {
@@ -41,11 +42,32 @@ Item {
         }
     }
 
-    // Format a distance in km -> "9.8k" / "540".
-    function _fmtKm(km) {
+    function _coerceBool(value, fallback) {
+        if (value === undefined || value === null)
+            return !!fallback
+        if (typeof value === "boolean")
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off")
+            return false
+        return !!fallback
+    }
+
+    // Format a distance from stored km into the active user unit.
+    function _fmtDistance(km) {
         if (km === undefined || km === null || km < 0) return "—"
-        if (km >= 1000) return (km / 1000).toFixed(1) + "k"
-        return Math.round(km).toString()
+        var value = displayDistanceInMiles ? Number(km) * 0.621371192 : Number(km)
+        if (value >= 1000) return (value / 1000).toFixed(1) + "k"
+        return Math.round(value).toString()
+    }
+
+    function _distanceUnit() {
+        return displayDistanceInMiles ? "mi" : "km"
     }
     // Signed dB -> "-12" / "+03" / "—".
     function _fmtDb(snr) {
@@ -74,6 +96,14 @@ Item {
         onTriggered: {
             if (root.lastFetchEpoch > 0)
                 root.lastAgeSec = Math.round((Date.now() - root.lastFetchEpoch) / 1000)
+        }
+    }
+
+    Connections {
+        target: root.bridge
+        function onSettingValueChanged(key, value) {
+            if (key === "Miles")
+                root.displayDistanceInMiles = root._coerceBool(value, false)
         }
     }
 
@@ -168,7 +198,7 @@ Item {
                                 if (!root.bridge) return "—"
                                 if (statCol.index === 0) return String(Number(root.bridge.pskHeardByCount))
                                 if (statCol.index === 1) return String(Number(root.bridge.pskHeardByDxccCount))
-                                return root._fmtKm(Number(root.bridge.pskHeardByMaxKm))
+                                return root._fmtDistance(Number(root.bridge.pskHeardByMaxKm))
                             }
                             color: root.cAccent
                             font.pixelSize: 18; font.bold: true; font.family: "monospace"
@@ -176,7 +206,7 @@ Item {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: statCol.index === 0 ? "RX ME"
-                                : statCol.index === 1 ? "DXCC" : "KM MAX"
+                                : statCol.index === 1 ? "DXCC" : root._distanceUnit().toUpperCase() + " MAX"
                             color: root.cTextDim
                             font.pixelSize: 9; font.letterSpacing: 1.0
                         }
@@ -265,7 +295,7 @@ Item {
                     text: {
                         if (!del.modelData) return ""
                         var km = Number(del.entry.distKm)
-                        return (km < 0) ? "—" : root._fmtKm(km) + " km"
+                        return (km < 0) ? "—" : root._fmtDistance(km) + " " + root._distanceUnit()
                     }
                     color: root.cTextDim
                     font.pixelSize: root.fSize - 2; font.family: "monospace"

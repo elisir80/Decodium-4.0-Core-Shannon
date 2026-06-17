@@ -54,6 +54,31 @@ Popup {
     property var logbookProfiles: []
     property var logbookNames: []
     property bool updatingLogbookCombo: false
+    property bool displayDistanceInMiles: bridge ? coerceBool(bridge.getSetting("Miles", false), false) : false
+
+    function coerceBool(value, fallback) {
+        if (value === undefined || value === null)
+            return !!fallback
+        if (typeof value === "boolean")
+            return value
+        if (typeof value === "number")
+            return value !== 0
+
+        var text = String(value).trim().toLowerCase()
+        if (text === "true" || text === "1" || text === "yes" || text === "on")
+            return true
+        if (text === "false" || text === "0" || text === "no" || text === "off")
+            return false
+        return !!fallback
+    }
+
+    function formatDistanceText(distanceKm, withSpace) {
+        var km = Number(distanceKm)
+        if (!isFinite(km) || km <= 0)
+            return ""
+        var value = displayDistanceInMiles ? km * 0.621371192 : km
+        return Math.round(value) + (withSpace ? " " : "") + (displayDistanceInMiles ? "mi" : "km")
+    }
 
     onAboutToShow: {
         ensureInitialPosition()
@@ -83,6 +108,14 @@ Popup {
             clearSelection()
             if (logWindow.visible)
                 refreshLog()
+        }
+    }
+
+    Connections {
+        target: bridge
+        function onSettingValueChanged(key, value) {
+            if (key === "Miles")
+                logWindow.displayDistanceInMiles = logWindow.coerceBool(value, false)
         }
     }
 
@@ -165,6 +198,30 @@ Popup {
             refreshLogbookProfiles()
             refreshLog()
         }
+    }
+
+    function selectedLogbookProfile() {
+        if (!logbookProfiles || logbookProfiles.length === 0)
+            return ({})
+        var idx = logbookCombo ? logbookCombo.currentIndex : -1
+        if (idx < 0 || idx >= logbookProfiles.length) {
+            for (var i = 0; i < logbookProfiles.length; ++i) {
+                var candidate = logbookProfiles[i] || ({})
+                if (candidate.active)
+                    return candidate
+            }
+            return logbookProfiles[0] || ({})
+        }
+        return logbookProfiles[idx] || ({})
+    }
+
+    function openDeleteLogbookDialog() {
+        var profile = selectedLogbookProfile()
+        if (!profile.path)
+            return
+        deleteLogbookDialog.profile = profile
+        deleteLogbookFileCheck.checked = true
+        deleteLogbookDialog.open()
     }
 
     function openExportAdifDialog() {
@@ -285,6 +342,61 @@ Popup {
                 clearSelection()
                 refreshLogbookProfiles()
                 refreshLog()
+            }
+        }
+    }
+
+    Dialog {
+        id: deleteLogbookDialog
+        title: "Cancella logbook"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        property var profile: ({})
+
+        ColumnLayout {
+            width: 430
+            spacing: 10
+            Label {
+                Layout.fillWidth: true
+                text: "Stai per cancellare il logbook selezionato."
+                color: accentOrange
+                font.pixelSize: 14
+                font.bold: true
+                wrapMode: Text.WordWrap
+            }
+            Label {
+                Layout.fillWidth: true
+                text: "Nome: " + String(deleteLogbookDialog.profile.name || "Logbook")
+                      + "\nPath: " + String(deleteLogbookDialog.profile.path || "")
+                      + "\nQSO: " + String(deleteLogbookDialog.profile.qsoCount || 0)
+                color: textPrimary
+                font.pixelSize: 12
+                wrapMode: Text.WrapAnywhere
+            }
+            CheckBox {
+                id: deleteLogbookFileCheck
+                checked: true
+                text: "Cancella anche il file ADIF dal disco"
+            }
+            Label {
+                Layout.fillWidth: true
+                text: deleteLogbookFileCheck.checked
+                      ? "Operazione distruttiva: il file .adi verra' eliminato. Se questo e' l'ultimo logbook, Decodium creera' un nuovo logbook vuoto."
+                      : "Il file .adi restera' sul disco; verra' rimossa solo l'associazione da Decodium."
+                color: textSecondary
+                font.pixelSize: 11
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        onAccepted: {
+            if (appEngine && appEngine.logManager && deleteLogbookDialog.profile.path) {
+                if (appEngine.logManager.deleteLogbook(deleteLogbookDialog.profile.path, deleteLogbookFileCheck.checked)) {
+                    clearSelection()
+                    refreshLogbookProfiles()
+                    refreshLog()
+                }
             }
         }
     }
@@ -498,6 +610,23 @@ Popup {
                     Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 10; font.bold: true; color: accentOrange }
                     MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
                     ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Back up the active logbook"; ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    width: 42; height: 28; radius: 4
+                    color: deleteLogbookMA.containsMouse ? Qt.rgba(255, 70, 90, 0.28) : Qt.rgba(255, 70, 90, 0.08)
+                    border.color: Qt.rgba(255, 70, 90, 0.55)
+                    opacity: logbookProfiles.length > 0 ? 1.0 : 0.45
+                    Text { anchors.centerIn: parent; text: "Del"; font.pixelSize: 10; font.bold: true; color: "#ff465a" }
+                    MouseArea {
+                        id: deleteLogbookMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: logbookProfiles.length > 0
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: logWindow.openDeleteLogbookDialog()
+                    }
+                    ToolTip.visible: deleteLogbookMA.containsMouse; ToolTip.text: "Delete selected logbook"; ToolTip.delay: 500
                 }
 
                 // Search field
@@ -732,7 +861,7 @@ Popup {
                         Text { text: modelData.mode || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: textPrimary; Layout.preferredWidth: 55 }
                         Text { text: modelData.reportSent || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 45 }
                         Text { text: modelData.reportReceived || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: textSecondary; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 45 }
-                        Text { text: (modelData.distance || 0) > 0 ? modelData.distance + " km" : ""; font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: accentOrange; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 60 }
+                        Text { text: logWindow.formatDistanceText(modelData.distance || 0, true); font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: accentOrange; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 60 }
                         Text { text: modelData.comment || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 11; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.45); Layout.fillWidth: true; elide: Text.ElideRight }
                     }
                 }
@@ -1021,7 +1150,7 @@ Popup {
                 Column {
                     spacing: 0
                     Text { text: "MAX DIST"; font.pixelSize: 8; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.5); font.letterSpacing: 1; font.bold: true }
-                    Text { text: (stats.maxDistance || 0) + " km"; font.pixelSize: 16; font.bold: true; color: accentOrange; font.family: decodiumMonoFontFamily }
+                    Text { text: logWindow.formatDistanceText(stats.maxDistance || 0, true) || "0 " + (logWindow.displayDistanceInMiles ? "mi" : "km"); font.pixelSize: 16; font.bold: true; color: accentOrange; font.family: decodiumMonoFontFamily }
                 }
 
                 Column {

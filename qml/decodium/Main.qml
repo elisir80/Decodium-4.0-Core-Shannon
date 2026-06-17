@@ -1721,6 +1721,7 @@ ApplicationWindow {
     property bool signalRxShowFreqColumn: settingBool("uiSignalRxShowFreqColumn", true)
     property bool signalRxShowDistColumn: settingBool("uiSignalRxShowDistColumn", true)
     property bool signalRxShowAzColumn: settingBool("uiSignalRxShowAzColumn", true)
+    property bool displayDistanceInMiles: settingBool("Miles", false)
     property bool showTxMessagesInRx: bridge.getSetting("TXMessagesToRX", true)
     property bool highlight73: bridge.getSetting("Highlight73", true)
     property bool highlightOrange: bridge.getSetting("HighlightOrange", false)
@@ -1844,6 +1845,8 @@ ApplicationWindow {
                 mainWindow.signalRxShowDistColumn = mainWindow.coerceBool(value, true)
             else if (key === "uiSignalRxShowAzColumn")
                 mainWindow.signalRxShowAzColumn = mainWindow.coerceBool(value, true)
+            else if (key === "Miles")
+                mainWindow.displayDistanceInMiles = mainWindow.coerceBool(value, false)
             else if (key === "UILanguage")
                 mainWindow.uiLanguage = mainWindow.normalizeUiLanguage(String(value || "en"))
             else if (key === "uiDecodePanelsLayoutSaved")
@@ -2166,8 +2169,16 @@ ApplicationWindow {
         if (isLocalDistanceEntry(modelData))
             return ""
         if (modelData && modelData.dxDistance !== undefined && modelData.dxDistance > 0)
-            return Math.round(modelData.dxDistance) + "km"
+            return formatDistanceText(modelData.dxDistance, false)
         return ""
+    }
+
+    function formatDistanceText(distanceKm, withSpace) {
+        var km = Number(distanceKm)
+        if (!isFinite(km) || km <= 0)
+            return ""
+        var value = displayDistanceInMiles ? km * 0.621371192 : km
+        return Math.round(value) + (withSpace ? " " : "") + (displayDistanceInMiles ? "mi" : "km")
     }
 
     // IU8LMC: Function to build tooltip text
@@ -2182,7 +2193,7 @@ ApplicationWindow {
         if (!isLocalDistanceEntry(modelData) && modelData.dxBearing !== undefined && modelData.dxBearing >= 0) {
             var bearingDist = "Az: " + Math.round(modelData.dxBearing) + "°"
             if (modelData.dxDistance !== undefined && modelData.dxDistance > 0) {
-                bearingDist += "  Dist: " + Math.round(modelData.dxDistance) + " km"
+                bearingDist += "  Dist: " + formatDistanceText(modelData.dxDistance, true)
             }
             lines.push(bearingDist)
         }

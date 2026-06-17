@@ -19593,6 +19593,82 @@ void DecodiumBridge::setNextLogGrid(const QString& grid)
     m_promptLogGrid = grid.trimmed().toUpper();
 }
 
+static QString logPromptDateTimeText(const QDateTime& utc)
+{
+    QDateTime const effective = utc.isValid()
+        ? utc.toUTC()
+        : QDateTime::currentDateTimeUtc();
+    return effective.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+}
+
+static QDateTime parseLogPromptDateTime(const QString& text, const QDateTime& fallbackUtc)
+{
+    QDateTime const fallback = fallbackUtc.isValid()
+        ? fallbackUtc.toUTC()
+        : QDateTime::currentDateTimeUtc();
+    QString clean = text.trimmed();
+    if (clean.isEmpty()) {
+        return fallback;
+    }
+
+    clean.replace(QChar('T'), QChar(' '));
+    clean.replace(QRegularExpression(QStringLiteral("\\s*(UTC|Z)\\s*$"),
+                                     QRegularExpression::CaseInsensitiveOption),
+                  QString());
+    clean = clean.simplified();
+
+    QStringList const dateTimeFormats {
+        QStringLiteral("yyyy-MM-dd HH:mm:ss"),
+        QStringLiteral("yyyy/MM/dd HH:mm:ss"),
+        QStringLiteral("yyyyMMdd HHmmss"),
+        QStringLiteral("yyyyMMddHHmmss")
+    };
+    for (const QString& format : dateTimeFormats) {
+        QDateTime parsed = QDateTime::fromString(clean, format);
+        if (parsed.isValid()) {
+            parsed.setTimeSpec(Qt::UTC);
+            return parsed.toUTC();
+        }
+    }
+
+    QString const digits = QString(clean).remove(QRegularExpression(QStringLiteral("[^0-9]")));
+    QStringList const timeFormats {
+        QStringLiteral("HH:mm:ss"),
+        QStringLiteral("HHmmss"),
+        QStringLiteral("HH:mm"),
+        QStringLiteral("HHmm")
+    };
+    for (const QString& format : timeFormats) {
+        QTime parsed = QTime::fromString(format == QStringLiteral("HHmmss") || format == QStringLiteral("HHmm")
+                                             ? digits
+                                             : clean,
+                                         format);
+        if (parsed.isValid()) {
+            return QDateTime(fallback.date(), parsed, Qt::UTC);
+        }
+    }
+
+    return fallback;
+}
+
+void DecodiumBridge::setNextLogTimes(const QString& timeOnUtc, const QString& timeOffUtc)
+{
+    QDateTime const fallbackOn = m_promptLogOn.isValid()
+        ? m_promptLogOn
+        : (m_pendingAutoLogOn.isValid()
+               ? m_pendingAutoLogOn
+               : QDateTime::currentDateTimeUtc());
+    QDateTime const fallbackOff = m_promptLogOff.isValid()
+        ? m_promptLogOff
+        : (m_pendingAutoLogOff.isValid() ? m_pendingAutoLogOff : fallbackOn);
+
+    m_promptLogOn = parseLogPromptDateTime(timeOnUtc, fallbackOn);
+    m_promptLogOff = parseLogPromptDateTime(timeOffUtc, fallbackOff);
+    if (m_promptLogOff.isValid() && m_promptLogOn.isValid() && m_promptLogOff < m_promptLogOn) {
+        m_promptLogOff = m_promptLogOn;
+    }
+}
+
 void DecodiumBridge::clearNextLogClusterSpotOverride()
 {
     m_nextLogClusterSpotOverrideValid = false;
@@ -26647,7 +26723,10 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         m_pendingAutoLogRptSent = m_lateAutoLogRptSent;
         m_pendingAutoLogRptRcvd = m_lateAutoLogRptRcvd;
         m_pendingAutoLogOn = m_lateAutoLogOn;
-        m_pendingAutoLogOff = m_lateAutoLogOff;
+        m_pendingAutoLogOff = QDateTime::currentDateTimeUtc();
+        if (m_pendingAutoLogOn.isValid() && m_pendingAutoLogOff < m_pendingAutoLogOn) {
+            m_pendingAutoLogOff = m_pendingAutoLogOn;
+        }
         m_pendingAutoLogDialFreq = m_lateAutoLogDialFreq;
         removeCallerFromQueue(latePartnerBase);
         bridgeLog("late-signoff-log: " + latePartnerBase + " msg=" + msg);
@@ -29240,6 +29319,8 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
         preview.insert(QStringLiteral("rcvd"), m_promptLogRptRcvd);
         preview.insert(QStringLiteral("freq"), m_promptLogDialFreq);
         preview.insert(QStringLiteral("mode"), m_promptLogMode.isEmpty() ? m_mode : m_promptLogMode);
+        preview.insert(QStringLiteral("timeOn"), logPromptDateTimeText(m_promptLogOn));
+        preview.insert(QStringLiteral("timeOff"), logPromptDateTimeText(m_promptLogOff.isValid() ? m_promptLogOff : m_promptLogOn));
         preview.insert(QStringLiteral("comment"),
                        m_promptLogCommentOverrideValid
                            ? m_promptLogComment
@@ -29254,6 +29335,8 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
     QString logRptSent = m_reportSent.trimmed();
     QString logRptRcvd = m_reportReceived.trimmed();
     double logFreqHz = m_frequency;
+    QDateTime logOnUtc = QDateTime::currentDateTimeUtc();
+    QDateTime logOffUtc = logOnUtc;
 
     if (m_pendingAutoLogValid) {
         if (!m_pendingAutoLogCall.isEmpty()) logDxCall = m_pendingAutoLogCall;
@@ -29261,6 +29344,8 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
         if (!m_pendingAutoLogRptSent.isEmpty()) logRptSent = m_pendingAutoLogRptSent;
         if (!m_pendingAutoLogRptRcvd.isEmpty()) logRptRcvd = m_pendingAutoLogRptRcvd;
         if (m_pendingAutoLogDialFreq > 0.0) logFreqHz = m_pendingAutoLogDialFreq;
+        if (m_pendingAutoLogOn.isValid()) logOnUtc = m_pendingAutoLogOn;
+        if (m_pendingAutoLogOff.isValid()) logOffUtc = m_pendingAutoLogOff;
     }
 
     if (logDxCall.isEmpty() && m_lateAutoLogValid
@@ -29270,6 +29355,12 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
         logRptSent = m_lateAutoLogRptSent;
         logRptRcvd = m_lateAutoLogRptRcvd;
         if (m_lateAutoLogDialFreq > 0.0) logFreqHz = m_lateAutoLogDialFreq;
+        if (m_lateAutoLogOn.isValid()) logOnUtc = m_lateAutoLogOn;
+        if (m_lateAutoLogOff.isValid()) logOffUtc = m_lateAutoLogOff;
+    }
+
+    if (logOffUtc < logOnUtc) {
+        logOffUtc = logOnUtc;
     }
 
     QVariantMap preview;
@@ -29279,6 +29370,8 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
     preview.insert(QStringLiteral("rcvd"), logRptRcvd);
     preview.insert(QStringLiteral("freq"), logFreqHz);
     preview.insert(QStringLiteral("mode"), m_mode);
+    preview.insert(QStringLiteral("timeOn"), logPromptDateTimeText(logOnUtc));
+    preview.insert(QStringLiteral("timeOff"), logPromptDateTimeText(logOffUtc));
     preview.insert(QStringLiteral("comment"),
                    m_promptLogCommentOverrideValid
                        ? m_promptLogComment
@@ -29517,6 +29610,16 @@ void DecodiumBridge::showLogQsoPromptDialog()
                                                         ? QStringLiteral("%1 Hz").arg(freqHz, 0, 'f', 0)
                                                         : QStringLiteral("-"), dialog));
 
+    auto* timeOnEdit = new QLineEdit(preview.value(QStringLiteral("timeOn")).toString(), dialog);
+    timeOnEdit->setClearButtonEnabled(false);
+    timeOnEdit->setPlaceholderText(QStringLiteral("YYYY-MM-DD HH:MM:SS UTC"));
+    form->addRow(QStringLiteral("Start UTC:"), timeOnEdit);
+
+    auto* timeOffEdit = new QLineEdit(preview.value(QStringLiteral("timeOff")).toString(), dialog);
+    timeOffEdit->setClearButtonEnabled(false);
+    timeOffEdit->setPlaceholderText(QStringLiteral("YYYY-MM-DD HH:MM:SS UTC"));
+    form->addRow(QStringLiteral("End UTC:"), timeOffEdit);
+
     auto* commentEdit = new QLineEdit(
         defaultLogCommentForQso(preview.value(QStringLiteral("mode")).toString().trimmed(),
                                 preview.value(QStringLiteral("sent")).toString().trimmed(),
@@ -29572,8 +29675,9 @@ void DecodiumBridge::showLogQsoPromptDialog()
     layout->addWidget(buttons);
 
     connect(buttons, &QDialogButtonBox::accepted, this,
-            [this, dialog, satelliteCombo, satModeCombo, spotCheck, commentEdit]() {
+            [this, dialog, satelliteCombo, satModeCombo, spotCheck, commentEdit, timeOnEdit, timeOffEdit]() {
         dialog->setProperty("decodiumAccepted", true);
+        setNextLogTimes(timeOnEdit->text(), timeOffEdit->text());
         m_promptLogComment = commentEdit->text().trimmed();
         m_promptLogCommentOverrideValid = true;
         setSetting(QStringLiteral("LogComments"), m_promptLogComment);
@@ -29818,6 +29922,20 @@ void DecodiumBridge::logQsoNow()
                                                 legacyLogSatellite,
                                                 legacyLogSatMode,
                                                 m_promptLogSnapshotValid);
+        QDateTime legacyTimeOn = m_promptLogOn.isValid()
+            ? m_promptLogOn
+            : (m_pendingAutoLogOn.isValid()
+                   ? m_pendingAutoLogOn
+                   : (m_lateAutoLogOn.isValid() ? m_lateAutoLogOn : QDateTime::currentDateTimeUtc()));
+        QDateTime legacyTimeOff = m_promptLogOff.isValid()
+            ? m_promptLogOff
+            : (m_pendingAutoLogOff.isValid()
+                   ? m_pendingAutoLogOff
+                   : (m_lateAutoLogOff.isValid() ? m_lateAutoLogOff : legacyTimeOn));
+        if (legacyTimeOff < legacyTimeOn) {
+            legacyTimeOff = legacyTimeOn;
+        }
+        m_legacyBackend->setNextLogPromptTimes(legacyTimeOn, legacyTimeOff, legacyTimeOn.isValid());
         m_legacyBackend->setNextLogClusterSpotState(dxClusterConnected(),
                                                     clusterSpotRequested && dxClusterConnected());
         if (m_promptLogSnapshotValid) {
@@ -38396,6 +38514,115 @@ bool DecodiumBridge::switchLogbook(const QString& path)
     saveLogbookSettings();
     reloadActiveLogbookState(QStringLiteral("switch"));
     emit statusMessage(QStringLiteral("Logbook attivo: %1").arg(m_activeLogbookName));
+    return true;
+}
+
+bool DecodiumBridge::deleteLogbook(const QString& path, bool deleteFile)
+{
+    QString cleanPath = path.trimmed();
+    if (cleanPath.startsWith(QStringLiteral("file://"))) {
+        cleanPath = QUrl(cleanPath).toLocalFile();
+    }
+    if (cleanPath.trimmed().isEmpty()) {
+        emit errorMessage(QStringLiteral("Logbook non valido"));
+        return false;
+    }
+    cleanPath = QDir::cleanPath(QFileInfo(cleanPath).absoluteFilePath());
+    if (cleanPath.isEmpty()) {
+        emit errorMessage(QStringLiteral("Logbook non valido"));
+        return false;
+    }
+
+    int const index = m_logbookProfilePaths.indexOf(cleanPath);
+    if (index < 0) {
+        emit errorMessage(QStringLiteral("Logbook non trovato: %1").arg(QDir::toNativeSeparators(cleanPath)));
+        return false;
+    }
+
+    QString const removedName = m_logbookProfileNames.value(index, QFileInfo(cleanPath).completeBaseName());
+    QString const activePath = QDir::cleanPath(QFileInfo(effectiveAdifLogPath()).absoluteFilePath());
+    bool const wasActive = cleanPath == activePath;
+    bool const removingLastProfile = m_logbookProfilePaths.size() == 1;
+
+    if (deleteFile) {
+        QFileInfo const info(cleanPath);
+        if (info.exists()) {
+            if (!info.isFile()) {
+                emit errorMessage(QStringLiteral("Il percorso del logbook non e' un file: %1")
+                                      .arg(QDir::toNativeSeparators(cleanPath)));
+                return false;
+            }
+        }
+    }
+
+    QString replacementName;
+    QString replacementPath;
+    if (removingLastProfile) {
+        replacementName = m_callsign.trimmed().toUpper();
+        if (replacementName.isEmpty()) {
+            replacementName = QStringLiteral("Default");
+        }
+
+        QDir dir(logbookDirectoryPath());
+        if (!dir.exists() && !dir.mkpath(QStringLiteral("."))) {
+            emit errorMessage(QStringLiteral("Impossibile creare cartella logbook: %1").arg(dir.absolutePath()));
+            return false;
+        }
+
+        QString const stem = sanitizedLogbookFileStem(replacementName);
+        QString newPath = dir.absoluteFilePath(stem + QStringLiteral(".adi"));
+        int suffix = 2;
+        while (QFileInfo::exists(newPath)
+               || QDir::cleanPath(QFileInfo(newPath).absoluteFilePath()) == cleanPath) {
+            newPath = dir.absoluteFilePath(QStringLiteral("%1_%2.adi").arg(stem).arg(suffix++));
+        }
+
+        ParsedAdifDocument emptyDoc;
+        emptyDoc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
+        emptyDoc.loaded = true;
+        if (!writeAdifDocument(newPath, emptyDoc)) {
+            emit errorMessage(QStringLiteral("Impossibile creare nuovo logbook vuoto: %1")
+                                  .arg(QDir::toNativeSeparators(newPath)));
+            return false;
+        }
+        replacementPath = QDir::cleanPath(QFileInfo(newPath).absoluteFilePath());
+    }
+
+    if (deleteFile) {
+        QFileInfo const info(cleanPath);
+        if (info.exists() && !QFile::remove(cleanPath)) {
+            if (!replacementPath.isEmpty()) {
+                QFile::remove(replacementPath);
+            }
+            emit errorMessage(QStringLiteral("Impossibile cancellare logbook: %1")
+                                  .arg(QDir::toNativeSeparators(cleanPath)));
+            return false;
+        }
+    }
+
+    m_logbookProfileNames.removeAt(index);
+    m_logbookProfilePaths.removeAt(index);
+
+    if (!replacementPath.isEmpty()) {
+        m_adifLogPath = replacementPath;
+        ensureLogbookProfile(replacementName, m_adifLogPath);
+        m_activeLogbookName = m_logbookProfileNames.value(m_logbookProfilePaths.indexOf(m_adifLogPath), replacementName);
+    } else if (wasActive) {
+        int const nextIndex = qBound(0, index, m_logbookProfilePaths.size() - 1);
+        m_adifLogPath = m_logbookProfilePaths.at(nextIndex);
+        m_activeLogbookName = m_logbookProfileNames.value(nextIndex, QFileInfo(m_adifLogPath).completeBaseName());
+    }
+
+    saveLogbookSettings();
+    if (wasActive || !replacementPath.isEmpty()) {
+        reloadActiveLogbookState(QStringLiteral("delete"));
+    } else {
+        emit activeLogbookChanged();
+    }
+
+    emit statusMessage(deleteFile
+                           ? QStringLiteral("Logbook cancellato: %1").arg(removedName)
+                           : QStringLiteral("Logbook rimosso dalla lista: %1").arg(removedName));
     return true;
 }
 

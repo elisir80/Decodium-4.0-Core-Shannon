@@ -472,7 +472,9 @@ QByteArray DecodiumWebServer::buildStateJson() const
 QByteArray DecodiumWebServer::buildDecodesJson() const
 {
     QJsonArray arr;
+    bool distanceInMiles = false;
     if (m_bridge) {
+        distanceInMiles = m_bridge->getSetting(QStringLiteral("Miles"), false).toBool();
         QVariantList const decodes = m_bridge->decodeList();
         // Limit a 200 entries piu' recenti per non saturare il payload
         int const start = qMax(0, decodes.size() - 200);
@@ -494,6 +496,8 @@ QByteArray DecodiumWebServer::buildDecodesJson() const
         }
     }
     QJsonObject root;
+    root[QStringLiteral("distanceInMiles")] = distanceInMiles;
+    root[QStringLiteral("distanceUnit")] = distanceInMiles ? QStringLiteral("mi") : QStringLiteral("km");
     root[QStringLiteral("decodes")] = arr;
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
 }
@@ -708,7 +712,7 @@ main { padding-bottom: 200px; } /* leave space for footer + TX panel + activity 
     <thead>
       <tr>
         <th>UTC</th><th>SNR</th><th>DT</th><th>Hz</th><th>Msg</th>
-        <th class="country">Country</th><th class="dist">km</th>
+        <th class="country">Country</th><th class="dist" id="distHead">km</th>
       </tr>
     </thead>
     <tbody id="decodes"></tbody>
@@ -781,13 +785,18 @@ function renderDecodes(payload) {
   const tbody = $("decodes");
   const rows = [];
   const fullList = (payload.decodes || []);
+  const distanceInMiles = !!payload.distanceInMiles;
+  const distanceUnit = distanceInMiles ? "mi" : "km";
+  const distHead = $("distHead");
+  if (distHead) distHead.textContent = distanceUnit;
   const list = fullList.slice(-100).reverse();
   for (const e of list) {
     let cls = "";
     if (e.isTx) cls = "tx";
     else if (e.isMyCall) cls = "mycall";
     else if (e.isCQ) cls = "cq";
-    const distStr = e.dxDistance > 0 ? Math.round(e.dxDistance) : "";
+    const distValue = distanceInMiles ? e.dxDistance * 0.621371192 : e.dxDistance;
+    const distStr = e.dxDistance > 0 ? Math.round(distValue) : "";
     rows.push(`<tr class="${cls}" data-freq="${e.freq}" data-dxcall="${escapeHtml(e.dxCallsign||"")}">
       <td>${e.time}</td>
       <td>${e.db}</td>

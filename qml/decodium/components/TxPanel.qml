@@ -40,6 +40,8 @@ Item {
     property string logPreviewRcvd: ""
     property string logPreviewFreq: ""
     property string logPreviewMode: ""
+    property string logPreviewTimeOn: ""
+    property string logPreviewTimeOff: ""
     property string logPreviewComment: ""
     property bool logClusterSpotAvailable: false
     property bool logClusterSpotChecked: false
@@ -60,6 +62,8 @@ Item {
         logPreviewFreq = preview.freq !== undefined ? Number(preview.freq || 0).toFixed(0)
                                                     : (engine ? Number(engine.frequency || 0).toFixed(0) : "")
         logPreviewMode = preview.mode ? String(preview.mode) : (engine && engine.mode ? engine.mode : "")
+        logPreviewTimeOn = preview.timeOn !== undefined ? String(preview.timeOn || "") : ""
+        logPreviewTimeOff = preview.timeOff !== undefined ? String(preview.timeOff || "") : ""
         logPreviewComment = preview.comment !== undefined ? String(preview.comment || "") : ""
     }
 
@@ -150,6 +154,8 @@ Item {
         syncLogSatelliteFields()
         logCommentField.text = logPreviewComment
         logGridField.text = logPreviewGrid
+        logTimeOnField.text = logPreviewTimeOn
+        logTimeOffField.text = logPreviewTimeOff
         logConfirmPopup.open()
     }
 
@@ -1843,7 +1849,7 @@ Item {
         dim: false
         focus: true
         width: 570
-        height: 490
+        height: 560
         x: parent ? Math.round((parent.width - width) / 2) : 0
         y: parent ? Math.round((parent.height - height) / 2) : 0
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -1852,6 +1858,8 @@ Item {
             txPanel.syncLogSatelliteFields()
             logCommentField.text = txPanel.logPreviewComment
             logGridField.text = txPanel.logPreviewGrid
+            logTimeOnField.text = txPanel.logPreviewTimeOn
+            logTimeOffField.text = txPanel.logPreviewTimeOff
             txPanel.logClusterSpotAvailable = !!(engine && engine.dxCluster && engine.dxCluster.connected)
             txPanel.logClusterSpotChecked = txPanel.logClusterSpotAvailable && !!engine.autoSpotEnabled
         }
@@ -1935,6 +1943,46 @@ Item {
 
                 Text { text: "Freq:"; color: textSecondary; font.pixelSize: 13 }
                 Text { text: logPreviewFreq && logPreviewFreq !== "0" ? logPreviewFreq + " Hz" : "-"; color: textPrimary; font.pixelSize: 14 }
+
+                Text { text: qsTr("Start UTC:"); color: textSecondary; font.pixelSize: 13 }
+                DecoTextField {
+                    id: logTimeOnField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    color: textPrimary
+                    selectedTextColor: bgDeep
+                    selectionColor: accentGreen
+                    font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily
+                    selectByMouse: true
+                    placeholderText: "YYYY-MM-DD HH:MM:SS"
+                    background: Rectangle {
+                        radius: 4
+                        color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                        border.color: logTimeOnField.activeFocus ? accentGreen : glassBorder
+                        border.width: 1
+                    }
+                }
+
+                Text { text: qsTr("End UTC:"); color: textSecondary; font.pixelSize: 13 }
+                DecoTextField {
+                    id: logTimeOffField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    color: textPrimary
+                    selectedTextColor: bgDeep
+                    selectionColor: accentGreen
+                    font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily
+                    selectByMouse: true
+                    placeholderText: "YYYY-MM-DD HH:MM:SS"
+                    background: Rectangle {
+                        radius: 4
+                        color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                        border.color: logTimeOffField.activeFocus ? accentGreen : glassBorder
+                        border.width: 1
+                    }
+                }
 
                 Text { text: "Comment:"; color: textSecondary; font.pixelSize: 13 }
                 DecoTextField {
@@ -2054,6 +2102,8 @@ Item {
                                 engine.setSetting("LogComments", logCommentField.text)
                             if (engine.setNextLogGrid)  // 1.0.302: locator editabile a mano
                                 engine.setNextLogGrid(logGridField.text)
+                            if (engine.setNextLogTimes)
+                                engine.setNextLogTimes(logTimeOnField.text, logTimeOffField.text)
                             engine.setNextLogClusterSpotEnabled(txPanel.logClusterSpotAvailable && txPanel.logClusterSpotChecked)
                             txPanel.logPromptAccepted = true
                             if (engine.confirmLogQso)

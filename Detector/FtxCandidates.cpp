@@ -1,7 +1,11 @@
 #include <algorithm>
+#include <cstdlib>
 #include <cmath>
 #include <cstddef>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -121,6 +125,79 @@ void sort_group_desc (float* candidate, int begin_index, int end_index)
       candidate[i * 2] = entry.frequency;
       candidate[i * 2 + 1] = entry.strength;
     }
+	}
+
+std::vector<float> parse_candidate_trace_freqs ()
+{
+  std::vector<float> freqs;
+  char const* const raw = std::getenv ("DECODIUM_FT_CANDIDATE_TRACE_FREQS");
+  if (!raw || !*raw)
+    {
+      return freqs;
+    }
+  std::istringstream entries {raw};
+  std::string entry;
+  while (std::getline (entries, entry, ','))
+    {
+      float const freq = static_cast<float> (std::atof (entry.c_str ()));
+      if (freq > 0.0f)
+        {
+          freqs.push_back (freq);
+        }
+    }
+  return freqs;
+}
+
+std::vector<float> const& candidate_trace_freqs ()
+{
+  static std::vector<float> const freqs = parse_candidate_trace_freqs ();
+  return freqs;
+}
+
+void trace_candidate_bins (ModeConfig const& config, float df, float f_offset,
+                           float syncmin, float const* savg, float const* sbase,
+                           std::vector<float> const& savsm)
+{
+  if (candidate_trace_freqs ().empty ())
+    {
+      return;
+    }
+  for (float const target : candidate_trace_freqs ())
+    {
+      int const center_bin = static_cast<int> (std::lround ((target - f_offset) / df));
+      for (int bin = center_bin - 5; bin <= center_bin + 5; ++bin)
+        {
+          if (bin < 2 || bin >= config.nh1 - 1)
+            {
+              continue;
+            }
+          float const left = savsm[static_cast<size_t> (bin - 2)];
+          float const center = savsm[static_cast<size_t> (bin - 1)];
+          float const right = savsm[static_cast<size_t> (bin)];
+          float const den = left - 2.0f * center + right;
+          float del = 0.0f;
+          if (den != 0.0f)
+            {
+              del = 0.5f * (left - right) / den;
+            }
+          float const fpeak = (static_cast<float> (bin) + del) * df + f_offset;
+          bool const local_peak = center >= left && center >= right;
+          std::cerr << "[FTXCANDTRACE] target=" << target
+                    << " nfft=" << config.nfft1
+                    << " bin=" << bin
+                    << " fbin=" << (static_cast<float> (bin) * df + f_offset)
+                    << " fpeak=" << fpeak
+                    << " savg=" << savg[bin - 1]
+                    << " sbase=" << sbase[bin - 1]
+                    << " left=" << left
+                    << " center=" << center
+                    << " right=" << right
+                    << " syncmin=" << syncmin
+                    << " local_peak=" << (local_peak ? 1 : 0)
+                    << " would_pass=" << ((local_peak && center >= syncmin) ? 1 : 0)
+                    << '\n';
+        }
+    }
 }
 
 void run_get_candidates (ModeConfig const& config, float const* dd,
@@ -186,6 +263,7 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
     }
 
   float const df = kSampleRate / static_cast<float> (config.nfft1);
+  float const f_offset = -1.5f * kSampleRate / static_cast<float> (config.nsps);
   int const min_bin = static_cast<int> (std::lround (200.0f / df));
   int nfa = static_cast<int> (fa / df);
   int nfb = static_cast<int> (fb / df);
@@ -203,10 +281,11 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
       savsm[static_cast<size_t> (i)] /= sbase[i];
     }
 
+  trace_candidate_bins (config, df, f_offset, syncmin, savg, sbase, savsm);
+
   std::vector<Candidate> raw_candidates;
   raw_candidates.reserve (static_cast<size_t> (maxcand));
 
-  float const f_offset = -1.5f * kSampleRate / static_cast<float> (config.nsps);
   for (int i = nfa + 1; i <= nfb - 1; ++i)
     {
       float const left = savsm[static_cast<size_t> (i - 2)];

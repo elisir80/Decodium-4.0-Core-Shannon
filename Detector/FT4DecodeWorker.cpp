@@ -2,11 +2,21 @@
 #include "Detector/FT4DecodeWorker.hpp"
 
 #include <algorithm>
+#include <chrono>
+#include <future>
 #include <mutex>
 
+#include <QDate>
+#include <QDateTime>
 #include <QDebug>
+#include <QDir>
 #include <QElapsedTimer>
+#include <QFile>
+#include <QFileInfo>
 #include <QMutexLocker>
+#include <QRegularExpression>
+#include <QSet>
+#include <QStandardPaths>
 #include <QThread>
 
 #include "Logger.hpp"
@@ -18,6 +28,9 @@
 #endif
 extern "C"
 {
+  void legacy_pack77_save_hash_call_c (char const c13[13], int* n10, int* n12, int* n22);
+  void ftx_ft8_stage4_seed_hash_call_c (char const* call);
+  void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_ft4_decode_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nfa, int* nfb,
                          int* ndepth, int* lapcqonly, int* ncontest,
                          char const* mycall, char const* hiscall,
@@ -35,6 +48,12 @@ namespace
   constexpr int kBitsPerMessage {77};
   constexpr int kDecodedChars {37};
   constexpr int kFt4StableDspStage {4};
+  constexpr qint64 kFt4HashSeedTailBytes {8 * 1024 * 1024};
+  constexpr qint64 kFt4HashSeedRefreshTailBytes {512 * 1024};
+  constexpr int kFt4HashSeedMaxCalls {4096};
+  constexpr qint64 kFt4HashSeedRefreshIntervalMs {10000};
+  constexpr int kFt4HashSeedRefreshMaxFiles {6};
+  constexpr int kFt4HashSeedPriorityMonths {2};
   char constexpr kFt4DspStageEnv[] {"DECODIUM_FT4_CPP_DSP_STAGE"};
   [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
@@ -95,6 +114,504 @@ namespace
         decoded = decoded.leftJustified (kDecodedChars, QLatin1Char {' '});
       }
     return decoded.left (kDecodedChars);
+  }
+
+  bool plausible_hash_seed_token (QString const& token)
+  {
+    if (token.size () < 3 || token.size () > 13)
+      {
+        return false;
+      }
+    static QSet<QString> const skipTokens {
+      QStringLiteral ("CQ"), QStringLiteral ("DE"), QStringLiteral ("DX"),
+      QStringLiteral ("QRZ"), QStringLiteral ("RRR"), QStringLiteral ("RR73"),
+      QStringLiteral ("FT8"), QStringLiteral ("FT4"), QStringLiteral ("FT2"),
+      QStringLiteral ("JT9"), QStringLiteral ("JT65"), QStringLiteral ("Q65"),
+      QStringLiteral ("WSPR"), QStringLiteral ("FST4")
+    };
+    if (skipTokens.contains (token))
+      {
+        return false;
+      }
+
+    static QRegularExpression const reportRx {
+      QStringLiteral (R"(^(?:R)?[+-]?\d{1,2}$)")
+    };
+    static QRegularExpression const modeSuffixRx {QStringLiteral (R"(^A\d+$)")};
+    static QRegularExpression const gridRx {
+      QStringLiteral (R"(^[A-R]{2}\d{2}(?:[A-X]{2})?$)")
+    };
+    if (reportRx.match (token).hasMatch ()
+        || modeSuffixRx.match (token).hasMatch ()
+        || gridRx.match (token).hasMatch ())
+      {
+        return false;
+      }
+
+    bool hasLetter = false;
+    bool hasDigit = false;
+    for (QChar const ch : token)
+      {
+        if (ch >= QLatin1Char ('A') && ch <= QLatin1Char ('Z'))
+          {
+            hasLetter = true;
+          }
+        else if (ch >= QLatin1Char ('0') && ch <= QLatin1Char ('9'))
+          {
+            hasDigit = true;
+          }
+        else if (ch != QLatin1Char ('/'))
+          {
+            return false;
+          }
+      }
+    return hasLetter && hasDigit;
+  }
+
+  void remember_hash_seed_call (QStringList& calls, QString call)
+  {
+    call = call.trimmed ().toUpper ();
+    if (call.startsWith (QLatin1Char ('<')) && call.endsWith (QLatin1Char ('>')))
+      {
+        call = call.mid (1, call.size () - 2);
+      }
+    if (!plausible_hash_seed_token (call))
+      {
+        return;
+      }
+    calls.removeAll (call);
+    calls.append (call);
+    while (calls.size () > kFt4HashSeedMaxCalls)
+      {
+        calls.removeFirst ();
+      }
+  }
+
+  bool collect_hash_seed_calls_from_tail (QString const& path, QStringList& calls,
+                                          qint64 tailBytes = kFt4HashSeedTailBytes)
+  {
+    QFile file {path};
+    if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
+      {
+        return false;
+      }
+    if (tailBytes > 0 && file.size () > tailBytes)
+      {
+        file.seek (file.size () - tailBytes);
+        file.readLine ();
+      }
+    QByteArray const data = file.readAll ().toUpper ();
+    QString const text = QString::fromLatin1 (data.constData (), data.size ());
+    static QRegularExpression const tokenRx {
+      QStringLiteral (R"((?:<[A-Z0-9/]{3,13}>|[A-Z0-9/]{3,13}))")
+    };
+    auto it = tokenRx.globalMatch (text);
+    while (it.hasNext ())
+      {
+        remember_hash_seed_call (calls, it.next ().captured (0));
+      }
+    return true;
+  }
+
+  QStringList hash_seed_monthly_all_files ()
+  {
+    QStringList names;
+    QDate const currentMonth = QDate::currentDate ();
+    for (int i = kFt4HashSeedPriorityMonths - 1; i >= 0; --i)
+      {
+        QDate const month = currentMonth.addMonths (-i);
+        names.append (month.toString (QStringLiteral ("yyyyMM"))
+                      + QStringLiteral ("_ALL.TXT"));
+      }
+    return names;
+  }
+
+  QString hash_seed_source_label (QString const& path)
+  {
+    QFileInfo const info {path};
+    QFileInfo const dirInfo {info.absolutePath ()};
+    return dirInfo.fileName () + QLatin1Char ('/')
+           + info.fileName () + QStringLiteral (":")
+           + QString::number (info.size ());
+  }
+
+  QStringList local_hash_seed_paths ()
+  {
+    QStringList paths;
+    QSet<QString> seen;
+    auto addPath = [&paths, &seen] (QString const& path, bool priority = false) {
+      QString const clean = QDir::cleanPath (path);
+      if (clean.isEmpty ())
+        {
+          return;
+        }
+      if (seen.contains (clean))
+        {
+          if (priority)
+            {
+              paths.removeAll (clean);
+              paths.append (clean);
+            }
+          return;
+        }
+      seen.insert (clean);
+      paths.append (clean);
+    };
+
+    auto addLogDir = [&addPath] (QString const& path, bool priority = false) {
+      QDir const dir {path};
+      if (!dir.exists ())
+        {
+          return;
+        }
+      static QStringList const filters {
+        QStringLiteral ("CALL3.TXT"),
+        QStringLiteral ("ALL.TXT"),
+        QStringLiteral ("all.txt"),
+        QStringLiteral ("*_ALL.TXT")
+      };
+      for (QString const& name : dir.entryList (filters, QDir::Files, QDir::Name))
+        {
+          addPath (dir.filePath (name), priority);
+        }
+    };
+
+    auto addMonthlyAllTxt = [&addPath] (QString const& path, bool priority) {
+      QDir const dir {path};
+      if (!dir.exists ())
+        {
+          return;
+        }
+      for (QString const& name : hash_seed_monthly_all_files ())
+        {
+          addPath (dir.filePath (name), priority);
+        }
+    };
+
+    addLogDir (QStandardPaths::writableLocation (QStandardPaths::AppDataLocation));
+
+    QStringList dataRoots;
+    auto addDataRoot = [&dataRoots] (QString const& root) {
+      QString const clean = QDir::cleanPath (root);
+      if (!clean.isEmpty () && !dataRoots.contains (clean))
+        {
+          dataRoots.append (clean);
+        }
+    };
+    addDataRoot (QStandardPaths::writableLocation (QStandardPaths::GenericDataLocation));
+    addDataRoot (QDir {QDir::homePath ()}.filePath (QStringLiteral ("Library/Application Support")));
+
+    for (QString const& root : dataRoots)
+      {
+        QDir const dir {root};
+        addLogDir (dir.filePath (QStringLiteral ("IU8LMC/Decodium")));
+        addLogDir (dir.filePath (QStringLiteral ("IU8LMC/Decodium/embedded-ft2")));
+        addLogDir (dir.filePath (QStringLiteral ("WSJT-X")));
+        addLogDir (dir.filePath (QStringLiteral ("JTDX")));
+        addLogDir (dir.filePath (QStringLiteral ("IU8LMC/Decodium/embedded-ft2")), true);
+        addMonthlyAllTxt (dir.filePath (QStringLiteral ("WSJT-X")), true);
+        addMonthlyAllTxt (dir.filePath (QStringLiteral ("JTDX")), true);
+      }
+    return paths;
+  }
+
+  int hash_seed_refresh_priority (QString const& path)
+  {
+    QFileInfo const info {path};
+    QString const cleanPath = QDir::cleanPath (path).toUpper ();
+    QString const name = info.fileName ().toUpper ();
+    int priority = 0;
+
+    if (name == QStringLiteral ("CALL3.TXT"))
+      {
+        priority += 10;
+      }
+    if (name == QStringLiteral ("ALL.TXT") || name.endsWith (QStringLiteral ("_ALL.TXT")))
+      {
+        priority += 20;
+      }
+
+    if (cleanPath.contains (QStringLiteral ("/IU8LMC/DECODIUM/EMBEDDED-FT2/")))
+      {
+        priority += 20;
+      }
+    else if (cleanPath.contains (QStringLiteral ("/IU8LMC/DECODIUM/")))
+      {
+        priority += 10;
+      }
+    if (cleanPath.contains (QStringLiteral ("/WSJT-X/")))
+      {
+        priority += 30;
+      }
+    if (cleanPath.contains (QStringLiteral ("/JTDX/")))
+      {
+        priority += 40;
+      }
+
+    QStringList const monthly = hash_seed_monthly_all_files ();
+    if (!monthly.isEmpty () && name == monthly.constLast ().toUpper ())
+      {
+        priority += 50;
+      }
+    else
+      {
+        for (QString const& monthlyName : monthly)
+          {
+            if (name == monthlyName.toUpper ())
+              {
+                priority += 30;
+                break;
+              }
+          }
+      }
+
+    return priority;
+  }
+
+  QStringList local_hash_seed_refresh_paths ()
+  {
+    struct Candidate
+    {
+      QString path;
+      int priority {};
+      QDateTime modified;
+    };
+
+    QList<Candidate> candidates;
+    for (QString const& path : local_hash_seed_paths ())
+      {
+        QFileInfo const info {path};
+        if (!info.exists () || !info.isFile ())
+          {
+            continue;
+          }
+        candidates.append ({path, hash_seed_refresh_priority (path), info.lastModified ()});
+      }
+
+    std::sort (candidates.begin (), candidates.end (), [] (Candidate const& lhs,
+                                                            Candidate const& rhs) {
+      if (lhs.priority != rhs.priority)
+        {
+          return lhs.priority > rhs.priority;
+        }
+      if (lhs.modified != rhs.modified)
+        {
+          return lhs.modified > rhs.modified;
+        }
+      return lhs.path < rhs.path;
+    });
+
+    if (candidates.size () > kFt4HashSeedRefreshMaxFiles)
+      {
+        candidates.erase (candidates.begin () + kFt4HashSeedRefreshMaxFiles, candidates.end ());
+      }
+
+    std::sort (candidates.begin (), candidates.end (), [] (Candidate const& lhs,
+                                                            Candidate const& rhs) {
+      if (lhs.priority != rhs.priority)
+        {
+          return lhs.priority < rhs.priority;
+        }
+      if (lhs.modified != rhs.modified)
+        {
+          return lhs.modified < rhs.modified;
+        }
+      return lhs.path < rhs.path;
+    });
+
+    QStringList paths;
+    paths.reserve (candidates.size ());
+    for (Candidate const& candidate : candidates)
+      {
+        paths.append (candidate.path);
+      }
+    return paths;
+  }
+
+  struct HashSeedSnapshot
+  {
+    QStringList calls;
+    QStringList sources;
+    int filesRead {0};
+    qint64 elapsedMs {0};
+  };
+
+  HashSeedSnapshot collect_initial_hash_seed_snapshot ()
+  {
+    QElapsedTimer timer;
+    timer.start ();
+    HashSeedSnapshot snapshot;
+    for (QString const& path : local_hash_seed_paths ())
+      {
+        if (collect_hash_seed_calls_from_tail (path, snapshot.calls))
+          {
+            ++snapshot.filesRead;
+            snapshot.sources.append (hash_seed_source_label (path));
+          }
+      }
+    snapshot.elapsedMs = timer.elapsed ();
+    return snapshot;
+  }
+
+  HashSeedSnapshot collect_hash_seed_refresh_snapshot ()
+  {
+    QElapsedTimer timer;
+    timer.start ();
+    HashSeedSnapshot snapshot;
+    for (QString const& path : local_hash_seed_refresh_paths ())
+      {
+        if (collect_hash_seed_calls_from_tail (path, snapshot.calls,
+                                               kFt4HashSeedRefreshTailBytes))
+          {
+            ++snapshot.filesRead;
+            snapshot.sources.append (hash_seed_source_label (path));
+          }
+      }
+    snapshot.elapsedMs = timer.elapsed ();
+    return snapshot;
+  }
+
+  struct HashSeedAsyncState
+  {
+    std::mutex mutex;
+    bool initialStarted {false};
+    bool initialApplied {false};
+    std::future<HashSeedSnapshot> initialFuture;
+    qint64 lastRefreshStartMs {0};
+    std::future<HashSeedSnapshot> refreshFuture;
+  };
+
+  HashSeedAsyncState& hash_seed_async_state ()
+  {
+    static HashSeedAsyncState state;
+    return state;
+  }
+
+  template<typename T>
+  bool future_ready (std::future<T>& future)
+  {
+    using namespace std::chrono_literals;
+    return future.valid () && future.wait_for (0ms) == std::future_status::ready;
+  }
+
+  void seed_hash_calls (QStringList const& calls)
+  {
+    for (QString const& call : calls)
+      {
+        QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
+        legacy_pack77_save_hash_call_c (field.constData (), nullptr, nullptr, nullptr);
+        ftx_ft8_stage4_seed_hash_call_c (field.constData ());
+      }
+    if (!calls.isEmpty ())
+      {
+        ftx_ft8_stage4_apply_hash_seed_cache_c ();
+      }
+  }
+
+  void start_ft4_pack77_hash_seed_collection_once ()
+  {
+    HashSeedAsyncState& state = hash_seed_async_state ();
+    std::lock_guard<std::mutex> lock {state.mutex};
+    if (state.initialStarted)
+      {
+        return;
+      }
+    state.initialStarted = true;
+    state.initialFuture = std::async (std::launch::async, [] {
+      return collect_initial_hash_seed_snapshot ();
+    });
+  }
+
+  void apply_ready_ft4_pack77_hash_seed_collection ()
+  {
+    HashSeedSnapshot snapshot;
+    bool haveSnapshot = false;
+    {
+      HashSeedAsyncState& state = hash_seed_async_state ();
+      std::lock_guard<std::mutex> lock {state.mutex};
+      if (!state.initialApplied && future_ready (state.initialFuture))
+        {
+          snapshot = state.initialFuture.get ();
+          state.initialApplied = true;
+          haveSnapshot = true;
+        }
+    }
+    if (!haveSnapshot)
+      {
+        return;
+      }
+
+    seed_hash_calls (snapshot.calls);
+    if (snapshot.filesRead > 0 && !snapshot.calls.isEmpty ())
+      {
+        LOG_INFO ("FT4 pack77 hash seed initialized: calls=" << snapshot.calls.size ()
+                  << " files=" << snapshot.filesRead
+                  << " elapsed_ms=" << snapshot.elapsedMs
+                  << " sources="
+                  << snapshot.sources.join (QStringLiteral (",")).toStdString ());
+      }
+  }
+
+  void start_ft4_hash_context_refresh_from_recent_logs ()
+  {
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
+    HashSeedAsyncState& state = hash_seed_async_state ();
+    std::lock_guard<std::mutex> lock {state.mutex};
+    if (state.refreshFuture.valid ())
+      {
+        if (!future_ready (state.refreshFuture))
+          {
+            return;
+          }
+        return;
+      }
+    if (state.lastRefreshStartMs > 0
+        && nowMs - state.lastRefreshStartMs < kFt4HashSeedRefreshIntervalMs)
+      {
+        return;
+      }
+    state.lastRefreshStartMs = nowMs;
+    state.refreshFuture = std::async (std::launch::async, [] {
+      return collect_hash_seed_refresh_snapshot ();
+    });
+  }
+
+  void apply_ready_ft4_hash_context_refresh ()
+  {
+    HashSeedSnapshot snapshot;
+    bool haveSnapshot = false;
+    {
+      HashSeedAsyncState& state = hash_seed_async_state ();
+      std::lock_guard<std::mutex> lock {state.mutex};
+      if (future_ready (state.refreshFuture))
+        {
+          snapshot = state.refreshFuture.get ();
+          haveSnapshot = true;
+        }
+    }
+    if (!haveSnapshot)
+      {
+        return;
+      }
+
+    seed_hash_calls (snapshot.calls);
+  }
+
+  void seed_ft4_pack77_hashes_from_rows (QStringList const& rows)
+  {
+    QStringList calls;
+    static QRegularExpression const tokenRx {
+      QStringLiteral (R"((?:<[A-Z0-9/]{3,13}>|[A-Z0-9/]{3,13}))")
+    };
+    for (QString const& row : rows)
+      {
+        auto it = tokenRx.globalMatch (row.toUpper ());
+        while (it.hasNext ())
+          {
+            remember_hash_seed_call (calls, it.next ().captured (0));
+          }
+      }
+    seed_hash_calls (calls);
   }
 
   QString build_row (QString const& utcPrefix, char marker, int snr, float dt, float freq,
@@ -204,6 +721,8 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
     }
   apply_decode_thread_limit (request.threadCount);
   int const activeThreads = active_decode_thread_limit ();
+  start_ft4_pack77_hash_seed_collection_once ();
+  start_ft4_hash_context_refresh_from_recent_logs ();
   log_ft4_dsp_rollout_once ();
   QElapsedTimer waitTimer;
   waitTimer.start ();
@@ -215,6 +734,9 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
+  apply_ready_ft4_pack77_hash_seed_collection ();
+  apply_ready_ft4_hash_context_refresh ();
+  ftx_ft8_stage4_apply_hash_seed_cache_c ();
 
   short int iwave[kFt4SampleCount] {};
   int const copyCount = std::min (static_cast<int>(request.audio.size ()), static_cast<int>(kFt4SampleCount));
@@ -282,8 +804,10 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
                  .arg (nfb)
                  .arg (current_thread_id_hex ());
     }
-  Q_EMIT decodeReady (request.serial, build_rows (utcPrefix, nout, snrs, dts, freqs, naps, quals,
-                                                  decodeds));
+  QStringList rows = build_rows (utcPrefix, nout, snrs, dts, freqs, naps, quals,
+                                 decodeds);
+  seed_ft4_pack77_hashes_from_rows (rows);
+  Q_EMIT decodeReady (request.serial, rows);
 }
 
 }

@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QDateTime>
 #include <QPalette>
 #include <QString>
 #include <QStringList>
@@ -99,6 +100,9 @@ public:
                                 const QString& satellite,
                                 const QString& satMode,
                                 bool satelliteValid);
+    void setNextLogPromptTimes(const QDateTime& timeOnUtc,
+                               const QDateTime& timeOffUtc,
+                               bool valid);
     void clearBandActivity();
     void clearRxFrequency();
     void setWaterfallPalette(const QString& palette);
