@@ -841,6 +841,65 @@ ApplicationWindow {
         compactFullSpectrum = !compactFullSpectrum
         persistUiSetting("CompactFullSpectrum", compactFullSpectrum)
     }
+
+    // 1.0.412 — Schermo intero opt-in. Uscita SEMPRE disponibile: tasto F11, Esc, e il
+    // pulsante ✕ dell'overlay in alto. NON persistito (saveWindowState non salva la
+    // visibility) → un riavvio non riparte MAI bloccato in fullscreen senza barra titolo.
+    function toggleFullScreen() {
+        mainWindow.visibility = (mainWindow.visibility === Window.FullScreen)
+            ? Window.Windowed : Window.FullScreen
+    }
+    function exitFullScreen() {
+        if (mainWindow.visibility === Window.FullScreen)
+            mainWindow.visibility = Window.Windowed
+    }
+    Shortcut {
+        sequences: ["F11"]
+        context: Qt.ApplicationShortcut
+        onActivated: mainWindow.toggleFullScreen()
+    }
+    Shortcut {
+        sequence: "Escape"
+        context: Qt.ApplicationShortcut
+        enabled: mainWindow.visibility === Window.FullScreen
+        onActivated: mainWindow.exitFullScreen()
+    }
+    // Overlay di uscita dallo schermo intero: sempre visibile e cliccabile in fullscreen,
+    // così non si resta mai intrappolati senza barra del titolo (lezione stato-finestra).
+    Rectangle {
+        id: fullScreenExitBar
+        visible: mainWindow.visibility === Window.FullScreen
+        z: 100000
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: 8
+        width: fsExitRow.implicitWidth + 26
+        height: 32
+        radius: 16
+        color: Qt.rgba(0, 0, 0, 0.75)
+        border.color: secondaryCyan
+        border.width: 1
+        Row {
+            id: fsExitRow
+            anchors.centerIn: parent
+            spacing: 10
+            Text { text: qsTr("Schermo intero"); color: "#ffffff"; font.pixelSize: 12; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: "F11 / Esc"; color: textSecondary; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
+            Rectangle {
+                width: 24; height: 24; radius: 12
+                anchors.verticalCenter: parent.verticalCenter
+                color: fsExitMA.containsMouse ? bridge.themeManager.ledRed : Qt.rgba(1, 1, 1, 0.18)
+                Text { anchors.centerIn: parent; text: "✕"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
+                MouseArea {
+                    id: fsExitMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: mainWindow.exitFullScreen()
+                }
+            }
+        }
+    }
     // 1.0.253 — Compact mode Signal RX: stesso pattern di Full Spectrum
     // ma indipendente. Opt-in default OFF.
     property bool compactSignalRx: settingBool("CompactSignalRx", false)
@@ -9425,6 +9484,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
     SettingsDialog {
         id: settingsDialog
+        onFullScreenRequested: mainWindow.toggleFullScreen()
     }
 
     // 1.0.195 — QSY Quick Picker (F2 shortcut). Lazy Loader async per evitare

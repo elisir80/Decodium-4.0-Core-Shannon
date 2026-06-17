@@ -10,6 +10,8 @@ import QtQuick.Layouts
 
 Dialog {
     id: settingsDialog
+    // 1.0.412 — richiesta di schermo intero gestita da Main.qml (mainWindow non è in scope qui).
+    signal fullScreenRequested()
     readonly property int popupViewportMargin: 16
     readonly property int popupBaseWidth: (parent && parent.width > 0) ? Math.round(parent.width) : 1440
     readonly property int popupBaseHeight: (parent && parent.height > 0) ? Math.round(parent.height) : 960
@@ -4212,6 +4214,20 @@ Dialog {
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
                             ToolTip.text: qsTr("At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.\n\nReduces stalls on modest PCs.\n\nDefault: OFF. Requires restart.")
+                        }
+                        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+
+                        // 1.0.412 — Schermo intero (opt-in, non persistito: al riavvio torna a finestra)
+                        Text { text: qsTr("Schermo intero:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Button {
+                            Layout.leftMargin: 24
+                            Layout.preferredHeight: controlHeight
+                            text: qsTr("Attiva (F11)")
+                            hoverEnabled: true
+                            onClicked: { settingsDialog.fullScreenRequested(); settingsDialog.close() }
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
