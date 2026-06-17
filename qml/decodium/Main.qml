@@ -7254,7 +7254,7 @@ ApplicationWindow {
                                         Item { Layout.fillWidth: true }
 
                                         Text {
-                                            text: decodePanel.fullSpectrumModelCount() + " decodes"
+                                            text: decodePanel.displayedDecodeCount() +" decodes"
                                             font.pixelSize: 10
                                             color: textSecondary
                                         }
@@ -7370,36 +7370,6 @@ ApplicationWindow {
                                         MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
                                     }
 
-                                    // Drag-reorder libero: controller a livello header, SOTTO le celle
-                                    // in z (così sopravvive al rebuild del Repeater quando l'ordine cambia).
-                                    // Le maniglie di resize (LeftButton, bordo) e i menu (RightButton) hanno
-                                    // priorità; il left-press sull'etichetta cade qui e trascina la colonna.
-                                    MouseArea {
-                                        id: fsDragCtlE
-                                        anchors.fill: parent
-                                        z: -1
-                                        acceptedButtons: Qt.LeftButton
-                                        property string grabId: ""
-                                        property bool reordering: false
-                                        property real pressX: 0
-                                        function colIdAt(px) {
-                                            var p = mapToItem(fsHeaderRowE, px, fsHeaderRowE.height / 2)
-                                            var c = fsHeaderRowE.childAt(p.x, p.y)
-                                            return (c && c.col) ? c.col.id : ""
-                                        }
-                                        onPressed: function(m) { grabId = colIdAt(m.x); pressX = m.x; reordering = false }
-                                        onPositionChanged: function(m) {
-                                            if (grabId === "" || !pressed) return
-                                            if (!reordering && Math.abs(m.x - pressX) < 6) return
-                                            reordering = true
-                                            var overId = colIdAt(m.x)
-                                            if (overId !== "" && overId !== grabId)
-                                                mainWindow.fsMoveColumnToId(grabId, overId)
-                                        }
-                                        onReleased: { if (reordering) mainWindow.fsPersistOrder(); grabId = ""; reordering = false }
-                                        onCanceled: { grabId = ""; reordering = false }
-                                    }
-
                                     RowLayout {
                                         id: fsHeaderRowE
                                         anchors.fill: parent
@@ -7430,46 +7400,99 @@ ApplicationWindow {
                                                     verticalAlignment: Text.AlignVCenter
                                                     elide: Text.ElideRight
                                                 }
-
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    acceptedButtons: Qt.RightButton
-                                                    onClicked: { fsHeaderMenuEmbedded.targetId = fsHCell.col.id; fsHeaderMenuEmbedded.popup() }
-                                                }
-
-                                                MouseArea {
+                                                // Linea divisoria/grip visibile sul bordo destro (zona di resize).
+                                                Rectangle {
                                                     visible: !fsHCell.meta.fill
-                                                    enabled: !fsHCell.meta.fill
-                                                    width: 9
+                                                    width: 1
                                                     anchors.right: parent.right
                                                     anchors.top: parent.top
                                                     anchors.bottom: parent.bottom
-                                                    cursorShape: Qt.SplitHCursor
-                                                    acceptedButtons: Qt.LeftButton
-                                                    preventStealing: true
-                                                    property real pressSceneX: 0
-                                                    property int pressW: 0
-                                                    onPressed: function(m) {
-                                                        pressSceneX = mapToItem(null, m.x, m.y).x
-                                                        pressW = mainWindow.fsColWidth(fsHCell.col.id)
-                                                    }
-                                                    onPositionChanged: function(m) {
-                                                        if (!pressed) return
-                                                        var dx = mapToItem(null, m.x, m.y).x - pressSceneX
-                                                        mainWindow.fsSetColumnWidth(fsHCell.col.id, pressW + dx)
-                                                    }
-                                                    onReleased: mainWindow.fsPersistWidths()
-                                                    Rectangle {
-                                                        anchors.right: parent.right
-                                                        anchors.verticalCenter: parent.verticalCenter
-                                                        width: 1
-                                                        height: Math.round(parent.height * 0.6)
-                                                        color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.35)
-                                                    }
+                                                    anchors.topMargin: 3
+                                                    anchors.bottomMargin: 3
+                                                    color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.45)
                                                 }
                                             }
                                         }
                                     }
+
+                                    // Controller UNICO sopra le celle (z alto, FUORI dal Repeater →
+                                    // sopravvive al rebuild durante il riordino live). Trascina l'etichetta
+                                    // per spostare la colonna (reorder live), trascina il bordo destro per
+                                    // ridimensionare, tasto destro = menu colonne.
+                                    MouseArea {
+                                        id: fsHdrCtlE
+                                            anchors.fill: parent
+                                            z: 100
+                                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                            hoverEnabled: true
+                                            preventStealing: true
+                                            property string grabId: ""
+                                            property bool resizing: false
+                                            property bool reordering: false
+                                            property real pressSceneX: 0
+                                            property int pressW: 0
+                                            function cellAt(localX) {
+                                                var p = mapToItem(fsHeaderRowE, localX, fsHeaderRowE.height / 2)
+                                                return fsHeaderRowE.childAt(p.x, p.y)
+                                            }
+                                            // Colonna il cui BORDO destro è entro ±7px dal cursore (zona resize,
+                                            // copre anche lo spacing fra colonne → facile da agganciare).
+                                            function resizeTargetAt(localX) {
+                                                var p = mapToItem(fsHeaderRowE, localX, 0)
+                                                var kids = fsHeaderRowE.children
+                                                for (var i = 0; i < kids.length; ++i) {
+                                                    var c = kids[i]
+                                                    if (!c || !c.col || mainWindow.fsColMeta(c.col.id).fill) continue
+                                                    if (Math.abs(p.x - (c.x + c.width)) <= 7) return c.col.id
+                                                }
+                                                return ""
+                                            }
+                                            cursorShape: {
+                                                if (resizing) return Qt.SplitHCursor
+                                                if (reordering) return Qt.ClosedHandCursor
+                                                return resizeTargetAt(mouseX) !== "" ? Qt.SplitHCursor : Qt.ArrowCursor
+                                            }
+                                            onPressed: function(m) {
+                                                pressSceneX = mapToItem(null, m.x, m.y).x
+                                                resizing = false; reordering = false
+                                                var rid = resizeTargetAt(m.x)
+                                                if (m.button === Qt.LeftButton && rid !== "") {
+                                                    grabId = rid
+                                                    resizing = true
+                                                    pressW = mainWindow.fsColWidth(rid)
+                                                } else {
+                                                    var c = cellAt(m.x)
+                                                    grabId = (c && c.col) ? c.col.id : ""
+                                                }
+                                            }
+                                            onPositionChanged: function(m) {
+                                                if (!pressed || grabId === "") return
+                                                var sx = mapToItem(null, m.x, m.y).x
+                                                if (resizing) {
+                                                    mainWindow.fsSetColumnWidth(grabId, pressW + (sx - pressSceneX))
+                                                    return
+                                                }
+                                                if (!(pressedButtons & Qt.LeftButton)) return
+                                                if (!reordering && Math.abs(sx - pressSceneX) < 6) return
+                                                reordering = true
+                                                var c = cellAt(m.x)
+                                                var overId = (c && c.col) ? c.col.id : ""
+                                                if (overId !== "" && overId !== grabId)
+                                                    mainWindow.fsMoveColumnToId(grabId, overId)
+                                            }
+                                            onReleased: function(m) {
+                                                if (resizing) mainWindow.fsPersistWidths()
+                                                else if (reordering) mainWindow.fsPersistOrder()
+                                                grabId = ""; resizing = false; reordering = false
+                                            }
+                                            onCanceled: { grabId = ""; resizing = false; reordering = false }
+                                            onClicked: function(m) {
+                                                if (m.button === Qt.RightButton) {
+                                                    var c = cellAt(m.x)
+                                                    if (c && c.col) { fsHeaderMenuEmbedded.targetId = c.col.id; fsHeaderMenuEmbedded.popup() }
+                                                }
+                                            }
+                                        }
                                 }
 
                                 // Even Period List
@@ -12039,7 +12062,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 
 	                            Text {
 	                                visible: period1FloatingWindow.width >= 470
-	                                text: decodePanel.fullSpectrumModelCount() + " " + qsTr("decodes")
+	                                text: decodePanel.displayedDecodeCount() +" " + qsTr("decodes")
 	                                font.pixelSize: 10
 	                                color: textSecondary
 	                            }
@@ -12177,32 +12200,6 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
                     }
 
-                    MouseArea {
-                        id: fsDragCtlF
-                        anchors.fill: parent
-                        z: -1
-                        acceptedButtons: Qt.LeftButton
-                        property string grabId: ""
-                        property bool reordering: false
-                        property real pressX: 0
-                        function colIdAt(px) {
-                            var p = mapToItem(fsHeaderRowF, px, fsHeaderRowF.height / 2)
-                            var c = fsHeaderRowF.childAt(p.x, p.y)
-                            return (c && c.col) ? c.col.id : ""
-                        }
-                        onPressed: function(m) { grabId = colIdAt(m.x); pressX = m.x; reordering = false }
-                        onPositionChanged: function(m) {
-                            if (grabId === "" || !pressed) return
-                            if (!reordering && Math.abs(m.x - pressX) < 6) return
-                            reordering = true
-                            var overId = colIdAt(m.x)
-                            if (overId !== "" && overId !== grabId)
-                                mainWindow.fsMoveColumnToId(grabId, overId)
-                        }
-                        onReleased: { if (reordering) mainWindow.fsPersistOrder(); grabId = ""; reordering = false }
-                        onCanceled: { grabId = ""; reordering = false }
-                    }
-
                     RowLayout {
                         id: fsHeaderRowF
                         anchors.fill: parent
@@ -12232,41 +12229,93 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                     verticalAlignment: Text.AlignVCenter
                                     elide: Text.ElideRight
                                 }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    acceptedButtons: Qt.RightButton
-                                    onClicked: { fsHeaderMenuFloating.targetId = fsHCellF.col.id; fsHeaderMenuFloating.popup() }
-                                }
-                                MouseArea {
+                                // Linea divisoria/grip visibile sul bordo destro (zona di resize).
+                                Rectangle {
                                     visible: !fsHCellF.meta.fill
-                                    enabled: !fsHCellF.meta.fill
-                                    width: 9
+                                    width: 1
                                     anchors.right: parent.right
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
-                                    cursorShape: Qt.SplitHCursor
-                                    acceptedButtons: Qt.LeftButton
-                                    preventStealing: true
-                                    property real pressSceneX: 0
-                                    property int pressW: 0
-                                    onPressed: function(m) {
-                                        pressSceneX = mapToItem(null, m.x, m.y).x
-                                        pressW = mainWindow.fsColWidth(fsHCellF.col.id)
-                                    }
-                                    onPositionChanged: function(m) {
-                                        if (!pressed) return
-                                        var dx = mapToItem(null, m.x, m.y).x - pressSceneX
-                                        mainWindow.fsSetColumnWidth(fsHCellF.col.id, pressW + dx)
-                                    }
-                                    onReleased: mainWindow.fsPersistWidths()
-                                    Rectangle {
-                                        anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 1
-                                        height: Math.round(parent.height * 0.6)
-                                        color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.35)
-                                    }
+                                    anchors.topMargin: 3
+                                    anchors.bottomMargin: 3
+                                    color: Qt.rgba(bridge.themeManager.successColor.r, bridge.themeManager.successColor.g, bridge.themeManager.successColor.b, 0.45)
                                 }
+                            }
+                        }
+                    }
+
+                    // Controller UNICO sopra le celle (floating): trascina l'etichetta per
+                    // riordinare (live, fuori dal Repeater), il bordo destro per ridimensionare,
+                    // tasto destro = menu colonne.
+                    MouseArea {
+                        id: fsHdrCtlF
+                        anchors.fill: parent
+                        z: 100
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        hoverEnabled: true
+                        preventStealing: true
+                        property string grabId: ""
+                        property bool resizing: false
+                        property bool reordering: false
+                        property real pressSceneX: 0
+                        property int pressW: 0
+                        function cellAt(localX) {
+                            var p = mapToItem(fsHeaderRowF, localX, fsHeaderRowF.height / 2)
+                            return fsHeaderRowF.childAt(p.x, p.y)
+                        }
+                        function resizeTargetAt(localX) {
+                            var p = mapToItem(fsHeaderRowF, localX, 0)
+                            var kids = fsHeaderRowF.children
+                            for (var i = 0; i < kids.length; ++i) {
+                                var c = kids[i]
+                                if (!c || !c.col || mainWindow.fsColMeta(c.col.id).fill) continue
+                                if (Math.abs(p.x - (c.x + c.width)) <= 7) return c.col.id
+                            }
+                            return ""
+                        }
+                        cursorShape: {
+                            if (resizing) return Qt.SplitHCursor
+                            if (reordering) return Qt.ClosedHandCursor
+                            return resizeTargetAt(mouseX) !== "" ? Qt.SplitHCursor : Qt.ArrowCursor
+                        }
+                        onPressed: function(m) {
+                            pressSceneX = mapToItem(null, m.x, m.y).x
+                            resizing = false; reordering = false
+                            var rid = resizeTargetAt(m.x)
+                            if (m.button === Qt.LeftButton && rid !== "") {
+                                grabId = rid
+                                resizing = true
+                                pressW = mainWindow.fsColWidth(rid)
+                            } else {
+                                var c = cellAt(m.x)
+                                grabId = (c && c.col) ? c.col.id : ""
+                            }
+                        }
+                        onPositionChanged: function(m) {
+                            if (!pressed || grabId === "") return
+                            var sx = mapToItem(null, m.x, m.y).x
+                            if (resizing) {
+                                mainWindow.fsSetColumnWidth(grabId, pressW + (sx - pressSceneX))
+                                return
+                            }
+                            if (!(pressedButtons & Qt.LeftButton)) return
+                            if (!reordering && Math.abs(sx - pressSceneX) < 6) return
+                            reordering = true
+                            var c = cellAt(m.x)
+                            var overId = (c && c.col) ? c.col.id : ""
+                            if (overId !== "" && overId !== grabId)
+                                mainWindow.fsMoveColumnToId(grabId, overId)
+                        }
+                        onReleased: function(m) {
+                            if (resizing) mainWindow.fsPersistWidths()
+                            else if (reordering) mainWindow.fsPersistOrder()
+                            grabId = ""; resizing = false; reordering = false
+                        }
+                        onCanceled: { grabId = ""; resizing = false; reordering = false }
+                        onClicked: function(m) {
+                            if (m.button === Qt.RightButton) {
+                                var c = cellAt(m.x)
+                                if (c && c.col) { fsHeaderMenuFloating.targetId = c.col.id; fsHeaderMenuFloating.popup() }
                             }
                         }
                     }

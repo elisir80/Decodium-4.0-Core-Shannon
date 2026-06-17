@@ -404,7 +404,7 @@ bool ft4_ldpc_norder3_fallback_enabled ()
       {
         return true;
       }
-    return ft4_hardware_threads () >= 4;
+    return ft4_hardware_threads () >= 8;
   }();
   return enabled;
 }
