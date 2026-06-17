@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <chrono>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
@@ -47,6 +48,25 @@ constexpr float kFt4SyncThresholdDeep {0.75f};
 constexpr float kFt4SnrFloor {-26.0f};
 constexpr float kFt4DecodeScale {2.83f};
 constexpr float kFt4SamplesPerSecond {666.67f};
+constexpr float kFt4LdpcNorder4FallbackSyncMin {1.80f};
+constexpr float kFt4LdpcNorder4FallbackStrongSyncMin {2.15f};
+constexpr float kFt4LdpcNorder4FallbackMinCandidateSnr {2.5f};
+constexpr float kFt4LdpcNorder4FallbackMaxosd3SyncMin {1.75f};
+constexpr float kFt4LdpcNorder4FallbackMaxosd3MinCandidateSnr {2.5f};
+constexpr float kFt4LdpcNorder4FallbackStrongSyncMaxosd3SyncMin {2.35f};
+constexpr float kFt4LdpcNorder4FallbackStrongSyncMaxosd3MinCandidateSnr {0.0f};
+constexpr float kFt4LdpcNorder4FallbackGridMaxosd3SyncMin {1.70f};
+constexpr float kFt4LdpcNorder4FallbackGridMinCandidateSnr {-0.10f};
+constexpr float kFt4LdpcNorder4FallbackGridMaxCandidateSnr {0.25f};
+constexpr float kFt4LdpcNorder4FallbackGridEdgeLowHz {360.0f};
+constexpr float kFt4LdpcNorder4FallbackGridEdgeHighHz {5000.0f};
+constexpr float kFt4LdpcNorder4FallbackLowAudioMinHz {500.0f};
+constexpr float kFt4LdpcNorder4FallbackLowAudioMaxHz {700.0f};
+constexpr float kFt4LdpcNorder4FallbackLowAudioSyncMin {1.60f};
+constexpr int kFt4ExtraLdpcFallbackBudgetMs {1400};
+constexpr int kFt4ExtraLdpcFallbackFastBudgetMs {2400};
+constexpr int kFt4ExtraLdpcFallbackDeadlineMs {5600};
+constexpr int kFt4ExtraLdpcFallbackFastDeadlineMs {6600};
 
 using Complex = std::complex<float>;
 
@@ -141,6 +161,23 @@ bool is_report_token (std::string const& word)
       ++pos;
     }
   return pos == word.size () && pos > digitStart && pos - digitStart <= 2;
+}
+
+std::vector<std::string> split_words (std::string const& text)
+{
+  std::vector<std::string> words;
+  std::istringstream stream {text};
+  std::string word;
+  while (stream >> word)
+    {
+      words.push_back (word);
+    }
+  return words;
+}
+
+bool is_rr73_token (std::string const& word)
+{
+  return word == "RR73" || word == "73" || word == "RRR";
 }
 
 bool looks_like_pack77_hash_call_seed (std::string const& call)
@@ -391,6 +428,24 @@ bool ft4_late_fine_grid_enabled ()
   return enabled;
 }
 
+bool ft4_wide_late_dt_enabled ()
+{
+  static bool const enabled = [] {
+    char const* const disabled = std::getenv ("DECODIUM_FT4_DISABLE_WIDE_LATE_DT");
+    if (disabled && std::atoi (disabled) != 0)
+      {
+        return false;
+      }
+    char const* const force = std::getenv ("DECODIUM_FT4_FORCE_WIDE_LATE_DT");
+    if (force && std::atoi (force) != 0)
+      {
+        return true;
+      }
+    return ft4_hardware_threads () >= 4;
+  }();
+  return enabled;
+}
+
 bool ft4_ldpc_norder3_fallback_enabled ()
 {
   static bool const enabled = [] {
@@ -407,6 +462,62 @@ bool ft4_ldpc_norder3_fallback_enabled ()
     return ft4_hardware_threads () >= 8;
   }();
   return enabled;
+}
+
+bool ft4_ldpc_norder4_fallback_enabled ()
+{
+  static bool const enabled = [] {
+    char const* const disabled = std::getenv ("DECODIUM_FT4_DISABLE_LDPC_NORDER4_FALLBACK");
+    if (disabled && std::atoi (disabled) != 0)
+      {
+        return false;
+      }
+    char const* const force = std::getenv ("DECODIUM_FT4_FORCE_LDPC_NORDER4_FALLBACK");
+    if (force && std::atoi (force) != 0)
+      {
+        return true;
+      }
+    return ft4_hardware_threads () >= 8;
+  }();
+  return enabled;
+}
+
+int ft4_extra_ldpc_fallback_budget_ms ()
+{
+  static int const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_EXTRA_LDPC_BUDGET_MS");
+    if (raw)
+      {
+        int const parsed = std::atoi (raw);
+        if (parsed >= 0 && parsed <= 7000)
+          {
+            return parsed;
+          }
+      }
+    return ft4_hardware_threads () >= 16
+        ? kFt4ExtraLdpcFallbackFastBudgetMs
+        : kFt4ExtraLdpcFallbackBudgetMs;
+  }();
+  return value;
+}
+
+int ft4_extra_ldpc_fallback_deadline_ms ()
+{
+  static int const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_EXTRA_LDPC_DEADLINE_MS");
+    if (raw)
+      {
+        int const parsed = std::atoi (raw);
+        if (parsed >= 0 && parsed <= 9000)
+          {
+            return parsed;
+          }
+      }
+    return ft4_hardware_threads () >= 16
+        ? kFt4ExtraLdpcFallbackFastDeadlineMs
+        : kFt4ExtraLdpcFallbackDeadlineMs;
+  }();
+  return value;
 }
 
 int ft4_ldpc_maxosd_override ()
@@ -463,6 +574,186 @@ float ft4_ldpc_fallback_sync_min ()
     return (parsed >= 0.0f && parsed <= 5.0f) ? parsed : kFt4LdpcFallbackSyncMin;
   }();
   return value;
+}
+
+float ft4_ldpc_norder4_fallback_sync_min ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_FALLBACK_SYNC_MIN");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackSyncMin;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= 0.0f && parsed <= 5.0f) ? parsed : kFt4LdpcNorder4FallbackSyncMin;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_strong_sync_min ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_FALLBACK_STRONG_SYNC_MIN");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackStrongSyncMin;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= 0.0f && parsed <= 5.0f) ? parsed : kFt4LdpcNorder4FallbackStrongSyncMin;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_min_candidate_snr ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_FALLBACK_MIN_CAND_SNR");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackMinCandidateSnr;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= -5.0f && parsed <= 20.0f) ? parsed : kFt4LdpcNorder4FallbackMinCandidateSnr;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_maxosd3_sync_min ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_MAXOSD3_SYNC_MIN");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackMaxosd3SyncMin;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= 0.0f && parsed <= 5.0f) ? parsed : kFt4LdpcNorder4FallbackMaxosd3SyncMin;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_maxosd3_min_candidate_snr ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_MAXOSD3_MIN_CAND_SNR");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackMaxosd3MinCandidateSnr;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= -5.0f && parsed <= 20.0f) ? parsed : kFt4LdpcNorder4FallbackMaxosd3MinCandidateSnr;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_strong_sync_maxosd3_sync_min ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_STRONG_SYNC_MAXOSD3_SYNC_MIN");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackStrongSyncMaxosd3SyncMin;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= 0.0f && parsed <= 5.0f) ? parsed : kFt4LdpcNorder4FallbackStrongSyncMaxosd3SyncMin;
+  }();
+  return value;
+}
+
+float ft4_ldpc_norder4_fallback_strong_sync_maxosd3_min_candidate_snr ()
+{
+  static float const value = [] {
+    char const* const raw = std::getenv ("DECODIUM_FT4_LDPC_NORDER4_STRONG_SYNC_MAXOSD3_MIN_CAND_SNR");
+    if (!raw)
+      {
+        return kFt4LdpcNorder4FallbackStrongSyncMaxosd3MinCandidateSnr;
+      }
+    float const parsed = static_cast<float> (std::atof (raw));
+    return (parsed >= -5.0f && parsed <= 20.0f)
+        ? parsed
+        : kFt4LdpcNorder4FallbackStrongSyncMaxosd3MinCandidateSnr;
+  }();
+  return value;
+}
+
+bool ft4_ldpc_norder4_fallback_strong_sync_candidate (float candidate_snr, float sync)
+{
+  return candidate_snr >= ft4_ldpc_norder4_fallback_strong_sync_maxosd3_min_candidate_snr ()
+         && sync >= ft4_ldpc_norder4_fallback_strong_sync_maxosd3_sync_min ();
+}
+
+bool ft4_ldpc_norder4_grid_edge_fallback_enabled ()
+{
+  static bool const enabled = [] {
+    char const* const disabled = std::getenv ("DECODIUM_FT4_DISABLE_GRID_EDGE_FALLBACK");
+    if (disabled && std::atoi (disabled) != 0)
+      {
+        return false;
+      }
+    char const* const force = std::getenv ("DECODIUM_FT4_FORCE_GRID_EDGE_FALLBACK");
+    if (force && std::atoi (force) != 0)
+      {
+        return true;
+      }
+    return ft4_hardware_threads () >= 16;
+  }();
+  return enabled;
+}
+
+bool ft4_ldpc_norder4_fallback_grid_candidate (float candidate_snr, float sync, float freq)
+{
+  if (!ft4_ldpc_norder4_grid_edge_fallback_enabled ())
+    {
+      return false;
+    }
+  bool const edge_candidate = freq <= kFt4LdpcNorder4FallbackGridEdgeLowHz
+                              || freq >= kFt4LdpcNorder4FallbackGridEdgeHighHz;
+  return candidate_snr >= kFt4LdpcNorder4FallbackGridMinCandidateSnr
+         && candidate_snr <= kFt4LdpcNorder4FallbackGridMaxCandidateSnr
+         && sync >= kFt4LdpcNorder4FallbackGridMaxosd3SyncMin
+         && edge_candidate;
+}
+
+bool ft4_ldpc_norder4_low_audio_retry_candidate (float candidate_snr, float sync, float freq)
+{
+  return ft4_hardware_threads () >= 8
+         && freq >= kFt4LdpcNorder4FallbackLowAudioMinHz
+         && freq <= kFt4LdpcNorder4FallbackLowAudioMaxHz
+         && candidate_snr >= kFt4LdpcNorder4FallbackGridMinCandidateSnr
+         && candidate_snr <= kFt4LdpcNorder4FallbackGridMaxCandidateSnr
+         && sync >= kFt4LdpcNorder4FallbackLowAudioSyncMin;
+}
+
+bool ft4_ldpc_norder4_fallback_candidate_allowed (float candidate_snr, float sync, int maxosd,
+                                                  float freq)
+{
+  if (candidate_snr >= ft4_ldpc_norder4_fallback_min_candidate_snr ())
+    {
+      return true;
+    }
+  if (maxosd == 2
+      && (ft4_ldpc_norder4_fallback_strong_sync_candidate (candidate_snr, sync)
+          || ft4_ldpc_norder4_fallback_grid_candidate (candidate_snr, sync, freq)))
+    {
+      return true;
+    }
+  return maxosd >= 3 && sync >= ft4_ldpc_norder4_fallback_strong_sync_min ();
+}
+
+int ft4_ldpc_norder4_fallback_maxosd (int maxosd, float candidate_snr, float sync, float freq)
+{
+  if (maxosd != 2)
+    {
+      return maxosd;
+    }
+  if ((candidate_snr >= ft4_ldpc_norder4_fallback_maxosd3_min_candidate_snr ()
+      && sync >= ft4_ldpc_norder4_fallback_maxosd3_sync_min ())
+      || ft4_ldpc_norder4_fallback_strong_sync_candidate (candidate_snr, sync)
+      || ft4_ldpc_norder4_fallback_grid_candidate (candidate_snr, sync, freq))
+    {
+      return 3;
+    }
+  return maxosd;
 }
 
 void append_ft4_harvest_grid_candidates (int depth, int nfa, int nfb, bool include_fine_grid,
@@ -1069,9 +1360,52 @@ bool is_duplicate (std::vector<std::string> const& seen, std::string const& deco
   return std::find (seen.begin (), seen.end (), decoded) != seen.end ();
 }
 
+std::vector<Ft4DecodeLine> expand_ft4_compound_line (Ft4DecodeLine const& line)
+{
+  std::string const decoded = normalize_expected_target_text (line.decoded);
+  size_t const semicolon = decoded.find (';');
+  if (semicolon == std::string::npos || decoded.find (';', semicolon + 1) != std::string::npos)
+    {
+      return {};
+    }
+
+  std::vector<std::string> const left = split_words (decoded.substr (0, semicolon));
+  std::vector<std::string> const right = split_words (decoded.substr (semicolon + 1));
+  if (left.size () != 2 || right.size () < 3)
+    {
+      return {};
+    }
+  if (!looks_like_pack77_hash_call_seed (left[0])
+      || !is_rr73_token (left[1])
+      || !looks_like_pack77_hash_call_seed (right[0])
+      || !looks_like_pack77_hash_call_seed (right[1])
+      || (!is_report_token (right[2]) && !is_rr73_token (right[2])))
+    {
+      return {};
+    }
+
+  Ft4DecodeLine first = line;
+  Ft4DecodeLine second = line;
+  first.decoded = fixed_latin1 (left[0] + " " + right[1] + " " + left[1] + " 1",
+                                kFt4DecodedChars);
+  second.decoded = fixed_latin1 (right[0] + " " + right[1] + " " + right[2] + " 1",
+                                 kFt4DecodedChars);
+  return {first, second};
+}
+
 bool append_line (Ft4DecodeLine const& line, std::vector<Ft4DecodeLine>& lines,
                   std::vector<std::string>& seen)
 {
+  std::vector<Ft4DecodeLine> const expanded = expand_ft4_compound_line (line);
+  if (!expanded.empty ())
+    {
+      bool appended = false;
+      for (Ft4DecodeLine const& expanded_line : expanded)
+        {
+          appended = append_line (expanded_line, lines, seen) || appended;
+        }
+      return appended;
+    }
   if (is_duplicate (seen, line.decoded))
     {
       return false;
@@ -1099,6 +1433,20 @@ void run_ft4_decode (short const* iwave,
 
   Ft4State& state = ft4_state ();
   ensure_tweaks (state);
+  auto const decode_started_at = std::chrono::steady_clock::now ();
+  int extra_ldpc_elapsed_ms = 0;
+  int const extra_ldpc_budget_ms = ft4_extra_ldpc_fallback_budget_ms ();
+  int const extra_ldpc_deadline_ms = ft4_extra_ldpc_fallback_deadline_ms ();
+  auto decode_elapsed_ms = [&] {
+    return static_cast<int> (std::chrono::duration_cast<std::chrono::milliseconds> (
+        std::chrono::steady_clock::now () - decode_started_at).count ());
+  };
+  auto extra_ldpc_budget_available = [&] {
+    return extra_ldpc_budget_ms > 0
+           && extra_ldpc_elapsed_ms < extra_ldpc_budget_ms
+           && extra_ldpc_deadline_ms > 0
+           && decode_elapsed_ms () < extra_ldpc_deadline_ms;
+  };
 
   char mycall_c[13];
   char hiscall_c[13];
@@ -1170,7 +1518,9 @@ void run_ft4_decode (short const* iwave,
       else if (isp == 3)
         {
           nd2 = ndecodes - nd1;
-          if (nd2 == 0)
+          if (nd2 == 0
+              && !(depth >= 4 && ft4_late_fine_grid_enabled ()
+                   && ft4_hardware_threads () >= 8))
             {
               break;
             }
@@ -1252,6 +1602,10 @@ void run_ft4_decode (short const* iwave,
                         {
                           ibmin = 560;
                           ibmax = 1012;
+                          if (ft4_wide_late_dt_enabled ())
+                            {
+                              ibmax = 1120;
+                            }
                         }
                       else
                         {
@@ -1631,26 +1985,26 @@ void run_ft4_decode (short const* iwave,
                       ndeep = norder_override;
                     }
                   int ntype = 0;
-	                  decode174_91_ (llr.data (), &Keff, &maxosd, &ndeep, apmask.data (),
-	                                 message91.data (), cw.data (), &ntype, &nharderror, &dmin);
-	                  if (trace_target)
-	                    {
-	                      trace_ft4_expected_target (*trace_target, "ldpc-result",
-	                                                 [&] (std::ostream& out) {
-	                        out << " isp=" << isp
-	                            << " icand=" << icand
-	                            << " iseg=" << iseg
-	                            << " ipass=" << ipass
-	                            << " iaptype=" << iaptype
-	                            << " f1=" << f1
-	                            << " dt=" << callback_dt
-	                            << " ntype=" << ntype
-	                            << " nharderror=" << nharderror
-	                            << " dmin=" << dmin
-	                            << " maxosd=" << maxosd
-	                            << " norder=" << ndeep;
-	                      });
-	                    }
+                  decode174_91_ (llr.data (), &Keff, &maxosd, &ndeep, apmask.data (),
+                                 message91.data (), cw.data (), &ntype, &nharderror, &dmin);
+                  if (trace_target)
+                    {
+                      trace_ft4_expected_target (*trace_target, "ldpc-result",
+                                                 [&] (std::ostream& out) {
+                        out << " isp=" << isp
+                            << " icand=" << icand
+                            << " iseg=" << iseg
+                            << " ipass=" << ipass
+                            << " iaptype=" << iaptype
+                            << " f1=" << f1
+                            << " dt=" << callback_dt
+                            << " ntype=" << ntype
+                            << " nharderror=" << nharderror
+                            << " dmin=" << dmin
+                            << " maxosd=" << maxosd
+                            << " norder=" << ndeep;
+                      });
+                    }
 
                   if (ntype == 0
                       && norder_override == -999
@@ -1661,7 +2015,7 @@ void run_ft4_decode (short const* iwave,
                       && ipass <= 3
                       && ndeep < 3
                       && maxosd >= 0
-	                      && smax >= ft4_ldpc_fallback_sync_min ())
+                      && smax >= ft4_ldpc_fallback_sync_min ())
                     {
                       std::array<signed char, kFt4K> fallback_message91 {};
                       std::array<signed char, 2 * kFt4Nd> fallback_cw {};
@@ -1707,6 +2061,127 @@ void run_ft4_decode (short const* iwave,
                         }
                     }
 
+                  if (ntype == 0
+                      && norder_override == -999
+                      && depth >= 4
+                      && iaptype == 0
+                      && ipass <= 3
+                      && maxosd >= 0
+                      && extra_ldpc_deadline_ms > 0
+                      && decode_elapsed_ms () < extra_ldpc_deadline_ms
+                      && ft4_ldpc_norder4_low_audio_retry_candidate (snr, smax, f1))
+                    {
+                      std::array<signed char, kFt4K> fallback_message91 {};
+                      std::array<signed char, 2 * kFt4Nd> fallback_cw {};
+                      float fallback_dmin = 0.0f;
+                      int fallback_Keff = Keff;
+                      int fallback_maxosd = 3;
+                      int fallback_norder = 4;
+                      int fallback_ntype = 0;
+                      int fallback_nharderror = -1;
+                      auto const extra_ldpc_started_at = std::chrono::steady_clock::now ();
+                      decode174_91_ (llr.data (), &fallback_Keff, &fallback_maxosd,
+                                     &fallback_norder, apmask.data (),
+                                     fallback_message91.data (), fallback_cw.data (),
+                                     &fallback_ntype, &fallback_nharderror,
+                                     &fallback_dmin);
+                      extra_ldpc_elapsed_ms += static_cast<int> (
+                          std::chrono::duration_cast<std::chrono::milliseconds> (
+                              std::chrono::steady_clock::now () - extra_ldpc_started_at).count ());
+                      if (trace_target)
+                        {
+                          trace_ft4_expected_target (*trace_target, "ldpc-low-audio-retry-result",
+                                                     [&] (std::ostream& out) {
+                            out << " isp=" << isp
+                                << " icand=" << icand
+                                << " iseg=" << iseg
+                                << " ipass=" << ipass
+                                << " iaptype=" << iaptype
+                                << " f1=" << f1
+                                << " dt=" << callback_dt
+                                << " ntype=" << fallback_ntype
+                                << " nharderror=" << fallback_nharderror
+                                << " dmin=" << fallback_dmin
+                                << " maxosd=" << fallback_maxosd
+                                << " norder=" << fallback_norder;
+                          });
+                        }
+                      if (fallback_ntype != 0 || fallback_nharderror >= 0)
+                        {
+                          message91 = fallback_message91;
+                          cw = fallback_cw;
+                          ntype = fallback_ntype;
+                          nharderror = fallback_nharderror;
+                          dmin = fallback_dmin;
+                          Keff = fallback_Keff;
+                          maxosd = fallback_maxosd;
+                          ndeep = fallback_norder;
+                        }
+                    }
+
+                  if (ntype == 0
+                      && norder_override == -999
+                      && ft4_ldpc_norder4_fallback_enabled ()
+                      && extra_ldpc_budget_available ()
+                      // Some weak FT4 finals decode only with OSD order 4 even
+                      // when the UI profile is the normal deep depth-3 path.
+                      // Keep this fast-machine only via
+                      // ft4_ldpc_norder4_fallback_enabled() and the live budget.
+                      && depth >= 3
+                      && iaptype == 0
+                      && ipass <= 3
+                      && maxosd >= 0
+                      && ft4_ldpc_norder4_fallback_candidate_allowed (snr, smax, maxosd, f1)
+                      && smax >= ft4_ldpc_norder4_fallback_sync_min ())
+                    {
+                      std::array<signed char, kFt4K> fallback_message91 {};
+                      std::array<signed char, 2 * kFt4Nd> fallback_cw {};
+                      float fallback_dmin = 0.0f;
+                      int fallback_Keff = Keff;
+                      int fallback_maxosd = ft4_ldpc_norder4_fallback_maxosd (maxosd, snr, smax, f1);
+                      int fallback_norder = 4;
+                      int fallback_ntype = 0;
+                      int fallback_nharderror = -1;
+                      auto const extra_ldpc_started_at = std::chrono::steady_clock::now ();
+                      decode174_91_ (llr.data (), &fallback_Keff, &fallback_maxosd,
+                                     &fallback_norder, apmask.data (),
+                                     fallback_message91.data (), fallback_cw.data (),
+                                     &fallback_ntype, &fallback_nharderror,
+                                     &fallback_dmin);
+                      extra_ldpc_elapsed_ms += static_cast<int> (
+                          std::chrono::duration_cast<std::chrono::milliseconds> (
+                              std::chrono::steady_clock::now () - extra_ldpc_started_at).count ());
+                      if (trace_target)
+                        {
+                          trace_ft4_expected_target (*trace_target, "ldpc-norder4-fallback-result",
+                                                     [&] (std::ostream& out) {
+                            out << " isp=" << isp
+                                << " icand=" << icand
+                                << " iseg=" << iseg
+                                << " ipass=" << ipass
+                                << " iaptype=" << iaptype
+                                << " f1=" << f1
+                                << " dt=" << callback_dt
+                                << " ntype=" << fallback_ntype
+                                << " nharderror=" << fallback_nharderror
+                                << " dmin=" << fallback_dmin
+                                << " maxosd=" << fallback_maxosd
+                                << " norder=" << fallback_norder;
+                          });
+                        }
+                      if (fallback_ntype != 0 || fallback_nharderror >= 0)
+                        {
+                          message91 = fallback_message91;
+                          cw = fallback_cw;
+                          ntype = fallback_ntype;
+                          nharderror = fallback_nharderror;
+                          dmin = fallback_dmin;
+                          Keff = fallback_Keff;
+                          maxosd = fallback_maxosd;
+                          ndeep = fallback_norder;
+                        }
+                    }
+
                   std::array<signed char, kFt4Bits> message77 {};
                   std::copy_n (message91.begin (), kFt4Bits, message77.begin ());
                   bool all_zero = true;
@@ -1718,26 +2193,26 @@ void run_ft4_decode (short const* iwave,
                           break;
                         }
                     }
-	                  if (all_zero)
-	                    {
-	                      if (trace_target)
-	                        {
-	                          trace_ft4_expected_target (*trace_target, "ldpc-zero",
-	                                                     [&] (std::ostream& out) {
-	                            out << " isp=" << isp
-	                                << " icand=" << icand
-	                                << " iseg=" << iseg
-	                                << " ipass=" << ipass
-	                                << " iaptype=" << iaptype
-	                                << " f1=" << f1
-	                                << " dt=" << callback_dt;
-	                          });
-	                        }
-	                      continue;
-	                    }
+                  if (all_zero)
+                    {
+                      if (trace_target)
+                        {
+                          trace_ft4_expected_target (*trace_target, "ldpc-zero",
+                                                     [&] (std::ostream& out) {
+                            out << " isp=" << isp
+                                << " icand=" << icand
+                                << " iseg=" << iseg
+                                << " ipass=" << ipass
+                                << " iaptype=" << iaptype
+                                << " f1=" << f1
+                                << " dt=" << callback_dt;
+                          });
+                        }
+                      continue;
+                    }
 
-	                  if (nharderror >= 0)
-	                    {
+                  if (nharderror >= 0)
+                    {
                       for (int i = 0; i < kFt4Bits; ++i)
                         {
                           message77[static_cast<size_t> (i)] =
@@ -1745,43 +2220,43 @@ void run_ft4_decode (short const* iwave,
                                                          + kFt4Rvec[static_cast<size_t> (i)]) & 1);
                         }
 
-	                      std::string message_fixed;
-	                      if (!unpack_message77_with_context (message77, &message_fixed))
-	                        {
-	                          if (trace_target)
-	                            {
-	                              trace_ft4_expected_target (*trace_target, "unpack-fail",
-	                                                         [&] (std::ostream& out) {
-	                                out << " isp=" << isp
-	                                    << " icand=" << icand
-	                                    << " iseg=" << iseg
-	                                    << " ipass=" << ipass
-	                                    << " iaptype=" << iaptype
-	                                    << " f1=" << f1
-	                                    << " dt=" << callback_dt;
-	                              });
-	                            }
-	                          break;
-	                        }
-	                      if (trace_target)
-	                        {
-	                          trace_ft4_expected_target (*trace_target, "decode-success",
-	                                                     [&] (std::ostream& out) {
-	                            out << " isp=" << isp
-	                                << " icand=" << icand
-	                                << " iseg=" << iseg
-	                                << " ipass=" << ipass
-	                                << " iaptype=" << iaptype
-	                                << " f1=" << f1
-	                                << " dt=" << callback_dt
-	                                << " decoded=\""
-	                                << normalize_expected_target_text (message_fixed)
-	                                << "\" expected_match="
-	                                << (ft4_expected_message_matches (*trace_target, message_fixed) ? 1 : 0);
-	                          });
-	                        }
+                      std::string message_fixed;
+                      if (!unpack_message77_with_context (message77, &message_fixed))
+                        {
+                          if (trace_target)
+                            {
+                              trace_ft4_expected_target (*trace_target, "unpack-fail",
+                                                         [&] (std::ostream& out) {
+                                out << " isp=" << isp
+                                    << " icand=" << icand
+                                    << " iseg=" << iseg
+                                    << " ipass=" << ipass
+                                    << " iaptype=" << iaptype
+                                    << " f1=" << f1
+                                    << " dt=" << callback_dt;
+                              });
+                            }
+                          break;
+                        }
+                      if (trace_target)
+                        {
+                          trace_ft4_expected_target (*trace_target, "decode-success",
+                                                     [&] (std::ostream& out) {
+                            out << " isp=" << isp
+                                << " icand=" << icand
+                                << " iseg=" << iseg
+                                << " ipass=" << ipass
+                                << " iaptype=" << iaptype
+                                << " f1=" << f1
+                                << " dt=" << callback_dt
+                                << " decoded=\""
+                                << normalize_expected_target_text (message_fixed)
+                                << "\" expected_match="
+                                << (ft4_expected_message_matches (*trace_target, message_fixed) ? 1 : 0);
+                          });
+                        }
 
-	                      Ft4DecodeLine line;
+                      Ft4DecodeLine line;
                       line.sync = smax;
                       if (snr > 0.0f)
                         {

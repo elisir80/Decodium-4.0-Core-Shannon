@@ -5,7 +5,7 @@
   #define AppName "Decodium"
 #endif
 #ifndef AppVersion
-  #define AppVersion "1.0.414"
+  #define AppVersion "1.0.415"
 #endif
 #ifndef AppPublisher
   #define AppPublisher "IU8LMC"
@@ -74,6 +74,13 @@ Type: filesandordirs; Name: "{localappdata}\IU8LMC\Decodium\cache\qmlcache"
 Type: filesandordirs; Name: "{localappdata}\IU8LMC\Decodium\qmlcache"
 Type: filesandordirs; Name: "{localappdata}\Decodium\cache\qmlcache"
 Type: filesandordirs; Name: "{localappdata}\decodium4\cache\qmlcache"
+
+[UninstallDelete]
+; Rimuovi anche eventuali file generati dopo l'installazione dentro la
+; directory dell'app. Con installazione per-utente, {app} corrisponde a:
+; C:\Users\<utente>\AppData\Local\Programs\Decodium.
+Type: filesandordirs; Name: "{app}\*"
+Type: dirifempty; Name: "{app}"
 
 [Files]
 ; Copia l'intero bundle portabile già preparato da windeployqt.
