@@ -13775,6 +13775,12 @@ bool DecodiumBridge::tryArmedWatchSeesTarget(const QStringList& rows)
             continue;
         bridgeLog(QStringLiteral("[CALL] ARMED: target %1 decodificato (msg='%2') -> inizio chiamata")
                       .arg(targetBase, msg));
+        // 1.0.412: ingaggia DAVVERO la chiamata, come il gemello tryResumeQsoOnReply:
+        // processDecodeDoubleClick genera TX1-TX6 verso il target, porta m_currentTx a TX1
+        // (advanceQsoState) e regola il periodo. Senza questo, beginTargetCallCalling
+        // abilitava solo il TX ma buildCurrentTxMessage restava vuoto (m_currentTx mai
+        // a TX1) -> il DX-watch si armava ma non chiamava mai.
+        processDecodeDoubleClick(msg, f[0], f[1], f[3].toInt());
         beginTargetCallCalling();
         return true;
     }

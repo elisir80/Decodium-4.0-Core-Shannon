@@ -2420,6 +2420,23 @@ ApplicationWindow {
         fsColumnOrder = arr
         fsPersistOrder()
     }
+    // Sposta la colonna `id` alla posizione della colonna `targetId` (drag libero).
+    // NON persiste: il controller di drag chiama fsPersistOrder() al rilascio.
+    function fsMoveColumnToId(id, targetId) {
+        if (id === targetId) return
+        var arr = (fsColumnOrder || []).slice()
+        var from = -1, to = -1
+        for (var i = 0; i < arr.length; ++i) {
+            if (arr[i].id === id) from = i
+            if (arr[i].id === targetId) to = i
+        }
+        if (from < 0 || to < 0 || from === to) return
+        var item = arr.splice(from, 1)[0]
+        // Inserisci alla posizione `to` dell'array già accorciato: la colonna
+        // trascinata finisce sotto il cursore sia da sinistra che da destra.
+        arr.splice(to, 0, item)
+        fsColumnOrder = arr
+    }
 
     function fsSetColumnWidth(id, w) {
         var meta = fsColMeta(id)
@@ -3058,8 +3075,9 @@ ApplicationWindow {
                         }
                         Text {
                             text: "v" + bridge.version()
-                            font.pixelSize: 9
-                            color: textSecondary
+                            font.pixelSize: 12
+                            font.bold: true
+                            color: "#ffffff"
                         }
                     }
                 }
@@ -6256,6 +6274,19 @@ ApplicationWindow {
                     property var rxDecodes: (bridge && bridge.rxDecodeModel) ? [] : currentRxDecodes()
                     property var clearedRxDecodeKeys: ({})
                     property int decodeListVersion: 0
+                    // 1.0.412 — versione dedicata al conteggio, bumpata dai segnali NATIVI
+                    // del modello band-activity (rowsInserted/removed/reset): il badge
+                    // "N decodes" si aggiorna LIVE come la lista, non solo sull'emit
+                    // throttled 500ms di decodeListChanged (prima sembrava contare solo
+                    // i decode tardivi perché il numero scattava in step poco percepibili).
+                    property int bandActivityCountVersion: 0
+                    Connections {
+                        target: bridge.bandActivityModel
+                        ignoreUnknownSignals: true
+                        function onRowsInserted() { decodePanel.bandActivityCountVersion++ }
+                        function onRowsRemoved() { decodePanel.bandActivityCountVersion++ }
+                        function onModelReset() { decodePanel.bandActivityCountVersion++ }
+                    }
                     property int rxDecodeListVersion: 0
                     property int lastSyncCount: 0
                     property real currentPeriodIndex: -1
@@ -6278,6 +6309,7 @@ ApplicationWindow {
 
                     function fullSpectrumModelCount() {
                         void(decodePanel.decodeListVersion)
+                        void(decodePanel.bandActivityCountVersion)
                         if (decodePanel.hasNativeBandActivityModel())
                             return bridge.bandActivityModel.count()
                         return decodePanel.allDecodes ? decodePanel.allDecodes.length : 0
@@ -7279,7 +7311,38 @@ ApplicationWindow {
                                         MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
                                     }
 
+                                    // Drag-reorder libero: controller a livello header, SOTTO le celle
+                                    // in z (così sopravvive al rebuild del Repeater quando l'ordine cambia).
+                                    // Le maniglie di resize (LeftButton, bordo) e i menu (RightButton) hanno
+                                    // priorità; il left-press sull'etichetta cade qui e trascina la colonna.
+                                    MouseArea {
+                                        id: fsDragCtlE
+                                        anchors.fill: parent
+                                        z: -1
+                                        acceptedButtons: Qt.LeftButton
+                                        property string grabId: ""
+                                        property bool reordering: false
+                                        property real pressX: 0
+                                        function colIdAt(px) {
+                                            var p = mapToItem(fsHeaderRowE, px, fsHeaderRowE.height / 2)
+                                            var c = fsHeaderRowE.childAt(p.x, p.y)
+                                            return (c && c.col) ? c.col.id : ""
+                                        }
+                                        onPressed: function(m) { grabId = colIdAt(m.x); pressX = m.x; reordering = false }
+                                        onPositionChanged: function(m) {
+                                            if (grabId === "" || !pressed) return
+                                            if (!reordering && Math.abs(m.x - pressX) < 6) return
+                                            reordering = true
+                                            var overId = colIdAt(m.x)
+                                            if (overId !== "" && overId !== grabId)
+                                                mainWindow.fsMoveColumnToId(grabId, overId)
+                                        }
+                                        onReleased: { if (reordering) mainWindow.fsPersistOrder(); grabId = ""; reordering = false }
+                                        onCanceled: { grabId = ""; reordering = false }
+                                    }
+
                                     RowLayout {
+                                        id: fsHeaderRowE
                                         anchors.fill: parent
                                         anchors.leftMargin: 8
                                         anchors.rightMargin: 8
@@ -12054,7 +12117,34 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                         MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
                     }
 
+                    MouseArea {
+                        id: fsDragCtlF
+                        anchors.fill: parent
+                        z: -1
+                        acceptedButtons: Qt.LeftButton
+                        property string grabId: ""
+                        property bool reordering: false
+                        property real pressX: 0
+                        function colIdAt(px) {
+                            var p = mapToItem(fsHeaderRowF, px, fsHeaderRowF.height / 2)
+                            var c = fsHeaderRowF.childAt(p.x, p.y)
+                            return (c && c.col) ? c.col.id : ""
+                        }
+                        onPressed: function(m) { grabId = colIdAt(m.x); pressX = m.x; reordering = false }
+                        onPositionChanged: function(m) {
+                            if (grabId === "" || !pressed) return
+                            if (!reordering && Math.abs(m.x - pressX) < 6) return
+                            reordering = true
+                            var overId = colIdAt(m.x)
+                            if (overId !== "" && overId !== grabId)
+                                mainWindow.fsMoveColumnToId(grabId, overId)
+                        }
+                        onReleased: { if (reordering) mainWindow.fsPersistOrder(); grabId = ""; reordering = false }
+                        onCanceled: { grabId = ""; reordering = false }
+                    }
+
                     RowLayout {
+                        id: fsHeaderRowF
                         anchors.fill: parent
                         anchors.leftMargin: 8
                         anchors.rightMargin: 8
