@@ -351,6 +351,96 @@ QVector<float> generate_cw_wave (QString const& message, int ifreq)
   return wave;
 }
 
+// Real-CW waveform at a FIXED WPM (variable duration). Unlike the Echo
+// variant above (fixed 2.048 s window with auto-scaled speed), this keys the
+// sidetone at the standard rate dit = 1.2/WPM seconds so a full "CQ CQ DE ..."
+// is sent at the intended speed. Used for the audio-CW TX path (USB/DATA),
+// which works on rigs whose CAT keyer is unreliable (e.g. Yaesu FT-991A).
+QVector<float> generate_cw_wave_wpm (QString const& message, int ifreq, int wpm)
+{
+  if (wpm < 5) wpm = 5;
+  if (wpm > 60) wpm = 60;
+
+  std::array<int, 250> icw {};
+  int ncw = encode_morse_bits (message, &icw);
+
+  // Trim leading/trailing key-up units so the wave starts/ends on a keyed bit.
+  int i1 = 0;
+  int i2 = 0;
+  for (int i = 0; i < ncw; ++i)
+    {
+      if (i1 == 0 && icw[static_cast<size_t> (i)] == 1) i1 = i + 1;
+      if (icw[static_cast<size_t> (i)] == 1) i2 = i + 2;
+    }
+  if (i1 < 1 || i2 < i1) return QVector<float> {};
+  if (i2 > static_cast<int> (icw.size ())) i2 = static_cast<int> (icw.size ());
+
+  ncw = i2 - i1 + 1;
+  std::array<int, 250> trimmed {};
+  for (int i = 0; i < ncw && i < static_cast<int> (trimmed.size ()); ++i)
+    {
+      trimmed[static_cast<size_t> (i)] = icw[static_cast<size_t> (i1 - 1 + i)];
+    }
+
+  double constexpr fsample = 48000.0;
+  double const nspd = 1.2 * fsample / static_cast<double> (wpm); // samples per dit unit
+  double const dt = 1.0 / fsample;
+  double const tdit = nspd * dt;
+  double const dphi = kTwoPi * static_cast<double> (ifreq) * dt;
+
+  int const nadd = static_cast<int> (0.002 / dt);                // ~2 ms key-shaping
+  long long const core = std::llround (nspd * static_cast<double> (ncw));
+  int const tail = 4 * nadd + 64;
+  long long total64 = core + tail;
+  long long constexpr kMaxCwSamples = 48000LL * 35;              // hard safety cap (~35 s)
+  if (total64 > kMaxCwSamples) total64 = kMaxCwSamples;
+  int const total = static_cast<int> (total64);
+  if (total <= tail) return QVector<float> {};
+
+  std::vector<float> x (static_cast<size_t> (total), 0.0f);
+  std::vector<float> y (static_cast<size_t> (total), 0.0f);
+  std::vector<float> z (static_cast<size_t> (total), 0.0f);
+
+  double phi = 0.0;
+  double t = 0.0;
+  for (int i = 0; i < total; ++i)
+    {
+      t += dt;
+      int const j = static_cast<int> (t / tdit) + 1;
+      phi += dphi;
+      if (phi > kTwoPi) phi -= kTwoPi;
+      x[static_cast<size_t> (i)] = (j >= 1 && j <= ncw)
+          ? static_cast<float> (trimmed[static_cast<size_t> (j - 1)])
+          : 0.0f;
+      z[static_cast<size_t> (i)] = static_cast<float> (std::sin (phi));
+    }
+
+  // Soft-key the on/off envelope to suppress key clicks (same triple-box pass
+  // used by the Echo CW generator). Envelope ends up in y.
+  smooth_fortran_style (x, y, nadd);
+  smooth_fortran_style (y, x, nadd);
+  smooth_fortran_style (x, y, nadd);
+
+  int const tail_start = std::max (0, total - 3 * nadd - 1);
+  std::fill (y.begin () + tail_start, y.end (), 0.0f);
+
+  float max_abs = 0.0f;
+  for (float value : y)
+    {
+      max_abs = std::max (max_abs, std::fabs (value));
+    }
+  if (max_abs <= 0.0f) return QVector<float> {};
+
+  float const fac = 0.99999f / max_abs;
+  QVector<float> wave (total, 0.0f);
+  for (int i = 0; i < total; ++i)
+    {
+      wave[i] = fac * y[static_cast<size_t> (i)] * z[static_cast<size_t> (i)];
+    }
+
+  return wave;
+}
+
 std::array<int, kEchoCallToneCount> encode_echo_call_tones (QString const& callsign)
 {
   std::array<int, kEchoCallToneCount> tones {};
@@ -1689,6 +1779,11 @@ QVector<float> generateToneWave (int const* itone, int nsym, int nsps, float fsa
 QVector<float> generateCwWave (QString const& message, int ifreq)
 {
   return generate_cw_wave (message, ifreq);
+}
+
+QVector<float> generateCwWaveWpm (QString const& message, int ifreq, int wpm)
+{
+  return generate_cw_wave_wpm (message, ifreq, wpm);
 }
 
 std::array<int, 250> encodeMorseBits (QString const& message, int* symbolCount)

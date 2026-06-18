@@ -11163,6 +11163,76 @@ QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
     return QString();
 }
 
+QString DecodiumBridge::decodeColorBgValue(const QString& prop) const
+{
+    return m_decodeColorBg.value(prop, QString());
+}
+
+bool DecodiumBridge::decodeColorBgEnabled(const QString& prop) const
+{
+    return m_decodeColorBgEnabled.value(prop, false);
+}
+
+void DecodiumBridge::setDecodeColorBg(const QString& prop, const QString& hex)
+{
+    if (!isDecodeColorProperty(prop)) return;
+    if (m_decodeColorBg.value(prop) == hex) return;
+    m_decodeColorBg.insert(prop, hex);
+    QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        .setValue(QStringLiteral("bg_%1").arg(prop), hex);
+    emit decodeColorBgChanged();
+}
+
+void DecodiumBridge::setDecodeColorBgEnabled(const QString& prop, bool enabled)
+{
+    if (!isDecodeColorProperty(prop)) return;
+    if (m_decodeColorBgEnabled.value(prop, false) == enabled) return;
+    m_decodeColorBgEnabled.insert(prop, enabled);
+    QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        .setValue(QStringLiteral("bgEnabled_%1").arg(prop), enabled);
+    emit decodeColorBgChanged();
+}
+
+// 1.0.416 — sfondo riga SCELTO dall'utente per la categoria che matcha l'entry.
+// Stessa priorita' di decodeHighlightBg, piu' B4 / DX Entity / 73 (signoff).
+// Ritorna "" se per quella categoria lo sfondo non e' abilitato. opt-in, default OFF.
+QString DecodiumBridge::decodeHighlightUserBg(const QVariantMap& entry) const
+{
+    auto bg = [this](const QString& prop) -> QString {
+        return m_decodeColorBgEnabled.value(prop, false) ? m_decodeColorBg.value(prop, QString()) : QString();
+    };
+    if (entry.value(QStringLiteral("isTx")).toBool())                 return bg(QStringLiteral("colorTxMessage"));
+    if (entry.value(QStringLiteral("isMyCall")).toBool())             return bg(QStringLiteral("colorMyCall"));
+    {
+        const QString msg = entry.value(QStringLiteral("message")).toString().toUpper();
+        if (msg.endsWith(QStringLiteral(" 73")) || msg.contains(QStringLiteral("RR73")) || msg.endsWith(QStringLiteral("RRR"))) {
+            const QString c73 = bg(QStringLiteral("color73"));
+            if (!c73.isEmpty()) return c73;
+        }
+    }
+    if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())      return bg(QStringLiteral("colorNewDxccBand"));
+    if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())          return bg(QStringLiteral("colorNewDxcc"));
+    if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool()) return bg(QStringLiteral("colorNewContinentBand"));
+    if (entry.value(QStringLiteral("dxIsNewContinent")).toBool())     return bg(QStringLiteral("colorNewContinent"));
+    if (entry.value(QStringLiteral("dxIsNewCqZoneBand")).toBool())    return bg(QStringLiteral("colorNewCqZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewCqZone")).toBool())        return bg(QStringLiteral("colorNewCqZone"));
+    if (entry.value(QStringLiteral("dxIsNewItuZoneBand")).toBool())   return bg(QStringLiteral("colorNewItuZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewItuZone")).toBool())       return bg(QStringLiteral("colorNewItuZone"));
+    if (entry.value(QStringLiteral("dxIsNewGridBand")).toBool())      return bg(QStringLiteral("colorNewGridBand"));
+    if (entry.value(QStringLiteral("dxIsNewGrid")).toBool())          return bg(QStringLiteral("colorNewGrid"));
+    if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())      return bg(QStringLiteral("colorNewCallBand"));
+    if (entry.value(QStringLiteral("dxIsNewCall")).toBool())          return bg(QStringLiteral("colorNewCall"));
+    if (entry.value(QStringLiteral("isB4")).toBool() || entry.value(QStringLiteral("dxIsWorked")).toBool())
+                                                                      return bg(QStringLiteral("colorB4"));
+    if (entry.value(QStringLiteral("isLotw")).toBool())              return bg(QStringLiteral("colorLotwUser"));
+    if (entry.value(QStringLiteral("dxCountry")).toString().size() > 0
+        || entry.value(QStringLiteral("dxIsMostWanted")).toBool()
+        || entry.value(QStringLiteral("dxIsNewCountry")).toBool()
+        || entry.value(QStringLiteral("dxIsNewBand")).toBool())      return bg(QStringLiteral("colorDXEntity"));
+    if (entry.value(QStringLiteral("isCQ")).toBool())                return bg(QStringLiteral("colorCQ"));
+    return QString();
+}
+
 QString DecodiumBridge::pskReporterProgramInfo() const
 {
     return QStringLiteral("Decodium4 v%1").arg(version()).simplified();
@@ -22593,6 +22663,8 @@ void DecodiumBridge::saveSettings()
     for (const QString& prop : decodeColorPropertyNames()) {
         s.setValue(decodeColorEnabledSettingKey(prop),
                    m_decodeColorEnabled.value(prop, true));
+        s.setValue(QStringLiteral("bg_%1").arg(prop), m_decodeColorBg.value(prop, QString()));
+        s.setValue(QStringLiteral("bgEnabled_%1").arg(prop), m_decodeColorBgEnabled.value(prop, false));
     }
     // B8 — Alerts
     s.setValue("alertSoundsEnabled", m_alertSoundsEnabled);
@@ -27899,8 +27971,12 @@ void DecodiumBridge::loadSettings()
     m_colorNewCallBand      = s.value("colorNewCallBand",      m_colorNewCallBand     ).toString();
     m_colorLotwUser         = s.value("colorLotwUser",         m_colorLotwUser        ).toString();
     m_decodeColorEnabled.clear();
+    m_decodeColorBg.clear();
+    m_decodeColorBgEnabled.clear();
     for (const QString& prop : decodeColorPropertyNames()) {
         m_decodeColorEnabled.insert(prop, s.value(decodeColorEnabledSettingKey(prop), true).toBool());
+        m_decodeColorBg.insert(prop, s.value(QStringLiteral("bg_%1").arg(prop), QString()).toString());
+        m_decodeColorBgEnabled.insert(prop, s.value(QStringLiteral("bgEnabled_%1").arg(prop), false).toBool());
     }
     // B8 — Alerts
     m_alertSoundsEnabled = s.value("alertSoundsEnabled", s.value("alert_Enabled", false)).toBool();

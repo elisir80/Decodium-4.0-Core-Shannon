@@ -1932,6 +1932,7 @@ ApplicationWindow {
         function onColorNewCallBandChanged() { mainWindow.refreshDecodeColors() }
         function onColorLotwUserChanged() { mainWindow.refreshDecodeColors() }
         function onDecodeColorEnabledChanged(prop, enabled) { mainWindow.refreshDecodeColors() }
+        function onDecodeColorBgChanged() { mainWindow.refreshDecodeColors() }
     }
 
     function decodeClamp01(value) {
@@ -2050,6 +2051,16 @@ ApplicationWindow {
     function effectiveDecodeColor(prop) {
         mainWindow.decodeColorRevision
         return bridge.effectiveDecodeColor(prop)
+    }
+
+    // 1.0.416 — colore di SFONDO riga scelto dall'utente per categoria (opt-in).
+    // null se per la categoria della riga lo sfondo non è abilitato → fallback al
+    // comportamento esistente. Dipende da decodeColorRevision per la reattività.
+    function decodeUserBgFill(modelData) {
+        mainWindow.decodeColorRevision
+        if (!modelData) return null
+        var hex = bridge.decodeHighlightUserBg(modelData)
+        return (hex && hex.length > 0) ? Qt.color(hex) : null
     }
 
 	    // Shannon-compatible color function (allineato a DecodeWindow.qml)
@@ -7687,11 +7698,13 @@ NumberAnimation {
                                             height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.fullSpectrumRowHeight * fs)
 	                                            property var highlightFill: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeHighlightFill(modelData)
 	                                            property var highlightBorder: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeHighlightBorder(modelData)
+                                            property var userBgFill: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeUserBgFill(modelData)
 	                                            // 1.0.205 — guard !modelData per evitare TypeError flood (~46/s) durante
 	                                            // model swap transients che saturava il main thread via logger sincrono.
 	                                            color: !modelData ? "transparent" :
 	                                                   isPeriodSeparator ? "transparent" :
-		                                                   highlightFill ? highlightFill :
+		                                                   userBgFill ? userBgFill :
+                                                   highlightFill ? highlightFill :
 			                                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)) :
 			                                                   decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(76/255, 175/255, 80/255, 0.2)) :
 			                                                   index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
@@ -8290,6 +8303,7 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
                                             // stabile e affidarsi al guard color in 6171.
                                             height: isPeriodSeparator ? Math.round(4 * fs) : Math.round(mainWindow.signalRxRowHeight * fs)
                                             color: isPeriodSeparator ? "transparent" :
+                                                   mainWindow.decodeUserBgFill(entry) ? mainWindow.decodeUserBgFill(entry) :
                                                    entry.isTx ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(241/255, 196/255, 15/255, 0.3)) :
                                                    entry.isMyCall ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3)) :
                                                    entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
@@ -12491,11 +12505,13 @@ NumberAnimation {
 		                            radius: 3
 		                            property var highlightFill: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeHighlightFill(modelData)
 		                            property var highlightBorder: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeHighlightBorder(modelData)
+                                            property var userBgFill: (!modelData || isPeriodSeparator) ? null : mainWindow.decodeUserBgFill(modelData)
 		                            // 1.0.205 — guard !modelData per evitare TypeError flood (~46/s) durante
 		                            // model swap transients che saturava il main thread via logger sincrono.
 		                            color: !modelData ? "transparent" :
 		                                   isPeriodSeparator ? "transparent" :
-			                                   highlightFill ? highlightFill :
+			                                   userBgFill ? userBgFill :
+                                                   highlightFill ? highlightFill :
 				                                   entry.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(entry.bgColorHex) :
 				                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
 				                                   mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
@@ -13059,7 +13075,8 @@ NumberAnimation {
 	                            // undefined per 1-2 frame -> color="" -> Rectangle nero.
 	                            color: !modelData ? "transparent" :
 	                                   isPeriodSeparator ? "transparent" :
-		                                   modelData.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(modelData.bgColorHex) :
+		                                   mainWindow.decodeUserBgFill(modelData) ? mainWindow.decodeUserBgFill(modelData) :
+			                                   modelData.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(modelData.bgColorHex) :
 		                                   modelData.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05))
 
 	                            Rectangle {

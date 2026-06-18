@@ -106,6 +106,7 @@ Window {
                 function onDecodeColorEnabledChanged(prop, enabled) {
                     decodeWindow.refreshDecodeColors()
                 }
+                function onDecodeColorBgChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorCQChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorMyCallChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorDXEntityChanged() { decodeWindow.refreshDecodeColors() }
@@ -288,6 +289,14 @@ Window {
     function effectiveDecodeColor(prop) {
         decodeWindow.decodeColorRevision
         return bridge.effectiveDecodeColor(prop)
+    }
+
+    // 1.0.416 — sfondo riga scelto dall'utente per categoria (opt-in). null se non abilitato.
+    function decodeUserBgFill(modelData) {
+        decodeWindow.decodeColorRevision
+        if (!modelData) return null
+        var hex = bridge.decodeHighlightUserBg(modelData)
+        return (hex && hex.length > 0) ? Qt.color(hex) : null
     }
 
     function wsjtxHighlightHex(modelData) {
@@ -1165,6 +1174,8 @@ Component.onCompleted: {
                                 // Cascata WSJT-X prioritaria; fallback ai vecchi tinte/zebra.
                                 color: {
                                     if (isPeriodSeparator) return Qt.rgba(1, 0.3, 0.3, 0.35)  // ROSSO chiaro evidente
+                                    var ubg = decodeWindow.decodeUserBgFill(modelData)
+                                    if (ubg) return ubg
                                     var wsx = decodeWindow.wsjtxBgColor(modelData)
                                     if (wsx) return wsx
                                     // 1.0.134: match DxCall — oro (Band Activity). Solo flag

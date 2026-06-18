@@ -2839,6 +2839,13 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   connect (this, &MainWindow::sendPrecomputedWave, m_modulator, &Modulator::setPrecomputedWave);
   connect (this, &MainWindow::sendMessage, m_modulator, &Modulator::start);
   connect (m_modulator, &Modulator::stateChanged, this, [this] (Modulator::ModulatorState state) {
+    // Audio-CW: la wave e' finita -> abbassa la PTT (tutte le piattaforme).
+    if (m_cwAudioTxActive && state == Modulator::Idle)
+      {
+        debugToFile (QStringLiteral ("cwaudio modDone"));
+        finishCwAudioTx ();
+        return;
+      }
 #if defined(Q_OS_LINUX)
     if (!m_tci_audio
         && (m_mode == "FT2" || m_mode == "FT4")
@@ -3720,6 +3727,15 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
   ptt1Timer.setSingleShot(true);
   connect(&ptt1Timer, &QTimer::timeout, this, &MainWindow::startTx2);
+
+  cwAudioGuardTimer.setSingleShot(true);
+  connect(&cwAudioGuardTimer, &QTimer::timeout, this, [this] {
+    if (m_cwAudioTxActive)
+      {
+        debugToFile(QStringLiteral("cwaudio guard timeout -> force PTT off"));
+        finishCwAudioTx();
+      }
+  });
 
   p1Timer.setSingleShot(true);
   connect(&p1Timer, &QTimer::timeout, this, &MainWindow::startWsprDecode);
@@ -32245,14 +32261,144 @@ void MainWindow::onRemoteSelectCallerDue(QString const& commandId, QString const
 void MainWindow::onRemoteSendCw(QString const& commandId, QString const& text, qint64 dialFrequencyHz, int wpm)
 {
   Q_UNUSED(commandId);
-  // Imposta la frequenza dial (se fornita) e invia il testo al keyer CW della radio
-  // tramite Hamlib. NB: la radio dev'essere in modo CW (impostalo da CAT o a mano).
+  // CW via AUDIO: la radio resta in USB/DATA-U (come per FT8) e Decodium genera
+  // il tono Morse manipolato e lo trasmette dalla scheda audio. Non dipende dal
+  // keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991A) non
+  // funziona in modalità dati. La frequenza richiesta è quella su cui deve
+  // comparire il segnale CW: il dial viene posto a (freq - sidetone) così che
+  // dial + tono = freq esatta.
+  startCwAudioTx(text, dialFrequencyHz, wpm);
+  showStatusMessage(tr("Remote CW (audio): %1 (%2 WPM)").arg(text).arg(wpm));
+}
+
+void MainWindow::startCwAudioTx(QString const& message, qint64 dialFrequencyHz, int wpm)
+{
+  QString const msg = message.trimmed();
+  if (msg.isEmpty())
+    {
+      showStatusMessage(tr("CW audio: messaggio vuoto"));
+      return;
+    }
+  if (wpm <= 0) wpm = 20;
+
+  // RTTY usa un percorso di TX manuale dedicato; il CW audio non convive con
+  // una sessione RTTY manuale in corso.
+  if (m_rttyManualTxActive)
+    {
+      showStatusMessage(tr("CW audio: TX RTTY in corso, riprova"));
+      return;
+    }
+
+  // Genera la forma d'onda CW (tono sidetone manipolato a WPM fisso).
+  int const sidetone = m_cwAudioSidetoneHz;
+  QVector<float> wave = decodium::txwave::generateCwWaveWpm(msg, sidetone, wpm);
+  if (wave.isEmpty())
+    {
+      showStatusMessage(tr("CW audio: impossibile generare \"%1\"").arg(msg));
+      debugToFile(QString {"cwaudio gen failed wpm:%1 msg:%2"}.arg(wpm).arg(msg));
+      return;
+    }
+  m_cwAudioWave = wave;
+
+  // Ferma qualunque sequenza automatica prima di prendere il TX.
+  if (m_auto || ui->autoButton->isChecked())
+    {
+      auto_tx_mode(false);
+    }
+
+  // Se siamo gia' in TX, non sovrapporre: ignora.
+  if (g_iptt == 1 || m_transmitting)
+    {
+      showStatusMessage(tr("CW audio: TX gia' attivo, comando ignorato"));
+      return;
+    }
+
+  // Porta il VFO sulla frequenza giusta (dial = freq - sidetone) cosi' il CW
+  // emesso cade esattamente sulla frequenza richiesta.
   if (dialFrequencyHz > 0)
     {
-      m_config.transceiver_frequency(dialFrequencyHz);
+      qint64 dial = dialFrequencyHz - sidetone;
+      if (dial < 1) dial = dialFrequencyHz;
+      m_config.transceiver_frequency(dial);
     }
-  m_config.transceiver_send_morse(text, wpm);
-  showStatusMessage(tr("Remote CW: %1 (%2 WPM)").arg(text).arg(wpm));
+
+  double const seconds = static_cast<double>(wave.size()) / 48000.0;
+  debugToFile(QString {"cwaudio start wpm:%1 samples:%2 secs:%3 dial:%4 tone:%5 msg:%6"}
+                  .arg(wpm)
+                  .arg(wave.size())
+                  .arg(seconds, 0, 'f', 2)
+                  .arg(dialFrequencyHz)
+                  .arg(sidetone)
+                  .arg(msg));
+
+  m_cwAudioTxActive = true;
+
+  // Alza la PTT, poi (dopo il ritardo di sequenziamento + assestamento QSY)
+  // avvia l'audio. Stesso schema del TX manuale RTTY.
+  g_iptt = 1;
+  requestRigPtt(true);
+
+  // Watchdog di sicurezza: se per qualunque motivo l'audio non termina, la PTT
+  // viene comunque riabbassata.
+  cwAudioGuardTimer.start(static_cast<int>(seconds * 1000.0) + 4000);
+
+  int const msDelay = qMax(150, int(1000.0 * m_config.txDelay()) + 150);
+  QTimer::singleShot(msDelay, this, [this] {
+    if (m_cwAudioTxActive && g_iptt == 1)
+      {
+        transmitCwAudio();
+      }
+  });
+}
+
+void MainWindow::transmitCwAudio()
+{
+  if (!m_cwAudioTxActive || m_cwAudioWave.isEmpty())
+    {
+      return;
+    }
+  if (m_tci_audio)
+    {
+      // Percorso TCI non supportato per il CW audio: abbandona in sicurezza.
+      showStatusMessage(tr("CW audio non disponibile con audio TCI"));
+      finishCwAudioTx();
+      return;
+    }
+
+  // Dimensiona la "lunghezza simboli" così che il modulatore copra l'intera
+  // wave (durata effettiva = min(symbolsLength*4*framesPerSymbol, wave.size())).
+  double const framesPerSymbol = 4096.0;
+  int symbolsLength = static_cast<int>(std::ceil(m_cwAudioWave.size() / (4.0 * framesPerSymbol))) + 2;
+  if (symbolsLength < 1) symbolsLength = 1;
+
+  // Riusa il percorso "precomputed wave" del modulatore (come Echo/FT2): mode
+  // "Echo", toneSpacing < 0, non sincronizzato. La wave e' passata come pending.
+  Q_EMIT sendPrecomputedWave(QStringLiteral("Echo"), m_cwAudioWave);
+  Q_EMIT sendMessage(QStringLiteral("Echo"), symbolsLength, framesPerSymbol,
+                     static_cast<double>(m_cwAudioSidetoneHz), -5.0, m_soundOutput,
+                     legacy_tx_output_channel(m_config.audio_output_channel()),
+                     false, false, 99.0, m_TRperiod);
+  debugToFile(QString {"cwaudio modStart nsym:%1 samples:%2"}
+                  .arg(symbolsLength)
+                  .arg(m_cwAudioWave.size()));
+}
+
+void MainWindow::finishCwAudioTx()
+{
+  if (!m_cwAudioTxActive)
+    {
+      return;
+    }
+  m_cwAudioTxActive = false;
+  cwAudioGuardTimer.stop();
+  m_cwAudioWave.clear();
+  // Ferma modulatore + abbassa PTT + riattiva monitor (ptt0Timer -> stopTx2).
+  Q_EMIT endTransmitMessage();
+  g_iptt = 0;
+  ptt0Timer.start(200);
+  monitor(true);
+  statusUpdate();
+  debugToFile(QStringLiteral("cwaudio done"));
 }
 
 void MainWindow::onRemoteSetModeRequested(QString const& commandId, QString const& mode)

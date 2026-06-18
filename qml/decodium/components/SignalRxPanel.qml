@@ -131,6 +131,7 @@ Item {
             height: isSep ? 4 : root.rowH
             color: !modelData ? "transparent" :
                    isSep ? "transparent" :
+                   (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
                    entry.isTx ? Qt.rgba(0.95, 0.77, 0.06, 0.28) :
                    entry.isMyCall ? Qt.rgba(0.96, 0.26, 0.21, 0.28) :
                    entry.isCQ ? Qt.rgba(root.cAccent.r, root.cAccent.g, root.cAccent.b, 0.14) :

@@ -100,6 +100,7 @@ Item {
             height: isSep ? 4 : root.rowH
             color: !modelData ? "transparent" :
                    isSep ? "transparent" :
+                   (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
                    entry.isTx ? Qt.rgba(root.cTx.r, root.cTx.g, root.cTx.b, 0.18) :
                    entry.isCQ ? Qt.rgba(root.cAccent.r, root.cAccent.g, root.cAccent.b, 0.12) :
                    (index % 2 === 0) ? Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.02)

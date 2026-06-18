@@ -18,6 +18,7 @@ QVector<float> generateFst4Wave (int const* itone, int nsym, int nsps, float fsa
 QVector<float> generateToneWave (int const* itone, int nsym, int nsps, float fsample,
                                  float toneSpacing, float f0);
 QVector<float> generateCwWave (QString const& message, int ifreq);
+QVector<float> generateCwWaveWpm (QString const& message, int ifreq, int wpm);
 std::array<int, 250> encodeMorseBits (QString const& message, int* symbolCount = nullptr);
 std::array<int, 6> encodeEchoCallTones (QString const& callsign);
 bool packSuperFoxMessage (QString const& line, QString const& otpKey, bool bMoreCQs, bool bSendMsg,

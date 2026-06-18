@@ -6314,6 +6314,12 @@ Dialog {
                                 property string currentColor: bridge[targetProp] || defaultColor
                                 property bool colorEnabled: bridge.decodeColorEnabled(targetProp)
                                 property string shownColor: colorEnabled ? currentColor : bridge.decodeColorFallback
+                                // 1.0.416 — sfondo riga per categoria (opt-in, default OFF)
+                                property bool bgEnabled: bridge.decodeColorBgEnabled(targetProp)
+                                property string bgColor: {
+                                    var v = bridge.decodeColorBgValue(targetProp)
+                                    return (v && v.length > 0) ? v : "#202830"
+                                }
 
                                 Text {
                                     text: modelData.label + ":"
@@ -6440,6 +6446,91 @@ Dialog {
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
                                     }
+                                }
+
+                                // ── 1.0.416: colore di SFONDO riga (per categoria) ──
+                                Text { text: qsTr("BG:"); color: textSecondary; font.pixelSize: 11; Layout.leftMargin: 8 }
+                                CheckBox {
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: controlHeight
+                                    checked: decodeColorRow.bgEnabled
+                                    onClicked: {
+                                        decodeColorRow.bgEnabled = checked
+                                        bridge.setDecodeColorBgEnabled(decodeColorRow.targetProp, checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height / 2 - height / 2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.")
+                                }
+                                Rectangle {
+                                    width: 60
+                                    height: 24
+                                    radius: 4
+                                    color: settingsDialog.validHexColor(decodeColorRow.bgColor) ? decodeColorRow.bgColor : "#202830"
+                                    opacity: decodeColorRow.bgEnabled ? 1.0 : 0.55
+                                    border.color: glassBorder
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: decodeColorRow.bgEnabled
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: decodeBgPresetPop.open()
+                                    }
+                                    Popup {
+                                        id: decodeBgPresetPop
+                                        width: 232
+                                        height: 88
+                                        background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 6 }
+                                        Flow {
+                                            anchors.fill: parent
+                                            anchors.margins: 8
+                                            spacing: 4
+                                            Repeater {
+                                                model: settingsDialog.presetColors
+                                                delegate: Rectangle {
+                                                    width: 20
+                                                    height: 20
+                                                    radius: 3
+                                                    color: modelData
+                                                    border.color: glassBorder
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            var nz = settingsDialog.normalizedHexColor(modelData)
+                                                            bridge.setDecodeColorBg(decodeColorRow.targetProp, nz)
+                                                            decodeColorRow.bgColor = nz
+                                                            decodeBgInput.text = nz
+                                                            decodeBgPresetPop.close()
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                DecoTextField {
+                                    id: decodeBgInput
+                                    text: decodeColorRow.bgColor
+                                    enabled: decodeColorRow.bgEnabled
+                                    opacity: enabled ? 1.0 : 0.55
+                                    selectByMouse: true
+                                    implicitHeight: controlHeight
+                                    Layout.preferredWidth: 90
+                                    color: settingsDialog.validHexColor(text) ? textPrimary : "#ff5555"
+                                    font.pixelSize: controlFontSize
+                                    onActiveFocusChanged: { if (!activeFocus) text = decodeColorRow.bgColor }
+                                    onAccepted: {
+                                        var nz = settingsDialog.normalizedHexColor(text)
+                                        if (settingsDialog.validHexColor(nz)) {
+                                            bridge.setDecodeColorBg(decodeColorRow.targetProp, nz)
+                                            decodeColorRow.bgColor = nz
+                                            text = nz
+                                        }
+                                    }
+                                    background: Rectangle { color: bgMedium; border.color: decodeBgInput.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                                 }
 
                                 Item { Layout.fillWidth: true }

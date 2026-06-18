@@ -716,6 +716,12 @@ private slots:
   void onRemoteSetModeRequested(QString const& commandId, QString const& mode);
   void onRemoteSetBandRequested(QString const& commandId, QString const& band);
   void onRemoteSendCw(QString const& commandId, QString const& text, qint64 dialFrequencyHz, int wpm);
+  // Audio-CW transmit: key a sidetone in USB/DATA via the modulator. Works on
+  // rigs whose CAT keyer is unreliable (e.g. Yaesu FT-991A) where Hamlib
+  // rig_send_morse does nothing. See startCwAudioTx().
+  void startCwAudioTx(QString const& message, qint64 dialFrequencyHz, int wpm);
+  void transmitCwAudio();
+  void finishCwAudioTx();
   void onRemoteSetDialFrequencyRequested(QString const& commandId, qint64 dialFrequencyHz);
   void onRemoteSetRxFrequencyRequested(QString const& commandId, int rxFrequencyHz);
   void onRemoteSetTxFrequencyRequested(QString const& commandId, int txFrequencyHz);
@@ -869,6 +875,10 @@ private:
   unsigned m_rttyTciSymbolsLength {0};
   double m_rttyTciFramesPerSymbol {0.0};
   bool m_rttyManualTxActive {false};
+  // Audio-CW (keyed sidetone) TX state.
+  bool m_cwAudioTxActive {false};
+  QVector<float> m_cwAudioWave;
+  int m_cwAudioSidetoneHz {700};
   Transceiver::TransceiverState m_rigState;
   Frequency m_remoteDialFrequencyTarget {0};
   qint64 m_remoteDialFrequencyGuardUntilMs {0};
@@ -1367,6 +1377,7 @@ private:
   QTimer stopWCTimer;               //Wait & Call
   QTimer ptt1Timer;                 //StartTx delay
   QTimer ptt0Timer;                 //StopTx delay
+  QTimer cwAudioGuardTimer;         //Audio-CW PTT safety watchdog
   QTimer logQSOTimer;
   bool m_logQsoTriggeredByTimer {false};
   QTimer killFileTimer;

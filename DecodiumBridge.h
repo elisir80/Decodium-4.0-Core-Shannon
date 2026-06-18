@@ -896,6 +896,12 @@ public:
     // Returns the priority-ranked WSJT-X background color for a decode entry,
     // or empty string when no highlight applies.
     Q_INVOKABLE QString decodeHighlightBg(const QVariantMap& entry) const;
+    // 1.0.416 (fork iu8lmc) — colore di SFONDO riga scelto dall'utente, per categoria.
+    Q_INVOKABLE QString decodeHighlightUserBg(const QVariantMap& entry) const;
+    Q_INVOKABLE QString decodeColorBgValue(const QString& prop) const;
+    Q_INVOKABLE bool decodeColorBgEnabled(const QString& prop) const;
+    Q_INVOKABLE void setDecodeColorBg(const QString& prop, const QString& hex);
+    Q_INVOKABLE void setDecodeColorBgEnabled(const QString& prop, bool enabled);
     bool b4Strikethrough()  const { return m_b4Strikethrough; }
     void setB4Strikethrough(bool v) { if (m_b4Strikethrough!=v){m_b4Strikethrough=v;emit b4StrikethroughChanged();} }
 
@@ -1495,6 +1501,7 @@ signals:
     void colorNewCallBandChanged();
     void colorLotwUserChanged();
     void decodeColorEnabledChanged(QString prop, bool enabled);
+    void decodeColorBgChanged();   // 1.0.416 sfondo decode cambiato
     void b4StrikethroughChanged();
     // B8 — Alert sounds
     void alertSoundsEnabledChanged();
@@ -2631,6 +2638,8 @@ private:
     QString m_colorNewCallBand       {"#B5E8E8"}; // light cyan
     QString m_colorLotwUser          {"#FFFFFF"}; // white bg, dark red text
     QHash<QString, bool> m_decodeColorEnabled;
+    QHash<QString, QString> m_decodeColorBg;          // 1.0.416 sfondo riga per categoria
+    QHash<QString, bool>    m_decodeColorBgEnabled;   // 1.0.416 abilitazione sfondo per categoria
 
     // Worked-before tracking (per-band/DXCC/zone/grid). Populated from ADIF
     // import + each logged TX. Keys for *byBand sets are "BAND|VALUE", e.g.
