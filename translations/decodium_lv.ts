@@ -371,79 +371,79 @@ Searched paths:
         <location filename="../map65/astro.ui" line="14"/>
         <location filename="../qmap/astro.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Forma</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="48"/>
         <location filename="../qmap/astro.ui" line="243"/>
         <source>Pointing Tests</source>
-        <translation type="unfinished"></translation>
+        <translation>Tēmēšanas testi</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="78"/>
         <location filename="../qmap/astro.ui" line="93"/>
         <source>6</source>
-        <translation type="unfinished">6</translation>
+        <translation>6</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="85"/>
         <location filename="../qmap/astro.ui" line="38"/>
         <source>1</source>
-        <translation type="unfinished">1</translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="92"/>
         <location filename="../qmap/astro.ui" line="51"/>
         <source>2, 5</source>
-        <translation type="unfinished"></translation>
+        <translation>2, 5</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="102"/>
         <location filename="../qmap/astro.ui" line="67"/>
         <source>3</source>
-        <translation type="unfinished">3</translation>
+        <translation>3</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="109"/>
         <location filename="../qmap/astro.ui" line="80"/>
         <source>4</source>
-        <translation type="unfinished">4</translation>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="119"/>
         <location filename="../qmap/astro.ui" line="109"/>
         <source>Offset   </source>
-        <translation type="unfinished"></translation>
+        <translation>Nobīde   </translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="122"/>
         <location filename="../qmap/astro.ui" line="112"/>
         <source>  deg</source>
-        <translation type="unfinished"></translation>
+        <translation>  grādi</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="147"/>
         <location filename="../qmap/astro.ui" line="169"/>
         <source>   s</source>
-        <translation type="unfinished"></translation>
+        <translation>   s</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="150"/>
         <location filename="../qmap/astro.ui" line="172"/>
         <source>Dwell   </source>
-        <translation type="unfinished"></translation>
+        <translation>Aizture   </translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="166"/>
         <location filename="../qmap/astro.ui" line="140"/>
         <source>Auto Cycle</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais cikls</translation>
     </message>
     <message>
         <location filename="../map65/astro.ui" line="173"/>
         <location filename="../qmap/astro.ui" line="153"/>
         <source>On Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Ieslēgts/izslēgts</translation>
     </message>
 </context>
 <context>
@@ -469,7 +469,7 @@ Searched paths:
     <message>
         <location filename="../map65/bandmap.ui" line="20"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Forma</translation>
     </message>
 </context>
 <context>
@@ -510,62 +510,62 @@ Searched paths:
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="9"/>
         <source>Client</source>
-        <translation type="unfinished"></translation>
+        <translation>Klients</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="10"/>
         <source>Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Laiks</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="11"/>
         <source>Snr</source>
-        <translation type="unfinished"></translation>
+        <translation>SNR</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="12"/>
         <source>DT</source>
-        <translation type="unfinished"></translation>
+        <translation>DT</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="13"/>
         <source>Frequency</source>
-        <translation type="unfinished">Frequency</translation>
+        <translation>Frekvence</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="14"/>
         <source>Drift</source>
-        <translation type="unfinished"></translation>
+        <translation>Dreifs</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="15"/>
         <source>Grid</source>
-        <translation type="unfinished">Grid</translation>
+        <translation>Lauciņš</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="16"/>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauda</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="17"/>
         <source>Live</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešraide</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="18"/>
         <source>Callsign</source>
-        <translation type="unfinished">Callsign</translation>
+        <translation>Izsaukums</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="23"/>
         <source>no</source>
-        <translation type="unfinished"></translation>
+        <translation>nē</translation>
     </message>
     <message>
         <location filename="../UDPExamples/BeaconsModel.cpp" line="23"/>
         <source>yes</source>
-        <translation type="unfinished"></translation>
+        <translation>jā</translation>
     </message>
 </context>
 <context>
@@ -589,12 +589,12 @@ Searched paths:
     <message>
         <location filename="../map65/about.ui" line="23"/>
         <source>About MAP65</source>
-        <translation type="unfinished"></translation>
+        <translation>Par MAP65</translation>
     </message>
     <message>
         <location filename="../qmap/about.ui" line="23"/>
         <source>About QMAP</source>
-        <translation type="unfinished"></translation>
+        <translation>Par QMAP</translation>
     </message>
 </context>
 <context>
@@ -668,37 +668,37 @@ Searched paths:
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="25"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="25"/>
         <source>Chiamate (CALL)</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaukumi (CALL)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="120"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="120"/>
         <source>Chiamata diretta</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešais izsaukums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="137"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="137"/>
         <source>ATTIVA</source>
-        <translation type="unfinished"></translation>
+        <translation>AKTĪVS</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="151"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="151"/>
         <source>Target callsign</source>
-        <translation type="unfinished"></translation>
+        <translation>Mērķa izsaukums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="181"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="181"/>
         <source>Tentativi max</source>
-        <translation type="unfinished"></translation>
+        <translation>Maks. mēģinājumi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="182"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="182"/>
         <source>Timeout totale (s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopējais noildze (s)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="197"/>
@@ -706,85 +706,85 @@ Searched paths:
         <location filename="../qml/decodium/components/CallDialog.qml" line="197"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="385"/>
         <source>∞</source>
-        <translation type="unfinished"></translation>
+        <translation>∞</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="245"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="245"/>
         <source>Periodo FT8/FT4</source>
-        <translation type="unfinished"></translation>
+        <translation>FT8/FT4 periods</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="251"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="251"/>
         <source>1st (:00/:30)</source>
-        <translation type="unfinished"></translation>
+        <translation>1. (:00/:30)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="281"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="281"/>
         <source>2nd (:15/:45)</source>
-        <translation type="unfinished"></translation>
+        <translation>2. (:15/:45)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="311"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="311"/>
         <source>Alterna</source>
-        <translation type="unfinished"></translation>
+        <translation>Mainās</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="347"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="347"/>
         <source>Pausa fra cicli (s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Pauze starp cikliem (s)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="378"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="378"/>
         <source>Stato: chiamando %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Statuss: izsaucu %1</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="384"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="384"/>
         <source>Tentativo %1 / %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Mēģinājums %1 / %2</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="401"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="401"/>
         <source>AutoCQ generico (pulsante ACQ)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vispārīgs AutoCQ (poga ACQ)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="410"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
         <source>Max chiamate CQ (0=∞)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maks. CQ izsaukumi (0=∞)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="426"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="426"/>
         <source>Pausa fra cicli CQ (s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Pauze starp CQ cikliem (s)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="447"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="447"/>
         <source>Chiudi</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizvērt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="470"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="470"/>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>Apturēt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/CallDialog.qml" line="500"/>
         <location filename="../qml/decodium/components/CallDialog.qml" line="500"/>
         <source>▶ Start</source>
-        <translation type="unfinished"></translation>
+        <translation>▶ Sākt</translation>
     </message>
 </context>
 <context>
@@ -800,87 +800,87 @@ Searched paths:
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="131"/>
         <source>&amp;Erase Band Activity</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Dzēst joslu aktivitāti</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="132"/>
         <source>Erase &amp;Rx Frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst &amp;Rx frekvenci</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="133"/>
         <source>Erase &amp;Both</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst &amp;abas</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="138"/>
         <source>&amp;Gen Msgs</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ģen. ziņojumus</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="193"/>
         <source>Free text:</source>
-        <translation type="unfinished"></translation>
+        <translation>Brīvs teksts:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="194"/>
         <source>Temporary grid:</source>
-        <translation type="unfinished"></translation>
+        <translation>Pagaidu lauciņš:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="195"/>
         <source>Configuration name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Konfigurācijas nosaukums:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="197"/>
         <source>Mode:</source>
-        <translation type="unfinished">Mode:</translation>
+        <translation>Režīms:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="198"/>
         <source>Submode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Apakšrežīms:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="199"/>
         <source>Fast mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ātrais režīms:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="200"/>
         <source>T/R period:</source>
-        <translation type="unfinished"></translation>
+        <translation>T/R periods:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="201"/>
         <source>Rx DF:</source>
-        <translation type="unfinished"></translation>
+        <translation>Rx DF:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="202"/>
         <source>Freq. Tol:</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekv. piel.:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="203"/>
         <source>DX call:</source>
-        <translation type="unfinished"></translation>
+        <translation>DX izsaukums:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="204"/>
         <source>DX grid:</source>
-        <translation type="unfinished"></translation>
+        <translation>DX lauciņš:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="287"/>
         <source>&amp;Auto Off</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Auto izslēgts</translation>
     </message>
     <message>
         <location filename="../UDPExamples/ClientWidget.cpp" line="288"/>
         <source>&amp;Halt Tx</source>
-        <translation type="unfinished">&amp;Halt Tx</translation>
+        <translation>&amp;Apturēt Tx</translation>
     </message>
 </context>
 <context>
@@ -912,7 +912,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorDialog.qml" line="83"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorDialog.qml" line="80"/>
         <source>Eyedropper</source>
-        <translation type="unfinished"></translation>
+        <translation>Pipete</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorDialog.qml" line="132"/>
@@ -921,7 +921,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorDialog.qml" line="132"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorDialog.qml" line="130"/>
         <source>Hue</source>
-        <translation type="unfinished"></translation>
+        <translation>Tonis</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorDialog.qml" line="188"/>
@@ -930,7 +930,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorDialog.qml" line="191"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorDialog.qml" line="189"/>
         <source>Alpha</source>
-        <translation type="unfinished"></translation>
+        <translation>Alfa</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorDialog.qml" line="209"/>
@@ -939,7 +939,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorDialog.qml" line="212"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorDialog.qml" line="218"/>
         <source>Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Krāsa</translation>
     </message>
 </context>
 <context>
@@ -1086,7 +1086,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorInputs.qml" line="32"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorInputs.qml" line="34"/>
         <source>Hex</source>
-        <translation type="unfinished"></translation>
+        <translation>Hex</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorInputs.qml" line="32"/>
@@ -1095,7 +1095,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorInputs.qml" line="32"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorInputs.qml" line="34"/>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorInputs.qml" line="32"/>
@@ -1104,7 +1104,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorInputs.qml" line="32"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorInputs.qml" line="34"/>
         <source>HSV</source>
-        <translation type="unfinished"></translation>
+        <translation>HSV</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/ColorInputs.qml" line="32"/>
@@ -1113,7 +1113,7 @@ Please check your log.</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/ColorInputs.qml" line="32"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/ColorInputs.qml" line="34"/>
         <source>HSL</source>
-        <translation type="unfinished"></translation>
+        <translation>HSL</translation>
     </message>
 </context>
 <context>
@@ -1495,24 +1495,26 @@ Format:
     <message>
         <location filename="../Configuration.cpp" line="4522"/>
         <source>Rig connection failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Radio savienojums neizdevās</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="4523"/>
         <source>The transceiver could not be opened with the selected settings.
 
 Save the configuration anyway? You can reconnect later from the main window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Transīveru nevarēja atvērt ar atlasītajiem iestatījumiem.
+
+Vai tomēr saglabāt konfigurāciju? Vēlāk varat atkārtoti savienoties no galvenā loga.</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="4637"/>
         <source>Callsign is empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaukums ir tukšs</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="4638"/>
         <source>Please enter your callsign before saving.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pirms saglabāšanas ievadiet savu izsaukumu.</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="5001"/>
@@ -1549,7 +1551,9 @@ Restart the application to apply listener changes.</translation>
         <source>The legacy CTY.DAT refresh failed, but Decodium will continue using the currently available country file.
 
 Network detail: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Novecojušā CTY.DAT atsvaidzināšana neizdevās, bet Decodium turpinās izmantot pašlaik pieejamo valstu failu.
+
+Tīkla detaļas: %1</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="5182"/>
@@ -1564,7 +1568,7 @@ Network detail: %1</source>
     <message>
         <location filename="../Configuration.cpp" line="5680"/>
         <source>Invalid IPv4 address</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīga IPv4 adrese</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="7069"/>
@@ -1741,7 +1745,7 @@ Reverted Hamlib will be used after restart</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/CopyAction.qml" line="9"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopēt</translation>
     </message>
 </context>
 <context>
@@ -1749,7 +1753,7 @@ Reverted Hamlib will be used after restart</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/CutAction.qml" line="9"/>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Izgriezt</translation>
     </message>
 </context>
 <context>
@@ -2119,115 +2123,115 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="18"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="18"/>
         <source>Decode History (DB)</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekodēšanas vēsture (DB)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <source>Export ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt ADIF</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="83"/>
         <source>ADIF (*.adi)</source>
-        <translation type="unfinished"></translation>
+        <translation>ADIF (*.adi)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="115"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="115"/>
         <source>Decode History</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekodēšanas vēsture</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="123"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="123"/>
         <source>%1 total decodes  •  %2 sessions</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 dekodēšanu kopā  •  %2 sesijas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="124"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="124"/>
         <source>Empty DB</source>
-        <translation type="unfinished"></translation>
+        <translation>Tukša datubāze</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="139"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="139"/>
         <source>Callsign</source>
-        <translation type="unfinished">Callsign</translation>
+        <translation>Izsaukums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="140"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="140"/>
         <source>Band</source>
-        <translation type="unfinished">Band</translation>
+        <translation>Josla</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="141"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="141"/>
         <source>Mode</source>
-        <translation type="unfinished">Mode</translation>
+        <translation>Režīms</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="142"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="142"/>
         <source>From (UTC)</source>
-        <translation type="unfinished"></translation>
+        <translation>No (UTC)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="143"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="143"/>
         <source>To (UTC)</source>
-        <translation type="unfinished"></translation>
+        <translation>Līdz (UTC)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="144"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="144"/>
         <source>Limit</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierobežojums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="150"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="150"/>
         <source>e.g. F4CQS</source>
-        <translation type="unfinished"></translation>
+        <translation>piem., F4CQS</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="360"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="360"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Meklēt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="379"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="379"/>
         <source>Clear filters</source>
-        <translation type="unfinished"></translation>
+        <translation>Notīrīt filtrus</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="407"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="407"/>
         <source>%1 results</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 rezultāti</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="408"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="408"/>
         <source>No results</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav rezultātu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="413"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="413"/>
         <source>Export ADIF…</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt ADIF…</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/DecodeHistoryDialog.qml" line="566"/>
         <location filename="../qml/decodium/components/DecodeHistoryDialog.qml" line="566"/>
         <source>Close</source>
-        <translation type="unfinished">Close</translation>
+        <translation>Aizvērt</translation>
     </message>
 </context>
 <context>
@@ -2235,67 +2239,67 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="14"/>
         <source>Client</source>
-        <translation type="unfinished"></translation>
+        <translation>Klients</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="15"/>
         <source>Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Laiks</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="16"/>
         <source>Snr</source>
-        <translation type="unfinished"></translation>
+        <translation>SNR</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="17"/>
         <source>DT</source>
-        <translation type="unfinished"></translation>
+        <translation>DT</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="18"/>
         <source>DF</source>
-        <translation type="unfinished"></translation>
+        <translation>DF</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="19"/>
         <source>Md</source>
-        <translation type="unfinished"></translation>
+        <translation>Md</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="20"/>
         <source>Confidence</source>
-        <translation type="unfinished"></translation>
+        <translation>Ticamība</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="21"/>
         <source>Live</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešraide</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="22"/>
         <source>Message</source>
-        <translation type="unfinished">Message</translation>
+        <translation>Ziņojums</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="27"/>
         <source>low</source>
-        <translation type="unfinished"></translation>
+        <translation>zems</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="27"/>
         <source>high</source>
-        <translation type="unfinished"></translation>
+        <translation>augsts</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="32"/>
         <source>no</source>
-        <translation type="unfinished"></translation>
+        <translation>nē</translation>
     </message>
     <message>
         <location filename="../UDPExamples/DecodesModel.cpp" line="32"/>
         <source>yes</source>
-        <translation type="unfinished"></translation>
+        <translation>jā</translation>
     </message>
 </context>
 <context>
@@ -2303,37 +2307,37 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../DecodiumBridge.cpp" line="22895"/>
         <source>TX non avviata</source>
-        <translation type="unfinished"></translation>
+        <translation>TX nav startēts</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="22896"/>
         <source>Nominativo compresso non risolto</source>
-        <translation type="unfinished"></translation>
+        <translation>Saspiestais izsaukums nav atrisināts</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="26433"/>
         <source>AutoCQ fermato</source>
-        <translation type="unfinished"></translation>
+        <translation>AutoCQ apturēts</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="26434"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
-        <translation type="unfinished"></translation>
+        <translation>Saņemts tiešais izsaukums, bet izsaukums nav atrisināts</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="31352"/>
         <source>Map selection: %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartes atlase: %1 %2</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="31353"/>
         <source>Map selection: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartes atlase: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="37490"/>
         <source>Update checks are disabled in this build.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjauninājumu pārbaude šajā būvējumā ir atspējota.</translation>
     </message>
 </context>
 <context>
@@ -2342,24 +2346,24 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="379"/>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="453"/>
         <source>Cloudlog API URL or API key not configured.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog API URL vai API atslēga nav konfigurēta.</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="423"/>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="437"/>
         <source>Cloudlog QSO upload</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog QSO augšupielāde</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="490"/>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="500"/>
         <source>Cloudlog API test</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog API tests</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="514"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog API atslēga ir derīga, bet bez rakstīšanas tiesībām.</translation>
     </message>
 </context>
 <context>
@@ -2367,207 +2371,207 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="422"/>
         <source>Disconnected: callsign missing, auto-reconnect skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienots: trūkst izsaukuma, automātiskā atkārtotā savienošana izlaista.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="423"/>
         <source>DX Cluster auto-reconnect skipped: callsign missing.</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster automātiskā atkārtotā savienošana izlaista: trūkst izsaukuma.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="426"/>
         <source>DX Cluster auto-reconnect starting.</source>
-        <translation type="unfinished"></translation>
+        <translation>Sākas DX Cluster automātiskā atkārtotā savienošana.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="490"/>
         <source>Connection timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienojuma noildze</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="493"/>
         <location filename="../DecodiumDxCluster.cpp" line="1201"/>
         <source>Error: %1</source>
-        <translation type="unfinished">Error: %1</translation>
+        <translation>Kļūda: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="494"/>
         <source>DX Cluster not reachable: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster nav sasniedzams: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="509"/>
         <location filename="../DecodiumDxCluster.cpp" line="510"/>
         <source>Callsign not usable for cluster login: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaukums nav izmantojams klastera pieteikšanai: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="516"/>
         <source>Login sent as %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieteikšanās nosūtīta kā %1</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="517"/>
         <source>Login sent as %1 (station %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieteikšanās nosūtīta kā %1 (stacija %2)</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="519"/>
         <source>Login sent (%1).</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieteikšanās nosūtīta (%1).</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="520"/>
         <source>Login sent (%1, station %2).</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieteikšanās nosūtīta (%1, stacija %2).</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="548"/>
         <source>connection closed</source>
-        <translation type="unfinished"></translation>
+        <translation>savienojums slēgts</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="549"/>
         <source>Disconnected: %1. Reconnecting in %2 s...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienots: %1. Atkārtota savienošana pēc %2 s...</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="551"/>
         <source>DX Cluster disconnected: %1. Reconnecting in %2 s...</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster atvienots: %1. Atkārtota savienošana pēc %2 s...</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="606"/>
         <source>Connection to %1 failed: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienojums ar %1 neizdevās: %2</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="631"/>
         <source>Connecting to %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Savieno ar %1...</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="632"/>
         <source>Connecting to %1 …</source>
-        <translation type="unfinished"></translation>
+        <translation>Savieno ar %1 …</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="651"/>
         <location filename="../DecodiumDxCluster.cpp" line="652"/>
         <source>Already connected or connecting.</source>
-        <translation type="unfinished"></translation>
+        <translation>Jau savienots vai savienojas.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="657"/>
         <source>Callsign not set. Please set your callsign in Station.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaukums nav iestatīts. Lūdzu, iestatiet savu izsaukumu sadaļā Stacija.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="658"/>
         <source>Callsign not set. Please set your callsign before connecting.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaukums nav iestatīts. Lūdzu, iestatiet savu izsaukumu pirms savienošanas.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="672"/>
         <source>Configured cluster endpoint is legacy/read-only. Using %1 instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konfigurētais klastera galapunkts ir novecojis/tikai lasāms. Tā vietā tiek izmantots %1.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="701"/>
         <source>No specific reason</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav konkrēta iemesla</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="703"/>
         <source>Error: no valid DX Cluster endpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Kļūda: nav derīga DX Cluster galapunkta</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="704"/>
         <source>DX Cluster configuration is invalid.</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster konfigurācija nav derīga.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="739"/>
         <source>Cannot send command: not connected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar nosūtīt komandu: nav savienots.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="750"/>
         <location filename="../DecodiumDxCluster.cpp" line="786"/>
         <source>Cannot send spot: invalid call or frequency.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar nosūtīt spotu: nederīgs izsaukums vai frekvence.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="755"/>
         <source>Cannot send spot: not connected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar nosūtīt spotu: nav savienots.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="772"/>
         <source>Cannot send spot: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar nosūtīt spotu: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="777"/>
         <location filename="../DecodiumDxCluster.cpp" line="778"/>
         <source>Spot sent: %1 %2 kHz</source>
-        <translation type="unfinished"></translation>
+        <translation>Spots nosūtīts: %1 %2 kHz</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="792"/>
         <source>Cannot send spot: callsign not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar nosūtīt spotu: izsaukums nav iestatīts.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="805"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
-        <translation type="unfinished">AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</translation>
+        <translation>AutoSpot izlaists: %1:%2 ir tikai lasāms. Konfigurējiet rakstāmu DX klastera galapunktu.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1067"/>
         <source>AutoSpot verification started for %1 on %2:%3</source>
-        <translation type="unfinished"></translation>
+        <translation>AutoSpot pārbaude sākta priekš %1 uz %2:%3</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1094"/>
         <source>Connected to %1, waiting for login prompt...</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienots ar %1, gaida pieteikšanās uzvedni...</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1096"/>
         <source>Connected to %1. Waiting for login prompt...</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienots ar %1. Gaida pieteikšanās uzvedni...</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1125"/>
         <source>remote host closed the connection</source>
-        <translation type="unfinished"></translation>
+        <translation>attālais resursdators slēdza savienojumu</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1129"/>
         <source>Disconnected</source>
-        <translation type="unfinished">Disconnected</translation>
+        <translation>Atvienots</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1130"/>
         <source>Disconnected from DX cluster.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienots no DX klastera.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1142"/>
         <source>DX Cluster receive buffer was trimmed after an unterminated server response.</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster saņemšanas buferis tika apgriezts pēc nepabeigtas servera atbildes.</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1182"/>
         <source>Unknown socket error</source>
-        <translation type="unfinished"></translation>
+        <translation>Nezināma ligzdas kļūda</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1203"/>
         <source>Socket error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ligzdas kļūda: %1</translation>
     </message>
 </context>
 <context>
@@ -2575,29 +2579,29 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="57"/>
         <source>Updating propagation data from %1 ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunina izplatīšanās datus no %1 ...</translation>
     </message>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="83"/>
         <source>Propagation update failed: empty network reply</source>
-        <translation type="unfinished"></translation>
+        <translation>Izplatīšanās atjaunināšana neizdevās: tukša tīkla atbilde</translation>
     </message>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="102"/>
         <location filename="../DecodiumPropagationManager.cpp" line="106"/>
         <location filename="../DecodiumPropagationManager.cpp" line="113"/>
         <source>Propagation update failed: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Izplatīšanās atjaunināšana neizdevās: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="118"/>
         <source>Propagation updated: %1 UTC</source>
-        <translation type="unfinished"></translation>
+        <translation>Izplatīšanās atjaunināta: %1 UTC</translation>
     </message>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
-        <translation type="unfinished"> | Feed time: %1</translation>
+        <translation> | Plūsmas laiks: %1</translation>
     </message>
 </context>
 <context>
@@ -2606,32 +2610,32 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="84"/>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="126"/>
         <source>API key mancante.</source>
-        <translation type="unfinished"></translation>
+        <translation>Trūkst API atslēgas.</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="106"/>
         <source>test fallito: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>tests neizdevās: %1</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="116"/>
         <source>API key non valida: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>nederīga API atslēga: %1</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="132"/>
         <source>record ADIF vuoto.</source>
-        <translation type="unfinished"></translation>
+        <translation>tukšs ADIF ieraksts.</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="159"/>
         <source>upload fallito: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>augšupielāde neizdevās: %1</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="169"/>
         <source>upload rifiutato per %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>augšupielāde noraidīta priekš %1: %2</translation>
     </message>
 </context>
 <context>
@@ -2639,7 +2643,7 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="1896"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
-        <translation type="unfinished"></translation>
+        <translation>CAT pārtraukts, automātiska atkārtota savienošana (%1/%2)...</translation>
     </message>
 </context>
 <context>
@@ -2647,7 +2651,7 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/DeleteAction.qml" line="9"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst</translation>
     </message>
 </context>
 <context>
@@ -2697,323 +2701,323 @@ or contact DXLab support at DXLab@groups.io.</translation>
     <message>
         <location filename="../map65/devsetup.ui" line="20"/>
         <source>Setup / Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīšana / opcijas</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="30"/>
         <location filename="../qmap/devsetup.ui" line="24"/>
         <source>Station</source>
-        <translation type="unfinished">Station</translation>
+        <translation>Stacija</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="48"/>
         <location filename="../qmap/devsetup.ui" line="42"/>
         <source>My Call:</source>
-        <translation type="unfinished">My Call:</translation>
+        <translation>Mans izsaukums:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="61"/>
         <location filename="../qmap/devsetup.ui" line="55"/>
         <source>My Grid:</source>
-        <translation type="unfinished">My Grid:</translation>
+        <translation>Mans lauciņš:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="74"/>
         <source>ID Interval (min):</source>
-        <translation type="unfinished"></translation>
+        <translation>ID intervāls (min):</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="87"/>
         <source>PTT Port:</source>
-        <translation type="unfinished">PTT Port:</translation>
+        <translation>PTT ports:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="94"/>
         <location filename="../qmap/devsetup.ui" line="62"/>
         <source>Astro Font Size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Astro fonta izmērs:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="111"/>
         <location filename="../qmap/devsetup.ui" line="86"/>
         <source>K1JT</source>
-        <translation type="unfinished">K1JT</translation>
+        <translation>K1JT</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="124"/>
         <location filename="../qmap/devsetup.ui" line="99"/>
         <source>FN20qi</source>
-        <translation type="unfinished"></translation>
+        <translation>FN20qi</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="151"/>
         <source>None</source>
-        <translation type="unfinished">None</translation>
+        <translation>Nav</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="156"/>
         <source>COM1</source>
-        <translation type="unfinished"></translation>
+        <translation>COM1</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="161"/>
         <source>COM2</source>
-        <translation type="unfinished"></translation>
+        <translation>COM2</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="166"/>
         <source>COM3</source>
-        <translation type="unfinished"></translation>
+        <translation>COM3</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="171"/>
         <source>COM4</source>
-        <translation type="unfinished"></translation>
+        <translation>COM4</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="176"/>
         <source>COM5</source>
-        <translation type="unfinished"></translation>
+        <translation>COM5</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="181"/>
         <source>COM6</source>
-        <translation type="unfinished"></translation>
+        <translation>COM6</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="186"/>
         <source>COM7</source>
-        <translation type="unfinished"></translation>
+        <translation>COM7</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="191"/>
         <source>COM8</source>
-        <translation type="unfinished"></translation>
+        <translation>COM8</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="196"/>
         <source>COM9</source>
-        <translation type="unfinished"></translation>
+        <translation>COM9</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="201"/>
         <source>COM10</source>
-        <translation type="unfinished"></translation>
+        <translation>COM10</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="206"/>
         <source>COM11</source>
-        <translation type="unfinished"></translation>
+        <translation>COM11</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="211"/>
         <source>COM12</source>
-        <translation type="unfinished"></translation>
+        <translation>COM12</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="216"/>
         <source>COM13</source>
-        <translation type="unfinished"></translation>
+        <translation>COM13</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="263"/>
         <source>DXCC:</source>
-        <translation type="unfinished"></translation>
+        <translation>DXCC:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="276"/>
         <source>Timeout (min):</source>
-        <translation type="unfinished"></translation>
+        <translation>Noildze (min):</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="289"/>
         <location filename="../qmap/devsetup.ui" line="148"/>
         <source>Fcal (Hz):</source>
-        <translation type="unfinished"></translation>
+        <translation>Fcal (Hz):</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="302"/>
         <location filename="../qmap/devsetup.ui" line="161"/>
         <source>Fadd (MHz)</source>
-        <translation type="unfinished"></translation>
+        <translation>Fadd (MHz)</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="335"/>
         <source>PJ9</source>
-        <translation type="unfinished"></translation>
+        <translation>PJ9</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="359"/>
         <location filename="../qmap/devsetup.ui" line="198"/>
         <source>0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="398"/>
         <source>Antennas:</source>
-        <translation type="unfinished"></translation>
+        <translation>Antenas:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="419"/>
         <source>Xpol</source>
-        <translation type="unfinished"></translation>
+        <translation>Xpol</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="445"/>
         <source>+</source>
-        <translation type="unfinished"></translation>
+        <translation>+</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="455"/>
         <source>x</source>
-        <translation type="unfinished"></translation>
+        <translation>x</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="484"/>
         <source>Dphi:</source>
-        <translation type="unfinished"></translation>
+        <translation>Dphi:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="536"/>
         <location filename="../qmap/devsetup.ui" line="233"/>
         <source>Save Directory:</source>
-        <translation type="unfinished">Save Directory:</translation>
+        <translation>Saglabāšanas mape:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="543"/>
         <source>C:\Users\joe\wsjt\map65\save</source>
-        <translation type="unfinished"></translation>
+        <translation>C:\Users\joe\wsjt\map65\save</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="560"/>
         <location filename="../qmap/devsetup.ui" line="257"/>
         <source>AzEl Directory:</source>
-        <translation type="unfinished">AzEl Directory:</translation>
+        <translation>AzEl mape:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="567"/>
         <source>C:\Users\joe\wsjt\map65</source>
-        <translation type="unfinished"></translation>
+        <translation>C:\Users\joe\wsjt\map65</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="584"/>
         <source>Editor command:</source>
-        <translation type="unfinished"></translation>
+        <translation>Redaktora komanda:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="597"/>
         <source>notepad</source>
-        <translation type="unfinished"></translation>
+        <translation>notepad</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="609"/>
         <location filename="../qmap/devsetup.ui" line="279"/>
         <source>I/O Devices</source>
-        <translation type="unfinished"></translation>
+        <translation>I/O ierīces</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="617"/>
         <source>Input Source (Rx, Baseband)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievades avots (Rx, pamatjosla)</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="630"/>
         <source>SoundCard</source>
-        <translation type="unfinished"></translation>
+        <translation>Skaņas karte</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="653"/>
         <source>Network</source>
-        <translation type="unfinished">Network</translation>
+        <translation>Tīkls</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="676"/>
         <source>Swap I/Q</source>
-        <translation type="unfinished"></translation>
+        <translation>Apmainīt I/Q</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="683"/>
         <location filename="../qmap/devsetup.ui" line="313"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjust to scale digital I/Q data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pielāgojiet, lai mērogotu digitālos I/Q datus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="686"/>
         <location filename="../qmap/devsetup.ui" line="316"/>
         <source>  dB</source>
-        <translation type="unfinished"></translation>
+        <translation>  dB</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="689"/>
         <location filename="../qmap/devsetup.ui" line="319"/>
         <source>Gain  </source>
-        <translation type="unfinished"></translation>
+        <translation>Pastiprinājums  </translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="755"/>
         <location filename="../qmap/devsetup.ui" line="385"/>
         <source>Port</source>
-        <translation type="unfinished"></translation>
+        <translation>Ports</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="773"/>
         <source>Dev Ch API      Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierīce Kan. API      Nosaukums</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="835"/>
         <source>Sample Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Iztveršanas frekvence</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="863"/>
         <source>96000 Hz</source>
-        <translation type="unfinished"></translation>
+        <translation>96000 Hz</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="886"/>
         <source>95238 Hz</source>
-        <translation type="unfinished"></translation>
+        <translation>95238 Hz</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="927"/>
         <source>Output Device (Tx Audio)</source>
-        <translation type="unfinished"></translation>
+        <translation>Izvades ierīce (Tx audio)</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="964"/>
         <source>Colors</source>
-        <translation type="unfinished">Colors</translation>
+        <translation>Krāsas</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="977"/>
         <source>Choose colors for Band Map and Messages Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>Izvēlieties krāsas joslu kartes un ziņojumu logiem</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1005"/>
         <source>Red</source>
-        <translation type="unfinished"></translation>
+        <translation>Sarkana</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1028"/>
         <source>Green</source>
-        <translation type="unfinished"></translation>
+        <translation>Zaļa</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1051"/>
         <source>Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>Zila</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1084"/>
         <source>Background</source>
-        <translation type="unfinished"></translation>
+        <translation>Fons</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1144"/>
         <source>Newest</source>
-        <translation type="unfinished"></translation>
+        <translation>Jaunākais</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1196"/>
@@ -3021,110 +3025,110 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../map65/devsetup.ui" line="1343"/>
         <location filename="../map65/devsetup.ui" line="1418"/>
         <source> K1ABC</source>
-        <translation type="unfinished"></translation>
+        <translation> K1ABC</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1213"/>
         <source>2nd</source>
-        <translation type="unfinished"></translation>
+        <translation>2.</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1285"/>
         <source>3rd</source>
-        <translation type="unfinished"></translation>
+        <translation>3.</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1360"/>
         <source>Oldest</source>
-        <translation type="unfinished"></translation>
+        <translation>Vecākais</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1442"/>
         <source>Color Selector</source>
-        <translation type="unfinished"></translation>
+        <translation>Krāsu atlasītājs</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1467"/>
         <source>Si570 Control</source>
-        <translation type="unfinished"></translation>
+        <translation>Si570 vadība</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1477"/>
         <source>LO Selection:</source>
-        <translation type="unfinished"></translation>
+        <translation>LO atlase:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1484"/>
         <source>IQ+, Generic Si570</source>
-        <translation type="unfinished"></translation>
+        <translation>IQ+, vispārīgs Si570</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1494"/>
         <source>IQ+  Rx/XT</source>
-        <translation type="unfinished"></translation>
+        <translation>IQ+  Rx/XT</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1524"/>
         <source>Rx frequency multiplier:</source>
-        <translation type="unfinished"></translation>
+        <translation>Rx frekvences reizinātājs:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1576"/>
         <source>Tx Offset (MHz):</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx nobīde (MHz):</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1628"/>
         <source>Tx frequency multiplier:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx frekvences reizinātājs:</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1677"/>
         <source>Frequency correction (ppm):</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvences korekcija (ppm):</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1743"/>
         <source>Initialize IQ+  on startup</source>
-        <translation type="unfinished"></translation>
+        <translation>Inicializēt IQ+ palaišanas laikā</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1753"/>
         <source>LiveCQ</source>
-        <translation type="unfinished"></translation>
+        <translation>LiveCQ</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1765"/>
         <location filename="../qmap/devsetup.ui" line="408"/>
         <source>LiveCQ URL</source>
-        <translation type="unfinished"></translation>
+        <translation>LiveCQ URL</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1777"/>
         <location filename="../qmap/devsetup.ui" line="420"/>
         <source>Other</source>
-        <translation type="unfinished"></translation>
+        <translation>Cits</translation>
     </message>
     <message>
         <location filename="../map65/devsetup.ui" line="1790"/>
         <location filename="../qmap/devsetup.ui" line="433"/>
         <source>Official QMAP URL</source>
-        <translation type="unfinished"></translation>
+        <translation>Oficiālais QMAP URL</translation>
     </message>
     <message>
         <location filename="../qmap/devsetup.ui" line="14"/>
         <source>Settings</source>
-        <translation type="unfinished">Settings</translation>
+        <translation>Iestatījumi</translation>
     </message>
     <message>
         <location filename="../qmap/devsetup.ui" line="69"/>
         <source>Highlight My Call:</source>
-        <translation type="unfinished"></translation>
+        <translation>Izcelt manu izsaukumu:</translation>
     </message>
     <message>
         <location filename="../qmap/devsetup.ui" line="300"/>
         <source>Input from Linrad or SDR Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievade no Linrad vai SDR Console</translation>
     </message>
 </context>
 <context>
@@ -3241,7 +3245,7 @@ Error: %2 - %3</translation>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="14"/>
         <source>Buttons</source>
-        <translation type="unfinished"></translation>
+        <translation>Pogas</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="27"/>
@@ -3253,7 +3257,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="27"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="27"/>
         <source>Enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Iespējots</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="40"/>
@@ -3265,7 +3269,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="40"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="40"/>
         <source>Disabled</source>
-        <translation type="unfinished">Disabled</translation>
+        <translation>Atspējots</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="65"/>
@@ -3398,7 +3402,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="334"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="362"/>
         <source>This is a tool tip</source>
-        <translation type="unfinished"></translation>
+        <translation>Šī ir rīka padoms</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="68"/>
@@ -3531,7 +3535,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="337"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="365"/>
         <source>This is a status tip</source>
-        <translation type="unfinished"></translation>
+        <translation>Šis ir statusa padoms</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="71"/>
@@ -3664,20 +3668,20 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="340"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="368"/>
         <source>This is &quot;what is this&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>Šis ir &quot;kas tas ir&quot;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="74"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="149"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="197"/>
         <source>PushButton</source>
-        <translation type="unfinished"></translation>
+        <translation>Spiedpoga</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="102"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="133"/>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>Labi</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="162"/>
@@ -3687,7 +3691,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="477"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="490"/>
         <source>Checked</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmēts</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="204"/>
@@ -3697,47 +3701,47 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="555"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="589"/>
         <source>Unchecked</source>
-        <translation type="unfinished"></translation>
+        <translation>Neatzīmēts</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="254"/>
         <source>ToolButton</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīka poga</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="282"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="313"/>
         <source>Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="326"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="389"/>
         <source>RadioButton</source>
-        <translation type="unfinished"></translation>
+        <translation>Radio poga</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="470"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="527"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="790"/>
         <source>CheckBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Izvēles rūtiņa</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="626"/>
         <source>CommandLinkButton</source>
-        <translation type="unfinished"></translation>
+        <translation>Komandsaites poga</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="654"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="670"/>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Komanda</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="704"/>
         <source>ButtonBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Pogu lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="780"/>
@@ -3745,64 +3749,64 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="953"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="585"/>
         <source>Inside DockWidget</source>
-        <translation type="unfinished"></translation>
+        <translation>Doka logrīkā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="797"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_buttons.ui" line="813"/>
         <source>Tristate</source>
-        <translation type="unfinished"></translation>
+        <translation>Trīsstāvokļu</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="14"/>
         <source>Containers - No Tabs</source>
-        <translation type="unfinished"></translation>
+        <translation>Konteineri — bez cilnēm</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="53"/>
         <source>MDI Area</source>
-        <translation type="unfinished"></translation>
+        <translation>MDI apgabals</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="63"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="288"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="354"/>
         <source>GroupBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Grupas lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="69"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="303"/>
         <source>Inside GroupBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Grupas lodziņā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="95"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="145"/>
         <source>Inside Stacked Page 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Sakrautajā 1. lapā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="115"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="165"/>
         <source>Inside Stacked Page 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Sakrautajā 2. lapā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="182"/>
         <source>Frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Rāmis</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="216"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="256"/>
         <source>Inside Frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Rāmī</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="272"/>
         <source>Widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Logrīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="317"/>
@@ -3810,25 +3814,25 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="427"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="441"/>
         <source>Subwindow</source>
-        <translation type="unfinished"></translation>
+        <translation>Apakšlogs</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="323"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="433"/>
         <source>Inside MDI Area 1</source>
-        <translation type="unfinished"></translation>
+        <translation>MDI 1. apgabalā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="337"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="447"/>
         <source>Inside MDI Area 2 </source>
-        <translation type="unfinished"></translation>
+        <translation>MDI 2. apgabalā </translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="382"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="416"/>
         <source>Inside Widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Logrīkā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="464"/>
@@ -3839,7 +3843,7 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="759"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="791"/>
         <source>ScroolArea</source>
-        <translation type="unfinished"></translation>
+        <translation>Ritināšanas apgabals</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="504"/>
@@ -3851,58 +3855,58 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="775"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="807"/>
         <source>Inside ScroolArea</source>
-        <translation type="unfinished"></translation>
+        <translation>Ritināšanas apgabalā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="520"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="695"/>
         <source>ScroolArea </source>
-        <translation type="unfinished"></translation>
+        <translation>Ritināšanas apgabals </translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="536"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="711"/>
         <source>Inside ScroolArea </source>
-        <translation type="unfinished"></translation>
+        <translation>Ritināšanas apgabalā </translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="824"/>
         <source>ToolBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīku lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="852"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="924"/>
         <source>Page 1</source>
-        <translation type="unfinished"></translation>
+        <translation>1. lapa</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="858"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="930"/>
         <source>Inside ToolBox Page 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīku lodziņa 1. lapā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="874"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="946"/>
         <source>Page 2</source>
-        <translation type="unfinished"></translation>
+        <translation>2. lapa</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="889"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="961"/>
         <source>Inside ToolBox Page 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīku lodziņa 2. lapā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_no_tabs.ui" line="978"/>
         <source>Stacked</source>
-        <translation type="unfinished"></translation>
+        <translation>Sakrauts</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="14"/>
         <source>Containers - Tabs</source>
-        <translation type="unfinished"></translation>
+        <translation>Konteineri — cilnes</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="57"/>
@@ -3914,13 +3918,13 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="300"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="344"/>
         <source>Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="63"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="107"/>
         <source>Inside TabWidget North Closable Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka ziemeļu aizverama 1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="71"/>
@@ -3932,54 +3936,54 @@ Error: %2 - %3</translation>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="314"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="358"/>
         <source>Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="77"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="121"/>
         <source>Inside TabWidget North Closable Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka ziemeļu aizverama 2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="145"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="186"/>
         <source>Inside TabWidget West Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka rietumu 1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="159"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="200"/>
         <source>Inside TabWidget West Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka rietumu 2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="224"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="265"/>
         <source>Inside TabWidget East Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka austrumu 1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="238"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="279"/>
         <source>Inside TabWidget East Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka austrumu 2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="306"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="350"/>
         <source>Inside TabWidget South Closable Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka dienvidu aizverama 1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="320"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_containers_tabs.ui" line="364"/>
         <source>Inside TabWidget South Closable Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilņu logrīka dienvidu aizverama 2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="14"/>
         <source>Displays</source>
-        <translation type="unfinished"></translation>
+        <translation>Displeji</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="42"/>
@@ -3989,23 +3993,28 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Testing&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Test&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="107"/>
         <source>Label</source>
-        <translation type="unfinished"></translation>
+        <translation>Etiķete</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="117"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="654"/>
         <source>Testing</source>
-        <translation type="unfinished"></translation>
+        <translation>Testēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="151"/>
         <source>TextBrowser</source>
-        <translation type="unfinished"></translation>
+        <translation>Teksta pārlūks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="161"/>
@@ -4014,76 +4023,80 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Testing&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Test&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="199"/>
         <source>GraphicsView</source>
-        <translation type="unfinished"></translation>
+        <translation>Grafikas skats</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="265"/>
         <source>CalendarWidget</source>
-        <translation type="unfinished"></translation>
+        <translation>Kalendāra logrīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="338"/>
         <source>LCDNumber</source>
-        <translation type="unfinished"></translation>
+        <translation>LCD numurs</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="397"/>
         <source>ProgressBar</source>
-        <translation type="unfinished"></translation>
+        <translation>Progresa josla</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="469"/>
         <source>Line - H</source>
-        <translation type="unfinished"></translation>
+        <translation>Līnija — H</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_displays.ui" line="541"/>
         <source>Line - V</source>
-        <translation type="unfinished"></translation>
+        <translation>Līnija — V</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="14"/>
         <source>Inputs - Fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievades — lauki</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="74"/>
         <source>FontComboBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Fonta kombinētais lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="134"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ComboBox&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Kombinētais lodziņš&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="145"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="170"/>
         <source>ComboBoxEditable</source>
-        <translation type="unfinished"></translation>
+        <translation>Rediģējams kombinētais lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="150"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="175"/>
         <source>Second option</source>
-        <translation type="unfinished"></translation>
+        <translation>Otra opcija</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="215"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="249"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="286"/>
         <source>LineEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Rindas rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="320"/>
         <source>TextEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Teksta rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="348"/>
@@ -4093,127 +4106,131 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;TextEdit&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Teksta rediģēšana&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="421"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="449"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="480"/>
         <source>PlainTextEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Vienkārša teksta rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="514"/>
         <source>SpinBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Skaitļa lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="601"/>
         <source>DoubleSpinBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Decimālskaitļa lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="688"/>
         <source>TimeEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Laika rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="775"/>
         <source>DateEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Datuma rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_fields.ui" line="862"/>
         <source>TimeDateEdit</source>
-        <translation type="unfinished"></translation>
+        <translation>Laika/datuma rediģēšana</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="14"/>
         <source>Inputs - No Fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievades — bez laukiem</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="76"/>
         <source>VerticalSlider</source>
-        <translation type="unfinished"></translation>
+        <translation>Vertikāls slīdnis</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="175"/>
         <source>HorizontalSlider</source>
-        <translation type="unfinished"></translation>
+        <translation>Horizontāls slīdnis</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="274"/>
         <source>VerticalScroolBar</source>
-        <translation type="unfinished"></translation>
+        <translation>Vertikāla ritjosla</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="355"/>
         <source>Dial</source>
-        <translation type="unfinished"></translation>
+        <translation>Ciparnīca</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="440"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="511"/>
         <source>ComboBox A</source>
-        <translation type="unfinished"></translation>
+        <translation>Kombinētais lodziņš A</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="445"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="516"/>
         <source>ComboBox B</source>
-        <translation type="unfinished"></translation>
+        <translation>Kombinētais lodziņš B</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="450"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="521"/>
         <source>ComboBox C</source>
-        <translation type="unfinished"></translation>
+        <translation>Kombinētais lodziņš C</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="556"/>
         <source>HorizontalScroolBar</source>
-        <translation type="unfinished"></translation>
+        <translation>Horizontāla ritjosla</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_inputs_no_fields.ui" line="622"/>
         <source>ComboBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Kombinētais lodziņš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="14"/>
         <source>Views</source>
-        <translation type="unfinished"></translation>
+        <translation>Skati</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="53"/>
         <source>ListView</source>
-        <translation type="unfinished"></translation>
+        <translation>Saraksta skats</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="76"/>
         <source>TreeView</source>
-        <translation type="unfinished"></translation>
+        <translation>Koka skats</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="99"/>
         <source>TableView</source>
-        <translation type="unfinished"></translation>
+        <translation>Tabulas skats</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_views.ui" line="122"/>
         <source>ColunmView</source>
-        <translation type="unfinished"></translation>
+        <translation>Kolonnu skats</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="14"/>
         <source>Widgets</source>
-        <translation type="unfinished"></translation>
+        <translation>Logrīki</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="74"/>
         <source>ListWidget</source>
-        <translation type="unfinished"></translation>
+        <translation>Saraksta logrīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="103"/>
@@ -4229,12 +4246,12 @@ p, li { white-space: pre-wrap; }
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="279"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="303"/>
         <source>New Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauns vienums</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="180"/>
         <source>TreeWidget</source>
-        <translation type="unfinished"></translation>
+        <translation>Koka logrīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="212"/>
@@ -4246,7 +4263,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="449"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="454"/>
         <source>New Column</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauna kolonna</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="229"/>
@@ -4256,18 +4273,18 @@ p, li { white-space: pre-wrap; }
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="293"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="307"/>
         <source>New Subitem</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauns apakšvienums</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="232"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="289"/>
         <source>Test</source>
-        <translation type="unfinished"></translation>
+        <translation>Tests</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="343"/>
         <source>TableWidget</source>
-        <translation type="unfinished"></translation>
+        <translation>Tabulas logrīks</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="372"/>
@@ -4277,43 +4294,43 @@ p, li { white-space: pre-wrap; }
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="439"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="444"/>
         <source>New Row</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauna rinda</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="397"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="459"/>
         <source>1.23</source>
-        <translation type="unfinished"></translation>
+        <translation>1.23</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="402"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="464"/>
         <source>Hello</source>
-        <translation type="unfinished"></translation>
+        <translation>Sveiki</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="407"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="469"/>
         <source>1,45</source>
-        <translation type="unfinished"></translation>
+        <translation>1,45</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="412"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="474"/>
         <source>Olá</source>
-        <translation type="unfinished"></translation>
+        <translation>Olá</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="417"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="479"/>
         <source>12/12/2012</source>
-        <translation type="unfinished"></translation>
+        <translation>12/12/2012</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="422"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/dw_widgets.ui" line="484"/>
         <source>Oui</source>
-        <translation type="unfinished"></translation>
+        <translation>Oui</translation>
     </message>
 </context>
 <context>
@@ -4704,7 +4721,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/FileDialog.qml" line="41"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FileDialog.qml" line="46"/>
         <source>Overwrite file?</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārrakstīt failu?</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/FileDialog.qml" line="45"/>
@@ -4713,7 +4730,8 @@ p, li { white-space: pre-wrap; }
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/FileDialog.qml" line="45"/>
         <source>“%1” already exists.
 Do you want to replace it?</source>
-        <translation type="unfinished"></translation>
+        <translation>“%1” jau eksistē.
+Vai vēlaties to aizstāt?</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/FileDialog.qml" line="186"/>
@@ -4722,7 +4740,7 @@ Do you want to replace it?</source>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/FileDialog.qml" line="158"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FileDialog.qml" line="174"/>
         <source>File name</source>
-        <translation type="unfinished"></translation>
+        <translation>Faila nosaukums</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/FileDialog.qml" line="201"/>
@@ -4731,7 +4749,7 @@ Do you want to replace it?</source>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/FileDialog.qml" line="174"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FileDialog.qml" line="190"/>
         <source>Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrs</translation>
     </message>
 </context>
 <context>
@@ -4803,7 +4821,7 @@ Error: %2</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/FontDialog.qml" line="80"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialog.qml" line="96"/>
         <source>Writing System</source>
-        <translation type="unfinished"></translation>
+        <translation>Rakstības sistēma</translation>
     </message>
 </context>
 <context>
@@ -4811,52 +4829,52 @@ Error: %2</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="31"/>
         <source>Family</source>
-        <translation type="unfinished"></translation>
+        <translation>Saime</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="39"/>
         <source>Font family</source>
-        <translation type="unfinished"></translation>
+        <translation>Fonta saime</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="81"/>
         <source>Style</source>
-        <translation type="unfinished"></translation>
+        <translation>Stils</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="89"/>
         <source>Font style</source>
-        <translation type="unfinished"></translation>
+        <translation>Fonta stils</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="128"/>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Izmērs</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="139"/>
         <source>Font point size</source>
-        <translation type="unfinished"></translation>
+        <translation>Fonta punktu izmērs</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="181"/>
         <source>Effects</source>
-        <translation type="unfinished"></translation>
+        <translation>Efekti</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="196"/>
         <source>Underline</source>
-        <translation type="unfinished"></translation>
+        <translation>Pasvītrojums</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="201"/>
         <source>Strikeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārsvītrojums</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/FontDialogContent.qml" line="210"/>
         <source>Sample</source>
-        <translation type="unfinished"></translation>
+        <translation>Paraugs</translation>
     </message>
 </context>
 <context>
@@ -4987,7 +5005,7 @@ Error: %2</translation>
         <location filename="../Configuration.cpp" line="449"/>
         <location filename="../Configuration.cpp" line="457"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="460"/>
@@ -5153,7 +5171,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="482"/>
         <source>Ham Radio Deluxe failed protocol probe using get id/get context</source>
-        <translation type="unfinished"></translation>
+        <translation>Ham Radio Deluxe protokola pārbaude neizdevās, izmantojot get id/get context</translation>
     </message>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="490"/>
@@ -5215,7 +5233,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="1851"/>
         <source>Ham Radio Deluxe reply to command &quot;%1&quot; is too large</source>
-        <translation type="unfinished"></translation>
+        <translation>Ham Radio Deluxe atbilde uz komandu &quot;%1&quot; ir pārāk liela</translation>
     </message>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="1881"/>
@@ -5225,7 +5243,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="1898"/>
         <source>Ham Radio Deluxe sent an invalid reply size to our command &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>Ham Radio Deluxe nosūtīja nederīgu atbildes izmēru uz mūsu komandu &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="1978"/>
@@ -5237,7 +5255,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="2003"/>
         <source>Ham Radio Deluxe TCP accepted, protocol silent while probing command &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>Ham Radio Deluxe TCP pieņemts, protokols klusē, pārbaudot komandu &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="2054"/>
@@ -5291,7 +5309,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="702"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Radio nav gatavs — caps ir null pēc atvēršanas (nav atbildes no radio?)</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="809"/>
@@ -5323,7 +5341,7 @@ Error: %2</translation>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="1083"/>
         <source>setting TX VFO mode</source>
-        <translation type="unfinished"></translation>
+        <translation>iestata TX VFO režīmu</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="329"/>
@@ -5541,37 +5559,37 @@ Error: %2</translation>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="164"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="164"/>
         <source>Zoom out</source>
-        <translation type="unfinished"></translation>
+        <translation>Attālināt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="194"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="194"/>
         <source>Zoom in</source>
-        <translation type="unfinished"></translation>
+        <translation>Pietuvināt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="224"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="224"/>
         <source>Reset view (auto-fit)</source>
-        <translation type="unfinished"></translation>
+        <translation>Atiestatīt skatu (auto pielāgošana)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="265"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="265"/>
         <source>Toggle day/night greyline overlay</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārslēgt dienas/nakts pelēkās līnijas pārklājumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="295"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="295"/>
         <source>Dock Live Map</source>
-        <translation type="unfinished"></translation>
+        <translation>Piedokot tiešraides karti</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LiveMapPanel.qml" line="295"/>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="295"/>
         <source>Detach Live Map</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot tiešraides karti</translation>
     </message>
 </context>
 <context>
@@ -5910,17 +5928,17 @@ Error: %2</translation>
     <message>
         <location filename="../widgets/logqso.cpp" line="222"/>
         <source>Spot su DX Cluster</source>
-        <translation type="unfinished"></translation>
+        <translation>Spots uz DX Cluster</translation>
     </message>
     <message>
         <location filename="../widgets/logqso.cpp" line="223"/>
         <source>Invia questo QSO al DX Cluster se la connessione cluster era gia&apos; attiva.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nosūtīt šo QSO uz DX Cluster, ja klastera savienojums jau bija aktīvs.</translation>
     </message>
     <message>
         <location filename="../widgets/logqso.cpp" line="642"/>
         <source>Log backend is not available</source>
-        <translation type="unfinished"></translation>
+        <translation>Žurnāla aizmugursistēma nav pieejama</translation>
     </message>
     <message>
         <location filename="../widgets/logqso.cpp" line="677"/>
@@ -5961,7 +5979,7 @@ Error: %2</translation>
         <location filename="../build/qml/decodium/components/LogWindow.qml" line="148"/>
         <location filename="../qml/decodium/components/LogWindow.qml" line="148"/>
         <source>Importa file ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Importēt ADIF failu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindow.qml" line="150"/>
@@ -5971,7 +5989,7 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="161"/>
         <location filename="../qml/decodium/components/LogWindow.qml" line="173"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="unfinished"></translation>
+        <translation>ADIF faili (*.adi *.adif)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindow.qml" line="150"/>
@@ -5981,19 +5999,19 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="161"/>
         <location filename="../qml/decodium/components/LogWindow.qml" line="173"/>
         <source>All files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Visi faili (*)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindow.qml" line="159"/>
         <location filename="../qml/decodium/components/LogWindow.qml" line="159"/>
         <source>Carica logbook ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Ielādēt ADIF žurnālu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindow.qml" line="171"/>
         <location filename="../qml/decodium/components/LogWindow.qml" line="171"/>
         <source>Esporta file ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt ADIF failu</translation>
     </message>
 </context>
 <context>
@@ -6002,7 +6020,7 @@ Error: %2</translation>
         <location filename="../build/qml/decodium/components/LogWindowContent.qml" line="129"/>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="129"/>
         <source>Importa file ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Importēt ADIF failu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindowContent.qml" line="131"/>
@@ -6012,7 +6030,7 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="142"/>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="150"/>
         <source>ADIF files (*.adi *.adif)</source>
-        <translation type="unfinished"></translation>
+        <translation>ADIF faili (*.adi *.adif)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindowContent.qml" line="131"/>
@@ -6022,19 +6040,19 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="142"/>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="150"/>
         <source>All files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Visi faili (*)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindowContent.qml" line="140"/>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="140"/>
         <source>Esporta file ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt ADIF failu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/LogWindowContent.qml" line="148"/>
         <location filename="../qml/decodium/components/LogWindowContent.qml" line="148"/>
         <source>Carica logbook ADIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Ielādēt ADIF žurnālu</translation>
     </message>
 </context>
 <context>
@@ -6171,170 +6189,171 @@ Error: %2</translation>
         <location filename="../build/qml/decodium/Main.qml" line="1616"/>
         <location filename="../qml/decodium/Main.qml" line="1616"/>
         <source>Open WAV file for decoding</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvērt WAV failu dekodēšanai</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="1618"/>
         <location filename="../qml/decodium/Main.qml" line="1618"/>
         <source>File WAV (*.wav)</source>
-        <translation type="unfinished"></translation>
+        <translation>WAV faili (*.wav)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="1618"/>
         <location filename="../qml/decodium/Main.qml" line="1618"/>
         <source>All files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Visi faili (*)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="1626"/>
         <location filename="../qml/decodium/Main.qml" line="1626"/>
         <source>Select folder with WAV files</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasiet mapi ar WAV failiem</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3165"/>
         <location filename="../qml/decodium/Main.qml" line="3165"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
-        <translation type="unfinished"></translation>
+        <translation>Klikšķis: sinhronizēt NTP tagad, lai izlīdzinātu DT (FT8/FT4)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3248"/>
         <location filename="../qml/decodium/Main.qml" line="3248"/>
         <source>Auto RX level active</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais RX līmenis aktīvs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3249"/>
         <location filename="../qml/decodium/Main.qml" line="3249"/>
         <source>Auto RX level disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais RX līmenis atspējots</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3701"/>
         <location filename="../qml/decodium/Main.qml" line="3701"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Klikšķis: atvērt WAV failu
+Labais klikšķis: dekodēt mapi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3801"/>
         <location filename="../qml/decodium/Main.qml" line="3801"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
-        <translation type="unfinished"></translation>
+        <translation>Atiestatīt izkārtojumu (Ctrl+Shift+L)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3833"/>
         <location filename="../qml/decodium/Main.qml" line="3833"/>
         <source>Decode history (Ctrl+Shift+H)</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekodēšanas vēsture (Ctrl+Shift+H)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3928"/>
         <location filename="../qml/decodium/Main.qml" line="3928"/>
         <source>Bilanciato</source>
-        <translation type="unfinished"></translation>
+        <translation>Līdzsvarots</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3928"/>
         <location filename="../qml/decodium/Main.qml" line="3928"/>
         <source>Weak-signal / DX</source>
-        <translation type="unfinished"></translation>
+        <translation>Vāja signāla / DX</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3928"/>
         <location filename="../qml/decodium/Main.qml" line="3928"/>
         <source>Contest</source>
-        <translation type="unfinished"></translation>
+        <translation>Sacensības</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3928"/>
         <location filename="../qml/decodium/Main.qml" line="3928"/>
         <source>CPU-limited</source>
-        <translation type="unfinished"></translation>
+        <translation>CPU ierobežots</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3929"/>
         <location filename="../qml/decodium/Main.qml" line="3929"/>
         <source>Profili…</source>
-        <translation type="unfinished"></translation>
+        <translation>Profili…</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="3934"/>
         <location filename="../qml/decodium/Main.qml" line="3934"/>
         <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gatavie profili — pa blokiem lieto FT2/dekodēšanas pārslēdzējus. Detaļas sadaļā Iestatīšana → FT2.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4172"/>
         <location filename="../qml/decodium/Main.qml" line="4172"/>
         <source>Drag to reposition the clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Velciet, lai pārvietotu pulksteni</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4363"/>
         <location filename="../qml/decodium/Main.qml" line="4363"/>
         <source>Cerca città...</source>
-        <translation type="unfinished"></translation>
+        <translation>Meklēt pilsētu...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4471"/>
         <location filename="../qml/decodium/Main.qml" line="4471"/>
         <source>Type a city name</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievadiet pilsētas nosaukumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4471"/>
         <location filename="../qml/decodium/Main.qml" line="4471"/>
         <source>No matching city</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav atbilstošas pilsētas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4506"/>
         <location filename="../qml/decodium/Main.qml" line="4506"/>
         <source>Analog clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Analogais pulkstenis</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4510"/>
         <location filename="../qml/decodium/Main.qml" line="4510"/>
         <source>Digital clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Digitālais pulkstenis</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4514"/>
         <location filename="../qml/decodium/Main.qml" line="4514"/>
         <source>City labels</source>
-        <translation type="unfinished"></translation>
+        <translation>Pilsētu etiķetes</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4521"/>
         <location filename="../qml/decodium/Main.qml" line="4521"/>
         <source>Hide clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Slēpt pulksteni</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4569"/>
         <location filename="../qml/decodium/Main.qml" line="4569"/>
         <source>Restore Waterfall</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot ūdenskritumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4621"/>
         <location filename="../qml/decodium/Main.qml" line="4621"/>
         <source>Restore QSO Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot QSO žurnālu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4673"/>
         <location filename="../qml/decodium/Main.qml" line="4673"/>
         <source>Restore astronomical data</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot astronomiskos datus</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4730"/>
         <location filename="../qml/decodium/Main.qml" line="4730"/>
         <source>Restore Live Map</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot tiešraides karti</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4871"/>
@@ -6342,61 +6361,63 @@ Right-click: decode a folder</source>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster
+Kreisais klikšķis: atvērt un savienot
+Labais klikšķis: atvienot</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4948"/>
         <location filename="../qml/decodium/Main.qml" line="4948"/>
         <source>Disable filter bypass</source>
-        <translation type="unfinished"></translation>
+        <translation>Atspējot filtru apiešanu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4949"/>
         <location filename="../qml/decodium/Main.qml" line="4949"/>
         <source>Bypass CQ/My Call and setup filters</source>
-        <translation type="unfinished"></translation>
+        <translation>Apiet CQ/Mana izsaukuma un iestatījumu filtrus</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="4996"/>
         <location filename="../qml/decodium/Main.qml" line="4996"/>
         <source>Restore Macro configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot makro konfigurāciju</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5048"/>
         <location filename="../qml/decodium/Main.qml" line="5048"/>
         <source>Restore Rig Control</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot radio vadību</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5101"/>
         <location filename="../qml/decodium/Main.qml" line="5101"/>
         <source>Restore Full Spectrum</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot pilno spektru</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5153"/>
         <location filename="../qml/decodium/Main.qml" line="5153"/>
         <source>Restore Period 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot 2. periodu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5204"/>
         <location filename="../qml/decodium/Main.qml" line="5204"/>
         <source>Restore Signal RX</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot signāla RX</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5256"/>
         <location filename="../qml/decodium/Main.qml" line="5256"/>
         <source>Restore TX panel</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot TX paneli</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="5511"/>
         <location filename="../qml/decodium/Main.qml" line="5511"/>
         <source>Clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Pulkstenis</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="6878"/>
@@ -6408,7 +6429,7 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="11596"/>
         <location filename="../qml/decodium/Main.qml" line="12171"/>
         <source>Return to normal row height</source>
-        <translation type="unfinished"></translation>
+        <translation>Atgriezties uz parasto rindas augstumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="6879"/>
@@ -6420,61 +6441,61 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="11597"/>
         <location filename="../qml/decodium/Main.qml" line="12172"/>
         <source>Compact rows (2x visible decodes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Kompaktas rindas (2x redzamas dekodēšanas)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="6909"/>
         <location filename="../qml/decodium/Main.qml" line="6909"/>
         <source>Detach Full Spectrum</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot pilno spektru</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="7328"/>
         <location filename="../qml/decodium/Main.qml" line="7328"/>
         <source>Go to the latest decode</source>
-        <translation type="unfinished"></translation>
+        <translation>Pāriet uz jaunāko dekodēšanu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="7514"/>
         <location filename="../qml/decodium/Main.qml" line="7514"/>
         <source>Clear Signal RX</source>
-        <translation type="unfinished"></translation>
+        <translation>Notīrīt signāla RX</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="7579"/>
         <location filename="../qml/decodium/Main.qml" line="7579"/>
         <source>Detach Signal RX</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot signāla RX</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="7991"/>
         <location filename="../qml/decodium/Main.qml" line="7991"/>
         <source>Stacca</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8003"/>
         <location filename="../qml/decodium/Main.qml" line="8003"/>
         <source>Stacca il DX Cluster in finestra</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot DX Cluster atsevišķā logā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8265"/>
         <location filename="../qml/decodium/Main.qml" line="8265"/>
         <source>Drag to swap the column</source>
-        <translation type="unfinished"></translation>
+        <translation>Velciet, lai apmainītu kolonnu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8468"/>
         <location filename="../qml/decodium/Main.qml" line="8468"/>
         <source>Detach TX panel</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot TX paneli</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8610"/>
         <location filename="../qml/decodium/Main.qml" line="8610"/>
         <source>Reset Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Atiestatīt izkārtojumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8626"/>
@@ -6483,67 +6504,70 @@ Right-click: disconnect</source>
 e ricentrare Decodium sul monitor principale?
 
 Le coordinate salvate verranno cancellate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atgriezt visus peldošos logus galvenajā logā
+un atkārtoti centrēt Decodium uz galvenā monitora?
+
+Saglabātās koordinātes tiks dzēstas.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="8927"/>
         <location filename="../qml/decodium/Main.qml" line="8927"/>
         <source>Notifica</source>
-        <translation type="unfinished"></translation>
+        <translation>Paziņojums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9566"/>
         <location filename="../qml/decodium/Main.qml" line="9566"/>
         <source>Apri cartella ALL.TXT</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvērt ALL.TXT mapi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9630"/>
         <location filename="../qml/decodium/Main.qml" line="9630"/>
         <source>Bypass Filters</source>
-        <translation type="unfinished"></translation>
+        <translation>Apiet filtrus</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9846"/>
         <location filename="../qml/decodium/Main.qml" line="9846"/>
         <source>Update checks disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjauninājumu pārbaude atspējota</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9861"/>
         <location filename="../qml/decodium/Main.qml" line="9861"/>
         <source>Esporta Cabrillo...</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt Cabrillo...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9889"/>
         <location filename="../qml/decodium/Main.qml" line="9889"/>
         <source>Mostra orologio</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt pulksteni</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9904"/>
         <location filename="../qml/decodium/Main.qml" line="9904"/>
         <source>Mostra DX Cluster</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt DX Cluster</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="9919"/>
         <location filename="../qml/decodium/Main.qml" line="9919"/>
         <source>Mostra PSK Reporter</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt PSK Reporter</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="10064"/>
         <location filename="../qml/decodium/Main.qml" line="10064"/>
         <source>Waterfall / Panadapter</source>
-        <translation type="unfinished"></translation>
+        <translation>Ūdenskritums / panadapteris</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="10109"/>
         <location filename="../qml/decodium/Main.qml" line="10109"/>
         <source>DecoSyncTime Monitor</source>
-        <translation type="unfinished"></translation>
+        <translation>DecoSyncTime monitors</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="10677"/>
@@ -6563,25 +6587,25 @@ Le coordinate salvate verranno cancellate.</source>
         <location filename="../build/qml/decodium/Main.qml" line="12734"/>
         <location filename="../qml/decodium/Main.qml" line="12734"/>
         <source>Dock TX panel</source>
-        <translation type="unfinished"></translation>
+        <translation>Piedokot TX paneli</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="13201"/>
         <location filename="../qml/decodium/Main.qml" line="13201"/>
         <source>Inserisci nel layout:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ievietot izkārtojumā:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="13208"/>
         <location filename="../qml/decodium/Main.qml" line="13208"/>
         <source>◧ accanto a Full Spectrum</source>
-        <translation type="unfinished"></translation>
+        <translation>◧ blakus pilnajam spektram</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/Main.qml" line="13209"/>
         <location filename="../qml/decodium/Main.qml" line="13209"/>
         <source>◧ accanto a Signal RX</source>
-        <translation type="unfinished"></translation>
+        <translation>◧ blakus signāla RX</translation>
     </message>
     <message>
         <source>Dock TX Panel</source>
@@ -8709,48 +8733,49 @@ list. The list can be maintained in Settings (F2).</translation>
     <message>
         <location filename="../qmap/mainwindow.ui" line="102"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle monitoring On/Off. &lt;br/&gt;Yellow when saving .qm files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pārslēgt monitorēšanu ieslēgtu/izslēgtu. &lt;br/&gt;Dzeltens, saglabājot .qm failus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="126"/>
         <source>1296.080</source>
-        <translation type="unfinished"></translation>
+        <translation>1296.080</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="136"/>
         <source>Fadd</source>
-        <translation type="unfinished"></translation>
+        <translation>Fadd</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="182"/>
         <source> 2023 Feb 02
 01:23:45 </source>
-        <translation type="unfinished"></translation>
+        <translation> 2023. g. 2. feb.
+01:23:45 </translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="193"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select offset announced by calling station, or use commonly used value for the band in use. Manually set WSJT-X TX and RX offset to same value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Atlasiet izsaucošās stacijas paziņoto nobīdi vai izmantojiet izmantotajai joslai parasto vērtību. Manuāli iestatiet WSJT-X TX un RX nobīdi uz vienādu vērtību.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="199"/>
         <source> Hz</source>
-        <translation type="unfinished"> Hz</translation>
+        <translation> Hz</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="202"/>
         <source>Offset </source>
-        <translation type="unfinished"></translation>
+        <translation>Nobīde </translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="309"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Decode most recent Rx period&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dekodēt jaunāko Rx periodu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="325"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase window&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dzēst logu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="357"/>
@@ -8762,22 +8787,22 @@ list. The list can be maintained in Settings (F2).</translation>
     <message>
         <location filename="../qmap/mainwindow.ui" line="396"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set a manually entered Fadd value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Iestatīt manuāli ievadītu Fadd vērtību.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="399"/>
         <source>Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīt</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="424"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add a manually entered Fadd value to the file &amp;quot;fadd.txt&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pievienot manuāli ievadītu Fadd vērtību failam &amp;quot;fadd.txt&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="456"/>
         <source>      UTC                   Frx              Fsked             DT           dB       Q65-     Message</source>
-        <translation type="unfinished"></translation>
+        <translation>      UTC                   Frx              Fsked             DT           dB       Q65-     Ziņojums</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="498"/>
@@ -8789,87 +8814,94 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="616"/>
         <source>About QMAP</source>
-        <translation type="unfinished"></translation>
+        <translation>Par QMAP</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="642"/>
         <source>Wideband Waterfall</source>
-        <translation type="unfinished"></translation>
+        <translation>Platjoslas ūdenskritums</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="668"/>
         <source>Delete all *.iq and *.qm files in SaveDir</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst visus *.iq un *.qm failus mapē SaveDir</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="870"/>
         <source>Q65-60A</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65-60A</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="878"/>
         <source>Q65-60B</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65-60B</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="889"/>
         <source>Q65-60C</source>
-        <translation type="unfinished">Q65-60C</translation>
+        <translation>Q65-60C</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="897"/>
         <source>Q65-60D</source>
-        <translation type="unfinished">Q65-60D</translation>
+        <translation>Q65-60D</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="905"/>
         <source>Q65-60E</source>
-        <translation type="unfinished">Q65-60E</translation>
+        <translation>Q65-60E</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="920"/>
         <source>Settings ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatījumi ...</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="928"/>
         <source>Quick-Start Guide to WSJT-X 2.7 and QMAP</source>
-        <translation type="unfinished"></translation>
+        <translation>WSJT-X 2.7 un QMAP ātrās palaišanas ceļvedis</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="941"/>
         <source>Continuous Waterfall</source>
-        <translation type="unfinished"></translation>
+        <translation>Nepārtraukts ūdenskritums</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="952"/>
         <source>Also Q65-30x</source>
-        <translation type="unfinished"></translation>
+        <translation>Arī Q65-30x</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="965"/>
         <source>Export .wav file at fQSO (60 s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt .wav failu pie fQSO (60 s)</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="970"/>
         <source>Export .wav file at fQSO (30 s, second part)</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt .wav failu pie fQSO (30 s, otrā daļa)</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="975"/>
         <source>Export .wav file at fQSO (30 s, first part)</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksportēt .wav failu pie fQSO (30 s, pirmā daļa)</translation>
     </message>
     <message>
         <location filename="../qmap/mainwindow.ui" line="983"/>
         <source>Fadd controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Fadd vadīklas</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="687"/>
@@ -9515,44 +9547,44 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="14"/>
         <source>MainWindow</source>
-        <translation type="unfinished"></translation>
+        <translation>Galvenais logs</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="21"/>
         <source>Issue #115 - Tabs scroller buttons</source>
-        <translation type="unfinished"></translation>
+        <translation>Issue #115 - Cilņu ritināšanas pogas</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="31"/>
         <source>Tab 1</source>
-        <translation type="unfinished"></translation>
+        <translation>1. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="37"/>
         <source>Issue #123 - Missing borders</source>
-        <translation type="unfinished"></translation>
+        <translation>Issue #123 - Trūkst apmaļu</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="43"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="66"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="93"/>
         <source>TextLabel</source>
-        <translation type="unfinished">TextLabel</translation>
+        <translation>Teksta etiķete</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="50"/>
         <source>Inside tab, outside frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilnē, ārpus rāmja</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="73"/>
         <source>Inside tab and frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Cilnē un rāmī</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="87"/>
         <source>Tab 2</source>
-        <translation type="unfinished"></translation>
+        <translation>2. cilne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="101"/>
@@ -9566,52 +9598,52 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="141"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="146"/>
         <source>Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Lapa</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="158"/>
         <source>Issue #112 - Hyperlinks color</source>
-        <translation type="unfinished"></translation>
+        <translation>Issue #112 - Hipersaišu krāsa</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/112&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Hyperlink Example&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#7d7d7d;&quot;&gt;CSS for the documents (RichText) is not the same as the application. We cannot change the internal content CSS, e.g., hyperlinks. We suggest you use the middle tons (0-255, use 125), so this works for both white and dark theme (this color). The original color is the blue link on top.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/112&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Hipersaites piemērs&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#7d7d7d;&quot;&gt;Dokumentu (RichText) CSS nav tāds pats kā lietotnei. Mēs nevaram mainīt iekšējā satura CSS, piem., hipersaites. Iesakām izmantot vidējos toņus (0-255, izmantojiet 125), lai tas darbotos gan gaišai, gan tumšai tēmai (šī krāsa). Sākotnējā krāsa ir zilā saite augšpusē.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="192"/>
         <source>Inside Central Widget</source>
-        <translation type="unfinished"></translation>
+        <translation>Centrālajā logrīkā</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="212"/>
         <source>Menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Izvēlne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="216"/>
         <source>Menu Sub</source>
-        <translation type="unfinished"></translation>
+        <translation>Apakšizvēlne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="226"/>
         <source>Menu Delayed</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizkavēta izvēlne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="230"/>
         <source>Menu Sub Delayed</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizkavēta apakšizvēlne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="239"/>
         <source>Menu Checkable</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmējama izvēlne</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="245"/>
         <source>About QDarkStyle</source>
-        <translation type="unfinished"></translation>
+        <translation>Par QDarkStyle</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="250"/>
@@ -9625,63 +9657,63 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="262"/>
         <source>Tool bar actions</source>
-        <translation type="unfinished"></translation>
+        <translation>Rīkjoslas darbības</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="277"/>
         <source>Tool bar actions delayed</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizkavētas rīkjoslas darbības</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="291"/>
         <source>Tool bar action checkable</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmējama rīkjoslas darbība</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="306"/>
         <source>Action A</source>
-        <translation type="unfinished"></translation>
+        <translation>Darbība A</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="311"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="314"/>
         <source>Action A Sub</source>
-        <translation type="unfinished"></translation>
+        <translation>Darbība A apakš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="319"/>
         <source>Action B Sub</source>
-        <translation type="unfinished"></translation>
+        <translation>Darbība B apakš</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="324"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="327"/>
         <source>Action Delayed A</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizkavēta darbība A</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="332"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="335"/>
         <source>Action Delayed Sub A</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizkavēta apakšdarbība A</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="343"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="346"/>
         <source>Action Checkable A</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmējama darbība A</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="357"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="360"/>
         <source>Action Checkable Sub A Checked</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmējama apakšdarbība A atzīmēta</translation>
     </message>
     <message>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="368"/>
         <location filename="../contrib/QDarkStyleSheet/example/ui/mw_menus.ui" line="371"/>
         <source>Action Checkable Sub A Unchecked</source>
-        <translation type="unfinished"></translation>
+        <translation>Atzīmējama apakšdarbība A neatzīmēta</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1349"/>
@@ -9777,12 +9809,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <location filename="../map65/mainwindow.ui" line="32"/>
         <location filename="../qmap/mainwindow.ui" line="32"/>
         <source>SpecJT   by K1JT</source>
-        <translation type="unfinished"></translation>
+        <translation>SpecJT   no K1JT</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="62"/>
         <source>   Freq        DF      Pol         UTC           DT         dB                                                                     RC       DS       TxPol</source>
-        <translation type="unfinished"></translation>
+        <translation>   Frekv.      DF      Pol         UTC           DT         dB                                                                     RC       DS       TxPol</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="98"/>
@@ -9791,158 +9823,163 @@ li.checked::marker { content: &quot;\2612&quot;; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="206"/>
         <source>&amp;Auto is OFF</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Auto ir IZSL.</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="225"/>
         <source>St&amp;op Tx</source>
-        <translation type="unfinished"></translation>
+        <translation>Ap&amp;turēt Tx</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="484"/>
         <source>&amp;GenStdMsgs</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ģen. std. ziņojumus</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="515"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;DX Grid&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;DX lauciņš&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="577"/>
         <source> 2014 Dec 02
 01:23:45 </source>
-        <translation type="unfinished"></translation>
+        <translation> 2014. g. 2. dec.
+01:23:45 </translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="636"/>
         <source>Tx first</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx vispirms</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="655"/>
         <source>Tx Q65  $</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx Q65  $</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="674"/>
         <source>Set Tx Freq</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīt Tx frekvenci</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="681"/>
         <source>Maximum drift rate in units of symbol rate per transmissiion.</source>
-        <translation type="unfinished"></translation>
+        <translation>Maksimālais dreifa ātrums simbolu ātruma vienībās uz vienu pārraidi.</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="716"/>
         <location filename="../qmap/mainwindow.ui" line="77"/>
         <source>NB</source>
-        <translation type="unfinished"></translation>
+        <translation>NB</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="774"/>
         <location filename="../qmap/mainwindow.ui" line="257"/>
         <source>500</source>
-        <translation type="unfinished"></translation>
+        <translation>500</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="830"/>
         <location filename="../qmap/mainwindow.ui" line="347"/>
         <source>Tol</source>
-        <translation type="unfinished"></translation>
+        <translation>Piel.</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1146"/>
         <source>Tx1</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx1</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1165"/>
         <source>Tx2</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx2</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1184"/>
         <source>Tx3</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx3</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1203"/>
         <source>Tx4</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx4</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1222"/>
         <source>Tx5</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx5</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1283"/>
         <source>Setup</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīšana</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1302"/>
         <location filename="../qmap/mainwindow.ui" line="551"/>
         <source>Waterfall palette</source>
-        <translation type="unfinished"></translation>
+        <translation>Ūdenskrituma palete</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1387"/>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Opcijas</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1390"/>
         <location filename="../qmap/mainwindow.ui" line="923"/>
         <source>F2</source>
-        <translation type="unfinished"></translation>
+        <translation>F2</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1395"/>
         <source>About MAP65</source>
-        <translation type="unfinished"></translation>
+        <translation>Par MAP65</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1398"/>
         <location filename="../qmap/mainwindow.ui" line="619"/>
         <source>Ctrl+F1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F1</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1403"/>
         <location filename="../qmap/mainwindow.ui" line="624"/>
         <source>Astro Data</source>
-        <translation type="unfinished">Astro Data</translation>
+        <translation>Astro dati</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1406"/>
         <location filename="../qmap/mainwindow.ui" line="627"/>
         <source>Shift+F10</source>
-        <translation type="unfinished"></translation>
+        <translation>Shift+F10</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1411"/>
         <location filename="../qmap/mainwindow.ui" line="632"/>
         <source>Band Map</source>
-        <translation type="unfinished"></translation>
+        <translation>Joslu karte</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1416"/>
         <location filename="../qmap/mainwindow.ui" line="637"/>
         <source>Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Ziņojumi</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1421"/>
         <source>Wide Waterfall</source>
-        <translation type="unfinished"></translation>
+        <translation>Platais ūdenskritums</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1431"/>
@@ -9956,7 +9993,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../map65/mainwindow.ui" line="1434"/>
         <location filename="../qmap/mainwindow.ui" line="655"/>
         <source>F6</source>
-        <translation type="unfinished"></translation>
+        <translation>F6</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1439"/>
@@ -9977,246 +10014,246 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../map65/mainwindow.ui" line="1447"/>
         <source>Delete all *.tf2 and *.iq files in SaveDir</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst visus *.tf2 un *.iq failus mapē SaveDir</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1452"/>
         <location filename="../qmap/mainwindow.ui" line="673"/>
         <source>Erase Band Map and Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst joslu karti un ziņojumus</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1457"/>
         <source>Erase map65_rx.log</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst map65_rx.log</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1468"/>
         <location filename="../qmap/mainwindow.ui" line="684"/>
         <source>Linrad</source>
-        <translation type="unfinished"></translation>
+        <translation>Linrad</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1479"/>
         <location filename="../qmap/mainwindow.ui" line="695"/>
         <source>CuteSDR</source>
-        <translation type="unfinished"></translation>
+        <translation>CuteSDR</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1484"/>
         <location filename="../qmap/mainwindow.ui" line="700"/>
         <source>Find Delta Phi</source>
-        <translation type="unfinished"></translation>
+        <translation>Atrast Delta Phi</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1492"/>
         <location filename="../qmap/mainwindow.ui" line="708"/>
         <source>F4 sets Tx6</source>
-        <translation type="unfinished"></translation>
+        <translation>F4 iestata Tx6</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1500"/>
         <location filename="../qmap/mainwindow.ui" line="716"/>
         <source>Only EME calls</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai EME izsaukumi</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1508"/>
         <location filename="../qmap/mainwindow.ui" line="724"/>
         <source>No shorthand decodes if Tx1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav saīsinātu dekodēšanu, ja Tx1</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1519"/>
         <source>No Deep Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav dziļās meklēšanas</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1527"/>
         <source>Normal Deep Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Parastā dziļā meklēšana</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1535"/>
         <source>Aggressive Deep Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Agresīva dziļā meklēšana</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1562"/>
         <location filename="../qmap/mainwindow.ui" line="751"/>
         <source>50</source>
-        <translation type="unfinished"></translation>
+        <translation>50</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1573"/>
         <location filename="../qmap/mainwindow.ui" line="762"/>
         <source>144</source>
-        <translation type="unfinished"></translation>
+        <translation>144</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1581"/>
         <location filename="../qmap/mainwindow.ui" line="770"/>
         <source>222</source>
-        <translation type="unfinished"></translation>
+        <translation>222</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1589"/>
         <location filename="../qmap/mainwindow.ui" line="778"/>
         <source>432</source>
-        <translation type="unfinished"></translation>
+        <translation>432</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1597"/>
         <location filename="../qmap/mainwindow.ui" line="786"/>
         <source>1296</source>
-        <translation type="unfinished"></translation>
+        <translation>1296</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1605"/>
         <location filename="../qmap/mainwindow.ui" line="794"/>
         <source>2304</source>
-        <translation type="unfinished"></translation>
+        <translation>2304</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1610"/>
         <location filename="../qmap/mainwindow.ui" line="799"/>
         <source>Online User&apos;s Guide</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešsaistes lietotāja ceļvedis</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1613"/>
         <location filename="../qmap/mainwindow.ui" line="802"/>
         <source>F1</source>
-        <translation type="unfinished"></translation>
+        <translation>F1</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1628"/>
         <location filename="../qmap/mainwindow.ui" line="817"/>
         <source>Available suffixes and add-on-prefixes</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieejamie sufiksi un pievienojamie prefiksi</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1633"/>
         <source>Erase map65_tx.log</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst map65_tx.log</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1641"/>
         <source>JT65A</source>
-        <translation type="unfinished"></translation>
+        <translation>JT65A</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1652"/>
         <source>JT65B</source>
-        <translation type="unfinished"></translation>
+        <translation>JT65B</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1660"/>
         <source>JT65C</source>
-        <translation type="unfinished"></translation>
+        <translation>JT65C</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1665"/>
         <source>I/Q Calibration</source>
-        <translation type="unfinished"></translation>
+        <translation>I/Q kalibrēšana</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1673"/>
         <source>Adjust Rx I/Q Calibration</source>
-        <translation type="unfinished"></translation>
+        <translation>Pielāgot Rx I/Q kalibrēšanu</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1681"/>
         <source>Apply Rx I/Q Calibration</source>
-        <translation type="unfinished"></translation>
+        <translation>Lietot Rx I/Q kalibrēšanu</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1689"/>
         <location filename="../qmap/mainwindow.ui" line="825"/>
         <source>AFMHot</source>
-        <translation type="unfinished"></translation>
+        <translation>AFMHot</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1697"/>
         <location filename="../qmap/mainwindow.ui" line="833"/>
         <source>Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>Zila</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1702"/>
         <location filename="../qmap/mainwindow.ui" line="838"/>
         <source>FUNcube Dongle Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>FUNcube Dongle iestatījumi</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1707"/>
         <location filename="../qmap/mainwindow.ui" line="843"/>
         <source>Edit wsjt.log</source>
-        <translation type="unfinished"></translation>
+        <translation>Rediģēt wsjt.log</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1710"/>
         <location filename="../qmap/mainwindow.ui" line="846"/>
         <source>Alt+Shift+E</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+Shift+E</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1715"/>
         <location filename="../qmap/mainwindow.ui" line="851"/>
         <source>Tx Tune</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx noskaņošana</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1718"/>
         <location filename="../qmap/mainwindow.ui" line="854"/>
         <source>Alt+T</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt+T</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1726"/>
         <location filename="../qmap/mainwindow.ui" line="862"/>
         <source>Decode Q65 near QSO frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekodēt Q65 tuvu QSO frekvencei</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1734"/>
         <source>Q65A</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65A</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1742"/>
         <source>Q65B</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65B</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1750"/>
         <source>No JT65</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav JT65</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1761"/>
         <source>No Q65</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav Q65</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1769"/>
         <source>Q65C</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65C</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1777"/>
         <source>Q65D</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65D</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1785"/>
         <source>Q65E</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65E</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.ui" line="1800"/>
         <source>Q65 Sensitivity in MAP65 3.0</source>
-        <translation type="unfinished"></translation>
+        <translation>Q65 jutība MAP65 3.0</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5427"/>
@@ -11203,7 +11240,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../map65/mainwindow.cpp" line="747"/>
         <location filename="../qmap/mainwindow.cpp" line="505"/>
         <source>Error in SoundIn</source>
-        <translation type="unfinished"></translation>
+        <translation>Kļūda SoundIn</translation>
     </message>
     <message>
         <location filename="../map65/mainwindow.cpp" line="1509"/>
@@ -11800,7 +11837,7 @@ is already in CALL3.TXT, do you wish to replace it?</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="2821"/>
         <source>Idle</source>
-        <translation type="unfinished">Idle</translation>
+        <translation>Dīkstāve</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="2903"/>
@@ -11840,7 +11877,7 @@ is already in CALL3.TXT, do you wish to replace it?</translation>
         <location filename="../widgets/mainwindow.cpp" line="3156"/>
         <location filename="../widgets/mainwindow.cpp" line="22283"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar atrisināt &quot;%1&quot;: %2</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="3160"/>
@@ -11901,24 +11938,24 @@ is already in CALL3.TXT, do you wish to replace it?</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="5207"/>
         <source>Audio input refreshed after device reconnect.</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio ievade atsvaidzināta pēc ierīces atkārtotas pieslēgšanas.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="5211"/>
         <location filename="../widgets/mainwindow.cpp" line="5219"/>
         <source>Audio output refreshed after device reconnect.</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio izvade atsvaidzināta pēc ierīces atkārtotas pieslēgšanas.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="6050"/>
         <source>Decodium v3.0 FT2 Raptor</source>
-        <translation type="unfinished"></translation>
+        <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="6051"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
-        <translation type="unfinished"></translation>
+        <translation>DX izsaukuma lodziņā jābūt izsaukumam, lai nosūtītu QSY pieprasījumu</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="8441"/>
@@ -11934,7 +11971,7 @@ is already in CALL3.TXT, do you wish to replace it?</translation>
         <location filename="../widgets/mainwindow.cpp" line="8984"/>
         <location filename="../widgets/mainwindow.cpp" line="9425"/>
         <source>Update checks are disabled in this build.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjauninājumu pārbaude šajā būvējumā ir atspējota.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="9003"/>
@@ -12204,7 +12241,7 @@ Current operator: %1</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="32163"/>
         <source>Remote caller queued: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Attālais izsaucējs rindā: %1</translation>
     </message>
     <message>
         <source>&lt;table cellspacing=1&gt;
@@ -12586,13 +12623,13 @@ Fingerprint: %8</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="29493"/>
         <source>SuperFox TX generation failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>SuperFox TX ģenerēšana neizdevās.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="30122"/>
         <location filename="../widgets/mainwindow.cpp" line="30180"/>
         <source>Cannot write decodium_log_config.ini file</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar ierakstīt decodium_log_config.ini failu</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="31227"/>
@@ -12820,7 +12857,7 @@ Error(%2): %3</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="32298"/>
         <source>Remote dial frequency set: %1 MHz</source>
-        <translation type="unfinished"></translation>
+        <translation>Attālā ciparnīcas frekvence iestatīta: %1 MHz</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="32317"/>
@@ -13015,22 +13052,22 @@ Error(%2): %3</translation>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="21403"/>
         <source>DX Call field is empty</source>
-        <translation type="unfinished"></translation>
+        <translation>DX izsaukuma lauks ir tukšs</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="21404"/>
         <source>The logger received a manual log request without a DX callsign.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žurnāls saņēma manuālu žurnalēšanas pieprasījumu bez DX izsaukuma.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="21405"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pirms QSO žurnalēšanas atlasiet saņemtu ziņojumu vai ievadiet DX izsaukumu.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="21965"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
-        <translation type="unfinished"></translation>
+        <translation>AutoSpot iesniegts klastera mezglam priekš %1 uz %2:%3</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="24134"/>
@@ -13195,7 +13232,7 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../plots/mainwindow.ui" line="14"/>
         <source>QCustomPlot plot examples</source>
-        <translation type="unfinished"></translation>
+        <translation>QCustomPlot diagrammu piemēri</translation>
     </message>
 </context>
 <context>
@@ -13204,19 +13241,19 @@ UDP server %2:%3</translation>
         <location filename="../build/qml/decodium/components/MamPanel.qml" line="387"/>
         <location filename="../qml/decodium/components/MamPanel.qml" line="387"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="unfinished"></translation>
+        <translation>Aktīvie QSO (vairākplūsmu): </translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/MamPanel.qml" line="399"/>
         <location filename="../qml/decodium/components/MamPanel.qml" line="399"/>
         <source>Doppio-click su una stazione per aggiungerla alla lista.</source>
-        <translation type="unfinished"></translation>
+        <translation>Veiciet dubultklikšķi uz stacijas, lai pievienotu to sarakstam.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/MamPanel.qml" line="459"/>
         <location filename="../qml/decodium/components/MamPanel.qml" line="459"/>
         <source>Nessuno stream attivo</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav aktīvas plūsmas</translation>
     </message>
 </context>
 <context>
@@ -13225,13 +13262,13 @@ UDP server %2:%3</translation>
         <location filename="../build/qml/decodium/components/MamWindow.qml" line="473"/>
         <location filename="../qml/decodium/components/MamWindow.qml" line="473"/>
         <source>QSO attivi (multi-stream): </source>
-        <translation type="unfinished"></translation>
+        <translation>Aktīvie QSO (vairākplūsmu): </translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/MamWindow.qml" line="532"/>
         <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
         <source>Nessuno stream attivo</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav aktīvas plūsmas</translation>
     </message>
 </context>
 <context>
@@ -13239,188 +13276,188 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="17"/>
         <source>Time On</source>
-        <translation type="unfinished"></translation>
+        <translation>Sākuma laiks</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="18"/>
         <source>Time Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Beigu laiks</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="19"/>
         <source>Callsign</source>
-        <translation type="unfinished">Callsign</translation>
+        <translation>Izsaukums</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="20"/>
         <source>Grid</source>
-        <translation type="unfinished">Grid</translation>
+        <translation>Lauciņš</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="21"/>
         <source>Name</source>
-        <translation type="unfinished">Name</translation>
+        <translation>Nosaukums</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="22"/>
         <source>Frequency</source>
-        <translation type="unfinished">Frequency</translation>
+        <translation>Frekvence</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="23"/>
         <source>Mode</source>
-        <translation type="unfinished">Mode</translation>
+        <translation>Režīms</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="24"/>
         <source>Sent</source>
-        <translation type="unfinished">Sent</translation>
+        <translation>Nosūtīts</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="25"/>
         <source>Rec&apos;d</source>
-        <translation type="unfinished"></translation>
+        <translation>Saņemts</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="26"/>
         <source>Power</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauda</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="27"/>
         <source>Operator</source>
-        <translation type="unfinished">Operator</translation>
+        <translation>Operators</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="28"/>
         <source>My Call</source>
-        <translation type="unfinished">My Call</translation>
+        <translation>Mans izsaukums</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="29"/>
         <source>My Grid</source>
-        <translation type="unfinished"></translation>
+        <translation>Mans lauciņš</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="30"/>
         <source>Exch Sent</source>
-        <translation type="unfinished"></translation>
+        <translation>Apmaiņa nosūtīta</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="31"/>
         <source>Exch Rcvd</source>
-        <translation type="unfinished"></translation>
+        <translation>Apmaiņa saņemta</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="32"/>
         <source>Prop</source>
-        <translation type="unfinished"></translation>
+        <translation>Izplat.</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="33"/>
         <source>Satellite</source>
-        <translation type="unfinished">Satellite</translation>
+        <translation>Satelīts</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="34"/>
         <source>Sat Mode</source>
-        <translation type="unfinished">Sat Mode</translation>
+        <translation>Sat. režīms</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="35"/>
         <source>RX Frequency</source>
-        <translation type="unfinished">RX Frequency</translation>
+        <translation>RX frekvence</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="36"/>
         <source>Comments</source>
-        <translation type="unfinished">Comments</translation>
+        <translation>Komentāri</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="49"/>
         <source>&amp;Add callsign</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Pievienot izsaukumu</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="50"/>
         <source>&amp;Delete callsign</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Dzēst izsaukumu</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="51"/>
         <source>&amp;Highlight last only</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Izcelt tikai pēdējo</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="52"/>
         <source>&amp;Background colour</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fona krāsa</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="53"/>
         <source>&amp;Foreground colour</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Priekšplāna krāsa</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="64"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Fails</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="66"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
+        <translation>I&amp;ziet</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="68"/>
         <source>Exit the application</source>
-        <translation type="unfinished"></translation>
+        <translation>Iziet no lietotnes</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="72"/>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Skats</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="81"/>
         <source>Port number:</source>
-        <translation type="unfinished"></translation>
+        <translation>Porta numurs:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="82"/>
         <source>Multicast Group (blank for unicast server):</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiraides grupa (tukšs unikāstes serverim):</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="83"/>
         <source>Network interfaces:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tīkla saskarnes:</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="103"/>
         <source>Server Details</source>
-        <translation type="unfinished"></translation>
+        <translation>Servera informācija</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="156"/>
         <source>Calls of Interest</source>
-        <translation type="unfinished"></translation>
+        <translation>Interesējošie izsaukumi</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="194"/>
         <source>Select background color</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasiet fona krāsu</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="208"/>
         <source>Select foreground color</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasiet priekšplāna krāsu</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregatorMainWindow.cpp" line="245"/>
         <source>Network Error:
 %1</source>
-        <translation type="unfinished">Network Error:
+        <translation>Tīkla kļūda:
 %1</translation>
     </message>
 </context>
@@ -13449,7 +13486,7 @@ UDP server %2:%3</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/MessageDialog.qml" line="89"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/MessageDialog.qml" line="97"/>
         <source>Hide Details...</source>
-        <translation type="unfinished"></translation>
+        <translation>Slēpt informāciju...</translation>
     </message>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Fusion/MessageDialog.qml" line="90"/>
@@ -13458,7 +13495,7 @@ UDP server %2:%3</translation>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/MessageDialog.qml" line="89"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/MessageDialog.qml" line="97"/>
         <source>Show Details...</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt informāciju...</translation>
     </message>
 </context>
 <context>
@@ -13466,22 +13503,22 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../map65/messages.ui" line="20"/>
         <source>Dialog</source>
-        <translation type="unfinished">Dialog</translation>
+        <translation>Dialoglodziņš</translation>
     </message>
     <message>
         <location filename="../map65/messages.ui" line="39"/>
         <source> Freq     DF     Pol     UTC       dB</source>
-        <translation type="unfinished"></translation>
+        <translation> Frekv.   DF     Pol     UTC       dB</translation>
     </message>
     <message>
         <location filename="../map65/messages.ui" line="59"/>
         <source>CQ* Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai CQ*</translation>
     </message>
     <message>
         <location filename="../map65/messages.ui" line="66"/>
         <source>CQ Only</source>
-        <translation type="unfinished">CQ Only</translation>
+        <translation>Tikai CQ</translation>
     </message>
 </context>
 <context>
@@ -13595,22 +13632,22 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../Transceiver/OmniRigTransceiver.cpp" line="55"/>
         <source>OmniRig: unrecognized mode</source>
-        <translation type="unfinished"></translation>
+        <translation>OmniRig: neatpazīts režīms</translation>
     </message>
     <message>
         <location filename="../Transceiver/OmniRigTransceiver.cpp" line="168"/>
         <source>Failed to start OmniRig COM server</source>
-        <translation type="unfinished"></translation>
+        <translation>Neizdevās palaist OmniRig COM serveri</translation>
     </message>
     <message>
         <location filename="../Transceiver/OmniRigTransceiver.cpp" line="387"/>
         <source>OmniRig COM/OLE error: %1 at %2: %3 (%4)</source>
-        <translation type="unfinished"></translation>
+        <translation>OmniRig COM/OLE kļūda: %1 pie %2: %3 (%4)</translation>
     </message>
     <message>
         <location filename="../Transceiver/OmniRigTransceiver.cpp" line="767"/>
         <source>OmniRig: don&apos;t know how to set rig frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>OmniRig: nezina, kā iestatīt radio frekvenci</translation>
     </message>
 </context>
 <context>
@@ -13618,7 +13655,7 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/PasteAction.qml" line="9"/>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Ielīmēt</translation>
     </message>
 </context>
 <context>
@@ -13753,7 +13790,7 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../SecureSettings.cpp" line="188"/>
         <source>DPAPI CryptUnprotectData failed</source>
-        <translation type="unfinished"></translation>
+        <translation>DPAPI CryptUnprotectData neizdevās</translation>
     </message>
     <message>
         <location filename="../SecureSettings.cpp" line="201"/>
@@ -13783,7 +13820,7 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../SecureSettings.cpp" line="269"/>
         <source>DPAPI CryptProtectData failed</source>
-        <translation type="unfinished"></translation>
+        <translation>DPAPI CryptProtectData neizdevās</translation>
     </message>
     <message>
         <location filename="../SecureSettings.cpp" line="282"/>
@@ -13813,37 +13850,37 @@ UDP server %2:%3</translation>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="47"/>
         <source>Connection refused</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienojums atteikts</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="49"/>
         <source>Host not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Resursdators nav atrasts</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="51"/>
         <source>Network error</source>
-        <translation type="unfinished"></translation>
+        <translation>Tīkla kļūda</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="53"/>
         <source>Connection timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Savienojuma noildze</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="859"/>
         <source>AutoSpot submitted for %1 on %2:%3</source>
-        <translation type="unfinished"></translation>
+        <translation>AutoSpot iesniegts priekš %1 uz %2:%3</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="862"/>
         <source>AutoSpot verified for %1 on %2:%3</source>
-        <translation type="unfinished"></translation>
+        <translation>AutoSpot apstiprināts priekš %1 uz %2:%3</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="865"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
-        <translation type="unfinished">AutoSpot rejected for %1 on %2:%3</translation>
+        <translation>AutoSpot noraidīts priekš %1 uz %2:%3</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="896"/>
@@ -13861,20 +13898,20 @@ UDP server %2:%3</translation>
         <location filename="../DecodiumDxCluster.cpp" line="932"/>
         <location filename="../widgets/mainwindow.cpp" line="22045"/>
         <source>cluster verification response exceeded the safety limit</source>
-        <translation type="unfinished"></translation>
+        <translation>klastera pārbaudes atbilde pārsniedza drošības ierobežojumu</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1030"/>
         <location filename="../DecodiumDxCluster.cpp" line="1050"/>
         <location filename="../widgets/mainwindow.cpp" line="22152"/>
         <source>published in show/dx</source>
-        <translation type="unfinished"></translation>
+        <translation>publicēts sadaļā show/dx</translation>
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="1033"/>
         <location filename="../widgets/mainwindow.cpp" line="22157"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
-        <translation type="unfinished"></translation>
+        <translation>mezgls pieņēma komandu; show/dx to vēl neatkārtoja</translation>
     </message>
     <message>
         <source>node accepted the command but the spot is not visible in show/dx</source>
@@ -13928,219 +13965,219 @@ Downloaded file exceeds limit of %1 MiB:
     <message>
         <location filename="../DecodiumBridge.cpp" line="19913"/>
         <source>Invalid frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīga frekvence</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="19915"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīgs datums/laiks. Izmantojiet ISO formātu vai yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="19917"/>
         <source>Invalid frequency row</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīga frekvences rinda</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="19976"/>
         <source>Failed to parse JSON frequencies file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Neizdevās parsēt JSON frekvenču failu: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="19984"/>
         <source>No frequencies were found</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvences netika atrastas</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="19990"/>
         <location filename="../DecodiumBridge.cpp" line="20092"/>
         <location filename="../DecodiumBridge.cpp" line="20119"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvenču fails satur pārāk daudz rindu (%1, ierobežojums %2)</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20031"/>
         <source>Frequency file does not exist</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvenču fails neeksistē</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20037"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvenču fails ir pārāk liels (%1 baiti, ierobežojums %2 baiti)</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20047"/>
         <source>Cannot open frequency file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nevar atvērt frekvenču failu: %1</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20057"/>
         <source>No valid working frequencies found</source>
-        <translation type="unfinished"></translation>
+        <translation>Nav atrastas derīgas darba frekvences</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20071"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīgs frekvenču fails: nepareizs faila magiskais paraksts</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20078"/>
         <source>Not a valid frequencies file: version is too new</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīgs frekvenču fails: versija ir pārāk jauna</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20086"/>
         <source>Not a valid frequencies file: cannot read row count</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīgs frekvenču fails: nevar nolasīt rindu skaitu</translation>
     </message>
     <message>
         <location filename="../DecodiumBridge.cpp" line="20113"/>
         <source>Not a valid frequencies file: contents corrupt</source>
-        <translation type="unfinished"></translation>
+        <translation>Nederīgs frekvenču fails: saturs ir bojāts</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="70"/>
         <source>Ham Radio Deluxe accetta la connessione TCP, ma non risponde al protocollo HRD. Verifica che HRD Rig Control sia avviato, che la radio sia gia&apos; connessa in HRD e che il server TCP/Remote sia abilitato sulla porta 7809.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ham Radio Deluxe pieņem TCP savienojumu, bet neatbild uz HRD protokolu. Pārbaudiet, vai HRD Rig Control ir palaists, vai radio jau ir savienots HRD un vai TCP/Remote serveris ir iespējots portā 7809.</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="91"/>
         <source>Porta seriale occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
-        <translation type="unfinished"></translation>
+        <translation>Seriālo portu izmanto cita programmatūra (iespējams, OmniRig, WSJT-X, FLDigi vai seriālais terminālis). Aizveriet programmu, kas izmanto portu, un mēģiniet vēlreiz.</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="96"/>
         <source>Porta %1 occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
-        <translation type="unfinished"></translation>
+        <translation>Portu %1 izmanto cita programmatūra (iespējams, OmniRig, WSJT-X, FLDigi vai seriālais terminālis). Aizveriet programmu, kas izmanto portu, un mēģiniet vēlreiz.</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="115"/>
         <source>Porta seriale CAT non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
-        <translation type="unfinished"></translation>
+        <translation>CAT seriālais ports nav pieejams. Pagaidiet, līdz Windows uzskaita radio, un mēģiniet vēlreiz.</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="117"/>
         <source>Porta %1 non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ports %1 nav pieejams. Pagaidiet, līdz Windows uzskaita radio, un mēģiniet vēlreiz.</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="132"/>
         <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
-        <translation type="unfinished"></translation>
+        <translation>CAT sakari ar radio pārtraukti. Pārbaudiet USB kabeli, COM portu, bodu ātrumu un vai radio ir ieslēgts. (hamlib pēdas: %1)</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="32"/>
         <source>Cloudlog URL is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog URL ir tukšs.</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="49"/>
         <source>Cloudlog URL scheme must be http or https.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cloudlog URL shēmai jābūt http vai https.</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="82"/>
         <source>[reply too large]</source>
-        <translation type="unfinished"></translation>
+        <translation>[atbilde pārāk liela]</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="86"/>
         <source>[reply exceeds limit]</source>
-        <translation type="unfinished"></translation>
+        <translation>[atbilde pārsniedz ierobežojumu]</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="163"/>
         <source> Risposta: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> Atbilde: %1</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="166"/>
         <source>%1: HTTP 401. Il server o proxy richiede autenticazione prima dell&apos;API Cloudlog. Controlla URL, Basic/Auth/Cloudflare o protezioni su /index.php/api; l&apos;API key Cloudlog non basta.%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: HTTP 401. Serveris vai starpniekserveris pieprasa autentifikāciju pirms Cloudlog API. Pārbaudiet URL, Basic/Auth/Cloudflare vai aizsardzību uz /index.php/api; Cloudlog API atslēga vien nav pietiekama.%2</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="171"/>
         <source>%1: HTTP 407. Il proxy richiede autenticazione prima di raggiungere Cloudlog.%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: HTTP 407. Starpniekserveris pieprasa autentifikāciju pirms Cloudlog sasniegšanas.%2</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="176"/>
         <source>%1: HTTP 403. Accesso negato dal server Cloudlog; verifica URL, permessi API key e protezioni web.%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: HTTP 403. Cloudlog serveris liedza piekļuvi; pārbaudiet URL, API atslēgas tiesības un tīmekļa aizsardzību.%2</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="181"/>
         <source>%1: HTTP %2.%3</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: HTTP %2.%3</translation>
     </message>
     <message>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="187"/>
         <source>%1: network error: %2.%3</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: tīkla kļūda: %2.%3</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="197"/>
         <source>UDP connection refused</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP savienojums atteikts</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="199"/>
         <source>UDP remote host closed</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP attālais resursdators aizvērts</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="201"/>
         <source>UDP host not found</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP resursdators nav atrasts</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="203"/>
         <source>UDP socket access error</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas piekļuves kļūda</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="205"/>
         <source>UDP socket resource error</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas resursu kļūda</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="207"/>
         <source>UDP socket timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas noildze</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="209"/>
         <source>UDP datagram too large</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP datagramma pārāk liela</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="211"/>
         <source>UDP network error</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP tīkla kļūda</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="213"/>
         <source>UDP address already in use</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP adrese jau tiek izmantota</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="215"/>
         <source>UDP socket address not available</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas adrese nav pieejama</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="217"/>
         <source>UDP unsupported socket operation</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP neatbalstīta ligzdas darbība</translation>
     </message>
     <message>
         <location filename="../Network/MessageClient.cpp" line="219"/>
         <source>UDP socket error</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas kļūda</translation>
     </message>
     <message>
         <location filename="../UDPExamples/MessageAggregator.cpp" line="100"/>
         <source>Unexpected error</source>
-        <translation type="unfinished"></translation>
+        <translation>Negaidīta kļūda</translation>
     </message>
 </context>
 <context>
@@ -14654,7 +14691,9 @@ Message</translation>
         <source>You need to enter your IARU Region
 in Settings or FM frequencies
 will not be shown!</source>
-        <translation type="unfinished"></translation>
+        <translation>Jums jāievada savs IARU reģions
+iestatījumos, citādi FM frekvences
+netiks rādītas!</translation>
     </message>
 </context>
 <context>
@@ -14683,49 +14722,49 @@ will not be shown!</source>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="18"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="18"/>
         <source>QSY Quick Picker</source>
-        <translation type="unfinished"></translation>
+        <translation>QSY ātrais atlasītājs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="82"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="82"/>
         <source>QSY a preset Working Frequencies</source>
-        <translation type="unfinished"></translation>
+        <translation>QSY uz iepriekš iestatītām darba frekvencēm</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="89"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="89"/>
         <source>%1 preset · %2 visibili</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 priekšiestatījumi · %2 redzami</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
         <source>Solo Preferred</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai izvēlētie</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="108"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="108"/>
         <source>Modo:</source>
-        <translation type="unfinished"></translation>
+        <translation>Režīms:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
         <source>Banda:</source>
-        <translation type="unfinished"></translation>
+        <translation>Josla:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="213"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="213"/>
         <source>Click su un preset per fare QSY · F2 per riaprire</source>
-        <translation type="unfinished"></translation>
+        <translation>Klikšķiniet uz priekšiestatījuma, lai veiktu QSY · F2, lai atkārtoti atvērtu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/QsyQuickPickerDialog.qml" line="220"/>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="220"/>
         <source>Chiudi</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizvērt</translation>
     </message>
 </context>
 <context>
@@ -14776,7 +14815,7 @@ will not be shown!</source>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/RedoAction.qml" line="8"/>
         <source>Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>Atkārtot</translation>
     </message>
 </context>
 <context>
@@ -14925,7 +14964,7 @@ Error(%2): %3</translation>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/SelectAllAction.qml" line="9"/>
         <source>Select All</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasīt visu</translation>
     </message>
 </context>
 <context>
@@ -14933,7 +14972,7 @@ Error(%2): %3</translation>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="170"/>
         <source>Network Error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Tīkla kļūda: %1</translation>
     </message>
 </context>
 <context>
@@ -14950,25 +14989,25 @@ Error(%2): %3</translation>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="517"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="517"/>
         <source>Select AzEl directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasiet AzEl mapi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="517"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="517"/>
         <source>Select save directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Atlasiet saglabāšanas mapi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="529"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="529"/>
         <source>Merge Working Frequencies</source>
-        <translation type="unfinished">Merge Working Frequencies</translation>
+        <translation>Apvienot darba frekvences</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="529"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="529"/>
         <source>Load Working Frequencies</source>
-        <translation type="unfinished">Load Working Frequencies</translation>
+        <translation>Ielādēt darba frekvences</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="531"/>
@@ -14976,7 +15015,7 @@ Error(%2): %3</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="541"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekvenču faili (*.qrg *.qrg.json)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="531"/>
@@ -14984,133 +15023,133 @@ Error(%2): %3</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="541"/>
         <source>All files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Visi faili (*)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="539"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="539"/>
         <source>Save Working Frequencies</source>
-        <translation type="unfinished">Save Working Frequencies</translation>
+        <translation>Saglabāt darba frekvences</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="722"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="722"/>
         <source>Auto</source>
-        <translation type="unfinished">Auto</translation>
+        <translation>Auto</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1133"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1133"/>
         <source>Transmitted Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārraidītais ziņojums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1134"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1134"/>
         <source>My Callsign</source>
-        <translation type="unfinished"></translation>
+        <translation>Mans izsaukums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1135"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1135"/>
         <source>New DXCC on Band</source>
-        <translation type="unfinished">New DXCC on Band</translation>
+        <translation>Jauns DXCC joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1136"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
         <source>New DXCC</source>
-        <translation type="unfinished">New DXCC</translation>
+        <translation>Jauns DXCC</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1137"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
         <source>New Continent on Band</source>
-        <translation type="unfinished">New Continent on Band</translation>
+        <translation>Jauns kontinents joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1138"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
         <source>New Continent</source>
-        <translation type="unfinished">New Continent</translation>
+        <translation>Jauns kontinents</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1139"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
         <source>New CQ Zone on Band</source>
-        <translation type="unfinished">New CQ Zone on Band</translation>
+        <translation>Jauna CQ zona joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1140"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
         <source>New CQ Zone</source>
-        <translation type="unfinished">New CQ Zone</translation>
+        <translation>Jauna CQ zona</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1141"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
         <source>New ITU Zone on Band</source>
-        <translation type="unfinished">New ITU Zone on Band</translation>
+        <translation>Jauna ITU zona joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1142"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
         <source>New ITU Zone</source>
-        <translation type="unfinished">New ITU Zone</translation>
+        <translation>Jauna ITU zona</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1143"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
         <source>New Grid on Band</source>
-        <translation type="unfinished">New Grid on Band</translation>
+        <translation>Jauns lauciņš joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1144"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
         <source>New Grid</source>
-        <translation type="unfinished">New Grid</translation>
+        <translation>Jauns lauciņš</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1145"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
         <source>New Callsign on Band</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauns izsaukums joslā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1146"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
         <source>New Callsign</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauns izsaukums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1147"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
         <source>LoTW User</source>
-        <translation type="unfinished">LoTW User</translation>
+        <translation>LoTW lietotājs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1148"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
         <source>CQ in Message</source>
-        <translation type="unfinished"></translation>
+        <translation>CQ ziņojumā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1149"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
         <source>DX Entity</source>
-        <translation type="unfinished"></translation>
+        <translation>DX vienība</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1150"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
         <source>73 / RR73</source>
-        <translation type="unfinished"></translation>
+        <translation>73 / RR73</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1151"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
         <source>B4 (Worked)</source>
-        <translation type="unfinished"></translation>
+        <translation>B4 (Strādāts)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1418"/>
@@ -15254,13 +15293,13 @@ Error(%2): %3</translation>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1499"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1499"/>
         <source>Frequencies</source>
-        <translation type="unfinished">Frequencies</translation>
+        <translation>Frekvences</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1499"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1499"/>
         <source>UI Buttons</source>
-        <translation type="unfinished"></translation>
+        <translation>UI pogas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1864"/>
@@ -15466,139 +15505,139 @@ Error(%2): %3</translation>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1986"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1986"/>
         <source>Refresh serial ports</source>
-        <translation type="unfinished"></translation>
+        <translation>Atsvaidzināt seriālos portus</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2086"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2086"/>
         <source>HRD Radio:</source>
-        <translation type="unfinished"></translation>
+        <translation>HRD radio:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2095"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2095"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
-        <translation type="unfinished"></translation>
+        <translation>Stingra atbilstība (pārtraukt, ja konfigurētais radio nav aktuālais HRD)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2483"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2483"/>
         <source>Connecting...</source>
-        <translation type="unfinished"></translation>
+        <translation>Savieno...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2531"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2531"/>
         <source>ALC AUTO CALIBRATION</source>
-        <translation type="unfinished"></translation>
+        <translation>ALC AUTOMĀTISKĀ KALIBRĒŠANA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2546"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2546"/>
         <source>ALC target:</source>
-        <translation type="unfinished"></translation>
+        <translation>ALC mērķis:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2552"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2552"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
-        <translation type="unfinished"></translation>
+        <translation>ALC skala 0-100. FT8/dati: parasti 15-25. Vērtības &gt;60 var pārslogot PA.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2602"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2602"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārraida noskaņošanas nesējsignālu un automātiski pielāgo TX audio līmeni, līdz radio ALC sasniedz mērķi. Vienreizējs. Nepieciešams savienots Hamlib CAT.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2606"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2606"/>
         <source>Cancel calibration</source>
-        <translation type="unfinished"></translation>
+        <translation>Atcelt kalibrēšanu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2607"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2607"/>
         <source>Calibrate ALC (transmits a carrier)</source>
-        <translation type="unfinished"></translation>
+        <translation>Kalibrēt ALC (pārraida nesējsignālu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2825"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2825"/>
         <source>Auto RX level active</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais RX līmenis aktīvs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2826"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2826"/>
         <source>Auto RX level disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais RX līmenis atspējots</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2980"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2980"/>
         <source>PROFILI PRONTI</source>
-        <translation type="unfinished"></translation>
+        <translation>GATAVIE PROFILI</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2992"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2992"/>
         <source>Bilanciato (QSO quotidiano) — default</source>
-        <translation type="unfinished"></translation>
+        <translation>Līdzsvarots (ikdienas QSO) — noklusējums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2993"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2993"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</source>
-        <translation type="unfinished"></translation>
+        <translation>Piesardzīgs ON · pilna dekodēšana AutoCQ ON · agrāka spēcīgu partneru noslēgšana ON · adaptīvā dekodēšana ON · AP keša glābšana ON · izlaist slota beigas OFF · MAM OFF · partnera atmiņa ON · TX2 atkārtota sūtīšana ON · plūstoša plūsma ON · izsaucēja atkārtojumi 5.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2994"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2994"/>
         <source>Weak-signal / caccia DX</source>
-        <translation type="unfinished"></translation>
+        <translation>Vājš signāls / DX medības</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2995"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
         <source>Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).</source>
-        <translation type="unfinished"></translation>
+        <translation>Tāpat kā Līdzsvarots, bet: izsaucēja atkārtojumi 7 · adaptīvā dekodēšana OFF (maksimāla jutība) · AP keša glābšana ON (pieņem dažus viltus) · izlaist slota beigas OFF (nezaudēt vēlīnās dekodēšanas).</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2996"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2996"/>
         <source>Contest / alta densità</source>
-        <translation type="unfinished"></translation>
+        <translation>Sacensības / augsts blīvums</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2997"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2997"/>
         <source>close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>agrāka spēcīgu partneru noslēgšana ON · izlaist slota beigas ON (minimāla aizture) · MAM vairākplūsmu ON (2 plūsmas, eksperimentāli) · pilna dekodēšana AutoCQ ON · izsaucēja atkārtojumi 3 · partnera atmiņa ON · piesardzīgs OFF.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2998"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2998"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
-        <translation type="unfinished"></translation>
+        <translation>CPU ierobežots (Decodium Console / mini PC)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="2999"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2999"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.</source>
-        <translation type="unfinished"></translation>
+        <translation>adaptīvā dekodēšana ON · MAM OFF · pilna dekodēšana AutoCQ OFF · plūstoša plūsma ON · pārējais pie noklusējuma vērtībām. Watchdog nemainīts.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3022"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3022"/>
         <source>● attivo</source>
-        <translation type="unfinished"></translation>
+        <translation>● aktīvs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3122"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3122"/>
         <source>Resume QSO on partner reply:</source>
-        <translation type="unfinished"></translation>
+        <translation>Atsākt QSO uz partnera atbildi:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3145"/>
@@ -15608,19 +15647,23 @@ Error(%2): %3</translation>
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
 
 Default: OFF (= Halt fully stops the sequence by default).</source>
-        <translation type="unfinished"></translation>
+        <translation>Ja apturat aktīva QSO laikā un tā pati stacija 2 minūšu laikā nosūta tiešu atbildi uz jūsu izsaukumu, Decodium var atsākt šo QSO.
+
+Attiecas tikai uz FT8/FT4/FT2 un tikai uz saglabāto QSO stāvokli.
+
+Noklusējums: IZSL. (= Apturēšana pēc noklusējuma pilnībā aptur secību).</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3184"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3184"/>
         <source>FT2 UTILITY</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2 RĪKI</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3189"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3189"/>
         <source>FT2: signoff retries (73/RR73):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: noslēguma atkārtojumi (73/RR73):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3210"/>
@@ -15633,13 +15676,20 @@ Lower = closes earlier (less &apos;stuck&apos; on the same station).
 Higher = more patient with weak/QSB partners.
 
 Doesn&apos;t affect FT8/FT4.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cik reižu atkārtot noslēdzošo 73/RR73 FT2, gaidot partnera apstiprinājumu pirms žurnalēšanas un noslēgšanas.
+
+Noklusējums: 4 (~28s).
+
+Mazāk = noslēdz agrāk (mazāk &apos;iestrēgst&apos; uz tās pašas stacijas).
+Vairāk = pacietīgāks pret vājiem/QSB partneriem.
+
+Neietekmē FT8/FT4.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3215"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3215"/>
         <source>FT4: signoff retries (73/RR73):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT4: noslēguma atkārtojumi (73/RR73):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3236"/>
@@ -15651,13 +15701,19 @@ Default: 4 (~30s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT8.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cik reižu atkārtot noslēdzošo 73/RR73 FT4.
+
+Noklusējums: 4 (~30s).
+
+Palieliniet līdz 6-8 vājiem/QSB partneriem (aizstāj agrākos automātiskos vāja/piesardzīga režīma papildinājumus).
+
+Neietekmē FT2/FT8.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3241"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3241"/>
         <source>FT8: signoff retries (73/RR73):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT8: noslēguma atkārtojumi (73/RR73):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3262"/>
@@ -15669,13 +15725,19 @@ Default: 3 (~45s).
 Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
 
 Doesn&apos;t affect FT2/FT4.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cik reižu atkārtot noslēdzošo 73/RR73 FT8.
+
+Noklusējums: 3 (~45s).
+
+Palieliniet līdz 6-8 vājiem/QSB partneriem (aizstāj agrākos automātiskos vāja/piesardzīga režīma papildinājumus).
+
+Neietekmē FT2/FT4.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3267"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3267"/>
         <source>Immediate TX on click (1.0.283 style):</source>
-        <translation type="unfinished"></translation>
+        <translation>Tūlītējs TX pēc klikšķa (1.0.283 stils):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3289"/>
@@ -15688,13 +15750,20 @@ Doesn&apos;t affect FT2/FT4.</source>
 Default: OFF (= safe upstream behaviour).
 
 Enable if it bothers you to wait 1 cycle after the click.</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjauno 1.0.283 uzvedību &apos;TX sākas NEKAVĒJOTIES pēc dubultklikšķa&apos;.
+
+• FT2: atvieglo perioda vārtus (TX1 no klikšķa apiet nākamā slota gaidīšanu)
+• FT8/FT4: paaugstina klikšķināmā loga ierobežojumu līdz d3CapMs (~11s FT8, 5.6s FT4) = īsta 1.0.283 uzvedība
+
+Noklusējums: IZSL. (= droša augšupplūsmas uzvedība).
+
+Iespējojiet, ja jūs traucē gaidīt 1 ciklu pēc klikšķa.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3294"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3294"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
-        <translation type="unfinished"></translation>
+        <translation>Žurnalēt RR73 pat ja partneris aiziet (FT2):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3316"/>
@@ -15704,13 +15773,17 @@ Enable if it bothers you to wait 1 cycle after the click.</source>
 Matches TX5/73 and sync mode behaviour.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2 + async AutoCQ: kad MĒS noslēdzam ar RR73 (TX4) pēc partnera R+ziņojuma un partneris pēc tam pazūd, tomēr žurnalēt QSO (pie noslēguma ierobežojuma), nevis atstāt to nežurnalētu.
+
+Atbilst TX5/73 un sinhronā režīma uzvedībai.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3321"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3321"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT8: ātrās secības (WSJT-X/JTDX stils):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3343"/>
@@ -15724,13 +15797,21 @@ Two changes:
 SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
 
 Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
-        <translation type="unfinished"></translation>
+        <translation>Samazina FT8 secības gaidīšanas lietotājiem, kuri dod priekšroku WSJT-X/JTDX stila reaģētspējai.
+
+Divas izmaiņas:
+  (1) Robežas atlaide 1200ms → 400ms = TX sākas ~800ms agrāk pēc slota robežas
+  (2) onFt8DecodeReady pieņem vēlīnas dekodēšanas d3CapMs (~11s) ietvaros, nevis atmet slotu = vairs nav &apos;15s papildus pēc partnera atbildes&apos;
+
+DROŠĪBA: CPU slodzes apstākļos jau esošais ierobežotājs piespiež atlaidi ≥900ms (drošība &gt; reaģētspēja noslogotos PC).
+
+Noklusējums: IZSL. (= piesardzīga augšupplūsmas uzvedība, maksimāla dekodēšanas uzticamība).</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3348"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3348"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: piesardzīgs TX logs (bez apgrieztiem kadriem):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3370"/>
@@ -15741,13 +15822,18 @@ Default: OFF (= conservative upstream behaviour, max decode reliability).</sourc
 • OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.
 
 Enable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nosaka, cik vēlu slotā var sākties async FT2 TX.
+
+• IESL. (noklusējums): TX sākas tikai tad, ja PILNĀ slodze (~2520ms) joprojām ietilpst — logs ~18% no slota. Ja tas pienāktu vēlu, TX tiek atlikts uz nākamo slotu, nevis tiek sūtīts APGRIEZTS kadrs, ko partneris nevar dekodēt. Mierīga, Decodium-3.0 stila stabilitāte.
+• IZSL.: FIX B (1.0.353) uzvedība — logs līdz ~76% no slota (nepieciešami tikai ~700ms lietderīgās slodzes). Reaģētspējīgāks, bet vēlīnas atbildes gadījumā var pārraidīt apgrieztus kadrus.
+
+Iespējojiet IZSL. tikai tad, ja vēlaties maksimālu reaģētspēju un pieņemat reizēm nedekodējamu vēlīnu TX.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3375"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3375"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: manuāla vienreizēja atbruņošana (1.0.300+):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3397"/>
@@ -15757,13 +15843,17 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
 
 Enable only if you double-click stations that consistently reply on the first attempt.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kad IESL. (augšupplūsmas 1.0.300+ uzvedība): pēc manuāla TX1-TX3 FT2, TX tiek atbruņots un atkārtoti uzvilkts TIKAI tad, kad pienāk partnera dekodēšana. Novērš TX1 mūžīgu cilpošanu pēc dubultklikšķa, bet VĀJIEM partneriem, kas nedekodējas pirmajā RX periodā, QSO tiek zaudēts (= &apos;TX1 apstājas, nepabeidzot&apos;).
+
+Kad IZSL. (noklusējums šajā atzarā, pirms 1.0.300): TX1 turpina atkārtoties, līdz tiek sasniegts &apos;Izsaucēja atkārtojumi&apos; — labāk vāja signāla QSO (Paskvāles gadījums).
+
+Iespējojiet tikai tad, ja veicat dubultklikšķi uz stacijām, kas konsekventi atbild pirmajā mēģinājumā.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3402"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3402"/>
         <source>Caller retries (max TX repeats per step):</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaucēja atkārtojumi (maks. TX atkārtojumi uz soli):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3425"/>
@@ -15779,13 +15869,23 @@ Lower (4-6) = less time wasted on stations that don&apos;t reply.
 Higher (15-20) = patience for weak DX / marginal propagation.
 
 Note: with &apos;FT2 manual one-shot disarm&apos; OFF (default) this is what stops TX1 from looping forever.</source>
-        <translation type="unfinished"></translation>
+        <translation>Maksimālais reižu skaits, cik tas pats TX solis (TX1/TX2/TX3) atkārtojas pirms apturēšanas, ja partneris neatbild.
+
+Noklusējums: 10.
+
+FT2 (slots 3.75s): 10 atkārtojumi ≈ 38s izsaukšanas.
+FT8 (slots 15s): 10 atkārtojumi ≈ 150s.
+
+Mazāk (4-6) = mazāk laika tiek tērēts stacijām, kas neatbild.
+Vairāk (15-20) = pacietība vājam DX / robežstāvokļa izplatīšanās.
+
+Piezīme: ar &apos;FT2 manuāla vienreizēja atbruņošana&apos; IZSL. (noklusējums) tas ir tas, kas neļauj TX1 mūžīgi cilpot.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3433"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3433"/>
         <source>Conservative FT2 (weak-signal mode):</source>
-        <translation type="unfinished"></translation>
+        <translation>Piesardzīgs FT2 (vāja signāla režīms):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3454"/>
@@ -15796,13 +15896,18 @@ Note: with &apos;FT2 manual one-shot disarm&apos; OFF (default) this is what sto
   • Same-step wait relaxed for weak partners
 
 Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pret-QSB regulēšana:
+  • Spoku filtrs -24 dB, nevis -22
+  • Atkārtojumu ierobežojums paplašināts SNR-adaptīvi (+2..+4 papildus)
+  • Tā paša soļa gaidīšana atvieglota vājiem partneriem
+
+Noklusējums: IZSL. — iespējojiet to, ja jums ir vāji DX partneri vai robežstāvokļa izplatīšanās.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3459"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3459"/>
         <source>FT2: full decode in AutoCQ:</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: pilna dekodēšana AutoCQ režīmā:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3480"/>
@@ -15812,13 +15917,17 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izsaucot CQ (AutoCQ), saglabā pilnu dekodēšanas dziļumu (OSD + 4. atņemšanas piegājiens + vāja signāla vidējošana), nevis samazina to līdz 2.
+
+Palīdz dzirdēt vājus atbildētājus. CPU slodzes apstākļos tas tik un tā automātiski samazinās.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3485"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3485"/>
         <source>FT2: close strong partners earlier:</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: agrāk noslēgt spēcīgus partnerus:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3506"/>
@@ -15828,13 +15937,17 @@ Default: OFF.</source>
 Weak partners keep the extra anti-QSB repetitions.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ja SPĒCĪGS partneris (SNR &gt; 0 dB) nenosūta noslēdzošo 73, samazina RR73 atkārtojumus no 8 līdz 4 (~15s, nevis 30s) pirms žurnalēšanas un atgriešanās pie CQ.
+
+Vāji partneri saglabā papildu pret-QSB atkārtojumus.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3511"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3511"/>
         <source>FT2: adaptive decode (CPU saver):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: adaptīva dekodēšana (CPU taupītājs):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3532"/>
@@ -15846,13 +15959,19 @@ When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes
 Useful mainly on modest PCs.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>TIKAI KLAUSĪŠANĀS režīmā (neizsaucot CQ un neesot QSO), retina async atkārtoto dekodēšanu no 100ms līdz ~350ms: neatkārto 95% pārklājoša audio dekodēšanu → taupa CPU un samazina maksimumus, kas var pazemināt dekodēšanas dziļumu.
+
+Gaidot atbildi (AutoCQ/QSO), tas paliek pilnā ritmā. Nezaudē nevienu dekodēšanu.
+
+Noderīgs galvenokārt vājākos PC.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3537"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3563"/>
         <source>FT2: AP cache rescue (experimental):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: AP keša glābšana (eksperimentāla):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3558"/>
@@ -15862,13 +15981,17 @@ Default: OFF.</source>
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eksperimentāls FT2 AP kešs: glabā joslā redzētos izsaukumus kā jaucējkodus (TTL 30 min) un var izglābt robežstāvokļa FT2 dekodēšanas, kad dekodētais izsaukums jau ir kešā.
+
+Drošības vārti: AP-keša izglābtās rindas tiek rādītas/auditētas, bet tās nevada AutoSeq, AutoCQ vai automātisko TX. Tās arī netiek izmantotas, lai atkārtoti aizpildītu AP kešu.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3563"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3589"/>
         <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: izlaist lieko slota beigu dekodēšanu (samazina aizķeršanās aizturi):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3587"/>
@@ -15880,13 +16003,19 @@ Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner
 Cost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai FT2 async: kad asinhronā dekodēšana (pieaugoša ik pēc 100 ms) JAU ir dekodējusi slotu, izlaiž slota beigu sinhrono dekodēšanas piegājienu šim slotam.
+
+Ieguvums: novērš sacensību (~1.8 s pēc TX) uz tā paša darbinieka, tāpēc partnera atbilde tiek uztverta ātrāk.
+
+Cena: slotiem, ko jau aptver async, zaudē pilno slota beigu vāja signāla vidējošanas piegājienu, kas var atgūt vājas/robežstāvokļa stacijas. Slotos, kur async atgrieza TUKŠU, sinhronā dekodēšana tiek saglabāta.
+
+Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3594"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3620"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2/FT8 MAM vairākplūsmu (MSHV, eksperimentāli):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3618"/>
@@ -15896,13 +16025,17 @@ Default: OFF.</source>
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
 
 EXPERIMENTAL. Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>MSHV vairākplūsmu režīms: vienā periodā tas atbild VAIRĀKIEM izsaucējiem vienlaikus, katram SAVĀ audio frekvencē (kā DX ekspedīcijas stacija).
+
+Šī ir PAPILDU MAM opcija: pirms tā darbības jābūt aktīvam MAM (vairākatbilžu režīms) vai AutoCQ. Kad tas ir IZSL., MAM paliek seriāls, viens izsaucējs vienlaikus, kā iepriekš.
+
+EKSPERIMENTĀLI. Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3623"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3649"/>
         <source>MAM multi-stream: max stream simultanei:</source>
-        <translation type="unfinished"></translation>
+        <translation>MAM vairākplūsmu: maks. vienlaicīgu plūsmu:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3651"/>
@@ -15912,13 +16045,17 @@ EXPERIMENTAL. Default: OFF.</source>
 Range 2-5. Default: 3.
 
 Higher values require more CPU to generate overlapping audio streams. Enabled only when MAM multi-stream is active.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cik paralēlus QSO MAM vairākplūsmu var izpildīt vienlaikus, katru savā frekvencē.
+
+Diapazons 2-5. Noklusējums: 3.
+
+Augstākas vērtības prasa vairāk CPU pārklājošos audio plūsmu ģenerēšanai. Iespējots tikai tad, kad MAM vairākplūsmu ir aktīvs.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3656"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3682"/>
         <source>FT2 partner-memory (anti-QSB):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2 partnera atmiņa (pret QSB):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3678"/>
@@ -15928,13 +16065,17 @@ Higher values require more CPU to generate overlapping audio streams. Enabled on
 Requires Conservative FT2 active.
 
 Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kešo partnera stāvokli (izsaukums + TX numurs + qsoProgress + SNR) 30 sekundes: ja partneris QSB dēļ pazūd un 30s laikā atkal parādās, atjauno qsoProgress, nevis sāk no jauna no TX1.
+
+Nepieciešams aktīvs piesardzīgs FT2.
+
+Noklusējums: IZSL. (pēc izvēles pēc 1.0.186 atcelšanas — stingri vārti + [FT2WS-F] žurnāls). Automātiski atspējots, ja piesardzīgais ir IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3683"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3709"/>
         <source>FT2 TX2 re-send on stall:</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2 TX2 atkārtota sūtīšana pie apstāšanās:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3705"/>
@@ -15944,103 +16085,107 @@ Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
 
 Requires Conservative FT2 active. Default: ON under Conservative.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ja esat TX3 (R+ziņojums) un partneris neatbild 2 periodus (~7.5s), vienreiz atkārtoti nosūta TX2 (signāla ziņojumu) pirms QSO pamešanas.
+
+Palīdz ar vājiem partneriem, kas neapstiprināja pirmajā reizē. Ierobežots līdz 1 atkārtotai sūtīšanai uz QSO (bez cilpām).
+
+Nepieciešams aktīvs piesardzīgs FT2. Noklusējums: IESL. piesardzīgajā režīmā.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3713"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3739"/>
         <source>Smooth decode flow:</source>
-        <translation type="unfinished"></translation>
+        <translation>Plūstoša dekodēšanas plūsma:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3734"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3760"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izklīdina FT8/FT4 dekodēšanas no perioda beigu galīgās partijas nepārtrauktā straumēšanā ar animētu pakāpenisku parādīšanos (~100 ms uz rindu). FT2 async ir nemainīgs, jo tas jau straumē. Noklusējums: IESL.; automātiska atkāpšanās, ja vājākos PC tiek konstatēti UI aizķeršanās. Atspējojiet, lai izmantotu novecojušo partiju uzvedību.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3870"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3896"/>
         <source>ASPETTO / TEMA</source>
-        <translation type="unfinished"></translation>
+        <translation>IZSKATS / TĒMA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3873"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3899"/>
         <source>Theme:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tēma:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3901"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3927"/>
         <source>Accent:</source>
-        <translation type="unfinished"></translation>
+        <translation>Akcents:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3938"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3964"/>
         <source>Density:</source>
-        <translation type="unfinished"></translation>
+        <translation>Blīvums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3979"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4005"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
-        <translation type="unfinished"></translation>
+        <translation>DX ekspedīcijas darbvieta (3 kolonnu taktiskais izkārtojums)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3994"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4020"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternatīvs viena paneļa operatora skats, optimizēts DX sablīvējumiem: taktiskais 3 kolonnu panelis (Cluster / Ūdenskritums / TX) klasiskās darbvietas vietā. Pēc izvēles, noklusēti IZSL.: kad atspējots, standarta izkārtojums paliek nemainīgs.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="3998"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4024"/>
         <source>UI Scale:</source>
-        <translation type="unfinished"></translation>
+        <translation>UI mērogs:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4030"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4056"/>
         <source>↻ restart to apply</source>
-        <translation type="unfinished"></translation>
+        <translation>↻ restartēt, lai lietotu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4037"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4063"/>
         <source>BANDE OPERATIVE</source>
-        <translation type="unfinished"></translation>
+        <translation>DARBA JOSLAS</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4040"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4066"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
-        <translation type="unfinished"></translation>
+        <translation>Klikšķiniet, lai rādītu/slēptu joslas atlasītājā. Neatlasītās joslas pazūd no HF / V-U / SHF joslas.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4069"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4095"/>
         <source>visible (click to hide)</source>
-        <translation type="unfinished"></translation>
+        <translation>redzams (klikšķis, lai slēptu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4069"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4095"/>
         <source>hidden (click to show)</source>
-        <translation type="unfinished"></translation>
+        <translation>paslēpts (klikšķis, lai rādītu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4078"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4104"/>
         <source>UI — PERFORMANCE</source>
-        <translation type="unfinished"></translation>
+        <translation>UI — VEIKTSPĒJA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4082"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4108"/>
         <source>UI Quality preset:</source>
-        <translation type="unfinished"></translation>
+        <translation>UI kvalitātes priekšiestatījums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4099"/>
@@ -16050,37 +16195,41 @@ Medium = light animations.
 High = all available animations.
 
 Default: Medium.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zems = bez efektiem (vājāki PC).
+Vidējs = vieglas animācijas.
+Augsts = visas pieejamās animācijas.
+
+Noklusējums: Vidējs.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4104"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4130"/>
         <source>Priorità processo:</source>
-        <translation type="unfinished"></translation>
+        <translation>Procesa prioritāte:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4109"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4135"/>
         <source>Normale</source>
-        <translation type="unfinished"></translation>
+        <translation>Normāla</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4109"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4135"/>
         <source>Sopra il normale</source>
-        <translation type="unfinished"></translation>
+        <translation>Virs normālas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4109"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4135"/>
         <source>Alta (consigliata)</source>
-        <translation type="unfinished"></translation>
+        <translation>Augsta (ieteicama)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4109"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4135"/>
         <source>Tempo reale ⚠️</source>
-        <translation type="unfinished"></translation>
+        <translation>Reālais laiks ⚠️</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4118"/>
@@ -16092,13 +16241,19 @@ Alta = più fluidità per audio/decode, rischio basso (consigliata se noti scatt
 Tempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).
 
 Se non sei sicuro usa &apos;Alta&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Procesa CPU plānošanas prioritāte (Windows).
+
+Normāla / Virs normālas (noklusējums) = drošas.
+Augsta = lielāka plūstamība audio/dekodēšanai, zems risks (ieteicama, ja pamanāt aizķeršanos).
+Reālais laiks ⚠️ = maksimāla plūstamība, BET var padarīt PC nereaģējošu (pele/tastatūra) un prasa administratora tiesības (bez administratora Windows to pazemina līdz Augstai).
+
+Ja neesat pārliecināts, izmantojiet &apos;Augsta&apos;.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4123"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4149"/>
         <source>UI Style (restart):</source>
-        <translation type="unfinished"></translation>
+        <translation>UI stils (restarts):</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4146"/>
@@ -16108,13 +16263,17 @@ Se non sei sicuro usa &apos;Alta&apos;.</source>
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
 • Universal — Microsoft Universal (WinPhone-style)
 • Fusion — neutral cross-platform desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>QML Quick Controls stils (nepieciešams restarts):
+• Material (ieteicams) — Google Material 3, pielāgojams, Decodium vēsturiskais noklusējums
+• FluentWinUI3 — natīvs Windows 11 (Mica/akrils). Automātiska atkāpšanās SplitView/StackView.
+• Universal — Microsoft Universal (WinPhone stils)
+• Fusion — neitrāls starpplatformu darbvirsmas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4157"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4183"/>
         <source>Frameless pop-out:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bezrāmja uznirstošais logs:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4170"/>
@@ -16124,13 +16283,17 @@ Se non sei sicuro usa &apos;Alta&apos;.</source>
 Windows 11 aesthetic.
 
 Default: OFF. Requires closing and reopening the window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Uznirstošie logi (Ūdenskritums, Period1, DecoSync) kļūst bezrāmja ar vilkšanu, izmantojot apmali.
+
+Windows 11 estētika.
+
+Noklusējums: IZSL. Nepieciešams aizvērt un atkārtoti atvērt logu.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4175"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4201"/>
         <source>Detach Full Spectrum:</source>
-        <translation type="unfinished"></translation>
+        <translation>Atvienot pilno spektru:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4188"/>
@@ -16140,13 +16303,17 @@ Default: OFF. Requires closing and reopening the window.</source>
 Reduces stalls on modest PCs.
 
 Default: OFF. Requires restart.</source>
-        <translation type="unfinished"></translation>
+        <translation>Palaišanas laikā atver pilno spektru (joslu aktivitāti) atsevišķā logā, izolējot galveno renderēšanas pavedienu no ListView animācijām.
+
+Samazina aizķeršanos vājākos PC.
+
+Noklusējums: IZSL. Nepieciešams restarts.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4193"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4219"/>
         <source>Spectrum FPS cap:</source>
-        <translation type="unfinished"></translation>
+        <translation>Spektra FPS ierobežojums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4213"/>
@@ -16158,25 +16325,31 @@ Default: OFF. Requires restart.</source>
   • 30 = modern hardware
 
 When Full Spectrum is detached the separate render thread holds 30 fps without affecting the decoder.</source>
-        <translation type="unfinished"></translation>
+        <translation>Iegultā ūdenskrituma/panadaptera maksimālais kadru ātrums.
+
+  • 15 = vājāki PC
+  • 20 = līdzsvarots noklusējums
+  • 30 = moderns aparatūra
+
+Kad pilnais spektrs ir atvienots, atsevišķais renderēšanas pavediens notur 30 fps, neietekmējot dekoderu.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4219"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4245"/>
         <source>Eventi CPU pressure:</source>
-        <translation type="unfinished"></translation>
+        <translation>CPU slodzes notikumi:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4233"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4259"/>
         <source>totale=%1 · severi=%2 (sessione)</source>
-        <translation type="unfinished"></translation>
+        <translation>kopā=%1 · nopietni=%2 (sesija)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4236"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4262"/>
         <source>totale=0 · severi=0</source>
-        <translation type="unfinished"></translation>
+        <translation>kopā=0 · nopietni=0</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4246"/>
@@ -16184,103 +16357,105 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
-        <translation type="unfinished"></translation>
+        <translation>cpuPressure notikumu skaitītāji pašreizējai sesijai.
+
+Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais signāls: ja pēc stundas lietošanas redzat ≥5, samaziniet UI kvalitāti uz Zemu vai spektra FPS ierobežojumu uz 15.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4348"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4374"/>
         <source>Waterfall Calls:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ūdenskrituma izsaukumi:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4356"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4382"/>
         <source>FS Dist:</source>
-        <translation type="unfinished"></translation>
+        <translation>FS attāl.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4364"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4390"/>
         <source>FS Az:</source>
-        <translation type="unfinished"></translation>
+        <translation>FS azim.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4372"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4398"/>
         <source>RX Freq:</source>
-        <translation type="unfinished"></translation>
+        <translation>RX frekv.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4380"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4406"/>
         <source>RX Dist:</source>
-        <translation type="unfinished"></translation>
+        <translation>RX attāl.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4388"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4414"/>
         <source>RX Az:</source>
-        <translation type="unfinished"></translation>
+        <translation>RX azim.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4483"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4509"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
-        <translation type="unfinished"></translation>
+        <translation>ATTĀLAIS TĪMEKĻA SERVERIS (iPad / mobilā PWA)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4486"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4512"/>
         <source>Abilita Web Server:</source>
-        <translation type="unfinished"></translation>
+        <translation>Iespējot tīmekļa serveri:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4506"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4532"/>
         <source>Porta TCP:</source>
-        <translation type="unfinished"></translation>
+        <translation>TCP ports:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4517"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4543"/>
         <source>URL accesso:</source>
-        <translation type="unfinished"></translation>
+        <translation>Piekļuves URL:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4528"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4554"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4555"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4581"/>
         <source>DECODE LIST DISPLAY</source>
-        <translation type="unfinished"></translation>
+        <translation>DEKODĒŠANAS SARAKSTA ATTĒLOŠANA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4558"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
         <source>Colored period separator:</source>
-        <translation type="unfinished"></translation>
+        <translation>Krāsains periodu atdalītājs:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4572"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4598"/>
         <source>Newest first:</source>
-        <translation type="unfinished"></translation>
+        <translation>Jaunākie vispirms:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4728"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4754"/>
         <source>CQ filter:</source>
-        <translation type="unfinished"></translation>
+        <translation>CQ filtrs:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4803"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4829"/>
         <source>Deep decode in TX:</source>
-        <translation type="unfinished"></translation>
+        <translation>Dziļā dekodēšana TX laikā:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4815"/>
@@ -16290,25 +16465,29 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
 
 Costs extra CPU during QSOs. Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Darbojoties/QSO laikā FT8, ARĪ palaiž dziļo dekodēšanu ar dziļumu 4 (tikai dekodēšanas saraksts) papildus ātrajai dziļuma 2 dekodēšanai, kas vada TX.
+
+Atgūst trešo pušu stacijas, ko ātrais piegājiens darbības laikā nepamanītu, NESKAROT laika kontroli vai QSO noslēgšanu (tas ir tīrs dekodēšanas saraksts, nevis auto-seq).
+
+QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="4999"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5025"/>
         <source>QRZ LOGBOOK</source>
-        <translation type="unfinished"></translation>
+        <translation>QRZ ŽURNĀLS</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5013"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5039"/>
         <source>Replace duplicates:</source>
-        <translation type="unfinished"></translation>
+        <translation>Aizstāt dublikātus:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5046"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5072"/>
         <source>Testing...</source>
-        <translation type="unfinished"></translation>
+        <translation>Testē...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5046"/>
@@ -16316,181 +16495,181 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5072"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7294"/>
         <source>Test</source>
-        <translation type="unfinished"></translation>
+        <translation>Tests</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5059"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5085"/>
         <source>Testing QRZ API key...</source>
-        <translation type="unfinished"></translation>
+        <translation>Testē QRZ API atslēgu...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5299"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5325"/>
         <source>Client ID:</source>
-        <translation type="unfinished"></translation>
+        <translation>Klienta ID:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5321"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5347"/>
         <source>Preset:</source>
-        <translation type="unfinished"></translation>
+        <translation>Priekšiestatījums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5465"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5491"/>
         <source>Tertiary UDP:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārais UDP:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5473"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5499"/>
         <source>Tertiary Server:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārais serveris:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5483"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5509"/>
         <source>Tertiary Port:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārais ports:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5494"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5520"/>
         <source>Tertiary TTL:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārais TTL:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5506"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5532"/>
         <source>Tertiary Interface:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārā saskarne:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5527"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5553"/>
         <source>Tertiary ADIF:</source>
-        <translation type="unfinished"></translation>
+        <translation>Terciārais ADIF:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5540"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5566"/>
         <source>N1MM / EasyLog</source>
-        <translation type="unfinished"></translation>
+        <translation>N1MM / EasyLog</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5543"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5569"/>
         <source>Enable N1MM:</source>
-        <translation type="unfinished"></translation>
+        <translation>Iespējot N1MM:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5551"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5577"/>
         <source>N1MM Port:</source>
-        <translation type="unfinished"></translation>
+        <translation>N1MM ports:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5563"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5589"/>
         <source>N1MM Server:</source>
-        <translation type="unfinished"></translation>
+        <translation>N1MM serveris:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5661"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5687"/>
         <source>FREQUENCY CALIBRATION</source>
-        <translation type="unfinished"></translation>
+        <translation>FREKVENCES KALIBRĒŠANA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5669"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5695"/>
         <source>Refresh</source>
-        <translation type="unfinished">Refresh</translation>
+        <translation>Atsvaidzināt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5695"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5721"/>
         <source>Slope:</source>
-        <translation type="unfinished">Slope:</translation>
+        <translation>Slīpums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5713"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5739"/>
         <source>ppm</source>
-        <translation type="unfinished"></translation>
+        <translation>ppm</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5715"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5741"/>
         <source>Intercept:</source>
-        <translation type="unfinished">Intercept:</translation>
+        <translation>Krustpunkts:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5733"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5759"/>
         <source>Hz</source>
-        <translation type="unfinished"></translation>
+        <translation>Hz</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5752"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5778"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
-        <translation type="unfinished"></translation>
+        <translation>Atiestatīt kalibrēšanu (slīpums=0, krustpunkts=0). Frekvence tiek ierakstīta radio bez korekcijas (ātrais ceļš).</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5764"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5790"/>
         <source>Preview correzione:</source>
-        <translation type="unfinished"></translation>
+        <translation>Korekcijas priekšskatījums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5775"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5801"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
-        <translation type="unfinished"></translation>
+        <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5790"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5816"/>
         <source>WORKING FREQUENCIES</source>
-        <translation type="unfinished"></translation>
+        <translation>DARBA FREKVENCES</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5798"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5824"/>
         <source>Load</source>
-        <translation type="unfinished"></translation>
+        <translation>Ielādēt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5807"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5833"/>
         <source>Merge</source>
-        <translation type="unfinished"></translation>
+        <translation>Apvienot</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5816"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
         <source>Save as</source>
-        <translation type="unfinished"></translation>
+        <translation>Saglabāt kā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5825"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5851"/>
         <source>Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Noklusējumi</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5855"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5881"/>
         <source>Region:</source>
-        <translation type="unfinished"></translation>
+        <translation>Reģions:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5870"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5896"/>
         <source>Freq MHz:</source>
-        <translation type="unfinished"></translation>
+        <translation>Frekv. MHz:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5890"/>
@@ -16498,25 +16677,25 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5916"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6044"/>
         <source>Pref</source>
-        <translation type="unfinished">Pref</translation>
+        <translation>Pref.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5899"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5925"/>
         <source>Description:</source>
-        <translation type="unfinished"></translation>
+        <translation>Apraksts:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5913"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5939"/>
         <source>Start:</source>
-        <translation type="unfinished"></translation>
+        <translation>Sākums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5924"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5950"/>
         <source>End:</source>
-        <translation type="unfinished"></translation>
+        <translation>Beigas:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5943"/>
@@ -16524,7 +16703,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5969"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6169"/>
         <source>Add</source>
-        <translation type="unfinished">Add</translation>
+        <translation>Pievienot</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5953"/>
@@ -16532,7 +16711,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5979"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6178"/>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunināt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5964"/>
@@ -16540,289 +16719,289 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5990"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6188"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Dzēst</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="5974"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6000"/>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Jauns</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6015"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6041"/>
         <source>IARU Region</source>
-        <translation type="unfinished">IARU Region</translation>
+        <translation>IARU reģions</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6016"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6042"/>
         <source>Mode</source>
-        <translation type="unfinished">Mode</translation>
+        <translation>Režīms</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6017"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6043"/>
         <source>Frequency</source>
-        <translation type="unfinished">Frequency</translation>
+        <translation>Frekvence</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6019"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6045"/>
         <source>Description</source>
-        <translation type="unfinished">Description</translation>
+        <translation>Apraksts</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6020"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6046"/>
         <source>Start Date/Time</source>
-        <translation type="unfinished">Start Date/Time</translation>
+        <translation>Sākuma datums/laiks</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6021"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6047"/>
         <source>End Date/Time</source>
-        <translation type="unfinished">End Date/Time</translation>
+        <translation>Beigu datums/laiks</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6074"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6100"/>
         <source>STATION INFORMATION</source>
-        <translation type="unfinished"></translation>
+        <translation>STACIJAS INFORMĀCIJA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6081"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6107"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
-        <translation type="unfinished"></translation>
+        <translation>Joslas nobīde ir transvertera/stacijas frekvences nobīde šai joslai; izmantojiet 0.000000, kad netiek lietota.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6105"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6131"/>
         <source>Band:</source>
-        <translation type="unfinished"></translation>
+        <translation>Josla:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6113"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6139"/>
         <source>Offset MHz:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nobīde MHz:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6192"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6218"/>
         <source>Band</source>
-        <translation type="unfinished">Band</translation>
+        <translation>Josla</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6193"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6219"/>
         <source>Offset</source>
-        <translation type="unfinished">Offset</translation>
+        <translation>Nobīde</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6194"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6220"/>
         <source>Antenna Description</source>
-        <translation type="unfinished">Antenna Description</translation>
+        <translation>Antenas apraksts</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6306"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6332"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izmantot šo konkrēto dekodēšanas krāsu. Kad IZSL., šī kategorija izmanto koplietoto noklusējuma krāsu.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6418"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6444"/>
         <source>Decode Boost:</source>
-        <translation type="unfinished"></translation>
+        <translation>Dekodēšanas pastiprinājums:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6485"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6511"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
-        <translation type="unfinished"></translation>
+        <translation>SASKARNES KRĀSAS (fons + teksts)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6490"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6516"/>
         <source>Usa colori personalizzati:</source>
-        <translation type="unfinished"></translation>
+        <translation>Izmantot pielāgotas krāsas:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6497"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6523"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
-        <translation type="unfinished"></translation>
+        <translation>(pārraksta tēmas fonu un tekstu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6504"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6530"/>
         <source>Background:</source>
-        <translation type="unfinished"></translation>
+        <translation>Fons:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6524"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6550"/>
         <source>Text:</source>
-        <translation type="unfinished"></translation>
+        <translation>Teksts:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6616"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6642"/>
         <source>Download CALL3.TXT...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lejupielādēt CALL3.TXT...</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6738"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6764"/>
         <source>Direct Visual:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešā vizualizācija:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6744"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6770"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ātrais vizuālais panadapteris. Novecojušā režīmā tas var atvērt otru audio tveršanu; normālā režīmā tas tikai palielina vizuālo atsvaidzināšanas ātrumu. Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6749"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6775"/>
         <source>Low CPU:</source>
-        <translation type="unfinished"></translation>
+        <translation>Zems CPU:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6758"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6784"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Profils lēniem PC: maksimums 2 FT pavedieni, lēnāks ūdenskritums, samazināta agrīnā/dziļā dekodēšana. Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="6763"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6789"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
-        <translation type="unfinished"></translation>
+        <translation>Samazina FT pavedienus, ūdenskrituma atsvaidzināšanu un QML renderēšanu monitorēšanas/TX laikā.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7068"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7094"/>
         <source>RF self-calibration:</source>
-        <translation type="unfinished"></translation>
+        <translation>RF paškalibrēšana:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7073"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7099"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>Izmantot saņemtās dekodēšanas DT vērtības tikai kā sekundāru laika sinhronizācijas norādījumu pēc tam, kad NTP/HTTPS jau ir fiksēts. Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7078"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7104"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai sekundārs norādījums; tas nevar izveidot pirmo laika fiksāciju.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7086"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7112"/>
         <source>ADV DECODING</source>
-        <translation type="unfinished"></translation>
+        <translation>PAPILDU DEKODĒŠANA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7089"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7115"/>
         <source>Auto Mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiskais režīms:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7093"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7119"/>
         <source>AUTO - enable the 3 technologies when needed</source>
-        <translation type="unfinished"></translation>
+        <translation>AUTO — iespējo 3 tehnoloģijas, kad nepieciešams</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7106"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7132"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kad IESL., 3 zemāk esošās funkcijas tiek pārvaldītas automātiski. Iedarbināšana: Neural+Turbo, kad dekodēšanu &lt; 2/slotā 4 slotus. Koherentā, kad Q65 SNR &lt; -22 dB.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7114"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7140"/>
         <source>Live state:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešais stāvoklis:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7116"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7142"/>
         <source>Neural</source>
-        <translation type="unfinished"></translation>
+        <translation>Neirālā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7118"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7144"/>
         <source>Turbo</source>
-        <translation type="unfinished"></translation>
+        <translation>Turbo</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7120"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7146"/>
         <source>Coherent</source>
-        <translation type="unfinished"></translation>
+        <translation>Koherentā</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7124"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7150"/>
         <source>Coherent Avg:</source>
-        <translation type="unfinished"></translation>
+        <translation>Koherentā vid.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7129"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7155"/>
         <source>Coherent Average (Q65/JT65)</source>
-        <translation type="unfinished"></translation>
+        <translation>Koherentā vidējošana (Q65/JT65)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7143"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7169"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
-        <translation type="unfinished"></translation>
+        <translation>Uzkrāj vairāku slotu vidējošanu Q65/JT65 dekodēšanai (+1-3 dB)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7150"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7176"/>
         <source>Neural Sync:</source>
-        <translation type="unfinished"></translation>
+        <translation>Neirālā sinhr.:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7155"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7181"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
-        <translation type="unfinished"></translation>
+        <translation>Neirālā sinhronizācija (FT8 OSD dekoders)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7169"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7195"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
-        <translation type="unfinished"></translation>
+        <translation>Piespiež OSD apzinīgu FT8 dekodēšanu (+2-3 dB uz robežsignāliem)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7176"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7202"/>
         <source>Turbo Feedback:</source>
-        <translation type="unfinished"></translation>
+        <translation>Turbo atgriezeniskā saite:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7181"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7207"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
-        <translation type="unfinished"></translation>
+        <translation>Turbo atgriezeniskā saite (paplašinātas LDPC iterācijas)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7195"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7221"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
-        <translation type="unfinished"></translation>
+        <translation>Paplašinātas LDPC iterācijas robežstāvokļa dekodēšanas atgūšanai</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7539"/>
@@ -16876,79 +17055,79 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7688"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7714"/>
         <source>Monitor (MON / STOP)</source>
-        <translation type="unfinished"></translation>
+        <translation>Monitors (MON / STOP)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7689"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
         <source>Setup (⚙)</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīšana (⚙)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7695"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7721"/>
         <source>Layout (window reset)</source>
-        <translation type="unfinished"></translation>
+        <translation>Izkārtojums (logu atiestatīšana)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7696"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
         <source>History (decode history)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vēsture (dekodēšanas vēsture)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7698"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7724"/>
         <source>Async FT2 (A)</source>
-        <translation type="unfinished"></translation>
+        <translation>Async FT2 (A)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7700"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
         <source>DX Cluster (toolbar)</source>
-        <translation type="unfinished"></translation>
+        <translation>DX Cluster (rīkjosla)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7701"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7727"/>
         <source>World Clock</source>
-        <translation type="unfinished"></translation>
+        <translation>Pasaules pulkstenis</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7705"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7731"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādiet vai slēpiet UI pogas pēc savas izvēles. Izmaiņas ir tūlītējas un tiek automātiski saglabātas.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7711"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7737"/>
         <source>TOP TOOLBAR</source>
-        <translation type="unfinished"></translation>
+        <translation>AUGŠĒJĀ RĪKJOSLA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7730"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7756"/>
         <source>TOOLBAR BUTTON ORDER</source>
-        <translation type="unfinished"></translation>
+        <translation>RĪKJOSLAS POGU SECĪBA</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7734"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7760"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
-        <translation type="unfinished"></translation>
+        <translation>Velciet augšējās rīkjoslas pogas (ilgs nospiediens), lai mainītu to secību. Izmantojiet zemāk esošo pogu, lai atjaunotu noklusējuma secību.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7752"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7778"/>
         <source>Restore default button order</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot noklusējuma pogu secību</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7782"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7808"/>
         <source>Restore default TX panel order</source>
-        <translation type="unfinished"></translation>
+        <translation>Atjaunot noklusējuma TX paneļa secību</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="1638"/>
@@ -17212,13 +17391,13 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7649"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7675"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wait &amp; Pounce klausās filtrētas CQ dekodēšanas, bet tas sāk atbildi tikai tad, kad operators jau ir uzvilcis TX/CQ.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7651"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7677"/>
         <source>W&amp;P Filters Only:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tikai W&amp;P filtri:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7659"/>
@@ -17524,43 +17703,43 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7579"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
         <source>EXCLUDE TERRITORY</source>
-        <translation type="unfinished"></translation>
+        <translation>IZSLĒGT TERITORIJU</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7582"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7608"/>
         <source>Europe:</source>
-        <translation type="unfinished"></translation>
+        <translation>Eiropa:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7590"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
         <source>Africa:</source>
-        <translation type="unfinished"></translation>
+        <translation>Āfrika:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7599"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7625"/>
         <source>Oceania:</source>
-        <translation type="unfinished"></translation>
+        <translation>Okeānija:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7607"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
         <source>Asia:</source>
-        <translation type="unfinished"></translation>
+        <translation>Āzija:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7616"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7642"/>
         <source>North America:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ziemeļamerika:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7624"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7650"/>
         <source>South America:</source>
-        <translation type="unfinished"></translation>
+        <translation>Dienvidamerika:</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SettingsDialog.qml" line="7634"/>
@@ -18859,7 +19038,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3537"/>
         <source>FT2: narrow reply decode (experimental):</source>
-        <translation type="unfinished"></translation>
+        <translation>FT2: šaura atbildes dekodēšana (eksperimentāla):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3558"/>
@@ -18868,7 +19047,11 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
 
 Default: OFF.</source>
-        <translation type="unfinished"></translation>
+        <translation>GAIDOT ATBILDI (AutoCQ vai aktīvs QSO), dekodē šauru logu ap jūsu RX frekvenci (±150 Hz), nevis visu joslu, ar pilnas joslas piegājienu ik pēc katra 4. cikla.
+
+Atbilde tiek dekodēta agrāk slotā (mazāk CPU uz mēģinājumu), tāpēc TX var reaģēt tajā pašā slotā, nevis nākamajā. Joslas aktivitāte joprojām tiek skenēta 1 ciklu no 4.
+
+Noklusējums: IZSL.</translation>
     </message>
 </context>
 <context>
@@ -18879,7 +19062,7 @@ Default: OFF.</source>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Material/SideBar.qml" line="67"/>
         <location filename="../dist-windows-x64/qml/QtQuick/Dialogs/quickimpl/qml/+Universal/SideBar.qml" line="68"/>
         <source>Add Favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Pievienot izlasei</translation>
     </message>
 </context>
 <context>
@@ -18888,7 +19071,7 @@ Default: OFF.</source>
         <location filename="../map65/soundin.cpp" line="370"/>
         <location filename="../qmap/soundin.cpp" line="157"/>
         <source>UDP Socket bind failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>UDP ligzdas piesaiste neizdevās.</translation>
     </message>
 </context>
 <context>
@@ -18920,32 +19103,32 @@ Default: OFF.</source>
     <message>
         <location filename="../Audio/soundin.cpp" line="275"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX ievades atvēršanas kļūda: Qt nevarēja atvērt atlasīto ievades ierīci. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="279"/>
         <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX ievades nolasīšanas kļūda: Qt ziņoja par I/O kļūmi paraugu nolasīšanas laikā. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="283"/>
         <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX ievades fatāla kļūda: atlasītā ievades ierīce pašlaik nav lietojama. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="289"/>
         <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX ievades nepietiekamība: tveršana atpalika, bet turpināsies. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="425"/>
         <source>Audio RX format unsupported: device=&quot;%1&quot; does not accept requested=%2; preferred=%3; selected-channel=%4</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX formāts neatbalstīts: ierīce=&quot;%1&quot; nepieņem pieprasīto=%2; vēlams=%3; atlasītais-kanāls=%4</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="466"/>
         <source>Audio RX sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX uztvērēja inicializācija neizdevās: ievades ierīce=&quot;%1&quot;, pieprasīts=%2, atlasītais-kanāls=%3</translation>
     </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="589"/>
@@ -18966,7 +19149,7 @@ Default: OFF.</source>
     <message>
         <location filename="../Audio/soundin.cpp" line="604"/>
         <source>Audio RX input stopped with error: device=&quot;%1&quot;, state=%2</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio RX ievade apstājās ar kļūdu: ierīce=&quot;%1&quot;, stāvoklis=%2</translation>
     </message>
     <message>
         <source>Interrupted</source>
@@ -19015,62 +19198,62 @@ Default: OFF.</source>
     <message>
         <location filename="../Audio/soundout.cpp" line="251"/>
         <source>Audio TX output open error: Qt could not open the selected output device. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades atvēršanas kļūda: Qt nevarēja atvērt atlasīto izvades ierīci. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="254"/>
         <source>Audio TX output write error: Qt reported an I/O failure while writing samples. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades rakstīšanas kļūda: Qt ziņoja par I/O kļūmi paraugu rakstīšanas laikā. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="258"/>
         <source>Audio TX output underrun: the audio sink fell behind but will continue. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades nepietiekamība: audio uztvērējs atpalika, bet turpināsies. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="262"/>
         <source>Audio TX output fatal error: the selected output device is not usable now. %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades fatāla kļūda: atlasītā izvades ierīce pašlaik nav lietojama. %1</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="355"/>
         <source>Audio TX format invalid: device=&quot;%1&quot;, requested=%2, preferred=%3</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX formāts nederīgs: ierīce=&quot;%1&quot;, pieprasīts=%2, vēlams=%3</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="362"/>
         <source>TX audio: device does not natively support %1 Hz / Int16 (preferred: %2 Hz / %3 ch) – relying on Qt/CoreAudio conversion</source>
-        <translation type="unfinished"></translation>
+        <translation>TX audio: ierīce natīvi neatbalsta %1 Hz / Int16 (vēlams: %2 Hz / %3 kan.) – paļaujas uz Qt/CoreAudio pārveidi</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="391"/>
         <source>Audio TX output device is not configured: select an output device in Settings &gt; Audio.</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades ierīce nav konfigurēta: atlasiet izvades ierīci sadaļā Iestatījumi &gt; Audio.</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="423"/>
         <source>Audio TX output start failed: Qt did not return a writable sink device. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades palaišana neizdevās: Qt neatgrieza rakstāmu uztvērēja ierīci. ierīce=&quot;%1&quot;, formāts=%2, stāvoklis=%3, qt-kļūda=%4</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="635"/>
         <source>Audio TX output write error: Qt rejected buffered audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades rakstīšanas kļūda: Qt noraidīja buferēto audio datus. ierīce=&quot;%1&quot;, formāts=%2, stāvoklis=%3, qt-kļūda=%4</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="687"/>
         <source>Audio TX source read error: generated TX audio source was closed before playback completed. device=&quot;%1&quot;, format=%2</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX avota nolasīšanas kļūda: ģenerētais TX audio avots tika aizvērts pirms atskaņošanas pabeigšanas. ierīce=&quot;%1&quot;, formāts=%2</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="696"/>
         <source>Audio TX source read error: Decodium could not read generated TX audio before writing it. device=&quot;%1&quot;, format=%2</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX avota nolasīšanas kļūda: Decodium nevarēja nolasīt ģenerēto TX audio pirms tā rakstīšanas. ierīce=&quot;%1&quot;, formāts=%2</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="716"/>
         <source>Audio TX output write error: Qt rejected generated TX audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvades rakstīšanas kļūda: Qt noraidīja ģenerēto TX audio datus. ierīce=&quot;%1&quot;, formāts=%2, stāvoklis=%3, qt-kļūda=%4</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="755"/>
@@ -19090,12 +19273,12 @@ Default: OFF.</source>
     <message>
         <location filename="../Audio/soundout.cpp" line="766"/>
         <source>TX output stopped while parked</source>
-        <translation type="unfinished"></translation>
+        <translation>TX izvade apstājās, kamēr bija novietota</translation>
     </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="771"/>
         <source>Audio TX output stopped with error: device=&quot;%1&quot;, state=%2</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio TX izvade apstājās ar kļūdu: ierīce=&quot;%1&quot;, stāvoklis=%2</translation>
     </message>
     <message>
         <source>Interrupted</source>
@@ -19117,19 +19300,19 @@ Default: OFF.</source>
         <location filename="../build/qml/decodium/components/SplashScreen.qml" line="192"/>
         <location filename="../qml/decodium/components/SplashScreen.qml" line="192"/>
         <source>Loading…</source>
-        <translation type="unfinished"></translation>
+        <translation>Ielādē…</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SplashScreen.qml" line="212"/>
         <location filename="../qml/decodium/components/SplashScreen.qml" line="212"/>
         <source>☕  Buy me a coffee</source>
-        <translation type="unfinished"></translation>
+        <translation>☕  Cieni mani ar kafiju</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/SplashScreen.qml" line="233"/>
         <location filename="../qml/decodium/components/SplashScreen.qml" line="233"/>
         <source>Start  ▶</source>
-        <translation type="unfinished"></translation>
+        <translation>Sākt  ▶</translation>
     </message>
 </context>
 <context>
@@ -19195,13 +19378,14 @@ Default: OFF.</source>
         <location filename="../qml/decodium/components/StatusBar.qml" line="469"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
-        <translation type="unfinished"></translation>
+        <translation>ALC mērītājs 0..100
+&gt;60 = pārmērīgs ALC (TX jauda pārāk augsta)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/StatusBar.qml" line="470"/>
         <location filename="../qml/decodium/components/StatusBar.qml" line="470"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
-        <translation type="unfinished"></translation>
+        <translation>Hamlib neziņo ALC šim radio/aizmugursistēmai</translation>
     </message>
 </context>
 <context>
@@ -19640,65 +19824,69 @@ Call CQ automatically until a reply is received</translation>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="269"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="269"/>
         <source>Potenza TX</source>
-        <translation type="unfinished"></translation>
+        <translation>TX jauda</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="794"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="794"/>
         <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vairākatbilžu režīms (MAM) - labais klikšķis atver logu (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="824"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="824"/>
         <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Dziļā meklēšana: dziļāka vāja signāla meklēšana, izmantojot zināmus izsaukumus (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="849"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="849"/>
         <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>A priori dekodēšana (AP): izmanto zināmu informāciju, lai atgūtu vājus signālus (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="874"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="874"/>
         <source>Automatic QSO sequencing (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Automātiska QSO secības veidošana (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="899"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="899"/>
         <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ātrais QSO: izlaiž TX1 un sāk no TX2 (tiešais ziņojums) (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="926"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="926"/>
         <source>Enable TX
 Right button + mouse wheel: adjust TX power</source>
-        <translation type="unfinished"></translation>
+        <translation>Iespējot TX
+Labā poga + peles ritenītis: pielāgot TX jaudu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="961"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="961"/>
         <source>Lock the TX frequency
 (Hold Tx Freq)</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloķēt TX frekvenci
+(Turēt Tx frekv.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="987"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="987"/>
         <source>Repeated Auto CQ
 Automatically calls CQ until a reply arrives (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Atkārtots Auto CQ
+Automātiski izsauc CQ, līdz pienāk atbilde (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1020"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1020"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktīvais izsaukums: %1 (mēģinājums %2/%3)
+Klikšķiniet, lai atvērtu paneli</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1023"/>
@@ -19706,91 +19894,93 @@ Click to open the panel</source>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with retry, timeout, and period control</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiešais izsaukums (CALL)
+Atver tiešā izsaukuma izsaukšanas paneli
+ar atkārtojumu, noildzes un perioda vadību</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1076"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1076"/>
         <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Auto CQ: maina TX/RX fāzes pēc atkārtotiem neatbildētiem CQ (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1102"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1102"/>
         <source>Stop TX</source>
-        <translation type="unfinished"></translation>
+        <translation>Apturēt TX</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1129"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1129"/>
         <source>Clear DX, reports, and TX1-TX5</source>
-        <translation type="unfinished"></translation>
+        <translation>Notīrīt DX, ziņojumus un TX1-TX5</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1154"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1154"/>
         <source>Tune (transmits the tuning carrier)</source>
-        <translation type="unfinished"></translation>
+        <translation>Noskaņot (pārraida noskaņošanas nesējsignālu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1189"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1189"/>
         <source>Filtro CQ attivo (%1). Click: cambia livello / spegne.</source>
-        <translation type="unfinished"></translation>
+        <translation>CQ filtrs aktīvs (%1). Klikšķis: maina līmeni / izslēdz.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1191"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1191"/>
         <source>Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.</source>
-        <translation type="unfinished"></translation>
+        <translation>CQ filtrs izslēgts. Klikšķis: rāda tikai CQ, tad cikliski 73 / RR73 / RRR.</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1223"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1223"/>
         <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
-        <translation type="unfinished"></translation>
+        <translation>Async FT2 režīms - sinusoīda: zaļš=RX, sarkans=TX (noklusēti IZSL.)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1238"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1238"/>
         <source>Hound mode active</source>
-        <translation type="unfinished"></translation>
+        <translation>Hound režīms aktīvs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1262"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1262"/>
         <source>Wait &amp; Pounce active</source>
-        <translation type="unfinished"></translation>
+        <translation>Wait &amp; Pounce aktīvs</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1787"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1787"/>
         <source>Cancel</source>
-        <translation type="unfinished">Cancel</translation>
+        <translation>Atcelt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1792"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1792"/>
         <source>Standard</source>
-        <translation type="unfinished"></translation>
+        <translation>Standarta</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1801"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1801"/>
         <source>Apply</source>
-        <translation type="unfinished">Apply</translation>
+        <translation>Lietot</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1856"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1856"/>
         <source>Conferma registrazione QSO</source>
-        <translation type="unfinished"></translation>
+        <translation>Apstiprināt QSO reģistrēšanu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1891"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1891"/>
         <source>Locatore (es. JN71) — inseribile a mano</source>
-        <translation type="unfinished"></translation>
+        <translation>Lokators (piem., JN71) — ievadāms manuāli</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1941"/>
@@ -19808,19 +19998,19 @@ with retry, timeout, and period control</source>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1966"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1966"/>
         <source>Spot al cluster</source>
-        <translation type="unfinished"></translation>
+        <translation>Spots uz klasteri</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="1966"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1966"/>
         <source>Cluster non connesso</source>
-        <translation type="unfinished"></translation>
+        <translation>Klasteris nav savienots</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="2141"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2141"/>
         <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
-        <translation type="unfinished"></translation>
+        <translation>TX%1 atspējots (labais klikšķis -&gt; izvēlne, lai atkārtoti iespējotu)</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="2142"/>
@@ -19828,25 +20018,27 @@ with retry, timeout, and period control</source>
         <source>Click: send now
 Right-click: menu (Edit / Skip TX%1)
 Long-press: edit message</source>
-        <translation type="unfinished"></translation>
+        <translation>Klikšķis: sūtīt tagad
+Labais klikšķis: izvēlne (Rediģēt / Izlaist TX%1)
+Ilgs nospiediens: rediģēt ziņojumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="2159"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2159"/>
         <source>Modifica messaggio TX%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Rediģēt TX%1 ziņojumu</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="2166"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2166"/>
         <source>Riabilita TX%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Atkārtoti iespējot TX%1</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/TxPanel.qml" line="2166"/>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2166"/>
         <source>Salta TX%1 (skip auto-seq)</source>
-        <translation type="unfinished"></translation>
+        <translation>Izlaist TX%1 (izlaist auto-seq)</translation>
     </message>
     <message>
         <source>Spot to cluster</source>
@@ -19874,53 +20066,53 @@ Long-press: edit message</source>
     <message>
         <location filename="../map65/txtune.ui" line="14"/>
         <source>Tx Tune</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx noskaņošana</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="54"/>
         <source>Tx Power:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tx jauda:</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="80"/>
         <source>Enable Tx I/Q Adjustment</source>
-        <translation type="unfinished"></translation>
+        <translation>Iespējot Tx I/Q pielāgošanu</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="96"/>
         <source>I/Q Amplitude:</source>
-        <translation type="unfinished"></translation>
+        <translation>I/Q amplitūda:</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="128"/>
         <location filename="../map65/txtune.ui" line="201"/>
         <source>Fine:</source>
-        <translation type="unfinished"></translation>
+        <translation>Smalki:</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="166"/>
         <source>I/Q Phase:</source>
-        <translation type="unfinished"></translation>
+        <translation>I/Q fāze:</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="230"/>
         <source>1.0000</source>
-        <translation type="unfinished"></translation>
+        <translation>1.0000</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="240"/>
         <source>0.000</source>
-        <translation type="unfinished"></translation>
+        <translation>0.000</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="250"/>
         <source>Tune</source>
-        <translation type="unfinished">Tune</translation>
+        <translation>Noskaņot</translation>
     </message>
     <message>
         <location filename="../map65/txtune.ui" line="257"/>
         <source>100 %</source>
-        <translation type="unfinished"></translation>
+        <translation>100 %</translation>
     </message>
 </context>
 <context>
@@ -19928,41 +20120,45 @@ Long-press: edit message</source>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="281"/>
         <source>Print the available network interfaces.</source>
-        <translation type="unfinished"></translation>
+        <translation>Drukāt pieejamās tīkla saskarnes.</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="286"/>
         <source>Where &lt;PORT&gt; is the UDP service port number to listen on.
 The default service port is 2237.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kur &lt;PORT&gt; ir UDP pakalpojuma porta numurs, kuru klausīties.
+Noklusējuma pakalpojuma ports ir 2237.</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="289"/>
         <source>PORT</source>
-        <translation type="unfinished"></translation>
+        <translation>PORT</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="294"/>
         <source>Where &lt;GROUP&gt; is the multicast group to join.
 The default is a unicast server listening on all interfaces.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kur &lt;GROUP&gt; ir multiraides grupa, kurai pievienoties.
+Noklusējums ir unikāstes serveris, kas klausās visās saskarnēs.</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="297"/>
         <source>GROUP</source>
-        <translation type="unfinished"></translation>
+        <translation>GROUP</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="301"/>
         <source>Where &lt;INTERFACE&gt; is the network interface name to join on.
 This option can be passed more than once to specify multiple network interfaces
 The default is use just the loop back interface.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kur &lt;INTERFACE&gt; ir tīkla saskarnes nosaukums, kurai pievienoties.
+Šo opciju var norādīt vairākas reizes, lai norādītu vairākas tīkla saskarnes
+Noklusējums ir izmantot tikai cilpas saskarni.</translation>
     </message>
     <message>
         <location filename="../UDPExamples/UDPDaemon.cpp" line="305"/>
         <source>INTERFACE</source>
-        <translation type="unfinished"></translation>
+        <translation>INTERFACE</translation>
     </message>
 </context>
 <context>
@@ -19970,7 +20166,7 @@ The default is use just the loop back interface.</source>
     <message>
         <location filename="../dist-windows-x64/qml/QtQuick/Controls/impl/UndoAction.qml" line="8"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Atsaukt</translation>
     </message>
 </context>
 <context>
@@ -19979,25 +20175,25 @@ The default is use just the loop back interface.</source>
         <location filename="../build/qml/decodium/components/Waterfall.qml" line="793"/>
         <location filename="../qml/decodium/components/Waterfall.qml" line="793"/>
         <source>Hide</source>
-        <translation type="unfinished"></translation>
+        <translation>Slēpt</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/Waterfall.qml" line="816"/>
         <location filename="../qml/decodium/components/Waterfall.qml" line="816"/>
         <source>Hide waterfall controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Slēpt ūdenskrituma vadīklas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/Waterfall.qml" line="1864"/>
         <location filename="../qml/decodium/components/Waterfall.qml" line="1864"/>
         <source>Mostra controlli</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt vadīklas</translation>
     </message>
     <message>
         <location filename="../build/qml/decodium/components/Waterfall.qml" line="1926"/>
         <location filename="../qml/decodium/components/Waterfall.qml" line="1926"/>
         <source>Show waterfall controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Rādīt ūdenskrituma vadīklas</translation>
     </message>
 </context>
 <context>
@@ -20014,69 +20210,70 @@ The default is use just the loop back interface.</source>
         <location filename="../map65/widegraph.ui" line="64"/>
         <source>Rx:  144.118.200
 Tx:  144.127.317</source>
-        <translation type="unfinished"></translation>
+        <translation>Rx:  144.118.200
+Tx:  144.127.317</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="111"/>
         <location filename="../map65/widegraph.ui" line="151"/>
         <location filename="../qmap/widegraph.ui" line="83"/>
         <source> kHz</source>
-        <translation type="unfinished"></translation>
+        <translation> kHz</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="114"/>
         <source>Offset </source>
-        <translation type="unfinished"></translation>
+        <translation>Nobīde </translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="154"/>
         <location filename="../qmap/widegraph.ui" line="86"/>
         <source>Span </source>
-        <translation type="unfinished"></translation>
+        <translation>Diapazons </translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="216"/>
         <location filename="../qmap/widegraph.ui" line="180"/>
         <source>Gain </source>
-        <translation type="unfinished"></translation>
+        <translation>Pastiprin. </translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="241"/>
         <location filename="../qmap/widegraph.ui" line="221"/>
         <source>Zero </source>
-        <translation type="unfinished"></translation>
+        <translation>Nulle </translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="254"/>
         <location filename="../qmap/widegraph.ui" line="250"/>
         <source>Auto Zero</source>
-        <translation type="unfinished"></translation>
+        <translation>Auto nulle</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="261"/>
         <location filename="../qmap/widegraph.ui" line="273"/>
         <source>2D Spectrum</source>
-        <translation type="unfinished"></translation>
+        <translation>2D spektrs</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="281"/>
         <source>Lock Tx=Rx Freq</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloķēt Tx=Rx frekv.</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="288"/>
         <source>Force Center Freq (MHz)</source>
-        <translation type="unfinished"></translation>
+        <translation>Piespiest centra frekv. (MHz)</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="310"/>
         <source>1296.065</source>
-        <translation type="unfinished"></translation>
+        <translation>1296.065</translation>
     </message>
     <message>
         <location filename="../map65/widegraph.ui" line="320"/>
         <source>Set Rx Freq</source>
-        <translation type="unfinished"></translation>
+        <translation>Iestatīt Rx frekv.</translation>
     </message>
     <message>
         <location filename="../widgets/widegraph.ui" line="525"/>
@@ -20355,7 +20552,7 @@ Tx:  144.127.317</source>
     <message>
         <location filename="../qmap/widegraph.ui" line="296"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Center freq:   1296.065.000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Centra frekv.:   1296.065.000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -20731,7 +20928,7 @@ quiet period when decoding is done.</translation>
         <location filename="../Configuration.ui" line="20"/>
         <location filename="../build/ui_Configuration.h" line="3508"/>
         <source>Decodium Setup</source>
-        <translation type="unfinished"></translation>
+        <translation>Decodium iestatīšana</translation>
     </message>
     <message>
         <location filename="../Configuration.ui" line="186"/>
@@ -23470,123 +23667,123 @@ Right click for insert and delete options.</translation>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="259"/>
         <source>List the available audio input devices</source>
-        <translation type="unfinished"></translation>
+        <translation>Uzskaitīt pieejamās audio ievades ierīces</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="261"/>
         <source>List the available audio output devices</source>
-        <translation type="unfinished"></translation>
+        <translation>Uzskaitīt pieejamās audio izvades ierīces</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="263"/>
         <source>Record from &lt;start-time&gt; seconds, default start immediately</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierakstīt no &lt;start-time&gt; sekundēm, pēc noklusējuma sākt nekavējoties</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="264"/>
         <source>start-time</source>
-        <translation type="unfinished"></translation>
+        <translation>sākuma-laiks</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="266"/>
         <source>Recording &lt;duration&gt; seconds</source>
-        <translation type="unfinished"></translation>
+        <translation>Ieraksta &lt;duration&gt; sekundes</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="267"/>
         <source>duration</source>
-        <translation type="unfinished"></translation>
+        <translation>ilgums</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="269"/>
         <source>Save output as &lt;output-file&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Saglabāt izvadi kā &lt;output-file&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="270"/>
         <source>output-file</source>
-        <translation type="unfinished"></translation>
+        <translation>izvades-fails</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="272"/>
         <source>Playback &lt;input-file&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Atskaņot &lt;input-file&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="273"/>
         <source>input-file</source>
-        <translation type="unfinished"></translation>
+        <translation>ievades-fails</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="275"/>
         <source>Overwrite existing file</source>
-        <translation type="unfinished"></translation>
+        <translation>Pārrakstīt esošo failu</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="277"/>
         <source>Record at &lt;sample-rate&gt;, default 48000 Hz</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierakstīt ar &lt;sample-rate&gt;, pēc noklusējuma 48000 Hz</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="278"/>
         <source>sample-rate</source>
-        <translation type="unfinished"></translation>
+        <translation>iztveršanas-frekvence</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="280"/>
         <source>Record &lt;num&gt; channels, default 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierakstīt &lt;num&gt; kanālus, pēc noklusējuma 2</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="281"/>
         <source>num</source>
-        <translation type="unfinished"></translation>
+        <translation>skaits</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="283"/>
         <source>Record from &lt;device-number&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Ierakstīt no &lt;device-number&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="284"/>
         <location filename="../Audio/tools/record_time_signal.cpp" line="287"/>
         <source>device-number</source>
-        <translation type="unfinished"></translation>
+        <translation>ierīces-numurs</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="286"/>
         <source>Playback to &lt;device-number&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Atskaņot uz &lt;device-number&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="289"/>
         <source>Playback &lt;category-name&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Atskaņot &lt;category-name&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="290"/>
         <source>category-name</source>
-        <translation type="unfinished"></translation>
+        <translation>kategorijas-nosaukums</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="292"/>
         <source>use notify signals every &lt;interval&gt; milliseconds, zero to use a timer</source>
-        <translation type="unfinished"></translation>
+        <translation>izmantot paziņojuma signālus ik pēc &lt;interval&gt; milisekundēm, nulle, lai izmantotu taimeri</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="293"/>
         <source>interval</source>
-        <translation type="unfinished"></translation>
+        <translation>intervāls</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="295"/>
         <source>audio buffer size &lt;frames&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>audio bufera izmērs &lt;frames&gt;</translation>
     </message>
     <message>
         <location filename="../Audio/tools/record_time_signal.cpp" line="296"/>
         <source>frames</source>
-        <translation type="unfinished"></translation>
+        <translation>kadri</translation>
     </message>
 </context>
 <context>
