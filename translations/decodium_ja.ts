@@ -14857,6 +14857,56 @@ Right click for insert and delete options.</source>
             <source>↻  Refresh</source>
             <translation>↻  更新</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>準備済みプロファイル</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>バランス (通常QSO) - デフォルト</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>弱信号 / DXハント</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>バランスと同様ですが: caller retries 7 · adaptive decode OFF (最大感度) · AP cache rescue ON (一部の誤検出を許容) · skip end-slot OFF (遅いデコードを失わない)。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>コンテスト / 高密度</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>close strong partners ON · skip end-slot ON (最小レイテンシ) · MAM multi-stream ON (2 streams, 実験的) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU制限 (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · その他はデフォルト。Watchdogは変更なし。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● アクティブ</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -15035,6 +15085,36 @@ Right click for insert and delete options.</source>
     <message>
         <source>Alert on My Call</source>
         <translation>自局コールでアラート</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>バランス</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>弱信号 / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>コンテスト</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU制限</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>プロファイル...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>準備済みプロファイル: FT2/デコードの切替をまとめて適用します。詳細は Setup -&gt; TX。</translation>
     </message>
 </context>
 <context>

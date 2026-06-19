@@ -14880,6 +14880,56 @@ Højre klik for at indsætte eller slette elementer.</translation>
             <source>↻  Refresh</source>
             <translation>↻  Opdater</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>KLARPROFILER</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Balanceret (daglig QSO) - standard</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Konservativ ON · fuld dekodning AutoCQ ON · luk stærke partnere ON · adaptiv dekodning ON · AP-cache-redning ON · spring slot-slut over OFF · MAM OFF · partnerhukommelse ON · TX2 gensend ON · jævnt flow ON · opkalderforsøg 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Svagt signal / DX-jagt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Som Balanceret, men: opkalderforsøg 7 · adaptiv dekodning OFF (maksimal følsomhed) · AP-cache-redning ON (accepterer nogle falske positive) · spring slot-slut over OFF (mister ikke sene dekodninger).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>Contest / høj tæthed</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>luk stærke partnere ON · spring slot-slut over ON (minimal latenstid) · MAM multi-stream ON (2 streams, eksperimentel) · fuld dekodning AutoCQ ON · opkalderforsøg 3 · partnerhukommelse ON · konservativ OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU-begrænset (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptiv dekodning ON · MAM OFF · fuld dekodning AutoCQ OFF · jævnt flow ON · resten som standard. Watchdogs uændret.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● aktiv</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -15058,6 +15108,36 @@ Højre klik for at indsætte eller slette elementer.</translation>
     <message>
         <source>Alert on My Call</source>
         <translation>Alarm ved mit kaldesignal</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Balanceret</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Svagt signal / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Contest</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU-begrænset</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>Profiler...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Klarprofiler: anvender FT2/dekode-tilvalg samlet. Detaljer i Setup -&gt; TX.</translation>
     </message>
 </context>
 <context>

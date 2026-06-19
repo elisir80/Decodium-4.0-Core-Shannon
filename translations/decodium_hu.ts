@@ -13506,6 +13506,56 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
             <source>↻  Refresh</source>
             <translation>↻  Frissítés</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>KÉSZ PROFILOK</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Kiegyensúlyozott (napi QSO) - alapértelmezett</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Konzervatív ON · teljes dekódolás AutoCQ ON · erős partnerek zárása ON · adaptív dekódolás ON · AP gyorsítótár-mentés ON · slot vége kihagyása OFF · MAM OFF · partner memória ON · TX2 újraküldés ON · sima folyamat ON · hívó újrapróbálkozás 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Gyenge jel / DX-vadászat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Mint a Kiegyensúlyozott, de: hívó újrapróbálkozás 7 · adaptív dekódolás OFF (maximális érzékenység) · AP gyorsítótár-mentés ON (néhány téves pozitívat elfogad) · slot vége kihagyása OFF (ne vesszenek el a késői dekódolások).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>Verseny / nagy sűrűség</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>erős partnerek zárása ON · slot vége kihagyása ON (minimális késleltetés) · MAM multi-stream ON (2 stream, kísérleti) · teljes dekódolás AutoCQ ON · hívó újrapróbálkozás 3 · partner memória ON · konzervatív OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU-korlátos (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptív dekódolás ON · MAM OFF · teljes dekódolás AutoCQ OFF · sima folyamat ON · a többi alapértéken marad. Watchdogok változatlanok.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● aktív</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -13684,6 +13734,36 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
     <message>
         <source>Alert on My Call</source>
         <translation>Riasztás saját hívójelre</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Kiegyensúlyozott</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Gyenge jel / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Verseny</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU-korlátos</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>Profilok...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Kész profilok: csoportosan alkalmazzák az FT2/dekódolási kapcsolókat. Részletek: Setup -&gt; TX.</translation>
     </message>
 </context>
 <context>

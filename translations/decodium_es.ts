@@ -4478,6 +4478,36 @@ Las coordenadas guardadas se borrarán.</translation>
         <source>Alert on My Call</source>
         <translation>Alerta en mi indicativo</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Equilibrado</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Señal débil / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Concurso</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU limitada</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>Perfiles...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Perfiles listos: aplican en bloque los ajustes FT2/decode. Detalles en Setup -&gt; TX.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -14658,6 +14688,56 @@ Cuesta CPU extra durante los QSO. Por defecto: OFF.</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2435"/>
         <source>↻  Refresh</source>
         <translation>↻  Actualizar</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>PERFILES LISTOS</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Equilibrado (QSO diario) - predeterminado</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservador ON · decodificación completa AutoCQ ON · cerrar partners fuertes ON · decodificación adaptativa ON · rescate de caché AP ON · saltar fin de slot OFF · MAM OFF · memoria de partner ON · reenvío TX2 ON · flujo suave ON · reintentos del llamador 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Señal débil / caza DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Como Equilibrado, pero: reintentos del llamador 7 · decodificación adaptativa OFF (máxima sensibilidad) · rescate de caché AP ON (acepta algunos falsos positivos) · saltar fin de slot OFF (no perder decodificaciones tardías).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>Concurso / alta densidad</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>cerrar partners fuertes ON · saltar fin de slot ON (latencia mínima) · MAM multi-stream ON (2 streams, experimental) · decodificación completa AutoCQ ON · reintentos del llamador 3 · memoria de partner ON · conservador OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU limitada (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>decodificación adaptativa ON · MAM OFF · decodificación completa AutoCQ OFF · flujo suave ON · resto en valores predeterminados. Watchdogs sin cambios.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● activo</translation>
     </message>
 </context>
 <context>

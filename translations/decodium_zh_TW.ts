@@ -14707,6 +14707,56 @@ Right click for insert and delete options.</source>
             <source>↻  Refresh</source>
             <translation>↻  重新整理</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>預設設定檔</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>均衡（日常 QSO）- 預設</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>保守模式 ON · AutoCQ 完整解碼 ON · 關閉強訊號夥伴 ON · 自適應解碼 ON · AP 快取救援 ON · 跳過時槽末端 OFF · MAM OFF · 夥伴記憶 ON · TX2 重送 ON · 平順流程 ON · 呼叫方重試 5。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>弱訊號 / DX 搜尋</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>類似均衡，但：呼叫方重試 7 · 自適應解碼 OFF（最高靈敏度）· AP 快取救援 ON（接受少量誤報）· 跳過時槽末端 OFF（不遺失較晚解碼）。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>競賽 / 高密度</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>關閉強訊號夥伴 ON · 跳過時槽末端 ON（最低延遲）· MAM 多串流 ON（2 串流，實驗性）· AutoCQ 完整解碼 ON · 呼叫方重試 3 · 夥伴記憶 ON · 保守模式 OFF。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU受限（Decodium Console / mini PC）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>自適應解碼 ON · MAM OFF · AutoCQ 完整解碼 OFF · 平順流程 ON · 其餘維持預設。Watchdog 不變。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● 啟用</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -14885,6 +14935,36 @@ Right click for insert and delete options.</source>
     <message>
         <source>Alert on My Call</source>
         <translation>我的呼號警示</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>均衡</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>弱訊號 / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>競賽</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU受限</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>設定檔...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>預設設定檔：批次套用 FT2/decode 開關。詳情在 Setup -&gt; TX。</translation>
     </message>
 </context>
 <context>

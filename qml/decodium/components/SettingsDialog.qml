@@ -2989,10 +2989,10 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
 
-                        // ── Profili pronti (1.0.384) ──
-                        // Applicano in blocco un set coerente di toggle FT2/decode.
+                        // ── Ready profiles (1.0.384) ──
+                        // Apply a coherent set of FT2/decode toggles as a group.
                         // Selettore rapido equivalente anche in toolbar (accanto a Setup).
-                        Text { text: qsTr("PROFILI PRONTI"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Text { text: qsTr("READY PROFILES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
                         Item {
                             Layout.columnSpan: 4
@@ -3004,14 +3004,14 @@ Dialog {
                                 spacing: 8
                                 Repeater {
                                     model: [
-                                        { pid: "balanced", name: qsTr("Bilanciato (QSO quotidiano) — default"),
-                                          desc: qsTr("Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.") },
-                                        { pid: "weak", name: qsTr("Weak-signal / caccia DX"),
-                                          desc: qsTr("Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).") },
-                                        { pid: "contest", name: qsTr("Contest / alta densità"),
-                                          desc: qsTr("close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.") },
+                                        { pid: "balanced", name: qsTr("Balanced (daily QSO) - default"),
+                                          desc: qsTr("Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.") },
+                                        { pid: "weak", name: qsTr("Weak-signal / DX hunting"),
+                                          desc: qsTr("Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).") },
+                                        { pid: "contest", name: qsTr("Contest / high density"),
+                                          desc: qsTr("close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.") },
                                         { pid: "cpu", name: qsTr("CPU-limited (Decodium Console / mini PC)"),
-                                          desc: qsTr("adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.") }
+                                          desc: qsTr("adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.") }
                                     ]
                                     delegate: Rectangle {
                                         id: profileEntry
@@ -3034,7 +3034,7 @@ Dialog {
                                                 Layout.fillWidth: true
                                                 spacing: 6
                                                 Text { text: modelData.name; color: textPrimary; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                                                Text { text: qsTr("● attivo"); color: primaryBlue; font.pixelSize: 11; font.bold: true; visible: profileEntry.isActive }
+                                                Text { text: qsTr("● active"); color: primaryBlue; font.pixelSize: 11; font.bold: true; visible: profileEntry.isActive }
                                             }
                                             Text { text: modelData.desc; color: textSecondary; font.pixelSize: 11; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                                         }
@@ -4393,26 +4393,36 @@ Dialog {
                         }
 
                         Text { text: qsTr("US State:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-                        CheckBox {
-                            checked: bridge.showUsState
-                            onCheckedChanged: bridge.showUsState = checked
-                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                            contentItem: Text { text: ""; leftPadding: 24 }
-                        }
-                        Text {
-                            text: bridge.usStateDataUpdating ? qsTr("Updating...")
-                                  : (bridge.usStateDataReady ? qsTr("%1 calls").arg(bridge.usStateGridCount)
-                                                             : qsTr("Not loaded"))
-                            color: bridge.usStateDataReady ? accentGreen : textSecondary
-                            font.pixelSize: 11
-                            verticalAlignment: Text.AlignVCenter
+                        RowLayout {
                             Layout.fillWidth: true
-                        }
-                        Button {
-                            text: qsTr("Update")
-                            enabled: bridge.showUsState && !bridge.usStateDataUpdating
-                            implicitHeight: controlHeight
-                            onClicked: bridge.updateUsStateData()
+                            Layout.preferredHeight: controlHeight
+                            spacing: 8
+                            CheckBox {
+                                checked: bridge.showUsState
+                                onCheckedChanged: bridge.showUsState = checked
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: controlHeight
+                                indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                contentItem: Text { text: ""; leftPadding: 24 }
+                            }
+                            Text {
+                                text: bridge.usStateDataUpdating ? qsTr("Updating...")
+                                      : (bridge.usStateDataReady ? qsTr("%1 calls").arg(bridge.usStateGridCount)
+                                                                 : qsTr("Not loaded"))
+                                color: bridge.usStateDataReady ? accentGreen : textSecondary
+                                font.pixelSize: 11
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: controlHeight
+                            }
+                            Button {
+                                text: qsTr("Update")
+                                enabled: bridge.showUsState && !bridge.usStateDataUpdating
+                                implicitHeight: controlHeight
+                                Layout.preferredWidth: 90
+                                onClicked: bridge.updateUsStateData()
+                            }
                         }
 
                         Text { text: qsTr("TX Msg to RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
@@ -6938,6 +6948,52 @@ Dialog {
                                 }
                             }
                         }
+
+                        // ── Aggiornamenti dati ──
+                        Text { text: qsTr("DATA UPDATES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Text { text: qsTr("LotW Users:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: 120; Layout.preferredHeight: controlHeight }
+                        Text {
+                            text: bridge.lotwUpdating ? qsTr("Updating...")
+                                  : (bridge.lotwUserCount > 0 ? qsTr("%1 users").arg(bridge.lotwUserCount)
+                                                              : qsTr("Not loaded"))
+                            color: bridge.lotwUserCount > 0 ? accentGreen : textSecondary
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: controlHeight
+                        }
+                        Button {
+                            text: qsTr("Force Update")
+                            enabled: !bridge.lotwUpdating
+                            implicitHeight: controlHeight
+                            Layout.preferredWidth: 132
+                            onClicked: bridge.forceUpdateLotwUsers()
+                        }
+                        Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }
+
+                        Text { text: qsTr("US States:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: 120; Layout.preferredHeight: controlHeight }
+                        Text {
+                            text: bridge.usStateDataUpdating ? qsTr("Updating...")
+                                  : (bridge.usStateDataReady ? qsTr("%1 calls, %2 locators").arg(bridge.usStateGridCount).arg(bridge.usStateLocatorCount)
+                                                             : qsTr("Not loaded"))
+                            color: bridge.usStateDataReady ? accentGreen : textSecondary
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: controlHeight
+                        }
+                        Button {
+                            text: qsTr("Force Update")
+                            enabled: !bridge.usStateDataUpdating
+                            implicitHeight: controlHeight
+                            Layout.preferredWidth: 132
+                            onClicked: bridge.updateUsStateData()
+                        }
+                        Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }
 
                         // ── Comportamento ──
                         Text { text: qsTr("BEHAVIOR"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }

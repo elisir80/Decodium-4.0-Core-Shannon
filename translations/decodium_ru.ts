@@ -14300,6 +14300,56 @@ Right click for insert and delete options.</source>
             <source>↻  Refresh</source>
             <translation>↻  Обновить</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>ГОТОВЫЕ ПРОФИЛИ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Сбалансированный (обычные QSO) - по умолчанию</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Консервативный ON · полное декодирование AutoCQ ON · закрывать сильных партнёров ON · адаптивное декодирование ON · восстановление AP-кэша ON · пропуск конца слота OFF · MAM OFF · память партнёра ON · повтор TX2 ON · плавный поток ON · повторов вызывающего 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Слабый сигнал / охота DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Как Сбалансированный, но: повторов вызывающего 7 · адаптивное декодирование OFF (максимальная чувствительность) · восстановление AP-кэша ON (допускает некоторые ложные срабатывания) · пропуск конца слота OFF (не терять поздние декоды).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>Контест / высокая плотность</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>закрывать сильных партнёров ON · пропуск конца слота ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · полное декодирование AutoCQ ON · повторов вызывающего 3 · память партнёра ON · консервативный OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>Ограничение CPU (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>адаптивное декодирование ON · MAM OFF · полное декодирование AutoCQ OFF · плавный поток ON · остальное по умолчанию. Watchdog без изменений.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● активно</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -14478,6 +14528,36 @@ Right click for insert and delete options.</source>
     <message>
         <source>Alert on My Call</source>
         <translation>Оповещение на мой позывной</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Сбалансированный</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Слабый сигнал / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Контест</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>Ограничение CPU</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>Профили...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Готовые профили: применяют настройки FT2/decode одним набором. Подробности: Setup -&gt; TX.</translation>
     </message>
 </context>
 <context>

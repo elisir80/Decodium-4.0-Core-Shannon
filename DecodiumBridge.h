@@ -294,6 +294,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int  workedCount  READ workedCount  NOTIFY workedCountChanged)
     Q_PROPERTY(bool lotwEnabled  READ lotwEnabled  WRITE setLotwEnabled  NOTIFY lotwEnabledChanged)
     Q_PROPERTY(bool lotwUpdating READ lotwUpdating NOTIFY lotwUpdatingChanged)
+    Q_PROPERTY(int lotwUserCount READ lotwUserCount NOTIFY lotwUsersChanged)
     Q_PROPERTY(bool showUsState READ showUsState WRITE setShowUsState NOTIFY showUsStateChanged)
     Q_PROPERTY(bool usStateDataReady READ usStateDataReady NOTIFY usStateDataChanged)
     Q_PROPERTY(bool usStateDataUpdating READ usStateDataUpdating NOTIFY usStateDataChanged)
@@ -1285,10 +1286,12 @@ public:
 
     // LotW lite
     bool lotwEnabled()  const { return m_lotwEnabled; }
-    void setLotwEnabled(bool v) { if (m_lotwEnabled!=v){m_lotwEnabled=v;emit lotwEnabledChanged();} }
+    void setLotwEnabled(bool v);
     bool lotwUpdating() const { return m_lotwUpdating; }
+    int lotwUserCount() const { return m_lotwUsers.size(); }
     Q_INVOKABLE bool isLotwUser(const QString& call) const;
     Q_INVOKABLE void updateLotwUsers();
+    Q_INVOKABLE void forceUpdateLotwUsers();
     bool showUsState() const { return m_showUsState; }
     void setShowUsState(bool v);
     bool usStateDataReady() const;
@@ -1588,6 +1591,7 @@ signals:
     void workedCountChanged();
     void lotwEnabledChanged();
     void lotwUpdatingChanged();
+    void lotwUsersChanged();
     void showUsStateChanged();
     void usStateDataChanged();
     void cloudlogEnabledChanged();
@@ -2861,6 +2865,7 @@ private:
     QString extractDecodedCallsign(const QString& msg, bool isCQ) const;
     QString extractDecodedGrid(const QString& msg) const;
     QString lookupUsStateForDecode(const QString& call, const QString& gridHint) const;
+    void reloadLotwUsers(bool forceDownload);
     void enrichDecodeEntry(QVariantMap& entry) const;
     // 1.0.142: throttle helper per decodeListChanged. Vedi commento timer.
     void emitDecodeListChangedThrottled();

@@ -14300,6 +14300,56 @@ Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</tr
             <source>↻  Refresh</source>
             <translation>↻  Actualitza</translation>
         </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>PERFILS PREPARATS</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Equilibrat (QSO diari) - predeterminat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservador ON · descodificació completa AutoCQ ON · partners forts propers ON · descodificació adaptativa ON · rescat de memòria cau AP ON · saltar final de slot OFF · MAM OFF · memòria de partner ON · reenviament TX2 ON · flux suau ON · reintents del caller 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Senyal feble / caça DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Com Equilibrat, però: reintents del caller 7 · descodificació adaptativa OFF (sensibilitat màxima) · rescat de memòria cau AP ON (accepta alguns falsos positius) · saltar final de slot OFF (no perdre descodificacions tardanes).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>Contest / high density</source>
+        <translation>Concurs / alta densitat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>partners forts propers ON · saltar final de slot ON (latència mínima) · MAM multi-stream ON (2 fluxos, experimental) · descodificació completa AutoCQ ON · reintents del caller 3 · memòria de partner ON · conservador OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU limitada (Decodium Console / mini PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>descodificació adaptativa ON · MAM OFF · descodificació completa AutoCQ OFF · flux suau ON · resta als valors predeterminats. Watchdogs sense canvis.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>● active</source>
+        <translation>● actiu</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -14478,6 +14528,36 @@ Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</tr
     <message>
         <source>Alert on My Call</source>
         <translation>Alerta en el meu indicatiu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Equilibrat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Senyal feble / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Concurs</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU limitada</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Profiles...</source>
+        <translation>Perfils...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Perfils preparats: apliquen en bloc els commutadors FT2/decode. Detalls a Setup -&gt; TX.</translation>
     </message>
 </context>
 <context>

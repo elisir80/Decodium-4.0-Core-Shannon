@@ -39,12 +39,14 @@ public:
 
   void decode (DecodeRequest const& request);
   void markLatestDecodeSerial (quint64 serial);
+  void beginShutdown ();
 
 Q_SIGNALS:
   void decodeReady (quint64 serial, QStringList rows);
 
 private:
   std::atomic<quint64> m_latestDecodeSerial {0};
+  std::atomic<bool> m_shuttingDown {false};
 };
 
 }

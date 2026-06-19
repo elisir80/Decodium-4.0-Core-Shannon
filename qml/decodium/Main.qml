@@ -4370,13 +4370,13 @@ ApplicationWindow {
                             anchors.margins: 2
                             font.pixelSize: 10
                             readonly property var ids: ["balanced", "weak", "contest", "cpu"]
-                            model: [qsTr("Bilanciato"), qsTr("Weak-signal / DX"), qsTr("Contest"), qsTr("CPU-limited")]
-                            displayText: currentIndex < 0 ? qsTr("Profili…") : model[currentIndex]
+                            model: [qsTr("Balanced"), qsTr("Weak-signal / DX"), qsTr("Contest"), qsTr("CPU-limited")]
+                            displayText: currentIndex < 0 ? qsTr("Profiles...") : model[currentIndex]
                             Component.onCompleted: currentIndex = bridge ? ids.indexOf(bridge.activeReadyProfile) : -1
                             onActivated: if (bridge && currentIndex >= 0) bridge.applyReadyProfile(ids[currentIndex])
                             ToolTip.visible: hovered
                             ToolTip.delay: 500
-                            ToolTip.text: qsTr("Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.")
+                            ToolTip.text: qsTr("Ready profiles - apply FT2/decode toggles as a group. Details in Setup -> TX.")
                             Connections {
                                 target: bridge
                                 function onActiveReadyProfileChanged() {
