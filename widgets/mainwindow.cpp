@@ -32273,11 +32273,25 @@ void MainWindow::onRemoteSendCw(QString const& commandId, QString const& text, q
   Q_UNUSED(commandId);
   // CW via AUDIO: la radio resta in USB/DATA-U (come per FT8) e Decodium genera
   // il tono Morse manipolato e lo trasmette dalla scheda audio. Non dipende dal
-  // keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991A) non
+  // keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991/991A) non
   // funziona in modalità dati. La frequenza richiesta è quella su cui deve
   // comparire il segnale CW: il dial viene posto a (freq - sidetone) così che
   // dial + tono = freq esatta.
-  startCwAudioTx(text, dialFrequencyHz, wpm);
+  //
+  // Il path TX reale appartiene al DecodiumBridge (PTT + audio sink). Deleghiamo
+  // a lui; fallback al percorso mainwindow legacy se il bridge non c'è.
+  QObject* bridge = qApp ? qApp->property("decodiumBridge").value<QObject*>() : nullptr;
+  if (bridge)
+    {
+      QMetaObject::invokeMethod(bridge, "sendCwAudio", Qt::QueuedConnection,
+                                Q_ARG(QString, text),
+                                Q_ARG(qint64, dialFrequencyHz),
+                                Q_ARG(int, wpm));
+    }
+  else
+    {
+      startCwAudioTx(text, dialFrequencyHz, wpm);
+    }
   showStatusMessage(tr("Remote CW (audio): %1 (%2 WPM)").arg(text).arg(wpm));
 }
 

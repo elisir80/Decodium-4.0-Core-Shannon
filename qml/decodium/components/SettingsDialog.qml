@@ -2474,6 +2474,19 @@ Dialog {
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
 
+                        // Soglia SWR oltre la quale il TX viene bloccato/interrotto (protezione PA).
+                        // Configurabile: utile per il CW e per antenne con SWR moderato. Default 2.5.
+                        Text { text: qsTr("SWR max:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        DecoComboBox {
+                            enabled: settingsDialog.supportsSwrTelemetry()
+                            model: ["2.0","2.5","3.0","3.5","4.0"]
+                            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+                            currentIndex: Math.max(0, model.indexOf(Number(bridge.getSetting("SWRStopThreshold", 2.5)).toFixed(1)))
+                            onActivated: bridge.setSetting("SWRStopThreshold", Number(currentText))
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: parent.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                        }
+
                         Text { text: ""; Layout.preferredWidth: 100 }
                         RowLayout {
                             Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 10

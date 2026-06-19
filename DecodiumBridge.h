@@ -973,6 +973,11 @@ public slots:
     Q_INVOKABLE void stopTx();
     Q_INVOKABLE void triggerManualTx() { startTx(); }  // PTT manuale FT2
     Q_INVOKABLE void sendTx(int n);    // usato da TxPanel: seleziona messaggio n e trasmette
+    // CW via AUDIO: manipola un sidetone e lo trasmette come audio TX in USB/DATA-U,
+    // riusando l'intero percorso TX del bridge (PTT, audio sink, stop). Indipendente
+    // dal keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991/991A) non
+    // funziona in modalita' dati. dialFrequencyHz=0 lascia il VFO dov'e'.
+    Q_INVOKABLE void sendCwAudio(const QString& text, qint64 dialFrequencyHz, int wpm);
     // Click su uno spot DX cluster nel waterfall: setta dxCall, txFrequency
     // sull'audio offset dello spot, abilita TX e avvia la sequenza QSO.
     Q_INVOKABLE void engageDxClusterSpot(const QString& call, int audioFreqHz);
@@ -2502,6 +2507,12 @@ private:
     QString m_autoSeqRogerReportBase;
     int     m_activeTxNumber {0};
     QString m_activeTxMessage;
+    // Stato CW-audio (vedi sendCwAudio). m_cwTxActive devia i punti FT-specifici
+    // di startTx/ensureTxAudioPrepared/completeTxPlayback verso il percorso CW.
+    bool    m_cwTxActive {false};
+    QString m_pendingCwText;
+    int     m_cwWpm {20};
+    int     m_cwSidetoneHz {700};
     QDateTime m_lastTxActivityUtc;
     QDateTime m_qsoStartedOn;
     bool    m_logAfterOwn73 {false};

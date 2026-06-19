@@ -7823,6 +7823,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                         bridgeLog(QStringLiteral("Remote command %1: set_band %2").arg(commandId, band));
                         applyRemoteBandChange(band);
                     }, Qt::QueuedConnection);
+                    connect(m_remoteServer, &RemoteCommandServer::sendCwRequested, this, [this](const QString& commandId, const QString& text, qint64 dialFrequencyHz, int wpm) {
+                        bridgeLog(QStringLiteral("Remote command %1: send_cw [%2] dial=%3 wpm=%4")
+                                      .arg(commandId, text).arg(dialFrequencyHz).arg(wpm));
+                        sendCwAudio(text, dialFrequencyHz, wpm);
+                    }, Qt::QueuedConnection);
                     connect(m_remoteServer, &RemoteCommandServer::setDialFrequencyRequested, this, [this](const QString& commandId, qint64 hz) {
                         bridgeLog(QStringLiteral("Remote command %1: set_dial_frequency %2 Hz").arg(commandId, QString::number(hz)));
                         applyRemoteDialFrequency(static_cast<double>(hz), QStringLiteral("remote-command"));
@@ -14185,7 +14190,9 @@ bool DecodiumBridge::checkSwrAllowsTransmission(const QString& reason)
         return true;
     }
 
-    constexpr double kSWRStopThreshold = 2.5;
+    // Soglia SWR configurabile (default 2.5), clamp di sicurezza 1.5..5.0.
+    double const kSWRStopThreshold =
+        qBound(1.5, getSetting(QStringLiteral("SWRStopThreshold"), 2.5).toDouble(), 5.0);
     if (m_rigSwr <= kSWRStopThreshold) {
         return true;
     }
@@ -14194,8 +14201,10 @@ bool DecodiumBridge::checkSwrAllowsTransmission(const QString& reason)
                   .arg(reason)
                   .arg(m_rigSwr, 0, 'f', 2)
                   .arg(kSWRStopThreshold, 0, 'f', 1));
-    emit errorMessage(QStringLiteral("SWR > 2.5 !!!\n\nTrasmissione bloccata\n\nControlla antenna"));
-    emit statusMessage(QStringLiteral("TX bloccato: SWR %1 > 2.5").arg(m_rigSwr, 0, 'f', 2));
+    emit errorMessage(QStringLiteral("SWR > %1 !!!\n\nTrasmissione bloccata\n\nControlla antenna")
+                          .arg(kSWRStopThreshold, 0, 'f', 1));
+    emit statusMessage(QStringLiteral("TX bloccato: SWR %1 > %2")
+                           .arg(m_rigSwr, 0, 'f', 2).arg(kSWRStopThreshold, 0, 'f', 1));
     return false;
 }
 
@@ -14205,7 +14214,9 @@ void DecodiumBridge::enforceSwrTransmissionLimit(const QString& reason)
         return;
     }
 
-    constexpr double kSWRStopThreshold = 2.5;
+    // Soglia SWR configurabile (default 2.5), clamp di sicurezza 1.5..5.0.
+    double const kSWRStopThreshold =
+        qBound(1.5, getSetting(QStringLiteral("SWRStopThreshold"), 2.5).toDouble(), 5.0);
     if (m_rigSwr <= kSWRStopThreshold || !m_transmitting) {
         return;
     }
@@ -14219,8 +14230,10 @@ void DecodiumBridge::enforceSwrTransmissionLimit(const QString& reason)
         stopTx();
     }
 
-    emit errorMessage(QStringLiteral("SWR > 2.5 !!!\n\nTrasmissione interrotta\n\nControlla antenna"));
-    emit statusMessage(QStringLiteral("TX interrotto: SWR %1 > 2.5").arg(m_rigSwr, 0, 'f', 2));
+    emit errorMessage(QStringLiteral("SWR > %1 !!!\n\nTrasmissione interrotta\n\nControlla antenna")
+                          .arg(kSWRStopThreshold, 0, 'f', 1));
+    emit statusMessage(QStringLiteral("TX interrotto: SWR %1 > %2")
+                           .arg(m_rigSwr, 0, 'f', 2).arg(kSWRStopThreshold, 0, 'f', 1));
 }
 
 // === SETTINGS ===
@@ -16115,7 +16128,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
 {
     QElapsedTimer totalTimer;
     totalTimer.start();
-    QString const mode = m_mode.trimmed().toUpper();
+    QString const mode = m_cwTxActive ? QStringLiteral("CW") : m_mode.trimmed().toUpper();
     QString const message = msg.trimmed();
     bool const tciAudio = usingTciAudioInput();
     auto logResult = [&](bool cacheHit,
@@ -16152,7 +16165,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
 
     // 1.0.364+ — MAM multi-stream: bypassa la cache (force rebuild) cosi' il
     // multi-stream non serve mai PCM/wave mono stantio. Mono path invariato.
-    if (!multiStreamActive()
+    if (!m_cwTxActive && !multiStreamActive()
         && cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
@@ -16215,7 +16228,13 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     QElapsedTimer phaseTimer;
     phaseTimer.start();
     QVector<float> wave;
-    if (multiStreamActive()) {
+    if (m_cwTxActive) {
+        // CW-audio: tono sidetone (= txAudioFrequency) manipolato in Morse a WPM fisso.
+        wave = decodium::txwave::generateCwWaveWpm(message, txAudioFrequency, m_cwWpm);
+        if (wave.isEmpty()) {
+            buildError = QStringLiteral("Generazione onda CW fallita");
+        }
+    } else if (multiStreamActive()) {
         wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
     } else {
         wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
@@ -16449,6 +16468,9 @@ void DecodiumBridge::noteTxPlaybackFinished(const QString& reason, bool error)
 
 bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
 {
+    // CW-audio: durata variabile, nessun allineamento agli slot FT (evita anche
+    // scheduleSyncTxBoundaryStop e i guard "late slot", che chiamano questa).
+    if (m_cwTxActive) return false;
     QString const normalized = m_mode.trimmed().toUpper();
     bool const ft2AutoCqCalling =
         normalized == QStringLiteral("FT2")
@@ -17075,6 +17097,21 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         stopTciTxAudioStream(true);
     }
 
+    // CW-audio: PTT gia' abbassata sopra; ripristina RX e termina senza la
+    // logica QSO/auto-sequence FT (signoff, re-arm, freq hop).
+    if (m_cwTxActive) {
+        m_cwTxActive = false;
+        m_pendingCwText.clear();
+        restoreTxAudioSchedulingBoost(reason);
+        resumeRxAudioAfterTx(reason);
+        resumeNonAudioTxWork(reason);
+        if (error) emit errorMessage(QStringLiteral("CW: playback TX terminato con errore"));
+        else       emit statusMessage(QStringLiteral("CW completato"));
+        bridgeLog(QStringLiteral("completeTxPlayback: CW done reason=%1 err=%2")
+                      .arg(reason).arg(error ? 1 : 0));
+        return;
+    }
+
     noteTxPlaybackFinished(reason, error);
 
     restoreTxAudioSchedulingBoost(reason);
@@ -17167,6 +17204,57 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     }
 }
 
+void DecodiumBridge::sendCwAudio(const QString& text, qint64 dialFrequencyHz, int wpm)
+{
+    if (QThread::currentThread() != thread()) {
+        QMetaObject::invokeMethod(this, "sendCwAudio", Qt::QueuedConnection,
+                                  Q_ARG(QString, text),
+                                  Q_ARG(qint64, dialFrequencyHz),
+                                  Q_ARG(int, wpm));
+        return;
+    }
+
+    QString const msg = text.trimmed();
+    if (msg.isEmpty()) {
+        emit statusMessage(QStringLiteral("CW: testo vuoto"));
+        return;
+    }
+    int w = wpm;
+    if (w < 5)  w = 5;
+    if (w > 60) w = 60;
+    if (m_transmitting || m_tuning) {
+        emit statusMessage(QStringLiteral("CW: TX o Tune gia' attivo"));
+        return;
+    }
+
+    // Arma lo stato CW: startTx() e ensureTxAudioPrepared() lo useranno per
+    // generare/trasmettere la waveform CW invece del payload FT.
+    m_pendingCwText = msg;
+    m_cwWpm = w;
+    m_cwTxActive = true;
+
+    // QSY opzionale: dial = freq_richiesta - sidetone, cosi' in USB il tono
+    // sidetone emerge esattamente sulla frequenza richiesta.
+    if (dialFrequencyHz > 0) {
+        double dial = static_cast<double>(dialFrequencyHz - m_cwSidetoneHz);
+        if (dial < 1.0) dial = static_cast<double>(dialFrequencyHz);
+        setFrequency(dial);
+    }
+
+    bridgeLog(QStringLiteral("sendCwAudio: text=[%1] wpm=%2 dial=%3 sidetone=%4")
+                  .arg(msg).arg(w).arg(dialFrequencyHz).arg(m_cwSidetoneHz));
+
+    startTx();
+
+    if (!m_transmitting) {
+        // startTx() ha abortito (es. backend non pronto): non lasciare lo
+        // stato CW armato, altrimenti il prossimo TX FT verrebbe deviato.
+        m_cwTxActive = false;
+        m_pendingCwText.clear();
+        emit statusMessage(QStringLiteral("CW: avvio TX non riuscito"));
+    }
+}
+
 void DecodiumBridge::startTx()
 {
     auto const selectedSlotMessage = [this]() -> QString {
@@ -17192,51 +17280,57 @@ void DecodiumBridge::startTx()
         stopTune();
     }
     if (m_transmitting || m_tuning) { bridgeLog("startTx: already TX/tuning, abort"); return; }
-    if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx"))) return;
-    if (!checkSwrAllowsTransmission(QStringLiteral("startTx"))) return;
-    if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
-        emit errorMessage(QStringLiteral("Backend legacy non disponibile per Fox/Hound"));
-        return;
-    }
-    if (!prepareHoundTxSelectionForStart(QStringLiteral("startTx"))) {
-        return;
-    }
-    if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx after hound prepare"))) return;
-
-    bool const fallbackToCq = (m_currentTx >= 1 && m_currentTx <= 5) &&
-                              m_dxCall.trimmed().isEmpty() &&
-                              selectedSlotMessage().trimmed().isEmpty() &&
-                              !m_tx6.trimmed().isEmpty() &&
-                              m_specialOperationActivity != kSpecialOpHound;
-    if (fallbackToCq) {
-        bridgeLog("startTx: no DX payload available, selecting TX6/CQ");
-        if (!selectCurrentTxIfAllowed(6, QStringLiteral("startTx fallback CQ"))) {
+    // CW-audio: salta le guardie FT (validazione payload, fallback CQ, Fox/Hound):
+    // il CW ha il suo testo arbitrario e nessuna sequenza FT.
+    if (!m_cwTxActive) {
+        if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx"))) return;
+        if (!checkSwrAllowsTransmission(QStringLiteral("startTx"))) return;
+        if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
+            emit errorMessage(QStringLiteral("Backend legacy non disponibile per Fox/Hound"));
             return;
+        }
+        if (!prepareHoundTxSelectionForStart(QStringLiteral("startTx"))) {
+            return;
+        }
+        if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx after hound prepare"))) return;
+
+        bool const fallbackToCq = (m_currentTx >= 1 && m_currentTx <= 5) &&
+                                  m_dxCall.trimmed().isEmpty() &&
+                                  selectedSlotMessage().trimmed().isEmpty() &&
+                                  !m_tx6.trimmed().isEmpty() &&
+                                  m_specialOperationActivity != kSpecialOpHound;
+        if (fallbackToCq) {
+            bridgeLog("startTx: no DX payload available, selecting TX6/CQ");
+            if (!selectCurrentTxIfAllowed(6, QStringLiteral("startTx fallback CQ"))) {
+                return;
+            }
         }
     }
 
-    QString msg = buildCurrentTxMessage();
+    QString msg = m_cwTxActive ? m_pendingCwText : buildCurrentTxMessage();
     // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM il payload reale e' la
     // lista m_mamMessages (la seam FASE 1 genera il wave multi-stream da
     // m_mamMessages/m_mamF0sHz). buildCurrentTxMessage() legge lo stato
     // single-QSO non popolato in MAM: usa il primo stream come msg
     // rappresentativo (passa la guard 'msg vuoto', cache key/log/TX-echo).
     // Gated: senza MAM attivo questo blocco non esiste -> startTx byte-identico.
-    if (mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
+    if (!m_cwTxActive && mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
         msg = m_mamMessages.first();
     }
-    forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
+    if (!m_cwTxActive) {
+        forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
+    }
     bridgeLog("startTx: msg=[" + msg + "]");
     if (msg.trimmed().isEmpty()) {
         emit errorMessage("Nessun messaggio TX selezionato");
         bridgeLog("startTx: empty msg abort");
         return;
     }
-    if (!repairOrRejectStalePartnerTxMessage(msg, QStringLiteral("startTx"))) {
+    if (!m_cwTxActive && !repairOrRejectStalePartnerTxMessage(msg, QStringLiteral("startTx"))) {
         emit statusMessage(QStringLiteral("TX bloccato: messaggio non coerente con il QSO attivo"));
         return;
     }
-    if (m_monitoring) {
+    if (!m_cwTxActive && m_monitoring) {
         int elapsedMs = -1;
         int latestStartMs = 0;
         int ft2AsyncDelayMs = 0;
@@ -17279,7 +17373,7 @@ void DecodiumBridge::startTx()
     // Ora settato solo dopo ensureTxAudioPrepared OK.
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
 
-    if (usingLegacyBackendForTx()) {
+    if (!m_cwTxActive && usingLegacyBackendForTx()) {
         bridgeLog("startTx: delegating to legacy backend");
         if (m_recordTxEnabled) {
             QString recordingError;
@@ -17306,7 +17400,8 @@ void DecodiumBridge::startTx()
     QAudioFormat preparedFmt;
     QAudioDevice preparedDev;
     bool const tciAudioTx = usingTciAudioInput();
-    const int txAudioFrequency = effectiveTxAudioFrequencyHz();
+    // CW-audio: il tono audio e' il sidetone (la portante CW reale = dial + sidetone).
+    const int txAudioFrequency = m_cwTxActive ? m_cwSidetoneHz : effectiveTxAudioFrequencyHz();
     const int xitHz = catSplitXitHzForTxFrequency(m_txFrequency);
     if (xitHz != 0 || catSplitTxDialFrequencyHz() > 0.0) {
         bridgeLog(QStringLiteral("startTx split audio: ui_tx=%1 audio_tx=%2 xit=%3 tx_dial=%4")
@@ -18301,6 +18396,9 @@ void DecodiumBridge::stopTx()
     m_txAudioRestartPending = false;
     m_activeTxNumber = 0;
     m_activeTxMessage.clear();
+    // CW-audio interrotto manualmente: disarma lo stato CW.
+    m_cwTxActive = false;
+    m_pendingCwText.clear();
 
 #if defined(Q_OS_MAC)
     if (m_txAudioSink || m_txPcmBuffer) {
