@@ -2063,6 +2063,10 @@ ApplicationWindow {
         return (hex && hex.length > 0) ? Qt.color(hex) : null
     }
 
+    function lotwMarkerColor() {
+        return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
+    }
+
 	    // Shannon-compatible color function (allineato a DecodeWindow.qml)
     function getDxccColor(modelData) {
         if (!modelData)
@@ -2073,7 +2077,6 @@ ApplicationWindow {
         if (customColor !== "") return boostedDecodeTextColor(customColor)
         if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
         if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
-        if (modelData.isLotw === true) return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
@@ -2252,12 +2255,29 @@ ApplicationWindow {
         return Math.round(value) + (withSpace ? " " : "") + (displayDistanceInMiles ? "mi" : "km")
     }
 
+    function usStateLabel(modelData) {
+        if (!bridge || !bridge.showUsState || !modelData || !modelData.usState)
+            return ""
+        return String(modelData.usState).trim().toUpperCase()
+    }
+
+    function dxccDisplayText(modelData) {
+        if (!modelData)
+            return ""
+        var country = modelData.dxCountry ? String(modelData.dxCountry) : ""
+        var state = usStateLabel(modelData)
+        if (country.length > 0 && state.length > 0)
+            return country + " · " + state
+        return country.length > 0 ? country : state
+    }
+
     // IU8LMC: Function to build tooltip text
     function getDxccTooltipText(modelData) {
         if (!modelData) return ""
-        if (!modelData.dxCountry) return ""
+        var dxccText = dxccDisplayText(modelData)
+        if (!dxccText) return ""
         var lines = []
-        var header = modelData.dxCallsign + " - " + modelData.dxCountry
+        var header = modelData.dxCallsign + " - " + dxccText
         if (modelData.dxContinent) header += " (" + modelData.dxContinent + ")"
         lines.push(header)
         // Bearing and distance to DX station
@@ -2544,7 +2564,7 @@ ApplicationWindow {
         case "freq": return entry.freq || ""
         case "msg":  return entry.displayMessage || entry.message || ""
         case "dist": return decodePanel.distanceText(entry)
-        case "dxcc": return entry.dxCountry || ""
+        case "dxcc": return dxccDisplayText(entry)
         case "az":   return formatBearingDegrees(entry.dxBearing)
         }
         return ""
@@ -2555,7 +2575,7 @@ ApplicationWindow {
         case "msg":  return fullSpectrumTextColor(entry)
         case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : (decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan))
         case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
-        case "dxcc": return boostedDecodeTextColor(entry.dxCountry ? effectiveDecodeColor("colorDXEntity") : textSecondary)
+        case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) ? effectiveDecodeColor("colorDXEntity") : textSecondary)
         case "az":   return boostedDecodeTextColor(secondaryCyan)
         }
         return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary)
@@ -7787,6 +7807,7 @@ NumberAnimation {
                                                         Layout.fillHeight: true
                                                         clip: col.id === "dxcc"
                                                         Text {
+                                                            visible: fsCellE.col.id !== "dxcc"
                                                             anchors.fill: parent
                                                             text: mainWindow.fsCellText(fsRowEmbedded.entry, fsCellE.col.id)
                                                             color: mainWindow.fsCellColor(fsRowEmbedded.entry, fsCellE.col.id)
@@ -7801,6 +7822,35 @@ NumberAnimation {
                                                                  : (fsCellE.col.id === "dxcc" ? Text.ElideRight : Text.ElideNone)
                                                             fontSizeMode: fsCellE.col.id === "dxcc" ? Text.HorizontalFit : Text.FixedSize
                                                             minimumPixelSize: fsCellE.col.id === "dxcc" ? Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65)) : 0
+                                                        }
+                                                        Item {
+                                                            visible: fsCellE.col.id === "dxcc"
+                                                            anchors.fill: parent
+                                                            Text {
+                                                                anchors.fill: parent
+                                                                anchors.rightMargin: fsRowEmbedded.entry.isLotw === true ? Math.max(9, Math.round(11 * fs)) : 0
+                                                                text: mainWindow.fsCellText(fsRowEmbedded.entry, fsCellE.col.id)
+                                                                color: mainWindow.fsCellColor(fsRowEmbedded.entry, fsCellE.col.id)
+                                                                font.family: mainWindow.decodedTextFontFamily
+                                                                font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
+                                                                horizontalAlignment: Text.AlignRight
+                                                                verticalAlignment: Text.AlignVCenter
+                                                                maximumLineCount: 1
+                                                                elide: Text.ElideRight
+                                                                fontSizeMode: Text.HorizontalFit
+                                                                minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
+                                                            }
+                                                            Rectangle {
+                                                                visible: fsRowEmbedded.entry.isLotw === true
+                                                                width: Math.max(5, Math.round(6 * fs))
+                                                                height: width
+                                                                radius: width / 2
+                                                                anchors.right: parent.right
+                                                                anchors.verticalCenter: parent.verticalCenter
+                                                                color: mainWindow.lotwMarkerColor()
+                                                                border.color: mainWindow.boostedDecodeTextColor(textSecondary)
+                                                                border.width: 1
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -8378,8 +8428,9 @@ YAnimator { duration: 100; easing.type: Easing.OutQuad }
 		                                                Text { text: rxFrequencyDelegate.entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
 	                                                Item { visible: rxFreqPanel.freqColumnWidth > 0; Layout.preferredWidth: rxFreqPanel.dtFreqGapWidth }
 		                                                Text { visible: rxFreqPanel.freqColumnWidth > 0; text: rxFrequencyDelegate.entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
-	                                                Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
-	                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
+                                                Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
+                                                Rectangle { property int dotSize: Math.max(5, Math.round(6 * fs)); visible: rxFrequencyDelegate.entry.isLotw === true; width: dotSize; height: dotSize; Layout.preferredWidth: dotSize; Layout.preferredHeight: dotSize; Layout.alignment: Qt.AlignVCenter; radius: dotSize / 2; color: mainWindow.lotwMarkerColor(); border.color: mainWindow.boostedDecodeTextColor(textSecondary); border.width: 1 }
+                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
 		                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
 		                                                Text { visible: rxFreqPanel.azColumnWidth > 0; text: formatBearingDegrees(rxFrequencyDelegate.entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
 	                                            }
@@ -12547,6 +12598,7 @@ NumberAnimation {
                                         Layout.fillHeight: true
                                         clip: col.id === "dxcc"
                                         Text {
+                                            visible: fsCellF.col.id !== "dxcc"
                                             anchors.fill: parent
                                             text: mainWindow.fsCellText(fsRowFloating.entry, fsCellF.col.id)
                                             color: mainWindow.fsCellColor(fsRowFloating.entry, fsCellF.col.id)
@@ -12561,6 +12613,35 @@ NumberAnimation {
                                                  : (fsCellF.col.id === "dxcc" ? Text.ElideRight : Text.ElideNone)
                                             fontSizeMode: fsCellF.col.id === "dxcc" ? Text.HorizontalFit : Text.FixedSize
                                             minimumPixelSize: fsCellF.col.id === "dxcc" ? Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65)) : 0
+                                        }
+                                        Item {
+                                            visible: fsCellF.col.id === "dxcc"
+                                            anchors.fill: parent
+                                            Text {
+                                                anchors.fill: parent
+                                                anchors.rightMargin: fsRowFloating.entry.isLotw === true ? Math.max(9, Math.round(11 * fs)) : 0
+                                                text: mainWindow.fsCellText(fsRowFloating.entry, fsCellF.col.id)
+                                                color: mainWindow.fsCellColor(fsRowFloating.entry, fsCellF.col.id)
+                                                font.family: mainWindow.decodedTextFontFamily
+                                                font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs)
+                                                horizontalAlignment: Text.AlignRight
+                                                verticalAlignment: Text.AlignVCenter
+                                                maximumLineCount: 1
+                                                elide: Text.ElideRight
+                                                fontSizeMode: Text.HorizontalFit
+                                                minimumPixelSize: Math.max(8, Math.round(mainWindow.decodedTextFontPixelSize * fs * 0.65))
+                                            }
+                                            Rectangle {
+                                                visible: fsRowFloating.entry.isLotw === true
+                                                width: Math.max(5, Math.round(6 * fs))
+                                                height: width
+                                                radius: width / 2
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                color: mainWindow.lotwMarkerColor()
+                                                border.color: mainWindow.boostedDecodeTextColor(textSecondary)
+                                                border.width: 1
+                                            }
                                         }
                                     }
                                 }
@@ -13100,9 +13181,10 @@ NumberAnimation {
 	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.dbDtGapWidth }
 		                                Text { text: entry.dt || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
 	                                Item { visible: rxFreqFloatingWindow.freqColumnWidth > 0; Layout.preferredWidth: rxFreqFloatingWindow.dtFreqGapWidth }
-		                                Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
-	                                Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
-	                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: getDxccColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
+			                                Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
+                                Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
+                                Rectangle { property int dotSize: Math.max(5, Math.round(6 * fs)); visible: entry.isLotw === true; width: dotSize; height: dotSize; Layout.preferredWidth: dotSize; Layout.preferredHeight: dotSize; Layout.alignment: Qt.AlignVCenter; radius: dotSize / 2; color: mainWindow.lotwMarkerColor(); border.color: mainWindow.boostedDecodeTextColor(textSecondary); border.width: 1 }
+                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: getDxccColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
 		                                Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
 		                                Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
                             }

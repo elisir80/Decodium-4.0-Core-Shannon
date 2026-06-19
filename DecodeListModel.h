@@ -39,6 +39,7 @@ public:
         DxCountryRole,
         DxContinentRole,
         DxPrefixRole,
+        UsStateRole,
         DxBearingRole,
         DxDistanceRole,
         DxIsMostWantedRole,

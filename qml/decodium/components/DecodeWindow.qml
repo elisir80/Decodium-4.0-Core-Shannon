@@ -442,12 +442,15 @@ Window {
 
         if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
         if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
-        if (modelData.isLotw)   return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
         if (modelData.isCQ)     return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         return boostedDecodeTextColor(textPrimary)
+    }
+
+    function lotwMarkerColor() {
+        return boostedDecodeTextColor(effectiveDecodeColor("colorLotwUser"))
     }
 
     // IU8LMC: Function to build tooltip text
@@ -456,7 +459,7 @@ Window {
         var lines = []
 
         // Header: Callsign - Country (Continent)
-        var header = (modelData.dxCallsign || "") + " - " + modelData.dxCountry
+        var header = (modelData.dxCallsign || "") + " - " + dxccDisplayText(modelData)
         if (modelData.dxContinent) header += " (" + modelData.dxContinent + ")"
         lines.push(header)
 
@@ -477,6 +480,22 @@ Window {
         }
 
         return lines.join("\n")
+    }
+
+    function usStateLabel(modelData) {
+        if (!bridge || !bridge.showUsState || !modelData || !modelData.usState)
+            return ""
+        return String(modelData.usState).trim().toUpperCase()
+    }
+
+    function dxccDisplayText(modelData) {
+        if (!modelData)
+            return ""
+        var country = modelData.dxCountry ? String(modelData.dxCountry) : ""
+        var state = usStateLabel(modelData)
+        if (country.length > 0 && state.length > 0)
+            return country + " · " + state
+        return country.length > 0 ? country : state
     }
 
 	    function formatBearingDegrees(value) {
@@ -1329,6 +1348,16 @@ Component.onCompleted: {
                                     Item { Layout.preferredWidth: decodeWindow.bandGapWidth }
 
                                     // Messaggio con coloring Shannon-compatible
+                                    Rectangle {
+                                        visible: modelData.isLotw === true
+                                        Layout.preferredWidth: 6
+                                        Layout.preferredHeight: 6
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: 3
+                                        color: decodeWindow.lotwMarkerColor()
+                                        border.color: decodeWindow.boostedDecodeTextColor(textSecondary)
+                                        border.width: 1
+                                    }
                                     Text {
                                         id: bandMsgText
                                         text: modelData.displayMessage || modelData.message
@@ -1350,16 +1379,28 @@ Component.onCompleted: {
                                         Layout.fillHeight: true
                                         Text {
                                             anchors.fill: parent
-                                            text: modelData.dxCountry || ""
+                                            anchors.rightMargin: modelData.isLotw === true ? 11 : 0
+                                            text: decodeWindow.dxccDisplayText(modelData)
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-	                                            color: decodeWindow.boostedDecodeTextColor(modelData.dxCountry ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
+	                                            color: decodeWindow.boostedDecodeTextColor((modelData.dxCountry || modelData.usState) ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                             elide: Text.ElideNone
                                             fontSizeMode: Text.HorizontalFit
                                             minimumPixelSize: 8
                                             maximumLineCount: 1
+                                        }
+                                        Rectangle {
+                                            visible: modelData.isLotw === true
+                                            width: 6
+                                            height: 6
+                                            radius: 3
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            color: decodeWindow.lotwMarkerColor()
+                                            border.color: decodeWindow.boostedDecodeTextColor(textSecondary)
+                                            border.width: 1
                                         }
                                     }
 
@@ -1826,6 +1867,34 @@ Component.onCompleted: {
                                     Item { Layout.preferredWidth: decodeWindow.rxGapWidth }
 
                                     // Messaggio RX con coloring + strikethrough B4
+                                    Rectangle {
+                                        visible: modelData.isLotw === true
+                                        Layout.preferredWidth: 6
+                                        Layout.preferredHeight: 6
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: 3
+                                        color: decodeWindow.lotwMarkerColor()
+                                        border.color: decodeWindow.boostedDecodeTextColor(textSecondary)
+                                        border.width: 1
+                                    }
+                                    Rectangle {
+                                        visible: decodeWindow.usStateLabel(modelData).length > 0
+                                        Layout.preferredWidth: 26
+                                        Layout.preferredHeight: 16
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: 4
+                                        color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.16)
+                                        border.color: decodeWindow.boostedDecodeTextColor(secondaryCyan)
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: decodeWindow.usStateLabel(modelData)
+                                            font.family: decodiumMonoFontFamily
+                                            font.pixelSize: 9
+                                            font.bold: true
+                                            color: decodeWindow.boostedDecodeTextColor(secondaryCyan)
+                                        }
+                                    }
                                     Text {
                                         id: rxMsgText
                                         text: modelData.displayMessage || modelData.message

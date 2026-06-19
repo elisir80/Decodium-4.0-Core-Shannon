@@ -1146,7 +1146,7 @@ Dialog {
         { label: qsTr("New Grid"),               prop: "colorNewGrid",          defaultColor: "#FF8C00" },
         { label: qsTr("New Callsign on Band"),   prop: "colorNewCallBand",      defaultColor: "#B5E8E8" },
         { label: qsTr("New Callsign"),           prop: "colorNewCall",          defaultColor: "#00E0E0" },
-        { label: qsTr("LoTW User"),              prop: "colorLotwUser",         defaultColor: "#FFFFFF" },
+        { label: qsTr("LoTW marker"),            prop: "colorLotwUser",         defaultColor: "#FFFFFF" },
         { label: qsTr("CQ in Message"),          prop: "colorCQ",               defaultColor: "#33FF33" },
         { label: qsTr("DX Entity"),              prop: "colorDXEntity",         defaultColor: "#FFAA33" },
         { label: qsTr("73 / RR73"),              prop: "color73",               defaultColor: "#5599FF" },
@@ -4377,6 +4377,29 @@ Dialog {
                             onCheckedChanged: bridge.setSetting("ShowDXCC", checked)
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+
+                        Text { text: qsTr("US State:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: bridge.showUsState
+                            onCheckedChanged: bridge.showUsState = checked
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                        }
+                        Text {
+                            text: bridge.usStateDataUpdating ? qsTr("Updating...")
+                                  : (bridge.usStateDataReady ? qsTr("%1 calls").arg(bridge.usStateGridCount)
+                                                             : qsTr("Not loaded"))
+                            color: bridge.usStateDataReady ? accentGreen : textSecondary
+                            font.pixelSize: 11
+                            verticalAlignment: Text.AlignVCenter
+                            Layout.fillWidth: true
+                        }
+                        Button {
+                            text: qsTr("Update")
+                            enabled: bridge.showUsState && !bridge.usStateDataUpdating
+                            implicitHeight: controlHeight
+                            onClicked: bridge.updateUsStateData()
                         }
 
                         Text { text: qsTr("TX Msg to RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }

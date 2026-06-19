@@ -470,6 +470,47 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
     }
 }
 
+void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioDevice * sink
+                         , unsigned downSampleFactor, AudioDevice::Channel channel)
+{
+  Q_ASSERT (sink);
+
+  if (shouldDispatchToSoundInputThread(this))
+    {
+      QPointer<SoundInput> guard {this};
+      QPointer<AudioDevice> sinkGuard {sink};
+      QAudioDevice deviceCopy {device};
+      QMetaObject::invokeMethod (this, [guard, deviceCopy, framesPerBuffer, sinkGuard,
+                                        downSampleFactor, channel] {
+        if (guard && sinkGuard)
+          {
+            guard->restart (deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
+          }
+      }, Qt::QueuedConnection);
+      return;
+    }
+
+  qDebug() << "SoundInput: forced restart for" << device.description();
+  stop ();
+
+  QPointer<SoundInput> guard {this};
+  QPointer<AudioDevice> sinkGuard {sink};
+  QAudioDevice deviceCopy {device};
+  auto delayedStart = [guard, deviceCopy, framesPerBuffer, sinkGuard,
+                       downSampleFactor, channel] {
+    if (guard && sinkGuard)
+      {
+        guard->start (deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
+      }
+  };
+
+#if defined(Q_OS_MACOS)
+  QTimer::singleShot (850, this, delayedStart);
+#else
+  QTimer::singleShot (0, this, delayedStart);
+#endif
+}
+
 void SoundInput::suspend ()
 {
   if (shouldDispatchToSoundInputThread(this))

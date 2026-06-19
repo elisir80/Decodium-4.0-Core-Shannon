@@ -31,6 +31,7 @@ static RoleSpec const kRoleSpecs[] = {
     { DecodeListModel::DxCountryRole,            "dxCountry",          "dxCountry" },
     { DecodeListModel::DxContinentRole,          "dxContinent",        "dxContinent" },
     { DecodeListModel::DxPrefixRole,             "dxPrefix",           "dxPrefix" },
+    { DecodeListModel::UsStateRole,              "usState",            "usState" },
     { DecodeListModel::DxBearingRole,            "dxBearing",          "dxBearing" },
     { DecodeListModel::DxDistanceRole,           "dxDistance",         "dxDistance" },
     { DecodeListModel::DxIsMostWantedRole,       "dxIsMostWanted",     "dxIsMostWanted" },

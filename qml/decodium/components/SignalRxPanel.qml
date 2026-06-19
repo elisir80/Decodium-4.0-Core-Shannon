@@ -24,6 +24,7 @@ Item {
     readonly property color cBlue:     tm ? tm.primaryColor   : "#3aa0ff"
     readonly property color cCyan:     tm ? tm.secondaryColor : "#66e6ff"
     readonly property color cTx:       tm ? tm.txColor        : "#ff7a5c"
+    readonly property color cLotw:     root.bridge ? root.bridge.effectiveDecodeColor("colorLotwUser") : "#ffffff"
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
@@ -33,6 +34,12 @@ Item {
     readonly property int wDb:   34
     readonly property int wDt:   compact ? 40 : 46
     readonly property int gap:   8
+
+    function usStateLabel(entry) {
+        if (!root.bridge || !root.bridge.showUsState || !entry || !entry.usState)
+            return ""
+        return String(entry.usState).trim().toUpperCase()
+    }
 
     // --- QSO lock banner: large DX call (accent) -------------------------------
     Rectangle {
@@ -201,6 +208,34 @@ Item {
                     Layout.preferredWidth: root.wDt
                 }
                 Item { Layout.preferredWidth: root.gap }
+                Rectangle {
+                    visible: !!modelData && del.entry.isLotw === true
+                    Layout.preferredWidth: 6
+                    Layout.preferredHeight: 6
+                    Layout.alignment: Qt.AlignVCenter
+                    radius: 3
+                    color: root.cLotw
+                    border.color: root.cTextDim
+                    border.width: 1
+                }
+                Rectangle {
+                    visible: root.usStateLabel(del.entry).length > 0
+                    Layout.preferredWidth: 26
+                    Layout.preferredHeight: 16
+                    Layout.alignment: Qt.AlignVCenter
+                    radius: 4
+                    color: Qt.rgba(root.cCyan.r, root.cCyan.g, root.cCyan.b, 0.16)
+                    border.color: root.cCyan
+                    border.width: 1
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.usStateLabel(del.entry)
+                        color: root.cCyan
+                        font.pixelSize: 9
+                        font.bold: true
+                        font.family: "monospace"
+                    }
+                }
                 Text {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
                     color: !modelData ? root.cText :

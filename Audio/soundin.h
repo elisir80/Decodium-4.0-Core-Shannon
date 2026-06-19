@@ -35,6 +35,7 @@ public:
   // stop call
   bool isActiveFor (QAudioDevice const&, unsigned downSampleFactor, AudioDevice::Channel = AudioDevice::Mono) const;
   Q_SLOT void start(QAudioDevice const&, int framesPerBuffer, AudioDevice * sink, unsigned downSampleFactor, AudioDevice::Channel = AudioDevice::Mono);
+  Q_SLOT void restart(QAudioDevice const&, int framesPerBuffer, AudioDevice * sink, unsigned downSampleFactor, AudioDevice::Channel = AudioDevice::Mono);
   Q_SLOT void suspend ();
   Q_SLOT void resume ();
   Q_SLOT void stop ();

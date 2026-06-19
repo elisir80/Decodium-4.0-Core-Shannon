@@ -18,6 +18,7 @@
 #include "Network/DecoSyncTime.hpp"
 #include "Web/DecodiumWebServer.hpp"
 #include "Network/RemoteCommandServer.hpp"
+#include "UsStateDataManager.h"
 #include "PrecisionTime.hpp"
 #include "SecureSettings.hpp"
 #include <QHostAddress>
@@ -5250,6 +5251,9 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
         // ghost than a real first call. Example reported:
         // "EA8DJR JE8TRM/P LO57 ?" at -26 dB while EA8DJR was only RX.
         // Keep active-QSO replies untouched via the isActiveQso return above.
+        // 1.0.416: extend the same hard mismatch signature to high-confidence
+        // weak first calls at <= -18 dB. Example: "9H1SR C38EPT/P NK14" at
+        // -19 dB, where NK14 is thousands of km away from the C3 DXCC.
         QString const msgFull = entry.value(QStringLiteral("displayMessage"))
                                       .toString().trimmed().toUpper();
         QString const msgFallback = entry.value(QStringLiteral("message"))
@@ -5264,7 +5268,7 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
             grid = extractDecodedGrid(msgText);
         }
         if (db <= -16
-            && (lowConfidence || db <= -20)
+            && (lowConfidence || db <= -18)
             && isGridTokenStrict(grid)
             && m_dxccLookup
             && m_dxccLookup->isLoaded()) {
@@ -5500,15 +5504,18 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
                 double const mismatchKm = azdist(ent.lat, entLonEast,
                                                  gridLat, gridLon,
                                                  mismatchAz);
-                // 1.0.378: sopprimi per grid-mismatch SOLO se il decode e' a bassa
-                // confidenza (token finale "?", tipico dei ghost AP-aided). Un decode
-                // diretto a mycall ad ALTA confidenza con grid errato puo' essere una
-                // chiamata reale col grid corrotto -> meglio mostrarla che perdere il QSO.
+                // 1.0.378: suppress low-confidence grid-mismatch directed decodes.
+                // 1.0.416: also suppress high-confidence weak first-calls when the
+                // mismatch is extreme. Active/manual targets returned earlier, so
+                // QSO replies stay visible even with a corrupt grid.
                 QStringList const ghostTokens = msg.split(QRegularExpression(QStringLiteral("\\s+")),
                                                           Qt::SkipEmptyParts);
                 bool const ghostLowConfidence = !ghostTokens.isEmpty()
                     && ghostTokens.constLast().trimmed() == QStringLiteral("?");
-                if (mismatchKm > 5000.0 && ghostLowConfidence) {
+                bool snrOk = false;
+                int const ghostSnr = fields.value(1).trimmed().toInt(&snrOk);
+                if (mismatchKm > 5000.0
+                    && (ghostLowConfidence || (snrOk && ghostSnr <= -18))) {
                     // dedup: il filtro gira a ogni rebuild lista (signal-rx); una riga
                     // di log per messaggio invece di decine identiche.
                     if (!m_loggedDirectedGhostMsgs.contains(msg)) {
@@ -7907,6 +7914,18 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             bridgeLog("DXCC: cty.dat non trovato, DXCC disabilitato finché il file non viene installato o scaricato.");
         }
     }
+    m_usStateData = new UsStateDataManager(this);
+    connect(m_usStateData, &UsStateDataManager::statusMessage, this, [this](const QString& msg) {
+        bridgeLog(msg);
+        emit statusMessage(msg);
+    });
+    connect(m_usStateData, &UsStateDataManager::updatingChanged, this, [this]() {
+        emit usStateDataChanged();
+    });
+    connect(m_usStateData, &UsStateDataManager::dataChanged, this, [this]() {
+        emit usStateDataChanged();
+        refreshDecodeListDxcc();
+    });
     connect(m_wsprUploader, &DecodiumWsprUploader::uploadStatus,
             this, [this](const QString& msg) { emit statusMessage("WSPR: " + msg); });
 
@@ -8469,6 +8488,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    if (m_showUsState && m_usStateData) {
+        m_usStateData->ensureLoadedAsync();
+    }
     applyLowCpuRuntimeProfile(QStringLiteral("startup"));
     // Popola m_workedCalls + m_worked dal log ADIF esistente all'avvio così che
     // i decode mostrino subito i colori WSJT-X corretti (NewDxcc/Continent/Zone/...
@@ -11158,7 +11180,6 @@ QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
     if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewCallBand"));
     if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewCall"));
 
-    if (entry.value(QStringLiteral("isLotw")).toBool())              return effectiveDecodeColor(QStringLiteral("colorLotwUser"));
     if (entry.value(QStringLiteral("isCQ")).toBool())                return effectiveDecodeColor(QStringLiteral("colorCQ"));
     return QString();
 }
@@ -22682,6 +22703,7 @@ void DecodiumBridge::saveSettings()
     s.setValue("qrzLogbookReplaceDuplicates", m_qrzLogbookReplaceDuplicates);
     // LotW / ADIF
     s.setValue("lotwEnabled",      m_lotwEnabled);
+    s.setValue("showUsState",      m_showUsState);
     // WSPR upload
     s.setValue("wsprUploadEnabled", m_wsprUploadEnabled);
     // DX Cluster
@@ -28004,6 +28026,7 @@ void DecodiumBridge::loadSettings()
     }
     // LotW
     m_lotwEnabled = s.value("lotwEnabled", false).toBool();
+    m_showUsState = s.value("showUsState", true).toBool();
     // WSPR upload
     m_wsprUploadEnabled = s.value("wsprUploadEnabled", false).toBool();
     if (m_wsprUploader) m_wsprUploader->setEnabled(m_wsprUploadEnabled);
@@ -28215,6 +28238,8 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit qrzLogbookApiKeyChanged();
     emit qrzLogbookReplaceDuplicatesChanged();
     emit lotwEnabledChanged();
+    emit showUsStateChanged();
+    emit usStateDataChanged();
     emit wsprUploadEnabledChanged();
     emit nfaChanged();
     emit nfbChanged();
@@ -30435,6 +30460,14 @@ QString DecodiumBridge::extractDecodedGrid(const QString& msg) const
     return {};
 }
 
+QString DecodiumBridge::lookupUsStateForDecode(const QString& call, const QString& gridHint) const
+{
+    if (!m_showUsState || !m_usStateData || !m_usStateData->ready()) {
+        return {};
+    }
+    return m_usStateData->stateForCall(call, gridHint);
+}
+
 static bool decodeFilterBoolSetting(const DecodiumBridge& bridge,
                                     const QString& key,
                                     bool fallback = false)
@@ -32029,6 +32062,7 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     }
 
     QString dxGridExtracted = extractDecodedGrid(msg);
+    QString const usState = lookupUsStateForDecode(rightCall, dxGridExtracted);
     double distKm = -1.0;
     double bearing = -1.0;
     if (!selfEntry && !dxGridExtracted.isEmpty() && !m_grid.isEmpty()) {
@@ -32051,6 +32085,7 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     entry["isLotw"] = isLotw;
     entry["dxCountry"] = dxCountry;
     entry["dxCallsign"] = rightCall;
+    entry["usState"] = usState;
     // 1.0.132: flag per highlight del nominativo inserito nel campo DxCall
     // (l'utente vuole vedere subito dove sta trasmettendo nel Full Spectrum).
     {
@@ -32222,9 +32257,34 @@ void DecodiumBridge::refreshDecodeListDxcc()
         }
     }
 
+    bool rxChanged = false;
+    for (int i = 0; i < m_rxDecodeList.size(); ++i) {
+        QVariantMap entry = m_rxDecodeList[i].toMap();
+        if (entry.value("isTx").toBool())
+            continue;
+        QVariantMap original = entry;
+        enrichDecodeEntry(entry);
+        if (entry != original) {
+            m_rxDecodeList[i] = entry;
+            rxChanged = true;
+        }
+    }
+
+    if (changed || rxChanged) {
+        if (changed) {
+            normalizeDecodeEntriesForDisplay(m_decodeList, 1500, m_mode);
+        }
+        if (rxChanged) {
+            normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
+        }
+        rebuildBandActivityModel();
+        rebuildRxDecodeModel();
+    }
     if (changed) {
-        normalizeDecodeEntriesForDisplay(m_decodeList, 1500, m_mode);
         emit decodeListChanged();
+    }
+    if (rxChanged) {
+        emit rxDecodeListChanged();
     }
 }
 
@@ -38817,8 +38877,52 @@ bool DecodiumBridge::importAdif(const QString& filename)
 }
 
 // ============================================================
-// LotW lite
+// US state data + LotW lite
 // ============================================================
+
+void DecodiumBridge::setShowUsState(bool v)
+{
+    if (m_showUsState == v) {
+        return;
+    }
+    m_showUsState = v;
+    {
+        QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        s.setValue(QStringLiteral("showUsState"), m_showUsState);
+    }
+    emit showUsStateChanged();
+    if (m_showUsState && m_usStateData) {
+        m_usStateData->ensureLoadedAsync();
+    }
+    refreshDecodeListDxcc();
+}
+
+bool DecodiumBridge::usStateDataReady() const
+{
+    return m_usStateData && m_usStateData->ready();
+}
+
+bool DecodiumBridge::usStateDataUpdating() const
+{
+    return m_usStateData && m_usStateData->updating();
+}
+
+int DecodiumBridge::usStateGridCount() const
+{
+    return m_usStateData ? m_usStateData->gridCount() : 0;
+}
+
+int DecodiumBridge::usStateLocatorCount() const
+{
+    return m_usStateData ? m_usStateData->stateCount() : 0;
+}
+
+void DecodiumBridge::updateUsStateData()
+{
+    if (m_usStateData) {
+        m_usStateData->updateNow();
+    }
+}
 
 bool DecodiumBridge::isLotwUser(const QString& call) const
 {

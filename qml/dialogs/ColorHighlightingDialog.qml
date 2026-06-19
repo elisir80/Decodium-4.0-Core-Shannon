@@ -36,7 +36,7 @@ Dialog {
         { label: "New Grid",              prop: "colorNewGrid",          defaultColor: "#FF8C00" },
         { label: "New Callsign on Band",  prop: "colorNewCallBand",      defaultColor: "#B5E8E8" },
         { label: "New Callsign",          prop: "colorNewCall",          defaultColor: "#00E0E0" },
-        { label: "LoTW User",             prop: "colorLotwUser",         defaultColor: "#FFFFFF" },
+        { label: "LoTW marker",           prop: "colorLotwUser",         defaultColor: "#FFFFFF" },
         { label: "CQ in Message",         prop: "colorCQ",               defaultColor: "#33FF33" },
         { label: "DX Entity",             prop: "colorDXEntity",         defaultColor: "#FFAA33" },
         { label: "73 / RR73",             prop: "color73",               defaultColor: "#5599FF" },

@@ -302,7 +302,7 @@ private:
   void closeEvent(QCloseEvent *) override;
   void childEvent(QChildEvent *) override;
   bool eventFilter(QObject *, QEvent *) override;
-  void restartConfiguredAudioStreams (bool resume_monitor);
+  void restartConfiguredAudioStreams (bool resume_monitor, bool force_input_reopen = false);
   void armAudioInputHealthChecks (qint64 baseline_ms);
   void refreshConfiguredAudioDevicesAfterHotplug (QString const& reason);
   void showQSYMessage(QString message);
@@ -751,6 +751,9 @@ private:
       unsigned channels, unsigned msBuffered) const;
   Q_SIGNAL void stopAudioOutputStream () const;
   Q_SIGNAL void startAudioInputStream (QAudioDevice const&,
+      int framesPerBuffer, AudioDevice * sink,
+      unsigned downSampleFactor, AudioDevice::Channel) const;
+  Q_SIGNAL void restartAudioInputStream (QAudioDevice const&,
       int framesPerBuffer, AudioDevice * sink,
       unsigned downSampleFactor, AudioDevice::Channel) const;
   Q_SIGNAL void suspendAudioInputStream () const;

@@ -2865,6 +2865,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 
   // hook up the audio input stream signals, slots and disposal
   connect (this, &MainWindow::startAudioInputStream, m_soundInput, &SoundInput::start);
+  connect (this, &MainWindow::restartAudioInputStream, m_soundInput, &SoundInput::restart);
   connect (this, &MainWindow::suspendAudioInputStream, m_soundInput, &SoundInput::suspend);
   connect (this, &MainWindow::resumeAudioInputStream, m_soundInput, &SoundInput::resume);
   connect (this, &MainWindow::reset_audio_input_stream, m_soundInput, &SoundInput::reset);
@@ -4081,7 +4082,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       }
 
       debugToFile (QStringLiteral ("audioStart   forcing startup audio reopen"));
-      restartConfiguredAudioStreams (false);
+      restartConfiguredAudioStreams (false, true);
       if (m_monitoring) {
         armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
       }
@@ -4948,7 +4949,7 @@ void MainWindow::legacyRearmMonitoring(QString const& reason)
       return;
     }
 
-  restartConfiguredAudioStreams (true);
+  restartConfiguredAudioStreams (true, true);
   armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
 }
 
@@ -5109,7 +5110,7 @@ void MainWindow::legacySetAudioInputDeviceName(QString const& name)
     {
       return;
     }
-  restartConfiguredAudioStreams (m_monitoring);
+  restartConfiguredAudioStreams (m_monitoring, true);
 }
 
 void MainWindow::legacySetAudioOutputDeviceName(QString const& name)
@@ -5129,7 +5130,7 @@ void MainWindow::legacySetAudioInputChannel(int channel)
     {
       return;
     }
-  restartConfiguredAudioStreams (m_monitoring);
+  restartConfiguredAudioStreams (m_monitoring, true);
 }
 
 void MainWindow::legacySetAudioOutputChannel(int channel)
@@ -5218,7 +5219,7 @@ void MainWindow::refreshConfiguredAudioDevicesAfterHotplug (QString const& reaso
 
   if (m_monitoring)
     {
-      restartConfiguredAudioStreams (true);
+      restartConfiguredAudioStreams (true, rebound_input);
       if (rebound_input)
         {
           armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
@@ -8079,7 +8080,7 @@ void MainWindow::showStatusMessage(const QString& statusMsg)
   }
 }
 
-void MainWindow::restartConfiguredAudioStreams (bool resume_monitor)
+void MainWindow::restartConfiguredAudioStreams (bool resume_monitor, bool force_input_reopen)
 {
   if (m_tci_audio || m_transmitting)
     {
@@ -8091,9 +8092,10 @@ void MainWindow::restartConfiguredAudioStreams (bool resume_monitor)
 
   auto const& input_device = m_config.audio_input_device ();
   auto const& output_device = m_config.audio_output_device ();
-  debugToFile (QString {"audioRest   resume:%1 mon:%2 in:%3 out:%4"}
+  debugToFile (QString {"audioRest   resume:%1 mon:%2 force:%3 in:%4 out:%5"}
                  .arg (resume_monitor)
                  .arg (m_monitoring)
+                 .arg (force_input_reopen)
                  .arg (input_device.isNull ()
                          ? QString {"<null>"}
                          : input_device.description ())
@@ -8120,7 +8122,15 @@ void MainWindow::restartConfiguredAudioStreams (bool resume_monitor)
           check_input_active ();
         }
 
-      if (input_already_active)
+      if (force_input_reopen)
+        {
+          debugToFile (QStringLiteral ("audioRest   forced input restart"));
+          Q_EMIT restartAudioInputStream (input_device
+                                          , m_rx_audio_buffer_frames
+                                          , m_detector, m_downSampleFactor
+                                          , m_config.audio_input_channel ());
+        }
+      else if (input_already_active)
         {
           debugToFile (QStringLiteral ("audioRest   input already active, resume only"));
           if (resume_monitor)
@@ -8224,7 +8234,7 @@ void MainWindow::armAudioInputHealthChecks (qint64 baseline_ms)
               on_monitorButton_clicked (false);
             }
 
-          restartConfiguredAudioStreams (false);
+          restartConfiguredAudioStreams (false, true);
 
           quint64 const reopen_check_id = ++m_audio_input_health_check_id;
           QTimer::singleShot (260, this, [this, baseline_ms, delay_ms, was_monitoring, reopen_check_id] {
@@ -8484,7 +8494,7 @@ void MainWindow::onApplicationStateChanged(Qt::ApplicationState state)
               return;
             }
 
-          restartConfiguredAudioStreams (true);
+          restartConfiguredAudioStreams (true, true);
           armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
           showStatusMessage (tr ("Audio input resumed after system wake."));
         });
@@ -8896,7 +8906,7 @@ void MainWindow::monitor (bool state)
         auto const restart_or_resume = [this, activating] {
           if (activating) {
             debugToFile (QStringLiteral ("monitor     activating via settings-style audio reopen"));
-            restartConfiguredAudioStreams (true);
+            restartConfiguredAudioStreams (true, true);
           } else {
             debugToFile (QStringLiteral ("monitor     resuming existing audio input stream"));
             Q_EMIT resumeAudioInputStream ();
@@ -28720,7 +28730,7 @@ void MainWindow::set_mode (QString const& mode)
               return;
             }
 
-          restartConfiguredAudioStreams (true);
+          restartConfiguredAudioStreams (true, true);
           armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
         });
     }

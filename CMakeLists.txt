@@ -410,6 +410,8 @@ set (wsjtx_CXXSRCS
   main.cpp
   DecodiumBridge.cpp
   DecodiumBridge.h
+  UsStateDataManager.cpp
+  UsStateDataManager.h
   lib/persistence/DecodeHistoryWorker.cpp
   lib/persistence/DecodeHistoryWorker.h
   DecodeListModel.cpp
@@ -1571,6 +1573,8 @@ add_executable (decodium_qml
   main_qml.cpp
   DecodiumBridge.cpp
   DecodiumBridge.h
+  UsStateDataManager.cpp
+  UsStateDataManager.h
   DecodeListModel.cpp
   DecodeListModel.h
   lib/persistence/DecodeHistoryWorker.cpp

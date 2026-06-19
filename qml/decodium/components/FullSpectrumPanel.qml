@@ -32,6 +32,7 @@ Item {
     readonly property color cCyan:     tm ? tm.secondaryColor : "#66e6ff"
     readonly property color cGrid:     tm ? tm.gridColor      : "#00d4b4"
     readonly property color cTx:       tm ? tm.txColor        : "#ff7a5c"
+    readonly property color cLotw:     root.bridge ? root.bridge.effectiveDecodeColor("colorLotwUser") : "#ffffff"
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
@@ -44,6 +45,22 @@ Item {
     readonly property int wFreq: 46
     readonly property int gap:   8
     readonly property int wDxcc: compact ? 0 : Math.min(180, Math.max(90, Math.round(width * 0.20)))
+
+    function usStateLabel(entry) {
+        if (!root.bridge || !root.bridge.showUsState || !entry || !entry.usState)
+            return ""
+        return String(entry.usState).trim().toUpperCase()
+    }
+
+    function dxccDisplayText(entry) {
+        if (!entry)
+            return ""
+        var country = entry.dxCountry ? String(entry.dxCountry) : ""
+        var state = usStateLabel(entry)
+        if (country.length > 0 && state.length > 0)
+            return country + " · " + state
+        return country.length > 0 ? country : state
+    }
 
     // Header column strip.
     Rectangle {
@@ -187,14 +204,31 @@ Item {
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
-                Text {
+                Item {
                     visible: root.wDxcc > 0
-                    text: !modelData ? "" : (del.entry.dxCountry || "")
-                    color: root.cTextDim
-                    font.pixelSize: root.fSize; font.family: "monospace"
-                    horizontalAlignment: Text.AlignRight
-                    elide: Text.ElideRight
                     Layout.preferredWidth: root.wDxcc
+                    Layout.fillHeight: true
+                    Text {
+                        anchors.fill: parent
+                        anchors.rightMargin: del.entry.isLotw === true ? 11 : 0
+                        text: !modelData ? "" : root.dxccDisplayText(del.entry)
+                        color: root.cTextDim
+                        font.pixelSize: root.fSize; font.family: "monospace"
+                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                    Rectangle {
+                        visible: !!modelData && del.entry.isLotw === true
+                        width: 6
+                        height: 6
+                        radius: 3
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: root.cLotw
+                        border.color: root.cTextDim
+                        border.width: 1
+                    }
                 }
             }
         }
