@@ -8493,6 +8493,13 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    if (m_lotwEnabled) {
+        QTimer::singleShot(0, this, [this]() {
+            if (m_lotwEnabled) {
+                updateLotwUsers();
+            }
+        });
+    }
     if (m_showUsState && m_usStateData) {
         m_usStateData->ensureLoadedAsync();
     }
