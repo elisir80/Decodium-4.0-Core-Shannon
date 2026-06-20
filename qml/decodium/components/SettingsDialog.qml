@@ -3781,20 +3781,63 @@ Dialog {
                         Text { text: qsTr("WATCHDOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("TX Watchdog (min):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        Text { text: qsTr("TX Watchdog Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        DecoComboBox {
+                            id: txWdModeCombo
+                            model: [qsTr("Off"), qsTr("Time"), qsTr("Count")]
+                            currentIndex: bridge ? bridge.txWatchdogMode : 0
+                            implicitHeight: controlHeight
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: numericFieldMinWidth
+                            Layout.preferredWidth: numericFieldMinWidth
+                            onActivated: {
+                                if (bridge && bridge.txWatchdogMode !== currentIndex) {
+                                    bridge.txWatchdogMode = currentIndex
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                            contentItem: Text {
+                                text: parent.displayText
+                                color: textPrimary
+                                font.pixelSize: controlFontSize
+                                leftPadding: 8
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                        Text { text: qsTr("TX Watchdog Time (min):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: txWdSpin
-                            from: 0; to: 999; value: bridge.txWatchdogMode === 1 ? bridge.txWatchdogTime : 0; editable: true
+                            from: 1; to: 999; value: bridge.txWatchdogTime; editable: true
+                            enabled: bridge.txWatchdogMode === 1
                             property bool completed: false
                             function applyWatchdog() {
-                                bridge.txWatchdogTime = value
-                                bridge.txWatchdogMode = value > 0 ? 1 : 0
-                                settingsDialog.scheduleSettingsPersist()
+                                if (bridge && bridge.txWatchdogMode === 1 && bridge.txWatchdogTime !== value) {
+                                    bridge.txWatchdogTime = value
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
                             }
                             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                             onValueChanged: if (completed) applyWatchdog()
                             Component.onCompleted: completed = true
                             contentItem: TextInput { text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        }
+                        Text { text: qsTr("TX Watchdog Count:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        SpinBox {
+                            id: txWdCountSpin
+                            from: 1; to: 50; value: bridge.txWatchdogCount; editable: true
+                            enabled: bridge.txWatchdogMode === 2
+                            property bool completed: false
+                            function applyWatchdog() {
+                                if (bridge && bridge.txWatchdogMode === 2 && bridge.txWatchdogCount !== value) {
+                                    bridge.txWatchdogCount = value
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
+                            onValueChanged: if (completed) applyWatchdog()
+                            Component.onCompleted: completed = true
+                            contentItem: TextInput { text: txWdCountSpin.textFromValue(txWdCountSpin.value, txWdCountSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdCountSpin.editable; validator: txWdCountSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
                         Text { text: qsTr("Tune Watchdog (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }

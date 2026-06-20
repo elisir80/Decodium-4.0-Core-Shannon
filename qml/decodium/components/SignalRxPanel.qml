@@ -25,6 +25,7 @@ Item {
     readonly property color cCyan:     tm ? tm.secondaryColor : "#66e6ff"
     readonly property color cTx:       tm ? tm.txColor        : "#ff7a5c"
     readonly property color cLotw:     root.bridge ? root.bridge.effectiveDecodeColor("colorLotwUser") : "#ffffff"
+    readonly property color cCq:       root.bridge ? root.bridge.effectiveDecodeColor("colorCQ") : root.cAccent
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
@@ -141,7 +142,7 @@ Item {
                    (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
                    entry.isTx ? Qt.rgba(0.95, 0.77, 0.06, 0.28) :
                    entry.isMyCall ? Qt.rgba(0.96, 0.26, 0.21, 0.28) :
-                   entry.isCQ ? Qt.rgba(root.cAccent.r, root.cAccent.g, root.cAccent.b, 0.14) :
+                   entry.isCQ ? Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.14) :
                    (index % 2 === 0) ? Qt.rgba(root.cBlue.r, root.cBlue.g, root.cBlue.b, 0.07)
                                      : Qt.rgba(root.cBlue.r, root.cBlue.g, root.cBlue.b, 0.13)
             radius: 2
@@ -240,7 +241,7 @@ Item {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
                     color: !modelData ? root.cText :
                            del.entry.isMyCall ? root.cTx :
-                           del.entry.isCQ ? root.cAccent : root.cText
+                           del.entry.isCQ ? root.cCq : root.cText
                     font.pixelSize: root.fSize; font.family: "monospace"
                     font.bold: !!modelData && del.entry.isMyCall === true
                     elide: Text.ElideRight

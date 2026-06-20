@@ -11182,6 +11182,8 @@ QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
     if (entry.value(QStringLiteral("isTx")).toBool())                return effectiveDecodeColor(QStringLiteral("colorTxMessage"));
     if (entry.value(QStringLiteral("isMyCall")).toBool())            return effectiveDecodeColor(QStringLiteral("colorMyCall"));
 
+    if (entry.value(QStringLiteral("isCQ")).toBool())                return effectiveDecodeColor(QStringLiteral("colorCQ"));
+
     if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewDxccBand"));
     if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewDxcc"));
     if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool())return effectiveDecodeColor(QStringLiteral("colorNewContinentBand"));
@@ -11195,7 +11197,6 @@ QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
     if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewCallBand"));
     if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewCall"));
 
-    if (entry.value(QStringLiteral("isCQ")).toBool())                return effectiveDecodeColor(QStringLiteral("colorCQ"));
     return QString();
 }
 
@@ -11246,6 +11247,8 @@ QString DecodiumBridge::decodeHighlightUserBg(const QVariantMap& entry) const
             if (!c73.isEmpty()) return c73;
         }
     }
+    if (entry.value(QStringLiteral("isCQ")).toBool())                 return bg(QStringLiteral("colorCQ"));
+
     if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())      return bg(QStringLiteral("colorNewDxccBand"));
     if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())          return bg(QStringLiteral("colorNewDxcc"));
     if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool()) return bg(QStringLiteral("colorNewContinentBand"));
@@ -11265,7 +11268,6 @@ QString DecodiumBridge::decodeHighlightUserBg(const QVariantMap& entry) const
         || entry.value(QStringLiteral("dxIsMostWanted")).toBool()
         || entry.value(QStringLiteral("dxIsNewCountry")).toBool()
         || entry.value(QStringLiteral("dxIsNewBand")).toBool())      return bg(QStringLiteral("colorDXEntity"));
-    if (entry.value(QStringLiteral("isCQ")).toBool())                return bg(QStringLiteral("colorCQ"));
     return QString();
 }
 
@@ -11798,10 +11800,34 @@ bool DecodiumBridge::ft4LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs,
 
 void DecodiumBridge::drainFt4LiveDecodeBacklog(quint64 keepSerial, const QString& reason)
 {
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    static constexpr qint64 kFt4PreserveRunningDecodeMaxAgeMs = 9000;
+    quint64 preserveRunningSerial = 0;
+    qint64 preserveRunningAgeMs = -1;
+
+    for (auto it = m_decodeStartMsBySerial.constBegin(); it != m_decodeStartMsBySerial.constEnd(); ++it) {
+        quint64 const serial = it.key();
+        if (serial == keepSerial) {
+            continue;
+        }
+        if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT4")) {
+            continue;
+        }
+        qint64 const ageMs = qMax<qint64>(0, nowMs - it.value());
+        if (ageMs <= kFt4PreserveRunningDecodeMaxAgeMs
+            && (preserveRunningSerial == 0 || ageMs > preserveRunningAgeMs)) {
+            preserveRunningSerial = serial;
+            preserveRunningAgeMs = ageMs;
+        }
+    }
+
     int removedMeta = 0;
     QList<quint64> const serials = m_decodeStartMsBySerial.keys();
     for (quint64 const serial : serials) {
         if (serial == keepSerial) {
+            continue;
+        }
+        if (serial == preserveRunningSerial) {
             continue;
         }
         if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT4")) {
@@ -11818,14 +11844,15 @@ void DecodiumBridge::drainFt4LiveDecodeBacklog(quint64 keepSerial, const QString
         QCoreApplication::removePostedEvents(m_ft4Worker, QEvent::MetaCall);
     }
 
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("backlog drain %1").arg(reason));
 
     if (nowMs - m_lastFt4BacklogDrainLogMs >= 2000) {
         m_lastFt4BacklogDrainLogMs = nowMs;
-        bridgeLog(QStringLiteral("FT4 live backlog drain: keepSerial=%1 removed=%2 %3")
+        bridgeLog(QStringLiteral("FT4 live backlog drain: keepSerial=%1 removed=%2 preserveSerial=%3 preserveAgeMs=%4 %5")
                       .arg(keepSerial)
                       .arg(removedMeta)
+                      .arg(preserveRunningSerial)
+                      .arg(preserveRunningAgeMs)
                       .arg(reason));
     }
 }

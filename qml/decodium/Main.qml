@@ -2077,10 +2077,10 @@ ApplicationWindow {
         if (customColor !== "") return boostedDecodeTextColor(customColor)
         if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
         if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
+        if (modelData.isCQ) return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        if (modelData.isCQ) return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         return boostedDecodeTextColor(textPrimary)
     }
 

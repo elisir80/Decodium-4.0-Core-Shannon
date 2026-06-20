@@ -442,10 +442,10 @@ Window {
 
         if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
         if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
+        if (modelData.isCQ)     return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        if (modelData.isCQ)     return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
         return boostedDecodeTextColor(textPrimary)
     }
 
