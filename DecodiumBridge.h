@@ -1643,9 +1643,11 @@ private slots:
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
 private:
-    void tickTargetCallOnTx();   // CALL retry counter/timing enforcement on TX end
+    void tickTargetCallOnTx();   // CALL missed-target counter/timing enforcement on TX end
     // DX-watch armato (estensione CALL): ARMED->CALLING quando il target compare
     // come mittente in un decode; re-arm/stop a fine tentativo senza QSO.
+    bool targetCallRowsContainTarget(const QStringList& rows, QString* matchedMessage = nullptr) const;
+    void observeTargetCallDecodeRows(const QStringList& rows, const QString& context);
     bool tryArmedWatchSeesTarget(const QStringList& rows);
     void beginTargetCallCalling();   // ARMED->CALLING: abilita TX + arma il timeout
     void endTargetCallNoQso(const QString& reason); // re-arm (capped->Halt) o stop
@@ -1708,7 +1710,7 @@ private:
     void noteCpuPressure(const QString& reason, int durationMs = 10000, bool severe = false);
     int effectiveFtThreadLimit() const;
     bool ft4AdaptiveCpuLimitActive(qint64 nowMs = 0) const;
-    void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason);
+    void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason, qint64 durationMs = 60000);
     int effectiveFt4ThreadLimit() const;
     int effectiveFt4DecodeDepth(int requestedDepth) const;
     int effectiveSpectrumTimerIntervalMs() const;
@@ -2548,18 +2550,20 @@ private:
     // === TARGET CALL feature (fork-only 1.0.262) ===
     bool    m_targetCallActive       {false};
     QString m_targetCallSign;
-    int     m_targetCallMaxRetries   {10};   // 0 = infinito
+    int     m_targetCallMaxRetries   {10};   // 0 = infinito; semantica: TX senza rivedere il target
     int     m_targetCallTimeoutS     {90};
     int     m_targetCallPeriod       {2};    // CALL UI convention: 0=1st, 1=2nd, 2=alterna
     int     m_targetCallPauseS       {0};
     int     m_targetCallRetryCount   {0};
     QDateTime m_targetCallStartedUtc;        // CALL wall-clock timeout anchor
     QDateTime m_targetCallLastTxUtc;         // ultima TX inviata al target
+    QDateTime m_targetCallLastSeenUtc;       // ultimo decode del target mentre CALL e' attivo
     quint64 m_targetCallSessionId {0};       // invalidates timeout/pause timers across stop/start
     QString m_targetCallSavedDxCall;         // dxCall pre-attivazione (per ripristino on stop)
     int     m_targetCallSavedTxPeriod {0};
     bool    m_targetCallSavedAlt12   {false};
     bool    m_targetCallWasTransmitting {false}; // edge detector per transmittingChanged
+    bool    m_targetCallSeenSinceLastTx {false}; // resetta il contatore TX a vuoto
     // DX-watch armato (opt-in, default OFF): ARMED prima di chiamare il target.
     bool    m_armedWatchEnabled      {false};  // toggle: arma il watch invece di chiamare subito
     bool    m_armedReArm             {false};  // a fine tentativo senza QSO torna in ascolto (capped)

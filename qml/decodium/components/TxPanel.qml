@@ -1049,10 +1049,10 @@ Item {
                                 readonly property real prefWidth: txPanel.toolbarActionWidth("CALL", "📞")
                                 readonly property bool callOn: engine && engine.targetCallActive
                                 readonly property string tip: engine && engine.targetCallActive
-                                              ? qsTr("Active call: %1 (attempt %2/%3)\nClick to open the panel").arg(engine.targetCallSign)
+                                              ? qsTr("Active call: %1 (missed target %2/%3)\nClick to open the panel").arg(engine.targetCallSign)
                                                     .arg(engine.targetCallRetryCount)
                                                     .arg(engine.targetCallMaxRetries === 0 ? "∞" : engine.targetCallMaxRetries)
-                                              : qsTr("Direct call (CALL)\nOpen the direct callsign call panel\nwith retry, timeout, and period control")
+                                              : qsTr("Direct call (CALL)\nOpen the direct callsign call panel\nwith missed-target limit, timeout, and period control")
                                 function activate(mouse) { txPanel.callRequested() }
                                 radius: 5
                                 color: callOn ? Qt.alpha(successGreen, 0.3) : Qt.alpha(textPrimary, 0.05)

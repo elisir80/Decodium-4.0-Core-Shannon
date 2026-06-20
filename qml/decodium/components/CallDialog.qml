@@ -1,5 +1,5 @@
 // 1.0.262 — CALL Dialog (fork-only iu8lmc)
-// Pannello per chiamata diretta verso uno specifico callsign con retry/timeout,
+// Pannello per chiamata diretta verso uno specifico callsign con limite target-missing/timeout,
 // + sezione AutoCQ generico (max cycles, pausa fra cicli).
 //
 // Apertura via callButton in TxPanel.qml. Bridge backend:
@@ -202,14 +202,14 @@ Window {
                 }
             }
 
-            // ====== TENTATIVI + TIMEOUT ======
+            // ====== TARGET MISSING + TIMEOUT ======
             GridLayout {
                 Layout.fillWidth: true
                 columns: 2
                 columnSpacing: 12
                 rowSpacing: 8
 
-                Text { text: qsTr("Tentativi max"); color: callDialog.cMuted; font.pixelSize: 12 }
+                Text { text: qsTr("Max chiamate a vuoto"); color: callDialog.cMuted; font.pixelSize: 12 }
                 Text { text: qsTr("Timeout totale (s)"); color: callDialog.cMuted; font.pixelSize: 12 }
 
                 RowLayout {
@@ -407,7 +407,7 @@ Window {
                     id: reArmCheck
                     Layout.fillWidth: true
                     Layout.leftMargin: 18
-                    text: qsTr("Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)")
+                    text: qsTr("Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)")
                     checked: bridge && bridge.armedReArm
                     enabled: armedCheck.checked && (!bridge || !bridge.targetCallActive)
                     opacity: enabled ? 1.0 : 0.5
@@ -441,7 +441,7 @@ Window {
                     }
                     Text {
                         visible: !(bridge && bridge.targetCallArmedWaiting)
-                        text: bridge ? qsTr("Tentativo %1 / %2").arg(bridge.targetCallRetryCount).arg(
+                        text: bridge ? qsTr("A vuoto %1 / %2").arg(bridge.targetCallRetryCount).arg(
                                   bridge.targetCallMaxRetries === 0 ? qsTr("∞") : bridge.targetCallMaxRetries) : ""
                         color: callDialog.cText
                         font.pixelSize: 12
