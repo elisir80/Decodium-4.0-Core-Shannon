@@ -1837,37 +1837,37 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23517"/>
+        <location filename="../DecodiumBridge.cpp" line="23528"/>
         <source>TX non avviata</source>
         <translation>TX не запущена</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23518"/>
+        <location filename="../DecodiumBridge.cpp" line="23529"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Сжатый callsign не разрешён</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27058"/>
+        <location filename="../DecodiumBridge.cpp" line="27069"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ остановлен</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27059"/>
+        <location filename="../DecodiumBridge.cpp" line="27070"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Получен прямой вызов, но callsign не разрешён</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32040"/>
+        <location filename="../DecodiumBridge.cpp" line="32058"/>
         <source>Map selection: %1 %2</source>
         <translation>Выбор на карте: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32041"/>
+        <location filename="../DecodiumBridge.cpp" line="32059"/>
         <source>Map selection: %1</source>
         <translation>Выбор на карте: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38386"/>
+        <location filename="../DecodiumBridge.cpp" line="38411"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Проверка обновлений отключена в этой сборке.</translation>
     </message>
@@ -4049,9 +4049,8 @@ Right-click: decode a folder</source>
         <translation>История декодирования (Ctrl+Shift+H)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
         <source>Bilanciato</source>
-        <translation>Сбалансированный</translation>
+        <translation type="vanished">Сбалансированный</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4373"/>
@@ -4069,14 +4068,27 @@ Right-click: decode a folder</source>
         <translation>Ограничение CPU</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4374"/>
         <source>Profili…</source>
-        <translation>Профили…</translation>
+        <translation type="vanished">Профили…</translation>
+    </message>
+    <message>
+        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
+        <translation type="vanished">Готовые профили — применяют разом переключатели FT2/декодирования. Подробности в Setup → FT2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>Сбалансированный</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4374"/>
+        <source>Profiles...</source>
+        <translation>Профили...</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4379"/>
-        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
-        <translation>Готовые профили — применяют разом переключатели FT2/декодирования. Подробности в Setup → FT2.</translation>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Готовые профили — применяют переключатели FT2/декодирования группой. Подробности в Setup -&gt; TX.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4617"/>
@@ -10354,74 +10366,74 @@ Downloaded file exceeds limit of %1 MiB:
         <translation>UDP ошибка сокета</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20532"/>
+        <location filename="../DecodiumBridge.cpp" line="20543"/>
         <source>Invalid frequency</source>
         <translation>Неверная частота</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20534"/>
+        <location filename="../DecodiumBridge.cpp" line="20545"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Неверные дата/время. Используйте формат ISO или yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20536"/>
+        <location filename="../DecodiumBridge.cpp" line="20547"/>
         <source>Invalid frequency row</source>
         <translation>Неверная строка частоты</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20595"/>
+        <location filename="../DecodiumBridge.cpp" line="20606"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>Не удалось разобрать JSON-файл частот: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20603"/>
+        <location filename="../DecodiumBridge.cpp" line="20614"/>
         <source>No frequencies were found</source>
         <translation>Частоты не найдены</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20609"/>
-        <location filename="../DecodiumBridge.cpp" line="20711"/>
-        <location filename="../DecodiumBridge.cpp" line="20738"/>
+        <location filename="../DecodiumBridge.cpp" line="20620"/>
+        <location filename="../DecodiumBridge.cpp" line="20722"/>
+        <location filename="../DecodiumBridge.cpp" line="20749"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>Файл частот содержит слишком много строк (%1, лимит %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20650"/>
+        <location filename="../DecodiumBridge.cpp" line="20661"/>
         <source>Frequency file does not exist</source>
         <translation>Файл частот не существует</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20656"/>
+        <location filename="../DecodiumBridge.cpp" line="20667"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>Файл частот слишком велик (%1 байт, лимит %2 байт)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20666"/>
+        <location filename="../DecodiumBridge.cpp" line="20677"/>
         <source>Cannot open frequency file: %1</source>
         <translation>Невозможно открыть файл частот: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20676"/>
+        <location filename="../DecodiumBridge.cpp" line="20687"/>
         <source>No valid working frequencies found</source>
         <translation>Действительные рабочие частоты не найдены</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20690"/>
+        <location filename="../DecodiumBridge.cpp" line="20701"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Недействительный файл частот: неверная сигнатура файла</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20697"/>
+        <location filename="../DecodiumBridge.cpp" line="20708"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Недействительный файл частот: версия слишком новая</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20716"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Недействительный файл частот: невозможно прочитать число строк</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20732"/>
+        <location filename="../DecodiumBridge.cpp" line="20743"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Недействительный файл частот: содержимое повреждено</translation>
     </message>
@@ -11428,7 +11440,7 @@ Error(%2): %3</source>
         <translation>2x интервал между тонами:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5239"/>
         <source>4-digit Grids:</source>
         <translation>4-символьные локаторы:</translation>
     </message>
@@ -11438,38 +11450,38 @@ Error(%2): %3</source>
         <translation>4-кратный интервал между тонами:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5690"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4521"/>
         <source>ALIGNMENT</source>
         <translation>ВЫРАВНИВАНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7749"/>
         <source>ALWAYS PASS</source>
         <translation>ВСЕГДА ПРОХОДИТЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4868"/>
         <source>AP Decode:</source>
         <translation>Декодирование AP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5054"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5064"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5112"/>
         <source>API Key:</source>
         <translation>Ключ API:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5053"/>
         <source>API URL:</source>
         <translation>API URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7426"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7482"/>
         <source>AUDIO ALERTS</source>
         <translation>АУДИО ALERTS</translation>
     </message>
@@ -11484,49 +11496,49 @@ Error(%2): %3</source>
         <translation>АВТО ПОСЛЕДОВАТЕЛЬНОСТЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5652"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
         <source>Accept UDP:</source>
         <translation>Примите UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5356"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5366"/>
         <source>Access token:</source>
         <translation>Токен доступа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7170"/>
         <source>Activity:</source>
         <translation>Деятельность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
         <source>Aggressive:</source>
         <translation>Агрессивный:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7429"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7485"/>
         <source>Alerts Enabled:</source>
         <translation>Оповещения включены:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4541"/>
         <source>Align Steps 2:</source>
         <translation>Выровняйте шаги 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4521"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
         <source>Align Steps:</source>
         <translation>Выровнять шаги:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4514"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4524"/>
         <source>Align:</source>
         <translation>Выровнять:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5457"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5519"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5529"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5597"/>
         <source>All interfaces</source>
         <translation>Все интерфейсы</translation>
     </message>
@@ -11536,7 +11548,7 @@ Error(%2): %3</source>
         <translation>Разрешить TX QSY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7032"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7088"/>
         <source>Alt Erase Btn:</source>
         <translation>Альтернативная кнопка стирания:</translation>
     </message>
@@ -11546,22 +11558,22 @@ Error(%2): %3</source>
         <translation>Alt F1-F6 Привязка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7736"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7792"/>
         <source>Always Pass 10:</source>
         <translation>Всегда проходите 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7740"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7796"/>
         <source>Always Pass 11:</source>
         <translation>Всегда проходите 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7799"/>
         <source>Always Pass 12:</source>
         <translation>Всегда проходите 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7705"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7761"/>
         <source>Always Pass 1:</source>
         <translation>Всегда проходить 1:</translation>
     </message>
@@ -11631,39 +11643,32 @@ Error(%2): %3</source>
         <translation>Авто-уровень RX отключён</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
         <source>PROFILI PRONTI</source>
-        <translation>ГОТОВЫЕ ПРОФИЛИ</translation>
+        <translation type="vanished">ГОТОВЫЕ ПРОФИЛИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
         <source>Bilanciato (QSO quotidiano) — default</source>
-        <translation>Сбалансированный (повседневное QSO) — по умолчанию</translation>
+        <translation type="vanished">Сбалансированный (повседневное QSO) — по умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</source>
-        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · пропуск конца слота OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</translation>
+        <translation type="vanished">Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · пропуск конца слота OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
         <source>Weak-signal / caccia DX</source>
-        <translation>Слабый сигнал / охота за DX</translation>
+        <translation type="vanished">Слабый сигнал / охота за DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
         <source>Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).</source>
-        <translation>Как Сбалансированный, но: caller retries 7 · adaptive decode OFF (максимальная чувствительность) · AP cache rescue ON (допускает несколько ложных) · пропуск конца слота OFF (не терять поздние декодирования).</translation>
+        <translation type="vanished">Как Сбалансированный, но: caller retries 7 · adaptive decode OFF (максимальная чувствительность) · AP cache rescue ON (допускает несколько ложных) · пропуск конца слота OFF (не терять поздние декодирования).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Contest / alta densità</source>
-        <translation>Contest / высокая плотность</translation>
+        <translation type="vanished">Contest / высокая плотность</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
         <source>close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</source>
-        <translation>close strong partners ON · пропуск конца слота ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</translation>
+        <translation type="vanished">close strong partners ON · пропуск конца слота ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3013"/>
@@ -11671,14 +11676,12 @@ Error(%2): %3</source>
         <translation>Ограничение CPU (Decodium Console / mini PC)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.</source>
-        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · остальное по умолчанию. Watchdog без изменений.</translation>
+        <translation type="vanished">adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · остальное по умолчанию. Watchdog без изменений.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
         <source>● attivo</source>
-        <translation>● активен</translation>
+        <translation type="vanished">● активен</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3137"/>
@@ -12371,109 +12374,113 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
         <translation>US State:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4403"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6958"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6979"/>
         <source>Updating...</source>
         <translation>Обновление...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4404"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4410"/>
         <source>%1 calls</source>
         <translation>%1 вызовов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4405"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6981"/>
         <source>Not loaded</source>
         <translation>Не загружено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4412"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6031"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4420"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6041"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6240"/>
         <source>Update</source>
         <translation>Обновить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4426"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4436"/>
         <source>Waterfall Calls:</source>
         <translation>Waterfall Calls:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4434"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4444"/>
         <source>FS Dist:</source>
         <translation>FS Dist:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4442"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4452"/>
         <source>FS Az:</source>
         <translation>FS Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4450"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4460"/>
         <source>RX Freq:</source>
         <translation>RX Freq:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4458"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4468"/>
         <source>RX Dist:</source>
         <translation>RX Dist:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4466"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4476"/>
         <source>RX Az:</source>
         <translation>RX Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4571"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>УДАЛЁННЫЙ ВЕБ-СЕРВЕР (iPad / mobile PWA)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4574"/>
         <source>Abilita Web Server:</source>
         <translation>Включить веб-сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4594"/>
         <source>Porta TCP:</source>
         <translation>TCP-порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4605"/>
         <source>URL accesso:</source>
         <translation>URL доступа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4616"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4643"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>ОТОБРАЖЕНИЕ СПИСКА ДЕКОДИРОВАНИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4636"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4646"/>
         <source>Colored period separator:</source>
         <translation>Цветной разделитель периодов:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4660"/>
         <source>Newest first:</source>
         <translation>Сначала новые:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4816"/>
         <source>CQ filter:</source>
         <translation>CQ filter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4881"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4891"/>
         <source>Deep decode in TX:</source>
         <translation>Deep decode в TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4893"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4903"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -12486,567 +12493,598 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 Требует дополнительного CPU во время QSO. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5077"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5087"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5091"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5101"/>
         <source>Replace duplicates:</source>
         <translation>Заменять дубликаты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5134"/>
         <source>Testing...</source>
         <translation>Тестирование...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5134"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7493"/>
         <source>Test</source>
         <translation>Тест</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5147"/>
         <source>Testing QRZ API key...</source>
         <translation>Тестирование ключа API QRZ...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5377"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5387"/>
         <source>Client ID:</source>
         <translation>Client ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5409"/>
         <source>Preset:</source>
         <translation>Пресет:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5553"/>
         <source>Tertiary UDP:</source>
         <translation>Tertiary UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5551"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
         <source>Tertiary Server:</source>
         <translation>Tertiary Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5571"/>
         <source>Tertiary Port:</source>
         <translation>Tertiary Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5582"/>
         <source>Tertiary TTL:</source>
         <translation>Tertiary TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5594"/>
         <source>Tertiary Interface:</source>
         <translation>Tertiary Interface:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5605"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5615"/>
         <source>Tertiary ADIF:</source>
         <translation>Tertiary ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5618"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5628"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5621"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5631"/>
         <source>Enable N1MM:</source>
         <translation>Включить N1MM:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5639"/>
         <source>N1MM Port:</source>
         <translation>N1MM Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5641"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5651"/>
         <source>N1MM Server:</source>
         <translation>N1MM Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5739"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5749"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>КАЛИБРОВКА ЧАСТОТЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5747"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5757"/>
         <source>Refresh</source>
         <translation>Обновить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5783"/>
         <source>Slope:</source>
         <translation>Наклон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5791"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5801"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5793"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5803"/>
         <source>Intercept:</source>
         <translation>Сдвиг:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5821"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5830"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5840"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
         <translation>Сбросить калибровку (slope=0, intercept=0). Частота записывается в rig без коррекции (быстрый путь).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5852"/>
         <source>Preview correzione:</source>
         <translation>Предпросмотр коррекции:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5853"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5863"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5868"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5878"/>
         <source>WORKING FREQUENCIES</source>
         <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5876"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5886"/>
         <source>Load</source>
         <translation>Загрузить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5885"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5895"/>
         <source>Merge</source>
         <translation>Объединить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5894"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5904"/>
         <source>Save as</source>
         <translation>Сохранить как</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5913"/>
         <source>Defaults</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5933"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5943"/>
         <source>Region:</source>
         <translation>Region:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5948"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5958"/>
         <source>Freq MHz:</source>
         <translation>Частота MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5968"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5978"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6106"/>
         <source>Pref</source>
         <translation>Pref</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5987"/>
         <source>Description:</source>
         <translation>Описание:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5991"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6001"/>
         <source>Start:</source>
         <translation>Начало:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6012"/>
         <source>End:</source>
         <translation>Конец:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6021"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6031"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6231"/>
         <source>Add</source>
         <translation>Добавить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6042"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6240"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6250"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6062"/>
         <source>New</source>
         <translation>Новый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6093"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6103"/>
         <source>IARU Region</source>
         <translation>IARU Region</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6094"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6104"/>
         <source>Mode</source>
         <translation>Режим</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6095"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
         <source>Frequency</source>
         <translation>Частота</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6107"/>
         <source>Description</source>
         <translation>Описание</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6098"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6108"/>
         <source>Start Date/Time</source>
         <translation>Дата/время начала</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6109"/>
         <source>End Date/Time</source>
         <translation>Дата/время конца</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6162"/>
         <source>STATION INFORMATION</source>
         <translation>ИНФОРМАЦИЯ О СТАНЦИИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6159"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6169"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>Band offset — это сдвиг частоты transverter/станции для данного диапазона; используйте 0.000000, если не применяется.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6193"/>
         <source>Band:</source>
         <translation>Диапазон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6191"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6201"/>
         <source>Offset MHz:</source>
         <translation>Offset MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6280"/>
         <source>Band</source>
         <translation>Диапазон</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6271"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6281"/>
         <source>Offset</source>
         <translation>Offset</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6282"/>
         <source>Antenna Description</source>
         <translation>Описание антенны</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6400"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
         <translation>Использовать этот конкретный цвет декодирования. Когда OFF, эта категория использует общий цвет по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6498"/>
         <source>BG:</source>
         <translation>BG:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6512"/>
         <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
         <translation>Окрашивать ФОН строки (помимо текста) для этой категории. OFF = без пользовательского фона.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6597"/>
         <source>Decode Boost:</source>
         <translation>Decode Boost:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6664"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>ЦВЕТА ИНТЕРФЕЙСА (фон + текст)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6669"/>
         <source>Usa colori personalizzati:</source>
         <translation>Использовать пользовательские цвета:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6666"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6676"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>(переопределяет фон и текст темы)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6673"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6683"/>
         <source>Background:</source>
         <translation>Фон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6703"/>
         <source>Text:</source>
         <translation>Текст:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6795"/>
         <source>Download CALL3.TXT...</source>
         <translation>Скачать CALL3.TXT...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6907"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6917"/>
         <source>Direct Visual:</source>
         <translation>Direct Visual:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6923"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
         <translation>Быстрый визуальный panadapter. В legacy-режиме может открыть второй аудиозахват; в обычном режиме только увеличивает частоту визуального обновления. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6928"/>
         <source>Low CPU:</source>
         <translation>Low CPU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6937"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
         <translation>Профиль для медленных PC: максимум 2 FT-потока, более медленный waterfall, сокращённое раннее/глубокое декодирование. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6932"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6942"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>Сокращает FT-потоки, обновление waterfall и рендеринг QML во время monitor/TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7237"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6953"/>
+        <source>DATA UPDATES</source>
+        <translation>ОБНОВЛЕНИЕ ДАННЫХ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6956"/>
+        <source>LotW Users:</source>
+        <translation>Пользователи LotW:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6959"/>
+        <source>%1 users</source>
+        <translation>%1 пользователей</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6990"/>
+        <source>Force Update</source>
+        <translation>Принудительно обновить</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6977"/>
+        <source>US States:</source>
+        <translation>US States:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6980"/>
+        <source>%1 calls, %2 locators</source>
+        <translation>%1 позывных, %2 локаторов</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7293"/>
         <source>RF self-calibration:</source>
         <translation>RF самокалибровка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7298"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
         <translation>Использовать значения DT принятых декодирований только как вторичную подсказку синхронизации времени после того, как NTP/HTTPS уже зафиксированы. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7303"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
         <translation>Только вторичная подсказка; она не может создать первую фиксацию времени.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7255"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7311"/>
         <source>ADV DECODING</source>
         <translation>ADV DECODING</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7258"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7314"/>
         <source>Auto Mode:</source>
         <translation>Auto Mode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7262"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7318"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>AUTO - включать 3 технологии при необходимости</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7275"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7331"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>Когда ON, 3 функции ниже управляются автоматически. Триггер: Neural+Turbo при декодированиях &lt; 2/slot в течение 4 слотов. Coherent при Q65 SNR &lt; -22 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7283"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7339"/>
         <source>Live state:</source>
         <translation>Текущее состояние:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7285"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7341"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7343"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7345"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7293"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7349"/>
         <source>Coherent Avg:</source>
         <translation>Coherent Avg:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7298"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7354"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7312"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7368"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>Накапливает многослотовое усреднение для декодирований Q65/JT65 (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7319"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7375"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7380"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync (FT8 OSD-декодер)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7394"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>Форсирует OSD-ориентированное декодирование FT8 (+2-3 dB на пограничных сигналах)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7345"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7401"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo Feedback:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7350"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7406"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo Feedback (расширенные итерации LDPC)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7364"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7420"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>Расширенные итерации LDPC для восстановления маргинального декодирования</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7708"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7764"/>
         <source>Always Pass 2:</source>
         <translation>Всегда пас 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7768"/>
         <source>Always Pass 3:</source>
         <translation>Всегда проходите 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7771"/>
         <source>Always Pass 4:</source>
         <translation>Всегда проходите 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7775"/>
         <source>Always Pass 5:</source>
         <translation>Всегда проходите 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7778"/>
         <source>Always Pass 6:</source>
         <translation>Всегда проходите 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7782"/>
         <source>Always Pass 7:</source>
         <translation>Всегда проходите 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7785"/>
         <source>Always Pass 8:</source>
         <translation>Всегда проходите 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7789"/>
         <source>Always Pass 9:</source>
         <translation>Всегда проходите 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7857"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7913"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Монитор (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
         <source>Setup (⚙)</source>
         <translation>Настройка (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7920"/>
         <source>Layout (window reset)</source>
         <translation>Раскладка (сброс окон)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7921"/>
         <source>History (decode history)</source>
         <translation>История (история декодирования)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7923"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7925"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX Cluster (toolbar)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
         <source>World Clock</source>
         <translation>Мировые часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7930"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>Показывайте или скрывайте кнопки UI по своему усмотрению. Изменения применяются сразу и сохраняются автоматически.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7880"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7936"/>
         <source>TOP TOOLBAR</source>
         <translation>ВЕРХНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7899"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7955"/>
         <source>TOOLBAR BUTTON ORDER</source>
         <translation>ПОРЯДОК КНОПОК ПАНЕЛИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7959"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
         <translation>Перетаскивайте кнопки верхней панели (долгое нажатие) для их переупорядочивания. Используйте кнопку ниже для восстановления порядка по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7921"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7977"/>
         <source>Restore default button order</source>
         <translation>Восстановить порядок кнопок по умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7951"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8007"/>
         <source>Restore default TX panel order</source>
         <translation>Восстановить порядок панели TX по умолчанию</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1640"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6213"/>
         <source>Antenna:</source>
         <translation>Антенна:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5366"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5376"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>Требуется перезапуск приложения. Для LAN/WAN используйте токен длиной не менее 12 символов.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6875"/>
         <source>Auto Astro:</source>
         <translation>Авто Астро:</translation>
     </message>
@@ -13056,7 +13094,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Автолокатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5218"/>
         <source>Auto Log:</source>
         <translation>Автоматический журнал:</translation>
     </message>
@@ -13066,7 +13104,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Автоматическая последовательность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
         <source>Avg Decode:</source>
         <translation>Среднее декодирование:</translation>
     </message>
@@ -13076,7 +13114,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Каталог AzEl:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6575"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6585"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 Зачеркивание:</translation>
     </message>
@@ -13086,12 +13124,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>БЕЗОПАСНОСТЬ CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6943"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6999"/>
         <source>BEHAVIOR</source>
         <translation>ПОВЕДЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7582"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
         <source>BLACKLIST</source>
         <translation>ЧЕРНЫЙ СПИСОК</translation>
     </message>
@@ -13116,72 +13154,72 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Скорость:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6739"/>
         <source>Black Level:</source>
         <translation>Уровень черного:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7626"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7682"/>
         <source>Blacklist 10:</source>
         <translation>Черный список 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7686"/>
         <source>Blacklist 11:</source>
         <translation>Черный список 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7689"/>
         <source>Blacklist 12:</source>
         <translation>Черный список 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7651"/>
         <source>Blacklist 1:</source>
         <translation>Черный список 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7598"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7654"/>
         <source>Blacklist 2:</source>
         <translation>Черный список 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7602"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7658"/>
         <source>Blacklist 3:</source>
         <translation>Черный список 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7661"/>
         <source>Blacklist 4:</source>
         <translation>Черный список 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7609"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7665"/>
         <source>Blacklist 5:</source>
         <translation>Черный список 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7668"/>
         <source>Blacklist 6:</source>
         <translation>Черный список 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7672"/>
         <source>Blacklist 7:</source>
         <translation>Черный список 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7619"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7675"/>
         <source>Blacklist 8:</source>
         <translation>Черный список 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7679"/>
         <source>Blacklist 9:</source>
         <translation>Черный список 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6645"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6655"/>
         <source>Blue Calls:</source>
         <translation>Синие позывные:</translation>
     </message>
@@ -13208,27 +13246,27 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>CI-V Адрес:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5028"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5038"/>
         <source>CLOUDLOG</source>
         <translation>ОБЛАЧНЫЙ ЛОГ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7111"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7167"/>
         <source>CONTEST</source>
         <translation>КОНКУРС</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4795"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4805"/>
         <source>CQ Only:</source>
         <translation>CQ Только:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7582"/>
         <source>CQ Zone Band:</source>
         <translation>CQ Зонный диапазон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7515"/>
         <source>CQ in Msg:</source>
         <translation>CQ в сообщении:</translation>
     </message>
@@ -13248,17 +13286,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>CW ID после 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7874"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
         <translation>Wait &amp;amp; Pounce прослушивает отфильтрованные декодирования CQ, но начинает ответ только когда TX/CQ уже взведена оператором.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7876"/>
         <source>W&amp;P Filters Only:</source>
         <translation>W&amp;amp;P только фильтры:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7884"/>
         <source>Calling Only:</source>
         <translation>Только вызывающие станции:</translation>
     </message>
@@ -13268,17 +13306,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Проверьте SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7015"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7071"/>
         <source>Clear DX Call:</source>
         <translation>Очистить DX-позывной:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7062"/>
         <source>Clear DX Grid:</source>
         <translation>Очистить DX-локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4512"/>
         <source>Click TX:</source>
         <translation>Нажмите TX:</translation>
     </message>
@@ -13299,7 +13337,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Цвет DX Объект:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6735"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6745"/>
         <source>Color Gain:</source>
         <translation>Усиление цвета:</translation>
     </message>
@@ -13310,53 +13348,53 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4986"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4996"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4987"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7201"/>
         <source>Contest Name:</source>
         <translation>Название конкурса:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5246"/>
         <source>Contest Only:</source>
         <translation>Только конкурс:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6751"/>
         <source>Contrast:</source>
         <translation>Контраст:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7246"/>
         <source>Custom Server:</source>
         <translation>Пользовательский сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6748"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6758"/>
         <source>DATA DOWNLOAD</source>
         <translation>ЗАГРУЗКА ДАННЫХ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6348"/>
         <source>DECODE COLORS</source>
         <translation>ДЕКОДИРОВАТЬ ЦВЕТА</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4802"/>
         <source>DECODE FILTERS</source>
         <translation>ФИЛЬТРЫ ДЕКОДИРОВАНИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4669"/>
         <source>DECODE PARAMETERS</source>
         <translation>ПАРАМЕТРЫ ДЕКОДИРОВАНИЯ</translation>
     </message>
@@ -13376,12 +13414,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>СПРАВОЧНИК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4936"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
         <source>DX CLUSTER</source>
         <translation>DX КЛАСТЕР</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7549"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
         <source>DX Call/Grid:</source>
         <translation>DX-позывной/локатор:</translation>
     </message>
@@ -13391,17 +13429,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Биты данных:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5193"/>
         <source>Days Upload:</source>
         <translation>Дни загрузки:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4672"/>
         <source>Decode Depth:</source>
         <translation>Глубина декодирования:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4723"/>
         <source>Decode at 52s:</source>
         <translation>Декодирование на 52 с:</translation>
     </message>
@@ -13411,12 +13449,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Декодированный шрифт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Deep</source>
         <translation>Глубокий</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4857"/>
         <source>Deep Search:</source>
         <translation>Глубокий поиск:</translation>
     </message>
@@ -13427,12 +13465,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4781"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4791"/>
         <source>Degrade S/N:</source>
         <translation>Ухудшить S/N:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5017"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Detail:</source>
         <translation>Деталь:</translation>
     </message>
@@ -13448,98 +13486,143 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2506"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5016"/>
         <source>Disconnect</source>
         <translation>Отключить</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4987"/>
         <source>Disconnected</source>
         <translation>Отключено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6795"/>
         <source>Download CALL3.TXT</source>
         <translation>Скачать CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7200"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7256"/>
         <source>Empty = automatic public servers</source>
         <translation>Пусто = автоматические общедоступные серверы.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
         <source>Enable NTP:</source>
         <translation>Включите NTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5693"/>
         <source>Enable TCP ADIF:</source>
         <translation>Включите TCP ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5031"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5080"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5311"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5041"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5090"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5321"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7696"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7752"/>
         <source>Enabled:</source>
         <translation>Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6998"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7054"/>
         <source>Erase Band Act:</source>
         <translation>Закон о стирании полосы:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4747"/>
         <source>Erasure Patterns:</source>
         <translation>Шаблоны стирания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7130"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>ГОТОВЫЕ ПРОФИЛИ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Сбалансированный (ежедневные QSO) — по умолчанию</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Слабый сигнал / охота за DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Как Сбалансированный, но: caller retries 7 · adaptive decode OFF (максимальная чувствительность) · AP cache rescue ON (допускает несколько ложных) · skip end-slot OFF (не терять поздние декодирования).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
+        <source>Contest / high density</source>
+        <translation>Contest / высокая плотность</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>close strong partners ON · skip end-slot ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · остальное по умолчанию. Watchdog без изменений.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
+        <source>● active</source>
+        <translation>● активен</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7186"/>
         <source>FD Exchange:</source>
         <translation>FD Обмен:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7748"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7804"/>
         <source>EXCLUDE TERRITORY</source>
         <translation>ИСКЛЮЧИТЬ ТЕРРИТОРИЮ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7751"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7807"/>
         <source>Europe:</source>
         <translation>Европа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7759"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7815"/>
         <source>Africa:</source>
         <translation>Африка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7768"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7824"/>
         <source>Oceania:</source>
         <translation>Океания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7776"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7832"/>
         <source>Asia:</source>
         <translation>Азия:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7841"/>
         <source>North America:</source>
         <translation>Северная Америка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7793"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7849"/>
         <source>South America:</source>
         <translation>Южная Америка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7803"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7859"/>
         <source>FILTER OPTIONS</source>
         <translation>ВАРИАНТЫ ФИЛЬТРА</translation>
     </message>
@@ -13559,12 +13642,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Подделать это</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Fast</source>
         <translation>Быстрый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Field Day</source>
         <translation>День поля</translation>
     </message>
@@ -13579,7 +13662,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Шрифт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
         <source>Force Call 1st:</source>
         <translation>Принудительно позывной первым:</translation>
     </message>
@@ -13594,12 +13677,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Принудительно RTS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Fox</source>
         <translation>Фокс</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7069"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7125"/>
         <source>Fox Mode:</source>
         <translation>Режим Fox:</translation>
     </message>
@@ -13614,27 +13697,27 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Полный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4496"/>
         <source>Greyline:</source>
         <translation>Серая линия:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6611"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6621"/>
         <source>HIGHLIGHTING</source>
         <translation>МЕЛИРОВАНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6648"/>
         <source>HL Blue:</source>
         <translation>ХЛ Синий:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6633"/>
         <source>HL Orange:</source>
         <translation>ХЛ Оранжевый:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5318"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
         <source>HTTP port:</source>
         <translation>HTTP-порт:</translation>
     </message>
@@ -13659,17 +13742,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Аппаратное обеспечение</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6890"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6900"/>
         <source>High DPI:</source>
         <translation>Высокое разрешение:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4701"/>
         <source>High Freq (Hz):</source>
         <translation>Высокая частота (Гц):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6624"/>
         <source>Highlight 73:</source>
         <translation>Выделение 73:</translation>
     </message>
@@ -13679,12 +13762,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Хост:Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Hound</source>
         <translation>Гончая</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7080"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7136"/>
         <source>Hound Mode:</source>
         <translation>Режим Hound:</translation>
     </message>
@@ -13694,12 +13777,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>IARU регион:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7597"/>
         <source>ITU Zone Band:</source>
         <translation>Зональный диапазон МСЭ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7208"/>
         <source>Indiv Name:</source>
         <translation>Имя Индива:</translation>
     </message>
@@ -13714,7 +13797,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Устройство ввода:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5464"/>
         <source>Interface Used:</source>
         <translation>Используемый интерфейс:</translation>
     </message>
@@ -13724,7 +13807,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Курсив</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4734"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4744"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
@@ -13734,22 +13817,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>УРОВНИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5194"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5204"/>
         <source>LOGGING</source>
         <translation>РЕГИСТРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5155"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5165"/>
         <source>LOTW</source>
         <translation>ЛОТВ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6899"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6909"/>
         <source>Larger Tab:</source>
         <translation>Большая вкладка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7231"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>Оставьте сервер пустым, чтобы автоматически использовать Pool.ntp.org, Apple, Cloudflare и Google.</translation>
     </message>
@@ -13761,32 +13844,32 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Левый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5445"/>
         <source>Listen Port:</source>
         <translation>Слушать порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5231"/>
         <source>Log as RTTY:</source>
         <translation>Войдите как RTTY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5158"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
         <source>LotW Enabled:</source>
         <translation>LotW Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4679"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
         <source>Low Freq (Hz):</source>
         <translation>Низкая частота (Гц):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4782"/>
         <source>Low Sidelobes</source>
         <translation>Низкие боковые лепестки</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4476"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
         <source>MAP AND DISTANCE</source>
         <translation>КАРТА И РАССТОЯНИЕ</translation>
     </message>
@@ -13796,33 +13879,33 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>MSK/Q65 TX до 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4494"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4504"/>
         <source>Map All Msgs:</source>
         <translation>Сопоставить все сообщения:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4782"/>
         <source>Max Sensitivity</source>
         <translation>Макс. чувствительность</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4489"/>
         <source>Miles:</source>
         <translation>Майлз:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2411"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5940"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5950"/>
         <source>Mode:</source>
         <translation>Режим:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6856"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6866"/>
         <source>Monitor Last:</source>
         <translation>Последний мониторинг:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6857"/>
         <source>Monitor OFF:</source>
         <translation>Монитор ВЫКЛ:</translation>
     </message>
@@ -13834,18 +13917,18 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Моно</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5444"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
         <source>Multicast TTL:</source>
         <translation>Многоадресный TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4826"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4836"/>
         <source>My Call Only:</source>
         <translation>Только мой позывной:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7466"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7522"/>
         <source>My Call:</source>
         <translation>Мой позывной:</translation>
     </message>
@@ -13855,17 +13938,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Мой локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7160"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC Спринт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4914"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4924"/>
         <source>NETWORK SERVICES</source>
         <translation>СЕТЕВЫЕ УСЛУГИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7170"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7226"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP СИНХРОНИЗАЦИЯ ВРЕМЕНИ</translation>
     </message>
@@ -13875,57 +13958,57 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Родной (15 радиостанций)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7575"/>
         <source>New CQ Zone:</source>
         <translation>Новая зона CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7567"/>
         <source>New Cont Band:</source>
         <translation>Новая группа продолжения:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7504"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7560"/>
         <source>New Continent:</source>
         <translation>Новый Континент:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7537"/>
         <source>New DXCC Band:</source>
         <translation>Новый ремешок DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7530"/>
         <source>New DXCC:</source>
         <translation>Новый DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7552"/>
         <source>New Grid Band:</source>
         <translation>Новый локатор по диапазону:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7545"/>
         <source>New Grid:</source>
         <translation>Новый локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7590"/>
         <source>New ITU Zone:</source>
         <translation>Новая зона МСЭ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7040"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7096"/>
         <source>No Btn Color:</source>
         <translation>Нет цвета кнопки:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5019"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5029"/>
         <source>No message</source>
         <translation>Нет сообщения</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5176"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5186"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d:</translation>
     </message>
@@ -13933,17 +14016,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="658"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="858"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Normal</source>
         <translation>Нормальный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5672"/>
         <source>Notify Request:</source>
         <translation>Уведомить запрос:</translation>
     </message>
@@ -13953,32 +14036,32 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7108"/>
         <source>OPERATING MODE</source>
         <translation>РЕЖИМ РАБОТЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7372"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7428"/>
         <source>OTP</source>
         <translation>ОТП</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7375"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7431"/>
         <source>OTP Enabled:</source>
         <translation>OTP Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>OTP Interval:</source>
         <translation>OTP Интервал:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7382"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7438"/>
         <source>OTP Seed:</source>
         <translation>OTP Сид:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7399"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7455"/>
         <source>OTP URL:</source>
         <translation>URL-адрес OTP:</translation>
     </message>
@@ -14003,7 +14086,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Откройте обновление Hamlib.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6640"/>
         <source>Orange Calls:</source>
         <translation>Оранжевые позывные:</translation>
     </message>
@@ -14023,7 +14106,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>ПИТАНИЕ ПАМЯТЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4927"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter:</translation>
     </message>
@@ -14043,12 +14126,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>PWR и SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6723"/>
         <source>Palette:</source>
         <translation>Палитра:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5178"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
@@ -14058,7 +14141,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Интервал опроса (сек):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4953"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4963"/>
         <source>Port:</source>
         <translation>Порт:</translation>
     </message>
@@ -14068,17 +14151,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Мощность (Вт):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6882"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6892"/>
         <source>Progress Red:</source>
         <translation>Прогресс Красный:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5197"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5207"/>
         <source>Prompt to Log:</source>
         <translation>Подсказка для входа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7556"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
         <source>QSY Message:</source>
         <translation>QSY Сообщение:</translation>
     </message>
@@ -14088,7 +14171,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>QTH:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7016"/>
         <source>Quick Call:</source>
         <translation>Быстрый вызов:</translation>
     </message>
@@ -14098,22 +14181,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Быстрый QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5271"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5281"/>
         <source>RECORDING</source>
         <translation>ЗАПИСЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5308"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5318"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>УДАЛЕННАЯ ВЕБ-ПАНЕЛЬ (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7193"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY Обмен:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4704"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4714"/>
         <source>RX Bandwidth:</source>
         <translation>RX Пропускная способность:</translation>
     </message>
@@ -14128,7 +14211,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>RX/TX через TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7079"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;TX после QSO:</translation>
     </message>
@@ -14138,30 +14221,30 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Задний/данные</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
         <source>Record RX:</source>
         <translation>Запишите RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5294"/>
         <source>Record TX:</source>
         <translation>Запишите TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5360"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5370"/>
         <source>Required for LAN/WAN</source>
         <translation>Требуется для LAN/WAN</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4342"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4378"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5815"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6464"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6474"/>
         <source>Reset</source>
         <translation>Сброс</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5670"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
         <source>Restore Win:</source>
         <translation>Восстановить победу:</translation>
     </message>
@@ -14193,12 +14276,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>СЕРИЙНЫЕ ПАРАМЕТРЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4776"/>
         <source>SIDELOBE CONTROL</source>
         <translation>БОКОВОЕ УПРАВЛЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6710"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6720"/>
         <source>SPECTRUM</source>
         <translation>СПЕКТР</translation>
     </message>
@@ -14208,7 +14291,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>РАЗДЕЛЕННАЯ ОПЕРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6830"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6840"/>
         <source>STARTUP</source>
         <translation>СТАРТАП</translation>
     </message>
@@ -14228,37 +14311,37 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Второй (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5544"/>
         <source>Secondary ADIF:</source>
         <translation>Вторичный ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5526"/>
         <source>Secondary Interface:</source>
         <translation>Вторичный интерфейс:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5507"/>
         <source>Secondary Port:</source>
         <translation>Вторичный порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5499"/>
         <source>Secondary Server:</source>
         <translation>Вторичный сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
         <source>Secondary TTL:</source>
         <translation>Вторичный срок жизни:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5491"/>
         <source>Secondary UDP:</source>
         <translation>Вторичный UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5472"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5482"/>
         <source>Send ADIF:</source>
         <translation>Отправьте ADIF:</translation>
     </message>
@@ -14273,17 +14356,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>COM порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5428"/>
         <source>Server Name:</source>
         <translation>Имя сервера:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5425"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
         <source>Server Port:</source>
         <translation>Порт сервера:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4949"/>
         <source>Server:</source>
         <translation>Сервер:</translation>
     </message>
@@ -14293,22 +14376,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Показать DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7155"/>
         <source>Show OTP:</source>
         <translation>Показать OTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4769"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4779"/>
         <source>Sidelobe Mode:</source>
         <translation>Режим бокового лепестка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4721"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4731"/>
         <source>Single Decode:</source>
         <translation>Одиночное декодирование:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5246"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5256"/>
         <source>Spec Op Cmts:</source>
         <translation>Технические характеристики:</translation>
     </message>
@@ -14318,14 +14401,14 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Сплит:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5065"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5075"/>
         <source>Station ID:</source>
         <translation>Идентификатор станции:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4970"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5116"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5126"/>
         <source>Status:</source>
         <translation>Статус:</translation>
     </message>
@@ -14335,12 +14418,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Стоп-биты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7091"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7147"/>
         <source>SuperFox:</source>
         <translation>SuperFox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7215"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7271"/>
         <source>Sync Now</source>
         <translation>Синхронизировать сейчас</translation>
     </message>
@@ -14360,17 +14443,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Хост TCI:Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5701"/>
         <source>TCP Port:</source>
         <translation>TCP Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5713"/>
         <source>TCP Server:</source>
         <translation>TCP Сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4937"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP:</translation>
     </message>
@@ -14404,7 +14487,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>TX Частота:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4428"/>
         <source>TX Msg to RX:</source>
         <translation>TX Сообщение RX:</translation>
     </message>
@@ -14450,7 +14533,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Настройте сторожевого пса(ов):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
         <source>Two-Pass:</source>
         <translation>Двухпроходной:</translation>
     </message>
@@ -14470,17 +14553,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Префикс типа 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5374"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5384"/>
         <source>UDP SERVER</source>
         <translation>UDP СЕРВЕР</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5348"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5358"/>
         <source>Username:</source>
         <translation>Имя пользователя:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7033"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF:</translation>
     </message>
@@ -14490,92 +14573,92 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>СТОРОЖЕВОЙ ПЕС</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7694"/>
         <source>WHITELIST</source>
         <translation>БЕЛЫЙ СПИСОК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5341"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5351"/>
         <source>WS bind:</source>
         <translation>Привязка WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5338"/>
         <source>WS socket port:</source>
         <translation>Разъем WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5295"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5305"/>
         <source>WSPR Upload:</source>
         <translation>WSPR Загрузить:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7862"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Подождите и набросьтесь:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6989"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7045"/>
         <source>Wait Features:</source>
         <translation>Особенности ожидания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7737"/>
         <source>Whitelist 10:</source>
         <translation>Белый список 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7685"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7741"/>
         <source>Whitelist 11:</source>
         <translation>Белый список 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7688"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7744"/>
         <source>Whitelist 12:</source>
         <translation>Белый список 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7706"/>
         <source>Whitelist 1:</source>
         <translation>Белый список 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7653"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7709"/>
         <source>Whitelist 2:</source>
         <translation>Белый список 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>Whitelist 3:</source>
         <translation>Белый список 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7660"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7716"/>
         <source>Whitelist 4:</source>
         <translation>Белый список 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7720"/>
         <source>Whitelist 5:</source>
         <translation>Белый список 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7667"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7723"/>
         <source>Whitelist 6:</source>
         <translation>Белый список 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7671"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7727"/>
         <source>Whitelist 7:</source>
         <translation>Белый список 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7674"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7730"/>
         <source>Whitelist 8:</source>
         <translation>Белый список 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7678"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7734"/>
         <source>Whitelist 9:</source>
         <translation>Белый список 9:</translation>
     </message>
@@ -14585,22 +14668,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Windows: DLL обновлена с сайта Hamlib. macOS/Linux: официальная документация и выпуски.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5271"/>
         <source>ZZ00:</source>
         <translation>ЗЗ00:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4837"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4847"/>
         <source>Zap:</source>
         <translation>Зап:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5253"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5263"/>
         <source>dB in Cmts:</source>
         <translation>dB в Cmts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6883"/>
         <source>kHz no k:</source>
         <translation>kHz нет к:</translation>
     </message>

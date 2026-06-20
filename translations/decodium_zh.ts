@@ -1825,37 +1825,37 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23517"/>
+        <location filename="../DecodiumBridge.cpp" line="23528"/>
         <source>TX non avviata</source>
         <translation>TX 未启动</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23518"/>
+        <location filename="../DecodiumBridge.cpp" line="23529"/>
         <source>Nominativo compresso non risolto</source>
         <translation>压缩的 callsign 未解析</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27058"/>
+        <location filename="../DecodiumBridge.cpp" line="27069"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ 已停止</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27059"/>
+        <location filename="../DecodiumBridge.cpp" line="27070"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>已收到直接呼叫，但 callsign 未解析</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32040"/>
+        <location filename="../DecodiumBridge.cpp" line="32058"/>
         <source>Map selection: %1 %2</source>
         <translation>地图选择：%1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32041"/>
+        <location filename="../DecodiumBridge.cpp" line="32059"/>
         <source>Map selection: %1</source>
         <translation>地图选择：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38386"/>
+        <location filename="../DecodiumBridge.cpp" line="38411"/>
         <source>Update checks are disabled in this build.</source>
         <translation>此版本已禁用更新检查。</translation>
     </message>
@@ -3973,9 +3973,8 @@ Right-click: decode a folder</source>
         <translation>解码历史 (Ctrl+Shift+H)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
         <source>Bilanciato</source>
-        <translation>均衡</translation>
+        <translation type="vanished">均衡</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4373"/>
@@ -3993,14 +3992,27 @@ Right-click: decode a folder</source>
         <translation>CPU 受限</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4374"/>
         <source>Profili…</source>
+        <translation type="vanished">配置文件…</translation>
+    </message>
+    <message>
+        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
+        <translation type="vanished">即用配置文件 — 批量应用 FT2/解码 的开关。详情见 Setup → FT2。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Balanced</source>
+        <translation>均衡</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4374"/>
+        <source>Profiles...</source>
         <translation>配置文件…</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4379"/>
-        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
-        <translation>即用配置文件 — 批量应用 FT2/解码 的开关。详情见 Setup → FT2。</translation>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>现成配置文件 — 将 FT2/解码开关作为一组应用。详见 Setup -&gt; TX。</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="4617"/>
@@ -10693,74 +10705,74 @@ Downloaded file exceeds limit of %1 MiB:
         <translation>UDP 套接字错误</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20532"/>
+        <location filename="../DecodiumBridge.cpp" line="20543"/>
         <source>Invalid frequency</source>
         <translation>无效频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20534"/>
+        <location filename="../DecodiumBridge.cpp" line="20545"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>无效的日期/时间。请使用 ISO 格式或 yyyy-MM-dd HH:mm。</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20536"/>
+        <location filename="../DecodiumBridge.cpp" line="20547"/>
         <source>Invalid frequency row</source>
         <translation>无效的频率行</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20595"/>
+        <location filename="../DecodiumBridge.cpp" line="20606"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>解析 JSON 频率文件失败：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20603"/>
+        <location filename="../DecodiumBridge.cpp" line="20614"/>
         <source>No frequencies were found</source>
         <translation>未找到任何频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20609"/>
-        <location filename="../DecodiumBridge.cpp" line="20711"/>
-        <location filename="../DecodiumBridge.cpp" line="20738"/>
+        <location filename="../DecodiumBridge.cpp" line="20620"/>
+        <location filename="../DecodiumBridge.cpp" line="20722"/>
+        <location filename="../DecodiumBridge.cpp" line="20749"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>频率文件包含的行过多 (%1，上限 %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20650"/>
+        <location filename="../DecodiumBridge.cpp" line="20661"/>
         <source>Frequency file does not exist</source>
         <translation>频率文件不存在</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20656"/>
+        <location filename="../DecodiumBridge.cpp" line="20667"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>频率文件过大 (%1 字节，上限 %2 字节)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20666"/>
+        <location filename="../DecodiumBridge.cpp" line="20677"/>
         <source>Cannot open frequency file: %1</source>
         <translation>无法打开频率文件：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20676"/>
+        <location filename="../DecodiumBridge.cpp" line="20687"/>
         <source>No valid working frequencies found</source>
         <translation>未找到有效的工作频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20690"/>
+        <location filename="../DecodiumBridge.cpp" line="20701"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>不是有效的频率文件：文件 magic 不正确</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20697"/>
+        <location filename="../DecodiumBridge.cpp" line="20708"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>不是有效的频率文件：版本过新</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20716"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>不是有效的频率文件：无法读取行数</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20732"/>
+        <location filename="../DecodiumBridge.cpp" line="20743"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>不是有效的频率文件：内容已损坏</translation>
     </message>
@@ -11769,7 +11781,7 @@ Error(%2): %3</source>
         <translation>2x 音调间距：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5239"/>
         <source>4-digit Grids:</source>
         <translation>4位网格：</translation>
     </message>
@@ -11779,38 +11791,38 @@ Error(%2): %3</source>
         <translation>4x 音调间距：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5690"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4521"/>
         <source>ALIGNMENT</source>
         <translation>对齐</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7749"/>
         <source>ALWAYS PASS</source>
         <translation>总是通过</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4868"/>
         <source>AP Decode:</source>
         <translation>AP解码：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5054"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5064"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5112"/>
         <source>API Key:</source>
         <translation>API 密钥：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5053"/>
         <source>API URL:</source>
         <translation>API URL：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7426"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7482"/>
         <source>AUDIO ALERTS</source>
         <translation>音频 ALERTS</translation>
     </message>
@@ -11825,49 +11837,49 @@ Error(%2): %3</source>
         <translation>自动序列</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5652"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
         <source>Accept UDP:</source>
         <translation>接受UDP：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5356"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5366"/>
         <source>Access token:</source>
         <translation>访问令牌：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7170"/>
         <source>Activity:</source>
         <translation>活动：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
         <source>Aggressive:</source>
         <translation>攻击性：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7429"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7485"/>
         <source>Alerts Enabled:</source>
         <translation>警报已启用：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4541"/>
         <source>Align Steps 2:</source>
         <translation>对齐步骤 2：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4521"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
         <source>Align Steps:</source>
         <translation>对齐步骤：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4514"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4524"/>
         <source>Align:</source>
         <translation>对齐：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5457"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5519"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5529"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5597"/>
         <source>All interfaces</source>
         <translation>所有接口</translation>
     </message>
@@ -11877,7 +11889,7 @@ Error(%2): %3</source>
         <translation>允许 TX QSY：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7032"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7088"/>
         <source>Alt Erase Btn:</source>
         <translation>Alt 擦除按钮：</translation>
     </message>
@@ -11887,22 +11899,22 @@ Error(%2): %3</source>
         <translation>Alt F1-F6 绑定：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7736"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7792"/>
         <source>Always Pass 10:</source>
         <translation>始终通过 10：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7740"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7796"/>
         <source>Always Pass 11:</source>
         <translation>始终通过 11：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7799"/>
         <source>Always Pass 12:</source>
         <translation>始终通过 12：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7705"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7761"/>
         <source>Always Pass 1:</source>
         <translation>始终通过 1：</translation>
     </message>
@@ -11972,39 +11984,32 @@ Error(%2): %3</source>
         <translation>自动 RX 电平已禁用</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
         <source>PROFILI PRONTI</source>
-        <translation>即用配置文件</translation>
+        <translation type="vanished">即用配置文件</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
         <source>Bilanciato (QSO quotidiano) — default</source>
-        <translation>均衡（日常 QSO）— 默认</translation>
+        <translation type="vanished">均衡（日常 QSO）— 默认</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</source>
-        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · 跳过时段末尾 OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5。</translation>
+        <translation type="vanished">Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · 跳过时段末尾 OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
         <source>Weak-signal / caccia DX</source>
-        <translation>弱信号 / DX 猎取</translation>
+        <translation type="vanished">弱信号 / DX 猎取</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
         <source>Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).</source>
-        <translation>与“均衡”相同，但：caller retries 7 · adaptive decode OFF（最高灵敏度）· AP cache rescue ON（接受少量误判）· 跳过时段末尾 OFF（不丢失迟到的解码）。</translation>
+        <translation type="vanished">与“均衡”相同，但：caller retries 7 · adaptive decode OFF（最高灵敏度）· AP cache rescue ON（接受少量误判）· 跳过时段末尾 OFF（不丢失迟到的解码）。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Contest / alta densità</source>
-        <translation>竞赛 / 高密度</translation>
+        <translation type="vanished">竞赛 / 高密度</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
         <source>close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</source>
-        <translation>close strong partners ON · 跳过时段末尾 ON（最小延迟）· MAM multi-stream ON（2 个 stream，实验性）· full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF。</translation>
+        <translation type="vanished">close strong partners ON · 跳过时段末尾 ON（最小延迟）· MAM multi-stream ON（2 个 stream，实验性）· full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF。</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3013"/>
@@ -12012,14 +12017,12 @@ Error(%2): %3</source>
         <translation>CPU 受限（Decodium Console / 迷你 PC）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.</source>
-        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · 其余为默认值。Watchdog 不变。</translation>
+        <translation type="vanished">adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · 其余为默认值。Watchdog 不变。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
         <source>● attivo</source>
-        <translation>● 活动</translation>
+        <translation type="vanished">● 活动</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3137"/>
@@ -12712,109 +12715,113 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
         <translation>US State：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4403"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6958"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6979"/>
         <source>Updating...</source>
         <translation>更新中…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4404"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4410"/>
         <source>%1 calls</source>
         <translation>%1 个呼号</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4405"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6981"/>
         <source>Not loaded</source>
         <translation>未加载</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4412"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6031"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4420"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6041"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6240"/>
         <source>Update</source>
         <translation>更新</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4426"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4436"/>
         <source>Waterfall Calls:</source>
         <translation>Waterfall 呼号：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4434"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4444"/>
         <source>FS Dist:</source>
         <translation>FS Dist：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4442"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4452"/>
         <source>FS Az:</source>
         <translation>FS Az：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4450"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4460"/>
         <source>RX Freq:</source>
         <translation>RX Freq：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4458"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4468"/>
         <source>RX Dist:</source>
         <translation>RX Dist：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4466"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4476"/>
         <source>RX Az:</source>
         <translation>RX Az：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4571"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>远程 WEB 服务器 (iPad / 移动 PWA)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4574"/>
         <source>Abilita Web Server:</source>
         <translation>启用 Web 服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4594"/>
         <source>Porta TCP:</source>
         <translation>TCP 端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4605"/>
         <source>URL accesso:</source>
         <translation>访问 URL：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4616"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4643"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>解码列表显示</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4636"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4646"/>
         <source>Colored period separator:</source>
         <translation>彩色周期分隔符：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4660"/>
         <source>Newest first:</source>
         <translation>最新在前：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4816"/>
         <source>CQ filter:</source>
         <translation>CQ 筛选：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4881"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4891"/>
         <source>Deep decode in TX:</source>
         <translation>TX 中 Deep decode：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4893"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4903"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -12827,567 +12834,598 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 在 QSO 期间消耗额外 CPU。默认：OFF。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5077"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5087"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5091"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5101"/>
         <source>Replace duplicates:</source>
         <translation>替换重复项：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5134"/>
         <source>Testing...</source>
         <translation>测试中…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5134"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7493"/>
         <source>Test</source>
         <translation>测试</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5147"/>
         <source>Testing QRZ API key...</source>
         <translation>正在测试 QRZ API 密钥…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5377"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5387"/>
         <source>Client ID:</source>
         <translation>Client ID：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5409"/>
         <source>Preset:</source>
         <translation>预设：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5553"/>
         <source>Tertiary UDP:</source>
         <translation>第三 UDP：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5551"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
         <source>Tertiary Server:</source>
         <translation>第三服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5571"/>
         <source>Tertiary Port:</source>
         <translation>第三端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5582"/>
         <source>Tertiary TTL:</source>
         <translation>第三 TTL：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5594"/>
         <source>Tertiary Interface:</source>
         <translation>第三接口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5605"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5615"/>
         <source>Tertiary ADIF:</source>
         <translation>第三 ADIF：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5618"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5628"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5621"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5631"/>
         <source>Enable N1MM:</source>
         <translation>启用 N1MM：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5639"/>
         <source>N1MM Port:</source>
         <translation>N1MM 端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5641"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5651"/>
         <source>N1MM Server:</source>
         <translation>N1MM 服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5739"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5749"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>频率校准</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5747"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5757"/>
         <source>Refresh</source>
         <translation>刷新</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5783"/>
         <source>Slope:</source>
         <translation>斜率：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5791"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5801"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5793"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5803"/>
         <source>Intercept:</source>
         <translation>截距：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5821"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5830"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5840"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
         <translation>重置校准（斜率=0，截距=0）。频率将不经校正写入电台（快速路径）。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5852"/>
         <source>Preview correzione:</source>
         <translation>校正预览：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5853"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5863"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5868"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5878"/>
         <source>WORKING FREQUENCIES</source>
         <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5876"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5886"/>
         <source>Load</source>
         <translation>加载</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5885"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5895"/>
         <source>Merge</source>
         <translation>合并</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5894"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5904"/>
         <source>Save as</source>
         <translation>另存为</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5913"/>
         <source>Defaults</source>
         <translation>默认值</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5933"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5943"/>
         <source>Region:</source>
         <translation>区域：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5948"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5958"/>
         <source>Freq MHz:</source>
         <translation>频率 MHz：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5968"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5978"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6106"/>
         <source>Pref</source>
         <translation>Pref</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5987"/>
         <source>Description:</source>
         <translation>描述：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5991"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6001"/>
         <source>Start:</source>
         <translation>起始：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6012"/>
         <source>End:</source>
         <translation>结束：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6021"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6031"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6231"/>
         <source>Add</source>
         <translation>添加</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6042"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6240"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6250"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6062"/>
         <source>New</source>
         <translation>新建</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6093"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6103"/>
         <source>IARU Region</source>
         <translation>IARU Region</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6094"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6104"/>
         <source>Mode</source>
         <translation>模式</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6095"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
         <source>Frequency</source>
         <translation>频率</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6107"/>
         <source>Description</source>
         <translation>描述</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6098"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6108"/>
         <source>Start Date/Time</source>
         <translation>起始日期/时间</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6109"/>
         <source>End Date/Time</source>
         <translation>结束日期/时间</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6162"/>
         <source>STATION INFORMATION</source>
         <translation>电台信息</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6159"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6169"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>波段偏移是该波段的 transverter/电台频率偏移；不使用时填 0.000000。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6193"/>
         <source>Band:</source>
         <translation>波段：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6191"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6201"/>
         <source>Offset MHz:</source>
         <translation>偏移 MHz：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6280"/>
         <source>Band</source>
         <translation>波段</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6271"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6281"/>
         <source>Offset</source>
         <translation>偏移</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6282"/>
         <source>Antenna Description</source>
         <translation>天线描述</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6400"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
         <translation>对此类别使用此特定解码颜色。OFF 时该类别使用共享的默认颜色。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6498"/>
         <source>BG:</source>
         <translation>BG：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6512"/>
         <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
         <translation>为此类别给行的背景着色（除文本外）。OFF = 无自定义背景。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6597"/>
         <source>Decode Boost:</source>
         <translation>Decode Boost：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6664"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>界面颜色（背景 + 文本）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6669"/>
         <source>Usa colori personalizzati:</source>
         <translation>使用自定义颜色：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6666"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6676"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>（覆盖主题的背景与文本）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6673"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6683"/>
         <source>Background:</source>
         <translation>背景：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6703"/>
         <source>Text:</source>
         <translation>文本：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6795"/>
         <source>Download CALL3.TXT...</source>
         <translation>下载 CALL3.TXT…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6907"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6917"/>
         <source>Direct Visual:</source>
         <translation>Direct Visual：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6923"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
         <translation>快速可视化 panadapter。在 legacy 模式下可能打开第二个音频捕获；在正常模式下仅提高可视刷新率。默认：OFF。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6928"/>
         <source>Low CPU:</source>
         <translation>Low CPU：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6937"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
         <translation>慢速 PC 的配置文件：最多 2 个 FT 线程、较慢的 waterfall、减少的 early/deep 解码。默认：OFF。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6932"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6942"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>在 monitor/TX 期间减少 FT 线程、waterfall 刷新和 QML 渲染。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7237"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6953"/>
+        <source>DATA UPDATES</source>
+        <translation>数据更新</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6956"/>
+        <source>LotW Users:</source>
+        <translation>LoTW 用户：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6959"/>
+        <source>%1 users</source>
+        <translation>%1 个用户</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6990"/>
+        <source>Force Update</source>
+        <translation>强制更新</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6977"/>
+        <source>US States:</source>
+        <translation>US States：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6980"/>
+        <source>%1 calls, %2 locators</source>
+        <translation>%1 个呼号，%2 个网格</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7293"/>
         <source>RF self-calibration:</source>
         <translation>RF 自校准：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7298"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
         <translation>仅在 NTP/HTTPS 已锁定后，将接收解码的 DT 值用作次要时间同步提示。默认：OFF。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7303"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
         <translation>仅作次要提示；它无法创建首次时间锁定。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7255"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7311"/>
         <source>ADV DECODING</source>
         <translation>高级解码</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7258"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7314"/>
         <source>Auto Mode:</source>
         <translation>自动模式：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7262"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7318"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>自动 - 需要时启用这 3 项技术</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7275"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7331"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>当 ON 时，下面 3 项功能自动管理。触发条件：当解码 &lt; 2/时段 持续 4 个时段时启用 Neural+Turbo。当 Q65 SNR &lt; -22 dB 时启用 Coherent。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7283"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7339"/>
         <source>Live state:</source>
         <translation>实时状态：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7285"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7341"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7343"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7345"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7293"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7349"/>
         <source>Coherent Avg:</source>
         <translation>Coherent Avg：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7298"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7354"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7312"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7368"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>为 Q65/JT65 解码累积多时段平均 (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7319"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7375"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7380"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync（FT8 OSD 解码器）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7394"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>强制 OSD 感知的 FT8 解码（边缘信号上 +2-3 dB）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7345"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7401"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo Feedback：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7350"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7406"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo Feedback（扩展 LDPC 迭代）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7364"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7420"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>用于边缘解码恢复的扩展 LDPC 迭代</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7708"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7764"/>
         <source>Always Pass 2:</source>
         <translation>始终通过 2：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7768"/>
         <source>Always Pass 3:</source>
         <translation>始终通过 3：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7771"/>
         <source>Always Pass 4:</source>
         <translation>始终通过 4：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7775"/>
         <source>Always Pass 5:</source>
         <translation>始终通过 5：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7778"/>
         <source>Always Pass 6:</source>
         <translation>始终通过 6：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7782"/>
         <source>Always Pass 7:</source>
         <translation>始终通过 7：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7785"/>
         <source>Always Pass 8:</source>
         <translation>始终通过 8：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7789"/>
         <source>Always Pass 9:</source>
         <translation>始终通过 9：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7857"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7913"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
         <source>Setup (⚙)</source>
         <translation>Setup (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7920"/>
         <source>Layout (window reset)</source>
         <translation>Layout（窗口重置）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7921"/>
         <source>History (decode history)</source>
         <translation>History（解码历史）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7923"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7925"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX Cluster（toolbar）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
         <source>World Clock</source>
         <translation>World Clock</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7930"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>按您的喜好显示或隐藏 UI 按钮。更改即时生效并自动保存。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7880"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7936"/>
         <source>TOP TOOLBAR</source>
         <translation>顶部 TOOLBAR</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7899"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7955"/>
         <source>TOOLBAR BUTTON ORDER</source>
         <translation>TOOLBAR 按钮顺序</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7959"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
         <translation>拖动顶部 toolbar 按钮（长按）以重新排序。使用下方按钮恢复默认顺序。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7921"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7977"/>
         <source>Restore default button order</source>
         <translation>恢复默认按钮顺序</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7951"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8007"/>
         <source>Restore default TX panel order</source>
         <translation>恢复默认 TX 面板顺序</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1640"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6213"/>
         <source>Antenna:</source>
         <translation>天线：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5366"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5376"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>需要重新启动应用程序。对于 LAN/WAN，请使用至少 12 个字符的令牌。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6875"/>
         <source>Auto Astro:</source>
         <translation>自动天文：</translation>
     </message>
@@ -13397,7 +13435,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>自动网格：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5218"/>
         <source>Auto Log:</source>
         <translation>自动记录：</translation>
     </message>
@@ -13407,7 +13445,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>自动序列：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
         <source>Avg Decode:</source>
         <translation>平均解码：</translation>
     </message>
@@ -13417,7 +13455,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>AzEl 目录：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6575"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6585"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 删除线：</translation>
     </message>
@@ -13427,12 +13465,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>后端 ZXProtect00000ZX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6943"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6999"/>
         <source>BEHAVIOR</source>
         <translation>行为</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7582"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
         <source>BLACKLIST</source>
         <translation>黑名单</translation>
     </message>
@@ -13457,72 +13495,72 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>波特率:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6739"/>
         <source>Black Level:</source>
         <translation>黑电平：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7626"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7682"/>
         <source>Blacklist 10:</source>
         <translation>黑名单10：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7686"/>
         <source>Blacklist 11:</source>
         <translation>黑名单11：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7689"/>
         <source>Blacklist 12:</source>
         <translation>黑名单12：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7651"/>
         <source>Blacklist 1:</source>
         <translation>黑名单1：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7598"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7654"/>
         <source>Blacklist 2:</source>
         <translation>黑名单2：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7602"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7658"/>
         <source>Blacklist 3:</source>
         <translation>黑名单3：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7661"/>
         <source>Blacklist 4:</source>
         <translation>黑名单4：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7609"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7665"/>
         <source>Blacklist 5:</source>
         <translation>黑名单5：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7668"/>
         <source>Blacklist 6:</source>
         <translation>黑名单6：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7672"/>
         <source>Blacklist 7:</source>
         <translation>黑名单7：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7619"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7675"/>
         <source>Blacklist 8:</source>
         <translation>黑名单8：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7679"/>
         <source>Blacklist 9:</source>
         <translation>黑名单9：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6645"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6655"/>
         <source>Blue Calls:</source>
         <translation>蓝色呼号：</translation>
     </message>
@@ -13549,27 +13587,27 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>CI-V 地址：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5028"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5038"/>
         <source>CLOUDLOG</source>
         <translation>云日志</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7111"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7167"/>
         <source>CONTEST</source>
         <translation>竞赛</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4795"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4805"/>
         <source>CQ Only:</source>
         <translation>仅限 CQ：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7582"/>
         <source>CQ Zone Band:</source>
         <translation>CQ 防区频段：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7515"/>
         <source>CQ in Msg:</source>
         <translation>消息中的 CQ：</translation>
     </message>
@@ -13589,17 +13627,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>73之后的CW ID：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7874"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
         <translation>Wait &amp;amp; Pounce 监听已筛选的 CQ 解码，但仅当操作员已 arm TX/CQ 时才开始回复。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7876"/>
         <source>W&amp;P Filters Only:</source>
         <translation>仅 W&amp;amp;P 筛选：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7884"/>
         <source>Calling Only:</source>
         <translation>仅呼叫电台：</translation>
     </message>
@@ -13609,17 +13647,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>检查 SWR：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7015"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7071"/>
         <source>Clear DX Call:</source>
         <translation>清除DX呼号：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7062"/>
         <source>Clear DX Grid:</source>
         <translation>清除DX网格：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4512"/>
         <source>Click TX:</source>
         <translation>单击TX：</translation>
     </message>
@@ -13640,7 +13678,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">颜色 DX 实体：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6735"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6745"/>
         <source>Color Gain:</source>
         <translation>色彩增益：</translation>
     </message>
@@ -13651,53 +13689,53 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4986"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4996"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4987"/>
         <source>Connected</source>
         <translation>已连接</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7201"/>
         <source>Contest Name:</source>
         <translation>比赛名称：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5246"/>
         <source>Contest Only:</source>
         <translation>仅比赛：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6751"/>
         <source>Contrast:</source>
         <translation>对比：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7246"/>
         <source>Custom Server:</source>
         <translation>自定义服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6748"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6758"/>
         <source>DATA DOWNLOAD</source>
         <translation>资料下载</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6348"/>
         <source>DECODE COLORS</source>
         <translation>解码颜色</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4802"/>
         <source>DECODE FILTERS</source>
         <translation>解码过滤器</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4669"/>
         <source>DECODE PARAMETERS</source>
         <translation>解码参数</translation>
     </message>
@@ -13717,12 +13755,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>目录</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4936"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
         <source>DX CLUSTER</source>
         <translation>DX集群</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7549"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
         <source>DX Call/Grid:</source>
         <translation>DX呼号/网格：</translation>
     </message>
@@ -13732,17 +13770,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>数据位：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5193"/>
         <source>Days Upload:</source>
         <translation>天上传：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4672"/>
         <source>Decode Depth:</source>
         <translation>解码深度：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4723"/>
         <source>Decode at 52s:</source>
         <translation>52秒解码：</translation>
     </message>
@@ -13752,12 +13790,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>解码字体：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Deep</source>
         <translation>深度</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4857"/>
         <source>Deep Search:</source>
         <translation>深度搜索：</translation>
     </message>
@@ -13768,12 +13806,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>默认值</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4781"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4791"/>
         <source>Degrade S/N:</source>
         <translation>降级 S/N：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5017"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Detail:</source>
         <translation>详细信息：</translation>
     </message>
@@ -13789,98 +13827,143 @@ Costs extra CPU during QSOs. Default: OFF.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2506"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5016"/>
         <source>Disconnect</source>
         <translation>断开连接</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4987"/>
         <source>Disconnected</source>
         <translation>已断开连接</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6795"/>
         <source>Download CALL3.TXT</source>
         <translation>下载CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7200"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7256"/>
         <source>Empty = automatic public servers</source>
         <translation>空=自动公共服务器</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
         <source>Enable NTP:</source>
         <translation>启用 NTP：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5693"/>
         <source>Enable TCP ADIF:</source>
         <translation>启用 TCP ADIF：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5031"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5080"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5311"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5041"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5090"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5321"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7696"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7752"/>
         <source>Enabled:</source>
         <translation>已启用：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6998"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7054"/>
         <source>Erase Band Act:</source>
         <translation>擦除带行为：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4747"/>
         <source>Erasure Patterns:</source>
         <translation>擦除模式：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7130"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>READY PROFILES</source>
+        <translation>现成配置文件</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>均衡（日常 QSO）- 默认</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>弱信号 / DX 猎手</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>与“均衡”相同，但：caller retries 7 · adaptive decode OFF（最高灵敏度）· AP cache rescue ON（接受少量误判）· skip end-slot OFF（不丢失迟到的解码）。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
+        <source>Contest / high density</source>
+        <translation>竞赛 / 高密度</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>close strong partners ON · skip end-slot ON（最小延迟）· MAM multi-stream ON（2 个 stream，实验性）· full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · 其余为默认值。Watchdog 不变。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
+        <source>● active</source>
+        <translation>● 活动</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7186"/>
         <source>FD Exchange:</source>
         <translation>FD 兑换：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7748"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7804"/>
         <source>EXCLUDE TERRITORY</source>
         <translation>排除地区</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7751"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7807"/>
         <source>Europe:</source>
         <translation>欧洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7759"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7815"/>
         <source>Africa:</source>
         <translation>非洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7768"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7824"/>
         <source>Oceania:</source>
         <translation>大洋洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7776"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7832"/>
         <source>Asia:</source>
         <translation>亚洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7841"/>
         <source>North America:</source>
         <translation>北美洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7793"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7849"/>
         <source>South America:</source>
         <translation>南美洲：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7803"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7859"/>
         <source>FILTER OPTIONS</source>
         <translation>过滤器选项</translation>
     </message>
@@ -13900,12 +13983,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>软件虚拟</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Fast</source>
         <translation>快速</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Field Day</source>
         <translation>野外日</translation>
     </message>
@@ -13920,7 +14003,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>字体：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
         <source>Force Call 1st:</source>
         <translation>强制优先呼号：</translation>
     </message>
@@ -13935,12 +14018,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>强制 RTS：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Fox</source>
         <translation>狐狸</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7069"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7125"/>
         <source>Fox Mode:</source>
         <translation>Fox 模式：</translation>
     </message>
@@ -13955,27 +14038,27 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>满</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4496"/>
         <source>Greyline:</source>
         <translation>灰线：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6611"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6621"/>
         <source>HIGHLIGHTING</source>
         <translation>突出显示</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6648"/>
         <source>HL Blue:</source>
         <translation>HL 蓝色：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6633"/>
         <source>HL Orange:</source>
         <translation>HL橙：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5318"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
         <source>HTTP port:</source>
         <translation>HTTP 端口：</translation>
     </message>
@@ -14000,17 +14083,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>硬件</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6890"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6900"/>
         <source>High DPI:</source>
         <translation>高DPI：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4701"/>
         <source>High Freq (Hz):</source>
         <translation>高频 (Hz)：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6624"/>
         <source>Highlight 73:</source>
         <translation>亮点73：</translation>
     </message>
@@ -14020,12 +14103,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>主机：端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Hound</source>
         <translation>猎犬</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7080"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7136"/>
         <source>Hound Mode:</source>
         <translation>Hound 模式：</translation>
     </message>
@@ -14035,12 +14118,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>IARU 区域:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7597"/>
         <source>ITU Zone Band:</source>
         <translation>国际电联区域频段：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7208"/>
         <source>Indiv Name:</source>
         <translation>个人姓名：</translation>
     </message>
@@ -14055,7 +14138,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>输入设备：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5464"/>
         <source>Interface Used:</source>
         <translation>使用的接口：</translation>
     </message>
@@ -14065,7 +14148,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>斜体</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4734"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4744"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
@@ -14075,22 +14158,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>级别</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5194"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5204"/>
         <source>LOGGING</source>
         <translation>记录</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5155"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5165"/>
         <source>LOTW</source>
         <translation>洛特</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6899"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6909"/>
         <source>Larger Tab:</source>
         <translation>更大的选项卡：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7231"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>将服务器留空以自动使用 pool.ntp.org、Apple、Cloudflare 和 Google。</translation>
     </message>
@@ -14102,32 +14185,32 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>左边</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5445"/>
         <source>Listen Port:</source>
         <translation>监听端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5231"/>
         <source>Log as RTTY:</source>
         <translation>以 RTTY 身份登录：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5158"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
         <source>LotW Enabled:</source>
         <translation>LotW 已启用：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4679"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
         <source>Low Freq (Hz):</source>
         <translation>低频 (Hz)：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4782"/>
         <source>Low Sidelobes</source>
         <translation>低旁瓣</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4476"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
         <source>MAP AND DISTANCE</source>
         <translation>地图和距离</translation>
     </message>
@@ -14137,33 +14220,33 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>MSK/Q65 TX 直到 73：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4494"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4504"/>
         <source>Map All Msgs:</source>
         <translation>映射所有消息：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4782"/>
         <source>Max Sensitivity</source>
         <translation>最大灵敏度</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4489"/>
         <source>Miles:</source>
         <translation>里程：</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2411"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5940"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5950"/>
         <source>Mode:</source>
         <translation>模式：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6856"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6866"/>
         <source>Monitor Last:</source>
         <translation>监控最后：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6857"/>
         <source>Monitor OFF:</source>
         <translation>显示器关闭：</translation>
     </message>
@@ -14175,18 +14258,18 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>单声道</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5444"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
         <source>Multicast TTL:</source>
         <translation>多点传送 TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4826"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4836"/>
         <source>My Call Only:</source>
         <translation>仅我的呼号：</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7466"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7522"/>
         <source>My Call:</source>
         <translation>我的呼号：</translation>
     </message>
@@ -14196,17 +14279,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>我的网格：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7160"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC 冲刺：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4914"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4924"/>
         <source>NETWORK SERVICES</source>
         <translation>网络服务</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7170"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7226"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP 时间同步</translation>
     </message>
@@ -14216,57 +14299,57 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>本机（15 个无线电）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7575"/>
         <source>New CQ Zone:</source>
         <translation>新 CQ 区域：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7567"/>
         <source>New Cont Band:</source>
         <translation>新连续带：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7504"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7560"/>
         <source>New Continent:</source>
         <translation>新大陆：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7537"/>
         <source>New DXCC Band:</source>
         <translation>新 DXCC 表带：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7530"/>
         <source>New DXCC:</source>
         <translation>新 DXCC：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7552"/>
         <source>New Grid Band:</source>
         <translation>新波段网格：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7545"/>
         <source>New Grid:</source>
         <translation>新网格：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7590"/>
         <source>New ITU Zone:</source>
         <translation>国际电联新区：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7040"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7096"/>
         <source>No Btn Color:</source>
         <translation>无按钮颜色：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5019"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5029"/>
         <source>No message</source>
         <translation>没有消息</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5176"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5186"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d：</translation>
     </message>
@@ -14274,17 +14357,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="658"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="858"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
         <source>Normal</source>
         <translation>正常</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5672"/>
         <source>Notify Request:</source>
         <translation>通知请求：</translation>
     </message>
@@ -14294,32 +14377,32 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7108"/>
         <source>OPERATING MODE</source>
         <translation>操作模式</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7372"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7428"/>
         <source>OTP</source>
         <translation>OTP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7375"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7431"/>
         <source>OTP Enabled:</source>
         <translation>OTP 已启用：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>OTP Interval:</source>
         <translation>OTP 间隔：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7382"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7438"/>
         <source>OTP Seed:</source>
         <translation>OTP 种子：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7399"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7455"/>
         <source>OTP URL:</source>
         <translation>OTP 网址:</translation>
     </message>
@@ -14344,7 +14427,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>打开Hamlib更新</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6640"/>
         <source>Orange Calls:</source>
         <translation>橙色呼号：</translation>
     </message>
@@ -14364,7 +14447,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>电源记忆</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4927"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter：</translation>
     </message>
@@ -14384,12 +14467,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>PWR 和 SWR：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6723"/>
         <source>Palette:</source>
         <translation>调色板：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5178"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
@@ -14399,7 +14482,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>轮询间隔：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4953"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4963"/>
         <source>Port:</source>
         <translation>端口:</translation>
     </message>
@@ -14409,17 +14492,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>功率（瓦）：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6882"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6892"/>
         <source>Progress Red:</source>
         <translation>进度红色：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5197"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5207"/>
         <source>Prompt to Log:</source>
         <translation>提示登录：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7556"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
         <source>QSY Message:</source>
         <translation>QSY 消息：</translation>
     </message>
@@ -14429,7 +14512,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>QTH：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7016"/>
         <source>Quick Call:</source>
         <translation>快速呼叫：</translation>
     </message>
@@ -14439,22 +14522,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>快速 QSO：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5271"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5281"/>
         <source>RECORDING</source>
         <translation>录音</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5308"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5318"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>远程网络仪表板 (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7193"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY 兑换：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4704"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4714"/>
         <source>RX Bandwidth:</source>
         <translation>RX 带宽：</translation>
     </message>
@@ -14469,7 +14552,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>RX/TX 通过 TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7079"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;QSO 之后的 TX：</translation>
     </message>
@@ -14479,30 +14562,30 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>后置/数据</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
         <source>Record RX:</source>
         <translation>记录RX：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5294"/>
         <source>Record TX:</source>
         <translation>记录TX：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5360"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5370"/>
         <source>Required for LAN/WAN</source>
         <translation>LAN/WAN 需要</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4342"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4378"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5815"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6464"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6474"/>
         <source>Reset</source>
         <translation>重置</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5670"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
         <source>Restore Win:</source>
         <translation>恢复胜利：</translation>
     </message>
@@ -14534,12 +14617,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>串口参数</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4776"/>
         <source>SIDELOBE CONTROL</source>
         <translation>旁瓣控制</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6710"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6720"/>
         <source>SPECTRUM</source>
         <translation>频谱</translation>
     </message>
@@ -14549,7 +14632,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>分体操作</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6830"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6840"/>
         <source>STARTUP</source>
         <translation>启动</translation>
     </message>
@@ -14569,37 +14652,37 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>第二次（：15/：45）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5544"/>
         <source>Secondary ADIF:</source>
         <translation>次要 ADIF：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5526"/>
         <source>Secondary Interface:</source>
         <translation>辅助接口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5507"/>
         <source>Secondary Port:</source>
         <translation>辅助端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5499"/>
         <source>Secondary Server:</source>
         <translation>辅助服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
         <source>Secondary TTL:</source>
         <translation>辅助 TTL：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5491"/>
         <source>Secondary UDP:</source>
         <translation>次要 UDP：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5472"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5482"/>
         <source>Send ADIF:</source>
         <translation>发送ADIF：</translation>
     </message>
@@ -14614,17 +14697,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>串行端口:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5428"/>
         <source>Server Name:</source>
         <translation>服务器名称：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5425"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
         <source>Server Port:</source>
         <translation>服务器端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4949"/>
         <source>Server:</source>
         <translation>服务器：</translation>
     </message>
@@ -14634,22 +14717,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>显示 DXCC：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7155"/>
         <source>Show OTP:</source>
         <translation>显示 OTP：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4769"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4779"/>
         <source>Sidelobe Mode:</source>
         <translation>旁瓣模式：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4721"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4731"/>
         <source>Single Decode:</source>
         <translation>单次解码：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5246"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5256"/>
         <source>Spec Op Cmts:</source>
         <translation>规范操作 CMT：</translation>
     </message>
@@ -14659,14 +14742,14 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>拆分：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5065"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5075"/>
         <source>Station ID:</source>
         <translation>站号：</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4970"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5116"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5126"/>
         <source>Status:</source>
         <translation>状态：</translation>
     </message>
@@ -14676,12 +14759,12 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>停止位：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7091"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7147"/>
         <source>SuperFox:</source>
         <translation>SuperFox：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7215"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7271"/>
         <source>Sync Now</source>
         <translation>立即同步</translation>
     </message>
@@ -14701,17 +14784,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>TCI 主机：端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5701"/>
         <source>TCP Port:</source>
         <translation>TCP 端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5713"/>
         <source>TCP Server:</source>
         <translation>TCP 服务器：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4937"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP：</translation>
     </message>
@@ -14745,7 +14828,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>TX 频率：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4428"/>
         <source>TX Msg to RX:</source>
         <translation>TX 发送至 RX 的消息：</translation>
     </message>
@@ -14791,7 +14874,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>调整看门狗：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
         <source>Two-Pass:</source>
         <translation>两次通过：</translation>
     </message>
@@ -14811,17 +14894,17 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>类型 2 前缀</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5374"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5384"/>
         <source>UDP SERVER</source>
         <translation>UDP 服务器</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5348"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5358"/>
         <source>Username:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7033"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF：</translation>
     </message>
@@ -14831,92 +14914,92 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>看门狗</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7694"/>
         <source>WHITELIST</source>
         <translation>白名单</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5341"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5351"/>
         <source>WS bind:</source>
         <translation>WS 绑定：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5338"/>
         <source>WS socket port:</source>
         <translation>WS 套接字端口：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5295"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5305"/>
         <source>WSPR Upload:</source>
         <translation>WSPR 上传：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7862"/>
         <source>Wait &amp; Pounce:</source>
         <translation>等待并猛扑：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6989"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7045"/>
         <source>Wait Features:</source>
         <translation>等待特点：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7737"/>
         <source>Whitelist 10:</source>
         <translation>白名单10：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7685"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7741"/>
         <source>Whitelist 11:</source>
         <translation>白名单11：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7688"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7744"/>
         <source>Whitelist 12:</source>
         <translation>白名单12：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7706"/>
         <source>Whitelist 1:</source>
         <translation>白名单1：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7653"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7709"/>
         <source>Whitelist 2:</source>
         <translation>白名单2：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>Whitelist 3:</source>
         <translation>白名单3：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7660"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7716"/>
         <source>Whitelist 4:</source>
         <translation>白名单4：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7720"/>
         <source>Whitelist 5:</source>
         <translation>白名单5：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7667"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7723"/>
         <source>Whitelist 6:</source>
         <translation>白名单6：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7671"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7727"/>
         <source>Whitelist 7:</source>
         <translation>白名单7：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7674"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7730"/>
         <source>Whitelist 8:</source>
         <translation>白名单8：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7678"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7734"/>
         <source>Whitelist 9:</source>
         <translation>白名单9：</translation>
     </message>
@@ -14926,22 +15009,22 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation>Windows：从 Hamlib 站点更新 DLL。 macOS/Linux：官方文档和版本。</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5271"/>
         <source>ZZ00:</source>
         <translation>ZZ00：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4837"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4847"/>
         <source>Zap:</source>
         <translation>电击：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5253"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5263"/>
         <source>dB in Cmts:</source>
         <translation>Cmts 中的 dB：</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6883"/>
         <source>kHz no k:</source>
         <translation>kHz 无 k：</translation>
     </message>
