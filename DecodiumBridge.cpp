@@ -8493,6 +8493,13 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    if (m_lotwEnabled) {
+        QTimer::singleShot(0, this, [this]() {
+            if (m_lotwEnabled) {
+                updateLotwUsers();
+            }
+        });
+    }
     if (m_showUsState && m_usStateData) {
         m_usStateData->ensureLoadedAsync();
     }
@@ -8796,6 +8803,9 @@ void DecodiumBridge::beginDecodeCallbackShutdown()
     }
     if (m_ft2Worker) {
         m_ft2Worker->beginShutdown();
+    }
+    if (m_ft4Worker) {
+        m_ft4Worker->beginShutdown();
     }
 
     auto disconnectWorker = [this](QObject *worker) {
@@ -12328,6 +12338,7 @@ void DecodiumBridge::resetTimeSyncDecodeMetrics()
     m_decodeStartMsBySerial.clear();
     m_decodeModeBySerial.clear();
     m_decodeUtcTokenBySerial.clear();
+    m_decodeSessionBySerial.clear();
     m_ft8PendingDeepFollowups.clear();
     m_ft8DeepFollowupCooldownSlots = 0;  // P0 (1.0.403): re-abilita il deep su reset time-sync
     bool const sampleCountChanged = (m_dtLastSampleCount != 0);
@@ -28336,6 +28347,13 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit qrzLogbookApiKeyChanged();
     emit qrzLogbookReplaceDuplicatesChanged();
     emit lotwEnabledChanged();
+    if (m_lotwEnabled) {
+        QTimer::singleShot(0, this, [this]() {
+            if (m_lotwEnabled) {
+                updateLotwUsers();
+            }
+        });
+    }
     emit showUsStateChanged();
     emit usStateDataChanged();
     emit wsprUploadEnabledChanged();
@@ -32439,6 +32457,17 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         forgetDecodeSerial();
         return;
     }
+    qint64 const startedAtMs = m_decodeStartMsBySerial.value(serial, 0);
+    qint64 const elapsedMs = startedAtMs > 0
+        ? QDateTime::currentMSecsSinceEpoch() - startedAtMs
+        : -1;
+    if (serialMode == QStringLiteral("FT4") && elapsedMs > 9000) {
+        bridgeLog("onFt8DecodeReady: ignored late FT4 callback serial=" + QString::number(serial) +
+                  " rows=" + QString::number(rows.size()) +
+                  " elapsedMs=" + QString::number(elapsedMs));
+        forgetDecodeSerial();
+        return;
+    }
 
     // I deep follow-up FT8 sono decode-list-only. La decisione TX e' gia'
     // stata presa dal fast pass: da qui in poi non devono attivare resume,
@@ -32486,10 +32515,6 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     QString const decodeMode = serialMode;
     QString const forcedUtcToken = m_decodeUtcTokenBySerial.value(serial);
     bool const trackTimeSync = isTimeSyncDecodeMode(decodeMode);
-    qint64 const startedAtMs = m_decodeStartMsBySerial.value(serial, 0);
-    qint64 const elapsedMs = startedAtMs > 0
-        ? QDateTime::currentMSecsSinceEpoch() - startedAtMs
-        : -1;
     if (decodeMode == QStringLiteral("FT8") && elapsedMs > 7000) {
         bridgeLog("onFt8DecodeReady: slow FT8 serial=" + QString::number(serial) +
                   " rows=" + QString::number(rows.size()) +
@@ -39027,20 +39052,57 @@ bool DecodiumBridge::isLotwUser(const QString& call) const
     return m_lotwUsers.contains(call.toUpper());
 }
 
+void DecodiumBridge::setLotwEnabled(bool v)
+{
+    if (m_lotwEnabled == v) {
+        return;
+    }
+
+    m_lotwEnabled = v;
+    emit lotwEnabledChanged();
+    if (m_lotwEnabled) {
+        updateLotwUsers();
+    } else {
+        refreshDecodeListDxcc();
+    }
+}
+
 void DecodiumBridge::updateLotwUsers()
+{
+    reloadLotwUsers(false);
+}
+
+void DecodiumBridge::forceUpdateLotwUsers()
+{
+    reloadLotwUsers(true);
+}
+
+void DecodiumBridge::reloadLotwUsers(bool forceDownload)
 {
     if (m_lotwUpdating) return;
     QString cachePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/lotw_users.txt";
+    auto loadCsvText = [this](const QString& text) {
+        m_lotwUsers.clear();
+        const QStringList lines = text.split('\n');
+        for (const QString& line : lines) {
+            QString const trimmed = line.trimmed();
+            if (trimmed.isEmpty() || trimmed.startsWith('#')) {
+                continue;
+            }
+            QString call = trimmed.section(',', 0, 0).trimmed().toUpper();
+            if (!call.isEmpty()) {
+                m_lotwUsers.insert(call);
+            }
+        }
+    };
     QFileInfo fi(cachePath);
-    if (fi.exists() && fi.lastModified().daysTo(QDateTime::currentDateTime()) < 7) {
+    if (!forceDownload && fi.exists() && fi.lastModified().daysTo(QDateTime::currentDateTime()) < 7) {
         QFile fc(cachePath);
         if (fc.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QTextStream ts(&fc);
-            while (!ts.atEnd()) {
-                QString call = ts.readLine().trimmed().toUpper();
-                if (!call.isEmpty()) m_lotwUsers.insert(call);
-            }
+            loadCsvText(QString::fromUtf8(fc.readAll()));
+            emit lotwUsersChanged();
             emit statusMessage(QString("LotW: %1 utenti dalla cache").arg(m_lotwUsers.size()));
+            refreshDecodeListDxcc();
             return;
         }
     }
@@ -39049,7 +39111,7 @@ void DecodiumBridge::updateLotwUsers()
     emit statusMessage("LotW: download lista utenti...");
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
     QNetworkReply* reply = nam->get(QNetworkRequest(QUrl("https://lotw.arrl.org/lotw-user-activity.csv")));
-    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, cachePath]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, cachePath, loadCsvText]() {
         reply->deleteLater();
         nam->deleteLater();
         m_lotwUpdating = false;
@@ -39062,14 +39124,10 @@ void DecodiumBridge::updateLotwUsers()
         QDir().mkpath(QFileInfo(cachePath).absolutePath());
         QFile cache(cachePath);
         if (cache.open(QIODevice::WriteOnly)) { cache.write(data); cache.close(); }
-        m_lotwUsers.clear();
-        QString text = QString::fromUtf8(data);
-        for (const QString& line : text.split('\n')) {
-            QString call = line.split(',').first().trimmed().toUpper();
-            if (!call.isEmpty() && !call.startsWith('#'))
-                m_lotwUsers.insert(call);
-        }
+        loadCsvText(QString::fromUtf8(data));
+        emit lotwUsersChanged();
         emit statusMessage(QString("LotW: %1 utenti caricati").arg(m_lotwUsers.size()));
+        refreshDecodeListDxcc();
     });
 }
 

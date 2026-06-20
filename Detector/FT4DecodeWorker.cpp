@@ -710,12 +710,19 @@ void FT4DecodeWorker::markLatestDecodeSerial (quint64 serial)
   m_latestDecodeSerial.store (serial, std::memory_order_relaxed);
 }
 
+void FT4DecodeWorker::beginShutdown ()
+{
+  m_shuttingDown.store (true, std::memory_order_relaxed);
+  m_latestDecodeSerial.store (~quint64(0), std::memory_order_relaxed);
+}
+
 void FT4DecodeWorker::decode (DecodeRequest const& request)
 {
   QElapsedTimer totalTimer;
   totalTimer.start ();
   quint64 latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
-  if (latestSerial != 0 && request.serial != latestSerial)
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || latestSerial == ~quint64(0))
     {
       return;
     }
@@ -730,7 +737,8 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
   qint64 const waitMs = waitTimer.elapsed ();
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
-  if (latestSerial != 0 && request.serial != latestSerial)
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || latestSerial == ~quint64(0))
     {
       return;
     }
@@ -778,7 +786,8 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
   qint64 const decodeMs = decodeTimer.elapsed ();
 
   latestSerial = m_latestDecodeSerial.load (std::memory_order_relaxed);
-  if (latestSerial != 0 && request.serial != latestSerial)
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || latestSerial == ~quint64(0))
     {
       return;
     }
@@ -791,7 +800,8 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT4 wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 thread=0x%11")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT4 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+                 .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
                  .arg (totalMs)
