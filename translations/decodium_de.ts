@@ -338,28 +338,34 @@ Gesuchte Pfade:
 <context>
     <name>Bands</name>
     <message>
+        <location filename="../models/Bands.cpp" line="139"/>
         <source>Band name</source>
-        <translation type="vanished">Bandname</translation>
+        <translation>Bandname</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="140"/>
         <source>Lower frequency limit</source>
-        <translation type="vanished">Untere Frequenzgrenze</translation>
+        <translation>Untere Frequenzgrenze</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="141"/>
         <source>Upper frequency limit</source>
-        <translation type="vanished">Obere Frequenzgrenze</translation>
+        <translation>Obere Frequenzgrenze</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="203"/>
         <source>Band</source>
-        <translation type="vanished">Band</translation>
+        <translation>Band</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="204"/>
         <source>Lower Limit</source>
-        <translation type="vanished">Untere Grenze</translation>
+        <translation>Untere Grenze</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="205"/>
         <source>Upper Limit</source>
-        <translation type="vanished">Obergrenze</translation>
+        <translation>Obergrenze</translation>
     </message>
 </context>
 <context>
@@ -382,32 +388,39 @@ Gesuchte Pfade:
 <context>
     <name>CabrilloLog</name>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="93"/>
         <source>Freq(MHz)</source>
-        <translation type="vanished">Frequenz (MHz)</translation>
+        <translation>Frequenz (MHz)</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="94"/>
         <source>Mode</source>
-        <translation type="vanished">Modus</translation>
+        <translation>Modus</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="95"/>
         <source>Date &amp; Time(UTC)</source>
-        <translation type="vanished">Datum &amp; Uhrzeit (UTC)</translation>
+        <translation>Datum &amp; Uhrzeit (UTC)</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="96"/>
         <source>Call</source>
-        <translation type="vanished">Rufen Sie an</translation>
+        <translation>Rufen Sie an</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="97"/>
         <source>Sent</source>
-        <translation type="vanished">Gesendet</translation>
+        <translation>Gesendet</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="98"/>
         <source>Rcvd</source>
-        <translation type="vanished">Rcvd</translation>
+        <translation>Rcvd</translation>
     </message>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="99"/>
         <source>Band</source>
-        <translation type="vanished">Band</translation>
+        <translation>Band</translation>
     </message>
 </context>
 <context>
@@ -441,98 +454,122 @@ Gesuchte Pfade:
         <translation>Anrufe (CALL)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="120"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="150"/>
         <source>Chiamata diretta</source>
         <translation>Direktanruf</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="137"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
         <source>ATTIVA</source>
         <translation>AKTIV</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="151"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
+        <source>⏳ ARMATO</source>
+        <translation>⏳ SCHARF</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="182"/>
         <source>Target callsign</source>
         <translation>Ziel-Rufzeichen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="181"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
         <source>Tentativi max</source>
         <translation>Max. Versuche</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="182"/>
         <source>Timeout slot (s)</source>
-        <translation>Slot-Timeout (s)</translation>
+        <translation type="vanished">Slot-Timeout (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="197"/>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="385"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
+        <source>Timeout totale (s)</source>
+        <translation>Gesamt-Timeout (s)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="228"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="445"/>
         <source>∞</source>
         <translation>∞</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="245"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="276"/>
         <source>Periodo FT8/FT4</source>
         <translation>FT8/FT4-Periode</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="251"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="282"/>
         <source>1st (:00/:30)</source>
         <translation>1. (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="281"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="312"/>
         <source>2nd (:15/:45)</source>
         <translation>2. (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="311"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="342"/>
         <source>Alterna</source>
         <translation>Abwechseln</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="347"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="378"/>
         <source>Pausa fra cicli (s)</source>
         <translation>Pause zwischen Zyklen (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="378"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="401"/>
+        <source>DX-watch armato — non chiama subito: aspetta che il target sia decodificato</source>
+        <translation>DX-Watch scharf — ruft nicht sofort: wartet, bis das Ziel dekodiert ist</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
+        <translation>Re-Arm: nach einem Versuch ohne QSO kehrt der Empfang zurück (max. 3 Mal, dann manuelles Halt)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
+        <source>⏳ In ascolto: aspetto %1 in decodifica…</source>
+        <translation>⏳ Höre zu: warte auf %1 in der Dekodierung…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="437"/>
         <source>Stato: chiamando %1</source>
         <translation>Status: rufe %1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="384"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
         <source>Tentativo %1 / %2</source>
         <translation>Versuch %1 / %2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="401"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
         <source>AutoCQ generico (pulsante ACQ)</source>
         <translation>Generisches AutoCQ (ACQ-Taste)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="470"/>
         <source>Max chiamate CQ (0=∞)</source>
         <translation>Max. CQ-Anrufe (0=∞)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="426"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="486"/>
         <source>Pausa fra cicli CQ (s)</source>
         <translation>Pause zwischen CQ-Zyklen (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="447"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="507"/>
         <source>Chiudi</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="470"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="530"/>
         <source>Stop</source>
         <translation>Stopp</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="500"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="560"/>
         <source>▶ Start</source>
         <translation>▶ Start</translation>
     </message>
@@ -671,288 +708,288 @@ Bitte überprüfen Sie Ihr Protokoll.</translation>
 <context>
     <name>Configuration::impl</name>
     <message>
-        <location filename="../Configuration.cpp" line="2317"/>
-        <location filename="../Configuration.cpp" line="2757"/>
-        <location filename="../Configuration.cpp" line="2786"/>
+        <location filename="../Configuration.cpp" line="2336"/>
+        <location filename="../Configuration.cpp" line="2776"/>
+        <location filename="../Configuration.cpp" line="2805"/>
         <source>&amp;Delete</source>
         <translation>&amp;Löschen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2318"/>
-        <location filename="../Configuration.cpp" line="2790"/>
+        <location filename="../Configuration.cpp" line="2337"/>
+        <location filename="../Configuration.cpp" line="2809"/>
         <source>&amp;Insert ...</source>
         <translation>&amp;Einfügen ...</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2354"/>
+        <location filename="../Configuration.cpp" line="2373"/>
         <source>Remote Web Dashboard (LAN)</source>
         <translation>Remote-Web-Dashboard (LAN)</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2357"/>
+        <location filename="../Configuration.cpp" line="2376"/>
         <source>ATTENZIONE SEZIONE SPERIMENTALE</source>
         <translation>ATTENZIONE SEZIONE SPERIMENTALE</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2363"/>
+        <location filename="../Configuration.cpp" line="2382"/>
         <source>Enable remote web dashboard</source>
         <translation>Aktivieren Sie das Remote-Web-Dashboard</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2365"/>
+        <location filename="../Configuration.cpp" line="2384"/>
         <source>Enables the HTTP/WS remote dashboard for browser control on your LAN.</source>
         <translation>Aktiviert das HTTP/WS-Remote-Dashboard für die Browsersteuerung auf Ihrem LAN.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2367"/>
+        <location filename="../Configuration.cpp" line="2386"/>
         <source>HTTP port:</source>
         <translation>HTTP-Port:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2372"/>
+        <location filename="../Configuration.cpp" line="2391"/>
         <source>HTTP dashboard port. WebSocket port is HTTP port minus 1.</source>
         <translation>HTTP Dashboard-Port. Der WebSocket-Port ist der HTTP-Port minus 1.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2375"/>
+        <location filename="../Configuration.cpp" line="2394"/>
         <source>WS bind address:</source>
         <translation>WS-Bindungsadresse:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2379"/>
+        <location filename="../Configuration.cpp" line="2398"/>
         <source>Listening address for WS/HTTP (examples: 0.0.0.0, 127.0.0.1, ::).</source>
         <translation>Abhöradresse für WS/HTTP (Beispiele: 0.0.0.0, 127.0.0.1, ::).</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2382"/>
+        <location filename="../Configuration.cpp" line="2401"/>
         <source>Username:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2386"/>
+        <location filename="../Configuration.cpp" line="2405"/>
         <source>Username requested by the remote dashboard login page.</source>
         <translation>Von der Remote-Dashboard-Anmeldeseite angeforderter Benutzername.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2389"/>
+        <location filename="../Configuration.cpp" line="2408"/>
         <source>Access token (password):</source>
         <translation>Zugriffstoken (Passwort):</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2392"/>
+        <location filename="../Configuration.cpp" line="2411"/>
         <source>Required by web login page</source>
         <translation>Erforderlich für die Web-Anmeldeseite</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2394"/>
+        <location filename="../Configuration.cpp" line="2413"/>
         <source>Password requested by the remote dashboard login page.</source>
         <translation>Von der Remote-Dashboard-Anmeldeseite angefordertes Passwort.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2398"/>
+        <location filename="../Configuration.cpp" line="2417"/>
         <source>Changes apply on next application start.</source>
         <translation>Änderungen gelten beim nächsten Anwendungsstart.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2430"/>
+        <location filename="../Configuration.cpp" line="2449"/>
         <source>AutoSpot</source>
         <translation>AutoSpot</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2433"/>
+        <location filename="../Configuration.cpp" line="2452"/>
         <source>Submit host:</source>
         <translation>Gastgeber einreichen:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2437"/>
+        <location filename="../Configuration.cpp" line="2456"/>
         <source>DX cluster node host/IP used both by the cluster window feed and by AutoSpot submit.
 Use a DxSpider-compatible node that accepts telnet login and spot commands.</source>
         <translation>DX-Clusterknotenhost/IP, der sowohl vom Cluster-Fenster-Feed als auch von der AutoSpot-Übermittlung verwendet wird.
 Verwenden Sie einen DxSpider-kompatiblen Knoten, der Telnet-Anmelde- und Spot-Befehle akzeptiert.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2441"/>
+        <location filename="../Configuration.cpp" line="2460"/>
         <source>Submit port:</source>
         <translation>Sendeport:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2446"/>
+        <location filename="../Configuration.cpp" line="2465"/>
         <source>DX cluster node port used both by the cluster window feed and by AutoSpot submit.
 Set the telnet port required by your cluster server.</source>
         <translation>DX-Clusterknoten-Port, der sowohl vom Cluster-Fenster-Feed als auch von der AutoSpot-Übermittlung verwendet wird.
 Legen Sie den für Ihren Clusterserver erforderlichen Telnet-Port fest.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2451"/>
+        <location filename="../Configuration.cpp" line="2470"/>
         <source>Enable AutoSpot after QSO log (after confirmed 73)</source>
         <translation>AutoSpot nach QSO-Protokoll aktivieren (nach Bestätigung 73)</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2454"/>
+        <location filename="../Configuration.cpp" line="2473"/>
         <source>When enabled, Decodium sends a DX cluster spot at QSO close after log.
 Requires a writable cluster endpoint.</source>
         <translation>Wenn aktiviert, sendet Decodium einen DX-Cluster-Spot bei QSO, der nach dem Protokoll geschlossen wird.
 Erfordert einen beschreibbaren Cluster-Endpunkt.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2458"/>
+        <location filename="../Configuration.cpp" line="2477"/>
         <source>Default node: iq8do.aricaserta.it:7300
 The cluster window and AutoSpot now use the same endpoint.</source>
         <translation>Standardknoten: iq8do.aricaserta.it:7300
 Das Clusterfenster und AutoSpot verwenden jetzt denselben Endpunkt.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2474"/>
+        <location filename="../Configuration.cpp" line="2493"/>
         <source>RTTY Modem</source>
         <translation>RTTY-Modem</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2477"/>
+        <location filename="../Configuration.cpp" line="2496"/>
         <source>Baud rate:</source>
         <translation>Baudrate:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2483"/>
+        <location filename="../Configuration.cpp" line="2502"/>
         <source>RTTY baud rate used for both receive and transmit.</source>
         <translation>RTTY-Baudrate, die sowohl für den Empfang als auch für die Übertragung verwendet wird.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2486"/>
+        <location filename="../Configuration.cpp" line="2505"/>
         <source>Mark tone (Hz):</source>
         <translation>Markenton (Hz):</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2491"/>
+        <location filename="../Configuration.cpp" line="2510"/>
         <source>Base mark tone. Space tone is mark tone plus shift.</source>
         <translation>Basismarkierungston. Der Space-Ton ist der Mark-Ton plus Shift.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2494"/>
+        <location filename="../Configuration.cpp" line="2513"/>
         <source>Shift (Hz):</source>
         <translation>Verschiebung (Hz):</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2499"/>
+        <location filename="../Configuration.cpp" line="2518"/>
         <source>Difference between mark and space tones.</source>
         <translation>Unterschied zwischen Mark- und Space-Tönen.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2502"/>
+        <location filename="../Configuration.cpp" line="2521"/>
         <source>Stop bits:</source>
         <translation>Stoppbits:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2508"/>
+        <location filename="../Configuration.cpp" line="2527"/>
         <source>Transmit stop bits appended after each 5-bit Baudot character.</source>
         <translation>Sendestoppbits werden nach jedem 5-Bit-Baudot-Zeichen angehängt.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2511"/>
+        <location filename="../Configuration.cpp" line="2530"/>
         <source>Reverse / normal</source>
         <translation>Umgekehrt / normal</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2513"/>
+        <location filename="../Configuration.cpp" line="2532"/>
         <source>Swap mark and space tones for both decoding and transmitting.</source>
         <translation>Tauschen Sie Markierungs- und Leerzeichentöne sowohl für die Dekodierung als auch für die Übertragung aus.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2515"/>
+        <location filename="../Configuration.cpp" line="2534"/>
         <source>Macro CQ:</source>
         <translation>Makro CQ:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2518"/>
+        <location filename="../Configuration.cpp" line="2537"/>
         <source>Text sent by the CQ macro button. Supported placeholders: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</source>
         <translation>Text, der von der Makroschaltfläche CQ gesendet wird. Unterstützte Platzhalter: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2521"/>
+        <location filename="../Configuration.cpp" line="2540"/>
         <source>Macro 73:</source>
         <translation>Makro 73:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2524"/>
+        <location filename="../Configuration.cpp" line="2543"/>
         <source>Text sent by the 73 macro button. Supported placeholders: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</source>
         <translation>Von der Makrotaste 73 gesendeter Text. Unterstützte Platzhalter: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2528"/>
+        <location filename="../Configuration.cpp" line="2547"/>
         <source>These settings apply to the built-in RTTY modem. Mark stays fixed; space is mark tone plus shift. Reverse swaps mark and space. Placeholders for CQ/73 macros: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</source>
         <translation>Diese Einstellungen gelten für das eingebaute RTTY-Modem. Mark bleibt fixiert; Leerzeichen ist Markierungston plus Verschiebung. Umgekehrt werden Zeichen und Leerzeichen vertauscht. Platzhalter für CQ/73-Makros: &lt;MYCALL&gt;, &lt;MYGRID&gt;, &lt;DXCALL&gt;, &lt;DXGRID&gt;.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2562"/>
+        <location filename="../Configuration.cpp" line="2581"/>
         <source>Failed to create save directory</source>
         <translation>Das Speicherverzeichnis konnte nicht erstellt werden</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2563"/>
+        <location filename="../Configuration.cpp" line="2582"/>
         <source>path: &quot;%1%</source>
         <translation>Pfad: „%1%</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2574"/>
+        <location filename="../Configuration.cpp" line="2593"/>
         <source>Failed to create samples directory</source>
         <translation>Beispielverzeichnis konnte nicht erstellt werden</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2575"/>
+        <location filename="../Configuration.cpp" line="2594"/>
         <source>path: &quot;%1&quot;</source>
         <translation>Pfad: „%1“</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2645"/>
+        <location filename="../Configuration.cpp" line="2664"/>
         <source>API key OK</source>
         <translation>API-Schlüssel OK</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2649"/>
+        <location filename="../Configuration.cpp" line="2668"/>
         <source>API key read-only</source>
         <translation>API-Schlüssel schreibgeschützt</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2653"/>
+        <location filename="../Configuration.cpp" line="2672"/>
         <source>API key invalid</source>
         <translation>API-Schlüssel ungültig</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2794"/>
+        <location filename="../Configuration.cpp" line="2813"/>
         <source>&amp;Load ...</source>
         <translation>&amp;Load ...</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2798"/>
+        <location filename="../Configuration.cpp" line="2817"/>
         <source>&amp;Save as ...</source>
         <translation>&amp;Speichern unter ...</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2802"/>
+        <location filename="../Configuration.cpp" line="2821"/>
         <source>&amp;Merge ...</source>
         <translation>&amp;Merge ...</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="2806"/>
+        <location filename="../Configuration.cpp" line="2825"/>
         <source>&amp;Reset</source>
         <translation>&amp;Zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4156"/>
+        <location filename="../Configuration.cpp" line="4175"/>
         <source>Serial Port:</source>
         <translation>Serieller Port:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4157"/>
+        <location filename="../Configuration.cpp" line="4176"/>
         <source>Serial port used for CAT control</source>
         <translation>Serieller Port, der für die CAT-Steuerung verwendet wird</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4164"/>
+        <location filename="../Configuration.cpp" line="4183"/>
         <source>TCI Server:</source>
         <translation>TCI-Server:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4165"/>
+        <location filename="../Configuration.cpp" line="4184"/>
         <source>Optional hostname and port of TCI service.
 Leave blank for a sensible default on this machine.
 Formats:
@@ -967,12 +1004,12 @@ Formate:
 	[IPv6-Adresse]:Port</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4177"/>
+        <location filename="../Configuration.cpp" line="4196"/>
         <source>Network Server:</source>
         <translation>Netzwerkserver:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4178"/>
+        <location filename="../Configuration.cpp" line="4197"/>
         <source>Optional hostname and port of network service.
 Leave blank for a sensible default on this machine.
 Formats:
@@ -987,12 +1024,12 @@ Formate:
 	[IPv6-Adresse]:Port</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4190"/>
+        <location filename="../Configuration.cpp" line="4209"/>
         <source>USB Device:</source>
         <translation>USB-Gerät:</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4191"/>
+        <location filename="../Configuration.cpp" line="4210"/>
         <source>Optional device identification.
 Leave blank for a sensible default for the rig.
 Format:
@@ -1003,54 +1040,54 @@ Format:
 	[VID[:PID[:VENDOR[:PRODUCT]]]]</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4227"/>
-        <location filename="../Configuration.cpp" line="4235"/>
+        <location filename="../Configuration.cpp" line="4246"/>
+        <location filename="../Configuration.cpp" line="4254"/>
         <source>Invalid audio input device</source>
         <translation>Ungültiges Audioeingabegerät</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4243"/>
+        <location filename="../Configuration.cpp" line="4262"/>
         <source>Invalid audio output device</source>
         <translation>Ungültiges Audioausgabegerät</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4250"/>
+        <location filename="../Configuration.cpp" line="4269"/>
         <source>Invalid PTT method</source>
         <translation>Ungültige PTT-Methode</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4260"/>
+        <location filename="../Configuration.cpp" line="4279"/>
         <source>Invalid PTT port</source>
         <translation>Ungültiger PTT-Port</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4268"/>
-        <location filename="../Configuration.cpp" line="4277"/>
+        <location filename="../Configuration.cpp" line="4287"/>
+        <location filename="../Configuration.cpp" line="4296"/>
         <source>Invalid Contest Exchange</source>
         <translation>Ungültiger Wettbewerbsaustausch</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4269"/>
+        <location filename="../Configuration.cpp" line="4288"/>
         <source>You must input a valid ARRL Field Day exchange</source>
         <translation>Sie müssen einen gültigen ARRL Field Day-Austausch eingeben</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4278"/>
+        <location filename="../Configuration.cpp" line="4297"/>
         <source>You must input a valid ARRL RTTY Roundup exchange</source>
         <translation>Sie müssen einen gültigen ARRL RTTY Roundup-Austausch eingeben</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4284"/>
+        <location filename="../Configuration.cpp" line="4303"/>
         <source>Pending DNS lookup, please try again later</source>
         <translation>Die Suche nach DNS steht aus. Bitte versuchen Sie es später noch einmal</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4510"/>
+        <location filename="../Configuration.cpp" line="4529"/>
         <source>Rig connection failed</source>
         <translation>Geräteverbindung fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4511"/>
+        <location filename="../Configuration.cpp" line="4530"/>
         <source>The transceiver could not be opened with the selected settings.
 
 Save the configuration anyway? You can reconnect later from the main window.</source>
@@ -1059,47 +1096,47 @@ Save the configuration anyway? You can reconnect later from the main window.</so
 Konfiguration trotzdem speichern? Sie können später vom Hauptfenster aus neu verbinden.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4625"/>
+        <location filename="../Configuration.cpp" line="4644"/>
         <source>Callsign is empty</source>
         <translation>Rufzeichen ist leer</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4626"/>
+        <location filename="../Configuration.cpp" line="4645"/>
         <source>Please enter your callsign before saving.</source>
         <translation>Bitte geben Sie vor dem Speichern Ihr Rufzeichen ein.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4989"/>
+        <location filename="../Configuration.cpp" line="5008"/>
         <source>Remote Dashboard Settings</source>
         <translation>Remote-Dashboard-Einstellungen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="4990"/>
+        <location filename="../Configuration.cpp" line="5009"/>
         <source>Remote dashboard settings were saved.
 Restart the application to apply listener changes.</source>
         <translation>Die Einstellungen des Remote-Dashboards wurden gespeichert.
 Starten Sie die Anwendung neu, um die Listener-Änderungen zu übernehmen.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5040"/>
-        <location filename="../Configuration.cpp" line="5050"/>
+        <location filename="../Configuration.cpp" line="5059"/>
+        <location filename="../Configuration.cpp" line="5069"/>
         <source>Reset Decode Highlighting</source>
         <translation>Dekodier-Hervorhebung zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5041"/>
-        <location filename="../Configuration.cpp" line="5051"/>
+        <location filename="../Configuration.cpp" line="5060"/>
+        <location filename="../Configuration.cpp" line="5070"/>
         <source>Reset all decode highlighting and priorities to default values</source>
         <translation>Setzen Sie alle Dekodierungshervorhebungen und -prioritäten auf die Standardwerte zurück</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5091"/>
-        <location filename="../Configuration.cpp" line="5114"/>
+        <location filename="../Configuration.cpp" line="5110"/>
+        <location filename="../Configuration.cpp" line="5133"/>
         <source>Error Loading CTY.DAT</source>
         <translation>Fehler beim Laden von CTY.DAT</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5093"/>
+        <location filename="../Configuration.cpp" line="5112"/>
         <source>The legacy CTY.DAT refresh failed, but Decodium will continue using the currently available country file.
 
 Network detail: %1</source>
@@ -1108,43 +1145,43 @@ Network detail: %1</source>
 Netzwerkdetail: %1</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5170"/>
+        <location filename="../Configuration.cpp" line="5189"/>
         <source>Error Loading CALL3.TXT file</source>
         <translation>Fehler beim Laden der Datei CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5231"/>
+        <location filename="../Configuration.cpp" line="5250"/>
         <source>Decodium v3.0 SE KP5 Decoded Text Font Chooser</source>
         <translation>Decodium v3.0 SE KP5 Schriftartenauswahl für dekodierten Text</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5668"/>
+        <location filename="../Configuration.cpp" line="5687"/>
         <source>Invalid IPv4 address</source>
         <translation>Ungültige IPv4-Adresse</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="7057"/>
+        <location filename="../Configuration.cpp" line="7083"/>
         <source>Not available</source>
         <translation>Nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="7061"/>
+        <location filename="../Configuration.cpp" line="7087"/>
         <source>Interface not currently reported by OS; selection preserved.</source>
         <translation>Schnittstelle wird derzeit nicht von OS gemeldet; Auswahl bleibt erhalten.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5268"/>
-        <location filename="../Configuration.cpp" line="5325"/>
+        <location filename="../Configuration.cpp" line="5287"/>
+        <location filename="../Configuration.cpp" line="5344"/>
         <source>Hamlib update only available on Windows.</source>
         <translation>Hamlib-Update nur unter Windows verfügbar.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5275"/>
+        <location filename="../Configuration.cpp" line="5294"/>
         <source>Error Loading libhamlib-4.dll</source>
         <translation>Fehler beim Laden von libhamlib-4.dll</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5298"/>
+        <location filename="../Configuration.cpp" line="5317"/>
         <source>Hamlib Update successful 
 
 New Hamlib will be used after restart</source>
@@ -1153,7 +1190,7 @@ New Hamlib will be used after restart</source>
 Nach dem Neustart wird das neue Hamlib verwendet</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5317"/>
+        <location filename="../Configuration.cpp" line="5336"/>
         <source>Hamlib successfully reverted 
 
 Reverted Hamlib will be used after restart</source>
@@ -1162,131 +1199,131 @@ Reverted Hamlib will be used after restart</source>
 Das zurückgesetzte Hamlib wird nach dem Neustart verwendet</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5322"/>
+        <location filename="../Configuration.cpp" line="5341"/>
         <source>No Hamlib update found that could be reverted</source>
         <translation>Es wurde kein Hamlib-Update gefunden, das rückgängig gemacht werden könnte</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5667"/>
+        <location filename="../Configuration.cpp" line="5686"/>
         <source>Error in network address</source>
         <translation>Fehler in der Netzwerkadresse</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5688"/>
+        <location filename="../Configuration.cpp" line="5707"/>
         <source>UDP server DNS lookup failed</source>
         <translation>UDP-Server DNS-Suche fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5732"/>
+        <location filename="../Configuration.cpp" line="5751"/>
         <source>MAC-ambiguous multicast groups addresses not supported</source>
         <translation>MAC-Mehrdeutige Multicast-Gruppenadressen werden nicht unterstützt</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5758"/>
+        <location filename="../Configuration.cpp" line="5777"/>
         <source>Load Working Frequencies</source>
         <translation>Arbeitsfrequenzen laden</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5758"/>
-        <location filename="../Configuration.cpp" line="5778"/>
-        <location filename="../Configuration.cpp" line="5855"/>
+        <location filename="../Configuration.cpp" line="5777"/>
+        <location filename="../Configuration.cpp" line="5797"/>
+        <location filename="../Configuration.cpp" line="5874"/>
         <source>Frequency files (*.qrg *.qrg.json);;All files (*.*)</source>
         <translation>Häufigkeitsdateien (*.qrg *.qrg.json);;Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5765"/>
+        <location filename="../Configuration.cpp" line="5784"/>
         <source>Replace Working Frequencies</source>
         <translation>Ersetzen Sie Arbeitsfrequenzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5766"/>
+        <location filename="../Configuration.cpp" line="5785"/>
         <source>Are you sure you want to discard your current working frequencies and replace them with the loaded ones?</source>
         <translation>Sind Sie sicher, dass Sie Ihre aktuellen Arbeitsfrequenzen verwerfen und durch die geladenen ersetzen möchten?</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5778"/>
+        <location filename="../Configuration.cpp" line="5797"/>
         <source>Merge Working Frequencies</source>
         <translation>Arbeitsfrequenzen zusammenführen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5806"/>
+        <location filename="../Configuration.cpp" line="5825"/>
         <source>Error reading frequency file</source>
         <translation>Fehler beim Lesen der Frequenzdatei</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5815"/>
-        <location filename="../Configuration.cpp" line="5824"/>
-        <location filename="../Configuration.cpp" line="5846"/>
+        <location filename="../Configuration.cpp" line="5834"/>
+        <location filename="../Configuration.cpp" line="5843"/>
+        <location filename="../Configuration.cpp" line="5865"/>
         <source>Not a valid frequencies file</source>
         <translation>Keine gültige Frequenzdatei</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5815"/>
+        <location filename="../Configuration.cpp" line="5834"/>
         <source>Incorrect file magic</source>
         <translation>Falsche Dateimagie</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5824"/>
+        <location filename="../Configuration.cpp" line="5843"/>
         <source>Version is too new</source>
         <translation>Version ist zu neu</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5846"/>
+        <location filename="../Configuration.cpp" line="5865"/>
         <source>Contents corrupt</source>
         <translation>Inhalte beschädigt</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5855"/>
+        <location filename="../Configuration.cpp" line="5874"/>
         <source>Save Working Frequencies</source>
         <translation>Sparen Sie Arbeitsfrequenzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5871"/>
+        <location filename="../Configuration.cpp" line="5890"/>
         <source>Only Save Selected  Working Frequencies</source>
         <translation>Speichern Sie nur ausgewählte Arbeitsfrequenzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5872"/>
+        <location filename="../Configuration.cpp" line="5891"/>
         <source>Are you sure you want to save only the working frequencies that are currently selected? Click No to save all.</source>
         <translation>Sind Sie sicher, dass Sie nur die aktuell ausgewählten Arbeitsfrequenzen speichern möchten? Klicken Sie auf Nein, um alles zu speichern.</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5905"/>
+        <location filename="../Configuration.cpp" line="5924"/>
         <source>Reset Working Frequencies</source>
         <translation>Arbeitsfrequenzen zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5906"/>
+        <location filename="../Configuration.cpp" line="5925"/>
         <source>Are you sure you want to discard your current working frequencies and replace them with default ones?</source>
         <translation>Sind Sie sicher, dass Sie Ihre aktuellen Arbeitsfrequenzen verwerfen und durch die Standardfrequenzen ersetzen möchten?</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5946"/>
+        <location filename="../Configuration.cpp" line="5965"/>
         <source>Save Directory</source>
         <translation>Verzeichnis speichern</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="5960"/>
+        <location filename="../Configuration.cpp" line="5979"/>
         <source>AzEl Directory</source>
         <translation>AzEl-Verzeichnis</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="6421"/>
+        <location filename="../Configuration.cpp" line="6440"/>
         <source>Rig control error</source>
         <translation>Fehler bei der Rig-Steuerung</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="6422"/>
+        <location filename="../Configuration.cpp" line="6441"/>
         <source>Failed to open connection to rig</source>
         <translation>Die Verbindung zum Rig konnte nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="6847"/>
+        <location filename="../Configuration.cpp" line="6873"/>
         <source>Rig failure</source>
         <translation>Rig-Fehler</translation>
     </message>
     <message>
-        <location filename="../Configuration.cpp" line="6924"/>
+        <location filename="../Configuration.cpp" line="6950"/>
         <source>Not found</source>
         <comment>audio device missing</comment>
         <translation>Nicht gefunden</translation>
@@ -1554,80 +1591,99 @@ oder wenden Sie sich an den DXLab-Support unter DXLab@groups.io.</translation>
 <context>
     <name>DecodeHighlightingModel</name>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="132"/>
         <source>CQ in message</source>
-        <translation type="vanished">CQ in Nachricht</translation>
+        <translation>CQ in Nachricht</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="133"/>
         <source>My Call in message</source>
-        <translation type="vanished">Meine Anrufnachricht</translation>
+        <translation>Meine Anrufnachricht</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="134"/>
         <source>Transmitted message</source>
-        <translation type="vanished">Übermittelte Nachricht</translation>
+        <translation>Übermittelte Nachricht</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="135"/>
         <source>New DXCC</source>
-        <translation type="vanished">Neu DXCC</translation>
+        <translation>Neu DXCC</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="136"/>
         <source>New DXCC on Band</source>
-        <translation type="vanished">Neues DXCC am Band</translation>
+        <translation>Neues DXCC am Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="137"/>
         <source>New Grid</source>
-        <translation type="vanished">Neues Raster</translation>
+        <translation>Neues Raster</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="138"/>
         <source>New Grid on Band</source>
-        <translation type="vanished">Neues Raster auf Band</translation>
+        <translation>Neues Raster auf Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="139"/>
         <source>New Call</source>
-        <translation type="vanished">Neuer Anruf</translation>
+        <translation>Neuer Anruf</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="140"/>
         <source>New Call on Band</source>
-        <translation type="vanished">Neuer Anruf bei der Band</translation>
+        <translation>Neuer Anruf bei der Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="141"/>
         <source>New Continent</source>
-        <translation type="vanished">Neuer Kontinent</translation>
+        <translation>Neuer Kontinent</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="142"/>
         <source>New Continent on Band</source>
-        <translation type="vanished">Neuer Kontinent auf Band</translation>
+        <translation>Neuer Kontinent auf Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="143"/>
         <source>New CQ Zone</source>
-        <translation type="vanished">Neue CQ-Zone</translation>
+        <translation>Neue CQ-Zone</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="144"/>
         <source>New CQ Zone on Band</source>
-        <translation type="vanished">Neue CQ Zone auf Band</translation>
+        <translation>Neue CQ Zone auf Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="145"/>
         <source>New ITU Zone</source>
-        <translation type="vanished">Neue ITU-Zone</translation>
+        <translation>Neue ITU-Zone</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="146"/>
         <source>New ITU Zone on Band</source>
-        <translation type="vanished">Neue ITU Zone auf Band</translation>
+        <translation>Neue ITU Zone auf Band</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="147"/>
         <source>LoTW User</source>
-        <translation type="vanished">LoTW Benutzer</translation>
+        <translation>LoTW Benutzer</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="202"/>
         <source>f/g unset</source>
-        <translation type="vanished">f/g nicht eingestellt</translation>
+        <translation>f/g nicht eingestellt</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="204"/>
         <source>b/g unset</source>
-        <translation type="vanished">b/g nicht eingestellt</translation>
+        <translation>b/g nicht eingestellt</translation>
     </message>
     <message>
+        <location filename="../models/DecodeHighlightingModel.cpp" line="277"/>
         <source>Highlight Type</source>
-        <translation type="vanished">Hervorhebungstyp</translation>
+        <translation>Hervorhebungstyp</translation>
     </message>
 </context>
 <context>
@@ -1731,37 +1787,37 @@ oder wenden Sie sich an den DXLab-Support unter DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="18836"/>
+        <location filename="../DecodiumBridge.cpp" line="23517"/>
         <source>TX non avviata</source>
         <translation>TX nicht gestartet</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="18837"/>
+        <location filename="../DecodiumBridge.cpp" line="23518"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Komprimiertes Rufzeichen nicht aufgelöst</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="21593"/>
+        <location filename="../DecodiumBridge.cpp" line="27058"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ gestoppt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="21594"/>
+        <location filename="../DecodiumBridge.cpp" line="27059"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Direktanruf empfangen, aber Rufzeichen nicht aufgelöst</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="26292"/>
+        <location filename="../DecodiumBridge.cpp" line="32040"/>
         <source>Map selection: %1 %2</source>
         <translation>Kartenauswahl: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="26293"/>
+        <location filename="../DecodiumBridge.cpp" line="32041"/>
         <source>Map selection: %1</source>
         <translation>Kartenauswahl: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="31246"/>
+        <location filename="../DecodiumBridge.cpp" line="38386"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Update-Prüfungen sind in diesem Build deaktiviert.</translation>
     </message>
@@ -1769,231 +1825,245 @@ oder wenden Sie sich an den DXLab-Support unter DXLab@groups.io.</translation>
 <context>
     <name>DecodiumCloudlogLite</name>
     <message>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="173"/>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="229"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="379"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="453"/>
         <source>Cloudlog API URL or API key not configured.</source>
         <translation>Cloudlog-API-URL oder API-Schlüssel nicht konfiguriert.</translation>
     </message>
     <message>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="205"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="423"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="437"/>
+        <source>Cloudlog QSO upload</source>
+        <translation>Cloudlog QSO-Upload</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="490"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="500"/>
+        <source>Cloudlog API test</source>
+        <translation>Cloudlog API-Test</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="514"/>
+        <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
+        <translation>Cloudlog API-Schlüssel gültig, aber ohne Schreibrechte.</translation>
+    </message>
+    <message>
         <source>Cloudlog network error: %1</source>
-        <translation>Cloudlog-Netzwerkfehler: %1</translation>
+        <translation type="vanished">Cloudlog-Netzwerkfehler: %1</translation>
     </message>
     <message>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="217"/>
         <source>Cloudlog returned HTTP %1 for QSO logging.</source>
-        <translation>Cloudlog lieferte HTTP %1 beim QSO-Logging.</translation>
+        <translation type="vanished">Cloudlog lieferte HTTP %1 beim QSO-Logging.</translation>
     </message>
     <message>
-        <location filename="../Network/DecodiumCloudlogLite.cpp" line="245"/>
         <source>Cloudlog test error: %1</source>
-        <translation>Cloudlog-Testfehler: %1</translation>
+        <translation type="vanished">Cloudlog-Testfehler: %1</translation>
     </message>
 </context>
 <context>
     <name>DecodiumDxCluster</name>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="396"/>
+        <location filename="../DecodiumDxCluster.cpp" line="422"/>
         <source>Disconnected: callsign missing, auto-reconnect skipped.</source>
         <translation>Getrennt: Rufzeichen fehlt, automatische Neuverbindung übersprungen.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="397"/>
+        <location filename="../DecodiumDxCluster.cpp" line="423"/>
         <source>DX Cluster auto-reconnect skipped: callsign missing.</source>
         <translation>DX-Cluster-Neuverbindung übersprungen: Rufzeichen fehlt.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="400"/>
+        <location filename="../DecodiumDxCluster.cpp" line="426"/>
         <source>DX Cluster auto-reconnect starting.</source>
         <translation>DX-Cluster-Neuverbindung wird gestartet.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="464"/>
+        <location filename="../DecodiumDxCluster.cpp" line="490"/>
         <source>Connection timeout</source>
         <translation>Verbindungs-Timeout</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="467"/>
-        <location filename="../DecodiumDxCluster.cpp" line="1161"/>
+        <location filename="../DecodiumDxCluster.cpp" line="493"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1201"/>
         <source>Error: %1</source>
         <translation>Fehler: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="468"/>
+        <location filename="../DecodiumDxCluster.cpp" line="494"/>
         <source>DX Cluster not reachable: %1</source>
         <translation>DX-Cluster nicht erreichbar: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="483"/>
-        <location filename="../DecodiumDxCluster.cpp" line="484"/>
+        <location filename="../DecodiumDxCluster.cpp" line="509"/>
+        <location filename="../DecodiumDxCluster.cpp" line="510"/>
         <source>Callsign not usable for cluster login: %1</source>
         <translation>Rufzeichen für Cluster-Anmeldung nicht verwendbar: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="490"/>
+        <location filename="../DecodiumDxCluster.cpp" line="516"/>
         <source>Login sent as %1</source>
         <translation>Anmeldung gesendet als %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="491"/>
+        <location filename="../DecodiumDxCluster.cpp" line="517"/>
         <source>Login sent as %1 (station %2)</source>
         <translation>Anmeldung gesendet als %1 (Station %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="493"/>
+        <location filename="../DecodiumDxCluster.cpp" line="519"/>
         <source>Login sent (%1).</source>
         <translation>Anmeldung gesendet (%1).</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="494"/>
+        <location filename="../DecodiumDxCluster.cpp" line="520"/>
         <source>Login sent (%1, station %2).</source>
         <translation>Anmeldung gesendet (%1, Station %2).</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="522"/>
+        <location filename="../DecodiumDxCluster.cpp" line="548"/>
         <source>connection closed</source>
         <translation>Verbindung geschlossen</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="523"/>
+        <location filename="../DecodiumDxCluster.cpp" line="549"/>
         <source>Disconnected: %1. Reconnecting in %2 s...</source>
         <translation>Getrennt: %1. Neuverbindung in %2 s...</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="525"/>
+        <location filename="../DecodiumDxCluster.cpp" line="551"/>
         <source>DX Cluster disconnected: %1. Reconnecting in %2 s...</source>
         <translation>DX-Cluster getrennt: %1. Neuverbindung in %2 s...</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="580"/>
+        <location filename="../DecodiumDxCluster.cpp" line="606"/>
         <source>Connection to %1 failed: %2</source>
         <translation>Verbindung zu %1 fehlgeschlagen: %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="605"/>
+        <location filename="../DecodiumDxCluster.cpp" line="631"/>
         <source>Connecting to %1...</source>
         <translation>Verbinde mit %1...</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="606"/>
+        <location filename="../DecodiumDxCluster.cpp" line="632"/>
         <source>Connecting to %1 …</source>
         <translation>Verbinde mit %1 …</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="625"/>
-        <location filename="../DecodiumDxCluster.cpp" line="626"/>
+        <location filename="../DecodiumDxCluster.cpp" line="651"/>
+        <location filename="../DecodiumDxCluster.cpp" line="652"/>
         <source>Already connected or connecting.</source>
         <translation>Bereits verbunden oder Verbindungsaufbau läuft.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="631"/>
+        <location filename="../DecodiumDxCluster.cpp" line="657"/>
         <source>Callsign not set. Please set your callsign in Station.</source>
         <translation>Rufzeichen nicht gesetzt. Bitte legen Sie Ihr Rufzeichen unter Station fest.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="632"/>
+        <location filename="../DecodiumDxCluster.cpp" line="658"/>
         <source>Callsign not set. Please set your callsign before connecting.</source>
         <translation>Rufzeichen nicht gesetzt. Bitte legen Sie Ihr Rufzeichen vor dem Verbinden fest.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="646"/>
+        <location filename="../DecodiumDxCluster.cpp" line="672"/>
         <source>Configured cluster endpoint is legacy/read-only. Using %1 instead.</source>
         <translation>Konfigurierter Cluster-Endpunkt ist veraltet/schreibgeschützt. Verwende stattdessen %1.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="675"/>
+        <location filename="../DecodiumDxCluster.cpp" line="701"/>
         <source>No specific reason</source>
         <translation>Kein bestimmter Grund</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="677"/>
+        <location filename="../DecodiumDxCluster.cpp" line="703"/>
         <source>Error: no valid DX Cluster endpoint</source>
         <translation>Fehler: kein gültiger DX-Cluster-Endpunkt</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="678"/>
+        <location filename="../DecodiumDxCluster.cpp" line="704"/>
         <source>DX Cluster configuration is invalid.</source>
         <translation>DX-Cluster-Konfiguration ist ungültig.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="713"/>
+        <location filename="../DecodiumDxCluster.cpp" line="739"/>
         <source>Cannot send command: not connected.</source>
         <translation>Befehl kann nicht gesendet werden: nicht verbunden.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="724"/>
-        <location filename="../DecodiumDxCluster.cpp" line="760"/>
+        <location filename="../DecodiumDxCluster.cpp" line="750"/>
+        <location filename="../DecodiumDxCluster.cpp" line="786"/>
         <source>Cannot send spot: invalid call or frequency.</source>
         <translation>Spot kann nicht gesendet werden: ungültiges Rufzeichen oder Frequenz.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="729"/>
+        <location filename="../DecodiumDxCluster.cpp" line="755"/>
         <source>Cannot send spot: not connected.</source>
         <translation>Spot kann nicht gesendet werden: nicht verbunden.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="746"/>
+        <location filename="../DecodiumDxCluster.cpp" line="772"/>
         <source>Cannot send spot: %1</source>
         <translation>Spot kann nicht gesendet werden: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="751"/>
-        <location filename="../DecodiumDxCluster.cpp" line="752"/>
+        <location filename="../DecodiumDxCluster.cpp" line="777"/>
+        <location filename="../DecodiumDxCluster.cpp" line="778"/>
         <source>Spot sent: %1 %2 kHz</source>
         <translation>Spot gesendet: %1 %2 kHz</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="766"/>
+        <location filename="../DecodiumDxCluster.cpp" line="792"/>
         <source>Cannot send spot: callsign not set.</source>
         <translation>Spot kann nicht gesendet werden: Rufzeichen nicht gesetzt.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="779"/>
+        <location filename="../DecodiumDxCluster.cpp" line="805"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>AutoSpot übersprungen: %1:%2 ist schreibgeschützt. Konfigurieren Sie einen beschreibbaren DX-Cluster-Endpunkt.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1027"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1067"/>
         <source>AutoSpot verification started for %1 on %2:%3</source>
         <translation>AutoSpot-Überprüfung gestartet für %1 auf %2:%3</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1054"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1094"/>
         <source>Connected to %1, waiting for login prompt...</source>
         <translation>Verbunden mit %1, warte auf Anmeldeaufforderung...</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1056"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1096"/>
         <source>Connected to %1. Waiting for login prompt...</source>
         <translation>Verbunden mit %1. Warte auf Anmeldeaufforderung...</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1085"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1125"/>
         <source>remote host closed the connection</source>
         <translation>Gegenstelle hat die Verbindung geschlossen</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1089"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1129"/>
         <source>Disconnected</source>
         <translation>Getrennt</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1090"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1130"/>
         <source>Disconnected from DX cluster.</source>
         <translation>Vom DX-Cluster getrennt.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1102"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1142"/>
         <source>DX Cluster receive buffer was trimmed after an unterminated server response.</source>
         <translation>DX-Cluster-Empfangspuffer wurde nach einer nicht abgeschlossenen Serverantwort gekürzt.</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1142"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1182"/>
         <source>Unknown socket error</source>
         <translation>Unbekannter Socket-Fehler</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1163"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1203"/>
         <source>Socket error: %1</source>
         <translation>Socket-Fehler: %1</translation>
     </message>
@@ -2065,7 +2135,7 @@ oder wenden Sie sich an den DXLab-Support unter DXLab@groups.io.</translation>
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="1813"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="1896"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT unterbrochen, automatische Neuverbindung (%1/%2)...</translation>
     </message>
@@ -2594,28 +2664,34 @@ Fehler: %2</translation>
 <context>
     <name>FoxLog::impl</name>
     <message>
+        <location filename="../models/FoxLog.cpp" line="169"/>
         <source>Date &amp; Time(UTC)</source>
-        <translation type="vanished">Datum &amp; Uhrzeit (UTC)</translation>
+        <translation>Datum &amp; Uhrzeit (UTC)</translation>
     </message>
     <message>
+        <location filename="../models/FoxLog.cpp" line="170"/>
         <source>Call</source>
-        <translation type="vanished">Rufen Sie an</translation>
+        <translation>Rufen Sie an</translation>
     </message>
     <message>
+        <location filename="../models/FoxLog.cpp" line="171"/>
         <source>Grid</source>
-        <translation type="vanished">Gitter</translation>
+        <translation>Gitter</translation>
     </message>
     <message>
+        <location filename="../models/FoxLog.cpp" line="172"/>
         <source>Sent</source>
-        <translation type="vanished">Gesendet</translation>
+        <translation>Gesendet</translation>
     </message>
     <message>
+        <location filename="../models/FoxLog.cpp" line="173"/>
         <source>Rcvd</source>
-        <translation type="vanished">Rcvd</translation>
+        <translation>Rcvd</translation>
     </message>
     <message>
+        <location filename="../models/FoxLog.cpp" line="174"/>
         <source>Band</source>
-        <translation type="vanished">Band</translation>
+        <translation>Band</translation>
     </message>
 </context>
 <context>
@@ -2770,68 +2846,91 @@ Fehler: %2</translation>
 <context>
     <name>FrequencyList_v2_101</name>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="813"/>
+        <location filename="../models/FrequencyList.cpp" line="1232"/>
         <source>IARU Region</source>
-        <translation type="vanished">IARU-Region</translation>
+        <translation>IARU-Region</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="834"/>
+        <location filename="../models/FrequencyList.cpp" line="1233"/>
         <source>Mode</source>
-        <translation type="vanished">Modus</translation>
+        <translation>Modus</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="862"/>
+        <location filename="../models/FrequencyList.cpp" line="1234"/>
         <source>Frequency</source>
-        <translation type="vanished">Häufigkeit</translation>
+        <translation>Häufigkeit</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="895"/>
+        <location filename="../models/FrequencyList.cpp" line="1235"/>
         <source>Frequency (MHz)</source>
-        <translation type="vanished">Frequenz (MHz)</translation>
+        <translation>Frequenz (MHz)</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="916"/>
+        <location filename="../models/FrequencyList.cpp" line="1240"/>
         <source>Description</source>
-        <translation type="vanished">Beschreibung</translation>
+        <translation>Beschreibung</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="937"/>
+        <location filename="../models/FrequencyList.cpp" line="1236"/>
         <source>Source</source>
-        <translation type="vanished">Quelle</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="971"/>
         <source>Start Time</source>
-        <translation type="vanished">Startzeit</translation>
+        <translation>Startzeit</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1005"/>
         <source>End Time</source>
-        <translation type="vanished">Endzeit</translation>
+        <translation>Endzeit</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1028"/>
+        <location filename="../models/FrequencyList.cpp" line="1239"/>
         <source>Pref</source>
-        <translation type="vanished">Präf</translation>
+        <translation>Präf</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1237"/>
         <source>Start Date/Time</source>
-        <translation type="vanished">Startdatum/-uhrzeit</translation>
+        <translation>Startdatum/-uhrzeit</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1238"/>
         <source>End Date/Time</source>
-        <translation type="vanished">Enddatum/Uhrzeit</translation>
+        <translation>Enddatum/Uhrzeit</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1387"/>
         <source>Failed to parse JSON file</source>
-        <translation type="vanished">Die JSON-Datei konnte nicht analysiert werden</translation>
+        <translation>Die JSON-Datei konnte nicht analysiert werden</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1392"/>
         <source>Information Missing</source>
-        <translation type="vanished">Informationen fehlen</translation>
+        <translation>Informationen fehlen</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1397"/>
         <source>No Frequencies were found</source>
-        <translation type="vanished">Es wurden keine Frequenzen gefunden</translation>
+        <translation>Es wurden keine Frequenzen gefunden</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1436"/>
         <source>Loaded Frequencies from %1</source>
-        <translation type="vanished">Geladene Frequenzen von %1</translation>
+        <translation>Geladene Frequenzen von %1</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="1437"/>
         <source>Entries Valid/Skipped %1</source>
-        <translation type="vanished">Gültige/übersprungene Einträge %1</translation>
+        <translation>Gültige/übersprungene Einträge %1</translation>
     </message>
 </context>
 <context>
@@ -2861,81 +2960,82 @@ Fehler: %2</translation>
         <translation>Amateurfunk Deluxe: Kein Gerät gefunden</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="915"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="914"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="919"/>
         <source>Ham Radio Deluxe: rig doesn&apos;t support mode</source>
         <translation>Ham Radio Deluxe: Rig unterstützt den Modus nicht</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="934"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="938"/>
         <source>Ham Radio Deluxe: sent an unrecognised mode</source>
         <translation>Ham Radio Deluxe: Es wurde ein nicht erkannter Modus gesendet</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1044"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1048"/>
         <source>Ham Radio Deluxe: item not found in %1 dropdown list</source>
         <translation>Amateurfunk Deluxe: Artikel nicht in der Dropdown-Liste %1 gefunden</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1104"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1108"/>
         <source>Ham Radio Deluxe: button not available</source>
         <translation>Amateurfunk Deluxe: Schaltfläche nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1580"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1584"/>
         <source>Ham Radio Deluxe didn&apos;t respond as expected</source>
         <translation>Ham Radio Deluxe reagierte nicht wie erwartet</translation>
     </message>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="630"/>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1726"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1730"/>
         <source>Ham Radio Deluxe: rig has disappeared or changed</source>
         <translation>Amateurfunk Deluxe: Das Gerät ist verschwunden oder hat sich verändert</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1748"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1752"/>
         <source>Ham Radio Deluxe send command &quot;%1&quot; failed %2
 </source>
         <translation>Ham Radio Deluxe-Sendebefehl „%1“ ist fehlgeschlagen %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1790"/>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1814"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1794"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1818"/>
         <source>Ham Radio Deluxe: failed to write command &quot;%1&quot;</source>
         <translation>Amateurfunk Deluxe: Befehl „%1“ konnte nicht geschrieben werden.</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1847"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1851"/>
         <source>Ham Radio Deluxe reply to command &quot;%1&quot; is too large</source>
         <translation>Antwort von Ham Radio Deluxe auf Befehl &quot;%1&quot; ist zu groß</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1877"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1881"/>
         <source>Ham Radio Deluxe sent an invalid reply to our command &quot;%1&quot;</source>
         <translation>Ham Radio Deluxe hat eine ungültige Antwort auf unseren Befehl „%1“ gesendet.</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1894"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1898"/>
         <source>Ham Radio Deluxe sent an invalid reply size to our command &quot;%1&quot;</source>
         <translation>Ham Radio Deluxe hat eine ungültige Antwortgröße auf unseren Befehl &quot;%1&quot; gesendet</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1974"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1978"/>
         <source>Ham Radio Deluxe failed to reply to command &quot;%1&quot; %2
 </source>
         <translation>Ham Radio Deluxe konnte nicht auf den Befehl „%1“ %2 antworten</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="1999"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2003"/>
         <source>Ham Radio Deluxe TCP accepted, protocol silent while probing command &quot;%1&quot;</source>
         <translation>Ham Radio Deluxe hat TCP akzeptiert, Protokoll bleibt beim Prüfen von Befehl &quot;%1&quot; stumm</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="2050"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2054"/>
         <source>Ham Radio Deluxe retries exhausted sending command &quot;%1&quot;</source>
         <translation>Ham Radio Deluxe versucht erneut, den Befehl „%1“ zu senden.</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HRDTransceiver.cpp" line="2072"/>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2076"/>
         <source>Ham Radio Deluxe didn&apos;t respond to command &quot;%1&quot; as expected</source>
         <translation>Ham Radio Deluxe reagierte nicht wie erwartet auf den Befehl „%1“.</translation>
     </message>
@@ -2949,22 +3049,22 @@ Fehler: %2</translation>
         <translation>Hamlib-Initialisierungsfehler</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="648"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="652"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Fehler in der Hamlib-Einstellungsdatei: %1 bei Zeichenversatz %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="654"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="658"/>
         <source>Hamlib settings file error: top level must be a JSON object</source>
         <translation>Fehler in der Hamlib-Einstellungsdatei: Die oberste Ebene muss ein JSON-Objekt sein</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="666"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="670"/>
         <source>Hamlib settings file error: config must be a JSON object</source>
         <translation>Fehler in der Hamlib-Einstellungsdatei: Die Konfiguration muss ein JSON-Objekt sein</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="577"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="581"/>
         <source>Unsupported CAT type</source>
         <translation>Nicht unterstützter CAT-Typ</translation>
     </message>
@@ -2974,102 +3074,102 @@ Fehler: %2</translation>
         <translation>Hamlib-Fehler: %1 während %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="690"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="694"/>
         <source>opening connection to rig</source>
         <translation>Öffnen der Verbindung zum Rig</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="698"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="702"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
         <translation>Gerät nicht bereit — caps nach dem Öffnen null (keine Antwort von der Funkanlage?)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="785"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="809"/>
         <source>getting current frequency</source>
         <translation>Aktuelle Frequenz abrufen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="789"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="813"/>
         <source>getting current mode</source>
         <translation>Aktuellen Modus abrufen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="818"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="838"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="842"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="862"/>
         <source>exchanging VFOs</source>
         <translation>Austausch von VFOs</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="826"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1292"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="850"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1337"/>
         <source>getting other VFO frequency</source>
         <translation>andere VFO-Frequenz erhalten</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="830"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="854"/>
         <source>getting other VFO mode</source>
         <translation>Anderen VFO-Modus erhalten</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1038"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1083"/>
         <source>setting TX VFO mode</source>
         <translation>TX-VFO-Modus wird eingestellt</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="329"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="843"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="867"/>
         <source>setting current VFO</source>
         <translation>Einstellung des Stroms VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="852"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="876"/>
         <source>getting frequency</source>
         <translation>Frequenz bekommen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="856"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="880"/>
         <source>getting mode</source>
         <translation>Holen Sie sich den Modus</translation>
     </message>
     <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="317"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="873"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1232"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="897"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1277"/>
         <source>getting current VFO</source>
         <translation>Aktuelles VFO erhalten</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="924"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="932"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="946"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1271"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="948"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="956"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="970"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1316"/>
         <source>getting current VFO frequency</source>
         <translation>Aktuelle VFO-Frequenz abrufen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="930"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="945"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="952"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1009"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1027"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1094"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="954"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="969"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="976"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1054"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1072"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1139"/>
         <source>setting frequency</source>
         <translation>Frequenz einstellen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1017"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1101"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1179"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1192"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1062"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1146"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1224"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1237"/>
         <source>getting current VFO mode</source>
         <translation>Aktuellen VFO-Modus abrufen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1023"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1032"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1107"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1185"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1198"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1068"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1077"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1152"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1230"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1243"/>
         <source>setting current VFO mode</source>
         <translation>Einstellung des aktuellen VFO-Modus</translation>
     </message>
@@ -3078,50 +3178,49 @@ Fehler: %2</translation>
         <translation type="vanished">Einstellung des VFOB-Modus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1081"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1150"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1126"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1195"/>
         <source>setting/unsetting split mode</source>
         <translation>Aktivieren/Deaktivieren des Split-Modus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1092"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1132"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1137"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1177"/>
         <source>setting split mode</source>
         <translation>Split-Modus einstellen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1120"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1165"/>
         <source>setting split TX frequency and mode</source>
         <translation>Einstellung der geteilten TX-Frequenz und des Modus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1125"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1170"/>
         <source>setting split TX frequency</source>
         <translation>Einstellen der geteilten TX-Frequenz</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1203"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1248"/>
         <source>getting split TX VFO mode</source>
         <translation>Aufteilung im TX VFO-Modus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1210"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1255"/>
         <source>setting split TX VFO mode</source>
         <translation>Einstellung des geteilten TX VFO-Modus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1329"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1374"/>
         <source>getting PTT state</source>
         <translation>Abrufen des PTT-Status</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1482"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1580"/>
         <source>setting PTT on</source>
         <translation>indem Sie PTT einschalten</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1491"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1525"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1682"/>
         <source>setting PTT off</source>
         <translation>indem Sie PTT ausschalten</translation>
     </message>
@@ -3140,24 +3239,30 @@ Fehler: %2</translation>
 <context>
     <name>IARURegions</name>
     <message>
+        <location filename="../models/IARURegions.cpp" line="15"/>
         <source>All</source>
-        <translation type="vanished">Alle</translation>
+        <translation>Alle</translation>
     </message>
     <message>
+        <location filename="../models/IARURegions.cpp" line="16"/>
         <source>Region 1</source>
-        <translation type="vanished">Region 1</translation>
+        <translation>Region 1</translation>
     </message>
     <message>
+        <location filename="../models/IARURegions.cpp" line="17"/>
         <source>Region 2</source>
-        <translation type="vanished">Region 2</translation>
+        <translation>Region 2</translation>
     </message>
     <message>
+        <location filename="../models/IARURegions.cpp" line="18"/>
         <source>Region 3</source>
-        <translation type="vanished">Region 3</translation>
+        <translation>Region 3</translation>
     </message>
     <message>
+        <location filename="../models/IARURegions.cpp" line="58"/>
+        <location filename="../models/IARURegions.cpp" line="85"/>
         <source>IARU Region</source>
-        <translation type="vanished">IARU-Region</translation>
+        <translation>IARU-Region</translation>
     </message>
 </context>
 <context>
@@ -3223,32 +3328,36 @@ Fehler: %2</translation>
 <context>
     <name>LiveMapPanel</name>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="161"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="180"/>
         <source>Zoom out</source>
         <translation>Verkleinern</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="191"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="210"/>
         <source>Zoom in</source>
         <translation>Vergrößern</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="221"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="240"/>
         <source>Reset view (auto-fit)</source>
         <translation>Ansicht zurücksetzen (automatisch anpassen)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="262"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="281"/>
         <source>Toggle day/night greyline overlay</source>
         <translation>Tag/Nacht-Graulinie ein-/ausblenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="292"/>
-        <source>Reattach Live Map</source>
-        <translation>Live-Karte wieder andocken</translation>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="311"/>
+        <source>Dock Live Map</source>
+        <translation>Live Map andocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="292"/>
+        <source>Reattach Live Map</source>
+        <translation type="vanished">Live-Karte wieder andocken</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="311"/>
         <source>Detach Live Map</source>
         <translation>Live-Karte abdocken</translation>
     </message>
@@ -3608,31 +3717,31 @@ Fehler: %2</translation>
 <context>
     <name>LogWindow</name>
     <message>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="148"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="181"/>
         <source>Importa file ADIF</source>
         <translation>ADIF-Datei importieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="150"/>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="161"/>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="173"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="183"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="194"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="230"/>
         <source>ADIF files (*.adi *.adif)</source>
         <translation>ADIF-Dateien (*.adi *.adif)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="150"/>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="161"/>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="173"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="183"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="194"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="230"/>
         <source>All files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="159"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="192"/>
         <source>Carica logbook ADIF</source>
         <translation>ADIF-Logbuch laden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LogWindow.qml" line="171"/>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="228"/>
         <source>Esporta file ADIF</source>
         <translation>ADIF-Datei exportieren</translation>
     </message>
@@ -3672,44 +3781,43 @@ Fehler: %2</translation>
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7795"/>
+        <location filename="../qml/decodium/Main.qml" line="10046"/>
         <source>About Decodium</source>
         <translation>Über Decodium</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7812"/>
+        <location filename="../qml/decodium/Main.qml" line="10063"/>
         <source>Useful Links...</source>
         <translation>Nützliche Links...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7836"/>
-        <location filename="../qml/decodium/Main.qml" line="8694"/>
+        <location filename="../qml/decodium/Main.qml" line="10087"/>
+        <location filename="../qml/decodium/Main.qml" line="10939"/>
         <source>Keyboard Shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7852"/>
+        <location filename="../qml/decodium/Main.qml" line="10103"/>
         <source>SWL Mode (RX Only)</source>
         <translation>SWL-Modus (nur RX)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7868"/>
+        <location filename="../qml/decodium/Main.qml" line="10119"/>
         <source>Multi-Answer Mode</source>
         <translation>Multi-Antwort-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7884"/>
+        <location filename="../qml/decodium/Main.qml" line="10135"/>
         <source>MAM Window...</source>
         <translation>MAM-Fenster...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7900"/>
         <source>Open ALL.TXT Folder</source>
-        <translation>ALL.TXT-Ordner öffnen</translation>
+        <translation type="vanished">ALL.TXT-Ordner öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7924"/>
-        <location filename="../qml/decodium/Main.qml" line="8549"/>
+        <location filename="../qml/decodium/Main.qml" line="10175"/>
+        <location filename="../qml/decodium/Main.qml" line="10794"/>
         <source>TX Watchdog</source>
         <translation>TX-Watchdog</translation>
     </message>
@@ -3718,18 +3826,18 @@ Fehler: %2</translation>
         <translation type="vanished">Split-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7940"/>
-        <location filename="../qml/decodium/Main.qml" line="8626"/>
+        <location filename="../qml/decodium/Main.qml" line="10191"/>
+        <location filename="../qml/decodium/Main.qml" line="10871"/>
         <source>Contest Mode</source>
         <translation>Contest-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7980"/>
+        <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Nur CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7996"/>
+        <location filename="../qml/decodium/Main.qml" line="10247"/>
         <source>My Call Only</source>
         <translation>Nur mein Rufzeichen</translation>
     </message>
@@ -3738,174 +3846,351 @@ Fehler: %2</translation>
         <translation type="vanished">ZAP-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8020"/>
+        <location filename="../qml/decodium/Main.qml" line="10271"/>
         <source>Deep Search</source>
         <translation>Tiefensuche</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8036"/>
+        <location filename="../qml/decodium/Main.qml" line="10287"/>
         <source>Avg Decode</source>
         <translation>Durchschnittsdekodierung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8070"/>
+        <location filename="../qml/decodium/Main.qml" line="10321"/>
         <source>VHF/UHF Features</source>
         <translation>VHF/UHF-Funktionen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8094"/>
+        <location filename="../qml/decodium/Main.qml" line="10345"/>
         <source>Record RX</source>
         <translation>RX aufzeichnen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8110"/>
+        <location filename="../qml/decodium/Main.qml" line="10361"/>
         <source>Record TX</source>
         <translation>TX aufzeichnen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8180"/>
+        <location filename="../qml/decodium/Main.qml" line="10431"/>
         <source>Update checks disabled</source>
         <translation>Update-Prüfungen deaktiviert</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9816"/>
+        <location filename="../qml/decodium/Main.qml" line="12130"/>
         <source>decodes</source>
         <translation>Decodes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10387"/>
+        <location filename="../qml/decodium/Main.qml" line="12863"/>
         <source>msgs</source>
         <translation>Msg</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9830"/>
-        <location filename="../qml/decodium/Main.qml" line="10402"/>
+        <location filename="../qml/decodium/Main.qml" line="12144"/>
+        <location filename="../qml/decodium/Main.qml" line="12878"/>
         <source>Clear</source>
         <translation>Loschen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9020"/>
-        <location filename="../qml/decodium/Main.qml" line="9900"/>
-        <location filename="../qml/decodium/Main.qml" line="10460"/>
-        <location filename="../qml/decodium/Main.qml" line="10473"/>
-        <location filename="../qml/decodium/Main.qml" line="10991"/>
+        <location filename="../qml/decodium/Main.qml" line="3569"/>
+        <source>Click: sync NTP now to align DT (FT8/FT4)</source>
+        <translation>Klick: NTP jetzt synchronisieren, um DT auszurichten (FT8/FT4)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4146"/>
+        <source>Click: open a WAV file
+Right-click: decode a folder</source>
+        <translation>Klick: WAV-Datei öffnen
+Rechtsklick: Ordner dekodieren</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4246"/>
+        <source>Reset layout (Ctrl+Shift+L)</source>
+        <translation>Layout zurücksetzen (Strg+Umschalt+L)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4278"/>
+        <source>Decode history (Ctrl+Shift+H)</source>
+        <translation>Dekodierverlauf (Strg+Umschalt+H)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Bilanciato</source>
+        <translation>Ausgewogen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Weak-signal / DX</source>
+        <translation>Schwachsignal / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>Contest</source>
+        <translation>Contest</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <source>CPU-limited</source>
+        <translation>CPU-limitiert</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4374"/>
+        <source>Profili…</source>
+        <translation>Profile…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4379"/>
+        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
+        <translation>Profile bereit — wenden die FT2/Dekodier-Schalter im Block an. Details unter Setup → FT2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4617"/>
+        <source>Drag to reposition the clock</source>
+        <translation>Zum Verschieben der Uhr ziehen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4808"/>
+        <source>Cerca città...</source>
+        <translation>Stadt suchen...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5118"/>
+        <source>Restore astronomical data</source>
+        <translation>Astronomische Daten wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5394"/>
+        <source>Bypass CQ/My Call and setup filters</source>
+        <translation>CQ/My Call und Filter-Einstellungen umgehen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5441"/>
+        <source>Restore Macro configuration</source>
+        <translation>Makro-Konfiguration wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5701"/>
+        <source>Restore TX panel</source>
+        <translation>TX-Panel wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5956"/>
+        <source>Clock</source>
+        <translation>Uhr</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7337"/>
+        <location filename="../qml/decodium/Main.qml" line="8130"/>
+        <location filename="../qml/decodium/Main.qml" line="12188"/>
+        <location filename="../qml/decodium/Main.qml" line="12922"/>
+        <source>Return to normal row height</source>
+        <translation>Zur normalen Zeilenhöhe zurückkehren</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7338"/>
+        <location filename="../qml/decodium/Main.qml" line="8131"/>
+        <location filename="../qml/decodium/Main.qml" line="12189"/>
+        <location filename="../qml/decodium/Main.qml" line="12923"/>
+        <source>Compact rows (2x visible decodes)</source>
+        <translation>Kompakte Zeilen (2x sichtbare Dekodierungen)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7910"/>
+        <source>Go to the latest decode</source>
+        <translation>Zur neuesten Dekodierung springen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8575"/>
+        <source>Stacca</source>
+        <translation>Abkoppeln</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8587"/>
+        <source>Stacca il DX Cluster in finestra</source>
+        <translation>DX Cluster in Fenster abkoppeln</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8849"/>
+        <source>Drag to swap the column</source>
+        <translation>Zum Tauschen der Spalte ziehen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9052"/>
+        <source>Detach TX panel</source>
+        <translation>TX-Panel abkoppeln</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10151"/>
+        <source>Apri cartella ALL.TXT</source>
+        <translation>ALL.TXT-Ordner öffnen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10446"/>
+        <source>Esporta Cabrillo...</source>
+        <translation>Cabrillo exportieren...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10474"/>
+        <source>Mostra orologio</source>
+        <translation>Uhr anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10489"/>
+        <source>Mostra DX Cluster</source>
+        <translation>DX Cluster anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10504"/>
+        <source>Mostra PSK Reporter</source>
+        <translation>PSK Reporter anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10656"/>
+        <source>Waterfall / Panadapter</source>
+        <translation>Waterfall / Panadapter</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11269"/>
+        <location filename="../qml/decodium/Main.qml" line="12214"/>
+        <location filename="../qml/decodium/Main.qml" line="12936"/>
+        <location filename="../qml/decodium/Main.qml" line="12949"/>
+        <location filename="../qml/decodium/Main.qml" line="13478"/>
         <source>Dock</source>
         <translation>Andocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11000"/>
-        <source>Dock TX Panel</source>
+        <location filename="../qml/decodium/Main.qml" line="13487"/>
+        <source>Dock TX panel</source>
         <translation>TX-Panel andocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8053"/>
+        <location filename="../qml/decodium/Main.qml" line="13954"/>
+        <source>Inserisci nel layout:</source>
+        <translation>Im Layout einfügen:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="13961"/>
+        <source>◧ accanto a Full Spectrum</source>
+        <translation>◧ neben Full Spectrum</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="13962"/>
+        <source>◧ accanto a Signal RX</source>
+        <translation>◧ neben Signal RX</translation>
+    </message>
+    <message>
+        <source>Dock TX Panel</source>
+        <translation type="vanished">TX-Panel andocken</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10304"/>
         <source>Hide ASYNC icon</source>
         <translation>ASYNC-Symbol ausblenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1054"/>
+        <location filename="../qml/decodium/Main.qml" line="1727"/>
         <source>Open WAV file for decoding</source>
         <translation>WAV-Datei zum Dekodieren öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1056"/>
+        <location filename="../qml/decodium/Main.qml" line="886"/>
+        <source>Schermo intero</source>
+        <translation>Vollbild</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="1729"/>
         <source>File WAV (*.wav)</source>
         <translation>WAV-Datei (*.wav)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1056"/>
+        <location filename="../qml/decodium/Main.qml" line="1729"/>
         <source>All files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1064"/>
+        <location filename="../qml/decodium/Main.qml" line="1737"/>
         <source>Select folder with WAV files</source>
         <translation>Ordner mit WAV-Dateien auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="2517"/>
         <source>Click: immediate NTP sync to align DT (FT8/FT4)</source>
-        <translation>Klick: sofortige NTP-Synchronisierung zur DT-Ausrichtung (FT8/FT4)</translation>
+        <translation type="vanished">Klick: sofortige NTP-Synchronisierung zur DT-Ausrichtung (FT8/FT4)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="2592"/>
+        <location filename="../qml/decodium/Main.qml" line="3652"/>
         <source>Auto RX level active</source>
         <translation>Auto-RX-Pegel aktiv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="2593"/>
+        <location filename="../qml/decodium/Main.qml" line="3653"/>
         <source>Auto RX level disabled</source>
         <translation>Auto-RX-Pegel deaktiviert</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="2732"/>
         <source>Select decoder mode</source>
-        <translation>Decoder-Modus auswählen</translation>
+        <translation type="vanished">Decoder-Modus auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="2925"/>
         <source>Click: open one WAV file
 Right-click: decode a folder</source>
-        <translation>Klick: eine WAV-Datei öffnen
+        <translation type="vanished">Klick: eine WAV-Datei öffnen
 Rechtsklick: einen Ordner dekodieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3408"/>
         <source>Search city...</source>
-        <translation>Stadt suchen...</translation>
+        <translation type="vanished">Stadt suchen...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3516"/>
+        <location filename="../qml/decodium/Main.qml" line="4916"/>
         <source>Type a city name</source>
         <translation>Stadtnamen eingeben</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3516"/>
+        <location filename="../qml/decodium/Main.qml" line="4916"/>
         <source>No matching city</source>
         <translation>Keine passende Stadt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3551"/>
+        <location filename="../qml/decodium/Main.qml" line="4951"/>
         <source>Analog clock</source>
         <translation>Analoge Uhr</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3555"/>
+        <location filename="../qml/decodium/Main.qml" line="4955"/>
         <source>Digital clock</source>
         <translation>Digitale Uhr</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3559"/>
+        <location filename="../qml/decodium/Main.qml" line="4959"/>
         <source>City labels</source>
         <translation>Städtebeschriftungen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3566"/>
+        <location filename="../qml/decodium/Main.qml" line="4966"/>
         <source>Hide clock</source>
         <translation>Uhr ausblenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3614"/>
+        <location filename="../qml/decodium/Main.qml" line="5014"/>
         <source>Restore Waterfall</source>
         <translation>Wasserfall wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3666"/>
+        <location filename="../qml/decodium/Main.qml" line="5066"/>
         <source>Restore QSO Log</source>
         <translation>QSO-Log wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3718"/>
         <source>Restore Astronomical Data</source>
-        <translation>Astronomische Daten wiederherstellen</translation>
+        <translation type="vanished">Astronomische Daten wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3775"/>
+        <location filename="../qml/decodium/Main.qml" line="5175"/>
         <source>Restore Live Map</source>
         <translation>Live-Karte wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3914"/>
+        <location filename="../qml/decodium/Main.qml" line="5316"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
@@ -3914,93 +4199,80 @@ Linksklick: öffnen und verbinden
 Rechtsklick: trennen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3970"/>
+        <location filename="../qml/decodium/Main.qml" line="5393"/>
         <source>Disable filter bypass</source>
         <translation>Filter-Bypass deaktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3971"/>
         <source>Bypass CQ/My Call and setup decode filters</source>
-        <translation>CQ/Mein Rufzeichen und eingerichtete Decode-Filter umgehen</translation>
+        <translation type="vanished">CQ/Mein Rufzeichen und eingerichtete Decode-Filter umgehen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4018"/>
         <source>Restore Macro Configuration</source>
-        <translation>Makro-Konfiguration wiederherstellen</translation>
+        <translation type="vanished">Makro-Konfiguration wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4070"/>
+        <location filename="../qml/decodium/Main.qml" line="5493"/>
         <source>Restore Rig Control</source>
         <translation>Gerätesteuerung wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4123"/>
+        <location filename="../qml/decodium/Main.qml" line="5546"/>
         <source>Restore Full Spectrum</source>
         <translation>Vollspektrum wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4175"/>
+        <location filename="../qml/decodium/Main.qml" line="5598"/>
         <source>Restore Period 2</source>
         <translation>Periode 2 wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4226"/>
+        <location filename="../qml/decodium/Main.qml" line="5649"/>
         <source>Restore Signal RX</source>
         <translation>Signal-RX wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4278"/>
         <source>Restore TX Panel</source>
-        <translation>TX-Panel wiederherstellen</translation>
+        <translation type="vanished">TX-Panel wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5714"/>
-        <location filename="../qml/decodium/Main.qml" line="6362"/>
-        <location filename="../qml/decodium/Main.qml" line="9874"/>
-        <location filename="../qml/decodium/Main.qml" line="10446"/>
         <source>Switch to normal row height</source>
-        <translation>Zu normaler Zeilenhöhe wechseln</translation>
+        <translation type="vanished">Zu normaler Zeilenhöhe wechseln</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5715"/>
-        <location filename="../qml/decodium/Main.qml" line="6363"/>
-        <location filename="../qml/decodium/Main.qml" line="9875"/>
-        <location filename="../qml/decodium/Main.qml" line="10447"/>
         <source>Compact rows (2x more visible decodes)</source>
-        <translation>Kompakte Zeilen (2x mehr sichtbare Decodes)</translation>
+        <translation type="vanished">Kompakte Zeilen (2x mehr sichtbare Decodes)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5745"/>
+        <location filename="../qml/decodium/Main.qml" line="7368"/>
         <source>Detach Full Spectrum</source>
         <translation>Vollspektrum abdocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6164"/>
         <source>Jump to latest decode</source>
-        <translation>Zum neuesten Decode springen</translation>
+        <translation type="vanished">Zum neuesten Decode springen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6328"/>
+        <location filename="../qml/decodium/Main.qml" line="8096"/>
         <source>Clear Signal RX</source>
         <translation>Signal-RX leeren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6393"/>
+        <location filename="../qml/decodium/Main.qml" line="8161"/>
         <source>Detach Signal RX</source>
         <translation>Signal-RX abdocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6851"/>
         <source>Detach TX Panel</source>
-        <translation>TX-Panel abdocken</translation>
+        <translation type="vanished">TX-Panel abdocken</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6947"/>
+        <location filename="../qml/decodium/Main.qml" line="9194"/>
         <source>Reset Layout</source>
         <translation>Layout zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6963"/>
+        <location filename="../qml/decodium/Main.qml" line="9210"/>
         <source>Riportare tutte le finestre flottanti dentro la finestra principale
 e ricentrare Decodium sul monitor principale?
 
@@ -4011,32 +4283,32 @@ und Decodium auf dem Hauptmonitor neu zentrieren?
 Die gespeicherten Koordinaten werden gelöscht.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7263"/>
+        <location filename="../qml/decodium/Main.qml" line="9511"/>
         <source>Notifica</source>
         <translation>Benachrichtigung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7964"/>
+        <location filename="../qml/decodium/Main.qml" line="10215"/>
         <source>Bypass Filters</source>
         <translation>Filter umgehen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8054"/>
+        <location filename="../qml/decodium/Main.qml" line="10305"/>
         <source>Show ASYNC icon</source>
         <translation>ASYNC-Symbol anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8134"/>
+        <location filename="../qml/decodium/Main.qml" line="10385"/>
         <source>Alert on CQ</source>
         <translation>Alarm bei CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8155"/>
+        <location filename="../qml/decodium/Main.qml" line="10406"/>
         <source>Color Highlighting...</source>
         <translation>Farbhervorhebung...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8167"/>
+        <location filename="../qml/decodium/Main.qml" line="10418"/>
         <source>QSY...</source>
         <translation>QSY...</translation>
     </message>
@@ -4049,77 +4321,71 @@ Die gespeicherten Koordinaten werden gelöscht.</translation>
         <translation type="vanished">Nach Updates suchen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8195"/>
         <source>Export Cabrillo...</source>
-        <translation>Cabrillo exportieren...</translation>
+        <translation type="vanished">Cabrillo exportieren...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8207"/>
+        <location filename="../qml/decodium/Main.qml" line="10458"/>
         <source>cty.dat downloading...</source>
         <translation>cty.dat wird heruntergeladen...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8207"/>
+        <location filename="../qml/decodium/Main.qml" line="10458"/>
         <source>Update cty.dat</source>
         <translation>cty.dat aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8223"/>
         <source>Show Clock</source>
-        <translation>Uhr anzeigen</translation>
+        <translation type="vanished">Uhr anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8238"/>
         <source>Show DX Cluster</source>
-        <translation>DX Cluster anzeigen</translation>
+        <translation type="vanished">DX Cluster anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8253"/>
         <source>Show PSK Reporter</source>
-        <translation>PSK Reporter anzeigen</translation>
+        <translation type="vanished">PSK Reporter anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8370"/>
+        <location filename="../qml/decodium/Main.qml" line="10628"/>
         <source>Time Sync Panel</source>
         <translation>Zeitsynchronisationspanel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8384"/>
+        <location filename="../qml/decodium/Main.qml" line="10642"/>
         <source>Active Stations</source>
         <translation>Aktive Stationen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8398"/>
+        <location filename="../qml/decodium/Main.qml" line="10671"/>
         <source>Live Map</source>
         <translation>Live-Karte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8413"/>
         <source>Fox Mode (Caller Queue)</source>
-        <translation>Fox-Modus (Anruferwarteschlange)</translation>
+        <translation type="vanished">Fox-Modus (Anruferwarteschlange)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8427"/>
         <source>Hound Mode</source>
-        <translation>Hound-Modus</translation>
+        <translation type="vanished">Hound-Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8441"/>
+        <location filename="../qml/decodium/Main.qml" line="10686"/>
         <source>Astro / EME</source>
         <translation>Astro / EME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8456"/>
+        <location filename="../qml/decodium/Main.qml" line="10701"/>
         <source>DecoSyncTime Monitor</source>
         <translation>DecoSyncTime-Monitor</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8470"/>
+        <location filename="../qml/decodium/Main.qml" line="10715"/>
         <source>DX Cluster Panel</source>
         <translation>DX-Cluster-Panel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8484"/>
+        <location filename="../qml/decodium/Main.qml" line="10729"/>
         <source>Alert on My Call</source>
         <translation>Alarm bei meinem Rufzeichen</translation>
     </message>
@@ -4128,15 +4394,15 @@ Die gespeicherten Koordinaten werden gelöscht.</translation>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="52"/>
-        <location filename="../widgets/mainwindow.cpp" line="10021"/>
-        <location filename="../widgets/mainwindow.cpp" line="10024"/>
-        <location filename="../widgets/mainwindow.cpp" line="22381"/>
-        <location filename="../widgets/mainwindow.cpp" line="22498"/>
-        <location filename="../widgets/mainwindow.cpp" line="22582"/>
-        <location filename="../widgets/mainwindow.cpp" line="22917"/>
-        <location filename="../widgets/mainwindow.cpp" line="23165"/>
-        <location filename="../widgets/mainwindow.cpp" line="23229"/>
-        <location filename="../widgets/mainwindow.cpp" line="23398"/>
+        <location filename="../widgets/mainwindow.cpp" line="10169"/>
+        <location filename="../widgets/mainwindow.cpp" line="10172"/>
+        <location filename="../widgets/mainwindow.cpp" line="22677"/>
+        <location filename="../widgets/mainwindow.cpp" line="22794"/>
+        <location filename="../widgets/mainwindow.cpp" line="22878"/>
+        <location filename="../widgets/mainwindow.cpp" line="23214"/>
+        <location filename="../widgets/mainwindow.cpp" line="23462"/>
+        <location filename="../widgets/mainwindow.cpp" line="23526"/>
+        <location filename="../widgets/mainwindow.cpp" line="23695"/>
         <source>Band Activity</source>
         <translation>Bandaktivität</translation>
     </message>
@@ -4148,13 +4414,13 @@ Die gespeicherten Koordinaten werden gelöscht.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="195"/>
-        <location filename="../widgets/mainwindow.cpp" line="10025"/>
-        <location filename="../widgets/mainwindow.cpp" line="22382"/>
-        <location filename="../widgets/mainwindow.cpp" line="22497"/>
-        <location filename="../widgets/mainwindow.cpp" line="22581"/>
-        <location filename="../widgets/mainwindow.cpp" line="22912"/>
-        <location filename="../widgets/mainwindow.cpp" line="23166"/>
-        <location filename="../widgets/mainwindow.cpp" line="23230"/>
+        <location filename="../widgets/mainwindow.cpp" line="10173"/>
+        <location filename="../widgets/mainwindow.cpp" line="22678"/>
+        <location filename="../widgets/mainwindow.cpp" line="22793"/>
+        <location filename="../widgets/mainwindow.cpp" line="22877"/>
+        <location filename="../widgets/mainwindow.cpp" line="23209"/>
+        <location filename="../widgets/mainwindow.cpp" line="23463"/>
+        <location filename="../widgets/mainwindow.cpp" line="23527"/>
         <source>Rx Frequency</source>
         <translation>Rx-Frequenz</translation>
     </message>
@@ -4768,7 +5034,7 @@ Nicht verfügbar für Inhaber von Nicht-Standard-Rufzeichen.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="1650"/>
-        <location filename="../widgets/mainwindow.cpp" line="22952"/>
+        <location filename="../widgets/mainwindow.cpp" line="23249"/>
         <source>Fox</source>
         <translation>Fox</translation>
     </message>
@@ -5216,10 +5482,10 @@ Liste. Die Liste kann in den Einstellungen (F2) gepflegt werden.</translation>
         <location filename="../widgets/mainwindow.ui" line="3138"/>
         <location filename="../widgets/mainwindow.ui" line="3145"/>
         <location filename="../widgets/mainwindow.ui" line="4208"/>
-        <location filename="../widgets/mainwindow.cpp" line="6292"/>
-        <location filename="../widgets/mainwindow.cpp" line="20624"/>
-        <location filename="../widgets/mainwindow.cpp" line="23642"/>
-        <location filename="../widgets/mainwindow.cpp" line="26411"/>
+        <location filename="../widgets/mainwindow.cpp" line="6381"/>
+        <location filename="../widgets/mainwindow.cpp" line="20859"/>
+        <location filename="../widgets/mainwindow.cpp" line="23939"/>
+        <location filename="../widgets/mainwindow.cpp" line="26840"/>
         <source>Random</source>
         <translation>Zufällig</translation>
     </message>
@@ -7055,66 +7321,66 @@ Liste. Die Liste kann in den Einstellungen (F2) gepflegt werden.</translation>
         <translation>Kurzanleitung für WSJT-X 2.5.0 und MAP65 3.0</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2265"/>
-        <location filename="../widgets/mainwindow.cpp" line="24589"/>
+        <location filename="../widgets/mainwindow.cpp" line="2311"/>
+        <location filename="../widgets/mainwindow.cpp" line="24888"/>
         <source>Rig Control Error</source>
         <translation>Rig-Steuerungsfehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2390"/>
-        <location filename="../widgets/mainwindow.cpp" line="17094"/>
-        <location filename="../widgets/mainwindow.cpp" line="26248"/>
+        <location filename="../widgets/mainwindow.cpp" line="2436"/>
+        <location filename="../widgets/mainwindow.cpp" line="17311"/>
+        <location filename="../widgets/mainwindow.cpp" line="26677"/>
         <source>Receiving</source>
         <translation>Empfangen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2750"/>
-        <location filename="../widgets/mainwindow.cpp" line="24590"/>
+        <location filename="../widgets/mainwindow.cpp" line="2796"/>
+        <location filename="../widgets/mainwindow.cpp" line="24889"/>
         <source>Do you want to reconfigure the radio interface?</source>
         <translation>Möchten Sie die Funkschnittstelle neu konfigurieren?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3504"/>
+        <location filename="../widgets/mainwindow.cpp" line="3560"/>
         <source>Error Loading LotW Users Data</source>
         <translation>Fehler beim Laden der LotW-Benutzerdaten</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3585"/>
+        <location filename="../widgets/mainwindow.cpp" line="3646"/>
         <source>Error Writing WAV File</source>
         <translation>Fehler beim Schreiben der WAV-Datei</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3620"/>
+        <location filename="../widgets/mainwindow.cpp" line="3681"/>
         <source>Enumerating audio devices</source>
         <translation>Auflisten von Audiogeräten</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3641"/>
+        <location filename="../widgets/mainwindow.cpp" line="3702"/>
         <source>Configurations...</source>
         <translation>Konfigurationen...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
-        <location filename="../widgets/mainwindow.cpp" line="3732"/>
-        <location filename="../widgets/mainwindow.cpp" line="22486"/>
-        <location filename="../widgets/mainwindow.cpp" line="22573"/>
-        <location filename="../widgets/mainwindow.cpp" line="22583"/>
-        <location filename="../widgets/mainwindow.cpp" line="22904"/>
-        <location filename="../widgets/mainwindow.cpp" line="22918"/>
-        <location filename="../widgets/mainwindow.cpp" line="23072"/>
-        <location filename="../widgets/mainwindow.cpp" line="23073"/>
-        <location filename="../widgets/mainwindow.cpp" line="23147"/>
-        <location filename="../widgets/mainwindow.cpp" line="23148"/>
-        <location filename="../widgets/mainwindow.cpp" line="23154"/>
-        <location filename="../widgets/mainwindow.cpp" line="23155"/>
-        <location filename="../widgets/mainwindow.cpp" line="23297"/>
-        <location filename="../widgets/mainwindow.cpp" line="23298"/>
-        <location filename="../widgets/mainwindow.cpp" line="23389"/>
-        <location filename="../widgets/mainwindow.cpp" line="23390"/>
-        <location filename="../widgets/mainwindow.cpp" line="25357"/>
-        <location filename="../widgets/mainwindow.cpp" line="25360"/>
-        <location filename="../widgets/mainwindow.cpp" line="25365"/>
-        <location filename="../widgets/mainwindow.cpp" line="25368"/>
+        <location filename="../widgets/mainwindow.cpp" line="3802"/>
+        <location filename="../widgets/mainwindow.cpp" line="22782"/>
+        <location filename="../widgets/mainwindow.cpp" line="22869"/>
+        <location filename="../widgets/mainwindow.cpp" line="22879"/>
+        <location filename="../widgets/mainwindow.cpp" line="23201"/>
+        <location filename="../widgets/mainwindow.cpp" line="23215"/>
+        <location filename="../widgets/mainwindow.cpp" line="23369"/>
+        <location filename="../widgets/mainwindow.cpp" line="23370"/>
+        <location filename="../widgets/mainwindow.cpp" line="23444"/>
+        <location filename="../widgets/mainwindow.cpp" line="23445"/>
+        <location filename="../widgets/mainwindow.cpp" line="23451"/>
+        <location filename="../widgets/mainwindow.cpp" line="23452"/>
+        <location filename="../widgets/mainwindow.cpp" line="23594"/>
+        <location filename="../widgets/mainwindow.cpp" line="23595"/>
+        <location filename="../widgets/mainwindow.cpp" line="23686"/>
+        <location filename="../widgets/mainwindow.cpp" line="23687"/>
+        <location filename="../widgets/mainwindow.cpp" line="25696"/>
+        <location filename="../widgets/mainwindow.cpp" line="25699"/>
+        <location filename="../widgets/mainwindow.cpp" line="25704"/>
+        <location filename="../widgets/mainwindow.cpp" line="25707"/>
         <source>Message</source>
         <translation>Nachricht</translation>
     </message>
@@ -7127,111 +7393,111 @@ Liste. Die Liste kann in den Einstellungen (F2) gepflegt werden.</translation>
         <translation type="vanished">Klicken Sie auf OK, um es erneut zu versuchen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6374"/>
-        <location filename="../widgets/mainwindow.cpp" line="23350"/>
+        <location filename="../widgets/mainwindow.cpp" line="6463"/>
+        <location filename="../widgets/mainwindow.cpp" line="23647"/>
         <source>Improper mode</source>
         <translation>Falscher Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6722"/>
-        <location filename="../widgets/mainwindow.cpp" line="27852"/>
+        <location filename="../widgets/mainwindow.cpp" line="6816"/>
+        <location filename="../widgets/mainwindow.cpp" line="28281"/>
         <source>File Open Error</source>
         <translation>Fehler beim Öffnen der Datei</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6723"/>
-        <location filename="../widgets/mainwindow.cpp" line="26314"/>
-        <location filename="../widgets/mainwindow.cpp" line="26838"/>
-        <location filename="../widgets/mainwindow.cpp" line="27853"/>
-        <location filename="../widgets/mainwindow.cpp" line="28044"/>
+        <location filename="../widgets/mainwindow.cpp" line="6817"/>
+        <location filename="../widgets/mainwindow.cpp" line="26743"/>
+        <location filename="../widgets/mainwindow.cpp" line="27267"/>
+        <location filename="../widgets/mainwindow.cpp" line="28282"/>
+        <location filename="../widgets/mainwindow.cpp" line="28473"/>
         <source>Cannot open &quot;%1&quot; for append: %2</source>
         <translation>„%1“ kann nicht zum Anhängen geöffnet werden: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6946"/>
+        <location filename="../widgets/mainwindow.cpp" line="7081"/>
         <source>Error saving c2 file</source>
         <translation>Fehler beim Speichern der c2-Datei</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7920"/>
-        <location filename="../widgets/mainwindow.cpp" line="7923"/>
+        <location filename="../widgets/mainwindow.cpp" line="8055"/>
+        <location filename="../widgets/mainwindow.cpp" line="8058"/>
         <source>Error in Sound Input</source>
         <translation>Fehler bei der Toneingabe</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7932"/>
-        <location filename="../widgets/mainwindow.cpp" line="7935"/>
+        <location filename="../widgets/mainwindow.cpp" line="8067"/>
+        <location filename="../widgets/mainwindow.cpp" line="8070"/>
         <source>Error in Sound Output</source>
         <translation>Fehler in der Tonausgabe</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8620"/>
-        <location filename="../widgets/mainwindow.cpp" line="10017"/>
+        <location filename="../widgets/mainwindow.cpp" line="8768"/>
+        <location filename="../widgets/mainwindow.cpp" line="10165"/>
         <source>Single-Period Decodes</source>
         <translation>Einzelperioden-Dekodierungen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8621"/>
-        <location filename="../widgets/mainwindow.cpp" line="10018"/>
+        <location filename="../widgets/mainwindow.cpp" line="8769"/>
+        <location filename="../widgets/mainwindow.cpp" line="10166"/>
         <source>Average Decodes</source>
         <translation>Durchschnittliche Dekodierungen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9748"/>
+        <location filename="../widgets/mainwindow.cpp" line="9896"/>
         <source>Change Operator</source>
         <translation>Betreiber wechseln</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9748"/>
+        <location filename="../widgets/mainwindow.cpp" line="9896"/>
         <source>New operator:</source>
         <translation>Neuer Betreiber:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9984"/>
+        <location filename="../widgets/mainwindow.cpp" line="10132"/>
         <source>Status File Error</source>
         <translation>Fehler in der Statusdatei</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9985"/>
-        <location filename="../widgets/mainwindow.cpp" line="20429"/>
+        <location filename="../widgets/mainwindow.cpp" line="10133"/>
+        <location filename="../widgets/mainwindow.cpp" line="20664"/>
         <source>Cannot open &quot;%1&quot; for writing: %2</source>
         <translation>„%1“ kann nicht zum Schreiben geöffnet werden: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10022"/>
+        <location filename="../widgets/mainwindow.cpp" line="10170"/>
         <source>Decodes containing My Call</source>
         <translation>Decodiert My Call</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10305"/>
+        <location filename="../widgets/mainwindow.cpp" line="10453"/>
         <source>Subprocess Error</source>
         <translation>Unterprozessfehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10306"/>
+        <location filename="../widgets/mainwindow.cpp" line="10454"/>
         <source>Subprocess failed with exit code %1</source>
         <translation>Der Unterprozess ist mit dem Exit-Code %1 fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10308"/>
-        <location filename="../widgets/mainwindow.cpp" line="10354"/>
+        <location filename="../widgets/mainwindow.cpp" line="10456"/>
+        <location filename="../widgets/mainwindow.cpp" line="10502"/>
         <source>Running: %1
 %2</source>
         <translation>Läuft: %1
 %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10353"/>
+        <location filename="../widgets/mainwindow.cpp" line="10501"/>
         <source>Subprocess error</source>
         <translation>Unterprozessfehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10478"/>
+        <location filename="../widgets/mainwindow.cpp" line="10626"/>
         <source>Reference spectrum saved</source>
         <translation>Referenzspektrum gespeichert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10567"/>
+        <location filename="../widgets/mainwindow.cpp" line="10715"/>
         <source>It is very important to avoid audio harmonics and distorted audio signals.
 This is usually achieved by the following step-by-step approach:
 
@@ -7280,22 +7546,22 @@ Dies wird in der Regel durch folgendes schrittweises Vorgehen erreicht:
 um sicherzustellen, dass das Signal sauber und nicht verzerrt ist.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10583"/>
+        <location filename="../widgets/mainwindow.cpp" line="10731"/>
         <source>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</source>
         <translation>&lt;b&gt;Empfohlene Audioeinstellungen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10647"/>
+        <location filename="../widgets/mainwindow.cpp" line="10795"/>
         <source>Invalid data in fmt.all at line %1</source>
         <translation>Ungültige Daten in fmt.all in Zeile %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10653"/>
+        <location filename="../widgets/mainwindow.cpp" line="10801"/>
         <source>Good Calibration Solution</source>
         <translation>Gute Kalibrierungslösung</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10654"/>
+        <location filename="../widgets/mainwindow.cpp" line="10802"/>
         <source>&lt;pre&gt;%1%L2 ±%L3 ppm
 %4%L5 ±%L6 Hz
 
@@ -7308,37 +7574,37 @@ um sicherzustellen, dass das Signal sauber und nicht verzerrt ist.</translation>
 %9%L10 Hz&lt;/pre&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10668"/>
+        <location filename="../widgets/mainwindow.cpp" line="10816"/>
         <source>Delete Calibration Measurements</source>
         <translation>Kalibrierungsmessungen löschen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10669"/>
+        <location filename="../widgets/mainwindow.cpp" line="10817"/>
         <source>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</source>
         <translation>Die Datei „fmt.all“ wird in „fmt.bak“ umbenannt.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11393"/>
+        <location filename="../widgets/mainwindow.cpp" line="11541"/>
         <source>No data read from disk. Wrong file format?</source>
         <translation>Keine Daten vom Datenträger gelesen. Falsches Dateiformat?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11400"/>
+        <location filename="../widgets/mainwindow.cpp" line="11548"/>
         <source>Confirm Delete</source>
         <translation>Bestätigen Sie Löschen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11401"/>
+        <location filename="../widgets/mainwindow.cpp" line="11549"/>
         <source>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</source>
         <translation>Sind Sie sicher, dass Sie alle *.wav- und *.c2-Dateien in „%1“ löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11438"/>
+        <location filename="../widgets/mainwindow.cpp" line="11586"/>
         <source>Keyboard Shortcuts</source>
         <translation>Tastaturkürzel</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11440"/>
+        <location filename="../widgets/mainwindow.cpp" line="11588"/>
         <source>&lt;table cellspacing=1&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
@@ -7440,33 +7706,33 @@ um sicherzustellen, dass das Signal sauber und nicht verzerrt ist.</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11500"/>
+        <location filename="../widgets/mainwindow.cpp" line="11648"/>
         <source>Special Mouse Commands</source>
         <translation>Spezielle Mausbefehle</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="12225"/>
+        <location filename="../widgets/mainwindow.cpp" line="12382"/>
         <source>No more files to open.</source>
         <translation>Es müssen keine Dateien mehr geöffnet werden.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="13581"/>
+        <location filename="../widgets/mainwindow.cpp" line="13788"/>
         <source>Embedded WSPR decoder unavailable.</source>
         <translation>Eingebetteter WSPR-Decoder nicht verfügbar.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15680"/>
-        <location filename="../widgets/mainwindow.cpp" line="26884"/>
+        <location filename="../widgets/mainwindow.cpp" line="15891"/>
+        <location filename="../widgets/mainwindow.cpp" line="27313"/>
         <source>Spotting to PSK Reporter unavailable</source>
         <translation>Spotting zu PSK Reporter nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15906"/>
+        <location filename="../widgets/mainwindow.cpp" line="16120"/>
         <source>WSPR Guard Band</source>
         <translation>WSPR Schutzband</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11502"/>
+        <location filename="../widgets/mainwindow.cpp" line="11650"/>
         <source>&lt;table cellpadding=5&gt;
   &lt;tr&gt;
     &lt;th align=&quot;right&quot;&gt;Click on&lt;/th&gt;
@@ -7692,13 +7958,13 @@ um sicherzustellen, dass das Signal sauber und nicht verzerrt ist.</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15925"/>
-        <location filename="../widgets/mainwindow.cpp" line="15942"/>
+        <location filename="../widgets/mainwindow.cpp" line="16139"/>
+        <location filename="../widgets/mainwindow.cpp" line="16156"/>
         <source>Fox Mode warning</source>
         <translation>Fox Moduswarnung</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17771"/>
+        <location filename="../widgets/mainwindow.cpp" line="17998"/>
         <source>This station transmits in the same time slot as you do.
 
 You must not start a QSO if both stations Tx even/1st
@@ -7715,7 +7981,7 @@ Klicken Sie auf die Schaltfläche MSK144-Modus, um Tx gerade/1st wieder zu aktiv
 Kontrollkästchen aktivieren oder einen anderen Sender auswählen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18398"/>
+        <location filename="../widgets/mainwindow.cpp" line="18624"/>
         <source>Should you switch to EU VHF Contest mode?
 
 To do so, check &apos;Special operating activity&apos; and
@@ -7726,35 +7992,35 @@ Aktivieren Sie dazu „Besondere Betriebstätigkeit“ und
 „EU VHF-Wettbewerb“ in den Einstellungen | Registerkarte „Erweitert“.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18417"/>
+        <location filename="../widgets/mainwindow.cpp" line="18643"/>
         <source>Should you switch to ARRL Field Day mode?</source>
         <translation>Sollten Sie in den ARRL Field Day-Modus wechseln?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18422"/>
+        <location filename="../widgets/mainwindow.cpp" line="18648"/>
         <source>Should you switch to RTTY contest mode?</source>
         <translation>Sollten Sie in den RTTY-Wettbewerbsmodus wechseln?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20391"/>
-        <location filename="../widgets/mainwindow.cpp" line="20410"/>
-        <location filename="../widgets/mainwindow.cpp" line="20428"/>
-        <location filename="../widgets/mainwindow.cpp" line="20455"/>
+        <location filename="../widgets/mainwindow.cpp" line="20626"/>
+        <location filename="../widgets/mainwindow.cpp" line="20645"/>
+        <location filename="../widgets/mainwindow.cpp" line="20663"/>
+        <location filename="../widgets/mainwindow.cpp" line="20690"/>
         <source>Add to CALL3.TXT</source>
         <translation>Zu CALL3.TXT hinzufügen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20392"/>
+        <location filename="../widgets/mainwindow.cpp" line="20627"/>
         <source>Please enter a valid grid locator</source>
         <translation>Bitte geben Sie einen gültigen Raster-Locator ein</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20411"/>
+        <location filename="../widgets/mainwindow.cpp" line="20646"/>
         <source>Cannot open &quot;%1&quot; for read/write: %2</source>
         <translation>„%1“ kann nicht zum Lesen/Schreiben geöffnet werden: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20453"/>
+        <location filename="../widgets/mainwindow.cpp" line="20688"/>
         <source>%1
 is already in CALL3.TXT, do you wish to replace it?</source>
         <translation>%1
@@ -7765,293 +8031,293 @@ ist bereits in CALL3.TXT enthalten. Möchten Sie es ersetzen?</translation>
         <translation type="vanished">Warnung: Das DX-Anruffeld ist leer.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3097"/>
-        <location filename="../widgets/mainwindow.cpp" line="22048"/>
+        <location filename="../widgets/mainwindow.cpp" line="3151"/>
+        <location filename="../widgets/mainwindow.cpp" line="22343"/>
         <source>Log file error</source>
         <translation>Fehler in der Protokolldatei</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="1219"/>
-        <location filename="../widgets/mainwindow.cpp" line="28497"/>
+        <location filename="../widgets/mainwindow.cpp" line="28926"/>
         <source>Async L2 Mode On</source>
         <translation>Async-L2-Modus Ein</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2674"/>
+        <location filename="../widgets/mainwindow.cpp" line="2720"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2714"/>
+        <location filename="../widgets/mainwindow.cpp" line="2760"/>
         <source>Language changed</source>
         <translation>Sprache geändert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2715"/>
+        <location filename="../widgets/mainwindow.cpp" line="2761"/>
         <source>Please restart the application for the language change to take effect.</source>
         <translation>Bitte starten Sie die Anwendung neu, damit die Sprachänderung wirksam wird.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2775"/>
+        <location filename="../widgets/mainwindow.cpp" line="2821"/>
         <source>Idle</source>
         <translation>Leerlauf</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2857"/>
+        <location filename="../widgets/mainwindow.cpp" line="2911"/>
         <source>Error scanning logbook</source>
         <translation>Fehler beim Scannen des Logbuchs</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2862"/>
+        <location filename="../widgets/mainwindow.cpp" line="2916"/>
         <source>Scanned logbook, %1 worked-before records created. CTY: %2</source>
         <translation>Gescanntes Logbuch, %1 bearbeitet, bevor Datensätze erstellt wurden. CTY: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3092"/>
+        <location filename="../widgets/mainwindow.cpp" line="3146"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3092"/>
+        <location filename="../widgets/mainwindow.cpp" line="3146"/>
         <source>parts != 4</source>
         <translation>Teile != 4</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3097"/>
-        <location filename="../widgets/mainwindow.cpp" line="22049"/>
+        <location filename="../widgets/mainwindow.cpp" line="3151"/>
+        <location filename="../widgets/mainwindow.cpp" line="22344"/>
         <source>Cannot open &quot;%1&quot;</source>
         <translation>„%1“ kann nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3109"/>
-        <location filename="../widgets/mainwindow.cpp" line="3114"/>
-        <location filename="../widgets/mainwindow.cpp" line="22091"/>
-        <location filename="../widgets/mainwindow.cpp" line="22099"/>
+        <location filename="../widgets/mainwindow.cpp" line="3163"/>
+        <location filename="../widgets/mainwindow.cpp" line="3168"/>
+        <location filename="../widgets/mainwindow.cpp" line="22387"/>
+        <location filename="../widgets/mainwindow.cpp" line="22395"/>
         <source>Error sending log to N1MM</source>
         <translation>Fehler beim Senden des Protokolls an N1MM</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3110"/>
-        <location filename="../widgets/mainwindow.cpp" line="22092"/>
+        <location filename="../widgets/mainwindow.cpp" line="3164"/>
+        <location filename="../widgets/mainwindow.cpp" line="22388"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
         <translation>&quot;%1&quot; kann nicht aufgelöst werden: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3114"/>
-        <location filename="../widgets/mainwindow.cpp" line="22100"/>
+        <location filename="../widgets/mainwindow.cpp" line="3168"/>
+        <location filename="../widgets/mainwindow.cpp" line="22396"/>
         <source>Write returned &quot;%1&quot;</source>
         <translation>Beim Schreiben wurde „%1“ zurückgegeben.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3141"/>
+        <location filename="../widgets/mainwindow.cpp" line="3195"/>
         <source>AutoSpot</source>
         <translation>AutoSpot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3143"/>
+        <location filename="../widgets/mainwindow.cpp" line="3197"/>
         <source>Invia spot al cluster configurato dopo il log QSO (73 confermato).</source>
         <translation>Stellen Sie sicher, dass der Cluster mit dem Protokoll QSO (73 Konfigurationen) konfiguriert ist.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3181"/>
+        <location filename="../widgets/mainwindow.cpp" line="3235"/>
         <source>Remote Web disabled: invalid configured HTTP port %1</source>
         <translation>Remote-Web deaktiviert: ungültiger konfigurierter HTTP-Port %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3235"/>
+        <location filename="../widgets/mainwindow.cpp" line="3289"/>
         <source>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</source>
         <translation>Remote WS: ungültiges FT2_REMOTE_WS_BIND=&quot;%1&quot; (mit 0.0.0.0)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3246"/>
+        <location filename="../widgets/mainwindow.cpp" line="3300"/>
         <source>Remote Web disabled: non-loopback bind requires token authentication.</source>
         <translation>Remote Web deaktiviert: Nicht-Loopback-Bindung erfordert Token-Authentifizierung.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3251"/>
+        <location filename="../widgets/mainwindow.cpp" line="3305"/>
         <source>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</source>
         <translation>Remote-Web deaktiviert: Das Token muss bei der LAN/WAN-Bindung mindestens 12 Zeichen lang sein.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3335"/>
+        <location filename="../widgets/mainwindow.cpp" line="3389"/>
         <source>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</source>
         <translation>Remote HTTP: ungültiges FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (unter Verwendung von Standard-WS+1)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3385"/>
+        <location filename="../widgets/mainwindow.cpp" line="3441"/>
         <source>Remote WS disabled: failed to bind %1:%2</source>
         <translation>Remote-WS deaktiviert: %1:%2 konnte nicht gebunden werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3391"/>
+        <location filename="../widgets/mainwindow.cpp" line="3447"/>
         <source>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</source>
         <translation>Remote-Web-Hinweis: Der Datenverkehr ist einfach HTTP/WS. Verwenden Sie nur den vertrauenswürdigen LAN/VPN oder einen TLS-Reverse-Proxy.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3397"/>
+        <location filename="../widgets/mainwindow.cpp" line="3453"/>
         <source>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</source>
         <translation>Remote WS deaktiviert: ungültig FT2_REMOTE_WS_PORT=&quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5149"/>
+        <location filename="../widgets/mainwindow.cpp" line="5226"/>
         <source>Audio input refreshed after device reconnect.</source>
         <translation>Audio-Eingang nach Geräte-Neuverbindung aktualisiert.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5153"/>
-        <location filename="../widgets/mainwindow.cpp" line="5161"/>
+        <location filename="../widgets/mainwindow.cpp" line="5230"/>
+        <location filename="../widgets/mainwindow.cpp" line="5238"/>
         <source>Audio output refreshed after device reconnect.</source>
         <translation>Audio-Ausgang nach Geräte-Neuverbindung aktualisiert.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5992"/>
+        <location filename="../widgets/mainwindow.cpp" line="6081"/>
         <source>Decodium v3.0 FT2 Raptor</source>
         <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5993"/>
+        <location filename="../widgets/mainwindow.cpp" line="6082"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
         <translation>Im DX-Call-Feld muss ein Rufzeichen stehen,
  um eine QSY-Anfrage zu senden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8351"/>
+        <location filename="../widgets/mainwindow.cpp" line="8499"/>
         <source>Audio input resumed after system wake.</source>
         <translation>Die Audioeingabe wurde nach dem Aufwecken des Systems wieder aufgenommen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8810"/>
+        <location filename="../widgets/mainwindow.cpp" line="8958"/>
         <source>Check for updates...</source>
         <translation>Nach Updates suchen...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8894"/>
-        <location filename="../widgets/mainwindow.cpp" line="9335"/>
+        <location filename="../widgets/mainwindow.cpp" line="9042"/>
+        <location filename="../widgets/mainwindow.cpp" line="9483"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Update-Prüfungen sind in diesem Build deaktiviert.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8913"/>
+        <location filename="../widgets/mainwindow.cpp" line="9061"/>
         <source>An update check is already in progress.</source>
         <translation>Eine Update-Prüfung wird bereits durchgeführt.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8927"/>
+        <location filename="../widgets/mainwindow.cpp" line="9075"/>
         <source>Checking for updates...</source>
         <translation>Suche nach Updates...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9178"/>
+        <location filename="../widgets/mainwindow.cpp" line="9326"/>
         <source>A new Decodium release is available.</source>
         <translation>Eine neue Decodium-Version ist verfügbar.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9180"/>
+        <location filename="../widgets/mainwindow.cpp" line="9328"/>
         <source>Installed version: %1
 Latest version: %2%3</source>
         <translation>Installierte Version: %1
 Neueste Version: %2%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9189"/>
+        <location filename="../widgets/mainwindow.cpp" line="9337"/>
         <source>Direct download: %1</source>
         <translation>Direkter Download: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9193"/>
+        <location filename="../widgets/mainwindow.cpp" line="9341"/>
         <source>Selected asset: %1
 </source>
         <translation>Ausgewähltes Asset: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9197"/>
+        <location filename="../widgets/mainwindow.cpp" line="9345"/>
         <source>Release page: %1</source>
         <translation>Freigabeseite: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9202"/>
+        <location filename="../widgets/mainwindow.cpp" line="9350"/>
         <source>Download page: %1</source>
         <translation>Download-Seite: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9210"/>
+        <location filename="../widgets/mainwindow.cpp" line="9358"/>
         <source>Download</source>
         <translation>Herunterladen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9211"/>
+        <location filename="../widgets/mainwindow.cpp" line="9359"/>
         <source>Remind me later</source>
         <translation>Erinnere mich später daran</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9212"/>
+        <location filename="../widgets/mainwindow.cpp" line="9360"/>
         <source>Skip this version</source>
         <translation>Überspringen Sie diese Version</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9256"/>
-        <location filename="../widgets/mainwindow.cpp" line="9270"/>
-        <location filename="../widgets/mainwindow.cpp" line="9296"/>
+        <location filename="../widgets/mainwindow.cpp" line="9404"/>
+        <location filename="../widgets/mainwindow.cpp" line="9418"/>
+        <location filename="../widgets/mainwindow.cpp" line="9444"/>
         <source>Update check failed.</source>
         <translation>Die Aktualisierungsprüfung ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9271"/>
+        <location filename="../widgets/mainwindow.cpp" line="9419"/>
         <source>The release metadata returned by GitHub could not be parsed.</source>
         <translation>Die von GitHub zurückgegebenen Release-Metadaten konnten nicht analysiert werden.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9297"/>
+        <location filename="../widgets/mainwindow.cpp" line="9445"/>
         <source>Unable to compare version numbers.</source>
         <translation>Versionsnummern können nicht verglichen werden.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9298"/>
+        <location filename="../widgets/mainwindow.cpp" line="9446"/>
         <source>Installed: %1
 Remote tag: %2</source>
         <translation>Installiert: %1
 Remote-Tag: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9311"/>
+        <location filename="../widgets/mainwindow.cpp" line="9459"/>
         <source>You are up to date.</source>
         <translation>Sie sind auf dem Laufenden.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9312"/>
+        <location filename="../widgets/mainwindow.cpp" line="9460"/>
         <source>Installed version: %1</source>
         <translation>Installierte Version: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9322"/>
+        <location filename="../widgets/mainwindow.cpp" line="9470"/>
         <source>Update available: %1</source>
         <translation>Update verfügbar: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10302"/>
+        <location filename="../widgets/mainwindow.cpp" line="10450"/>
         <source>No subprocess diagnostic output was captured.</source>
         <translation>Es wurde keine Diagnoseausgabe des Unterprozesses erfasst.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10683"/>
+        <location filename="../widgets/mainwindow.cpp" line="10831"/>
         <source>Load Decodium Certificate</source>
         <translation>Laden Sie das Decodium-Zertifikat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10685"/>
+        <location filename="../widgets/mainwindow.cpp" line="10833"/>
         <source>Decodium Certificate (*.decodium);;All files (*)</source>
         <translation>Decodium-Zertifikat (*.decodium);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10729"/>
-        <location filename="../widgets/mainwindow.cpp" line="10743"/>
-        <location filename="../widgets/mainwindow.cpp" line="10755"/>
+        <location filename="../widgets/mainwindow.cpp" line="10877"/>
+        <location filename="../widgets/mainwindow.cpp" line="10891"/>
+        <location filename="../widgets/mainwindow.cpp" line="10903"/>
         <source>DXped Certificate Manager</source>
         <translation>DXped Zertifikatsmanager</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10730"/>
+        <location filename="../widgets/mainwindow.cpp" line="10878"/>
         <source>DXpedCertManager.py was not found.
 
 Expected locations:
@@ -8066,63 +8332,63 @@ Erwartete Standorte:
 - Tools für beschreibbare Datenverzeichnisse/</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10744"/>
+        <location filename="../widgets/mainwindow.cpp" line="10892"/>
         <source>Python 3 was not found in PATH.
 Please install Python and try again.</source>
         <translation>Python 3 wurde in PATH nicht gefunden.
 Bitte installieren Sie Python und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10756"/>
+        <location filename="../widgets/mainwindow.cpp" line="10904"/>
         <source>Failed to start DXped Certificate Manager.</source>
         <translation>Der DXped-Zertifikat-Manager konnte nicht gestartet werden.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10760"/>
+        <location filename="../widgets/mainwindow.cpp" line="10908"/>
         <source>DXped Certificate Manager started</source>
         <translation>DXped Zertifikatsmanager gestartet</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10777"/>
-        <location filename="../widgets/mainwindow.cpp" line="20018"/>
+        <location filename="../widgets/mainwindow.cpp" line="10925"/>
+        <location filename="../widgets/mainwindow.cpp" line="20253"/>
         <source>Invalid Certificate</source>
         <translation>Ungültiges Zertifikat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10778"/>
+        <location filename="../widgets/mainwindow.cpp" line="10926"/>
         <source>The Decodium certificate file is invalid or the signature verification failed.</source>
         <translation>Die Decodium-Zertifikatdatei ist ungültig oder die Signaturüberprüfung ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10804"/>
+        <location filename="../widgets/mainwindow.cpp" line="10952"/>
         <source>Decodium certificate loaded but expired: %1 (%2)</source>
         <translation>Decodium-Zertifikat geladen, aber abgelaufen: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10810"/>
-        <location filename="../widgets/mainwindow.cpp" line="20027"/>
+        <location filename="../widgets/mainwindow.cpp" line="10958"/>
+        <location filename="../widgets/mainwindow.cpp" line="20262"/>
         <source>Certificate Expired</source>
         <translation>Zertifikat abgelaufen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10811"/>
+        <location filename="../widgets/mainwindow.cpp" line="10959"/>
         <source>The Decodium certificate for %1 expired on %2.</source>
         <translation>Das Decodium-Zertifikat für %1 ist am %2 abgelaufen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10823"/>
+        <location filename="../widgets/mainwindow.cpp" line="10971"/>
         <source>Decodium certificate loaded for %1, current callsign is %2</source>
         <translation>Decodium-Zertifikat für %1 geladen, aktuelles Rufzeichen ist %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10829"/>
-        <location filename="../widgets/mainwindow.cpp" line="10849"/>
-        <location filename="../widgets/mainwindow.cpp" line="20049"/>
+        <location filename="../widgets/mainwindow.cpp" line="10977"/>
+        <location filename="../widgets/mainwindow.cpp" line="10997"/>
+        <location filename="../widgets/mainwindow.cpp" line="20284"/>
         <source>Certificate Loaded</source>
         <translation>Zertifikat geladen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10830"/>
+        <location filename="../widgets/mainwindow.cpp" line="10978"/>
         <source>Certificate loaded successfully.
 
 Certificate call: %1
@@ -8141,12 +8407,12 @@ Läuft ab: %4
 Das Zertifikat ist aktiv, stimmt jedoch nicht mit dem aktuellen Rufzeichen des Betreibers überein.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10843"/>
+        <location filename="../widgets/mainwindow.cpp" line="10991"/>
         <source>Decodium certificate active: %1 (%2)</source>
         <translation>Decodium-Zertifikat aktiv: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10850"/>
+        <location filename="../widgets/mainwindow.cpp" line="10998"/>
         <source>Certificate loaded successfully.
 
 Call: %1
@@ -8159,12 +8425,12 @@ Stufe: %2
 Läuft ab: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10919"/>
+        <location filename="../widgets/mainwindow.cpp" line="11067"/>
         <source>No Decodium certificate loaded.</source>
         <translation>Kein Decodium-Zertifikat geladen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10923"/>
+        <location filename="../widgets/mainwindow.cpp" line="11071"/>
         <source>Call: %1
 Tier: %2
 Expires: %3</source>
@@ -8173,25 +8439,60 @@ Stufe: %2
 Läuft ab: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10928"/>
+        <location filename="../widgets/mainwindow.cpp" line="11076"/>
         <source>
 Path: %1</source>
         <translation>Pfad: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10931"/>
+        <location filename="../widgets/mainwindow.cpp" line="11079"/>
         <source>
 Current operator: %1</source>
         <translation>Aktueller Betreiber: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10950"/>
+        <location filename="../widgets/mainwindow.cpp" line="11098"/>
         <source>If you make fair use of any part of WSJT-X under terms of the GNU General Public License, you must display the following copyright notice prominently in your derivative work:
 
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</source>
         <translation>Wenn Sie einen Teil von WSJT-X gemäß den Bedingungen der GNU General Public License fair nutzen, müssen Sie den folgenden Urheberrechtshinweis in Ihrem abgeleiteten Werk gut sichtbar anbringen:
 
 „Die Algorithmen, der Quellcode, das Erscheinungsbild von WSJT-X und zugehörigen Programmen sowie Protokollspezifikationen für die Modi FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, Q65, MSK144 unterliegen dem Copyright (C) 2001-2025 von einem oder mehreren der folgenden Autoren: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; IV3NWV; Greg Beam, W9MDB; Philip Karn, DG2YCB; Roger Rehr, W3SZ; WSJT Entwicklungsgruppe.“</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32268"/>
+        <source>Remote caller queued: %1</source>
+        <translation>Entfernter Anrufer in Warteschlange: %1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32295"/>
+        <source>Remote CW (audio): %1 (%2 WPM)</source>
+        <translation>Entferntes CW (Audio): %1 (%2 WPM)</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32303"/>
+        <source>CW audio: messaggio vuoto</source>
+        <translation>CW-Audio: leere Nachricht</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32312"/>
+        <source>CW audio: TX RTTY in corso, riprova</source>
+        <translation>CW-Audio: TX RTTY läuft, erneut versuchen</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32321"/>
+        <source>CW audio: impossibile generare &quot;%1&quot;</source>
+        <translation>CW-Audio: &quot;%1&quot; kann nicht erzeugt werden</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32336"/>
+        <source>CW audio: TX gia&apos; attivo, comando ignorato</source>
+        <translation>CW-Audio: TX bereits aktiv, Befehl ignoriert</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="32387"/>
+        <source>CW audio non disponibile con audio TCI</source>
+        <translation>CW-Audio nicht verfügbar mit TCI-Audio</translation>
     </message>
     <message>
         <source>&lt;table cellspacing=1&gt;
@@ -8295,22 +8596,22 @@ Current operator: %1</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15882"/>
+        <location filename="../widgets/mainwindow.cpp" line="16096"/>
         <source>Async L2: starting queued call %1</source>
         <translation>Async L2: Aufruf in der Warteschlange %1 starten</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15884"/>
+        <location filename="../widgets/mainwindow.cpp" line="16098"/>
         <source>Async L2: starting queued call</source>
         <translation>Async L2: Anruf in der Warteschlange starten</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15902"/>
+        <location filename="../widgets/mainwindow.cpp" line="16116"/>
         <source>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</source>
         <translation>Bitte wählen Sie eine andere Tx-Frequenz. Decodium v3.0 FT2 Raptor sendet wissentlich keinen anderen Modus im WSPR-Subband auf 30 m.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15920"/>
+        <location filename="../widgets/mainwindow.cpp" line="16134"/>
         <source>Please choose another dial frequency.
 Must be 3Khz away from %1.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
@@ -8321,7 +8622,7 @@ Decodium v3.0 FT2 Raptor funktioniert nicht im Fox-Modus
 Überlappung der Standard-Unterbänder FT8.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15938"/>
+        <location filename="../widgets/mainwindow.cpp" line="16152"/>
         <source>Please choose another dial frequency.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</source>
@@ -8330,23 +8631,23 @@ Decodium v3.0 FT2 Raptor funktioniert nicht im Fox-Modus
 Überlappung der WSPR-Subbänder.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17721"/>
+        <location filename="../widgets/mainwindow.cpp" line="17948"/>
         <source>Async L2: %1 queued, waiting free TX slot</source>
         <translation>Async L2: %1 in der Warteschlange, wartet auf freien TX-Steckplatz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17723"/>
+        <location filename="../widgets/mainwindow.cpp" line="17950"/>
         <source>Async L2: caller queued, waiting free TX slot</source>
         <translation>Async L2: Anrufer in Warteschlange, wartet auf freien TX-Slot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19932"/>
-        <location filename="../widgets/mainwindow.cpp" line="19945"/>
+        <location filename="../widgets/mainwindow.cpp" line="20167"/>
+        <location filename="../widgets/mainwindow.cpp" line="20180"/>
         <source>DXpedition Certificate Required</source>
         <translation>DXpedition-Zertifikat erforderlich</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19933"/>
+        <location filename="../widgets/mainwindow.cpp" line="20168"/>
         <source>To activate DXpedition mode you must load a valid .dxcert certificate for your callsign.
 
 Load certificate now?</source>
@@ -8355,44 +8656,44 @@ Load certificate now?</source>
 Zertifikat jetzt laden?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19946"/>
+        <location filename="../widgets/mainwindow.cpp" line="20181"/>
         <source>DXpedition mode was not activated because no valid certificate is loaded.</source>
         <translation>DXpedition-Modus wurde nicht aktiviert, da kein gültiges Zertifikat geladen ist.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20009"/>
+        <location filename="../widgets/mainwindow.cpp" line="20244"/>
         <source>Load DXpedition Certificate</source>
         <translation>Laden Sie das DXpedition-Zertifikat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20011"/>
+        <location filename="../widgets/mainwindow.cpp" line="20246"/>
         <source>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</source>
         <translation>DXped-Zertifikat (*.dxcert);;JSON-Dateien (*.json);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20019"/>
+        <location filename="../widgets/mainwindow.cpp" line="20254"/>
         <source>The certificate file is invalid or the signature verification failed.</source>
         <translation>Die Zertifikatsdatei ist ungültig oder die Signaturüberprüfung ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20028"/>
+        <location filename="../widgets/mainwindow.cpp" line="20263"/>
         <source>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</source>
         <translation>Das Zertifikat für %1 ist abgelaufen oder noch nicht gültig.
 Gültig von %2 bis %3.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20040"/>
+        <location filename="../widgets/mainwindow.cpp" line="20275"/>
         <source>Unauthorized Operator</source>
         <translation>Unbefugter Betreiber</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20041"/>
+        <location filename="../widgets/mainwindow.cpp" line="20276"/>
         <source>Your callsign %1 is not listed in this certificate for DXpedition %2.</source>
         <translation>Ihr Rufzeichen %1 ist in diesem Zertifikat für DXpedition %2 nicht aufgeführt.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20050"/>
+        <location filename="../widgets/mainwindow.cpp" line="20285"/>
         <source>Certificate loaded successfully.
 
 DXpedition: %1 (%2)
@@ -8411,42 +8712,42 @@ Gültig: %6 bis %7
 Fingerabdruck: %8</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21497"/>
+        <location filename="../widgets/mainwindow.cpp" line="21745"/>
         <source>AutoSpot skipped: invalid DX cluster endpoint</source>
         <translation>AutoSpot übersprungen: ungültiger DX-Cluster-Endpunkt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21498"/>
+        <location filename="../widgets/mainwindow.cpp" line="21746"/>
         <source>SKIP invalid endpoint</source>
         <translation>SKIP ungültiger Endpunkt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21530"/>
+        <location filename="../widgets/mainwindow.cpp" line="21778"/>
         <source>AutoSpot skipped: empty DX cluster host</source>
         <translation>AutoSpot übersprungen: leerer DX-Cluster-Host</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21531"/>
+        <location filename="../widgets/mainwindow.cpp" line="21779"/>
         <source>SKIP empty host</source>
         <translation>SKIP leerer Host</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21539"/>
+        <location filename="../widgets/mainwindow.cpp" line="21787"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>AutoSpot übersprungen: %1:%2 ist schreibgeschützt. Konfigurieren Sie einen beschreibbaren DX-Cluster-Endpunkt.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21559"/>
+        <location filename="../widgets/mainwindow.cpp" line="21807"/>
         <source>AutoSpot skipped: empty MyCall</source>
         <translation>AutoSpot übersprungen: MyCall leer</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21560"/>
+        <location filename="../widgets/mainwindow.cpp" line="21808"/>
         <source>SKIP empty MyCall</source>
         <translation>SKIP leer MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21567"/>
+        <location filename="../widgets/mainwindow.cpp" line="21815"/>
         <source>SUBMIT %1:%2 | %3</source>
         <translation>SUBMIT %1:%2 | %3</translation>
     </message>
@@ -8455,134 +8756,134 @@ Fingerabdruck: %8</translation>
         <translation type="vanished">AutoSpot wird vom Clusterknoten für %1 auf %2:%3 akzeptiert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21794"/>
+        <location filename="../widgets/mainwindow.cpp" line="22072"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>AutoSpot wurde für %1 auf %2:%3 abgelehnt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22041"/>
+        <location filename="../widgets/mainwindow.cpp" line="22336"/>
         <source>Duplicate log suppressed for %1 (%2 s window)</source>
         <translation>Doppeltes Protokoll für %1 unterdrückt (Fenster von %2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22651"/>
+        <location filename="../widgets/mainwindow.cpp" line="22947"/>
         <source>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</source>
         <translation>%1 Baud Baudot-Terminal. Markieren Sie %2 Hz, verschieben Sie %3 Hz, %4, %5 Stoppbits. Der empfangene Text wird oben angezeigt. Geben Sie unten den zu sendenden Text ein.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22655"/>
+        <location filename="../widgets/mainwindow.cpp" line="22951"/>
         <source>reverse</source>
         <translation>umkehren</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22655"/>
+        <location filename="../widgets/mainwindow.cpp" line="22951"/>
         <source>normal</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22700"/>
+        <location filename="../widgets/mainwindow.cpp" line="22996"/>
         <source>RTTY text contains no encodable Baudot characters</source>
         <translation>RTTY-Text enthält keine kodierbaren Baudot-Zeichen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22844"/>
+        <location filename="../widgets/mainwindow.cpp" line="23141"/>
         <source>RTTY Received Text</source>
         <translation>RTTY Empfangener Text</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22845"/>
+        <location filename="../widgets/mainwindow.cpp" line="23142"/>
         <source>RTTY Transmitted Text</source>
         <translation>RTTY Übertragener Text</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22914"/>
+        <location filename="../widgets/mainwindow.cpp" line="23211"/>
         <source>Stations calling DXpedition %1</source>
         <translation>Stationen, die DXpedition %1 aufrufen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22948"/>
+        <location filename="../widgets/mainwindow.cpp" line="23245"/>
         <source>Show Already Worked</source>
         <translation>Bereits bearbeitet anzeigen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22950"/>
+        <location filename="../widgets/mainwindow.cpp" line="23247"/>
         <source>Super Fox</source>
         <translation>Super Fox</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22968"/>
+        <location filename="../widgets/mainwindow.cpp" line="23265"/>
         <source>Super Hound</source>
         <translation>Super Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22979"/>
+        <location filename="../widgets/mainwindow.cpp" line="23276"/>
         <source>Hound</source>
         <translation>Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23399"/>
+        <location filename="../widgets/mainwindow.cpp" line="23696"/>
         <source>Tx Messages</source>
         <translation>Tx-Nachrichten</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23862"/>
-        <location filename="../widgets/mainwindow.cpp" line="23873"/>
-        <location filename="../widgets/mainwindow.cpp" line="23912"/>
-        <location filename="../widgets/mainwindow.cpp" line="23922"/>
-        <location filename="../widgets/mainwindow.cpp" line="30701"/>
-        <location filename="../widgets/mainwindow.cpp" line="30747"/>
+        <location filename="../widgets/mainwindow.cpp" line="24159"/>
+        <location filename="../widgets/mainwindow.cpp" line="24170"/>
+        <location filename="../widgets/mainwindow.cpp" line="24209"/>
+        <location filename="../widgets/mainwindow.cpp" line="24219"/>
+        <location filename="../widgets/mainwindow.cpp" line="31152"/>
+        <location filename="../widgets/mainwindow.cpp" line="31198"/>
         <source>Confirm Erase</source>
         <translation>Bestätigen Sie das Löschen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23863"/>
+        <location filename="../widgets/mainwindow.cpp" line="24160"/>
         <source>Are you sure you want to erase file ALL.TXT?</source>
         <translation>Sind Sie sicher, dass Sie die Datei ALL.TXT löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23874"/>
+        <location filename="../widgets/mainwindow.cpp" line="24171"/>
         <source>Are you sure you want to erase the list of Q65 callers?</source>
         <translation>Sind Sie sicher, dass Sie die Liste der Q65-Anrufer löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23883"/>
-        <location filename="../widgets/mainwindow.cpp" line="27016"/>
+        <location filename="../widgets/mainwindow.cpp" line="24180"/>
+        <location filename="../widgets/mainwindow.cpp" line="27445"/>
         <source>Confirm Reset</source>
         <translation>Bestätigen Sie das Zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23884"/>
+        <location filename="../widgets/mainwindow.cpp" line="24181"/>
         <source>Are you sure you want to erase your contest log?</source>
         <translation>Sind Sie sicher, dass Sie Ihr Wettbewerbsprotokoll löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23885"/>
+        <location filename="../widgets/mainwindow.cpp" line="24182"/>
         <source>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</source>
         <translation>Dadurch werden alle QSO-Datensätze für den aktuellen Wettbewerb entfernt. Sie werden in der ADIF-Protokolldatei gespeichert, stehen jedoch nicht für den Export in Ihr Cabrillo-Protokoll zur Verfügung.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23905"/>
+        <location filename="../widgets/mainwindow.cpp" line="24202"/>
         <source>Cabrillo Log saved</source>
         <translation>Cabrillo Protokoll gespeichert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29012"/>
+        <location filename="../widgets/mainwindow.cpp" line="29463"/>
         <source>Embedded WSPR decoder failed: %1</source>
         <translation>Fehler beim eingebetteten WSPR-Decoder: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29147"/>
+        <location filename="../widgets/mainwindow.cpp" line="29598"/>
         <source>SuperFox TX generation failed.</source>
         <translation>SuperFox-TX-Erzeugung fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29776"/>
-        <location filename="../widgets/mainwindow.cpp" line="29834"/>
+        <location filename="../widgets/mainwindow.cpp" line="30227"/>
+        <location filename="../widgets/mainwindow.cpp" line="30285"/>
         <source>Cannot write decodium_log_config.ini file</source>
         <translation>Datei decodium_log_config.ini kann nicht geschrieben werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30881"/>
+        <location filename="../widgets/mainwindow.cpp" line="31332"/>
         <source>Call sign and LOTW password are required.
 
 Enter these in Settings at the Reporting tab.</source>
@@ -8591,99 +8892,99 @@ Enter these in Settings at the Reporting tab.</source>
 Geben Sie diese in den Einstellungen auf der Registerkarte „Berichte“ ein.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30889"/>
+        <location filename="../widgets/mainwindow.cpp" line="31340"/>
         <source>Upload QSOs to LOTW first, and *wait* for LOTW to update.</source>
         <translation>Laden Sie zuerst QSOs auf LOTW hoch und *warten*, bis LOTW aktualisiert wurde.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30906"/>
+        <location filename="../widgets/mainwindow.cpp" line="31357"/>
         <source>Downloading from LOTW...</source>
         <translation>Herunterladen von LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30998"/>
+        <location filename="../widgets/mainwindow.cpp" line="31449"/>
         <source>Download QSOs from LOTW succeeded.</source>
         <translation>Das Herunterladen von QSOs von LOTW war erfolgreich.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31011"/>
+        <location filename="../widgets/mainwindow.cpp" line="31462"/>
         <source>Download QSOs from LOTW failed.</source>
         <translation>Download QSOs from LOTW failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31086"/>
-        <location filename="../widgets/mainwindow.cpp" line="31098"/>
-        <location filename="../widgets/mainwindow.cpp" line="31121"/>
+        <location filename="../widgets/mainwindow.cpp" line="31537"/>
+        <location filename="../widgets/mainwindow.cpp" line="31549"/>
+        <location filename="../widgets/mainwindow.cpp" line="31572"/>
         <source>Unable to open file</source>
         <translation>Datei kann nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31157"/>
+        <location filename="../widgets/mainwindow.cpp" line="31608"/>
         <source>Download QSLs from LOTW succeeded.</source>
         <translation>Das Herunterladen der QSLs von LOTW war erfolgreich.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31164"/>
+        <location filename="../widgets/mainwindow.cpp" line="31615"/>
         <source>Download QSLs from LOTW failed.</source>
         <translation>Das Herunterladen von QSLs von LOTW ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31185"/>
+        <location filename="../widgets/mainwindow.cpp" line="31636"/>
         <source>No QSOs to upload to LOTW</source>
         <translation>Keine QSOs zum Hochladen auf LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31229"/>
+        <location filename="../widgets/mainwindow.cpp" line="31680"/>
         <source>Upload to LOTW Error</source>
         <translation>Fehler beim Hochladen auf LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31237"/>
+        <location filename="../widgets/mainwindow.cpp" line="31688"/>
         <source>Uploading to LOTW...</source>
         <translation>Hochladen auf LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31334"/>
+        <location filename="../widgets/mainwindow.cpp" line="31785"/>
         <source>LOTW process error</source>
         <translation>LOTW-Prozessfehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31405"/>
+        <location filename="../widgets/mainwindow.cpp" line="31856"/>
         <source>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</source>
         <translation>Netzwerkfehler – Weiterleitung für beglaubigte LOTW-Anfrage wird abgelehnt:
 „%1“</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31414"/>
+        <location filename="../widgets/mainwindow.cpp" line="31865"/>
         <source>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</source>
         <translation>Netzwerkfehler – SSL/TLS-Unterstützung nicht installiert, kann nicht abgerufen werden:
 „%1“</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31424"/>
+        <location filename="../widgets/mainwindow.cpp" line="31875"/>
         <source>Network Error - Too many redirects:
 &apos;%1&apos;</source>
         <translation>Netzwerkfehler – Zu viele Weiterleitungen:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31438"/>
+        <location filename="../widgets/mainwindow.cpp" line="31889"/>
         <source>Network Error:
 %1</source>
         <translation>Netzwerkfehler:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31445"/>
+        <location filename="../widgets/mainwindow.cpp" line="31896"/>
         <source>File System Error - Cannot commit changes to:
 &quot;%1&quot;</source>
         <translation>Dateisystemfehler – Änderungen können nicht übernommen werden für:
 „%1“</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31474"/>
+        <location filename="../widgets/mainwindow.cpp" line="31925"/>
         <source>File System Error - Cannot open file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -8692,7 +8993,7 @@ Error(%2): %3</source>
 Fehler (%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31482"/>
+        <location filename="../widgets/mainwindow.cpp" line="31933"/>
         <source>File System Error - Cannot write to file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -8701,344 +9002,343 @@ Error(%2): %3</source>
 Fehler (%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31545"/>
+        <location filename="../widgets/mainwindow.cpp" line="31996"/>
         <source>Unable to open incremental log file</source>
         <translation>Die inkrementelle Protokolldatei kann nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31701"/>
+        <location filename="../widgets/mainwindow.cpp" line="32152"/>
         <source>Remote waterfall stream enabled</source>
         <translation>Remote-Wasserfall-Stream aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31702"/>
+        <location filename="../widgets/mainwindow.cpp" line="32153"/>
         <source>Remote waterfall stream disabled</source>
         <translation>Remote-Wasserfall-Stream deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31774"/>
         <source>Remote FT2 caller queued: %1</source>
-        <translation>Remote-FT2-Anrufer in der Warteschlange: %1</translation>
+        <translation type="vanished">Remote-FT2-Anrufer in der Warteschlange: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31787"/>
+        <location filename="../widgets/mainwindow.cpp" line="32438"/>
         <source>Remote mode request ignored: RTTY is hidden in this release</source>
         <translation>Remote-Modus-Anfrage ignoriert: RTTY ist in dieser Version ausgeblendet</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31793"/>
+        <location filename="../widgets/mainwindow.cpp" line="32444"/>
         <source>Remote mode set: %1</source>
         <translation>Remote-Modus eingestellt: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31839"/>
+        <location filename="../widgets/mainwindow.cpp" line="32490"/>
         <source>Remote band ignored: invalid band &quot;%1&quot;</source>
         <translation>Remote-Band ignoriert: ungültiges Band „%1“</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31843"/>
+        <location filename="../widgets/mainwindow.cpp" line="32494"/>
         <source>Remote band set: 160m</source>
         <translation>Remote-Band-Set: 160 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31844"/>
+        <location filename="../widgets/mainwindow.cpp" line="32495"/>
         <source>Remote band set: 80m</source>
         <translation>Remote-Band-Set: 80 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31845"/>
+        <location filename="../widgets/mainwindow.cpp" line="32496"/>
         <source>Remote band set: 60m</source>
         <translation>Remote-Band-Set: 60 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31846"/>
+        <location filename="../widgets/mainwindow.cpp" line="32497"/>
         <source>Remote band set: 40m</source>
         <translation>Remote-Band-Set: 40 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31847"/>
+        <location filename="../widgets/mainwindow.cpp" line="32498"/>
         <source>Remote band set: 30m</source>
         <translation>Fernbedienungsband-Set: 30 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31848"/>
+        <location filename="../widgets/mainwindow.cpp" line="32499"/>
         <source>Remote band set: 20m</source>
         <translation>Fernbedienungsband-Set: 20 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31849"/>
+        <location filename="../widgets/mainwindow.cpp" line="32500"/>
         <source>Remote band set: 17m</source>
         <translation>Remote-Band-Set: 17 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31850"/>
+        <location filename="../widgets/mainwindow.cpp" line="32501"/>
         <source>Remote band set: 15m</source>
         <translation>Fernbedienungsband-Set: 15 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31851"/>
+        <location filename="../widgets/mainwindow.cpp" line="32502"/>
         <source>Remote band set: 12m</source>
         <translation>Fernbedienungsband-Set: 12 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31852"/>
+        <location filename="../widgets/mainwindow.cpp" line="32503"/>
         <source>Remote band set: 10m</source>
         <translation>Fernbedienungsband-Set: 10 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31853"/>
+        <location filename="../widgets/mainwindow.cpp" line="32504"/>
         <source>Remote band set: 6m</source>
         <translation>Fernbedienungsband-Set: 6 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31854"/>
+        <location filename="../widgets/mainwindow.cpp" line="32505"/>
         <source>Remote band set: 2m</source>
         <translation>Fernbedienungsband-Set: 2 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31855"/>
+        <location filename="../widgets/mainwindow.cpp" line="32506"/>
         <source>Remote band set: 70cm</source>
         <translation>Fernbedienungsband-Set: 70 cm</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31857"/>
+        <location filename="../widgets/mainwindow.cpp" line="32508"/>
         <source>Remote band ignored: unsupported band &quot;%1&quot;</source>
         <translation>Remote-Band ignoriert: nicht unterstütztes Band „%1“</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31909"/>
+        <location filename="../widgets/mainwindow.cpp" line="32560"/>
         <source>Remote dial frequency set: %1 MHz</source>
         <translation>Remote-Abstimmfrequenz gesetzt: %1 MHz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31928"/>
+        <location filename="../widgets/mainwindow.cpp" line="32579"/>
         <source>Remote Rx frequency set: %1 Hz</source>
         <translation>Remote-Rx-Frequenz eingestellt: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31946"/>
+        <location filename="../widgets/mainwindow.cpp" line="32597"/>
         <source>Remote Tx frequency set: %1 Hz</source>
         <translation>Remote-Tx-Frequenz eingestellt: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32032"/>
+        <location filename="../widgets/mainwindow.cpp" line="32683"/>
         <source>Remote TX enabled</source>
         <translation>Remote TX aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32032"/>
+        <location filename="../widgets/mainwindow.cpp" line="32683"/>
         <source>Remote TX disabled</source>
         <translation>Remote TX deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32049"/>
+        <location filename="../widgets/mainwindow.cpp" line="32700"/>
         <source>Remote Auto CQ enabled</source>
         <translation>Remote Auto CQ aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32049"/>
+        <location filename="../widgets/mainwindow.cpp" line="32700"/>
         <source>Remote Auto CQ disabled</source>
         <translation>Remote Auto CQ deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32075"/>
+        <location filename="../widgets/mainwindow.cpp" line="32726"/>
         <source>Remote AutoSpot enabled</source>
         <translation>Remote AutoSpot aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32075"/>
+        <location filename="../widgets/mainwindow.cpp" line="32726"/>
         <source>Remote AutoSpot disabled</source>
         <translation>Remote AutoSpot deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32076"/>
+        <location filename="../widgets/mainwindow.cpp" line="32727"/>
         <source>AutoSpot enabled</source>
         <translation>AutoSpot aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32076"/>
+        <location filename="../widgets/mainwindow.cpp" line="32727"/>
         <source>AutoSpot disabled</source>
         <translation>AutoSpot deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32094"/>
+        <location filename="../widgets/mainwindow.cpp" line="32745"/>
         <source>Remote Monitoring ignored: cannot enable while transmitting</source>
         <translation>Fernüberwachung ignoriert: Kann während der Übertragung nicht aktiviert werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32108"/>
+        <location filename="../widgets/mainwindow.cpp" line="32759"/>
         <source>Remote Monitoring enabled</source>
         <translation>Fernüberwachung aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32108"/>
+        <location filename="../widgets/mainwindow.cpp" line="32759"/>
         <source>Remote Monitoring disabled</source>
         <translation>Fernüberwachung deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32120"/>
+        <location filename="../widgets/mainwindow.cpp" line="32771"/>
         <source>Remote Async L2 ignored: not in FT2 mode</source>
         <translation>Remote Async L2 ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32128"/>
+        <location filename="../widgets/mainwindow.cpp" line="32779"/>
         <source>Remote Async L2 ignored: mandatory in FT2 mode</source>
         <translation>Remote Async L2 ignoriert: obligatorisch im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32132"/>
+        <location filename="../widgets/mainwindow.cpp" line="32783"/>
         <source>Remote Async L2 enabled (mandatory in FT2)</source>
         <translation>Remote Async L2 aktiviert (obligatorisch in FT2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32144"/>
+        <location filename="../widgets/mainwindow.cpp" line="32795"/>
         <source>Remote Dual Carrier ignored: not in FT2 mode</source>
         <translation>Remote Dual Carrier ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32148"/>
+        <location filename="../widgets/mainwindow.cpp" line="32799"/>
         <source>Remote Dual Carrier enabled</source>
         <translation>Remote Dual Carrier aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32148"/>
+        <location filename="../widgets/mainwindow.cpp" line="32799"/>
         <source>Remote Dual Carrier disabled</source>
         <translation>Remote-Dual-Carrier deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32160"/>
+        <location filename="../widgets/mainwindow.cpp" line="32811"/>
         <source>Remote Alt 1/2 ignored: not available in FT2 mode</source>
         <translation>Remote Alt 1/2 ignoriert: im FT2-Modus nicht verfügbar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32164"/>
+        <location filename="../widgets/mainwindow.cpp" line="32815"/>
         <source>Remote Alt 1/2 enabled</source>
         <translation>Remote Alt 1/2 aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32164"/>
+        <location filename="../widgets/mainwindow.cpp" line="32815"/>
         <source>Remote Alt 1/2 disabled</source>
         <translation>Remote Alt 1/2 deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32176"/>
+        <location filename="../widgets/mainwindow.cpp" line="32827"/>
         <source>Remote Manual TX ignored: not in FT2 mode</source>
         <translation>Remote-Handbuch TX ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32180"/>
+        <location filename="../widgets/mainwindow.cpp" line="32831"/>
         <source>Remote Manual TX enabled</source>
         <translation>Remote Manual TX aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32180"/>
+        <location filename="../widgets/mainwindow.cpp" line="32831"/>
         <source>Remote Manual TX disabled</source>
         <translation>Remote-Handbuch TX deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32192"/>
+        <location filename="../widgets/mainwindow.cpp" line="32843"/>
         <source>Remote Speedy ignored: not in FT2 mode</source>
         <translation>Remote Speedy ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32196"/>
+        <location filename="../widgets/mainwindow.cpp" line="32847"/>
         <source>Remote Speedy enabled</source>
         <translation>Remote Speedy aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32196"/>
+        <location filename="../widgets/mainwindow.cpp" line="32847"/>
         <source>Remote Speedy disabled</source>
         <translation>Remote Speedy deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32208"/>
+        <location filename="../widgets/mainwindow.cpp" line="32859"/>
         <source>Remote D-CW ignored: not in FT2 mode</source>
         <translation>Remote D-CW ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32212"/>
+        <location filename="../widgets/mainwindow.cpp" line="32863"/>
         <source>Remote D-CW enabled</source>
         <translation>Remote D-CW aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32212"/>
+        <location filename="../widgets/mainwindow.cpp" line="32863"/>
         <source>Remote D-CW disabled</source>
         <translation>Remote D-CW deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32224"/>
+        <location filename="../widgets/mainwindow.cpp" line="32875"/>
         <source>Remote Quick QSO ignored: not in FT2 mode</source>
         <translation>Remote Quick QSO ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32228"/>
+        <location filename="../widgets/mainwindow.cpp" line="32879"/>
         <source>Remote Quick QSO enabled</source>
         <translation>Remote Quick QSO aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32228"/>
+        <location filename="../widgets/mainwindow.cpp" line="32879"/>
         <source>Remote Quick QSO disabled</source>
         <translation>Remote Quick QSO deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32240"/>
+        <location filename="../widgets/mainwindow.cpp" line="32891"/>
         <source>Remote QSO profile ignored: not in FT2 mode</source>
         <translation>Remote-Profil QSO ignoriert: nicht im FT2-Modus</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32251"/>
+        <location filename="../widgets/mainwindow.cpp" line="32902"/>
         <source>Remote QSO profile ignored: unsupported FT2 count %1</source>
         <translation>Remote-Profil QSO ignoriert: nicht unterstützte FT2-Anzahl %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32256"/>
+        <location filename="../widgets/mainwindow.cpp" line="32907"/>
         <source>Remote QSO profile set to %1 msg</source>
         <translation>Remote-QSO-Profil auf %1-Meldung eingestellt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23923"/>
+        <location filename="../widgets/mainwindow.cpp" line="24220"/>
         <source>Are you sure you want to erase the WSPR hashtable?</source>
         <translation>Sind Sie sicher, dass Sie die Hashtabelle WSPR löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21260"/>
+        <location filename="../widgets/mainwindow.cpp" line="21498"/>
         <source>DX Call field is empty</source>
         <translation>DX-Call-Feld ist leer</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21261"/>
+        <location filename="../widgets/mainwindow.cpp" line="21499"/>
         <source>The logger received a manual log request without a DX callsign.</source>
         <translation>Der Logger hat eine manuelle Log-Anfrage ohne DX-Rufzeichen erhalten.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21262"/>
+        <location filename="../widgets/mainwindow.cpp" line="21500"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
         <translation>Wählen Sie eine empfangene Nachricht aus oder geben Sie das DX-Rufzeichen ein, bevor Sie das QSO loggen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21792"/>
+        <location filename="../widgets/mainwindow.cpp" line="22070"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
         <translation>AutoSpot an Cluster-Knoten übermittelt für %1 auf %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23942"/>
+        <location filename="../widgets/mainwindow.cpp" line="24239"/>
         <source>ChronoGPS not found</source>
         <translation>ChronoGPS nicht gefunden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23943"/>
+        <location filename="../widgets/mainwindow.cpp" line="24240"/>
         <source>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</source>
         <translation>ChronoGPS.exe wurde nicht im Anwendungsverzeichnis gefunden.
 Bitte stellen Sie sicher, dass sich ChronoGPS.exe im selben Ordner wie Decodium befindet.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24437"/>
+        <location filename="../widgets/mainwindow.cpp" line="24734"/>
         <source>%1 W</source>
         <translation>%1 W</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24456"/>
+        <location filename="../widgets/mainwindow.cpp" line="24753"/>
         <source>SWR &gt; 2.5 !!!
 
 Transmission was stopped
@@ -9051,134 +9351,165 @@ Die Übertragung wurde gestoppt
 Überprüfen Sie Ihre Antenne</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24571"/>
+        <location filename="../widgets/mainwindow.cpp" line="24870"/>
         <source>CAT disconnected, reconnecting (%1/3)...</source>
         <translation>CAT getrennt, Verbindung wieder hergestellt (%1/3)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25081"/>
+        <location filename="../widgets/mainwindow.cpp" line="25420"/>
         <source>Tune digital gain </source>
         <translation>Stellen Sie die digitale Verstärkung ein </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25083"/>
+        <location filename="../widgets/mainwindow.cpp" line="25422"/>
         <source>Transmit digital gain </source>
         <translation>Digitale Verstärkung übertragen </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25113"/>
+        <location filename="../widgets/mainwindow.cpp" line="25452"/>
         <source>Prefixes</source>
         <translation>Präfixe</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26140"/>
+        <location filename="../widgets/mainwindow.cpp" line="26569"/>
         <source>Network Error</source>
         <translation>Netzwerkfehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26141"/>
+        <location filename="../widgets/mainwindow.cpp" line="26570"/>
         <source>Error: %1
 UDP server %2:%3</source>
         <translation>Fehler: %1
 UDP-Server %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26313"/>
+        <location filename="../widgets/mainwindow.cpp" line="26742"/>
         <source>File Error</source>
         <translation>Dateifehler</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26607"/>
+        <location filename="../widgets/mainwindow.cpp" line="27036"/>
         <source>Phase Training Disabled</source>
         <translation>Phasentraining deaktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26610"/>
+        <location filename="../widgets/mainwindow.cpp" line="27039"/>
         <source>Phase Training Enabled</source>
         <translation>Phasentraining aktiviert</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26757"/>
+        <location filename="../widgets/mainwindow.cpp" line="27186"/>
         <source> WD:0m </source>
         <translation> WD:0m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26760"/>
+        <location filename="../widgets/mainwindow.cpp" line="27189"/>
         <source> Runaway Tx watchdog </source>
         <translation> Runaway Tx-Watchdog </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26777"/>
+        <location filename="../widgets/mainwindow.cpp" line="27206"/>
         <source> WD:%1m </source>
         <translation> WD:%1m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27027"/>
-        <location filename="../widgets/mainwindow.cpp" line="27030"/>
+        <location filename="../widgets/mainwindow.cpp" line="27456"/>
+        <location filename="../widgets/mainwindow.cpp" line="27459"/>
         <source>Free Text Message</source>
         <translation>Kostenlose Textnachricht</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27028"/>
-        <location filename="../widgets/mainwindow.cpp" line="27031"/>
+        <location filename="../widgets/mainwindow.cpp" line="27457"/>
+        <location filename="../widgets/mainwindow.cpp" line="27460"/>
         <source>Message:</source>
         <translation>Nachricht:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27049"/>
+        <location filename="../widgets/mainwindow.cpp" line="27478"/>
         <source>Directional calls not yet supported in SuperFox mode</source>
         <translation>Richtungsrufe werden im SuperFox-Modus noch nicht unterstützt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27068"/>
+        <location filename="../widgets/mainwindow.cpp" line="27497"/>
         <source>TOTP: No seed entered in fox configuration to generate verification code.</source>
         <translation>TOTP: In der Fox-Konfiguration wurde kein Startwert eingegeben, um einen Bestätigungscode zu generieren.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="28475"/>
+        <location filename="../widgets/mainwindow.cpp" line="28904"/>
         <source>Async L2 is mandatory in FT2 mode</source>
         <translation>Async L2 ist im FT2-Modus obligatorisch</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29140"/>
+        <location filename="../widgets/mainwindow.cpp" line="29591"/>
         <source>TOTP SF: seed not long enough.</source>
         <translation>TOTP SF: Saatgut nicht lang genug.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29274"/>
+        <location filename="../widgets/mainwindow.cpp" line="29725"/>
         <source>Unable to open log file</source>
         <translation>Die Protokolldatei kann nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30702"/>
+        <location filename="../widgets/mainwindow.cpp" line="31153"/>
         <source>Are you sure you want to erase the Tx Log?</source>
         <translation>Sind Sie sicher, dass Sie das Sendeprotokoll löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30727"/>
+        <location filename="../widgets/mainwindow.cpp" line="31178"/>
         <source>&quot;%1&quot; added to Ignore List</source>
         <translation>„%1“ zur Ignorierungsliste hinzugefügt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30748"/>
+        <location filename="../widgets/mainwindow.cpp" line="31199"/>
         <source>Are you sure you want to erase the Ignore List?</source>
         <translation>Sind Sie sicher, dass Sie die Ignorierungsliste löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26841"/>
-        <location filename="../widgets/mainwindow.cpp" line="28047"/>
+        <location filename="../widgets/mainwindow.cpp" line="27270"/>
+        <location filename="../widgets/mainwindow.cpp" line="28476"/>
         <source>Log File Error</source>
         <translation>Fehler in der Protokolldatei</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23913"/>
+        <location filename="../widgets/mainwindow.cpp" line="24210"/>
         <source>Are you sure you want to erase file decodium_log.adi?</source>
         <translation>Sind Sie sicher, dass Sie die Datei decodium_log.adi löschen möchten?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27017"/>
+        <location filename="../widgets/mainwindow.cpp" line="27446"/>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Sind Sie sicher, dass Sie die QSO-Warteschlangen löschen möchten?</translation>
+    </message>
+</context>
+<context>
+    <name>MamPanel</name>
+    <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="387"/>
+        <source>QSO attivi (multi-stream): </source>
+        <translation>Aktive QSOs (Multi-Stream):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="399"/>
+        <source>Doppio-click su una stazione per aggiungerla alla lista.</source>
+        <translation>Doppelklick auf eine Station, um sie zur Liste hinzuzufügen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MamPanel.qml" line="459"/>
+        <source>Nessuno stream attivo</source>
+        <translation>Kein Stream aktiv</translation>
+    </message>
+</context>
+<context>
+    <name>MamWindow</name>
+    <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="473"/>
+        <source>QSO attivi (multi-stream): </source>
+        <translation>Aktive QSOs (Multi-Stream):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
+        <source>Nessuno stream attivo</source>
+        <translation>Kein Stream aktiv</translation>
     </message>
 </context>
 <context>
@@ -9198,8 +9529,10 @@ UDP-Server %2:%3</translation>
 <context>
     <name>Modes</name>
     <message>
+        <location filename="../models/Modes.cpp" line="68"/>
+        <location filename="../models/Modes.cpp" line="95"/>
         <source>Mode</source>
-        <translation type="vanished">Modus</translation>
+        <translation>Modus</translation>
     </message>
 </context>
 <context>
@@ -9343,8 +9676,9 @@ UDP-Server %2:%3</translation>
         <translation>Fehler beim Öffnen der LotW-Benutzer-CSV-Datei: „%1“</translation>
     </message>
     <message>
+        <location filename="../models/Bands.cpp" line="52"/>
         <source>OOB</source>
-        <translation type="vanished">OOB</translation>
+        <translation>OOB</translation>
     </message>
     <message>
         <location filename="../WFPalette.cpp" line="55"/>
@@ -9511,27 +9845,33 @@ UDP-Server %2:%3</translation>
         <translation>secret-tool löschen fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21837"/>
-        <location filename="../DecodiumDxCluster.cpp" line="870"/>
+        <location filename="../widgets/mainwindow.cpp" line="22115"/>
+        <location filename="../DecodiumDxCluster.cpp" line="896"/>
         <source>timeout waiting for cluster response</source>
         <translation>Zeitüberschreitung beim Warten auf Cluster-Antwort</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21838"/>
-        <location filename="../DecodiumDxCluster.cpp" line="871"/>
+        <location filename="../widgets/mainwindow.cpp" line="22116"/>
+        <location filename="../DecodiumDxCluster.cpp" line="897"/>
         <source>timeout waiting for cluster response: %1</source>
         <translation>Zeitüberschreitung beim Warten auf Cluster-Antwort: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21962"/>
-        <location filename="../DecodiumDxCluster.cpp" line="990"/>
-        <location filename="../DecodiumDxCluster.cpp" line="1010"/>
+        <location filename="../widgets/mainwindow.cpp" line="22150"/>
+        <location filename="../DecodiumDxCluster.cpp" line="932"/>
+        <source>cluster verification response exceeded the safety limit</source>
+        <translation>Cluster-Verifizierungsantwort hat das Sicherheitslimit überschritten</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="22257"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1030"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1050"/>
         <source>published in show/dx</source>
         <translation>in show/dx veröffentlicht</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21967"/>
-        <location filename="../DecodiumDxCluster.cpp" line="993"/>
+        <location filename="../widgets/mainwindow.cpp" line="22262"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1033"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
         <translation>Knoten hat den Befehl angenommen; show/dx hat ihn noch nicht zurückgemeldet</translation>
     </message>
@@ -9544,14 +9884,14 @@ UDP-Server %2:%3</translation>
         <translation type="vanished">Der Knoten hat den Befehl akzeptiert, aber der Spot ist in show/dx nicht sichtbar: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21992"/>
-        <location filename="../DecodiumDxCluster.cpp" line="1019"/>
+        <location filename="../widgets/mainwindow.cpp" line="22287"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1059"/>
         <source>connection closed before cluster confirmation</source>
         <translation>Verbindung vor Clusterbestätigung geschlossen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21993"/>
-        <location filename="../DecodiumDxCluster.cpp" line="1020"/>
+        <location filename="../widgets/mainwindow.cpp" line="22288"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1060"/>
         <source>connection closed before cluster confirmation: %1</source>
         <translation>Verbindung vor Clusterbestätigung geschlossen: %1</translation>
     </message>
@@ -9562,6 +9902,7 @@ UDP-Server %2:%3</translation>
     </message>
     <message>
         <location filename="../Network/Cloudlog.cpp" line="62"/>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="42"/>
         <source>Cloudlog URL is invalid: %1</source>
         <translation>Cloudlog URL ist ungültig: %1</translation>
     </message>
@@ -9644,104 +9985,191 @@ Die heruntergeladene Datei überschreitet die Grenze von %1 MiB:
         <translation>UDP-Socket-Fehler</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16235"/>
+        <location filename="../DecodiumBridge.cpp" line="20532"/>
         <source>Invalid frequency</source>
         <translation>Ungültige Frequenz</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16237"/>
+        <location filename="../DecodiumBridge.cpp" line="20534"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Ungültiges Datum/Uhrzeit. ISO-Format oder yyyy-MM-dd HH:mm verwenden.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16239"/>
+        <location filename="../DecodiumBridge.cpp" line="20536"/>
         <source>Invalid frequency row</source>
         <translation>Ungültige Frequenzzeile</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16260"/>
+        <location filename="../DecodiumBridge.cpp" line="20595"/>
+        <source>Failed to parse JSON frequencies file: %1</source>
+        <translation>JSON-Frequenzdatei konnte nicht verarbeitet werden: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20603"/>
+        <source>No frequencies were found</source>
+        <translation>Keine Frequenzen gefunden</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20609"/>
+        <location filename="../DecodiumBridge.cpp" line="20711"/>
+        <location filename="../DecodiumBridge.cpp" line="20738"/>
+        <source>Frequency file contains too many rows (%1, limit %2)</source>
+        <translation>Frequenzdatei enthält zu viele Zeilen (%1, Limit %2)</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20650"/>
+        <source>Frequency file does not exist</source>
+        <translation>Frequenzdatei existiert nicht</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20656"/>
+        <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
+        <translation>Frequenzdatei ist zu groß (%1 Bytes, Limit %2 Bytes)</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20666"/>
         <source>Cannot open frequency file: %1</source>
         <translation>Frequenzdatei kann nicht geöffnet werden: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16284"/>
+        <location filename="../DecodiumBridge.cpp" line="20676"/>
+        <source>No valid working frequencies found</source>
+        <translation>Keine gültigen Arbeitsfrequenzen gefunden</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20690"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Keine gültige Frequenzdatei: falsche Datei-Signatur</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16291"/>
+        <location filename="../DecodiumBridge.cpp" line="20697"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Keine gültige Frequenzdatei: Version ist zu neu</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="16310"/>
+        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <source>Not a valid frequencies file: cannot read row count</source>
+        <translation>Keine gültige Frequenzdatei: Zeilenanzahl kann nicht gelesen werden</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="20732"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Keine gültige Frequenzdatei: Inhalt beschädigt</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="44"/>
+        <location filename="../DecodiumDxCluster.cpp" line="47"/>
         <source>Connection refused</source>
         <translation>Verbindung abgelehnt</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="46"/>
+        <location filename="../DecodiumDxCluster.cpp" line="49"/>
         <source>Host not found</source>
         <translation>Host nicht gefunden</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="48"/>
+        <location filename="../DecodiumDxCluster.cpp" line="51"/>
         <source>Network error</source>
         <translation>Netzwerkfehler</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="50"/>
+        <location filename="../DecodiumDxCluster.cpp" line="53"/>
         <source>Connection timeout</source>
         <translation>Verbindungs-Timeout</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="833"/>
+        <location filename="../DecodiumDxCluster.cpp" line="859"/>
         <source>AutoSpot submitted for %1 on %2:%3</source>
         <translation>AutoSpot übermittelt für %1 auf %2:%3</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="836"/>
+        <location filename="../DecodiumDxCluster.cpp" line="862"/>
         <source>AutoSpot verified for %1 on %2:%3</source>
         <translation>AutoSpot bestätigt für %1 auf %2:%3</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="839"/>
+        <location filename="../DecodiumDxCluster.cpp" line="865"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>AutoSpot abgelehnt für %1 auf %2:%3</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="67"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="70"/>
         <source>Ham Radio Deluxe accetta la connessione TCP, ma non risponde al protocollo HRD. Verifica che HRD Rig Control sia avviato, che la radio sia gia&apos; connessa in HRD e che il server TCP/Remote sia abilitato sulla porta 7809.</source>
         <translation>Ham Radio Deluxe akzeptiert die TCP-Verbindung, antwortet aber nicht auf das HRD-Protokoll. Stellen Sie sicher, dass HRD Rig Control gestartet ist, die Funkanlage bereits in HRD verbunden ist und der TCP-/Remote-Server auf Port 7809 aktiviert ist.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="88"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="91"/>
         <source>Porta seriale occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
         <translation>Serielle Schnittstelle wird von einer anderen Software belegt (wahrscheinlich OmniRig, WSJT-X, FLDigi oder ein serielles Terminal). Schließen Sie das Programm, das die Schnittstelle verwendet, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="93"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="96"/>
         <source>Porta %1 occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
         <translation>Schnittstelle %1 wird von einer anderen Software belegt (wahrscheinlich OmniRig, WSJT-X, FLDigi oder ein serielles Terminal). Schließen Sie das Programm, das die Schnittstelle verwendet, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="112"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="115"/>
         <source>Porta seriale CAT non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
         <translation>Serielle CAT-Schnittstelle nicht verfügbar. Warten Sie, bis Windows die Funkanlage erkannt hat, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="114"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="117"/>
         <source>Porta %1 non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
         <translation>Schnittstelle %1 nicht verfügbar. Warten Sie, bis Windows die Funkanlage erkannt hat, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="129"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="132"/>
         <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
         <translation>CAT-Kommunikation mit dem Gerät unterbrochen. Prüfen Sie USB-Kabel, COM-Port, Baudrate und ob das Gerät eingeschaltet ist. (Hamlib-Trace: %1)</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="32"/>
+        <source>Cloudlog URL is empty.</source>
+        <translation>Cloudlog-URL ist leer.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="49"/>
+        <source>Cloudlog URL scheme must be http or https.</source>
+        <translation>Cloudlog-URL-Schema muss http oder https sein.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="82"/>
+        <source>[reply too large]</source>
+        <translation>[Antwort zu groß]</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="86"/>
+        <source>[reply exceeds limit]</source>
+        <translation>[Antwort überschreitet Limit]</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="163"/>
+        <source> Risposta: %1</source>
+        <translation> Antwort: %1</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="166"/>
+        <source>%1: HTTP 401. Il server o proxy richiede autenticazione prima dell&apos;API Cloudlog. Controlla URL, Basic/Auth/Cloudflare o protezioni su /index.php/api; l&apos;API key Cloudlog non basta.%2</source>
+        <translation>%1: HTTP 401. Der Server oder Proxy verlangt eine Authentifizierung vor der Cloudlog-API. Prüfe URL, Basic/Auth/Cloudflare oder Schutzmechanismen auf /index.php/api; der Cloudlog-API-Schlüssel allein reicht nicht.%2</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="171"/>
+        <source>%1: HTTP 407. Il proxy richiede autenticazione prima di raggiungere Cloudlog.%2</source>
+        <translation>%1: HTTP 407. Der Proxy verlangt eine Authentifizierung, bevor Cloudlog erreicht werden kann.%2</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="176"/>
+        <source>%1: HTTP 403. Accesso negato dal server Cloudlog; verifica URL, permessi API key e protezioni web.%2</source>
+        <translation>%1: HTTP 403. Zugriff vom Cloudlog-Server verweigert; prüfe URL, API-Schlüssel-Rechte und Web-Schutzmechanismen.%2</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="181"/>
+        <source>%1: HTTP %2.%3</source>
+        <translation>%1: HTTP %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="187"/>
+        <source>%1: network error: %2.%3</source>
+        <translation>%1: Netzwerkfehler: %2.%3</translation>
     </message>
 </context>
 <context>
@@ -10386,497 +10814,495 @@ Fehler (%2): %3</translation>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="13"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1314"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1389"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="473"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
         <source>Select AzEl directory</source>
         <translation>AzEl-Verzeichnis auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="473"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
         <source>Select save directory</source>
         <translation>Speicherverzeichnis auswählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="485"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
         <source>Merge Working Frequencies</source>
         <translation>Arbeitsfrequenzen zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="485"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
         <source>Load Working Frequencies</source>
         <translation>Arbeitsfrequenzen laden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="487"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
         <translation>Frequenzdateien (*.qrg *.qrg.json)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="487"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
         <source>All files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="541"/>
         <source>Save Working Frequencies</source>
         <translation>Arbeitsfrequenzen speichern</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="677"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="724"/>
         <source>Auto</source>
         <translation>Automatisch</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1060"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1135"/>
         <source>Transmitted Message</source>
         <translation>Gesendete Nachricht</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1061"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
         <source>My Callsign</source>
         <translation>Mein Rufzeichen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1062"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
         <source>New DXCC on Band</source>
         <translation>Neues DXCC auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1063"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
         <source>New DXCC</source>
         <translation>Neues DXCC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1064"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
         <source>New Continent on Band</source>
         <translation>Neuer Kontinent auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1065"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
         <source>New Continent</source>
         <translation>Neuer Kontinent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1066"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
         <source>New CQ Zone on Band</source>
         <translation>Neue CQ-Zone auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1067"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
         <source>New CQ Zone</source>
         <translation>Neue CQ-Zone</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1068"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
         <source>New ITU Zone on Band</source>
         <translation>Neue ITU-Zone auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1069"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
         <source>New ITU Zone</source>
         <translation>Neue ITU-Zone</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1070"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
         <source>New Grid on Band</source>
         <translation>Neuer Locator auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1071"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
         <source>New Grid</source>
         <translation>Neuer Locator</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
         <source>New Callsign on Band</source>
         <translation>Neues Rufzeichen auf Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1073"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
         <source>New Callsign</source>
         <translation>Neues Rufzeichen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1074"/>
         <source>LoTW User</source>
-        <translation>LoTW-Benutzer</translation>
+        <translation type="vanished">LoTW-Benutzer</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1075"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
         <source>CQ in Message</source>
         <translation>CQ in Nachricht</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1076"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
         <source>DX Entity</source>
         <translation>DX-Entität</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1077"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
         <source>73 / RR73</source>
         <translation>73 / RR73</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1078"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
         <source>B4 (Worked)</source>
         <translation>B4 (gearbeitet)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1344"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>Änderungen werden sofort angewendet, wo dies unterstützt wird.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1359"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1436"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Station</source>
         <translation>Station</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Radio</source>
         <translation>Radio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Audio</source>
         <translation>Audio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>TX</source>
         <translation>TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Display</source>
         <translation>Anzeige</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Decode</source>
         <translation>Dekodierung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Reporting</source>
         <translation>Reporting</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Colors</source>
         <translation>Farben</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Advanced</source>
         <translation>Erweitert</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Alerts</source>
         <translation>Warnungen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Filters</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1103"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
         <source>Choose Decoded Font</source>
         <translation>Dekodierten Font wählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1103"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
         <source>Choose Font</source>
         <translation>Font wählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1111"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1186"/>
         <source>Search:</source>
         <translation>Suchen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1121"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1196"/>
         <source>filter by name</source>
         <translation>nach Name filtern</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
         <source>Monospaced fonts:</source>
         <translation>Monospace-Fonts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
         <source>Fonts:</source>
         <translation>Fonts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1185"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1260"/>
         <source>Selected:</source>
         <translation>Ausgewählt:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1195"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1270"/>
         <source>Size:</source>
         <translation>Größe:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1258"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1333"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1263"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1338"/>
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>Frequencies</source>
         <translation>Frequenzen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
         <source>UI Buttons</source>
         <translation>UI-Schaltflächen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1757"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1866"/>
         <source>Search radio, model or brand...</source>
         <translation>Radio, Modell oder Marke suchen...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1514"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1603"/>
         <source>STATION INFO</source>
         <translation>STATIONSINFO</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1517"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1606"/>
         <source>Station Name:</source>
         <translation>Stationsname:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3625"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3661"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4371"/>
         <source>Choose</source>
         <translation>Wählen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3273"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3845"/>
         <source>2x Tone Spacing:</source>
         <translation>2x Tonabstand:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4370"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
         <source>4-digit Grids:</source>
         <translation>4-stellige Locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3287"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3859"/>
         <source>4x Tone Spacing:</source>
         <translation>4x Tonabstand:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4812"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3738"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4511"/>
         <source>ALIGNMENT</source>
         <translation>AUSRICHTUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6642"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7693"/>
         <source>ALWAYS PASS</source>
         <translation>IMMER PASSIEREN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4035"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4858"/>
         <source>AP Decode:</source>
         <translation>AP-Dekodierung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4208"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5054"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
         <source>API Key:</source>
         <translation>API Schlüssel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4200"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5043"/>
         <source>API URL:</source>
         <translation>API URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6380"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7426"/>
         <source>AUDIO ALERTS</source>
         <translation>AUDIO ALERTS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2424"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2680"/>
         <source>AUDIO DEVICES</source>
         <translation>AUDIOGERÄTE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2707"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3053"/>
         <source>AUTO SEQUENCE</source>
         <translation>AUTOMATISCHE SEQUENZ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5652"/>
         <source>Accept UDP:</source>
         <translation>Akzeptieren Sie UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5356"/>
         <source>Access token:</source>
         <translation>Zugriffstoken:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6102"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7114"/>
         <source>Activity:</source>
         <translation>Aktivität:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3956"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4746"/>
         <source>Aggressive:</source>
         <translation>Aggressiv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6383"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7429"/>
         <source>Alerts Enabled:</source>
         <translation>Aktivierte Warnungen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3758"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
         <source>Align Steps 2:</source>
         <translation>Ausrichtungsschritte 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3748"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4521"/>
         <source>Align Steps:</source>
         <translation>Ausrichtungsschritte:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4514"/>
         <source>Align:</source>
         <translation>Ausrichten:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4589"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4651"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5457"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5587"/>
         <source>All interfaces</source>
         <translation>Alle Schnittstellen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2698"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2984"/>
         <source>Allow TX QSY:</source>
         <translation>Zulassen TX QSY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6026"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7032"/>
         <source>Alt Erase Btn:</source>
         <translation>Alt Erase Btn:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3308"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3880"/>
         <source>Alt F1-F6 Bind:</source>
         <translation>Alt F1-F6 Bindung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6685"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7736"/>
         <source>Always Pass 10:</source>
         <translation>Bestehen Sie immer 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7740"/>
         <source>Always Pass 11:</source>
         <translation>Bestehen Sie immer 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6692"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7743"/>
         <source>Always Pass 12:</source>
         <translation>Bestehen Sie immer 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7705"/>
         <source>Always Pass 1:</source>
         <translation>Immer Pass 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1988"/>
         <source>Refresh serial ports</source>
         <translation>Serielle Schnittstellen aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2088"/>
         <source>HRD Radio:</source>
         <translation>HRD-Funkgerät:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1977"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2097"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
         <translation>Strikte Übereinstimmung (abbrechen, wenn das konfigurierte Funkgerät in HRD nicht aktiv ist)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2365"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
         <source>Connecting...</source>
         <translation>Verbinde...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2840"/>
         <source>Auto RX level active</source>
         <translation>Auto-RX-Pegel aktiv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2841"/>
         <source>Auto RX level disabled</source>
         <translation>Auto-RX-Pegel deaktiviert</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2790"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3137"/>
         <source>Resume QSO on partner reply:</source>
         <translation>QSO fortsetzen wenn Partner antwortet:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2808"/>
         <source>If you Halt while working a station and that station replies to you again within 2 minutes, Decodium automatically resumes the QSO (like v3).
 
 Applies to FT8/FT4/FT2.
 
 Default: OFF (= Halt fully stops the sequence by default).</source>
-        <translation>Wenn Sie während eines QSOs mit einer Station Halt drücken und diese Station Ihnen innerhalb von 2 Minuten erneut antwortet, setzt Decodium das QSO automatisch fort (wie v3).
+        <translation type="vanished">Wenn Sie während eines QSOs mit einer Station Halt drücken und diese Station Ihnen innerhalb von 2 Minuten erneut antwortet, setzt Decodium das QSO automatisch fort (wie v3).
 
 Gilt für FT8/FT4/FT2.
 
 Standard: AUS (= Halt stoppt die Sequenz standardmäßig vollständig).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2851"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3199"/>
         <source>FT2 UTILITY</source>
         <translation>FT2-WERKZEUGE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2856"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3204"/>
         <source>FT2: signoff retries (73/RR73):</source>
         <translation>FT2: Signoff-Wiederholungen (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2878"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3225"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -10895,12 +11321,12 @@ Höher = geduldiger bei schwachen/QSB-Partnern.
 Betrifft FT8/FT4 nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3230"/>
         <source>FT4: signoff retries (73/RR73):</source>
         <translation>FT4: Signoff-Wiederholungen (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2905"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3251"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -10917,12 +11343,12 @@ Auf 6-8 erhöhen für schwache/QSB-Partner (ersetzt die früheren automatischen 
 Betrifft FT2/FT8 nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2910"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3256"/>
         <source>FT8: signoff retries (73/RR73):</source>
         <translation>FT8: Signoff-Wiederholungen (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2932"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3277"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -10939,12 +11365,12 @@ Auf 6-8 erhöhen für schwache/QSB-Partner (ersetzt die früheren automatischen 
 Betrifft FT2/FT4 nicht.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2937"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3282"/>
         <source>Immediate TX on click (1.0.283 style):</source>
         <translation>Sofortiges TX beim Klick (Stil 1.0.283):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2959"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3304"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -10963,12 +11389,12 @@ Standard: AUS (= sicheres Upstream-Verhalten).
 Aktivieren, falls es Sie stört, nach dem Klick 1 Zyklus zu warten.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2964"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
         <translation>FT8: schnelle Sequenzen (WSJT-X/JTDX-Stil):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2986"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3358"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -10989,12 +11415,12 @@ SICHERHEIT: unter CPU-Last erzwingt die bestehende Begrenzung eine Grace ≥900 
 Standard: AUS (= konservatives Upstream-Verhalten, maximale Decode-Zuverlässigkeit).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2994"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
         <source>Conservative FT2 (weak-signal mode):</source>
         <translation>Conservative FT2 (Schwachsignal-Modus):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3015"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3469"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
@@ -11009,12 +11435,12 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 Standard: AUS — aktivieren Sie es bei schwachen DX-Partnern oder marginaler Ausbreitung.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3474"/>
         <source>FT2: full decode in AutoCQ:</source>
         <translation>FT2: vollständige Dekodierung in AutoCQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3041"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3495"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
@@ -11027,12 +11453,12 @@ Hilft Ihnen, schwache Antwortende zu hören. Wird unter CPU-Last ohnehin automat
 Standard: AUS.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3046"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3500"/>
         <source>FT2: close strong partners earlier:</source>
         <translation>FT2: starke Partner früher abschließen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3067"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
@@ -11045,12 +11471,12 @@ Schwache Partner behalten die zusätzlichen Anti-QSB-Wiederholungen.
 Standard: AUS.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3526"/>
         <source>FT2: adaptive decode (CPU saver):</source>
         <translation>FT2: adaptive Dekodierung (CPU sparen):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3093"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3547"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -11067,30 +11493,28 @@ Hauptsächlich auf schwächeren PCs nützlich.
 Standard: AUS.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3098"/>
         <source>FT2: AP cache (experimental, Phase 0):</source>
-        <translation>FT2: AP-Cache (experimentell, Phase 0):</translation>
+        <translation type="vanished">FT2: AP-Cache (experimentell, Phase 0):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3119"/>
         <source>PHASE 0 (observability): logs into a cache the callsigns seen in-band (hashed, TTL 30 min) and measures how often a decoded call had already been seen — logged as [FT2WS-AP] in the diagnostic log.
 
 Doesn&apos;t change the decoder yet. It&apos;s the foundation for band-wide AP decoding (−3 dB target) coming in later phases.
 
 Default: OFF.</source>
-        <translation>PHASE 0 (Beobachtbarkeit): protokolliert die im Band gesehenen Rufzeichen in einem Cache (gehasht, TTL 30 min) und misst, wie oft ein dekodiertes Rufzeichen bereits gesehen wurde — als [FT2WS-AP] im Diagnoseprotokoll erfasst.
+        <translation type="vanished">PHASE 0 (Beobachtbarkeit): protokolliert die im Band gesehenen Rufzeichen in einem Cache (gehasht, TTL 30 min) und misst, wie oft ein dekodiertes Rufzeichen bereits gesehen wurde — als [FT2WS-AP] im Diagnoseprotokoll erfasst.
 
 Ändert den Decoder noch nicht. Es ist die Grundlage für bandweite AP-Decodierung (−3 dB Ziel), die in späteren Phasen kommt.
 
 Standard: AUS.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3697"/>
         <source>FT2 partner-memory (anti-QSB):</source>
         <translation>FT2 partner-memory (Anti-QSB):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3719"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
@@ -11103,12 +11527,12 @@ Erfordert aktives Conservative FT2.
 Standard: AUS (opt-in nach dem 1.0.186-Revert — striktes Gate + [FT2WS-F]-Log). Automatisch deaktiviert, wenn Conservative AUS ist.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3724"/>
         <source>FT2 TX2 re-send on stall:</source>
         <translation>FT2 TX2 erneutes Senden bei Stillstand:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3173"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3746"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
@@ -11121,67 +11545,66 @@ Hilft bei schwachen Partnern, die beim ersten Mal nicht bestätigt haben. Auf 1 
 Erfordert aktives Conservative FT2. Standard: EIN unter Conservative.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3181"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3754"/>
         <source>Smooth decode flow:</source>
         <translation>Flüssiger Decode-Fluss:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3202"/>
         <source>Spalma i decode FT8/FT4 dal batch finale del periodo a streaming continuo con fade animato (~100ms per row). FT2 async resta invariato (gia&apos; streaming). Default ON; auto-fallback se rileva UI stall su PC modesti. Disattiva per comportamento batch legacy.</source>
-        <translation>Verteilt die FT8/FT4-Decodes vom finalen Periodenstapel auf einen kontinuierlichen Stream mit animiertem Fade (~100 ms pro Zeile). FT2-Async bleibt unverändert (bereits Streaming). Standard EIN; automatischer Fallback, wenn auf schwächeren PCs ein UI-Stall erkannt wird. Deaktivieren für klassisches Stapelverhalten.</translation>
+        <translation type="vanished">Verteilt die FT8/FT4-Decodes vom finalen Periodenstapel auf einen kontinuierlichen Stream mit animiertem Fade (~100 ms pro Zeile). FT2-Async bleibt unverändert (bereits Streaming). Standard EIN; automatischer Fallback, wenn auf schwächeren PCs ein UI-Stall erkannt wird. Deaktivieren für klassisches Stapelverhalten.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3334"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3911"/>
         <source>ASPETTO / TEMA</source>
         <translation>ERSCHEINUNGSBILD / DESIGN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3337"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3914"/>
         <source>Theme:</source>
         <translation>Theme:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3364"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4039"/>
         <source>UI Scale:</source>
         <translation>UI-Skalierung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3396"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4071"/>
         <source>↻ restart to apply</source>
         <translation>↻ Neustart zum Anwenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3403"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4078"/>
         <source>BANDE OPERATIVE</source>
         <translation>BETRIEBSBÄNDER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3406"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4081"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
         <translation>Klicken, um Bänder im Auswahlfeld ein-/auszublenden. Abgewählte Bänder verschwinden aus der HF- / V-U- / SHF-Leiste.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4110"/>
         <source>visible (click to hide)</source>
         <translation>sichtbar (Klick zum Ausblenden)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4110"/>
         <source>hidden (click to show)</source>
         <translation>ausgeblendet (Klick zum Anzeigen)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3444"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4119"/>
         <source>UI — PERFORMANCE</source>
         <translation>UI — LEISTUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4123"/>
         <source>UI Quality preset:</source>
         <translation>UI-Qualitätsvoreinstellung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3465"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4140"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
@@ -11194,30 +11617,29 @@ Hoch = alle verfügbaren Animationen.
 Standard: Mittel.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3470"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4164"/>
         <source>UI Style (restart):</source>
         <translation>UI-Stil (Neustart):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3493"/>
         <source>Stile QML Quick Controls (richiede restart):
 • Material (consigliato) — Google Material 3, customizable, default storico Decodium
 • FluentWinUI3 — Windows 11 nativo (Mica/acrylic). Fallback automatico per SplitView/StackView.
 • Universal — Microsoft Universal (WinPhone-style)
 • Fusion — cross-platform desktop neutro</source>
-        <translation>QML-Quick-Controls-Stil (erfordert Neustart):
+        <translation type="vanished">QML-Quick-Controls-Stil (erfordert Neustart):
 • Material (empfohlen) — Google Material 3, anpassbar, historischer Decodium-Standard
 • FluentWinUI3 — Windows 11 nativ (Mica/Acrylic). Automatischer Fallback für SplitView/StackView.
 • Universal — Microsoft Universal (WinPhone-Stil)
 • Fusion — plattformübergreifend, neutraler Desktop</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3504"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4198"/>
         <source>Frameless pop-out:</source>
         <translation>Rahmenloses Pop-out:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3516"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4211"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
@@ -11230,12 +11652,12 @@ Windows-11-Ästhetik.
 Standard: AUS. Erfordert Schließen und erneutes Öffnen des Fensters.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4216"/>
         <source>Detach Full Spectrum:</source>
         <translation>Vollspektrum abdocken:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3533"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4229"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
@@ -11248,12 +11670,12 @@ Reduziert Stalls auf schwächeren PCs.
 Standard: AUS. Erfordert Neustart.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3538"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4248"/>
         <source>Spectrum FPS cap:</source>
         <translation>Spektrum-FPS-Grenze:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3558"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4268"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -11270,22 +11692,22 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 Wenn das Vollspektrum abgedockt ist, hält der separate Render-Thread 30 fps, ohne den Decoder zu beeinträchtigen.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4274"/>
         <source>Eventi CPU pressure:</source>
         <translation>CPU-Pressure-Ereignisse:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4288"/>
         <source>totale=%1 · severi=%2 (sessione)</source>
         <translation>gesamt=%1 · schwer=%2 (Sitzung)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3581"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4291"/>
         <source>totale=0 · severi=0</source>
         <translation>gesamt=0 · schwer=0</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3591"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4301"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
@@ -11294,57 +11716,57 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
 Schwere (≥1100 ms oder ein Stoß von 4+ kurzen Stalls) sind das stärkste Signal: Wenn Sie nach einer Stunde Nutzung ≥5 sehen, senken Sie die UI-Qualität auf Niedrig oder die Spektrum-FPS-Grenze auf 15.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4426"/>
         <source>Waterfall Calls:</source>
         <translation>Wasserfall-Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3783"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4561"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>REMOTE-WEBSERVER (iPad / mobile PWA)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3786"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4564"/>
         <source>Abilita Web Server:</source>
         <translation>Webserver aktivieren:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
         <source>Porta TCP:</source>
         <translation>TCP-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4595"/>
         <source>URL accesso:</source>
         <translation>Zugriffs-URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4606"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3855"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4633"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>DECODE-LISTEN-ANZEIGE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4636"/>
         <source>Colored period separator:</source>
         <translation>Farbiger Periodentrenner:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3872"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4650"/>
         <source>Newest first:</source>
         <translation>Neueste zuerst:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4052"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4881"/>
         <source>Deep decode in TX:</source>
         <translation>Deep Decode bei TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4061"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4893"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -11357,760 +11779,1259 @@ Holt Drittstationen zurück, die der schnelle Durchlauf während des Betriebs ve
 Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4228"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5077"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ-LOGBUCH</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4239"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5091"/>
         <source>Replace duplicates:</source>
         <translation>Duplikate ersetzen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4268"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
         <source>Testing...</source>
         <translation>Test läuft...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4268"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6391"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7437"/>
         <source>Test</source>
         <translation>Test</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4281"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5137"/>
         <source>Testing QRZ API key...</source>
         <translation>QRZ-API-Schlüssel wird getestet...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4509"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5377"/>
         <source>Client ID:</source>
         <translation>Client-ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
         <source>Preset:</source>
         <translation>Voreinstellung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4675"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5543"/>
         <source>Tertiary UDP:</source>
         <translation>Tertiäres UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5551"/>
         <source>Tertiary Server:</source>
         <translation>Tertiärer Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
         <source>Tertiary Port:</source>
         <translation>Tertiärer Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4704"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
         <source>Tertiary TTL:</source>
         <translation>Tertiäres TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4716"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5584"/>
         <source>Tertiary Interface:</source>
         <translation>Tertiäre Schnittstelle:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5605"/>
         <source>Tertiary ADIF:</source>
         <translation>Tertiäres ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4750"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5618"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4753"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5621"/>
         <source>Enable N1MM:</source>
         <translation>N1MM aktivieren:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4761"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5629"/>
         <source>N1MM Port:</source>
         <translation>N1MM-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5641"/>
         <source>N1MM Server:</source>
         <translation>N1MM-Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4871"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5739"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>FREQUENZKALIBRIERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5747"/>
         <source>Refresh</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4905"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5773"/>
         <source>Slope:</source>
         <translation>Steigung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4923"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5791"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4925"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5793"/>
         <source>Intercept:</source>
         <translation>Achsenabschnitt:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4943"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5811"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4962"/>
         <source>Azzera la calibrazione (slope=0, intercept=0). La frequenza viene scritta al rig senza correzione (fast path).</source>
-        <translation>Setzt die Kalibrierung zurück (Steigung=0, Achsenabschnitt=0). Die Frequenz wird ohne Korrektur an das Gerät geschrieben (Fast Path).</translation>
+        <translation type="vanished">Setzt die Kalibrierung zurück (Steigung=0, Achsenabschnitt=0). Die Frequenz wird ohne Korrektur an das Gerät geschrieben (Fast Path).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4974"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
         <source>Preview correzione:</source>
         <translation>Korrekturvorschau:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5853"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5000"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5868"/>
         <source>WORKING FREQUENCIES</source>
         <translation>ARBEITSFREQUENZEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5008"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5876"/>
         <source>Load</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5017"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5885"/>
         <source>Merge</source>
         <translation>Zusammenführen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5026"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5894"/>
         <source>Save as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5035"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5903"/>
         <source>Defaults</source>
         <translation>Standardwerte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5065"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5933"/>
         <source>Region:</source>
         <translation>Region:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5080"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5948"/>
         <source>Freq MHz:</source>
         <translation>Freq MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5100"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5228"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6096"/>
         <source>Pref</source>
         <translation>Präf</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5109"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5977"/>
         <source>Description:</source>
         <translation>Beschreibung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5123"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5991"/>
         <source>Start:</source>
         <translation>Start:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5134"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6002"/>
         <source>End:</source>
         <translation>Ende:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5153"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5353"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6021"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6221"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5163"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5362"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4412"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6031"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6230"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5174"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5372"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
+        <source>LoTW marker</source>
+        <translation>LoTW-Markierung</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2479"/>
+        <source>SWR max:</source>
+        <translation>SWR max:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2546"/>
+        <source>ALC AUTO CALIBRATION</source>
+        <translation>ALC AUTO-KALIBRIERUNG</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2561"/>
+        <source>ALC target:</source>
+        <translation>ALC-Ziel:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
+        <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
+        <translation>ALC-Skala 0-100. FT8/Daten: typischerweise 15-25. Werte &gt;60 riskieren eine Übersteuerung der PA.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2617"/>
+        <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
+        <translation>Sendet einen Tune-Träger und passt den TX-Audiopegel automatisch an, bis das ALC der Funkgeräts das Ziel erreicht. Einmalig. Erfordert verbundenes Hamlib-CAT.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2621"/>
+        <source>Cancel calibration</source>
+        <translation>Kalibrierung abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2622"/>
+        <source>Calibrate ALC (transmits a carrier)</source>
+        <translation>ALC kalibrieren (sendet einen Träger)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <source>PROFILI PRONTI</source>
+        <translation>PROFILE BEREIT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
+        <source>Bilanciato (QSO quotidiano) — default</source>
+        <translation>Ausgewogen (tägliches QSO) — Standard</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</source>
+        <translation>Conservative AN · Full Decode AutoCQ AN · starke Partner schließen AN · adaptive Dekodierung AN · AP-Cache-Rettung AN · Slot-Ende überspringen AUS · MAM AUS · Partner-Memory AN · TX2-Wiederholung AN · Smooth Flow AN · Anrufer-Wiederholungen 5.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
+        <source>Weak-signal / caccia DX</source>
+        <translation>Schwachsignal / DX-Jagd</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
+        <source>Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).</source>
+        <translation>Wie Ausgewogen, aber: Anrufer-Wiederholungen 7 · adaptive Dekodierung AUS (maximale Empfindlichkeit) · AP-Cache-Rettung AN (akzeptiert einige Fehler) · Slot-Ende überspringen AUS (keine späten Dekodierungen verlieren).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
+        <source>Contest / alta densità</source>
+        <translation>Contest / hohe Dichte</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
+        <source>close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</source>
+        <translation>starke Partner schließen AN · Slot-Ende überspringen AN (minimale Latenz) · MAM Multi-Stream AN (2 Streams, experimentell) · Full Decode AutoCQ AN · Anrufer-Wiederholungen 3 · Partner-Memory AN · Conservative AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3013"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU-limitiert (Decodium Console / Mini-PC)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.</source>
+        <translation>adaptive Dekodierung AN · MAM AUS · Full Decode AutoCQ AUS · Smooth Flow AN · Rest auf Standardwerten. Watchdogs unverändert.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
+        <source>● attivo</source>
+        <translation>● aktiv</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3160"/>
+        <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
+
+Applies only to FT8/FT4/FT2 and only to the saved QSO state.
+
+Default: OFF (= Halt fully stops the sequence by default).</source>
+        <translation>Wenn du während eines aktiven QSO Halt drückst und dieselbe Station innerhalb von 2 Minuten eine direkte Antwort an dein Rufzeichen sendet, kann Decodium dieses QSO fortsetzen.
+
+Gilt nur für FT8/FT4/FT2 und nur für den gespeicherten QSO-Status.
+
+Standard: AUS (= Halt stoppt die Sequenz standardmäßig vollständig).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3309"/>
+        <source>Log RR73 even if partner leaves (FT2):</source>
+        <translation>RR73 protokollieren, auch wenn Partner abbricht (FT2):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3331"/>
+        <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
+
+Matches TX5/73 and sync mode behaviour.
+
+Default: OFF.</source>
+        <translation>FT2 + async AutoCQ: wenn WIR mit RR73 (TX4) abschließen, nachdem der Partner R+Rapport gesendet hat, und der Partner dann verschwindet, das QSO trotzdem protokollieren (am Signoff-Limit), anstatt es unprotokolliert zu lassen.
+
+Entspricht dem Verhalten von TX5/73 und dem Sync-Modus.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3363"/>
+        <source>FT2: conservative TX window (no truncated frames):</source>
+        <translation>FT2: konservatives TX-Fenster (keine abgeschnittenen Frames):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3385"/>
+        <source>Controls how late in a slot the async FT2 TX may start.
+
+• ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
+• OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.
+
+Enable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.</source>
+        <translation>Steuert, wie spät in einem Slot der async-FT2-TX starten darf.
+
+• AN (Standard): Der TX startet nur, wenn die VOLLSTÄNDIGE Nutzlast (~2520 ms) noch hineinpasst — Fenster ~18% des Slots. Würde er zu spät ankommen, wird der TX auf den nächsten Slot verschoben, statt einen ABGESCHNITTENEN Frame zu senden, den der Partner nicht dekodieren kann. Ruhige Stabilität im Decodium-3.0-Stil.
+• AUS: FIX-B-Verhalten (1.0.353) — Fenster bis zu ~76% des Slots (nur ~700 ms nutzbare Nutzlast erforderlich). Reaktiver, kann aber bei einer späten Antwort abgeschnittene Frames senden.
+
+Aktiviere AUS nur, wenn du maximale Reaktivität willst und gelegentliche nicht dekodierbare späte TX akzeptierst.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3390"/>
+        <source>FT2: manual one-shot disarm (1.0.300+):</source>
+        <translation>FT2: manuelle One-Shot-Entschärfung (1.0.300+):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
+
+When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
+
+Enable only if you double-click stations that consistently reply on the first attempt.</source>
+        <translation>Wenn AN (Verhalten Upstream 1.0.300+): nach einem manuellen TX1-TX3 in FT2 wird der TX entschärft und NUR dann wieder scharfgeschaltet, wenn eine Partner-Dekodierung eintrifft. Vermeidet endloses TX1-Schleifen bei Doppelklick, aber bei SCHWACHEN Partnern, die in der ersten RX-Periode nicht dekodiert werden, geht das QSO verloren (= &apos;TX1 stoppt ohne Abschluss&apos;).
+
+Wenn AUS (Standard in diesem Fork, vor 1.0.300): TX1 wiederholt sich, bis &apos;Anrufer-Wiederholungen&apos; erreicht ist — besser für Schwachsignal-QSOs (Pasquales Fall).
+
+Nur aktivieren, wenn du Stationen doppelklickst, die durchgängig beim ersten Versuch antworten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3417"/>
+        <source>Caller retries (max TX repeats per step):</source>
+        <translation>Anrufer-Wiederholungen (max. TX-Wiederholungen pro Schritt):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3440"/>
+        <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
+
+Default: 10.
+
+FT2 (slot 3.75s): 10 retries ≈ 38s of calling.
+FT8 (slot 15s): 10 retries ≈ 150s.
+
+Lower (4-6) = less time wasted on stations that don&apos;t reply.
+Higher (15-20) = patience for weak DX / marginal propagation.
+
+Note: with &apos;FT2 manual one-shot disarm&apos; OFF (default) this is what stops TX1 from looping forever.</source>
+        <translation>Wie oft sich derselbe TX-Schritt (TX1/TX2/TX3) maximal wiederholt, bevor angehalten wird, falls der Partner nicht antwortet.
+
+Standard: 10.
+
+FT2 (Slot 3,75 s): 10 Wiederholungen ≈ 38 s Anruf.
+FT8 (Slot 15 s): 10 Wiederholungen ≈ 150 s.
+
+Niedriger (4-6) = weniger Zeit vergeudet bei Stationen, die nicht antworten.
+Höher (15-20) = Geduld für schwache DX / marginale Ausbreitung.
+
+Hinweis: mit &apos;FT2 manuelle One-Shot-Entschärfung&apos; AUS (Standard) ist dies das, was TX1 vom endlosen Schleifen abhält.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3552"/>
+        <source>FT2: narrow reply decode (experimental):</source>
+        <translation>FT2: schmale Antwort-Dekodierung (experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
+        <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
+
+The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
+
+Default: OFF.</source>
+        <translation>Beim WARTEN AUF EINE ANTWORT (AutoCQ oder aktives QSO) wird ein schmales Fenster um deine RX-Frequenz (±150 Hz) dekodiert statt des gesamten Bandes, mit einem Vollband-Durchgang in jedem 4. Zyklus.
+
+Die Antwort wird früher im Slot dekodiert (weniger CPU pro Versuch), sodass der TX im selben Slot reagieren kann statt im nächsten. Die Bandaktivität wird weiterhin in 1 von 4 Zyklen gescannt.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
+        <source>FT2: AP cache rescue (experimental):</source>
+        <translation>FT2: AP-Cache-Rettung (experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3599"/>
+        <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
+
+Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
+
+Default: OFF.</source>
+        <translation>Experimenteller FT2-AP-Cache: speichert im Band gesehene Rufzeichen als Hashes (TTL 30 Min.) und kann grenzwertige FT2-Dekodierungen retten, wenn ein dekodiertes Rufzeichen bereits im Cache ist.
+
+Sicherheits-Gate: per AP-Cache gerettete Zeilen werden angezeigt/geprüft, treiben aber weder AutoSeq, AutoCQ noch automatischen TX an. Sie werden auch nicht erneut zum Befüllen des AP-Cache verwendet.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3604"/>
+        <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
+        <translation>FT2: redundante Slot-Ende-Dekodierung überspringen (verringert Aufschalt-Latenz):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
+
+Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
+
+Cost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.
+
+Default: OFF.</source>
+        <translation>Nur FT2 async: wenn die asynchrone Dekodierung (inkrementell alle 100 ms) einen Slot BEREITS dekodiert hat, den synchronen Slot-Ende-Dekodier-Durchgang für diesen Slot überspringen.
+
+Vorteil: beseitigt die Konkurrenz (~1,8 s nach TX) auf demselben Worker, sodass die Partner-Antwort schneller aufgegriffen wird.
+
+Kosten: bei Slots, die bereits von async abgedeckt sind, verlierst du den vollständigen Slot-Ende-Durchgang mit Schwach-Mittelung, der schwache/marginale Stationen wiederherstellen kann. Slots, in denen async LEER zurückgab, behalten weiterhin die Sync-Dekodierung.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3635"/>
+        <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
+        <translation>FT2/FT8 MAM Multi-Stream (MSHV, experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3659"/>
+        <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
+
+This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
+
+EXPERIMENTAL. Default: OFF.</source>
+        <translation>MSHV-Multi-Stream-Modus: in einer einzigen Periode antwortet er MEHREREN Anrufern gleichzeitig, jeder auf SEINER eigenen Audiofrequenz (wie eine DX-Pedition-Station).
+
+Dies ist eine ZUSÄTZLICHE MAM-Option: MAM (Multi-Answer Mode) oder AutoCQ muss aktiv sein, bevor es laufen kann. Mit AUS bleibt MAM seriell, ein Anrufer nach dem anderen, wie zuvor.
+
+EXPERIMENTELL. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3664"/>
+        <source>MAM multi-stream: max stream simultanei:</source>
+        <translation>MAM Multi-Stream: max. gleichzeitige Streams:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3692"/>
+        <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
+
+Range 2-5. Default: 3.
+
+Higher values require more CPU to generate overlapping audio streams. Enabled only when MAM multi-stream is active.</source>
+        <translation>Wie viele parallele QSOs MAM Multi-Stream gleichzeitig ausführen kann, jedes auf seiner eigenen Frequenz.
+
+Bereich 2-5. Standard: 3.
+
+Höhere Werte erfordern mehr CPU, um überlappende Audiostreams zu erzeugen. Nur aktiviert, wenn MAM Multi-Stream aktiv ist.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3775"/>
+        <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
+        <translation>Verteilt FT8/FT4-Dekodierungen vom finalen Periodenend-Batch in kontinuierliches Streaming mit animiertem Fade (~100 ms pro Zeile). FT2 async ist unverändert, da es bereits streamt. Standard: AN; automatischer Fallback, falls UI-Stockungen auf bescheidenen PCs erkannt werden. Deaktivieren für klassisches Batch-Verhalten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3942"/>
+        <source>Accent:</source>
+        <translation>Akzent:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3979"/>
+        <source>Density:</source>
+        <translation>Dichte:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4020"/>
+        <source>DX-Pedition Workspace (3-column tactical layout)</source>
+        <translation>DX-Pedition-Arbeitsbereich (taktisches 3-Spalten-Layout)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4035"/>
+        <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
+        <translation>Alternative Einzelpanel-Operatoransicht, optimiert für DX-Pile-ups: ein taktisches 3-Spalten-Dashboard (Cluster / Waterfall / TX) statt des klassischen Arbeitsbereichs. Opt-in, Standard AUS: das Standardlayout bleibt unverändert, wenn deaktiviert.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4145"/>
+        <source>Priorità processo:</source>
+        <translation>Prozesspriorität:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4150"/>
+        <source>Normale</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4150"/>
+        <source>Sopra il normale</source>
+        <translation>Über Normal</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4150"/>
+        <source>Alta (consigliata)</source>
+        <translation>Hoch (empfohlen)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4150"/>
+        <source>Tempo reale ⚠️</source>
+        <translation>Echtzeit ⚠️</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4159"/>
+        <source>Priorità di scheduling CPU del processo (Windows).
+
+Normale / Sopra il normale (default) = sicure.
+Alta = più fluidità per audio/decode, rischio basso (consigliata se noti scatti).
+Tempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).
+
+Se non sei sicuro usa &apos;Alta&apos;.</source>
+        <translation>CPU-Scheduling-Priorität des Prozesses (Windows).
+
+Normal / Über Normal (Standard) = sicher.
+Hoch = mehr Flüssigkeit für Audio/Dekodierung, geringes Risiko (empfohlen, wenn du Ruckler bemerkst).
+Echtzeit ⚠️ = maximale Flüssigkeit, ABER kann den PC nicht mehr reagieren lassen (Maus/Tastatur) und erfordert Administratorrechte (ohne Admin stuft Windows sie auf Hoch herab).
+
+Wenn du unsicher bist, verwende &apos;Hoch&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4187"/>
+        <source>QML Quick Controls style (requires restart):
+• Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
+• FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
+• Universal — Microsoft Universal (WinPhone-style)
+• Fusion — neutral cross-platform desktop</source>
+        <translation>QML-Quick-Controls-Stil (erfordert Neustart):
+• Material (empfohlen) — Google Material 3, anpassbar, historischer Standard von Decodium
+• FluentWinUI3 — natives Windows 11 (Mica/Acryl). Automatischer Fallback für SplitView/StackView.
+• Universal — Microsoft Universal (WinPhone-Stil)
+• Fusion — neutral, plattformübergreifend, Desktop</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4234"/>
+        <source>Schermo intero:</source>
+        <translation>Vollbild:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
+        <source>Attiva (F11)</source>
+        <translation>Aktivieren (F11)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4243"/>
+        <source>Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.</source>
+        <translation>Bringt Decodium in den Vollbildmodus. Zum Beenden: F11, Esc oder die Schaltfläche ✕ oben. Wird nicht gespeichert: beim Neustart kehrst du zum normalen Fenster zurück.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
+        <source>US State:</source>
+        <translation>US-Bundesstaat:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4403"/>
+        <source>Updating...</source>
+        <translation>Aktualisiere...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4404"/>
+        <source>%1 calls</source>
+        <translation>%1 Rufzeichen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4405"/>
+        <source>Not loaded</source>
+        <translation>Nicht geladen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4434"/>
+        <source>FS Dist:</source>
+        <translation>FS Dist:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4442"/>
+        <source>FS Az:</source>
+        <translation>FS Az:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4450"/>
+        <source>RX Freq:</source>
+        <translation>RX-Freq:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4458"/>
+        <source>RX Dist:</source>
+        <translation>RX Dist:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4466"/>
+        <source>RX Az:</source>
+        <translation>RX Az:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4806"/>
+        <source>CQ filter:</source>
+        <translation>CQ-Filter:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5830"/>
+        <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
+        <translation>Kalibrierung zurücksetzen (slope=0, intercept=0). Die Frequenz wird ohne Korrektur an das Funkgerät geschrieben (schneller Pfad).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6042"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6240"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5184"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6093"/>
         <source>IARU Region</source>
         <translation>IARU-Region</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5226"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6094"/>
         <source>Mode</source>
         <translation>Modus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5227"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6095"/>
         <source>Frequency</source>
         <translation>Frequenz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6097"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6098"/>
         <source>Start Date/Time</source>
         <translation>Startdatum/-uhrzeit</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5231"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6099"/>
         <source>End Date/Time</source>
         <translation>Enddatum/-uhrzeit</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6152"/>
         <source>STATION INFORMATION</source>
         <translation>STATIONSINFORMATIONEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5291"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6159"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>Der Band-Offset ist der Transverter-/Stationsfrequenz-Offset für dieses Band; 0.000000 verwenden, wenn nicht genutzt.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5315"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6183"/>
         <source>Band:</source>
         <translation>Band:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5323"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6191"/>
         <source>Offset MHz:</source>
         <translation>Offset MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5402"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6270"/>
         <source>Band</source>
         <translation>Band</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5403"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6271"/>
         <source>Offset</source>
         <translation>Offset</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5404"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6272"/>
         <source>Antenna Description</source>
         <translation>Antennenbeschreibung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5590"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6390"/>
+        <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
+        <translation>Diese spezifische Dekodierfarbe verwenden. Bei AUS verwendet diese Kategorie die gemeinsame Standardfarbe.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6488"/>
+        <source>BG:</source>
+        <translation>BG:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6502"/>
+        <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
+        <translation>Färbt den HINTERGRUND der Zeile (zusätzlich zum Text) für diese Kategorie. AUS = kein benutzerdefinierter Hintergrund.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6587"/>
         <source>Decode Boost:</source>
         <translation>Decode-Boost:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6654"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>OBERFLÄCHENFARBEN (Hintergrund + Text)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6659"/>
         <source>Usa colori personalizzati:</source>
         <translation>Benutzerdefinierte Farben verwenden:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5669"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6666"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>(überschreibt Hintergrund und Text des Designs)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5676"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6673"/>
         <source>Background:</source>
         <translation>Hintergrund:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5696"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6693"/>
         <source>Text:</source>
         <translation>Text:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5788"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
         <source>Download CALL3.TXT...</source>
         <translation>CALL3.TXT herunterladen...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5905"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6907"/>
         <source>Direct Visual:</source>
         <translation>Direkte Visualisierung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5911"/>
-        <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only raises the visual refresh rate.</source>
-        <translation>Schneller visueller Panadapter. Im Legacy-Modus kann eine zweite Audioaufnahme geöffnet werden; im Normalmodus wird nur die visuelle Aktualisierungsrate erhöht.</translation>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7899"/>
+        <source>TOOLBAR BUTTON ORDER</source>
+        <translation>REIHENFOLGE DER TOOLBAR-SCHALTFLÄCHEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5916"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7903"/>
+        <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
+        <translation>Ziehe die Schaltflächen der oberen Toolbar (langes Drücken), um sie neu anzuordnen. Verwende die Schaltfläche unten, um die Standardreihenfolge wiederherzustellen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7921"/>
+        <source>Restore default button order</source>
+        <translation>Standard-Schaltflächenreihenfolge wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7951"/>
+        <source>Restore default TX panel order</source>
+        <translation>Standard-TX-Panel-Reihenfolge wiederherstellen</translation>
+    </message>
+    <message>
+        <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only raises the visual refresh rate.</source>
+        <translation type="vanished">Schneller visueller Panadapter. Im Legacy-Modus kann eine zweite Audioaufnahme geöffnet werden; im Normalmodus wird nur die visuelle Aktualisierungsrate erhöht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6918"/>
         <source>Low CPU:</source>
         <translation>Niedrige CPU-Last:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5922"/>
         <source>Profile for slow PCs: up to 2 FT threads, slower waterfall, reduced early/deep decoding.</source>
-        <translation>Profil für langsame PCs: bis zu 2 FT-Threads, langsamerer Wasserfall, reduziertes Early-/Deep-Decoding.</translation>
+        <translation type="vanished">Profil für langsame PCs: bis zu 2 FT-Threads, langsamerer Wasserfall, reduziertes Early-/Deep-Decoding.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6932"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>Reduziert FT-Threads, Wasserfall-Aktualisierung und QML-Rendering während Monitor/TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6226"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7237"/>
+        <source>RF self-calibration:</source>
+        <translation>HF-Selbstkalibrierung:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7242"/>
+        <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
+        <translation>Empfangene Dekodier-DT-Werte nur als sekundären Zeit-Sync-Hinweis verwenden, nachdem NTP/HTTPS bereits eingerastet ist. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7247"/>
+        <source>Secondary hint only; it cannot create the first time lock.</source>
+        <translation>Nur sekundärer Hinweis; er kann nicht die erste Zeit-Einrastung erzeugen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7255"/>
         <source>ADV DECODING</source>
         <translation>ERW. DECODIERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7258"/>
         <source>Auto Mode:</source>
         <translation>Automatikmodus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6233"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7262"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>AUTO – die 3 Technologien bei Bedarf aktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6243"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7275"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>Wenn EIN, werden die 3 Funktionen unten automatisch verwaltet. Auslöser: Neural+Turbo, wenn Decodes &lt; 2/Slot über 4 Slots. Coherent, wenn Q65-SNR &lt; -22 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6251"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7283"/>
         <source>Live state:</source>
         <translation>Live-Status:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6253"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7285"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6255"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6257"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7293"/>
         <source>Coherent Avg:</source>
         <translation>Coherent-Mittelung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6266"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7298"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Kohärente Mittelung (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7312"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>Sammelt Mehr-Slot-Mittelung für Q65/JT65-Decodes (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6284"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7319"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7324"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync (FT8-OSD-Decoder)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6300"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7338"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>Erzwingt OSD-fähige FT8-Decodierung (+2-3 dB bei Grenzsignalen)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6307"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7345"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo-Feedback:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6312"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7350"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo-Feedback (erweiterte LDPC-Iterationen)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6323"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7364"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>Erweiterte LDPC-Iterationen zur Wiederherstellung grenzwertiger Decodes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7708"/>
         <source>Always Pass 2:</source>
         <translation>Immer Pass 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6661"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7712"/>
         <source>Always Pass 3:</source>
         <translation>Immer bestehen 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
         <source>Always Pass 4:</source>
         <translation>Immer bestehen 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6668"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7719"/>
         <source>Always Pass 5:</source>
         <translation>Immer bestanden 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6671"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
         <source>Always Pass 6:</source>
         <translation>Immer bestehen 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6675"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
         <source>Always Pass 7:</source>
         <translation>Immer bestehen 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6678"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7729"/>
         <source>Always Pass 8:</source>
         <translation>Immer bestehen 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6682"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7733"/>
         <source>Always Pass 9:</source>
         <translation>Bestehen Sie immer 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7748"/>
+        <source>EXCLUDE TERRITORY</source>
+        <translation>GEBIET AUSSCHLIESSEN</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
+        <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
+        <translation>Wait &amp;amp; Pounce hört auf gefilterte CQ-Dekodierungen, startet eine Antwort aber nur, wenn TX/CQ bereits vom Operator scharfgeschaltet wurde.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7857"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6765"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
         <source>Setup (⚙)</source>
         <translation>Einrichtung (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6772"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7867"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7869"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX-Cluster (Werkzeugleiste)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6775"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7870"/>
         <source>World Clock</source>
         <translation>Weltuhr</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6778"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7864"/>
         <source>Layout (window reset)</source>
         <translation>Layout (Fenster-Reset)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6779"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7865"/>
         <source>History (decode history)</source>
         <translation>Verlauf (Decodierungen)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6780"/>
         <source>DX Cluster (footer)</source>
-        <translation>DX-Cluster (Fußzeile)</translation>
+        <translation type="vanished">DX-Cluster (Fußzeile)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7874"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>UI-Schaltflächen nach Belieben ein- oder ausblenden. Änderungen sind sofort wirksam und werden automatisch gespeichert.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6790"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7880"/>
         <source>TOP TOOLBAR</source>
         <translation>OBERE SYMBOLLEISTE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6809"/>
         <source>BOTTOM BAR (FOOTER)</source>
-        <translation>UNTERE LEISTE (FUSSZEILE)</translation>
+        <translation type="vanished">UNTERE LEISTE (FUSSZEILE)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
         <source>Antenna:</source>
         <translation>Antenne:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5366"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>App-Neustart erforderlich. Verwenden Sie für LAN/WAN ein Token mit mindestens 12 Zeichen.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5863"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6865"/>
         <source>Auto Astro:</source>
         <translation>Auto-Astro:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1476"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1565"/>
         <source>Auto Grid:</source>
         <translation>Automatischer Locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4349"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
         <source>Auto Log:</source>
         <translation>Automatisches Protokoll:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2725"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
         <source>Auto Sequence:</source>
         <translation>Automatische Sequenz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4869"/>
         <source>Avg Decode:</source>
         <translation>Durchschnittliche Dekodierung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2602"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2883"/>
         <source>AzEl Directory:</source>
         <translation>AzEl-Verzeichnis:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6575"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 Durchgestrichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1575"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1684"/>
         <source>BACKEND CAT</source>
         <translation>BACKEND CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6943"/>
         <source>BEHAVIOR</source>
         <translation>VERHALTEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7582"/>
         <source>BLACKLIST</source>
         <translation>Schwarze Liste</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1687"/>
         <source>Backend:</source>
         <translation>Backend:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2622"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2903"/>
         <source>Band TX Memory:</source>
         <translation>Band TX Speicher:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2910"/>
         <source>Band Tune Mem:</source>
         <translation>Band-Tune-Speicher:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1884"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1993"/>
         <source>Baud Rate:</source>
         <translation>Baudrate:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6729"/>
         <source>Black Level:</source>
         <translation>Schwarzwert:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6575"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7626"/>
         <source>Blacklist 10:</source>
         <translation>Schwarze Liste 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6579"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7630"/>
         <source>Blacklist 11:</source>
         <translation>Schwarze Liste 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6582"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
         <source>Blacklist 12:</source>
         <translation>Schwarze Liste 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6544"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7595"/>
         <source>Blacklist 1:</source>
         <translation>Schwarze Liste 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
+        <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
+        <translation>Schneller visueller Panadapter. Im klassischen Modus kann er eine zweite Audioaufnahme öffnen; im normalen Modus erhöht er nur die visuelle Aktualisierungsrate. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6927"/>
+        <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
+        <translation>Profil für langsame PCs: maximal 2 FT-Threads, langsameres Waterfall, reduzierte frühe/tiefe Dekodierung. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7598"/>
         <source>Blacklist 2:</source>
         <translation>Schwarze Liste 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6551"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7602"/>
         <source>Blacklist 3:</source>
         <translation>Schwarze Liste 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6554"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7605"/>
         <source>Blacklist 4:</source>
         <translation>Schwarze Liste 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6558"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7609"/>
         <source>Blacklist 5:</source>
         <translation>Schwarze Liste 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
         <source>Blacklist 6:</source>
         <translation>Schwarze Liste 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
         <source>Blacklist 7:</source>
         <translation>Schwarze Liste 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6568"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7619"/>
         <source>Blacklist 8:</source>
         <translation>Schwarze Liste 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7623"/>
         <source>Blacklist 9:</source>
         <translation>Schwarze Liste 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6645"/>
         <source>Blue Calls:</source>
         <translation>Blaue Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1217"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
         <source>Bold</source>
         <translation>Fett</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="825"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="872"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
         <source>Both</source>
         <translation>Beides</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1655"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1764"/>
         <source>CAT CONTROL</source>
         <translation>CAT-STEUERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2027"/>
         <source>CI-V Addr:</source>
         <translation>CI-V Adresse:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4188"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5028"/>
         <source>CLOUDLOG</source>
         <translation>CLOUDLOG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7111"/>
         <source>CONTEST</source>
         <translation>WETTBEWERB</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4005"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4795"/>
         <source>CQ Only:</source>
         <translation>Nur CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6480"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7526"/>
         <source>CQ Zone Band:</source>
         <translation>CQ Zonenband:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6413"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
         <source>CQ in Msg:</source>
         <translation>CQ in Nachricht:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3249"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3821"/>
         <source>CW ID</source>
         <translation>CW-ID</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3259"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3831"/>
         <source>CW ID Interval (min):</source>
         <translation>CW-ID-Intervall (min):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3252"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3824"/>
         <source>CW ID after 73:</source>
         <translation>CW-ID nach 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7820"/>
         <source>W&amp;P Filters Only:</source>
         <translation>Nur W&amp;P-Filter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6740"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7828"/>
         <source>Calling Only:</source>
         <translation>Nur rufende Stationen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2456"/>
         <source>Check SWR:</source>
         <translation>Überprüfen Sie SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6009"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7015"/>
         <source>Clear DX Call:</source>
         <translation>DX-Rufzeichen löschen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6000"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7006"/>
         <source>Clear DX Grid:</source>
         <translation>DX-Locator löschen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4502"/>
         <source>Click TX:</source>
         <translation>Klicken Sie auf TX:</translation>
     </message>
@@ -12131,7 +13052,7 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Farbe DX Entität:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5738"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6735"/>
         <source>Color Gain:</source>
         <translation>Farbgewinn:</translation>
     </message>
@@ -12140,131 +13061,131 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Farbe für mein Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1638"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2365"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4986"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1632"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
         <source>Connected</source>
         <translation>Verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6132"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7145"/>
         <source>Contest Name:</source>
         <translation>Name des Wettbewerbs:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4377"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
         <source>Contest Only:</source>
         <translation>Nur Wettbewerb:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6741"/>
         <source>Contrast:</source>
         <translation>Kontrast:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6177"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
         <source>Custom Server:</source>
         <translation>Benutzerdefinierter Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5751"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6748"/>
         <source>DATA DOWNLOAD</source>
         <translation>DATEN-DOWNLOAD</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5465"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6338"/>
         <source>DECODE COLORS</source>
         <translation>FARBEN DEKODIEREN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4792"/>
         <source>DECODE FILTERS</source>
         <translation>FILTER DEKODIEREN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3881"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4659"/>
         <source>DECODE PARAMETERS</source>
         <translation>PARAMETER DEKODIEREN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3674"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4384"/>
         <source>DECODES</source>
         <translation>DEKODIERT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2333"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2453"/>
         <source>DIAGNOSTICS</source>
         <translation>DIAGNOSE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2583"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2864"/>
         <source>DIRECTORY</source>
         <translation>VERZEICHNIS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4936"/>
         <source>DX CLUSTER</source>
         <translation>DX-CLUSTER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7549"/>
         <source>DX Call/Grid:</source>
         <translation>DX-Rufzeichen/Locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2156"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2276"/>
         <source>Data Bits:</source>
         <translation>Datenbits:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
         <source>Days Upload:</source>
         <translation>Tage hochladen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3884"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4662"/>
         <source>Decode Depth:</source>
         <translation>Dekodierungstiefe:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3926"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4713"/>
         <source>Decode at 52s:</source>
         <translation>Dekodierung bei 52 Sekunden:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3636"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4346"/>
         <source>Decoded Font:</source>
         <translation>Entschlüsselte Schriftart:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3887"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
         <source>Deep</source>
         <translation>Tief</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4027"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4847"/>
         <source>Deep Search:</source>
         <translation>Tiefensuche:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="610"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="813"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="656"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="860"/>
         <source>Default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3991"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4781"/>
         <source>Degrade S/N:</source>
         <translation>Degradieren Sie S/N:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4177"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5017"/>
         <source>Detail:</source>
         <translation>Detail:</translation>
     </message>
@@ -12273,1011 +13194,1004 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Direktprotokoll QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3163"/>
         <source>Disable TX after 73:</source>
         <translation>Deaktivieren Sie TX nach 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1638"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2373"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4166"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5006"/>
         <source>Disconnect</source>
         <translation>Trennen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1632"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4977"/>
         <source>Disconnected</source>
         <translation>Nicht verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5788"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6785"/>
         <source>Download CALL3.TXT</source>
         <translation>Laden Sie CALL3.TXT herunter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6187"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7200"/>
         <source>Empty = automatic public servers</source>
         <translation>Leer = automatische öffentliche Server</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6160"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>Enable NTP:</source>
         <translation>Aktivieren Sie NTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4815"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5683"/>
         <source>Enable TCP ADIF:</source>
         <translation>Aktivieren Sie TCP ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4191"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4231"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4443"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6534"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6590"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6645"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5031"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5080"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5311"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7696"/>
         <source>Enabled:</source>
         <translation>Aktiviert:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5992"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6998"/>
         <source>Erase Band Act:</source>
         <translation>Bandakt löschen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3947"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
         <source>Erasure Patterns:</source>
         <translation>Löschmuster:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7130"/>
         <source>FD Exchange:</source>
         <translation>FD Austausch:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6700"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7751"/>
         <source>Europe:</source>
         <translation>Europa:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6701"/>
         <source>EU / Europe</source>
-        <translation>EU / Europa</translation>
+        <translation type="vanished">EU / Europa</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7759"/>
         <source>Africa:</source>
         <translation>Afrika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6704"/>
         <source>AF / Africa</source>
-        <translation>AF / Afrika</translation>
+        <translation type="vanished">AF / Afrika</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7768"/>
         <source>Oceania:</source>
         <translation>Ozeanien:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6708"/>
         <source>OC / Oceania</source>
-        <translation>OC / Ozeanien</translation>
+        <translation type="vanished">OC / Ozeanien</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6710"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7776"/>
         <source>Asia:</source>
         <translation>Asien:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6711"/>
         <source>AS / Asia</source>
-        <translation>AS / Asien</translation>
+        <translation type="vanished">AS / Asien</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6714"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7785"/>
         <source>North America:</source>
         <translation>Nordamerika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6715"/>
         <source>NA / North America</source>
-        <translation>NA / Nordamerika</translation>
+        <translation type="vanished">NA / Nordamerika</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6717"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7793"/>
         <source>South America:</source>
         <translation>Südamerika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6718"/>
         <source>SA / South America</source>
-        <translation>SA / Südamerika</translation>
+        <translation type="vanished">SA / Südamerika</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6722"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7803"/>
         <source>FILTER OPTIONS</source>
         <translation>FILTEROPTIONEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3597"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4307"/>
         <source>FONT</source>
         <translation>SCHRIFTART</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2936"/>
         <source>FREQUENCY AND TIMING</source>
         <translation>FREQUENZ UND ZEITSTEUERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="793"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="840"/>
         <source>Fake It</source>
         <translation>Fake es</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3887"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
         <source>Fast</source>
         <translation>Schnell</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
         <source>Field Day</source>
         <translation>Feldtag</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2669"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
         <source>First (:00/:30)</source>
         <translation>Zuerst (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3600"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4310"/>
         <source>Font:</source>
         <translation>Schriftart:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5963"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6968"/>
         <source>Force Call 1st:</source>
         <translation>Rufzeichen zuerst erzwingen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2220"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2340"/>
         <source>Force DTR:</source>
         <translation>Erzwinge DTR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2362"/>
         <source>Force RTS:</source>
         <translation>Erzwinge RTS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
         <source>Fox</source>
         <translation>Fox</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6063"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7069"/>
         <source>Fox Mode:</source>
         <translation>Fox-Modus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="829"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="876"/>
         <source>Front/Mic</source>
         <translation>Vorne/Mikrofon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
         <source>Full</source>
         <translation>Voll</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
         <source>Greyline:</source>
         <translation>Greyline:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6611"/>
         <source>HIGHLIGHTING</source>
         <translation>Hervorheben</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5641"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6638"/>
         <source>HL Blue:</source>
         <translation>HL Blau:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5626"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6623"/>
         <source>HL Orange:</source>
         <translation>HL Orange:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4450"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5318"/>
         <source>HTTP port:</source>
         <translation>HTTP-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1582"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
         <source>Hamlib (300+ radios)</source>
         <translation>Hamlib (über 300 Funkgeräte)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2379"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2512"/>
         <source>Hamlib:</source>
         <translation>Hamlib:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2195"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2315"/>
         <source>Handshake:</source>
         <translation>Händedruck:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="616"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="662"/>
         <source>Hardware</source>
         <translation>Hardware</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5888"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6890"/>
         <source>High DPI:</source>
         <translation>Hohe DPI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3907"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4691"/>
         <source>High Freq (Hz):</source>
         <translation>Hohe Frequenz (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6614"/>
         <source>Highlight 73:</source>
         <translation>Highlight 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1942"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2062"/>
         <source>Host:Port:</source>
         <translation>Host:Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
         <source>Hound</source>
         <translation>Hound</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6071"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7080"/>
         <source>Hound Mode:</source>
         <translation>Hound-Modus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1483"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1572"/>
         <source>IARU Region:</source>
         <translation>IARU Region:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7541"/>
         <source>ITU Zone Band:</source>
         <translation>ITU-Zonenband:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7152"/>
         <source>Indiv Name:</source>
         <translation>Einzelname:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
         <source>Input Channel:</source>
         <translation>Eingangskanal:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2450"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2706"/>
         <source>Input Device:</source>
         <translation>Eingabegerät:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
         <source>Interface Used:</source>
         <translation>Verwendete Schnittstelle:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1224"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1299"/>
         <source>Italic</source>
         <translation>Kursiv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3944"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4734"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2514"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2782"/>
         <source>LEVELS</source>
         <translation>EBENEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5194"/>
         <source>LOGGING</source>
         <translation>PROTOKOLLIERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5155"/>
         <source>LOTW</source>
         <translation>LOTW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5897"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6899"/>
         <source>Larger Tab:</source>
         <translation>Größerer Tab:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6218"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7231"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>Lassen Sie den Server leer, um automatisch pool.ntp.org, Apple, Cloudflare und Google zu verwenden.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="821"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="868"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
         <source>Left</source>
         <translation>Links</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
         <source>Listen Port:</source>
         <translation>Hörport:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4362"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5221"/>
         <source>Log as RTTY:</source>
         <translation>Als RTTY anmelden:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4302"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5158"/>
         <source>LotW Enabled:</source>
         <translation>LotW Aktiviert:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3898"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4679"/>
         <source>Low Freq (Hz):</source>
         <translation>Niedrige Frequenz (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3982"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
         <source>Low Sidelobes</source>
         <translation>Niedrige Nebenkeulen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4476"/>
         <source>MAP AND DISTANCE</source>
         <translation>KARTE UND ENTFERNUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2829"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3181"/>
         <source>MSK/Q65 TX until 73:</source>
         <translation>MSK/Q65 TX bis 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3721"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4494"/>
         <source>Map All Msgs:</source>
         <translation>Alle Nachrichten zuordnen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3982"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4772"/>
         <source>Max Sensitivity</source>
         <translation>Maximale Empfindlichkeit</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3706"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
         <source>Miles:</source>
         <translation>Meilen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2291"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5940"/>
         <source>Mode:</source>
         <translation>Modus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5854"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6856"/>
         <source>Monitor Last:</source>
         <translation>Zuletzt überwachen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5845"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6847"/>
         <source>Monitor OFF:</source>
         <translation>Monitor AUS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="819"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="866"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
         <source>Mono</source>
         <translation>Mono</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4576"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5444"/>
         <source>Multicast TTL:</source>
         <translation>Multicast TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4012"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4826"/>
         <source>My Call Only:</source>
         <translation>Nur mein Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1459"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6420"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7466"/>
         <source>My Call:</source>
         <translation>Mein Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1553"/>
         <source>My Grid:</source>
         <translation>Mein Locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7160"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC Sprint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4077"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4914"/>
         <source>NETWORK SERVICES</source>
         <translation>NETZWERKDIENSTLEISTUNGEN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6157"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7170"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP ZEITSYNC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1582"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
         <source>Native (15 radios)</source>
         <translation>Native (15 Radios)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6473"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
         <source>New CQ Zone:</source>
         <translation>Neue CQ-Zone:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6465"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7511"/>
         <source>New Cont Band:</source>
         <translation>Neue Cont-Band:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6458"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7504"/>
         <source>New Continent:</source>
         <translation>Neuer Kontinent:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
         <source>New DXCC Band:</source>
         <translation>Neues DXCC-Band:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6428"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
         <source>New DXCC:</source>
         <translation>Neues DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6450"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7496"/>
         <source>New Grid Band:</source>
         <translation>Neuer Locator pro Band:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6443"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
         <source>New Grid:</source>
         <translation>Neuer Locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7534"/>
         <source>New ITU Zone:</source>
         <translation>Neue ITU-Zone:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6034"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7040"/>
         <source>No Btn Color:</source>
         <translation>Keine BTN-Farbe:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4179"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5019"/>
         <source>No message</source>
         <translation>Keine Nachricht</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5176"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="612"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="794"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="811"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7117"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3887"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
         <source>Normal</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4794"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5662"/>
         <source>Notify Request:</source>
         <translation>Anfrage benachrichtigen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1382"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1460"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6046"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7052"/>
         <source>OPERATING MODE</source>
         <translation>BETRIEBSART</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6331"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7372"/>
         <source>OTP</source>
         <translation>OTP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6334"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7375"/>
         <source>OTP Enabled:</source>
         <translation>OTP Aktiviert:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6349"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7390"/>
         <source>OTP Interval:</source>
         <translation>OTP Intervall:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6341"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7382"/>
         <source>OTP Seed:</source>
         <translation>OTP Samen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6358"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7399"/>
         <source>OTP URL:</source>
         <translation>OTP URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="817"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="864"/>
         <source>Off</source>
         <translation>Aus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="815"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="862"/>
         <source>On</source>
         <translation>Auf</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1504"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1593"/>
         <source>Op Call:</source>
         <translation>Operator-Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2393"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2526"/>
         <source>Open Hamlib update</source>
         <translation>Öffnen Sie das Hamlib-Update</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6630"/>
         <source>Orange Calls:</source>
         <translation>Orange Rufzeichen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2499"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
         <source>Output Channel:</source>
         <translation>Ausgangskanal:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2482"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2744"/>
         <source>Output Device:</source>
         <translation>Ausgabegerät:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2619"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2900"/>
         <source>POWER MEMORY</source>
         <translation>POWER-SPEICHER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4080"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2047"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2167"/>
         <source>PTT Method:</source>
         <translation>PTT-Methode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2094"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2214"/>
         <source>PTT Port:</source>
         <translation>PTT-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2348"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2468"/>
         <source>PWR and SWR:</source>
         <translation>PWR und SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5716"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6713"/>
         <source>Palette:</source>
         <translation>Palette:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4309"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
         <source>Password:</source>
         <translation>Passwort:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2125"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2245"/>
         <source>Poll Interval (s):</source>
         <translation>Umfrageintervall(e):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4113"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4953"/>
         <source>Port:</source>
         <translation>Hafen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1551"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1652"/>
         <source>Power (W):</source>
         <translation>Leistung (W):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5880"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6882"/>
         <source>Progress Red:</source>
         <translation>Fortschrittsrot:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5197"/>
         <source>Prompt to Log:</source>
         <translation>Aufforderung zum Protokollieren:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6510"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7556"/>
         <source>QSY Message:</source>
         <translation>QSY-Nachricht:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1525"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1617"/>
         <source>QTH:</source>
         <translation>QTH:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5955"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
         <source>Quick Call:</source>
         <translation>Schnellanruf:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3114"/>
         <source>Quick QSO:</source>
         <translation>Schnell QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4412"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5271"/>
         <source>RECORDING</source>
         <translation>AUFNAHME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4440"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5308"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>REMOTE-WEB-DASHBOARD (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7137"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY Austausch:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4704"/>
         <source>RX Bandwidth:</source>
         <translation>RX Bandbreite:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2517"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2785"/>
         <source>RX Input Level:</source>
         <translation>RX Eingangspegel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2031"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2151"/>
         <source>RX/TX via TCI</source>
         <translation>RX/TX über TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6017"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7023"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;TX nach QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="827"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="874"/>
         <source>Rear/Data</source>
         <translation>Hinten/Daten</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4415"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
         <source>Record RX:</source>
         <translation>Datensatz RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4422"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
         <source>Record TX:</source>
         <translation>Datensatz TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4492"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5360"/>
         <source>Required for LAN/WAN</source>
         <translation>Erforderlich für LAN/WAN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3632"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3668"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4947"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5554"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4342"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4378"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5815"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6464"/>
         <source>Reset</source>
         <translation>Zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4802"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5670"/>
         <source>Restore Win:</source>
         <translation>Gewinn wiederherstellen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="791"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="838"/>
         <source>Rig</source>
         <translation>Rig</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1629"/>
         <source>Rig Info:</source>
         <translation>Rig-Info:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1767"/>
         <source>Rig:</source>
         <translation>Anlage:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="823"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2502"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
         <source>Right</source>
         <translation>Richtig</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2141"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2261"/>
         <source>SERIAL PARAMETERS</source>
         <translation>SERIELLE PARAMETER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3976"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
         <source>SIDELOBE CONTROL</source>
         <translation>SIDELOBE-STEUERUNG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5713"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6710"/>
         <source>SPECTRUM</source>
         <translation>SPEKTRUM</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2264"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2384"/>
         <source>SPLIT OPERATION</source>
         <translation>SPLIT-BETRIEB</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6830"/>
         <source>STARTUP</source>
         <translation>START</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1456"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1539"/>
         <source>STATION DETAILS</source>
         <translation>STATIONSDETAILS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2586"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2867"/>
         <source>Save Directory:</source>
         <translation>Verzeichnis speichern:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2669"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
         <source>Second (:15/:45)</source>
         <translation>Zweiter (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4666"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5534"/>
         <source>Secondary ADIF:</source>
         <translation>Sekundär ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
         <source>Secondary Interface:</source>
         <translation>Sekundäre Schnittstelle:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5497"/>
         <source>Secondary Port:</source>
         <translation>Sekundärer Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4621"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5489"/>
         <source>Secondary Server:</source>
         <translation>Sekundärer Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5506"/>
         <source>Secondary TTL:</source>
         <translation>Sekundäre TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4613"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5481"/>
         <source>Secondary UDP:</source>
         <translation>Sekundär UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5472"/>
         <source>Send ADIF:</source>
         <translation>Senden Sie ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3093"/>
         <source>Send RR73:</source>
         <translation>Senden Sie RR73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1810"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1919"/>
         <source>Serial Port:</source>
         <translation>Serieller Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4550"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5418"/>
         <source>Server Name:</source>
         <translation>Servername:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4557"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5425"/>
         <source>Server Port:</source>
         <translation>Server-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4939"/>
         <source>Server:</source>
         <translation>Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3677"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4387"/>
         <source>Show DXCC:</source>
         <translation>DXCC anzeigen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6087"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7099"/>
         <source>Show OTP:</source>
         <translation>OTP anzeigen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3979"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4769"/>
         <source>Sidelobe Mode:</source>
         <translation>Sidelobe-Modus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3934"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4721"/>
         <source>Single Decode:</source>
         <translation>Einzeldekodierung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4387"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5246"/>
         <source>Spec Op Cmts:</source>
         <translation>Spezifische Operationsbefehle:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2267"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2387"/>
         <source>Split:</source>
         <translation>Aufteilung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5065"/>
         <source>Station ID:</source>
         <translation>Stations-ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1628"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4130"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4260"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4970"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5116"/>
         <source>Status:</source>
         <translation>Status:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2176"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2296"/>
         <source>Stop Bits:</source>
         <translation>Stoppbits:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6079"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7091"/>
         <source>SuperFox:</source>
         <translation>SuperFox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6202"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7215"/>
         <source>Sync Now</source>
         <translation>Jetzt synchronisieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2320"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2440"/>
         <source>TCI Audio</source>
         <translation>TCI Audio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2143"/>
         <source>TCI Audio:</source>
         <translation>TCI-Audio:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1997"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2117"/>
         <source>TCI Host:Port:</source>
         <translation>TCI-Host:Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4823"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5691"/>
         <source>TCP Port:</source>
         <translation>TCP-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4835"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5703"/>
         <source>TCP Server:</source>
         <translation>TCP-Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4087"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4927"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6697"/>
         <source>TERRITORY</source>
-        <translation>GEBIET</translation>
+        <translation type="vanished">GEBIET</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3842"/>
         <source>TONE SPACING</source>
         <translation>TONABSTAND</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2304"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2424"/>
         <source>TX Audio Src:</source>
         <translation>TX Audioquelle:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2437"/>
         <source>TX Audio:</source>
         <translation>TX Audio:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2969"/>
         <source>TX Delay (s):</source>
         <translation>TX Verzögerung(en):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2653"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2939"/>
         <source>TX Frequency:</source>
         <translation>TX Häufigkeit:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3685"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4418"/>
         <source>TX Msg to RX:</source>
         <translation>TX Nachricht an RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2569"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2845"/>
         <source>TX Output Level:</source>
         <translation>TX Ausgangspegel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2666"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2952"/>
         <source>TX Slot:</source>
         <translation>TX-Steckplatz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3213"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3784"/>
         <source>TX Watchdog (min):</source>
         <translation>TX Watchdog (min):</translation>
     </message>
@@ -13298,172 +14212,172 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Gebiet 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1622"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1731"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
         <translation>Tipp: Schließen Sie OmniRig über das Windows-Taskleistensymbol und drücken Sie dann erneut auf „Verbinden“.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3228"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3800"/>
         <source>Tune Watchdog (s):</source>
         <translation>Watchdog(s) einstellen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
         <source>Two-Pass:</source>
         <translation>Zwei-Pass:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
         <source>Type 1 prefix</source>
         <translation>Geben Sie das Präfix 1 ein</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1494"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1583"/>
         <source>Type 2 Msg Gen:</source>
         <translation>Typ-2-Msg-Gen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
         <source>Type 2 prefix</source>
         <translation>Präfix vom Typ 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5374"/>
         <source>UDP SERVER</source>
         <translation>UDP-SERVER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4480"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5348"/>
         <source>Username:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5972"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6977"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3781"/>
         <source>WATCHDOG</source>
         <translation>WACHHUND</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
         <source>WHITELIST</source>
         <translation>WHITELIST</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4473"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5341"/>
         <source>WS bind:</source>
         <translation>WS-Bindung:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4460"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
         <source>WS socket port:</source>
         <translation>WS-Socket-Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4430"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5295"/>
         <source>WSPR Upload:</source>
         <translation>WSPR Hochladen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6725"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7806"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Warten und springen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5983"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6989"/>
         <source>Wait Features:</source>
         <translation>Wartefunktionen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
         <source>Whitelist 10:</source>
         <translation>Whitelist 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6634"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7685"/>
         <source>Whitelist 11:</source>
         <translation>Whitelist 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7688"/>
         <source>Whitelist 12:</source>
         <translation>Whitelist 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6599"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7650"/>
         <source>Whitelist 1:</source>
         <translation>Whitelist 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6602"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7653"/>
         <source>Whitelist 2:</source>
         <translation>Whitelist 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7657"/>
         <source>Whitelist 3:</source>
         <translation>Whitelist 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6609"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7660"/>
         <source>Whitelist 4:</source>
         <translation>Whitelist 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6613"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7664"/>
         <source>Whitelist 5:</source>
         <translation>Whitelist 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6616"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7667"/>
         <source>Whitelist 6:</source>
         <translation>Whitelist 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6620"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7671"/>
         <source>Whitelist 7:</source>
         <translation>Whitelist 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7674"/>
         <source>Whitelist 8:</source>
         <translation>Whitelist 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6627"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7678"/>
         <source>Whitelist 9:</source>
         <translation>Whitelist 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2404"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2537"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
         <translation>Windows: DLL von der Hamlib-Site aktualisiert. macOS/Linux: offizielle Dokumentation und Veröffentlichungen.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4402"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
         <source>ZZ00:</source>
         <translation>ZZ00:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4837"/>
         <source>Zap:</source>
         <translation>Zap:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4394"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5253"/>
         <source>dB in Cmts:</source>
         <translation>dB in Cmts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5871"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6873"/>
         <source>kHz no k:</source>
         <translation>kHz nein k:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2691"/>
         <source>↻  Refresh</source>
         <translation>↻  Aktualisieren</translation>
     </message>
@@ -13495,53 +14409,53 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Das Audiosenkengerät konnte nicht initialisiert werden</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="138"/>
+        <location filename="../Audio/soundin.cpp" line="275"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
         <translation>Audio-RX-Eingang-Öffnungsfehler: Qt konnte das gewählte Eingabegerät nicht öffnen. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="142"/>
+        <location filename="../Audio/soundin.cpp" line="279"/>
         <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
         <translation>Audio-RX-Eingang-Lesefehler: Qt meldete einen E/A-Fehler beim Lesen der Samples. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="146"/>
+        <location filename="../Audio/soundin.cpp" line="283"/>
         <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
         <translation>Audio-RX-Eingang-Schwerwiegender Fehler: das gewählte Eingabegerät ist derzeit nicht verwendbar. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="152"/>
+        <location filename="../Audio/soundin.cpp" line="289"/>
         <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
         <translation>Audio-RX-Eingang-Underrun: die Aufnahme ist zurückgefallen, wird aber fortgesetzt. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="254"/>
+        <location filename="../Audio/soundin.cpp" line="425"/>
         <source>Audio RX format unsupported: device=&quot;%1&quot; does not accept requested=%2; preferred=%3; selected-channel=%4</source>
         <translation>Audio-RX-Format nicht unterstützt: Gerät=&quot;%1&quot; akzeptiert angefordert=%2 nicht; bevorzugt=%3; gewählter Kanal=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="292"/>
+        <location filename="../Audio/soundin.cpp" line="466"/>
         <source>Audio RX sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
         <translation>Audio-RX-Sink-Initialisierung fehlgeschlagen: Eingabegerät=&quot;%1&quot;, angefordert=%2, gewählter Kanal=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="384"/>
+        <location filename="../Audio/soundin.cpp" line="630"/>
         <source>Idle</source>
         <translation>Leerlauf</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="389"/>
-        <location filename="../Audio/soundin.cpp" line="393"/>
+        <location filename="../Audio/soundin.cpp" line="635"/>
+        <location filename="../Audio/soundin.cpp" line="639"/>
         <source>Receiving</source>
         <translation>Empfangen</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="393"/>
+        <location filename="../Audio/soundin.cpp" line="639"/>
         <source>Suspended</source>
         <translation>Suspendiert</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="399"/>
+        <location filename="../Audio/soundin.cpp" line="645"/>
         <source>Audio RX input stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>Audio-RX-Eingang mit Fehler gestoppt: Gerät=&quot;%1&quot;, Status=%2</translation>
     </message>
@@ -13554,7 +14468,7 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Fehler</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="406"/>
+        <location filename="../Audio/soundin.cpp" line="652"/>
         <source>Stopped</source>
         <translation>Angehalten</translation>
     </message>
@@ -13590,77 +14504,87 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Kein Audioausgabegerät konfiguriert.</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="185"/>
+        <location filename="../Audio/soundout.cpp" line="251"/>
         <source>Audio TX output open error: Qt could not open the selected output device. %1</source>
         <translation>Audio-TX-Ausgang-Öffnungsfehler: Qt konnte das gewählte Ausgabegerät nicht öffnen. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="188"/>
+        <location filename="../Audio/soundout.cpp" line="254"/>
         <source>Audio TX output write error: Qt reported an I/O failure while writing samples. %1</source>
         <translation>Audio-TX-Ausgang-Schreibfehler: Qt meldete einen E/A-Fehler beim Schreiben der Samples. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="192"/>
+        <location filename="../Audio/soundout.cpp" line="258"/>
         <source>Audio TX output underrun: the audio sink fell behind but will continue. %1</source>
         <translation>Audio-TX-Ausgang-Underrun: der Audio-Sink ist zurückgefallen, wird aber fortgesetzt. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="196"/>
+        <location filename="../Audio/soundout.cpp" line="262"/>
         <source>Audio TX output fatal error: the selected output device is not usable now. %1</source>
         <translation>Audio-TX-Ausgang-Schwerwiegender Fehler: das gewählte Ausgabegerät ist derzeit nicht verwendbar. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="243"/>
+        <location filename="../Audio/soundout.cpp" line="355"/>
         <source>Audio TX format invalid: device=&quot;%1&quot;, requested=%2, preferred=%3</source>
         <translation>Audio-TX-Format ungültig: Gerät=&quot;%1&quot;, angefordert=%2, bevorzugt=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="250"/>
+        <location filename="../Audio/soundout.cpp" line="362"/>
         <source>TX audio: device does not natively support %1 Hz / Int16 (preferred: %2 Hz / %3 ch) – relying on Qt/CoreAudio conversion</source>
         <translation>TX-Audio: Gerät unterstützt %1 Hz / Int16 nicht nativ (bevorzugt: %2 Hz / %3 Kanäle) – verlasse mich auf Qt/CoreAudio-Konvertierung</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="276"/>
+        <location filename="../Audio/soundout.cpp" line="391"/>
         <source>Audio TX output device is not configured: select an output device in Settings &gt; Audio.</source>
         <translation>Audio-TX-Ausgabegerät ist nicht konfiguriert: Wählen Sie ein Ausgabegerät unter Einstellungen &gt; Audio.</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="304"/>
+        <location filename="../Audio/soundout.cpp" line="423"/>
         <source>Audio TX output start failed: Qt did not return a writable sink device. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audio-TX-Ausgang-Start fehlgeschlagen: Qt lieferte kein beschreibbares Sink-Gerät. Gerät=&quot;%1&quot;, Format=%2, Status=%3, Qt-Fehler=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="446"/>
+        <location filename="../Audio/soundout.cpp" line="635"/>
         <source>Audio TX output write error: Qt rejected buffered audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audio-TX-Ausgang-Schreibfehler: Qt hat gepufferte Audiodaten abgelehnt. Gerät=&quot;%1&quot;, Format=%2, Status=%3, Qt-Fehler=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="482"/>
+        <location filename="../Audio/soundout.cpp" line="687"/>
+        <source>Audio TX source read error: generated TX audio source was closed before playback completed. device=&quot;%1&quot;, format=%2</source>
+        <translation>Audio-TX-Quelle Lesefehler: erzeugte TX-Audioquelle wurde geschlossen, bevor die Wiedergabe abgeschlossen war. device=&quot;%1&quot;, format=%2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="696"/>
         <source>Audio TX source read error: Decodium could not read generated TX audio before writing it. device=&quot;%1&quot;, format=%2</source>
         <translation>Audio-TX-Quelle-Lesefehler: Decodium konnte erzeugtes TX-Audio vor dem Schreiben nicht lesen. Gerät=&quot;%1&quot;, Format=%2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="500"/>
+        <location filename="../Audio/soundout.cpp" line="716"/>
         <source>Audio TX output write error: Qt rejected generated TX audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audio-TX-Ausgang-Schreibfehler: Qt hat erzeugte TX-Audiodaten abgelehnt. Gerät=&quot;%1&quot;, Format=%2, Status=%3, Qt-Fehler=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="539"/>
+        <location filename="../Audio/soundout.cpp" line="755"/>
         <source>Idle</source>
         <translation>Leerlauf</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="542"/>
+        <location filename="../Audio/soundout.cpp" line="758"/>
         <source>Sending</source>
         <translation>Senden</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="545"/>
+        <location filename="../Audio/soundout.cpp" line="761"/>
         <source>Suspended</source>
         <translation>Suspendiert</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="549"/>
+        <location filename="../Audio/soundout.cpp" line="766"/>
+        <source>TX output stopped while parked</source>
+        <translation>TX-Ausgang gestoppt, während geparkt</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="771"/>
         <source>Audio TX output stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>Audio-TX-Ausgang mit Fehler gestoppt: Gerät=&quot;%1&quot;, Status=%2</translation>
     </message>
@@ -13673,7 +14597,7 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <translation type="vanished">Fehler</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="553"/>
+        <location filename="../Audio/soundout.cpp" line="775"/>
         <source>Stopped</source>
         <translation>Angehalten</translation>
     </message>
@@ -13722,216 +14646,226 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
 <context>
     <name>StationList::impl</name>
     <message>
+        <location filename="../models/StationList.cpp" line="302"/>
         <source>Band name</source>
-        <translation type="vanished">Bandname</translation>
+        <translation>Bandname</translation>
     </message>
     <message>
+        <location filename="../models/StationList.cpp" line="328"/>
         <source>Frequency offset</source>
-        <translation type="vanished">Frequenzoffset</translation>
+        <translation>Frequenzoffset</translation>
     </message>
     <message>
+        <location filename="../models/StationList.cpp" line="350"/>
         <source>Antenna description</source>
-        <translation type="vanished">Antennenbeschreibung</translation>
+        <translation>Antennenbeschreibung</translation>
     </message>
     <message>
+        <location filename="../models/StationList.cpp" line="372"/>
         <source>Band</source>
-        <translation type="vanished">Band</translation>
+        <translation>Band</translation>
     </message>
     <message>
+        <location filename="../models/StationList.cpp" line="373"/>
         <source>Offset</source>
-        <translation type="vanished">Versatz</translation>
+        <translation>Versatz</translation>
     </message>
     <message>
+        <location filename="../models/StationList.cpp" line="374"/>
         <source>Antenna Description</source>
-        <translation type="vanished">Antennenbeschreibung</translation>
+        <translation>Antennenbeschreibung</translation>
     </message>
 </context>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="446"/>
         <source>Reset Layout (Ctrl+Shift+L)
 Move all floating windows back into the main window
 and recenter Decodium on the primary monitor.</source>
-        <translation>Layout zurücksetzen (Ctrl+Shift+L)
+        <translation type="vanished">Layout zurücksetzen (Ctrl+Shift+L)
 Alle schwebenden Fenster zurück in das Hauptfenster holen
 und Decodium auf dem Hauptmonitor neu zentrieren.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="468"/>
         <source>Layout</source>
-        <translation>Layout</translation>
+        <translation type="vanished">Layout</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="486"/>
         <source>Decode History (Ctrl+Shift+H)
 Open the persisted decode history browser
 stored in the SQLite database. Filters + ADIF export.</source>
-        <translation>Decode-Verlauf (Ctrl+Shift+H)
+        <translation type="vanished">Decode-Verlauf (Ctrl+Shift+H)
 Öffnet den persistenten Decode-Verlauf-Browser,
 gespeichert in der SQLite-Datenbank. Filter + ADIF-Export.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="510"/>
         <source>History</source>
-        <translation>Verlauf</translation>
+        <translation type="vanished">Verlauf</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="533"/>
         <source>DX Cluster (toggle)
 Open or close the floating DX Cluster window.
 The window can be moved to any monitor.</source>
-        <translation>DX-Cluster (umschalten)
+        <translation type="vanished">DX-Cluster (umschalten)
 Öffnet oder schließt das schwebende DX-Cluster-Fenster.
 Das Fenster kann auf jeden Monitor verschoben werden.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="568"/>
         <source>DX Cluster</source>
-        <translation>DX-Cluster</translation>
+        <translation type="vanished">DX-Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="581"/>
         <source>Reset Layout</source>
-        <translation>Layout zurücksetzen</translation>
+        <translation type="vanished">Layout zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="589"/>
         <source>Move all floating windows back into the main window
 and recenter Decodium on the primary monitor?
 
 Saved window coordinates will be cleared.</source>
-        <translation>und Decodium auf dem Hauptmonitor neu zentrieren?
+        <translation type="vanished">und Decodium auf dem Hauptmonitor neu zentrieren?
 
 Die gespeicherten Fensterkoordinaten werden gelöscht.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="469"/>
+        <source>ALC meter 0..100
+&gt;60 = excessive ALC (TX power too high)</source>
+        <translation>ALC-Anzeige 0..100
+&gt;60 = übermäßiges ALC (TX-Leistung zu hoch)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="470"/>
+        <source>ALC is not reported by Hamlib for this rig/backend</source>
+        <translation>ALC wird von Hamlib für dieses Funkgerät/Backend nicht gemeldet</translation>
     </message>
 </context>
 <context>
     <name>TCITransceiver</name>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="500"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="505"/>
         <source>ConnectionRefused</source>
         <translation>Verbindung verweigert</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="501"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="506"/>
         <source>RemoteHostClosed</source>
         <translation>RemoteHostGeschlossen</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="502"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="507"/>
         <source>HostNotFound</source>
         <translation>HostNotFound</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="503"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="508"/>
         <source>SocketAccess</source>
         <translation>SocketAccess</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="504"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="509"/>
         <source>SocketResource</source>
         <translation>SocketResource</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="505"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="510"/>
         <source>SocketTimeout</source>
         <translation>SocketTimeout</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="506"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="511"/>
         <source>DatagramTooLarge</source>
         <translation>DatagramTooLarge</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="507"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="512"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="508"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="513"/>
         <source>AddressInUse</source>
         <translation>AddressInUse</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="509"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="514"/>
         <source>SocketAddressNotAvailable</source>
         <translation>SocketAddressNotAvailable</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="510"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="515"/>
         <source>UnsupportedSocketOperation</source>
         <translation>Nicht unterstützteSocketOperation</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="511"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="516"/>
         <source>UnfinishedSocketOperation</source>
         <translation>UnfinishedSocketOperation</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="512"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="517"/>
         <source>ProxyAuthenticationRequired</source>
         <translation>ProxyAuthenticationRequired</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="513"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="518"/>
         <source>SslHandshakeFailed</source>
         <translation>SslHandshakeFailed</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="514"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="519"/>
         <source>ProxyConnectionRefused</source>
         <translation>ProxyConnectionRefused</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="515"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="520"/>
         <source>ProxyConnectionClosed</source>
         <translation>ProxyConnectionClosed</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="516"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="521"/>
         <source>ProxyConnectionTimeout</source>
         <translation>ProxyConnectionTimeout</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="517"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="522"/>
         <source>ProxyNotFound</source>
         <translation>ProxyNotFound</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="518"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="523"/>
         <source>ProxyProtocol</source>
         <translation>ProxyProtocol</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="519"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="524"/>
         <source>Operation</source>
         <translation>Betrieb</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="520"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="525"/>
         <source>SslInternal</source>
         <translation>SslIntern</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="521"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="526"/>
         <source>SslInvalidUserData</source>
         <translation>SslInvalidUserData</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="522"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="527"/>
         <source>Temporary</source>
         <translation>Vorübergehend</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="523"/>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="730"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="528"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="735"/>
         <source>UnknownSocket</source>
         <translation>UnknownSocket</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="668"/>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="731"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="673"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="736"/>
         <source>TCI websocket error: %1</source>
         <translation>TCI Websocket-Fehler: %1</translation>
     </message>
@@ -13940,17 +14874,17 @@ Die gespeicherten Fensterkoordinaten werden gelöscht.</translation>
         <translation type="vanished">TCI SDR ist nicht eingeschaltet</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="916"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="921"/>
         <source>TCI could not be opened</source>
         <translation>TCI konnte nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="1707"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="1712"/>
         <source>TCI should use PTT via CAT</source>
         <translation>TCI sollte PTT über CAT verwenden</translation>
     </message>
     <message>
-        <location filename="../Transceiver/TCITransceiver.cpp" line="2026"/>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="2031"/>
         <source>TCI modulator not Idle</source>
         <translation>TCI-Modulator nicht im Leerlauf</translation>
     </message>
@@ -14127,55 +15061,47 @@ Die gespeicherten Fensterkoordinaten werden gelöscht.</translation>
 <context>
     <name>TxPanel</name>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="475"/>
         <source>Multi-Answer Mode (right-click=window)</source>
-        <translation>Multi-Antwort-Modus (Rechtsklick=Fenster)</translation>
+        <translation type="vanished">Multi-Antwort-Modus (Rechtsklick=Fenster)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="512"/>
         <source>Deep Search</source>
-        <translation>Tiefensuche</translation>
+        <translation type="vanished">Tiefensuche</translation>
     </message>
     <message>
         <source>A-Priori Decoding</source>
         <translation type="vanished">A-priori-Decodierung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="574"/>
         <source>SWL Mode (Listen Only)</source>
-        <translation>SWL-Modus (nur Empfang)</translation>
+        <translation type="vanished">SWL-Modus (nur Empfang)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="604"/>
         <source>Auto Sequence</source>
-        <translation>Automatische Sequenz</translation>
+        <translation type="vanished">Automatische Sequenz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="634"/>
         <source>Quick QSO - skip TX1 and start from TX2 (direct report)</source>
-        <translation>Quick QSO - TX1 uberspringen und mit TX2 starten (direkter Rapport)</translation>
+        <translation type="vanished">Quick QSO - TX1 uberspringen und mit TX2 starten (direkter Rapport)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="674"/>
         <source>Enable TX</source>
-        <translation>TX aktivieren</translation>
+        <translation type="vanished">TX aktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="708"/>
         <source>Lock TX frequency
 (Hold Tx Freq)</source>
-        <translation>TX-Frequenz sperren
+        <translation type="vanished">TX-Frequenz sperren
 (Hold Tx Freq)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="735"/>
         <source>Auto CQ Repeat
 Call CQ automatically until a reply is received</source>
-        <translation>Auto-CQ-Wiederholung
+        <translation type="vanished">Auto-CQ-Wiederholung
 CQ automatisch rufen, bis eine Antwort kommt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="804"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1081"/>
         <source>TX slot
 1st: :00/:30
 2nd: :15/:45</source>
@@ -14184,142 +15110,264 @@ CQ automatisch rufen, bis eine Antwort kommt</translation>
 2nd: :15/:45</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="834"/>
         <source>Auto CQ: alternate TX/RX phases after repeated CQ without reply</source>
-        <translation>Auto CQ: TX/RX-Phasen nach wiederholtem CQ ohne Antwort wechseln</translation>
+        <translation type="vanished">Auto CQ: TX/RX-Phasen nach wiederholtem CQ ohne Antwort wechseln</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="927"/>
         <source>Tune</source>
-        <translation>Abstimmen</translation>
+        <translation type="vanished">Abstimmen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="893"/>
         <source>Clear DX, reports and TX1-TX5</source>
-        <translation>DX, Rapporte und TX1-TX5 loschen</translation>
+        <translation type="vanished">DX, Rapporte und TX1-TX5 loschen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="543"/>
         <source>A priori decoding</source>
-        <translation>A-priori-Decodierung</translation>
+        <translation type="vanished">A-priori-Decodierung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="770"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
         <translation>Aktiver Anruf: %1 (Versuch %2/%3)
 Klicken, um das Panel zu öffnen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="773"/>
         <source>Calls (CALL)
 Open the direct-call panel for a callsign
 with attempts, timeout and period control</source>
-        <translation>Anrufe (CALL)
+        <translation type="vanished">Anrufe (CALL)
 Öffnet das Direktanruf-Panel für ein Rufzeichen
 mit Versuchs-, Timeout- und Periodensteuerung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="865"/>
         <source>Halt TX</source>
+        <translation type="vanished">TX stoppen</translation>
+    </message>
+    <message>
+        <source>FT2 Async Mode - sine wave: green=RX, red=TX</source>
+        <translation type="vanished">FT2-Async-Modus - Sinuswelle: grun=RX, rot=TX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="275"/>
+        <source>Potenza TX</source>
+        <translation>TX-Leistung</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="826"/>
+        <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
+        <translation>Multi-Answer Mode (MAM) - Rechtsklick öffnet das Fenster (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="856"/>
+        <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
+        <translation>Deep Search: tiefere Schwachsignalsuche mit bekannten Rufzeichen (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="881"/>
+        <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
+        <translation>A-priori-Dekodierung (AP): nutzt bekannte Informationen, um schwache Signale wiederherzustellen (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="906"/>
+        <source>Automatic QSO sequencing (default OFF)</source>
+        <translation>Automatische QSO-Sequenzierung (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="931"/>
+        <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
+        <translation>Quick QSO: überspringt TX1 und startet bei TX2 (direkter Rapport) (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="958"/>
+        <source>Enable TX
+Right button + mouse wheel: adjust TX power</source>
+        <translation>TX aktivieren
+Rechte Taste + Mausrad: TX-Leistung anpassen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="993"/>
+        <source>Lock the TX frequency
+(Hold Tx Freq)</source>
+        <translation>TX-Frequenz sperren
+(Hold Tx Freq)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1019"/>
+        <source>Repeated Auto CQ
+Automatically calls CQ until a reply arrives (default OFF)</source>
+        <translation>Wiederholtes Auto CQ
+Ruft automatisch CQ, bis eine Antwort eintrifft (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
+        <source>Direct call (CALL)
+Open the direct callsign call panel
+with retry, timeout, and period control</source>
+        <translation>Direktanruf (CALL)
+Öffnet das Panel für den direkten Rufzeichenanruf
+mit Wiederholung, Timeout und Periodensteuerung</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>
+        <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
+        <translation>Auto CQ: wechselt zwischen TX/RX-Phasen nach wiederholten unbeantworteten CQs (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1134"/>
+        <source>Stop TX</source>
         <translation>TX stoppen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="940"/>
-        <source>FT2 Async Mode - sine wave: green=RX, red=TX</source>
-        <translation>FT2-Async-Modus - Sinuswelle: grun=RX, rot=TX</translation>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1161"/>
+        <source>Clear DX, reports, and TX1-TX5</source>
+        <translation>DX, Rapporte und TX1-TX5 löschen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="971"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1186"/>
+        <source>Tune (transmits the tuning carrier)</source>
+        <translation>Tune (sendet den Abstimmträger)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1221"/>
+        <source>Filtro CQ attivo (%1). Click: cambia livello / spegne.</source>
+        <translation>CQ-Filter aktiv (%1). Klick: Stufe wechseln / ausschalten.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1223"/>
+        <source>Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.</source>
+        <translation>CQ-Filter aus. Klick: nur CQ anzeigen, dann durch 73 / RR73 / RRR wechseln.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1255"/>
+        <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
+        <translation>Async-FT2-Modus - Sinuswelle: grün=RX, rot=TX (Standard AUS)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1270"/>
         <source>Hound mode active</source>
         <translation>Hound-Modus aktiv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1002"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1294"/>
         <source>Wait &amp; Pounce active</source>
         <translation>Wait &amp; Pounce aktiv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1473"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1819"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1478"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1824"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1487"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1833"/>
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1541"/>
-        <source>Confirm QSO Log</source>
-        <translation>QSO-Log bestätigen</translation>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1890"/>
+        <source>Conferma registrazione QSO</source>
+        <translation>QSO-Protokollierung bestätigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1576"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2040"/>
+        <source>Spot al cluster</source>
+        <translation>Spot zum Cluster</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2040"/>
+        <source>Cluster non connesso</source>
+        <translation>Cluster nicht verbunden</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2230"/>
+        <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
+        <translation>TX%1 deaktiviert (Rechtsklick -&gt; Menü zum Wiederaktivieren)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2231"/>
+        <source>Click: send now
+Right-click: menu (Edit / Skip TX%1)
+Long-press: edit message</source>
+        <translation>Klick: jetzt senden
+Rechtsklick: Menü (Bearbeiten / TX%1 überspringen)
+Langes Drücken: Nachricht bearbeiten</translation>
+    </message>
+    <message>
+        <source>Confirm QSO Log</source>
+        <translation type="vanished">QSO-Log bestätigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1925"/>
         <source>Locatore (es. JN71) — inseribile a mano</source>
         <translation>Locator (z. B. JN71) — manuell eingebbar</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1626"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1947"/>
+        <source>Start UTC:</source>
+        <translation>Start UTC:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1967"/>
+        <source>End UTC:</source>
+        <translation>Ende UTC:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2015"/>
         <source>Sat Mode:</source>
         <translation>Sat-Modus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1637"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2026"/>
         <source>DX Cluster:</source>
         <translation>DX-Cluster:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1651"/>
         <source>Spot to cluster</source>
-        <translation>Spot an Cluster</translation>
+        <translation type="vanished">Spot an Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1651"/>
         <source>Cluster not connected</source>
-        <translation>Cluster nicht verbunden</translation>
+        <translation type="vanished">Cluster nicht verbunden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1668"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2057"/>
         <source>Close</source>
         <translation>Schliessen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1694"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2083"/>
         <source>Add</source>
         <translation>Hinzufugen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1826"/>
         <source>TX%1 disabilitato (clic destro → menu per riabilitare)</source>
-        <translation>TX%1 deaktiviert (Rechtsklick → Menü zum erneuten Aktivieren)</translation>
+        <translation type="vanished">TX%1 deaktiviert (Rechtsklick → Menü zum erneuten Aktivieren)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1827"/>
         <source>Clic: invia ora
 Clic destro: menu (Modifica / Salta TX%1)
 Long-press: modifica messaggio</source>
-        <translation>Klick: jetzt senden
+        <translation type="vanished">Klick: jetzt senden
 Rechtsklick: Menü (Bearbeiten / TX%1 überspringen)
 Lange drücken: Nachricht bearbeiten</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1844"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2248"/>
         <source>Modifica messaggio TX%1</source>
         <translation>TX%1-Nachricht bearbeiten</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1851"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2255"/>
         <source>Riabilita TX%1</source>
         <translation>TX%1 wieder aktivieren</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1851"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2255"/>
         <source>Salta TX%1 (skip auto-seq)</source>
         <translation>TX%1 überspringen (Auto-Seq überspringen)</translation>
     </message>
@@ -14327,22 +15375,26 @@ Lange drücken: Nachricht bearbeiten</translation>
 <context>
     <name>Waterfall</name>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="574"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="793"/>
         <source>Hide</source>
         <translation>Ausblenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="597"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="816"/>
         <source>Hide waterfall controls</source>
         <translation>Wasserfall-Steuerung ausblenden</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1471"/>
-        <source>Show controls</source>
-        <translation>Steuerung anzeigen</translation>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1864"/>
+        <source>Mostra controlli</source>
+        <translation>Steuerelemente anzeigen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1488"/>
+        <source>Show controls</source>
+        <translation type="vanished">Steuerung anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1926"/>
         <source>Show waterfall controls</source>
         <translation>Wasserfall-Steuerung anzeigen</translation>
     </message>
@@ -16605,33 +17657,33 @@ Klicken Sie mit der rechten Maustaste, um Optionen zum Einfügen und Löschen an
 <context>
     <name>main</name>
     <message>
-        <location filename="../main.cpp" line="436"/>
+        <location filename="../main.cpp" line="446"/>
         <source>Failed to create a temporary directory</source>
         <translation>Es konnte kein temporäres Verzeichnis erstellt werden</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="437"/>
-        <location filename="../main.cpp" line="445"/>
+        <location filename="../main.cpp" line="447"/>
+        <location filename="../main.cpp" line="455"/>
         <source>Path: &quot;%1&quot;</source>
         <translation>Pfad: „%1“</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="443"/>
+        <location filename="../main.cpp" line="453"/>
         <source>Failed to create a usable temporary directory</source>
         <translation>Es konnte kein verwendbares temporäres Verzeichnis erstellt werden</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="444"/>
+        <location filename="../main.cpp" line="454"/>
         <source>Another application may be locking the directory</source>
         <translation>Möglicherweise sperrt eine andere Anwendung das Verzeichnis</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="460"/>
+        <location filename="../main.cpp" line="470"/>
         <source>Failed to create data directory</source>
         <translation>Datenverzeichnis konnte nicht erstellt werden</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="461"/>
+        <location filename="../main.cpp" line="471"/>
         <source>path: &quot;%1&quot;</source>
         <translation>Pfad: „%1“</translation>
     </message>
