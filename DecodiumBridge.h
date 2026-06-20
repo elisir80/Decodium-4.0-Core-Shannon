@@ -1831,6 +1831,7 @@ private:
     void syncSettingToLegacyIni(const QString& key, const QVariant& value);
     QVariant readSettingFromLegacyIni(const QString& key) const;
     void persistTxWatchdogSettings();
+    bool txWatchdogLimitConfigured() const;
     QFont fontSettingFont(const QString& key,
                           const QString& fallbackFamily,
                           int fallbackPointSize) const;
