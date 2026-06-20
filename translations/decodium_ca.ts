@@ -493,9 +493,13 @@ Searched paths:
         <translation>Target callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
         <source>Tentativi max</source>
-        <translation>Intents màx.</translation>
+        <translation type="vanished">Intents màx.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <source>Max chiamate a vuoto</source>
+        <translation>Trucades en va màx.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
@@ -540,8 +544,17 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
+        <translation>Re-arm: si el target desapareix torna a l'escolta (màx. 3 vegades, després Halt manual)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <source>A vuoto %1 / %2</source>
+        <translation>En va %1 / %2</translation>
+    </message>
+    <message>
         <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>Re-arm: a cada intent sense QSO torna a l&apos;escolta (màx. 3 vegades, després Halt manual)</translation>
+        <translation type="vanished">Re-arm: a cada intent sense QSO torna a l&apos;escolta (màx. 3 vegades, després Halt manual)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
@@ -554,9 +567,8 @@ Searched paths:
         <translation>Estat: trucant %1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
         <source>Tentativo %1 / %2</source>
-        <translation>Intent %1 / %2</translation>
+        <translation type="vanished">Intent %1 / %2</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
@@ -1842,37 +1854,37 @@ o contacta amb l&apos;assistència de DXLab a DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23627"/>
+        <location filename="../DecodiumBridge.cpp" line="23725"/>
         <source>TX non avviata</source>
         <translation>TX no iniciada</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23628"/>
+        <location filename="../DecodiumBridge.cpp" line="23726"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Callsign comprimit no resolt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27168"/>
+        <location filename="../DecodiumBridge.cpp" line="27278"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ aturat</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27169"/>
+        <location filename="../DecodiumBridge.cpp" line="27279"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Trucada directa rebuda, però el callsign no està resolt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32199"/>
+        <location filename="../DecodiumBridge.cpp" line="32310"/>
         <source>Map selection: %1 %2</source>
         <translation>Selecció al mapa: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32200"/>
+        <location filename="../DecodiumBridge.cpp" line="32311"/>
         <source>Map selection: %1</source>
         <translation>Selecció al mapa: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38603"/>
+        <location filename="../DecodiumBridge.cpp" line="38716"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Les comprovacions d&apos;actualització estan desactivades en aquesta versió.</translation>
     </message>
@@ -10383,74 +10395,74 @@ El fitxer baixat supera el límit de %1 MiB:
         <translation>Error de socket UDP</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20642"/>
+        <location filename="../DecodiumBridge.cpp" line="20740"/>
         <source>Invalid frequency</source>
         <translation>Freqüència no vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20644"/>
+        <location filename="../DecodiumBridge.cpp" line="20742"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Data/hora no vàlida. Useu el format ISO o yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20646"/>
+        <location filename="../DecodiumBridge.cpp" line="20744"/>
         <source>Invalid frequency row</source>
         <translation>Fila de freqüència no vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20803"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>No s&apos;ha pogut analitzar el fitxer JSON de freqüències: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20713"/>
+        <location filename="../DecodiumBridge.cpp" line="20811"/>
         <source>No frequencies were found</source>
         <translation>No s&apos;ha trobat cap freqüència</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20719"/>
-        <location filename="../DecodiumBridge.cpp" line="20821"/>
-        <location filename="../DecodiumBridge.cpp" line="20848"/>
+        <location filename="../DecodiumBridge.cpp" line="20817"/>
+        <location filename="../DecodiumBridge.cpp" line="20919"/>
+        <location filename="../DecodiumBridge.cpp" line="20946"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>El fitxer de freqüències conté massa files (%1, límit %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20760"/>
+        <location filename="../DecodiumBridge.cpp" line="20858"/>
         <source>Frequency file does not exist</source>
         <translation>El fitxer de freqüències no existeix</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20766"/>
+        <location filename="../DecodiumBridge.cpp" line="20864"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>El fitxer de freqüències és massa gran (%1 bytes, límit %2 bytes)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20776"/>
+        <location filename="../DecodiumBridge.cpp" line="20874"/>
         <source>Cannot open frequency file: %1</source>
         <translation>No es pot obrir el fitxer de freqüències: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20786"/>
+        <location filename="../DecodiumBridge.cpp" line="20884"/>
         <source>No valid working frequencies found</source>
         <translation>No s&apos;ha trobat cap freqüència de treball vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20800"/>
+        <location filename="../DecodiumBridge.cpp" line="20898"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>No és un fitxer de freqüències vàlid: magic de fitxer incorrecte</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20807"/>
+        <location filename="../DecodiumBridge.cpp" line="20905"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>No és un fitxer de freqüències vàlid: la versió és massa nova</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20815"/>
+        <location filename="../DecodiumBridge.cpp" line="20913"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>No és un fitxer de freqüències vàlid: no es pot llegir el nombre de files</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20842"/>
+        <location filename="../DecodiumBridge.cpp" line="20940"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>No és un fitxer de freqüències vàlid: contingut corrupte</translation>
     </message>
@@ -15488,20 +15500,34 @@ Automatically calls CQ until a reply arrives (default OFF)</source>
 Truca CQ automàticament fins que arriba una resposta (per defecte OFF)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
-        <translation>Trucada activa: %1 (intent %2/%3)
+        <translation type="vanished">Trucada activa: %1 (intent %2/%3)
+Clic per obrir el panell</translation>
+    </message>
+    <message>
+        <source>Direct call (CALL)
+Open the direct callsign call panel
+with retry, timeout, and period control</source>
+        <translation type="vanished">Trucada directa (CALL)
+Obre el panell de trucada directa per callsign
+amb retry, timeout i control de període</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
+        <source>Active call: %1 (missed target %2/%3)
+Click to open the panel</source>
+        <translation>Trucada activa: %1 (target mancat %2/%3)
 Clic per obrir el panell</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
-with retry, timeout, and period control</source>
+with missed-target limit, timeout, and period control</source>
         <translation>Trucada directa (CALL)
 Obre el panell de trucada directa per callsign
-amb retry, timeout i control de període</translation>
+amb límit de target mancat, timeout i control de període</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>

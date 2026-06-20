@@ -465,9 +465,13 @@ Keresett útvonalak:%1</translation>
         <translation>Cél hívójel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
         <source>Tentativi max</source>
-        <translation>Max próbálkozások</translation>
+        <translation type="vanished">Max próbálkozások</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <source>Max chiamate a vuoto</source>
+        <translation>Max elvétett cél</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
@@ -512,8 +516,17 @@ Keresett útvonalak:%1</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
+        <translation>Újraélesítés: ha a cél eltűnik, visszatér a hallgatáshoz (max 3 alkalommal, majd kézi Halt)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <source>A vuoto %1 / %2</source>
+        <translation>Elvétett cél %1 / %2</translation>
+    </message>
+    <message>
         <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>Újraélesítés: QSO nélküli próbálkozás után visszatér a hallgatáshoz (max. 3 alkalommal, majd kézi Halt)</translation>
+        <translation type="vanished">Újraélesítés: QSO nélküli próbálkozás után visszatér a hallgatáshoz (max. 3 alkalommal, majd kézi Halt)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
@@ -526,9 +539,8 @@ Keresett útvonalak:%1</translation>
         <translation>Állapot: %1 hívása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
         <source>Tentativo %1 / %2</source>
-        <translation>Próbálkozás %1 / %2</translation>
+        <translation type="vanished">Próbálkozás %1 / %2</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
@@ -1778,37 +1790,37 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23627"/>
+        <location filename="../DecodiumBridge.cpp" line="23725"/>
         <source>TX non avviata</source>
         <translation>TX nem indult el</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23628"/>
+        <location filename="../DecodiumBridge.cpp" line="23726"/>
         <source>Nominativo compresso non risolto</source>
         <translation>A tömörített hívójel nem feloldható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27168"/>
+        <location filename="../DecodiumBridge.cpp" line="27278"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ leállítva</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27169"/>
+        <location filename="../DecodiumBridge.cpp" line="27279"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Közvetlen hívás érkezett, de a hívójel nem feloldható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32199"/>
+        <location filename="../DecodiumBridge.cpp" line="32310"/>
         <source>Map selection: %1 %2</source>
         <translation>Térkép-kijelölés: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32200"/>
+        <location filename="../DecodiumBridge.cpp" line="32311"/>
         <source>Map selection: %1</source>
         <translation>Térkép-kijelölés: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38603"/>
+        <location filename="../DecodiumBridge.cpp" line="38716"/>
         <source>Update checks are disabled in this build.</source>
         <translation>A frissítések ellenőrzése le van tiltva ebben a buildben.</translation>
     </message>
@@ -9729,74 +9741,74 @@ A letöltött fájl meghaladja a%1MiB korlátot:%2</translation>
         <translation>UDP socket hiba</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20642"/>
+        <location filename="../DecodiumBridge.cpp" line="20740"/>
         <source>Invalid frequency</source>
         <translation>Érvénytelen frekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20644"/>
+        <location filename="../DecodiumBridge.cpp" line="20742"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Érvénytelen dátum/idő. Használjon ISO formátumot vagy yyyy-MM-dd HH:mm formátumot.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20646"/>
+        <location filename="../DecodiumBridge.cpp" line="20744"/>
         <source>Invalid frequency row</source>
         <translation>Érvénytelen frekvencia sor</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20803"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>A JSON frekvenciafájl értelmezése sikertelen: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20713"/>
+        <location filename="../DecodiumBridge.cpp" line="20811"/>
         <source>No frequencies were found</source>
         <translation>Nem található frekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20719"/>
-        <location filename="../DecodiumBridge.cpp" line="20821"/>
-        <location filename="../DecodiumBridge.cpp" line="20848"/>
+        <location filename="../DecodiumBridge.cpp" line="20817"/>
+        <location filename="../DecodiumBridge.cpp" line="20919"/>
+        <location filename="../DecodiumBridge.cpp" line="20946"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>A frekvenciafájl túl sok sort tartalmaz (%1, korlát %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20760"/>
+        <location filename="../DecodiumBridge.cpp" line="20858"/>
         <source>Frequency file does not exist</source>
         <translation>A frekvenciafájl nem létezik</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20766"/>
+        <location filename="../DecodiumBridge.cpp" line="20864"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>A frekvenciafájl túl nagy (%1 bájt, korlát %2 bájt)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20776"/>
+        <location filename="../DecodiumBridge.cpp" line="20874"/>
         <source>Cannot open frequency file: %1</source>
         <translation>A frekvenciafájl nem nyitható meg: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20786"/>
+        <location filename="../DecodiumBridge.cpp" line="20884"/>
         <source>No valid working frequencies found</source>
         <translation>Nem található érvényes munkafrekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20800"/>
+        <location filename="../DecodiumBridge.cpp" line="20898"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Nem érvényes frekvenciafájl: hibás fájl magic</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20807"/>
+        <location filename="../DecodiumBridge.cpp" line="20905"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Nem érvényes frekvenciafájl: a verzió túl új</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20815"/>
+        <location filename="../DecodiumBridge.cpp" line="20913"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Nem érvényes frekvenciafájl: a sorszám nem olvasható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20842"/>
+        <location filename="../DecodiumBridge.cpp" line="20940"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Nem érvényes frekvenciafájl: a tartalom sérült</translation>
     </message>
@@ -14830,20 +14842,34 @@ Automatically calls CQ until a reply arrives (default OFF)</source>
 Automatikusan CQ-t hív, amíg válasz nem érkezik (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
-        <translation>Aktív hívás: %1 (próbálkozás %2/%3)
+        <translation type="vanished">Aktív hívás: %1 (próbálkozás %2/%3)
+Kattintson a panel megnyitásához</translation>
+    </message>
+    <message>
+        <source>Direct call (CALL)
+Open the direct callsign call panel
+with retry, timeout, and period control</source>
+        <translation type="vanished">Közvetlen hívás (CALL)
+Nyissa meg a közvetlen hívójel-hívó panelt
+újrapróbálkozással, időtúllépéssel és periódus-vezérléssel</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
+        <source>Active call: %1 (missed target %2/%3)
+Click to open the panel</source>
+        <translation>Aktív hívás: %1 (elvétett cél %2/%3)
 Kattintson a panel megnyitásához</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
-with retry, timeout, and period control</source>
+with missed-target limit, timeout, and period control</source>
         <translation>Közvetlen hívás (CALL)
 Nyissa meg a közvetlen hívójel-hívó panelt
-újrapróbálkozással, időtúllépéssel és periódus-vezérléssel</translation>
+elvétett cél korlátjával, időtúllépéssel és periódus-vezérléssel</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>

@@ -481,9 +481,13 @@ Searched paths:
         <translation>目标 callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
         <source>Tentativi max</source>
-        <translation>最大尝试次数</translation>
+        <translation type="vanished">最大尝试次数</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <source>Max chiamate a vuoto</source>
+        <translation>最大未命中目标次数</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
@@ -528,8 +532,17 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
+        <translation>重新待命：若目标消失则返回监听（最多 3 次，之后需手动 Halt）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <source>A vuoto %1 / %2</source>
+        <translation>未命中目标 %1 / %2</translation>
+    </message>
+    <message>
         <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>重新待命：每次尝试未成 QSO 则返回监听（最多 3 次，之后需手动 Halt）</translation>
+        <translation type="vanished">重新待命：每次尝试未成 QSO 则返回监听（最多 3 次，之后需手动 Halt）</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
@@ -542,9 +555,8 @@ Searched paths:
         <translation>状态：正在呼叫 %1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
         <source>Tentativo %1 / %2</source>
-        <translation>尝试 %1 / %2</translation>
+        <translation type="vanished">尝试 %1 / %2</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
@@ -1825,37 +1837,37 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23627"/>
+        <location filename="../DecodiumBridge.cpp" line="23725"/>
         <source>TX non avviata</source>
         <translation>TX 未启动</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23628"/>
+        <location filename="../DecodiumBridge.cpp" line="23726"/>
         <source>Nominativo compresso non risolto</source>
         <translation>压缩的 callsign 未解析</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27168"/>
+        <location filename="../DecodiumBridge.cpp" line="27278"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ 已停止</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27169"/>
+        <location filename="../DecodiumBridge.cpp" line="27279"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>已收到直接呼叫，但 callsign 未解析</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32199"/>
+        <location filename="../DecodiumBridge.cpp" line="32310"/>
         <source>Map selection: %1 %2</source>
         <translation>地图选择：%1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32200"/>
+        <location filename="../DecodiumBridge.cpp" line="32311"/>
         <source>Map selection: %1</source>
         <translation>地图选择：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38603"/>
+        <location filename="../DecodiumBridge.cpp" line="38716"/>
         <source>Update checks are disabled in this build.</source>
         <translation>此版本已禁用更新检查。</translation>
     </message>
@@ -10705,74 +10717,74 @@ Downloaded file exceeds limit of %1 MiB:
         <translation>UDP 套接字错误</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20642"/>
+        <location filename="../DecodiumBridge.cpp" line="20740"/>
         <source>Invalid frequency</source>
         <translation>无效频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20644"/>
+        <location filename="../DecodiumBridge.cpp" line="20742"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>无效的日期/时间。请使用 ISO 格式或 yyyy-MM-dd HH:mm。</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20646"/>
+        <location filename="../DecodiumBridge.cpp" line="20744"/>
         <source>Invalid frequency row</source>
         <translation>无效的频率行</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20803"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>解析 JSON 频率文件失败：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20713"/>
+        <location filename="../DecodiumBridge.cpp" line="20811"/>
         <source>No frequencies were found</source>
         <translation>未找到任何频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20719"/>
-        <location filename="../DecodiumBridge.cpp" line="20821"/>
-        <location filename="../DecodiumBridge.cpp" line="20848"/>
+        <location filename="../DecodiumBridge.cpp" line="20817"/>
+        <location filename="../DecodiumBridge.cpp" line="20919"/>
+        <location filename="../DecodiumBridge.cpp" line="20946"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>频率文件包含的行过多 (%1，上限 %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20760"/>
+        <location filename="../DecodiumBridge.cpp" line="20858"/>
         <source>Frequency file does not exist</source>
         <translation>频率文件不存在</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20766"/>
+        <location filename="../DecodiumBridge.cpp" line="20864"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>频率文件过大 (%1 字节，上限 %2 字节)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20776"/>
+        <location filename="../DecodiumBridge.cpp" line="20874"/>
         <source>Cannot open frequency file: %1</source>
         <translation>无法打开频率文件：%1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20786"/>
+        <location filename="../DecodiumBridge.cpp" line="20884"/>
         <source>No valid working frequencies found</source>
         <translation>未找到有效的工作频率</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20800"/>
+        <location filename="../DecodiumBridge.cpp" line="20898"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>不是有效的频率文件：文件 magic 不正确</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20807"/>
+        <location filename="../DecodiumBridge.cpp" line="20905"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>不是有效的频率文件：版本过新</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20815"/>
+        <location filename="../DecodiumBridge.cpp" line="20913"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>不是有效的频率文件：无法读取行数</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20842"/>
+        <location filename="../DecodiumBridge.cpp" line="20940"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>不是有效的频率文件：内容已损坏</translation>
     </message>
@@ -15837,20 +15849,34 @@ Automatically calls CQ until a reply arrives (default OFF)</source>
 自动呼叫 CQ 直到收到回复（默认 OFF）</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
-        <translation>活动呼叫：%1（尝试 %2/%3）
+        <translation type="vanished">活动呼叫：%1（尝试 %2/%3）
+点击打开面板</translation>
+    </message>
+    <message>
+        <source>Direct call (CALL)
+Open the direct callsign call panel
+with retry, timeout, and period control</source>
+        <translation type="vanished">直接呼叫 (CALL)
+打开直接 callsign 呼叫面板，
+带重试、超时和周期控制</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
+        <source>Active call: %1 (missed target %2/%3)
+Click to open the panel</source>
+        <translation>活动呼叫：%1（未命中目标 %2/%3）
 点击打开面板</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
-with retry, timeout, and period control</source>
+with missed-target limit, timeout, and period control</source>
         <translation>直接呼叫 (CALL)
 打开直接 callsign 呼叫面板，
-带重试、超时和周期控制</translation>
+带未命中目标上限、超时和周期控制</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>

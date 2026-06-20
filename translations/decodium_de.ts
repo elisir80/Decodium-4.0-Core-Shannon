@@ -474,13 +474,17 @@ Gesuchte Pfade:
         <translation>Ziel-Rufzeichen</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
         <source>Tentativi max</source>
-        <translation>Max. Versuche</translation>
+        <translation type="vanished">Max. Versuche</translation>
     </message>
     <message>
         <source>Timeout slot (s)</source>
         <translation type="vanished">Slot-Timeout (s)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <source>Max chiamate a vuoto</source>
+        <translation>Max. Anrufe ohne Antwort</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
@@ -525,8 +529,17 @@ Gesuchte Pfade:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
+        <translation>Re-Arm: wenn das Ziel verschwindet, kehrt der Empfang zurück (max. 3 Mal, dann manuelles Halt)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <source>A vuoto %1 / %2</source>
+        <translation>Ohne Antwort %1 / %2</translation>
+    </message>
+    <message>
         <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>Re-Arm: nach einem Versuch ohne QSO kehrt der Empfang zurück (max. 3 Mal, dann manuelles Halt)</translation>
+        <translation type="vanished">Re-Arm: nach einem Versuch ohne QSO kehrt der Empfang zurück (max. 3 Mal, dann manuelles Halt)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
@@ -539,9 +552,8 @@ Gesuchte Pfade:
         <translation>Status: rufe %1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
         <source>Tentativo %1 / %2</source>
-        <translation>Versuch %1 / %2</translation>
+        <translation type="vanished">Versuch %1 / %2</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
@@ -1787,37 +1799,37 @@ oder wenden Sie sich an den DXLab-Support unter DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23627"/>
+        <location filename="../DecodiumBridge.cpp" line="23725"/>
         <source>TX non avviata</source>
         <translation>TX nicht gestartet</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23628"/>
+        <location filename="../DecodiumBridge.cpp" line="23726"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Komprimiertes Rufzeichen nicht aufgelöst</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27168"/>
+        <location filename="../DecodiumBridge.cpp" line="27278"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ gestoppt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27169"/>
+        <location filename="../DecodiumBridge.cpp" line="27279"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Direktanruf empfangen, aber Rufzeichen nicht aufgelöst</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32199"/>
+        <location filename="../DecodiumBridge.cpp" line="32310"/>
         <source>Map selection: %1 %2</source>
         <translation>Kartenauswahl: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32200"/>
+        <location filename="../DecodiumBridge.cpp" line="32311"/>
         <source>Map selection: %1</source>
         <translation>Kartenauswahl: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38603"/>
+        <location filename="../DecodiumBridge.cpp" line="38716"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Update-Prüfungen sind in diesem Build deaktiviert.</translation>
     </message>
@@ -9997,74 +10009,74 @@ Die heruntergeladene Datei überschreitet die Grenze von %1 MiB:
         <translation>UDP-Socket-Fehler</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20642"/>
+        <location filename="../DecodiumBridge.cpp" line="20740"/>
         <source>Invalid frequency</source>
         <translation>Ungültige Frequenz</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20644"/>
+        <location filename="../DecodiumBridge.cpp" line="20742"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Ungültiges Datum/Uhrzeit. ISO-Format oder yyyy-MM-dd HH:mm verwenden.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20646"/>
+        <location filename="../DecodiumBridge.cpp" line="20744"/>
         <source>Invalid frequency row</source>
         <translation>Ungültige Frequenzzeile</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20705"/>
+        <location filename="../DecodiumBridge.cpp" line="20803"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>JSON-Frequenzdatei konnte nicht verarbeitet werden: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20713"/>
+        <location filename="../DecodiumBridge.cpp" line="20811"/>
         <source>No frequencies were found</source>
         <translation>Keine Frequenzen gefunden</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20719"/>
-        <location filename="../DecodiumBridge.cpp" line="20821"/>
-        <location filename="../DecodiumBridge.cpp" line="20848"/>
+        <location filename="../DecodiumBridge.cpp" line="20817"/>
+        <location filename="../DecodiumBridge.cpp" line="20919"/>
+        <location filename="../DecodiumBridge.cpp" line="20946"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>Frequenzdatei enthält zu viele Zeilen (%1, Limit %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20760"/>
+        <location filename="../DecodiumBridge.cpp" line="20858"/>
         <source>Frequency file does not exist</source>
         <translation>Frequenzdatei existiert nicht</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20766"/>
+        <location filename="../DecodiumBridge.cpp" line="20864"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>Frequenzdatei ist zu groß (%1 Bytes, Limit %2 Bytes)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20776"/>
+        <location filename="../DecodiumBridge.cpp" line="20874"/>
         <source>Cannot open frequency file: %1</source>
         <translation>Frequenzdatei kann nicht geöffnet werden: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20786"/>
+        <location filename="../DecodiumBridge.cpp" line="20884"/>
         <source>No valid working frequencies found</source>
         <translation>Keine gültigen Arbeitsfrequenzen gefunden</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20800"/>
+        <location filename="../DecodiumBridge.cpp" line="20898"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Keine gültige Frequenzdatei: falsche Datei-Signatur</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20807"/>
+        <location filename="../DecodiumBridge.cpp" line="20905"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Keine gültige Frequenzdatei: Version ist zu neu</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20815"/>
+        <location filename="../DecodiumBridge.cpp" line="20913"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Keine gültige Frequenzdatei: Zeilenanzahl kann nicht gelesen werden</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20842"/>
+        <location filename="../DecodiumBridge.cpp" line="20940"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Keine gültige Frequenzdatei: Inhalt beschädigt</translation>
     </message>
@@ -15234,10 +15246,9 @@ CQ automatisch rufen, bis eine Antwort kommt</translation>
         <translation type="vanished">A-priori-Decodierung</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
         <source>Active call: %1 (attempt %2/%3)
 Click to open the panel</source>
-        <translation>Aktiver Anruf: %1 (Versuch %2/%3)
+        <translation type="vanished">Aktiver Anruf: %1 (Versuch %2/%3)
 Klicken, um das Panel zu öffnen</translation>
     </message>
     <message>
@@ -15308,13 +15319,28 @@ Automatically calls CQ until a reply arrives (default OFF)</source>
 Ruft automatisch CQ, bis eine Antwort eintrifft (Standard AUS)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with retry, timeout, and period control</source>
-        <translation>Direktanruf (CALL)
+        <translation type="vanished">Direktanruf (CALL)
 Öffnet das Panel für den direkten Rufzeichenanruf
 mit Wiederholung, Timeout und Periodensteuerung</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
+        <source>Active call: %1 (missed target %2/%3)
+Click to open the panel</source>
+        <translation>Aktiver Anruf: %1 (verfehltes Ziel %2/%3)
+Klicken, um das Panel zu öffnen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
+        <source>Direct call (CALL)
+Open the direct callsign call panel
+with missed-target limit, timeout, and period control</source>
+        <translation>Direktanruf (CALL)
+Öffnet das Panel für den direkten Rufzeichenanruf
+mit Limit verfehltes Ziel, Timeout und Periodensteuerung</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>
