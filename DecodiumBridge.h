@@ -1710,7 +1710,7 @@ private:
     void noteCpuPressure(const QString& reason, int durationMs = 10000, bool severe = false);
     int effectiveFtThreadLimit() const;
     bool ft4AdaptiveCpuLimitActive(qint64 nowMs = 0) const;
-    void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason);
+    void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason, qint64 durationMs = 60000);
     int effectiveFt4ThreadLimit() const;
     int effectiveFt4DecodeDepth(int requestedDepth) const;
     int effectiveSpectrumTimerIntervalMs() const;

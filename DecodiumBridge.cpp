@@ -11850,7 +11850,7 @@ void DecodiumBridge::drainFt4LiveDecodeBacklog(quint64 keepSerial, const QString
         QCoreApplication::removePostedEvents(m_ft4Worker, QEvent::MetaCall);
     }
 
-    activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("backlog drain %1").arg(reason));
+    activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("backlog drain %1").arg(reason), qint64 {3000});
 
     if (nowMs - m_lastFt4BacklogDrainLogMs >= 2000) {
         m_lastFt4BacklogDrainLogMs = nowMs;
@@ -29309,12 +29309,13 @@ bool DecodiumBridge::ft4AdaptiveCpuLimitActive(qint64 nowMs) const
     return nowMs < m_ft4AdaptiveLimitUntilMs;
 }
 
-void DecodiumBridge::activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason)
+void DecodiumBridge::activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason, qint64 durationMs)
 {
     if (nowMs <= 0) {
         nowMs = QDateTime::currentMSecsSinceEpoch();
     }
-    m_ft4AdaptiveLimitUntilMs = qMax(m_ft4AdaptiveLimitUntilMs, nowMs + qint64 {60000});
+    durationMs = qBound<qint64>(qint64 {1000}, durationMs, qint64 {60000});
+    m_ft4AdaptiveLimitUntilMs = qMax(m_ft4AdaptiveLimitUntilMs, nowMs + durationMs);
 
     if (nowMs - m_lastFt4AdaptiveLogMs >= 2000) {
         m_lastFt4AdaptiveLogMs = nowMs;
@@ -36331,7 +36332,7 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
     QString ft4BacklogDetail;
     if (ft4LiveDecodeBacklogActive(nowMs, 5000, 0, &ft4BacklogDetail)) {
         m_ft4EarlyDecodeSent = true;
-        activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("early-skip %1").arg(ft4BacklogDetail));
+        activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("early-skip %1").arg(ft4BacklogDetail), qint64 {3000});
         if (nowMs - m_lastEarlyDecodeSkipLogMs > 2000) {
             m_lastEarlyDecodeSkipLogMs = nowMs;
             bridgeLog(QStringLiteral("FT4 early decode skipped: backlog %1").arg(ft4BacklogDetail));
