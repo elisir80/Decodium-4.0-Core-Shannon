@@ -6853,6 +6853,12 @@ void DecodiumBridge::persistTxWatchdogSettings()
     }
 }
 
+bool DecodiumBridge::txWatchdogLimitConfigured() const
+{
+    return (m_txWatchdogMode == 1 && m_txWatchdogTime > 0)
+        || (m_txWatchdogMode == 2 && m_txWatchdogCount > 0);
+}
+
 void DecodiumBridge::setTxWatchdogMode(int v)
 {
     v = qBound(0, v, 2);
@@ -13905,6 +13911,11 @@ void DecodiumBridge::beginTargetCallCalling()
                 bridgeLog(QStringLiteral("targetCall timeout reached during TX; stop deferred to TX end"));
                 return;
             }
+            if (txWatchdogLimitConfigured()) {
+                bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), TX watchdog priority active -> continue")
+                              .arg(m_targetCallTimeoutS));
+                return;
+            }
             bridgeLog(QStringLiteral("targetCall: timeout reached (%1s)")
                           .arg(m_targetCallTimeoutS));
             endTargetCallNoQso(QStringLiteral("timeout"));
@@ -14038,16 +14049,31 @@ void DecodiumBridge::tickTargetCallOnTx()
                   .arg(m_targetCallPauseS));
 
     if (m_targetCallMaxRetries > 0 && m_targetCallRetryCount >= m_targetCallMaxRetries) {
-        bridgeLog(QStringLiteral("targetCall: max retries reached (%1)").arg(m_targetCallMaxRetries));
-        endTargetCallNoQso(QStringLiteral("max retries"));
-        return;
+        if (txWatchdogLimitConfigured()) {
+            int const extraRetries = m_targetCallRetryCount - m_targetCallMaxRetries;
+            if (extraRetries == 0 || (extraRetries > 0 && extraRetries % 5 == 0)) {
+                bridgeLog(QStringLiteral("targetCall: max retries reached (%1), TX watchdog priority active -> continue")
+                              .arg(m_targetCallMaxRetries));
+            }
+        } else {
+            bridgeLog(QStringLiteral("targetCall: max retries reached (%1)").arg(m_targetCallMaxRetries));
+            endTargetCallNoQso(QStringLiteral("max retries"));
+            return;
+        }
     }
 
     if (m_targetCallTimeoutS > 0 && elapsedS >= m_targetCallTimeoutS) {
-        bridgeLog(QStringLiteral("targetCall: timeout reached (%1s)")
-                      .arg(m_targetCallTimeoutS));
-        endTargetCallNoQso(QStringLiteral("timeout"));
-        return;
+        if (txWatchdogLimitConfigured()) {
+            if (m_targetCallRetryCount == 1 || m_targetCallRetryCount % 5 == 0) {
+                bridgeLog(QStringLiteral("targetCall: timeout reached (%1s), TX watchdog priority active -> continue")
+                              .arg(m_targetCallTimeoutS));
+            }
+        } else {
+            bridgeLog(QStringLiteral("targetCall: timeout reached (%1s)")
+                          .arg(m_targetCallTimeoutS));
+            endTargetCallNoQso(QStringLiteral("timeout"));
+            return;
+        }
     }
 
     if (m_targetCallPauseS > 0) {
@@ -14068,10 +14094,15 @@ void DecodiumBridge::tickTargetCallOnTx()
                 ? qMax<qint64>(0, m_targetCallStartedUtc.secsTo(resumeNowUtc))
                 : 0;
             if (m_targetCallTimeoutS > 0 && resumeElapsedS >= m_targetCallTimeoutS) {
-                bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s)")
-                              .arg(m_targetCallTimeoutS));
-                endTargetCallNoQso(QStringLiteral("timeout pausa"));
-                return;
+                if (txWatchdogLimitConfigured()) {
+                    bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s), TX watchdog priority active -> resume")
+                                  .arg(m_targetCallTimeoutS));
+                } else {
+                    bridgeLog(QStringLiteral("targetCall: timeout reached during pause (%1s)")
+                                  .arg(m_targetCallTimeoutS));
+                    endTargetCallNoQso(QStringLiteral("timeout pausa"));
+                    return;
+                }
             }
             bool const resumeQsoProgressed = m_qsoProgress > 2 && m_currentTx >= 2 && m_currentTx <= 5;
             if (resumeQsoProgressed) {
@@ -26623,7 +26654,19 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // m_txRetryCount is set to 1 by the first successful send of a TX step.
         // The configured cap is the total number of sends, so equality already
         // means the operator's retry budget has been consumed.
-        if (applyRetryLimit && m_currentTx == m_lastNtx && m_txRetryCount >= effectiveMaxCallerRetries) {
+        if (applyRetryLimit && m_currentTx == m_lastNtx
+            && m_txRetryCount >= effectiveMaxCallerRetries
+            && txWatchdogLimitConfigured()) {
+            int const extraRetries = m_txRetryCount - effectiveMaxCallerRetries;
+            if (extraRetries == 0 || (extraRetries > 0 && extraRetries % 5 == 0)) {
+                bridgeLog(QStringLiteral("checkAndStartPeriodicTx: retry limit %1 su TX%2 reached, TX watchdog priority active -> continue")
+                              .arg(effectiveMaxCallerRetries)
+                              .arg(m_currentTx));
+            }
+        }
+        if (applyRetryLimit && m_currentTx == m_lastNtx
+            && m_txRetryCount >= effectiveMaxCallerRetries
+            && !txWatchdogLimitConfigured()) {
             QString const assistSuffix =
                 (effectiveMaxCallerRetries != m_maxCallerRetries)
                     ? QStringLiteral(" (slow CPU assist)")
@@ -34086,7 +34129,7 @@ void DecodiumBridge::onPeriodTimer()
     // m_txWatchdogMode: 0=off, 1=time-based (monotonic real elapsed), 2=count-based (periodi)
     bool const txWatchdogSessionActive =
         m_txEnabled || m_transmitting || m_autoCqRepeat || m_deferredManualSyncTx;
-    bool const txWatchdogConfigured = (m_txWatchdogMode > 0);
+    bool const txWatchdogConfigured = txWatchdogLimitConfigured();
     if (txWatchdogSessionActive && txWatchdogConfigured) {
         if (!m_txWatchdogElapsedActive || !m_txWatchdogElapsed.isValid()) {
             m_txWatchdogElapsed.restart();
