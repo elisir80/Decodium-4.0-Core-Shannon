@@ -1707,6 +1707,10 @@ private:
     bool cpuPressureSevereActive() const;
     void noteCpuPressure(const QString& reason, int durationMs = 10000, bool severe = false);
     int effectiveFtThreadLimit() const;
+    bool ft4AdaptiveCpuLimitActive(qint64 nowMs = 0) const;
+    void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason);
+    int effectiveFt4ThreadLimit() const;
+    int effectiveFt4DecodeDepth(int requestedDepth) const;
     int effectiveSpectrumTimerIntervalMs() const;
     void applyLowCpuRuntimeProfile(const QString& reason);
     int effectiveDecodeDepth() const;
@@ -2318,6 +2322,10 @@ private:
     bool m_ft4EarlyDecodeSent {false};
     qint64 m_lastEarlyDecodeSkipLogMs {0};
     qint64 m_lastFt8BacklogDrainLogMs {0};
+    int m_ft4LateCallbackStreak {0};
+    qint64 m_ft4AdaptiveLimitUntilMs {0};
+    qint64 m_lastFt4AdaptiveLogMs {0};
+    qint64 m_lastFt4BacklogDrainLogMs {0};
     QVector<short> m_pendingTimeSyncDecodeAudio;
     qint64 m_pendingTimeSyncDecodeSlot {-1};
     QString m_pendingTimeSyncDecodeMode;
@@ -3134,6 +3142,9 @@ private:
     bool ft8LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs, quint64 ignoreSerial,
                                     QString* detail = nullptr) const;
     void drainFt8LiveDecodeBacklog(quint64 keepSerial, const QString& reason);
+    bool ft4LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs, quint64 ignoreSerial,
+                                    QString* detail = nullptr) const;
+    void drainFt4LiveDecodeBacklog(quint64 keepSerial, const QString& reason);
     void resetFtxDecodeWorkersForModeChange(const QString& previousMode,
                                             const QString& nextMode);
     void queueFt8DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
