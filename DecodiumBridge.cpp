@@ -11758,6 +11758,78 @@ void DecodiumBridge::drainFt8LiveDecodeBacklog(quint64 keepSerial, const QString
     }
 }
 
+bool DecodiumBridge::ft4LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs,
+                                                quint64 ignoreSerial,
+                                                QString* detail) const
+{
+    int pendingFt4 = 0;
+    qint64 oldestAgeMs = 0;
+    quint64 oldestSerial = 0;
+
+    for (auto it = m_decodeStartMsBySerial.constBegin(); it != m_decodeStartMsBySerial.constEnd(); ++it) {
+        quint64 const serial = it.key();
+        if (serial == ignoreSerial) {
+            continue;
+        }
+        if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT4")) {
+            continue;
+        }
+
+        ++pendingFt4;
+        qint64 const ageMs = qMax<qint64>(0, nowMs - it.value());
+        if (ageMs > oldestAgeMs) {
+            oldestAgeMs = ageMs;
+            oldestSerial = serial;
+        }
+    }
+
+    bool const tooOld = oldestAgeMs >= minAgeMs;
+    bool const tooQueued = pendingFt4 >= 2 && oldestAgeMs >= 3500;
+    bool const active = tooOld || tooQueued;
+    if (detail) {
+        *detail = QStringLiteral("pending=%1 oldestSerial=%2 oldestAgeMs=%3 minAgeMs=%4")
+            .arg(pendingFt4)
+            .arg(oldestSerial)
+            .arg(oldestAgeMs)
+            .arg(minAgeMs);
+    }
+    return active;
+}
+
+void DecodiumBridge::drainFt4LiveDecodeBacklog(quint64 keepSerial, const QString& reason)
+{
+    int removedMeta = 0;
+    QList<quint64> const serials = m_decodeStartMsBySerial.keys();
+    for (quint64 const serial : serials) {
+        if (serial == keepSerial) {
+            continue;
+        }
+        if (m_decodeModeBySerial.value(serial).trimmed().toUpper() != QStringLiteral("FT4")) {
+            continue;
+        }
+        m_decodeStartMsBySerial.remove(serial);
+        m_decodeModeBySerial.remove(serial);
+        m_decodeUtcTokenBySerial.remove(serial);
+        m_decodeSessionBySerial.remove(serial);
+        ++removedMeta;
+    }
+
+    if (m_ft4Worker) {
+        QCoreApplication::removePostedEvents(m_ft4Worker, QEvent::MetaCall);
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("backlog drain %1").arg(reason));
+
+    if (nowMs - m_lastFt4BacklogDrainLogMs >= 2000) {
+        m_lastFt4BacklogDrainLogMs = nowMs;
+        bridgeLog(QStringLiteral("FT4 live backlog drain: keepSerial=%1 removed=%2 %3")
+                      .arg(keepSerial)
+                      .arg(removedMeta)
+                      .arg(reason));
+    }
+}
+
 void DecodiumBridge::resetEarlyDecodeSchedule()
 {
     m_ft8EarlyDecodeSlot = -1;
@@ -29092,6 +29164,48 @@ int DecodiumBridge::effectiveFtThreadLimit() const
     return normalLimit;
 }
 
+bool DecodiumBridge::ft4AdaptiveCpuLimitActive(qint64 nowMs) const
+{
+    if (nowMs <= 0) {
+        nowMs = QDateTime::currentMSecsSinceEpoch();
+    }
+    return nowMs < m_ft4AdaptiveLimitUntilMs;
+}
+
+void DecodiumBridge::activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason)
+{
+    if (nowMs <= 0) {
+        nowMs = QDateTime::currentMSecsSinceEpoch();
+    }
+    m_ft4AdaptiveLimitUntilMs = qMax(m_ft4AdaptiveLimitUntilMs, nowMs + qint64 {60000});
+
+    if (nowMs - m_lastFt4AdaptiveLogMs >= 2000) {
+        m_lastFt4AdaptiveLogMs = nowMs;
+        bridgeLog(QStringLiteral("FT4 adaptive CPU limit active: until +%1ms reason=%2 streak=%3")
+                      .arg(qMax<qint64>(0, m_ft4AdaptiveLimitUntilMs - nowMs))
+                      .arg(reason)
+                      .arg(m_ft4LateCallbackStreak));
+    }
+}
+
+int DecodiumBridge::effectiveFt4ThreadLimit() const
+{
+    int const baseLimit = effectiveFtThreadLimit();
+    if (ft4AdaptiveCpuLimitActive()) {
+        return qMin(baseLimit, 4);
+    }
+    return baseLimit;
+}
+
+int DecodiumBridge::effectiveFt4DecodeDepth(int requestedDepth) const
+{
+    int depth = qBound(1, requestedDepth, 4);
+    if (ft4AdaptiveCpuLimitActive()) {
+        depth = qMin(depth, 3);
+    }
+    return depth;
+}
+
 int DecodiumBridge::effectiveSpectrumTimerIntervalMs() const
 {
     QSettings s("Decodium", "Decodium3");
@@ -32462,11 +32576,21 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         ? QDateTime::currentMSecsSinceEpoch() - startedAtMs
         : -1;
     if (serialMode == QStringLiteral("FT4") && elapsedMs > 9000) {
+        ++m_ft4LateCallbackStreak;
+        activateFt4AdaptiveCpuLimit(QDateTime::currentMSecsSinceEpoch(),
+                                    QStringLiteral("late callback serial=%1 elapsedMs=%2 rows=%3")
+                                        .arg(serial)
+                                        .arg(elapsedMs)
+                                        .arg(rows.size()));
         bridgeLog("onFt8DecodeReady: ignored late FT4 callback serial=" + QString::number(serial) +
                   " rows=" + QString::number(rows.size()) +
-                  " elapsedMs=" + QString::number(elapsedMs));
+                  " elapsedMs=" + QString::number(elapsedMs) +
+                  " streak=" + QString::number(m_ft4LateCallbackStreak));
         forgetDecodeSerial();
         return;
+    }
+    if (serialMode == QStringLiteral("FT4") && elapsedMs >= 0 && elapsedMs <= 7500) {
+        m_ft4LateCallbackStreak = 0;
     }
 
     // I deep follow-up FT8 sono decode-list-only. La decisione TX e' gia'
@@ -36012,8 +36136,9 @@ void DecodiumBridge::queueFt4DecodeRequest(const QVector<short>& audioSnapshot, 
     req.nfqso = qBound(m_nfa, m_rxFrequency, m_nfb);
     req.nfa = m_nfa;
     req.nfb = m_nfb;
-    req.ndepth = (m_transmitting || m_tuning) ? qMin(decodeDepth, 2) : decodeDepth;
-    req.threadCount = effectiveFtThreadLimit();
+    int const requestedDepth = (m_transmitting || m_tuning) ? qMin(decodeDepth, 2) : decodeDepth;
+    req.ndepth = effectiveFt4DecodeDepth(requestedDepth);
+    req.threadCount = effectiveFt4ThreadLimit();
     req.ncontest = m_ncontest;
     req.lapcqonly = cqHint;
     req.mycall = m_callsign.toLocal8Bit();
@@ -36022,7 +36147,10 @@ void DecodiumBridge::queueFt4DecodeRequest(const QVector<short>& audioSnapshot, 
     bridgeLog("FT4 decode dispatch: serial=" + QString::number(serial) +
               " samples=" + QString::number(audioSnapshot.size()) +
               " slot=" + QString::number(slotIndexForUtc) +
-              " depth=" + QString::number(decodeDepth));
+              " depth=" + QString::number(req.ndepth) +
+              (req.ndepth != decodeDepth ? " requestedDepth=" + QString::number(decodeDepth) : QString()) +
+              " threads=" + QString::number(req.threadCount) +
+              (ft4AdaptiveCpuLimitActive() ? " adaptive=1" : QString()));
 
     auto* worker = m_ft4Worker;
     worker->markLatestDecodeSerial(serial);
@@ -36051,9 +36179,29 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
         return;
     }
 
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (ft4AdaptiveCpuLimitActive(nowMs)) {
+        m_ft4EarlyDecodeSent = true;
+        if (nowMs - m_lastEarlyDecodeSkipLogMs > 2000) {
+            m_lastEarlyDecodeSkipLogMs = nowMs;
+            bridgeLog(QStringLiteral("FT4 early decode skipped: adaptive CPU limit"));
+        }
+        return;
+    }
+
+    QString ft4BacklogDetail;
+    if (ft4LiveDecodeBacklogActive(nowMs, 5000, 0, &ft4BacklogDetail)) {
+        m_ft4EarlyDecodeSent = true;
+        activateFt4AdaptiveCpuLimit(nowMs, QStringLiteral("early-skip %1").arg(ft4BacklogDetail));
+        if (nowMs - m_lastEarlyDecodeSkipLogMs > 2000) {
+            m_lastEarlyDecodeSkipLogMs = nowMs;
+            bridgeLog(QStringLiteral("FT4 early decode skipped: backlog %1").arg(ft4BacklogDetail));
+        }
+        return;
+    }
+
     if (cpuPressureActive() || m_lowCpuModeEnabled) {
         m_ft4EarlyDecodeSent = true;
-        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
         if (nowMs - m_lastEarlyDecodeSkipLogMs > 2000) {
             m_lastEarlyDecodeSkipLogMs = nowMs;
             bridgeLog(m_lowCpuModeEnabled
@@ -36088,7 +36236,6 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
         nutc = utcToken.toInt();
     }
 
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     m_decodeStartMsBySerial.insert(serial, nowMs);
     m_decodeModeBySerial.insert(serial, QStringLiteral("FT4"));
     m_decodeUtcTokenBySerial.insert(serial, utcToken);
@@ -36481,13 +36628,20 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "FT4") {
+        QString ft4BacklogDetail;
+        bool const ft4RuntimeBacklog = ft4LiveDecodeBacklogActive(nowMs, 6500, serial, &ft4BacklogDetail);
+        if (ft4RuntimeBacklog) {
+            drainFt4LiveDecodeBacklog(serial, QStringLiteral("final-dispatch %1").arg(ft4BacklogDetail));
+        }
+
         decodium::ft4::DecodeRequest req;
         req.serial = serial; req.audio = audioSnapshot;
         req.nutc = nutc; req.nqsoprogress = decodeQsoProgress;
         req.nfqso = nfqso;
         req.nfa = m_nfa; req.nfb = m_nfb;
-        req.ndepth = txStartPending ? qMin(decodeDepth, 2) : decodeDepth;
-        req.threadCount = effectiveFtThreadLimit();
+        int const requestedFt4Depth = txStartPending ? qMin(decodeDepth, 2) : decodeDepth;
+        req.ndepth = effectiveFt4DecodeDepth(requestedFt4Depth);
+        req.threadCount = effectiveFt4ThreadLimit();
         req.ncontest = m_ncontest;
         req.lapcqonly = cqHint;
         req.mycall = m_callsign.toLocal8Bit();
@@ -36496,6 +36650,17 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             bridgeLog(QStringLiteral("FT4 decode depth reduced before TX: %1 -> %2")
                           .arg(decodeDepth)
                           .arg(req.ndepth));
+        }
+        if (ft4AdaptiveCpuLimitActive(nowMs) || ft4RuntimeBacklog || req.ndepth != requestedFt4Depth
+            || req.threadCount != effectiveFtThreadLimit()) {
+            bridgeLog(QStringLiteral("FT4 final adaptive dispatch: serial=%1 depth=%2 requestedDepth=%3 threads=%4 baseThreads=%5 backlog=%6 adaptive=%7")
+                          .arg(serial)
+                          .arg(req.ndepth)
+                          .arg(requestedFt4Depth)
+                          .arg(req.threadCount)
+                          .arg(effectiveFtThreadLimit())
+                          .arg(ft4RuntimeBacklog ? 1 : 0)
+                          .arg(ft4AdaptiveCpuLimitActive(nowMs) ? 1 : 0));
         }
         auto* worker = m_ft4Worker;
         if (!worker) {
