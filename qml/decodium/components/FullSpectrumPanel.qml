@@ -33,6 +33,7 @@ Item {
     readonly property color cGrid:     tm ? tm.gridColor      : "#00d4b4"
     readonly property color cTx:       tm ? tm.txColor        : "#ff7a5c"
     readonly property color cLotw:     root.bridge ? root.bridge.effectiveDecodeColor("colorLotwUser") : "#ffffff"
+    readonly property color cCq:       root.bridge ? root.bridge.effectiveDecodeColor("colorCQ") : root.cAccent
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
@@ -119,7 +120,7 @@ Item {
                    isSep ? "transparent" :
                    (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
                    entry.isTx ? Qt.rgba(root.cTx.r, root.cTx.g, root.cTx.b, 0.18) :
-                   entry.isCQ ? Qt.rgba(root.cAccent.r, root.cAccent.g, root.cAccent.b, 0.12) :
+                   entry.isCQ ? Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.12) :
                    (index % 2 === 0) ? Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.02)
                                      : Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.05)
             radius: 2
@@ -199,7 +200,7 @@ Item {
                 Item { Layout.preferredWidth: root.gap }
                 Text {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
-                    color: !modelData ? root.cText : (del.entry.isCQ ? root.cAccent : root.cText)
+                    color: !modelData ? root.cText : (del.entry.isCQ ? root.cCq : root.cText)
                     font.pixelSize: root.fSize; font.family: "monospace"
                     elide: Text.ElideRight
                     Layout.fillWidth: true
