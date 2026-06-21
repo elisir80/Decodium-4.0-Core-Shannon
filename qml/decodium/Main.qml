@@ -829,6 +829,11 @@ ApplicationWindow {
     // durante toggle compact/full (height cambia su TUTTI i delegate
     // contemporaneamente -> blink per 100ms di animation displaced).
     property bool compactToggling: false
+    // 1.0.428 — calmante FT2 "slot-machine": durante una risposta partner il
+    // modello RX puo' fare shift/reset rapidi (match-key instabile; fix radice
+    // separato) e gli YAnimator displaced facevano scorrere le righe come reel.
+    // false = riposizionamento istantaneo (calmo, default). Vedi diagnosi 2026-06-21.
+    property bool decodeRowSlideAnim: false
     Timer {
         id: compactToggleTimer
         interval: 220  // > 100ms animation + 100ms padding
@@ -7690,15 +7695,15 @@ NumberAnimation {
 	                                        }
 	                                        addDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 
                                         ScrollBar.vertical: ScrollBar {
@@ -8321,15 +8326,15 @@ OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad
 	                                        }
 	                                        addDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: 100; easing.type: Easing.OutQuad }
+YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: 100; easing.type: Easing.OutQuad }
+YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: 100; easing.type: Easing.OutQuad }
+YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 
                                         ScrollBar.vertical: ScrollBar {
@@ -12530,15 +12535,15 @@ NumberAnimation {
 	                        }
 	                        addDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
                             policy: ScrollBar.AsNeeded
@@ -13125,15 +13130,15 @@ NumberAnimation {
 	                        }
 	                        addDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: 100; easing.type: Easing.OutQuad }
+	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
                             policy: ScrollBar.AsNeeded
