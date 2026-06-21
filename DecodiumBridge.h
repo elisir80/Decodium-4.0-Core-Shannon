@@ -1711,6 +1711,8 @@ private:
     int effectiveFtThreadLimit() const;
     bool ft4AdaptiveCpuLimitActive(qint64 nowMs = 0) const;
     void activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& reason, qint64 durationMs = 60000);
+    bool ft4LatencyGuardActive(qint64 nowMs = 0) const;
+    void activateFt4LatencyGuard(qint64 nowMs, const QString& reason);
     int effectiveFt4ThreadLimit() const;
     int effectiveFt4DecodeDepth(int requestedDepth) const;
     int effectiveSpectrumTimerIntervalMs() const;
@@ -2329,6 +2331,8 @@ private:
     qint64 m_ft4AdaptiveLimitUntilMs {0};
     qint64 m_lastFt4AdaptiveLogMs {0};
     qint64 m_lastFt4BacklogDrainLogMs {0};
+    qint64 m_ft4LatencyGuardUntilMs {0};
+    qint64 m_lastFt4LatencyGuardLogMs {0};
     QVector<short> m_pendingTimeSyncDecodeAudio;
     qint64 m_pendingTimeSyncDecodeSlot {-1};
     QString m_pendingTimeSyncDecodeMode;
