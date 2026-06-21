@@ -29326,10 +29326,33 @@ void DecodiumBridge::activateFt4AdaptiveCpuLimit(qint64 nowMs, const QString& re
     }
 }
 
+bool DecodiumBridge::ft4LatencyGuardActive(qint64 nowMs) const
+{
+    if (nowMs <= 0) {
+        nowMs = QDateTime::currentMSecsSinceEpoch();
+    }
+    return nowMs < m_ft4LatencyGuardUntilMs;
+}
+
+void DecodiumBridge::activateFt4LatencyGuard(qint64 nowMs, const QString& reason)
+{
+    if (nowMs <= 0) {
+        nowMs = QDateTime::currentMSecsSinceEpoch();
+    }
+    m_ft4LatencyGuardUntilMs = qMax(m_ft4LatencyGuardUntilMs, nowMs + qint64 {120000});
+
+    if (nowMs - m_lastFt4LatencyGuardLogMs >= 2000) {
+        m_lastFt4LatencyGuardLogMs = nowMs;
+        bridgeLog(QStringLiteral("FT4 latency guard active: until +%1ms reason=%2")
+                      .arg(qMax<qint64>(0, m_ft4LatencyGuardUntilMs - nowMs))
+                      .arg(reason));
+    }
+}
+
 int DecodiumBridge::effectiveFt4ThreadLimit() const
 {
     int const baseLimit = effectiveFtThreadLimit();
-    if (ft4AdaptiveCpuLimitActive()) {
+    if (ft4LatencyGuardActive() || ft4AdaptiveCpuLimitActive()) {
         return qMin(baseLimit, 4);
     }
     return baseLimit;
@@ -29338,7 +29361,9 @@ int DecodiumBridge::effectiveFt4ThreadLimit() const
 int DecodiumBridge::effectiveFt4DecodeDepth(int requestedDepth) const
 {
     int depth = qBound(1, requestedDepth, 4);
-    if (ft4AdaptiveCpuLimitActive()) {
+    if (ft4LatencyGuardActive()) {
+        depth = qMin(depth, 2);
+    } else if (ft4AdaptiveCpuLimitActive()) {
         depth = qMin(depth, 3);
     }
     return depth;
@@ -32713,6 +32738,13 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     qint64 const elapsedMs = startedAtMs > 0
         ? QDateTime::currentMSecsSinceEpoch() - startedAtMs
         : -1;
+    if (serialMode == QStringLiteral("FT4") && elapsedMs > 2500) {
+        activateFt4LatencyGuard(QDateTime::currentMSecsSinceEpoch(),
+                                QStringLiteral("slow callback serial=%1 elapsedMs=%2 rows=%3")
+                                    .arg(serial)
+                                    .arg(elapsedMs)
+                                    .arg(rows.size()));
+    }
     if (serialMode == QStringLiteral("FT4") && elapsedMs > 9000) {
         ++m_ft4LateCallbackStreak;
         activateFt4AdaptiveCpuLimit(QDateTime::currentMSecsSinceEpoch(),
@@ -36315,12 +36347,14 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
         m_ft4EarlyDecodeSlot = utcSlot;
         m_ft4EarlyDecodeSent = false;
     }
-    if (m_ft4EarlyDecodeSent || msInSlot < 6250) {
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool const latencyGuard = ft4LatencyGuardActive(nowMs);
+    int const earlyThresholdMs = latencyGuard ? 5200 : 6250;
+    if (m_ft4EarlyDecodeSent || msInSlot < earlyThresholdMs) {
         return;
     }
 
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    if (ft4AdaptiveCpuLimitActive(nowMs)) {
+    if (!latencyGuard && ft4AdaptiveCpuLimitActive(nowMs)) {
         m_ft4EarlyDecodeSent = true;
         if (nowMs - m_lastEarlyDecodeSkipLogMs > 2000) {
             m_lastEarlyDecodeSkipLogMs = nowMs;
@@ -36772,6 +36806,21 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         bool const ft4RuntimeBacklog = ft4LiveDecodeBacklogActive(nowMs, 6500, serial, &ft4BacklogDetail);
         if (ft4RuntimeBacklog) {
             drainFt4LiveDecodeBacklog(serial, QStringLiteral("final-dispatch %1").arg(ft4BacklogDetail));
+        }
+        QString ft4LatencyGuardDetail;
+        bool const ft4LatencyGuardPending =
+            ft4LatencyGuardActive(nowMs)
+            && ft4LiveDecodeBacklogActive(nowMs, 1000, serial, &ft4LatencyGuardDetail);
+        if (ft4LatencyGuardPending) {
+            m_decodeStartMsBySerial.remove(serial);
+            m_decodeModeBySerial.remove(serial);
+            m_decodeUtcTokenBySerial.remove(serial);
+            m_decodeSessionBySerial.remove(serial);
+            m_decoding = false;
+            emit decodingChanged();
+            bridgeLog(QStringLiteral("FT4 final decode skipped: latency guard pending early decode %1")
+                          .arg(ft4LatencyGuardDetail));
+            return;
         }
 
         decodium::ft4::DecodeRequest req;
