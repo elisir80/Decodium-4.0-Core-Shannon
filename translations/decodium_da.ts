@@ -13341,6 +13341,11 @@ Koster ekstra CPU under QSO&apos;er. Standard: OFF.</translation>
         <translation>Decode Boost:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Kun visuel kontrast; det ændrer ikke dekoderens følsomhed.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>INTERFACE-FARVER (baggrund + tekst)</translation>

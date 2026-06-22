@@ -11198,6 +11198,25 @@ QString decodeColorEnabledSettingKey(const QString& prop)
 {
     return prop + QStringLiteral("Enabled");
 }
+
+QString decodeColorBoldSettingKey(const QString& prop)
+{
+    return QStringLiteral("bold_%1").arg(prop);
+}
+
+bool decodeColorBoldDefault(const QString& prop)
+{
+    // Preserve the historical emphasis for CQ, own call, TX and "new" classes,
+    // while keeping signoff and normal decodes neutral unless the user opts in.
+    if (prop == QStringLiteral("colorCQ")
+        || prop == QStringLiteral("colorMyCall")
+        || prop == QStringLiteral("colorTxMessage")
+        || prop == QStringLiteral("colorDXEntity"))
+        return true;
+    if (prop.startsWith(QStringLiteral("colorNew")))
+        return true;
+    return false;
+}
 }
 
 QString DecodiumBridge::decodeColorValue(const QString& prop) const
@@ -11249,6 +11268,30 @@ void DecodiumBridge::setDecodeColorEnabled(const QString& prop, bool enabled)
     emit settingValueChanged(key, enabled);
 }
 
+bool DecodiumBridge::decodeColorBold(const QString& prop) const
+{
+    if (!isDecodeColorProperty(prop))
+        return false;
+    return m_decodeColorBold.value(prop, decodeColorBoldDefault(prop));
+}
+
+void DecodiumBridge::setDecodeColorBold(const QString& prop, bool bold)
+{
+    if (!isDecodeColorProperty(prop))
+        return;
+    if (m_decodeColorBold.value(prop, decodeColorBoldDefault(prop)) == bold)
+        return;
+
+    m_decodeColorBold.insert(prop, bold);
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    const QString key = decodeColorBoldSettingKey(prop);
+    s.setValue(key, bold);
+    s.sync();
+    syncSettingToLegacyIni(key, bold);
+    emit decodeColorBoldChanged(prop, bold);
+    emit settingValueChanged(key, bold);
+}
+
 QString DecodiumBridge::effectiveDecodeColor(const QString& prop) const
 {
     if (!isDecodeColorProperty(prop))
@@ -11258,23 +11301,27 @@ QString DecodiumBridge::effectiveDecodeColor(const QString& prop) const
 
 QString DecodiumBridge::decodeHighlightBg(const QVariantMap& entry) const
 {
-    if (entry.value(QStringLiteral("isTx")).toBool())                return effectiveDecodeColor(QStringLiteral("colorTxMessage"));
-    if (entry.value(QStringLiteral("isMyCall")).toBool())            return effectiveDecodeColor(QStringLiteral("colorMyCall"));
+    auto enabledColor = [this](const QString& prop) -> QString {
+        return decodeColorEnabled(prop) ? decodeColorValue(prop) : QString();
+    };
 
-    if (entry.value(QStringLiteral("isCQ")).toBool())                return effectiveDecodeColor(QStringLiteral("colorCQ"));
+    if (entry.value(QStringLiteral("isTx")).toBool())                return enabledColor(QStringLiteral("colorTxMessage"));
+    if (entry.value(QStringLiteral("isMyCall")).toBool())            return enabledColor(QStringLiteral("colorMyCall"));
 
-    if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewDxccBand"));
-    if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewDxcc"));
-    if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool())return effectiveDecodeColor(QStringLiteral("colorNewContinentBand"));
-    if (entry.value(QStringLiteral("dxIsNewContinent")).toBool())    return effectiveDecodeColor(QStringLiteral("colorNewContinent"));
-    if (entry.value(QStringLiteral("dxIsNewCqZoneBand")).toBool())   return effectiveDecodeColor(QStringLiteral("colorNewCqZoneBand"));
-    if (entry.value(QStringLiteral("dxIsNewCqZone")).toBool())       return effectiveDecodeColor(QStringLiteral("colorNewCqZone"));
-    if (entry.value(QStringLiteral("dxIsNewItuZoneBand")).toBool())  return effectiveDecodeColor(QStringLiteral("colorNewItuZoneBand"));
-    if (entry.value(QStringLiteral("dxIsNewItuZone")).toBool())      return effectiveDecodeColor(QStringLiteral("colorNewItuZone"));
-    if (entry.value(QStringLiteral("dxIsNewGridBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewGridBand"));
-    if (entry.value(QStringLiteral("dxIsNewGrid")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewGrid"));
-    if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return effectiveDecodeColor(QStringLiteral("colorNewCallBand"));
-    if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return effectiveDecodeColor(QStringLiteral("colorNewCall"));
+    if (entry.value(QStringLiteral("isCQ")).toBool())                return enabledColor(QStringLiteral("colorCQ"));
+
+    if (entry.value(QStringLiteral("dxIsNewDxccBand")).toBool())     return enabledColor(QStringLiteral("colorNewDxccBand"));
+    if (entry.value(QStringLiteral("dxIsNewDxcc")).toBool())         return enabledColor(QStringLiteral("colorNewDxcc"));
+    if (entry.value(QStringLiteral("dxIsNewContinentBand")).toBool())return enabledColor(QStringLiteral("colorNewContinentBand"));
+    if (entry.value(QStringLiteral("dxIsNewContinent")).toBool())    return enabledColor(QStringLiteral("colorNewContinent"));
+    if (entry.value(QStringLiteral("dxIsNewCqZoneBand")).toBool())   return enabledColor(QStringLiteral("colorNewCqZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewCqZone")).toBool())       return enabledColor(QStringLiteral("colorNewCqZone"));
+    if (entry.value(QStringLiteral("dxIsNewItuZoneBand")).toBool())  return enabledColor(QStringLiteral("colorNewItuZoneBand"));
+    if (entry.value(QStringLiteral("dxIsNewItuZone")).toBool())      return enabledColor(QStringLiteral("colorNewItuZone"));
+    if (entry.value(QStringLiteral("dxIsNewGridBand")).toBool())     return enabledColor(QStringLiteral("colorNewGridBand"));
+    if (entry.value(QStringLiteral("dxIsNewGrid")).toBool())         return enabledColor(QStringLiteral("colorNewGrid"));
+    if (entry.value(QStringLiteral("dxIsNewCallBand")).toBool())     return enabledColor(QStringLiteral("colorNewCallBand"));
+    if (entry.value(QStringLiteral("dxIsNewCall")).toBool())         return enabledColor(QStringLiteral("colorNewCall"));
 
     return QString();
 }
@@ -23078,6 +23125,8 @@ void DecodiumBridge::saveSettings()
     for (const QString& prop : decodeColorPropertyNames()) {
         s.setValue(decodeColorEnabledSettingKey(prop),
                    m_decodeColorEnabled.value(prop, true));
+        s.setValue(decodeColorBoldSettingKey(prop),
+                   m_decodeColorBold.value(prop, decodeColorBoldDefault(prop)));
         s.setValue(QStringLiteral("bg_%1").arg(prop), m_decodeColorBg.value(prop, QString()));
         s.setValue(QStringLiteral("bgEnabled_%1").arg(prop), m_decodeColorBgEnabled.value(prop, false));
     }
@@ -28423,10 +28472,12 @@ void DecodiumBridge::loadSettings()
     m_colorNewCallBand      = s.value("colorNewCallBand",      m_colorNewCallBand     ).toString();
     m_colorLotwUser         = s.value("colorLotwUser",         m_colorLotwUser        ).toString();
     m_decodeColorEnabled.clear();
+    m_decodeColorBold.clear();
     m_decodeColorBg.clear();
     m_decodeColorBgEnabled.clear();
     for (const QString& prop : decodeColorPropertyNames()) {
         m_decodeColorEnabled.insert(prop, s.value(decodeColorEnabledSettingKey(prop), true).toBool());
+        m_decodeColorBold.insert(prop, s.value(decodeColorBoldSettingKey(prop), decodeColorBoldDefault(prop)).toBool());
         m_decodeColorBg.insert(prop, s.value(QStringLiteral("bg_%1").arg(prop), QString()).toString());
         m_decodeColorBgEnabled.insert(prop, s.value(QStringLiteral("bgEnabled_%1").arg(prop), false).toBool());
     }
@@ -28706,6 +28757,8 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit colorNewCallChanged();
     emit colorNewCallBandChanged();
     emit colorLotwUserChanged();
+    for (const QString& prop : decodeColorPropertyNames())
+        emit decodeColorBoldChanged(prop, m_decodeColorBold.value(prop, decodeColorBoldDefault(prop)));
     emit b4StrikethroughChanged();
     emit alertSoundsEnabledChanged();
 }
@@ -32677,12 +32730,21 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
     //   font.bold: modelData.isTx||isCQ||isMyCall||dxIsNewCountry||dxIsMostWanted
     // con singolo lookup model.isHighlighted → meno costo per delegate paint
     // (= meno carico GPU su PC vecchi).
-    bool const isHl = entry.value(QStringLiteral("isTx")).toBool()
+    bool const isHl = (entry.value(QStringLiteral("isTx")).toBool()
+                       && decodeColorEnabled(QStringLiteral("colorTxMessage"))
+                       && decodeColorBold(QStringLiteral("colorTxMessage")))
                    || (entry.value(QStringLiteral("isCQ")).toBool()
-                       && decodeColorEnabled(QStringLiteral("colorCQ")))
-                   || entry.value(QStringLiteral("isMyCall")).toBool()
-                   || dxIsNewCountry
-                   || entry.value(QStringLiteral("dxIsMostWanted")).toBool();
+                       && decodeColorEnabled(QStringLiteral("colorCQ"))
+                       && decodeColorBold(QStringLiteral("colorCQ")))
+                   || (entry.value(QStringLiteral("isMyCall")).toBool()
+                       && decodeColorEnabled(QStringLiteral("colorMyCall"))
+                       && decodeColorBold(QStringLiteral("colorMyCall")))
+                   || (dxIsNewCountry
+                       && decodeColorEnabled(QStringLiteral("colorDXEntity"))
+                       && decodeColorBold(QStringLiteral("colorDXEntity")))
+                   || (entry.value(QStringLiteral("dxIsMostWanted")).toBool()
+                       && decodeColorEnabled(QStringLiteral("colorDXEntity"))
+                       && decodeColorBold(QStringLiteral("colorDXEntity")));
     entry["isHighlighted"] = isHl;
 
     // 1.0.232 (Sprint 1, Phase 4.2.1) — pre-compute 3 display strings/colors

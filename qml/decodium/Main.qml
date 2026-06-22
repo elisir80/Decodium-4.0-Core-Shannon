@@ -1938,6 +1938,7 @@ ApplicationWindow {
         function onColorNewCallBandChanged() { mainWindow.refreshDecodeColors() }
         function onColorLotwUserChanged() { mainWindow.refreshDecodeColors() }
         function onDecodeColorEnabledChanged(prop, enabled) { mainWindow.refreshDecodeColors() }
+        function onDecodeColorBoldChanged(prop, bold) { mainWindow.refreshDecodeColors() }
         function onDecodeColorBgChanged() { mainWindow.refreshDecodeColors() }
     }
 
@@ -2059,6 +2060,45 @@ ApplicationWindow {
         return bridge.effectiveDecodeColor(prop)
     }
 
+    function decodeColorBoldEnabled(prop) {
+        mainWindow.decodeColorRevision
+        return !!(bridge.decodeColorEnabled(prop) && bridge.decodeColorBold(prop))
+    }
+
+    function decodeTextColorProp(modelData) {
+        if (!modelData)
+            return "colorDecodeText"
+        if (modelData.isTx === true) return "colorTxMessage"
+        if (modelData.isMyCall === true) return "colorMyCall"
+        if (highlight73 && isSignoffMessage(modelData.message)) return "color73"
+        if (modelData.isB4 === true || modelData.dxIsWorked === true) return "colorB4"
+        if (modelData.isCQ === true) return "colorCQ"
+        if (modelData.dxIsNewDxccBand === true) return "colorNewDxccBand"
+        if (modelData.dxIsNewDxcc === true) return "colorNewDxcc"
+        if (modelData.dxIsNewContinentBand === true) return "colorNewContinentBand"
+        if (modelData.dxIsNewContinent === true) return "colorNewContinent"
+        if (modelData.dxIsNewCqZoneBand === true) return "colorNewCqZoneBand"
+        if (modelData.dxIsNewCqZone === true) return "colorNewCqZone"
+        if (modelData.dxIsNewItuZoneBand === true) return "colorNewItuZoneBand"
+        if (modelData.dxIsNewItuZone === true) return "colorNewItuZone"
+        if (modelData.dxIsNewGridBand === true) return "colorNewGridBand"
+        if (modelData.dxIsNewGrid === true) return "colorNewGrid"
+        if (modelData.dxIsNewCallBand === true) return "colorNewCallBand"
+        if (modelData.dxIsNewCall === true) return "colorNewCall"
+        if (modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
+            return "colorDXEntity"
+        return "colorDecodeText"
+    }
+
+    function decodeEntryBoldForModel(modelData) {
+        mainWindow.decodeColorRevision
+        if (!modelData)
+            return false
+        if (customHighlightColor(modelData) !== "")
+            return false
+        return decodeColorBoldEnabled(decodeTextColorProp(modelData))
+    }
+
     // 1.0.416 — colore di SFONDO riga scelto dall'utente per categoria (opt-in).
     // null se per la categoria della riga lo sfondo non è abilitato → fallback al
     // comportamento esistente. Dipende da decodeColorRevision per la reattività.
@@ -2078,16 +2118,8 @@ ApplicationWindow {
         if (!modelData)
             return boostedDecodeTextColor(textPrimary)
         var customColor = customHighlightColor(modelData)
-        if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
-        if (modelData.isMyCall) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
         if (customColor !== "") return boostedDecodeTextColor(customColor)
-        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
-        if (modelData.isB4 === true || modelData.dxIsWorked === true) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
-        if (modelData.isCQ) return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
-        if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
-            || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
-            return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        return boostedDecodeTextColor(effectiveDecodeColor("colorDecodeText"))
+        return boostedDecodeTextColor(effectiveDecodeColor(decodeTextColorProp(modelData)))
     }
 
     function decodeHighlightHex(modelData) {
@@ -2579,7 +2611,7 @@ ApplicationWindow {
         if (!entry) return boostedDecodeTextColor(textSecondary)
         switch (id) {
         case "msg":  return fullSpectrumTextColor(entry)
-        case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : (decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? bridge.themeManager.successColor : secondaryCyan))
+        case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan)
         case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
         case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) ? effectiveDecodeColor("colorDXEntity") : textSecondary)
         case "az":   return boostedDecodeTextColor(secondaryCyan)
@@ -2590,7 +2622,7 @@ ApplicationWindow {
         if (!entry) return false
         switch (id) {
         case "db":   return entry.isTx === true
-        case "freq": return (entry.isTx === true) || decodePanel.isAtRxFrequency(entry.freq || "0", entry)
+        case "freq": return entry.isTx === true
         case "msg":  return decodePanel.decodeEntryBold(entry)
         }
         return false
@@ -6616,12 +6648,7 @@ ApplicationWindow {
 		                    }
 
 		                    function decodeEntryBold(md) {
-		                        mainWindow.decodeColorRevision
-		                        return !!(md && ((md.isTx === true) ||
-		                                        ((md.isCQ === true) && bridge.decodeColorEnabled("colorCQ")) ||
-		                                        (md.isMyCall === true) ||
-		                                        (md.dxIsNewCountry === true) ||
-		                                        (md.dxIsMostWanted === true)))
+		                        return mainWindow.decodeEntryBoldForModel(md)
 		                    }
 
 		                    function decodeEntryStrikeout(md) {
@@ -7732,7 +7759,7 @@ NumberAnimation {
 	                                                   isPeriodSeparator ? "transparent" :
 		                                                   userBgFill ? userBgFill :
                                                    highlightFill ? highlightFill :
-			                                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)) :
+			                                                   (entry.isCQ && bridge.decodeColorEnabled("colorCQ")) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)) :
 			                                                   decodePanel.isAtRxFrequency(entry.freq || "0", entry) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(76/255, 175/255, 80/255, 0.2)) :
 			                                                   index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.02)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
                                             border.color: highlightBorder ? highlightBorder : "transparent"
@@ -8363,7 +8390,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                                                    mainWindow.decodeUserBgFill(entry) ? mainWindow.decodeUserBgFill(entry) :
                                                    entry.isTx ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(241/255, 196/255, 15/255, 0.3)) :
                                                    entry.isMyCall ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3)) :
-                                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
+                                                   (entry.isCQ && bridge.decodeColorEnabled("colorCQ")) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
                                                    index % 2 === 0 ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.08)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.15))
                                             radius: 2
 
@@ -12571,7 +12598,7 @@ NumberAnimation {
 			                                   userBgFill ? userBgFill :
                                                    highlightFill ? highlightFill :
 				                                   entry.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(entry.bgColorHex) :
-				                                   entry.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
+				                                   (entry.isCQ && bridge.decodeColorEnabled("colorCQ")) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) :
 				                                   mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05))
 	                            border.color: !isPeriodSeparator && highlightBorder ? highlightBorder : "transparent"
 	                            border.width: !isPeriodSeparator && highlightFill ? 1 : 0
@@ -13165,7 +13192,7 @@ NumberAnimation {
 	                                   isPeriodSeparator ? "transparent" :
 		                                   mainWindow.decodeUserBgFill(modelData) ? mainWindow.decodeUserBgFill(modelData) :
 			                                   modelData.bgColorHex ? mainWindow.boostedDecodeBackgroundColor(modelData.bgColorHex) :
-		                                   modelData.isCQ ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05))
+		                                   (modelData.isCQ && bridge.decodeColorEnabled("colorCQ")) ? mainWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15)) : mainWindow.boostedDecodeBackgroundColor(Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.05))
 
 	                            Rectangle {
 	                                visible: parent.isPeriodSeparator
