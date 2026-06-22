@@ -26694,17 +26694,12 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             && !isCqAutoCq
             && !(m_currentTx == 5 && m_ft2DeferredLogPending);
         int effectiveMaxCallerRetries = m_maxCallerRetries;
-        bool const slowCpuAssist =
-            (m_lowCpuModeEnabled || cpuPressureActive())
-            && m_currentTx >= 1
-            && m_currentTx <= 3;
-        if (slowCpuAssist) {
-            if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
-                effectiveMaxCallerRetries = qMax(effectiveMaxCallerRetries, 18);
-            } else if (m_mode == QStringLiteral("FT8") || m_mode == QStringLiteral("FT4")) {
-                effectiveMaxCallerRetries = qMax(effectiveMaxCallerRetries, 14);
-            }
-        }
+        // 1.0.429: il valore "Caller retries" impostato dall'utente e' un limite
+        // HARD per-step. Rimosso lo slow-CPU assist che alzava silenziosamente il
+        // cap a 18 (FT2 async) / 14 (FT8/FT4) sotto pressione CPU/low-CPU mode:
+        // scavalcava l'impostazione (utente metteva 4 e ne vedeva ~18). Chi vuole
+        // piu' retry sotto carico alza direttamente lo SpinBox (opt-in, coerente con
+        // "niente automazione silenziosa che scavalca i settaggi").
         // Sprint1 (1.0.393): se il phase-lock breaker ha appena corretto la
         // parita', il tentativo successivo e' il PRIMO in fase giusta: concedi
         // +1 retry oltre il cap. Senza questo (round 4 loopback, 02:09:22) il
@@ -26721,22 +26716,17 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // m_txRetryCount is set to 1 by the first successful send of a TX step.
         // The configured cap is the total number of sends, so equality already
         // means the operator's retry budget has been consumed.
+        // 1.0.429: il cap "Caller retries" e' un limite HARD per-step e vale SEMPRE,
+        // anche col TX Watchdog configurato. Prima, con un watchdog impostato, il
+        // ramo halt era gated da !txWatchdogLimitConfigured() e il cap veniva
+        // ignorato (il TX continuava fino allo scadere del watchdog). Il watchdog
+        // resta un limite GLOBALE indipendente (enforce a parte in checkTxWatchdog,
+        // ~34231): vince il primo che scatta tra cap-per-step e watchdog.
         if (applyRetryLimit && m_currentTx == m_lastNtx
-            && m_txRetryCount >= effectiveMaxCallerRetries
-            && txWatchdogLimitConfigured()) {
-            int const extraRetries = m_txRetryCount - effectiveMaxCallerRetries;
-            if (extraRetries == 0 || (extraRetries > 0 && extraRetries % 5 == 0)) {
-                bridgeLog(QStringLiteral("checkAndStartPeriodicTx: retry limit %1 su TX%2 reached, TX watchdog priority active -> continue")
-                              .arg(effectiveMaxCallerRetries)
-                              .arg(m_currentTx));
-            }
-        }
-        if (applyRetryLimit && m_currentTx == m_lastNtx
-            && m_txRetryCount >= effectiveMaxCallerRetries
-            && !txWatchdogLimitConfigured()) {
+            && m_txRetryCount >= effectiveMaxCallerRetries) {
             QString const assistSuffix =
                 (effectiveMaxCallerRetries != m_maxCallerRetries)
-                    ? QStringLiteral(" (slow CPU assist)")
+                    ? QStringLiteral(" (parity grace +1)")
                     : QString();
             QString const retryReason =
                 "checkAndStartPeriodicTx: retry limit " +
