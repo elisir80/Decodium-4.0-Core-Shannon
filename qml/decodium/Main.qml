@@ -2065,27 +2065,33 @@ ApplicationWindow {
         return !!(bridge.decodeColorEnabled(prop) && bridge.decodeColorBold(prop))
     }
 
+    function decodeColorCategoryEnabled(prop) {
+        mainWindow.decodeColorRevision
+        return !!(bridge && bridge.decodeColorEnabled(prop))
+    }
+
     function decodeTextColorProp(modelData) {
         if (!modelData)
             return "colorDecodeText"
-        if (modelData.isTx === true) return "colorTxMessage"
-        if (modelData.isMyCall === true) return "colorMyCall"
-        if (highlight73 && isSignoffMessage(modelData.message)) return "color73"
-        if (modelData.isB4 === true || modelData.dxIsWorked === true) return "colorB4"
-        if (modelData.isCQ === true) return "colorCQ"
-        if (modelData.dxIsNewDxccBand === true) return "colorNewDxccBand"
-        if (modelData.dxIsNewDxcc === true) return "colorNewDxcc"
-        if (modelData.dxIsNewContinentBand === true) return "colorNewContinentBand"
-        if (modelData.dxIsNewContinent === true) return "colorNewContinent"
-        if (modelData.dxIsNewCqZoneBand === true) return "colorNewCqZoneBand"
-        if (modelData.dxIsNewCqZone === true) return "colorNewCqZone"
-        if (modelData.dxIsNewItuZoneBand === true) return "colorNewItuZoneBand"
-        if (modelData.dxIsNewItuZone === true) return "colorNewItuZone"
-        if (modelData.dxIsNewGridBand === true) return "colorNewGridBand"
-        if (modelData.dxIsNewGrid === true) return "colorNewGrid"
-        if (modelData.dxIsNewCallBand === true) return "colorNewCallBand"
-        if (modelData.dxIsNewCall === true) return "colorNewCall"
-        if (modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
+        if (modelData.isTx === true && decodeColorCategoryEnabled("colorTxMessage")) return "colorTxMessage"
+        if (modelData.isMyCall === true && decodeColorCategoryEnabled("colorMyCall")) return "colorMyCall"
+        if (highlight73 && isSignoffMessage(modelData.message) && decodeColorCategoryEnabled("color73")) return "color73"
+        if ((modelData.isB4 === true || modelData.dxIsWorked === true) && decodeColorCategoryEnabled("colorB4")) return "colorB4"
+        if (modelData.isCQ === true && decodeColorCategoryEnabled("colorCQ")) return "colorCQ"
+        if (modelData.dxIsNewDxccBand === true && decodeColorCategoryEnabled("colorNewDxccBand")) return "colorNewDxccBand"
+        if (modelData.dxIsNewDxcc === true && decodeColorCategoryEnabled("colorNewDxcc")) return "colorNewDxcc"
+        if (modelData.dxIsNewContinentBand === true && decodeColorCategoryEnabled("colorNewContinentBand")) return "colorNewContinentBand"
+        if (modelData.dxIsNewContinent === true && decodeColorCategoryEnabled("colorNewContinent")) return "colorNewContinent"
+        if (modelData.dxIsNewCqZoneBand === true && decodeColorCategoryEnabled("colorNewCqZoneBand")) return "colorNewCqZoneBand"
+        if (modelData.dxIsNewCqZone === true && decodeColorCategoryEnabled("colorNewCqZone")) return "colorNewCqZone"
+        if (modelData.dxIsNewItuZoneBand === true && decodeColorCategoryEnabled("colorNewItuZoneBand")) return "colorNewItuZoneBand"
+        if (modelData.dxIsNewItuZone === true && decodeColorCategoryEnabled("colorNewItuZone")) return "colorNewItuZone"
+        if (modelData.dxIsNewGridBand === true && decodeColorCategoryEnabled("colorNewGridBand")) return "colorNewGridBand"
+        if (modelData.dxIsNewGrid === true && decodeColorCategoryEnabled("colorNewGrid")) return "colorNewGrid"
+        if (modelData.dxIsNewCallBand === true && decodeColorCategoryEnabled("colorNewCallBand")) return "colorNewCallBand"
+        if (modelData.dxIsNewCall === true && decodeColorCategoryEnabled("colorNewCall")) return "colorNewCall"
+        if ((modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
+                && decodeColorCategoryEnabled("colorDXEntity"))
             return "colorDXEntity"
         return "colorDecodeText"
     }
@@ -2613,7 +2619,7 @@ ApplicationWindow {
         case "msg":  return fullSpectrumTextColor(entry)
         case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan)
         case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
-        case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) ? effectiveDecodeColor("colorDXEntity") : textSecondary)
+        case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) && decodeColorCategoryEnabled("colorDXEntity") ? effectiveDecodeColor("colorDXEntity") : textSecondary)
         case "az":   return boostedDecodeTextColor(secondaryCyan)
         }
         return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : textSecondary)

@@ -115,26 +115,32 @@ Item {
     function decodeMessageColorProp(entry) {
         if (!entry)
             return "colorDecodeText"
-        if (entry.isTx === true) return "colorTxMessage"
-        if (entry.isMyCall === true) return "colorMyCall"
-        if (root.highlight73 && root.bridge && isSignoffMessage(entry.displayMessage || entry.message || "")) return "color73"
-        if (entry.isB4 === true || entry.dxIsWorked === true) return "colorB4"
-        if (entry.isCQ === true) return "colorCQ"
-        if (entry.dxIsNewDxccBand === true) return "colorNewDxccBand"
-        if (entry.dxIsNewDxcc === true) return "colorNewDxcc"
-        if (entry.dxIsNewContinentBand === true) return "colorNewContinentBand"
-        if (entry.dxIsNewContinent === true) return "colorNewContinent"
-        if (entry.dxIsNewCqZoneBand === true) return "colorNewCqZoneBand"
-        if (entry.dxIsNewCqZone === true) return "colorNewCqZone"
-        if (entry.dxIsNewItuZoneBand === true) return "colorNewItuZoneBand"
-        if (entry.dxIsNewItuZone === true) return "colorNewItuZone"
-        if (entry.dxIsNewGridBand === true) return "colorNewGridBand"
-        if (entry.dxIsNewGrid === true) return "colorNewGrid"
-        if (entry.dxIsNewCallBand === true) return "colorNewCallBand"
-        if (entry.dxIsNewCall === true) return "colorNewCall"
-        if (entry.dxIsMostWanted === true || entry.dxIsNewCountry === true || entry.dxIsNewBand === true)
+        if (entry.isTx === true && decodeColorCategoryEnabled("colorTxMessage")) return "colorTxMessage"
+        if (entry.isMyCall === true && decodeColorCategoryEnabled("colorMyCall")) return "colorMyCall"
+        if (root.highlight73 && root.bridge && isSignoffMessage(entry.displayMessage || entry.message || "") && decodeColorCategoryEnabled("color73")) return "color73"
+        if ((entry.isB4 === true || entry.dxIsWorked === true) && decodeColorCategoryEnabled("colorB4")) return "colorB4"
+        if (entry.isCQ === true && decodeColorCategoryEnabled("colorCQ")) return "colorCQ"
+        if (entry.dxIsNewDxccBand === true && decodeColorCategoryEnabled("colorNewDxccBand")) return "colorNewDxccBand"
+        if (entry.dxIsNewDxcc === true && decodeColorCategoryEnabled("colorNewDxcc")) return "colorNewDxcc"
+        if (entry.dxIsNewContinentBand === true && decodeColorCategoryEnabled("colorNewContinentBand")) return "colorNewContinentBand"
+        if (entry.dxIsNewContinent === true && decodeColorCategoryEnabled("colorNewContinent")) return "colorNewContinent"
+        if (entry.dxIsNewCqZoneBand === true && decodeColorCategoryEnabled("colorNewCqZoneBand")) return "colorNewCqZoneBand"
+        if (entry.dxIsNewCqZone === true && decodeColorCategoryEnabled("colorNewCqZone")) return "colorNewCqZone"
+        if (entry.dxIsNewItuZoneBand === true && decodeColorCategoryEnabled("colorNewItuZoneBand")) return "colorNewItuZoneBand"
+        if (entry.dxIsNewItuZone === true && decodeColorCategoryEnabled("colorNewItuZone")) return "colorNewItuZone"
+        if (entry.dxIsNewGridBand === true && decodeColorCategoryEnabled("colorNewGridBand")) return "colorNewGridBand"
+        if (entry.dxIsNewGrid === true && decodeColorCategoryEnabled("colorNewGrid")) return "colorNewGrid"
+        if (entry.dxIsNewCallBand === true && decodeColorCategoryEnabled("colorNewCallBand")) return "colorNewCallBand"
+        if (entry.dxIsNewCall === true && decodeColorCategoryEnabled("colorNewCall")) return "colorNewCall"
+        if ((entry.dxIsMostWanted === true || entry.dxIsNewCountry === true || entry.dxIsNewBand === true)
+                && decodeColorCategoryEnabled("colorDXEntity"))
             return "colorDXEntity"
         return "colorDecodeText"
+    }
+
+    function decodeColorCategoryEnabled(prop) {
+        root.decodeColorRevision
+        return !!(root.bridge && root.bridge.decodeColorEnabled(prop))
     }
 
     function decodeMessageColor(entry) {
