@@ -1337,6 +1337,16 @@ namespace
   QRegularExpression non_r_db_regexp {"\\A[-+]{1}[0-9]{1,2}\\z"};
   auto quint32_max = std::numeric_limits<quint32>::max ();
   constexpr int N_WIDGETS {38};
+
+  bool verbose_decode_post_log_enabled ()
+  {
+    static bool const enabled = [] {
+      auto const raw = qgetenv ("DECODIUM_VERBOSE_DECODE_POST_LOG").trimmed ().toLower ();
+      return raw == "1" || raw == "true" || raw == "yes" || raw == "on";
+    }();
+    return enabled;
+  }
+
 #if defined(Q_OS_LINUX)
   constexpr int default_rx_audio_buffer_frames {-1}; // keep ALSA/PipeWire default latency tuning
 #else
@@ -1365,6 +1375,40 @@ namespace
     }
     return qBound (1, configured, kMaxEmbeddedDecodeThreads);
   }
+
+  QString ft4_progressive_decode_key (QString const& row)
+  {
+    QString const normalized = row.simplified ();
+    QStringList parts = normalized.split (QLatin1Char (' '), Qt::SkipEmptyParts);
+    int markerIndex = -1;
+    for (int i = 0; i < parts.size (); ++i) {
+      if (parts.at (i) == QLatin1String ("+")
+          || parts.at (i) == QLatin1String ("*")
+          || parts.at (i) == QLatin1String ("#")) {
+        markerIndex = i;
+        break;
+      }
+    }
+    if (markerIndex >= 4 && markerIndex + 1 < parts.size ()) {
+      bool ok = false;
+      int const freq = parts.at (markerIndex - 1).toInt (&ok);
+      int const freqBucket = ok ? (freq / 5) * 5 : 0;
+      QStringList messageParts = parts.mid (markerIndex + 1);
+      if (!messageParts.isEmpty ()) {
+        QString const tail = messageParts.constLast ().trimmed ().toLower ();
+        if (tail.size () <= 3 && tail.startsWith (QLatin1Char ('a'))) {
+          messageParts.removeLast ();
+        }
+      }
+      return parts.at (0)
+          + QLatin1Char ('|')
+          + QString::number (freqBucket)
+          + QLatin1Char ('|')
+          + messageParts.join (QLatin1Char (' ')).toUpper ();
+    }
+    return normalized.toUpper ();
+  }
+
   struct AllTxtWriterState
   {
     QMutex mutex;
@@ -12982,6 +13026,11 @@ bool MainWindow::cancelPendingInProcessDecode ()
   if (m_ft4DecodePending) {
     ++m_ft4DecodeSerial;
     m_ft4DecodePending = false;
+    m_ft4DecodePendingUtc = 0;
+    m_ft4DecodePendingDepth = 0;
+    m_ft4DecodeFollowupPending = false;
+    m_ft4DecodeFollowupAudio.clear ();
+    m_ft4DeliveredDecodeKeys.clear ();
     cancelled = true;
   }
 
@@ -13115,21 +13164,59 @@ void MainWindow::requestInProcessFt4Decode ()
   request.nfqso = qBound (0, int (dec_data.params.nfqso), 5000);
   request.nfa = qBound (0, int (dec_data.params.nfa), 5000);
   request.nfb = qMax (request.nfa + 50, qBound (0, int (dec_data.params.nfb), 5000));
-  request.ndepth = qBound (1, int (dec_data.params.ndepth), 4);
   request.threadCount = embedded_decode_thread_count ();
+  int const rawDepth = int (dec_data.params.ndepth);
+  int baseDepth = rawDepth & 0x7;
+  if (baseDepth <= 0) {
+    baseDepth = qBound (1, rawDepth, 3);
+  }
+  baseDepth = qBound (1, baseDepth, 3);
+  bool const deepRequested = baseDepth >= 3;
+  bool const apRequested = (rawDepth & 0x40) != 0
+      || (ui->actionEnable_AP_DXcall && ui->actionEnable_AP_DXcall->isChecked ())
+      || (ui->actionEnable_AP_FT8 && ui->actionEnable_AP_FT8->isChecked ());
+  bool const forceFt4LiveDepth4 = qEnvironmentVariableIntValue ("DECODIUM_FT4_FORCE_LIVE_DEPTH4") != 0;
+  int const requestedDepth = (deepRequested && apRequested) ? 4 : baseDepth;
+  request.ndepth = requestedDepth;
+  if (!m_diskData && request.ndepth > 3 && request.threadCount < 16 && !forceFt4LiveDepth4) {
+    request.ndepth = 3;
+  }
   request.ncontest = qBound (0, int (dec_data.params.nexp_decode & 7), 16);
   request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
 
+  m_ft4DecodeFollowupPending = false;
+  m_ft4DecodeFollowupAudio.clear ();
+  m_ft4DeliveredDecodeKeys.clear ();
+
+  decodium::ft4::DecodeRequest dispatchRequest = request;
+  if (!m_diskData && request.ndepth > 2) {
+    dispatchRequest.ndepth = 2;
+    m_ft4DecodeFollowupPending = true;
+    m_ft4DecodeFollowupAudio = request.audio;
+    m_ft4DecodeFollowupUtc = request.nutc;
+    m_ft4DecodeFollowupQsoProgress = request.nqsoprogress;
+    m_ft4DecodeFollowupQsoFreq = request.nfqso;
+    m_ft4DecodeFollowupFa = request.nfa;
+    m_ft4DecodeFollowupFb = request.nfb;
+    m_ft4DecodeFollowupDepth = request.ndepth;
+    m_ft4DecodeFollowupThreads = request.threadCount;
+    m_ft4DecodeFollowupContest = request.ncontest;
+    m_ft4DecodeFollowupMycall = request.mycall;
+    m_ft4DecodeFollowupHiscall = request.hiscall;
+  }
+
   m_ft4DecodePending = true;
+  m_ft4DecodePendingUtc = dispatchRequest.nutc;
+  m_ft4DecodePendingDepth = dispatchRequest.ndepth;
   m_decodedTransportQueue.clear ();
   m_decodeStartMs = QDateTime::currentMSecsSinceEpoch ();
   decodeBusy (true);
 
   auto * worker = m_ft4DecodeWorker;
   QMetaObject::invokeMethod (m_ft4DecodeWorker,
-                             [worker, request] () {
-                               worker->decode (request);
+                             [worker, dispatchRequest] () {
+                               worker->decode (dispatchRequest);
                              },
                              Qt::QueuedConnection);
 }
@@ -26487,13 +26574,17 @@ void MainWindow::postDecode (bool is_new, DecodedText decoded_text)      //avt 1
 
   //avt 10/26/21
   if (((QDateTime::currentMSecsSinceEpoch() / 1000 - m_secBandChanged) > 4*int(m_TRperiod)/4)) {  //avt 7/7/22 band wasn't recently changed
-    debugToFile(QString {"enqueueDecod deCall:%1 m_mode:%2 grid:%3 m_currentBand:%4"}.arg(call).arg(m_mode).arg(grid).arg(m_currentBand));
+    bool const verboseDecodePostLog = verbose_decode_post_log_enabled ();
+    if (verboseDecodePostLog)
+      debugToFile(QString {"enqueueDecod deCall:%1 m_mode:%2 grid:%3 m_currentBand:%4"}.arg(call).arg(m_mode).arg(grid).arg(m_currentBand));
     auto const& looked_up = m_logBook.countries ()->lookup (call);
     m_logBook.match (call, m_mode, grid, looked_up, callB4, countryB4, gridB4, continentB4, CQZoneB4, ITUZoneB4);
-    debugToFile(QString {"             callB4:%1 countryB4:%2 continentB4:%3"}.arg(callB4).arg(countryB4).arg(continentB4));
+    if (verboseDecodePostLog)
+      debugToFile(QString {"             callB4:%1 countryB4:%2 continentB4:%3"}.arg(callB4).arg(countryB4).arg(continentB4));
     m_logBook.match (call, m_mode, grid, looked_up, callB4onBand, countryB4onBand, gridB4onBand,
                  continentB4onBand, CQZoneB4onBand, ITUZoneB4onBand, m_currentBand);
-    debugToFile(QString {"             callB4onBand:%1 countryB4onBand:%2 continentB4onBand:%3"}.arg(callB4onBand).arg(countryB4onBand).arg(continentB4onBand));
+    if (verboseDecodePostLog)
+      debugToFile(QString {"             callB4onBand:%1 countryB4onBand:%2 continentB4onBand:%3"}.arg(callB4onBand).arg(countryB4onBand).arg(continentB4onBand));
 
     int nAz = -1;
     int nDkm = -1;
@@ -26505,7 +26596,8 @@ void MainWindow::postDecode (bool is_new, DecodedText decoded_text)      //avt 1
 
     //DX defined as not same continent
     bool isDx = looked_up.continent != m_logBook.countries()->lookup(m_config.my_callsign()).continent; //avt 10/14/21
-    debugToFile(QString {"             isDx:%1 entity_name:%2"}.arg(isDx).arg(looked_up.entity_name));
+    if (verboseDecodePostLog)
+      debugToFile(QString {"             isDx:%1 entity_name:%2"}.arg(isDx).arg(looked_up.entity_name));
     enqueueDecode (decoded_text, false, true, isDx, !callB4onBand, !callB4, !countryB4onBand, !countryB4, looked_up.entity_name, AD1CCty::continent(looked_up.continent), nAz, nDkm);   //avt 5/4/24
   }
   else
@@ -29187,7 +29279,14 @@ void MainWindow::processFt4DecodedRows (quint64 serial, QStringList const& rows)
     return;
   }
 
+  int const completedUtc = m_ft4DecodePendingUtc;
+  int const completedDepth = m_ft4DecodePendingDepth;
+  qint64 const decodeElapsedMs = m_decodeStartMs > 0
+      ? QDateTime::currentMSecsSinceEpoch () - m_decodeStartMs
+      : -1;
   m_ft4DecodePending = false;
+  m_ft4DecodePendingUtc = 0;
+  m_ft4DecodePendingDepth = 0;
 
   if (m_mode != "FT4") {
     if (m_decoderBusy) {
@@ -29196,14 +29295,81 @@ void MainWindow::processFt4DecodedRows (quint64 serial, QStringList const& rows)
     return;
   }
 
+  int newRows = 0;
   for (auto const& row : rows) {
     if (!row.trimmed ().isEmpty ()) {
-      m_decodedTransportQueue.enqueue (row.toUtf8 ());
+      QString const key = ft4_progressive_decode_key (row);
+      if (!m_ft4DeliveredDecodeKeys.contains (key)) {
+        m_ft4DeliveredDecodeKeys.insert (key);
+        m_decodedTransportQueue.enqueue (row.toUtf8 ());
+        ++newRows;
+      }
     }
   }
 
+  debugToFile (QString {"ft4Decode   done utc:%1 rows:%2 newRows:%3 elapsedMs:%4 depth:%5"}
+                 .arg (completedUtc)
+                 .arg (rows.size ())
+                 .arg (newRows)
+                 .arg (decodeElapsedMs)
+                 .arg (completedDepth));
+
   readFromStdout ();
 
+  qint64 const deliveredMs = m_decodeStartMs > 0
+      ? QDateTime::currentMSecsSinceEpoch () - m_decodeStartMs
+      : -1;
+  debugToFile (QString {"ft4Decode   delivered utc:%1 rows:%2 newRows:%3 elapsedMs:%4 depth:%5"}
+                 .arg (completedUtc)
+                 .arg (rows.size ())
+                 .arg (newRows)
+                 .arg (deliveredMs)
+                 .arg (completedDepth));
+
+  if (m_ft4DecodeFollowupPending) {
+    qint64 const elapsedMs = m_decodeStartMs > 0
+        ? QDateTime::currentMSecsSinceEpoch () - m_decodeStartMs
+        : 0;
+    if (elapsedMs <= 4500 && m_mode == "FT4" && m_ft4DecodeWorker) {
+      decodium::ft4::DecodeRequest followup;
+      followup.serial = ++m_ft4DecodeSerial;
+      followup.audio = m_ft4DecodeFollowupAudio;
+      followup.nutc = m_ft4DecodeFollowupUtc;
+      followup.nqsoprogress = m_ft4DecodeFollowupQsoProgress;
+      followup.nfqso = m_ft4DecodeFollowupQsoFreq;
+      followup.nfa = m_ft4DecodeFollowupFa;
+      followup.nfb = m_ft4DecodeFollowupFb;
+      followup.ndepth = m_ft4DecodeFollowupDepth;
+      followup.threadCount = m_ft4DecodeFollowupThreads;
+      followup.ncontest = m_ft4DecodeFollowupContest;
+      followup.mycall = m_ft4DecodeFollowupMycall;
+      followup.hiscall = m_ft4DecodeFollowupHiscall;
+      m_ft4DecodeFollowupPending = false;
+      m_ft4DecodeFollowupAudio.clear ();
+      m_ft4DecodePending = true;
+      m_ft4DecodePendingUtc = followup.nutc;
+      m_ft4DecodePendingDepth = followup.ndepth;
+      debugToFile (QString {"ft4Decode   followup queued utc:%1 depth:%2 elapsedMs:%3"}
+                     .arg (followup.nutc)
+                     .arg (followup.ndepth)
+                     .arg (elapsedMs));
+      auto * worker = m_ft4DecodeWorker;
+      QMetaObject::invokeMethod (m_ft4DecodeWorker,
+                                 [worker, followup] () {
+                                   worker->decode (followup);
+                                 },
+                                 Qt::QueuedConnection);
+      return;
+    }
+    debugToFile (QString {"ft4Decode   followup skipped utc:%1 depth:%2 elapsedMs:%3"}
+                   .arg (m_ft4DecodeFollowupUtc)
+                   .arg (m_ft4DecodeFollowupDepth)
+                   .arg (elapsedMs));
+    m_ft4DecodeFollowupPending = false;
+    m_ft4DecodeFollowupAudio.clear ();
+  }
+
+  m_ft4DeliveredDecodeKeys.clear ();
   decodeDone ();
 }
 
@@ -29720,7 +29886,7 @@ void MainWindow::debugToFile(QString str)       //avt 11/25/19
 
   QString file = m_config.writeable_data_dir().absoluteFilePath("debug.txt");
   QFile outputFile(file);
-  if (!outputFile.open(QIODevice::ReadWrite | QIODevice::Append))
+  if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
   {
      MessageBox::warning_message (this, tr ("Unable to open log file"), file);
      return;

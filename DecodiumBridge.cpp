@@ -29543,6 +29543,14 @@ int DecodiumBridge::effectiveFt4ThreadLimit() const
 int DecodiumBridge::effectiveFt4DecodeDepth(int requestedDepth) const
 {
     int depth = qBound(1, requestedDepth, 4);
+    bool const canUseDepth4 = m_deepSearchEnabled
+        && m_ft8ApEnabled
+        && !m_lowCpuModeEnabled
+        && !cpuPressureActive()
+        && effectiveFt4ThreadLimit() >= 16;
+    if (depth > 3 && !canUseDepth4) {
+        depth = 3;
+    }
     if (ft4LatencyGuardActive()) {
         depth = qMin(depth, 2);
     } else if (ft4AdaptiveCpuLimitActive()) {
@@ -29619,13 +29627,19 @@ void DecodiumBridge::noteCpuPressure(const QString& reason, int durationMs, bool
 
 int DecodiumBridge::effectiveDecodeDepth() const
 {
+    QString const normalizedMode = m_mode.trimmed().toUpper();
     int depth = qBound(1, m_ndepth, 4);
-    if ((m_avgDecodeEnabled || m_deepSearchEnabled) && depth < 4) {
+    if (normalizedMode == QStringLiteral("FT4")) {
+        if (m_deepSearchEnabled && m_ft8ApEnabled && depth < 4) {
+            depth = 4;
+        } else if (!(m_deepSearchEnabled && m_ft8ApEnabled)) {
+            depth = qMin(depth, 3);
+        }
+    } else if ((m_avgDecodeEnabled || m_deepSearchEnabled) && depth < 4) {
         depth = 4;
     }
 
     if (m_lowCpuModeEnabled) {
-        QString const normalizedMode = m_mode.trimmed().toUpper();
         if (normalizedMode == QStringLiteral("FT8")
             || normalizedMode == QStringLiteral("FT4")
             || normalizedMode == QStringLiteral("FT2")) {
@@ -36632,7 +36646,7 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
     m_decodeUtcTokenBySerial.insert(serial, utcToken);
     m_decodeSessionBySerial.insert(serial, m_decodeSessionId);
 
-    queueFt4DecodeRequest(audioSnapshot, serial, nutc, utcSlot, effectiveDecodeDepth(),
+    queueFt4DecodeRequest(audioSnapshot, serial, nutc, utcSlot, qMin(effectiveDecodeDepth(), 2),
                           legacyDecodeQsoProgress(), legacyDecodeCqHint());
     m_ft4EarlyDecodeSent = true;
 }
