@@ -26777,11 +26777,18 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             && !m_autoCqRepeat
             && !m_dxCall.trimmed().isEmpty()
             && m_currentTx != 6;
-        // "Caller retries" caps repeated pre-signoff TX steps (TX1/TX2/TX3).
-        // TX4/TX5 are final signoff steps and are governed by the per-mode
-        // signoff retry cap instead, so they must not be aborted here.
+        // "Caller retries" caps repeated CALLING steps (TX1/TX2) toward a partner
+        // that hasn't engaged. It must NOT abort a QSO already in its CLOSE phase:
+        // TX4/TX5 are the final signoff steps (per-mode signoff retry cap), and
+        // TX3=R+report puts us at qsoProgress 4 (ROGER_REPORT) where the QSO is
+        // established and only the partner's RR73/73 is missing. 1.0.433: extend
+        // the upstream 1.0.432 guard (only TX4/TX5/SIGNOFF) to also cover
+        // qsoProgress==4 - otherwise with a low cap (e.g. 1) in FT8/FT4 the halt
+        // at TX3 cleared the QSO state right when the incoming RR73 arrived, so
+        // the RR73 was dropped (user FT8 report; 1.0.431 fix overwritten in 1.0.432).
         bool const inSignoffTxStep =
-            (m_currentTx == 4 || m_currentTx == 5 || m_qsoProgress == 5);
+            (m_currentTx == 4 || m_currentTx == 5
+             || m_qsoProgress == 4 || m_qsoProgress == 5);
         bool applyRetryLimit =
             (m_autoCqRepeat || manualPartnerQso)
             && !isCqAutoCq
