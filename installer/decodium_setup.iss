@@ -1,4 +1,4 @@
-; Decodium Installer Script per Inno Setup 6.x
+﻿; Decodium Installer Script per Inno Setup 6.x
 ; Pensato per essere pilotato sia localmente sia da GitHub Actions.
 
 #ifndef AppName
@@ -54,8 +54,53 @@ WizardStyle=modern
 LicenseFile={#SourceRoot}\COPYING
 
 [Languages]
-Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
+; 1.0.430 — tutte le 13 lingue supportate dall'app Decodium (translations/decodium_*.ts).
+; Le ultime 3 (cinese sempl./trad., lettone) non sono nel set ufficiale di Inno: i .isl
+; sono inclusi nel repo sotto installer\languages\ (UTF-8 con BOM, da jrsoftware/issrc).
+Name: "italian";            MessagesFile: "compiler:Languages\Italian.isl"
+Name: "english";            MessagesFile: "compiler:Default.isl"
+Name: "catalan";            MessagesFile: "compiler:Languages\Catalan.isl"
+Name: "danish";             MessagesFile: "compiler:Languages\Danish.isl"
+Name: "german";             MessagesFile: "compiler:Languages\German.isl"
+Name: "spanish";            MessagesFile: "compiler:Languages\Spanish.isl"
+Name: "french";             MessagesFile: "compiler:Languages\French.isl"
+Name: "hungarian";          MessagesFile: "compiler:Languages\Hungarian.isl"
+Name: "japanese";           MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "russian";            MessagesFile: "compiler:Languages\Russian.isl"
+Name: "chinesesimplified";  MessagesFile: "languages\ChineseSimplified.isl"
+Name: "chinesetraditional"; MessagesFile: "languages\ChineseTraditional.isl"
+Name: "latvian";            MessagesFile: "languages\Latvian.isl"
+
+[CustomMessages]
+; 1.0.430 — messaggi del riavvio post-installazione, tradotti in tutte le lingue
+; dell'app. RebootPrompt = avviso/domanda (MsgBox); RebootCountdown = testo mostrato
+; da Windows durante il conto alla rovescia di shutdown.exe. Vedi [Code]/CurStepChanged.
+english.RebootPrompt=Decodium was updated successfully.%n%nFor best performance it is STRONGLY RECOMMENDED to restart your computer now: audio, CAT and caches always start clean and you avoid malfunctions after the update.%n%nDo you want to restart now? (recommended)
+italian.RebootPrompt=Decodium è stato aggiornato con successo.%n%nPer un funzionamento ottimale si CONSIGLIA VIVAMENTE di riavviare ora il computer: audio, CAT e cache ripartono sempre puliti e si evitano malfunzionamenti dopo l'aggiornamento.%n%nVuoi riavviare adesso? (consigliato)
+catalan.RebootPrompt=Decodium s'ha actualitzat correctament.%n%nPer a un funcionament òptim es RECOMANA ENCARIDAMENT reiniciar ara l'ordinador: l'àudio, el CAT i les memòries cau sempre s'inicien netes i s'eviten errades després de l'actualització.%n%nVoleu reiniciar ara? (recomanat)
+danish.RebootPrompt=Decodium blev opdateret.%n%nFor at opnå den bedste ydeevne ANBEFALES det KRAFTIGT at genstarte computeren nu: lyd, CAT og cache starter altid rene, og du undgår fejl efter opdateringen.%n%nVil du genstarte nu? (anbefales)
+german.RebootPrompt=Decodium wurde erfolgreich aktualisiert.%n%nFür eine optimale Funktion wird DRINGEND EMPFOHLEN, den Computer jetzt neu zu starten: Audio, CAT und Caches starten immer sauber und Fehlfunktionen nach dem Update werden vermieden.%n%nMöchten Sie jetzt neu starten? (empfohlen)
+spanish.RebootPrompt=Decodium se ha actualizado correctamente.%n%nPara un funcionamiento óptimo se RECOMIENDA ENCARECIDAMENTE reiniciar ahora el ordenador: el audio, el CAT y las cachés siempre arrancan limpios y se evitan fallos tras la actualización.%n%n¿Quieres reiniciar ahora? (recomendado)
+french.RebootPrompt=Decodium a été mis à jour avec succès.%n%nPour un fonctionnement optimal, il est FORTEMENT RECOMMANDÉ de redémarrer l'ordinateur maintenant : l'audio, le CAT et les caches redémarrent toujours propres et vous évitez les dysfonctionnements après la mise à jour.%n%nVoulez-vous redémarrer maintenant ? (recommandé)
+hungarian.RebootPrompt=A Decodium frissítése sikerült.%n%nAz optimális működés érdekében NYOMATÉKOSAN AJÁNLOTT most újraindítani a számítógépet: a hang, a CAT és a gyorsítótárak mindig tisztán indulnak, és elkerülhetők a frissítés utáni hibák.%n%nÚjraindítja most? (ajánlott)
+japanese.RebootPrompt=Decodium のアップデートが完了しました。%n%n最適な動作のために、今すぐパソコンを再起動することを強くおすすめします。オーディオ・CAT・キャッシュが常にクリーンな状態で起動し、アップデート後の不具合を防げます。%n%n今すぐ再起動しますか？（推奨）
+russian.RebootPrompt=Decodium успешно обновлён.%n%nДля оптимальной работы НАСТОЯТЕЛЬНО РЕКОМЕНДУЕТСЯ перезагрузить компьютер сейчас: звук, CAT и кэш всегда запускаются с чистого состояния, и вы избежите сбоев после обновления.%n%nПерезагрузить сейчас? (рекомендуется)
+chinesesimplified.RebootPrompt=Decodium 已成功更新。%n%n为获得最佳性能，强烈建议立即重新启动计算机：音频、CAT 和缓存始终以干净状态启动，可避免更新后出现故障。%n%n现在重新启动吗？（推荐）
+chinesetraditional.RebootPrompt=Decodium 已成功更新。%n%n為獲得最佳效能，強烈建議立即重新啟動電腦：音訊、CAT 與快取始終以乾淨狀態啟動，可避免更新後發生故障。%n%n現在重新啟動嗎？（建議）
+latvian.RebootPrompt=Decodium tika veiksmīgi atjaunināts.%n%nLai nodrošinātu optimālu darbību, ĻOTI IETEICAMS tagad restartēt datoru: audio, CAT un kešatmiņa vienmēr startē tīri, un jūs izvairīsities no kļūdām pēc atjaunināšanas.%n%nVai restartēt tagad? (ieteicams)
+english.RebootCountdown=Decodium updated. The PC will restart in 15 seconds. Save your open work.
+italian.RebootCountdown=Decodium aggiornato. Il PC verrà riavviato tra 15 secondi. Salva il lavoro aperto.
+catalan.RebootCountdown=Decodium actualitzat. L'ordinador es reiniciarà d'aquí a 15 segons. Deseu la feina oberta.
+danish.RebootCountdown=Decodium opdateret. Pc'en genstarter om 15 sekunder. Gem dit åbne arbejde.
+german.RebootCountdown=Decodium aktualisiert. Der PC wird in 15 Sekunden neu gestartet. Speichern Sie Ihre offene Arbeit.
+spanish.RebootCountdown=Decodium actualizado. El PC se reiniciará en 15 segundos. Guarda tu trabajo abierto.
+french.RebootCountdown=Decodium mis à jour. Le PC redémarrera dans 15 secondes. Enregistrez votre travail ouvert.
+hungarian.RebootCountdown=A Decodium frissítve. A számítógép 15 másodperc múlva újraindul. Mentse a megnyitott munkát.
+japanese.RebootCountdown=Decodium を更新しました。15 秒後に PC が再起動します。開いている作業を保存してください。
+russian.RebootCountdown=Decodium обновлён. Компьютер перезагрузится через 15 секунд. Сохраните открытую работу.
+chinesesimplified.RebootCountdown=Decodium 已更新。计算机将在 15 秒后重新启动。请保存正在进行的工作。
+chinesetraditional.RebootCountdown=Decodium 已更新。電腦將在 15 秒後重新啟動。請儲存正在進行的工作。
+latvian.RebootCountdown=Decodium atjaunināts. Dators tiks restartēts pēc 15 sekundēm. Saglabājiet atvērto darbu.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -178,17 +223,15 @@ begin
     riavvio con conto alla rovescia 15s; se rifiuta, nessun riavvio (riapre Decodium
     dall'icona quando vuole). Saltato in /SILENT e /VERYSILENT per non sorprendere
     flussi automatici/CI. shutdown /r funziona anche per utente non-admin
-    (sessione interattiva = SeShutdownPrivilege). }
+    (sessione interattiva = SeShutdownPrivilege). I testi (RebootPrompt/RebootCountdown)
+    sono localizzati in tutte le 13 lingue via [CustomMessages] e seguono la lingua
+    scelta nell'installer. }
   if (CurStep = ssDone) and (not WizardSilent) then
   begin
-    if MsgBox('Decodium e'' stato aggiornato con successo.'#13#10#13#10
-              + 'Per un funzionamento ottimale si CONSIGLIA VIVAMENTE di riavviare '
-              + 'ora il computer: audio, CAT e cache ripartono sempre puliti e si '
-              + 'evitano malfunzionamenti dopo l''aggiornamento.'#13#10#13#10
-              + 'Vuoi riavviare adesso? (consigliato)',
+    if MsgBox(ExpandConstant('{cm:RebootPrompt}'),
               mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES then
       Exec(ExpandConstant('{sys}\shutdown.exe'),
-           '/r /t 15 /c "Decodium aggiornato. Il PC verra'' riavviato tra 15 secondi. Salva il lavoro aperto."',
+           '/r /t 15 /c "' + ExpandConstant('{cm:RebootCountdown}') + '"',
            '', SW_HIDE, ewNoWait, ResultCode);
   end;
 end;
