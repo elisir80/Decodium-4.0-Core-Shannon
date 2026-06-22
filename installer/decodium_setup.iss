@@ -114,11 +114,11 @@ Root: HKCU; Subkey: "Software\{#AppPublisher}\{#AppName}"; ValueType: string; Va
 Root: HKCU; Subkey: "Software\{#AppPublisher}\{#AppName}"; ValueType: string; ValueName: "Version"; ValueData: "{#AppVersion}"
 
 [Run]
-; 1.0.428 — avvio automatico DISABILITATO: dopo un'installazione interattiva il PC
-; viene riavviato (vedi sezione [Code], CurStepChanged). Lanciare l'app per poi
-; riavviare subito sarebbe inutile/confuso: l'utente riapre Decodium dopo il reboot
-; (icona desktop / menu Start). Per tornare al comportamento classico (avvio app, NO
-; reboot) riabilita la riga sottostante e rimuovi la sezione [Code].
+; 1.0.430 — avvio automatico DISABILITATO: a fine installazione interattiva viene
+; PROPOSTO (non forzato) il riavvio del PC con avviso consigliato (vedi [Code],
+; CurStepChanged). Lanciare l'app qui e poi proporre il reboot sarebbe confuso:
+; l'utente riapre Decodium dall'icona desktop / menu Start quando preferisce. Per
+; tornare al comportamento classico (avvio app subito) riabilita la riga sottostante.
 ; Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
@@ -140,7 +140,7 @@ end;
 
 { 1.0.428 — Disinstallazione OBBLIGATORIA in automatico della versione precedente
   PRIMA di copiare i nuovi file (scelta utente). Gira in silenzio e senza riavvio
-  (il reboot lo forziamo a fine installazione). L'uninstaller di Inno si auto-copia
+  (il reboot viene proposto a fine installazione). L'uninstaller di Inno si auto-copia
   in temp e ritorna subito: dopo Exec attendiamo che la chiave di disinstallazione
   sparisca (max ~30s) cosi' la copia dei nuovi file non va in conflitto con la
   cancellazione dei vecchi. La pulizia della cartella e' rinforzata anche dalla
@@ -172,12 +172,23 @@ begin
   if CurStep = ssInstall then
     UninstallPreviousVersion;
 
-  { 1.0.428 — Riavvio PC FORZATO a fine installazione interattiva (scelta utente:
-    "reboot obbligatorio"). Conta alla rovescia 15s con messaggio. Saltato in
-    /SILENT e /VERYSILENT per non sorprendere flussi automatici/CI. shutdown /r
-    funziona anche per utente non-admin (sessione interattiva = SeShutdownPrivilege). }
+  { 1.0.430 — Riavvio PC OPZIONALE a fine installazione interattiva (era forzato
+    nella 1.0.428). Mostriamo un avviso che RACCOMANDA VIVAMENTE il riavvio (audio,
+    CAT e cache puliti); il pulsante predefinito e' "Si". Se l'utente accetta,
+    riavvio con conto alla rovescia 15s; se rifiuta, nessun riavvio (riapre Decodium
+    dall'icona quando vuole). Saltato in /SILENT e /VERYSILENT per non sorprendere
+    flussi automatici/CI. shutdown /r funziona anche per utente non-admin
+    (sessione interattiva = SeShutdownPrivilege). }
   if (CurStep = ssDone) and (not WizardSilent) then
-    Exec(ExpandConstant('{sys}\shutdown.exe'),
-         '/r /t 15 /c "Decodium aggiornato. Il PC verra'' riavviato tra 15 secondi per completare l''installazione. Salva il lavoro aperto."',
-         '', SW_HIDE, ewNoWait, ResultCode);
+  begin
+    if MsgBox('Decodium e'' stato aggiornato con successo.'#13#10#13#10
+              + 'Per un funzionamento ottimale si CONSIGLIA VIVAMENTE di riavviare '
+              + 'ora il computer: audio, CAT e cache ripartono sempre puliti e si '
+              + 'evitano malfunzionamenti dopo l''aggiornamento.'#13#10#13#10
+              + 'Vuoi riavviare adesso? (consigliato)',
+              mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES then
+      Exec(ExpandConstant('{sys}\shutdown.exe'),
+           '/r /t 15 /c "Decodium aggiornato. Il PC verra'' riavviato tra 15 secondi. Salva il lavoro aperto."',
+           '', SW_HIDE, ewNoWait, ResultCode);
+  end;
 end;
