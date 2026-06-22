@@ -1971,21 +1971,20 @@ ApplicationWindow {
             return value
 
         var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
-        if (lum < 0.08 || lum > 0.92)
-            return c
-
-        var sat = 0.30 * boost
-        var r = c.r + (c.r - lum) * sat
-        var g = c.g + (c.g - lum) * sat
-        var b = c.b + (c.b - lum) * sat
+        var sat = 0.85 * boost
+        var r = lum + (c.r - lum) * (1.0 + sat)
+        var g = lum + (c.g - lum) * (1.0 + sat)
+        var b = lum + (c.b - lum) * (1.0 + sat)
         r = decodeClamp01(r)
         g = decodeClamp01(g)
         b = decodeClamp01(b)
 
         var boostedLum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        var targetLum = 0.52 + 0.28 * boost
+        var targetLum = lum < 0.55
+                ? lum + (0.68 - lum) * 0.75 * boost
+                : lum + (0.95 - lum) * 0.35 * boost
         if (boostedLum < targetLum) {
-            var mix = Math.min(0.65, (targetLum - boostedLum) / Math.max(0.001, 1.0 - boostedLum))
+            var mix = Math.min(0.75, (targetLum - boostedLum) / Math.max(0.001, 1.0 - boostedLum))
             r = r + (1.0 - r) * mix
             g = g + (1.0 - g) * mix
             b = b + (1.0 - b) * mix
@@ -2003,12 +2002,12 @@ ApplicationWindow {
             return value
 
         var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
-        var sat = 0.18 * boost
+        var sat = 0.55 * boost
         var r = decodeClamp01(c.r + (c.r - lum) * sat)
         var g = decodeClamp01(c.g + (c.g - lum) * sat)
         var b = decodeClamp01(c.b + (c.b - lum) * sat)
-        var alphaLift = c.a < 0.12 ? 0.05 * boost : 0.12 * boost
-        var alphaCap = c.a < 0.12 ? 0.16 : 0.58
+        var alphaLift = c.a < 0.12 ? 0.18 * boost : 0.28 * boost
+        var alphaCap = c.a < 0.12 ? 0.32 : 0.72
         return Qt.rgba(r, g, b, Math.min(alphaCap, c.a + alphaLift))
     }
 

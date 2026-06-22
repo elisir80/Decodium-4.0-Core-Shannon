@@ -43,6 +43,7 @@ Item {
     property bool highlightBlue: root.bridge ? root.bridge.getSetting("HighlightBlue", false) : false
     property string highlightOrangeCallsigns: root.bridge ? root.bridge.getSetting("HighlightOrangeCallsigns", "") : ""
     property string highlightBlueCallsigns: root.bridge ? root.bridge.getSetting("HighlightBlueCallsigns", "") : ""
+    property int decodeColorBoost: root.bridge ? Math.max(0, Math.min(100, Number(root.bridge.getSetting("uiDecodeColorBoost", 35)))) : 35
 
     // Column widths (compact-aware like the classic panel).
     readonly property bool compact: width < 560
@@ -86,6 +87,8 @@ Item {
                 root.highlightOrangeCallsigns = String(value || "")
             else if (key === "HighlightBlueCallsigns" || key === "BlueCallsigns")
                 root.highlightBlueCallsigns = String(value || "")
+            else if (key === "uiDecodeColorBoost")
+                root.decodeColorBoost = Math.max(0, Math.min(100, Number(value)))
             else
                 return
             root.refreshDecodeColors()
@@ -164,16 +167,79 @@ Item {
         return !!(root.bridge && root.bridge.decodeColorEnabled(prop))
     }
 
+    function decodeClamp01(value) {
+        return Math.max(0, Math.min(1, Number(value)))
+    }
+
+    function decodeColorObject(value) {
+        if (value === undefined || value === null)
+            return null
+        if (typeof value === "object" && value.r !== undefined)
+            return value
+        var text = String(value)
+        if (text.length === 0)
+            return null
+        try {
+            return Qt.color(text)
+        } catch (e) {
+            return null
+        }
+    }
+
+    function boostedDecodeTextColor(value) {
+        root.decodeColorRevision
+        var boost = Math.max(0, Math.min(100, Number(root.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        var sat = 0.85 * boost
+        var r = decodeClamp01(lum + (c.r - lum) * (1.0 + sat))
+        var g = decodeClamp01(lum + (c.g - lum) * (1.0 + sat))
+        var b = decodeClamp01(lum + (c.b - lum) * (1.0 + sat))
+        var boostedLum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        var targetLum = lum < 0.55
+                ? lum + (0.68 - lum) * 0.75 * boost
+                : lum + (0.95 - lum) * 0.35 * boost
+        if (boostedLum < targetLum) {
+            var mix = Math.min(0.75, (targetLum - boostedLum) / Math.max(0.001, 1.0 - boostedLum))
+            r = r + (1.0 - r) * mix
+            g = g + (1.0 - g) * mix
+            b = b + (1.0 - b) * mix
+        }
+        return Qt.rgba(decodeClamp01(r), decodeClamp01(g), decodeClamp01(b), c.a)
+    }
+
+    function boostedDecodeBackgroundColor(value) {
+        root.decodeColorRevision
+        var boost = Math.max(0, Math.min(100, Number(root.decodeColorBoost))) / 100.0
+        if (boost <= 0)
+            return value
+        var c = decodeColorObject(value)
+        if (!c || c.a <= 0)
+            return value
+        var lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        var sat = 0.55 * boost
+        var r = decodeClamp01(c.r + (c.r - lum) * sat)
+        var g = decodeClamp01(c.g + (c.g - lum) * sat)
+        var b = decodeClamp01(c.b + (c.b - lum) * sat)
+        var alphaLift = c.a < 0.12 ? 0.18 * boost : 0.28 * boost
+        var alphaCap = c.a < 0.12 ? 0.32 : 0.72
+        return Qt.rgba(r, g, b, Math.min(alphaCap, c.a + alphaLift))
+    }
+
     function decodeMessageColor(entry) {
         root.decodeColorRevision
         if (!entry)
             return root.cText
         var message = entry.displayMessage || entry.message || ""
         if (root.highlightOrange && highlightListMatches(message, root.highlightOrangeCallsigns))
-            return "#E14B00"
+            return boostedDecodeTextColor("#E14B00")
         if (root.highlightBlue && highlightListMatches(message, root.highlightBlueCallsigns))
-            return "#0064FF"
-        return root.bridge ? root.bridge.effectiveDecodeColor(decodeMessageColorProp(entry)) : root.cText
+            return boostedDecodeTextColor("#0064FF")
+        return root.bridge ? boostedDecodeTextColor(root.bridge.effectiveDecodeColor(decodeMessageColorProp(entry))) : root.cText
     }
 
     function decodeMessageBold(entry) {
@@ -243,9 +309,9 @@ Item {
             height: isSep ? 4 : root.rowH
             color: !modelData ? "transparent" :
                    isSep ? "transparent" :
-                   (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
+                   (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.boostedDecodeBackgroundColor(root.bridge.decodeHighlightUserBg(entry)) :
                    entry.isTx ? Qt.rgba(root.cTx.r, root.cTx.g, root.cTx.b, 0.18) :
-                   (entry.isCQ && root.bridge && root.bridge.decodeColorEnabled("colorCQ")) ? Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.12) :
+                   (entry.isCQ && root.bridge && root.bridge.decodeColorEnabled("colorCQ")) ? root.boostedDecodeBackgroundColor(Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.12)) :
                    (index % 2 === 0) ? Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.02)
                                      : Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.05)
             radius: 2
