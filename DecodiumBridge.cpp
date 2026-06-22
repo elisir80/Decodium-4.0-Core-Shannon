@@ -26689,9 +26689,23 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             && !m_autoCqRepeat
             && !m_dxCall.trimmed().isEmpty()
             && m_currentTx != 6;
+        // 1.0.431: il cap "Caller retries" limita i tentativi di CHIAMATA (partner
+        // che non ha ancora risposto: CALLING_CQ/REPLYING/REPORT, progress<=3). NON
+        // deve abortire un QSO gia' avviato che e' in CHIUSURA: una volta inviato
+        // R+report (progress 4 ROGER_REPORT) o l'RR73/73 (progress 5 SIGNOFF) restano
+        // solo gli scambi finali e il QSO va lasciato completare (il cap-signoff +
+        // il TX watchdog limitano la coda). REGRESSIONE 1.0.430 (cap reso HARD): con
+        // cap=1 in FT8/FT4 MANUALE, al boundary del periodo RX (in attesa dell'RR73
+        // del partner) l'halt a TX3/TX4 azzerava lo stato del QSO (setDxCall(""),
+        // m_qsoProgress=0) -> l'RR73 decodificato subito dopo cadeva in
+        // "if (m_dxCall.isEmpty()) return;" e veniva scartato ("non preso in
+        // considerazione"). In FT2 era gia' coperto dal deferred-signoff; FT8/FT4
+        // manuali no (autoCqDeferredSignoff richiede m_autoCqRepeat).
+        bool const inActiveQsoClose = (m_qsoProgress == 4 || m_qsoProgress == 5);
         bool applyRetryLimit =
             (m_autoCqRepeat || manualPartnerQso)
             && !isCqAutoCq
+            && !inActiveQsoClose
             && !(m_currentTx == 5 && m_ft2DeferredLogPending);
         int effectiveMaxCallerRetries = m_maxCallerRetries;
         // 1.0.429: il valore "Caller retries" impostato dall'utente e' un limite
