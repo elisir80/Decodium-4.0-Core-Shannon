@@ -8257,18 +8257,16 @@ NumberAnimation {
         if (!rxFrequencyList)
             return
         var targetY = rxFrequencyList.tailContentY()
-        var distance = Math.abs(rxFrequencyList.contentY - targetY)
         rxFrequencyTailAnimation.stop()
         rxFrequencyList.tailFollowPending = true
-        if (distance < 1 || distance > Math.max(12000, rxFrequencyList.height * 18)) {
-            rxFrequencyList.contentY = targetY
-            rxFrequencyList.finishTailFollow()
-            return
-        }
-        rxFrequencyTailAnimation.from = rxFrequencyList.contentY
-        rxFrequencyTailAnimation.to = targetY
-        rxFrequencyTailAnimation.duration = Math.max(180, Math.min(620, 130 + distance * 0.24))
-        rxFrequencyTailAnimation.start()
+        // 1.0.434 - come evenPeriodList (1.0.228): assegnazione diretta, niente
+        // NumberAnimation. In FT2 i decode arrivano a raffica (piu' batch/periodo):
+        // lo scroll animato 180-620ms si sovrapponeva ai nuovi decode -> "slot
+        // machine" (righe che rimbalzano/saltano "nelle risposte"). Il tail-follow
+        // non necessita animazione (l'addDisplaced YAnimator copre gia' i delegate).
+        // NumberAnimation mantenuta nei floating detached (UX pop-out).
+        rxFrequencyList.contentY = targetY
+        rxFrequencyList.finishTailFollow()
     })
 }
 NumberAnimation {

@@ -7114,7 +7114,19 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
         }
     }
     coalesceRxPaneTxRows(filtered, m_mode);
-    QDateTime const sortReferenceUtc = QDateTime::currentDateTimeUtc();
+    // 1.0.434: riferimento di sort DETERMINISTICO derivato dai dati (max
+    // timestamp delle entry) invece di QDateTime::currentDateTimeUtc(): con
+    // "now" il riferimento cambiava ad ogni rebuild -> le righe TX/senza-timestamp
+    // potevano riordinarsi tra un rebuild e l'altro (churn "slot machine").
+    // Stesso input -> stesso ordine. Fallback a now se nessuna entry ha timestamp.
+    qint64 maxEntryTsMs = 0;
+    for (QVariant const& fv : filtered) {
+        qint64 const ts = static_cast<qint64>(fv.toMap().value(QStringLiteral("timestamp")).toULongLong());
+        if (ts > maxEntryTsMs) maxEntryTsMs = ts;
+    }
+    QDateTime const sortReferenceUtc = (maxEntryTsMs > 0)
+        ? QDateTime::fromMSecsSinceEpoch(maxEntryTsMs, Qt::UTC)
+        : QDateTime::currentDateTimeUtc();
     std::stable_sort(filtered.begin(), filtered.end(),
         [&sortReferenceUtc](QVariant const& a, QVariant const& b) {
             qint64 const ta = decodeDisplaySortMsecs(a.toMap(), sortReferenceUtc);
@@ -7392,8 +7404,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 || key == QStringLiteral("HideWorkedBand")
                 || key == QStringLiteral("HideToday")
                 || key == QStringLiteral("HideWorkedToday")) {
-                rebuildBandActivityModel();
-                rebuildRxDecodeModel();
+                // 1.0.434: passa per il throttle 500ms (come il path decode
+                // normale) invece di rebuildare i 2 model in diretta. La 1.0.432
+                // li chiamava sincroni qui, bypassando il coalescing e aggiungendo
+                // rebuild durante i burst -> churn. emitDecodeListChangedThrottled
+                // -> decodeListChanged -> rebuild di entrambi i model, coalescato.
+                emitDecodeListChangedThrottled();
             }
         });
 
