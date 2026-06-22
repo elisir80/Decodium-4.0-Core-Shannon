@@ -13160,6 +13160,11 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <translation>Decode Boost：</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>僅調整視覺對比；不會改變解碼器靈敏度。</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>介面顏色（背景 + 文字）</translation>

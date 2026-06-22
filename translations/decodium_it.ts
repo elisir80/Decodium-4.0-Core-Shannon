@@ -13687,6 +13687,11 @@ Se non sei sicuro usa &apos;Alta&apos;.</translation>
         <translation>Decode Boost:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Solo contrasto visivo; non modifica la sensibilità del decoder.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>COLORI INTERFACCIA (sfondo + testo)</translation>

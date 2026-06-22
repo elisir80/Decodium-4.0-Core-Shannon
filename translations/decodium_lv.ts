@@ -14391,6 +14391,11 @@ QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
         <translation>Dekodēšanas pastiprinājums:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Tikai vizuālais kontrasts; tas nemaina dekodera jutību.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>SASKARNES KRĀSAS (fons + teksts)</translation>

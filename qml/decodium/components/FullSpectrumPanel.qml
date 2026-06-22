@@ -93,8 +93,24 @@ Item {
         function onColor73Changed() { root.refreshDecodeColors() }
         function onColorCQChanged() { root.refreshDecodeColors() }
         function onColorMyCallChanged() { root.refreshDecodeColors() }
+        function onColorDXEntityChanged() { root.refreshDecodeColors() }
+        function onColorB4Changed() { root.refreshDecodeColors() }
         function onColorTxMessageChanged() { root.refreshDecodeColors() }
         function onColorDecodeTextChanged() { root.refreshDecodeColors() }
+        function onColorNewDxccChanged() { root.refreshDecodeColors() }
+        function onColorNewDxccBandChanged() { root.refreshDecodeColors() }
+        function onColorNewContinentChanged() { root.refreshDecodeColors() }
+        function onColorNewContinentBandChanged() { root.refreshDecodeColors() }
+        function onColorNewCqZoneChanged() { root.refreshDecodeColors() }
+        function onColorNewCqZoneBandChanged() { root.refreshDecodeColors() }
+        function onColorNewItuZoneChanged() { root.refreshDecodeColors() }
+        function onColorNewItuZoneBandChanged() { root.refreshDecodeColors() }
+        function onColorNewGridChanged() { root.refreshDecodeColors() }
+        function onColorNewGridBandChanged() { root.refreshDecodeColors() }
+        function onColorNewCallChanged() { root.refreshDecodeColors() }
+        function onColorNewCallBandChanged() { root.refreshDecodeColors() }
+        function onDecodeColorEnabledChanged(prop, enabled) { root.refreshDecodeColors() }
+        function onDecodeColorBoldChanged(prop, bold) { root.refreshDecodeColors() }
     }
 
     function isSignoffMessage(message) {
@@ -117,24 +133,59 @@ Item {
         return false
     }
 
+    function decodeMessageColorProp(entry) {
+        if (!entry)
+            return "colorDecodeText"
+        if (entry.isTx === true && decodeColorCategoryEnabled("colorTxMessage")) return "colorTxMessage"
+        if (entry.isMyCall === true && decodeColorCategoryEnabled("colorMyCall")) return "colorMyCall"
+        if (root.highlight73 && root.bridge && isSignoffMessage(entry.displayMessage || entry.message || "") && decodeColorCategoryEnabled("color73")) return "color73"
+        if ((entry.isB4 === true || entry.dxIsWorked === true) && decodeColorCategoryEnabled("colorB4")) return "colorB4"
+        if (entry.isCQ === true && decodeColorCategoryEnabled("colorCQ")) return "colorCQ"
+        if (entry.dxIsNewDxccBand === true && decodeColorCategoryEnabled("colorNewDxccBand")) return "colorNewDxccBand"
+        if (entry.dxIsNewDxcc === true && decodeColorCategoryEnabled("colorNewDxcc")) return "colorNewDxcc"
+        if (entry.dxIsNewContinentBand === true && decodeColorCategoryEnabled("colorNewContinentBand")) return "colorNewContinentBand"
+        if (entry.dxIsNewContinent === true && decodeColorCategoryEnabled("colorNewContinent")) return "colorNewContinent"
+        if (entry.dxIsNewCqZoneBand === true && decodeColorCategoryEnabled("colorNewCqZoneBand")) return "colorNewCqZoneBand"
+        if (entry.dxIsNewCqZone === true && decodeColorCategoryEnabled("colorNewCqZone")) return "colorNewCqZone"
+        if (entry.dxIsNewItuZoneBand === true && decodeColorCategoryEnabled("colorNewItuZoneBand")) return "colorNewItuZoneBand"
+        if (entry.dxIsNewItuZone === true && decodeColorCategoryEnabled("colorNewItuZone")) return "colorNewItuZone"
+        if (entry.dxIsNewGridBand === true && decodeColorCategoryEnabled("colorNewGridBand")) return "colorNewGridBand"
+        if (entry.dxIsNewGrid === true && decodeColorCategoryEnabled("colorNewGrid")) return "colorNewGrid"
+        if (entry.dxIsNewCallBand === true && decodeColorCategoryEnabled("colorNewCallBand")) return "colorNewCallBand"
+        if (entry.dxIsNewCall === true && decodeColorCategoryEnabled("colorNewCall")) return "colorNewCall"
+        if ((entry.dxIsMostWanted === true || entry.dxIsNewCountry === true || entry.dxIsNewBand === true)
+                && decodeColorCategoryEnabled("colorDXEntity"))
+            return "colorDXEntity"
+        return "colorDecodeText"
+    }
+
+    function decodeColorCategoryEnabled(prop) {
+        root.decodeColorRevision
+        return !!(root.bridge && root.bridge.decodeColorEnabled(prop))
+    }
+
     function decodeMessageColor(entry) {
         root.decodeColorRevision
         if (!entry)
             return root.cText
         var message = entry.displayMessage || entry.message || ""
-        if (entry.isTx)
-            return "#f1c40f"
-        if (entry.isMyCall)
-            return root.cTx
         if (root.highlightOrange && highlightListMatches(message, root.highlightOrangeCallsigns))
             return "#E14B00"
         if (root.highlightBlue && highlightListMatches(message, root.highlightBlueCallsigns))
             return "#0064FF"
-        if (root.highlight73 && root.bridge && isSignoffMessage(message))
-            return root.bridge.effectiveDecodeColor("color73")
-        if (entry.isCQ)
-            return root.bridge ? root.bridge.effectiveDecodeColor("colorCQ") : root.cCq
-        return root.bridge ? root.bridge.effectiveDecodeColor("colorDecodeText") : root.cText
+        return root.bridge ? root.bridge.effectiveDecodeColor(decodeMessageColorProp(entry)) : root.cText
+    }
+
+    function decodeMessageBold(entry) {
+        root.decodeColorRevision
+        if (!entry || !root.bridge)
+            return false
+        var message = entry.displayMessage || entry.message || ""
+        if ((root.highlightOrange && highlightListMatches(message, root.highlightOrangeCallsigns)) ||
+            (root.highlightBlue && highlightListMatches(message, root.highlightBlueCallsigns)))
+            return false
+        var prop = decodeMessageColorProp(entry)
+        return root.bridge.decodeColorEnabled(prop) && root.bridge.decodeColorBold(prop)
     }
 
     // Header column strip.
@@ -194,7 +245,7 @@ Item {
                    isSep ? "transparent" :
                    (root.bridge && root.bridge.decodeHighlightUserBg(entry).length > 0) ? root.bridge.decodeHighlightUserBg(entry) :
                    entry.isTx ? Qt.rgba(root.cTx.r, root.cTx.g, root.cTx.b, 0.18) :
-                   entry.isCQ ? Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.12) :
+                   (entry.isCQ && root.bridge && root.bridge.decodeColorEnabled("colorCQ")) ? Qt.rgba(root.cCq.r, root.cCq.g, root.cCq.b, 0.12) :
                    (index % 2 === 0) ? Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.02)
                                      : Qt.rgba(root.cText.r, root.cText.g, root.cText.b, 0.05)
             radius: 2
@@ -276,6 +327,7 @@ Item {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
                     color: root.decodeMessageColor(del.entry)
                     font.pixelSize: root.fSize; font.family: "monospace"
+                    font.bold: root.decodeMessageBold(del.entry)
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }

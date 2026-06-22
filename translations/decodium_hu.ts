@@ -12186,6 +12186,11 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation>Decode Boost:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Csak vizuális kontraszt; nem módosítja a dekóder érzékenységét.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>INTERFÉSZ SZÍNEK (háttér + szöveg)</translation>

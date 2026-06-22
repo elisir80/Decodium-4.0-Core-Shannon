@@ -12556,6 +12556,11 @@ Si tu n&apos;es pas sûr, utilise &apos;Haute&apos;.</translation>
         <translation>Renforcement du décodage :</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Contraste visuel uniquement ; cela ne modifie pas la sensibilité du décodeur.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>COULEURS DE L&apos;INTERFACE (fond + texte)</translation>

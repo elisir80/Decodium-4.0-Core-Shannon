@@ -127,6 +127,7 @@ Window {
                 function onColorNewCallChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorNewCallBandChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorLotwUserChanged() { decodeWindow.refreshDecodeColors() }
+                function onDecodeColorBoldChanged(prop, bold) { decodeWindow.refreshDecodeColors() }
 		    }
     property bool hideTelemetryOnlyDecodes: Qt.platform.os === "windows"
     property string highlightOrangeCallsigns: bridge.getSetting("HighlightOrangeCallsigns", "")
@@ -434,29 +435,53 @@ Window {
 
         var customColor = customHighlightColor(modelData)
         if (customColor !== "") return boostedDecodeTextColor(customColor)
-        if (highlight73 && isSignoffMessage(modelData.message)) return boostedDecodeTextColor(effectiveDecodeColor("color73"))
-        if (modelData.isB4 || modelData.dxIsWorked) return boostedDecodeTextColor(effectiveDecodeColor("colorB4"))
 
         var textHighlight = wsjtxTextHighlightColor(modelData)
         if (textHighlight.length > 0)
             return boostedDecodeTextColor(textHighlight)
 
-        if (modelData.isTx)     return boostedDecodeTextColor(effectiveDecodeColor("colorTxMessage"))
-        if (rowReallyIsMyCall(modelData)) return boostedDecodeTextColor(effectiveDecodeColor("colorMyCall"))
-        if (modelData.isCQ)     return boostedDecodeTextColor(effectiveDecodeColor("colorCQ"))
-        if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
-            || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
-            return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        return boostedDecodeTextColor(effectiveDecodeColor("colorDecodeText"))
+        return boostedDecodeTextColor(effectiveDecodeColor(decodeTextColorProp(modelData)))
     }
 
     function decodeEntryBold(modelData) {
         decodeWindow.decodeColorRevision
-        return !!(modelData && ((modelData.isTx === true) ||
-                                ((modelData.isCQ === true) && bridge.decodeColorEnabled("colorCQ")) ||
-                                rowReallyIsMyCall(modelData) ||
-                                (modelData.dxIsNewCountry === true) ||
-                                (modelData.dxIsMostWanted === true)))
+        if (!modelData)
+            return false
+        if (customHighlightColor(modelData) !== "")
+            return false
+        return !!(bridge.decodeColorEnabled(decodeTextColorProp(modelData)) &&
+                  bridge.decodeColorBold(decodeTextColorProp(modelData)))
+    }
+
+    function decodeColorCategoryEnabled(prop) {
+        decodeWindow.decodeColorRevision
+        return !!(bridge && bridge.decodeColorEnabled(prop))
+    }
+
+    function decodeTextColorProp(modelData) {
+        if (!modelData)
+            return "colorDecodeText"
+        if (modelData.isTx === true && decodeColorCategoryEnabled("colorTxMessage")) return "colorTxMessage"
+        if (rowReallyIsMyCall(modelData) && decodeColorCategoryEnabled("colorMyCall")) return "colorMyCall"
+        if (highlight73 && isSignoffMessage(modelData.message) && decodeColorCategoryEnabled("color73")) return "color73"
+        if ((modelData.isB4 === true || modelData.dxIsWorked === true) && decodeColorCategoryEnabled("colorB4")) return "colorB4"
+        if (modelData.isCQ === true && decodeColorCategoryEnabled("colorCQ")) return "colorCQ"
+        if (modelData.dxIsNewDxccBand === true && decodeColorCategoryEnabled("colorNewDxccBand")) return "colorNewDxccBand"
+        if (modelData.dxIsNewDxcc === true && decodeColorCategoryEnabled("colorNewDxcc")) return "colorNewDxcc"
+        if (modelData.dxIsNewContinentBand === true && decodeColorCategoryEnabled("colorNewContinentBand")) return "colorNewContinentBand"
+        if (modelData.dxIsNewContinent === true && decodeColorCategoryEnabled("colorNewContinent")) return "colorNewContinent"
+        if (modelData.dxIsNewCqZoneBand === true && decodeColorCategoryEnabled("colorNewCqZoneBand")) return "colorNewCqZoneBand"
+        if (modelData.dxIsNewCqZone === true && decodeColorCategoryEnabled("colorNewCqZone")) return "colorNewCqZone"
+        if (modelData.dxIsNewItuZoneBand === true && decodeColorCategoryEnabled("colorNewItuZoneBand")) return "colorNewItuZoneBand"
+        if (modelData.dxIsNewItuZone === true && decodeColorCategoryEnabled("colorNewItuZone")) return "colorNewItuZone"
+        if (modelData.dxIsNewGridBand === true && decodeColorCategoryEnabled("colorNewGridBand")) return "colorNewGridBand"
+        if (modelData.dxIsNewGrid === true && decodeColorCategoryEnabled("colorNewGrid")) return "colorNewGrid"
+        if (modelData.dxIsNewCallBand === true && decodeColorCategoryEnabled("colorNewCallBand")) return "colorNewCallBand"
+        if (modelData.dxIsNewCall === true && decodeColorCategoryEnabled("colorNewCall")) return "colorNewCall"
+        if ((modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
+                && decodeColorCategoryEnabled("colorDXEntity"))
+            return "colorDXEntity"
+        return "colorDecodeText"
     }
 
     function lotwMarkerColor() {
@@ -1214,7 +1239,7 @@ Component.onCompleted: {
                                     // 1.0.141: difesa contro stazioni "fantasma" rosse
 	                                    if (decodeWindow.rowReallyIsMyCall(modelData))
 	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.25))
-	                                    if (modelData.isCQ)     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12))
+	                                    if (modelData.isCQ && bridge.decodeColorEnabled("colorCQ"))     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12))
 	                                    if (isAtRxFrequency(modelData.freq, modelData))
 	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.2))
 	                                    return index % 2 === 0
@@ -1349,8 +1374,8 @@ Component.onCompleted: {
                                         text: modelData.freq
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
-	                                        color: decodeWindow.boostedDecodeTextColor(isAtRxFrequency(modelData.freq, modelData) ? primaryBlue : secondaryCyan)
-                                        font.bold: isAtRxFrequency(modelData.freq, modelData)
+	                                        color: decodeWindow.boostedDecodeTextColor(modelData.isTx ? "#f1c40f" : secondaryCyan)
+                                        font.bold: modelData.isTx === true
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.bandFreqWidth
                                     }
@@ -1393,7 +1418,7 @@ Component.onCompleted: {
                                             text: decodeWindow.dxccDisplayText(modelData)
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-	                                            color: decodeWindow.boostedDecodeTextColor((modelData.dxCountry || modelData.usState) ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
+	                                            color: decodeWindow.boostedDecodeTextColor((modelData.dxCountry || modelData.usState) && decodeWindow.decodeColorCategoryEnabled("colorDXEntity") ? decodeWindow.effectiveDecodeColor("colorDXEntity") : textSecondary)
                                             horizontalAlignment: Text.AlignRight
                                             verticalAlignment: Text.AlignVCenter
                                             elide: Text.ElideNone
@@ -1755,7 +1780,7 @@ Component.onCompleted: {
                                     // 1.0.141: difesa contro stazioni "fantasma" rosse (Signal RX)
 	                                    if (decodeWindow.rowReallyIsMyCall(modelData))
 	                                        return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(244/255, 67/255, 54/255, 0.3))
-	                                    if (modelData.isCQ)     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15))
+	                                    if (modelData.isCQ && bridge.decodeColorEnabled("colorCQ"))     return decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.15))
 	                                    return index % 2 === 0
 	                                           ? decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.05))
 	                                           : decodeWindow.boostedDecodeBackgroundColor(Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.1))

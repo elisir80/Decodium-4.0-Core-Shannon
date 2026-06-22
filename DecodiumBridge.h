@@ -903,6 +903,8 @@ public:
     QString decodeColorFallback() const { return QStringLiteral("#AFC4D8"); }
     Q_INVOKABLE bool decodeColorEnabled(const QString& prop) const;
     Q_INVOKABLE void setDecodeColorEnabled(const QString& prop, bool enabled);
+    Q_INVOKABLE bool decodeColorBold(const QString& prop) const;
+    Q_INVOKABLE void setDecodeColorBold(const QString& prop, bool bold);
     Q_INVOKABLE QString effectiveDecodeColor(const QString& prop) const;
 
     // Returns the priority-ranked WSJT-X background color for a decode entry,
@@ -1529,6 +1531,7 @@ signals:
     void colorNewCallBandChanged();
     void colorLotwUserChanged();
     void decodeColorEnabledChanged(QString prop, bool enabled);
+    void decodeColorBoldChanged(QString prop, bool bold);
     void decodeColorBgChanged();   // 1.0.416 sfondo decode cambiato
     void b4StrikethroughChanged();
     // B8 — Alert sounds
@@ -2693,6 +2696,7 @@ private:
     QString m_colorNewCallBand       {"#B5E8E8"}; // light cyan
     QString m_colorLotwUser          {"#FFFFFF"}; // white bg, dark red text
     QHash<QString, bool> m_decodeColorEnabled;
+    QHash<QString, bool> m_decodeColorBold;
     QHash<QString, QString> m_decodeColorBg;          // 1.0.416 sfondo riga per categoria
     QHash<QString, bool>    m_decodeColorBgEnabled;   // 1.0.416 abilitazione sfondo per categoria
 

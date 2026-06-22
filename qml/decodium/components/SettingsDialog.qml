@@ -6403,6 +6403,7 @@ Dialog {
                                 property string defaultColor: modelData.defaultColor
                                 property string currentColor: bridge[targetProp] || defaultColor
                                 property bool colorEnabled: bridge.decodeColorEnabled(targetProp)
+                                property bool boldEnabled: bridge.decodeColorBold(targetProp)
                                 property string shownColor: colorEnabled ? currentColor : bridge.decodeColorFallback
                                 // 1.0.416 — sfondo riga per categoria (opt-in, default OFF)
                                 property bool bgEnabled: bridge.decodeColorBgEnabled(targetProp)
@@ -6538,6 +6539,21 @@ Dialog {
                                     }
                                 }
 
+                                Text { text: qsTr("Bold") + ":"; color: textSecondary; font.pixelSize: 11; Layout.leftMargin: 6 }
+                                CheckBox {
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: controlHeight
+                                    checked: decodeColorRow.boldEnabled
+                                    enabled: decodeColorRow.colorEnabled
+                                    opacity: enabled ? 1.0 : 0.55
+                                    onClicked: {
+                                        decodeColorRow.boldEnabled = checked
+                                        bridge.setDecodeColorBold(decodeColorRow.targetProp, checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height / 2 - height / 2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                }
+
                                 // ── 1.0.416: colore di SFONDO riga (per categoria) ──
                                 Text { text: qsTr("BG:"); color: textSecondary; font.pixelSize: 11; Layout.leftMargin: 8 }
                                 CheckBox {
@@ -6638,7 +6654,12 @@ Dialog {
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
-                        Text { text: qsTr("Decode Boost:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text {
+                            text: qsTr("Decode Boost:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                        }
                         RowLayout {
                             Layout.fillWidth: true
                             Layout.columnSpan: 3
@@ -6659,6 +6680,13 @@ Dialog {
                                 horizontalAlignment: Text.AlignRight
                                 Layout.preferredWidth: 44
                             }
+                        }
+                        Text {
+                            text: qsTr("Visual contrast only; it does not change decoder sensitivity.")
+                            color: textDim
+                            font.pixelSize: 10
+                            Layout.columnSpan: 4
+                            Layout.leftMargin: 110
                         }
 
 	                        // ── Highlighting ──
