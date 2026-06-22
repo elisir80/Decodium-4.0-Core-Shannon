@@ -10980,6 +10980,11 @@ Fehler (%2): %3</translation>
         <translation>B4 (gearbeitet)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <source>Normal decodes</source>
+        <translation>Normale Dekodierungen</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>Änderungen werden sofort angewendet, wo dies unterstützt wird.</translation>
@@ -13390,6 +13395,26 @@ Wenn du unsicher bist, verwende &apos;Hoch&apos;.</translation>
         <source>FILTER OPTIONS</source>
         <translation>FILTEROPTIONEN</translation>
     </message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+    <source>Worked on Band:</source>
+    <translation>Auf Band gearbeitet:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+    <source>Hide stations already worked on the current band.</source>
+    <translation>Stationen ausblenden, die auf dem aktuellen Band bereits gearbeitet wurden.</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+    <source>Worked Today:</source>
+    <translation>Heute gearbeitet:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
+    <source>Hide stations already logged today in UTC.</source>
+    <translation>Stationen ausblenden, die heute in UTC bereits geloggt wurden.</translation>
+</message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>FONT</source>

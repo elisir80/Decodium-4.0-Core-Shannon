@@ -37,6 +37,12 @@ Item {
 
     readonly property int rowH: tm ? tm.densityRowHeight() : 22
     readonly property int fSize: tm ? tm.densityFontSize() : 12
+    property int decodeColorRevision: 0
+    property bool highlight73: root.bridge ? root.bridge.getSetting("Highlight73", true) : true
+    property bool highlightOrange: root.bridge ? root.bridge.getSetting("HighlightOrange", false) : false
+    property bool highlightBlue: root.bridge ? root.bridge.getSetting("HighlightBlue", false) : false
+    property string highlightOrangeCallsigns: root.bridge ? root.bridge.getSetting("HighlightOrangeCallsigns", "") : ""
+    property string highlightBlueCallsigns: root.bridge ? root.bridge.getSetting("HighlightBlueCallsigns", "") : ""
 
     // Column widths (compact-aware like the classic panel).
     readonly property bool compact: width < 560
@@ -61,6 +67,74 @@ Item {
         if (country.length > 0 && state.length > 0)
             return country + " · " + state
         return country.length > 0 ? country : state
+    }
+
+    function refreshDecodeColors() {
+        decodeColorRevision = (decodeColorRevision + 1) % 1000000
+    }
+
+    Connections {
+        target: root.bridge
+        function onSettingValueChanged(key, value) {
+            if (key === "Highlight73")
+                root.highlight73 = !!value
+            else if (key === "HighlightOrange")
+                root.highlightOrange = !!value
+            else if (key === "HighlightBlue")
+                root.highlightBlue = !!value
+            else if (key === "HighlightOrangeCallsigns" || key === "OrangeCallsigns")
+                root.highlightOrangeCallsigns = String(value || "")
+            else if (key === "HighlightBlueCallsigns" || key === "BlueCallsigns")
+                root.highlightBlueCallsigns = String(value || "")
+            else
+                return
+            root.refreshDecodeColors()
+        }
+        function onColor73Changed() { root.refreshDecodeColors() }
+        function onColorCQChanged() { root.refreshDecodeColors() }
+        function onColorMyCallChanged() { root.refreshDecodeColors() }
+        function onColorTxMessageChanged() { root.refreshDecodeColors() }
+        function onColorDecodeTextChanged() { root.refreshDecodeColors() }
+    }
+
+    function isSignoffMessage(message) {
+        var words = String(message || "").toUpperCase().replace(/[<>;,]/g, " ").split(/\s+/)
+        for (var i = 0; i < words.length; ++i) {
+            if (words[i] === "73" || words[i] === "RR73" || words[i] === "RRR")
+                return true
+        }
+        return false
+    }
+
+    function highlightListMatches(message, listText) {
+        var wanted = String(listText || "").toUpperCase().split(/[,\s;]+/)
+        var messageText = " " + String(message || "").toUpperCase().replace(/[<>;,]/g, " ") + " "
+        for (var i = 0; i < wanted.length; ++i) {
+            var token = wanted[i].trim()
+            if (token.length > 0 && messageText.indexOf(" " + token + " ") !== -1)
+                return true
+        }
+        return false
+    }
+
+    function decodeMessageColor(entry) {
+        root.decodeColorRevision
+        if (!entry)
+            return root.cText
+        var message = entry.displayMessage || entry.message || ""
+        if (entry.isTx)
+            return "#f1c40f"
+        if (entry.isMyCall)
+            return root.cTx
+        if (root.highlightOrange && highlightListMatches(message, root.highlightOrangeCallsigns))
+            return "#E14B00"
+        if (root.highlightBlue && highlightListMatches(message, root.highlightBlueCallsigns))
+            return "#0064FF"
+        if (root.highlight73 && root.bridge && isSignoffMessage(message))
+            return root.bridge.effectiveDecodeColor("color73")
+        if (entry.isCQ)
+            return root.bridge ? root.bridge.effectiveDecodeColor("colorCQ") : root.cCq
+        return root.bridge ? root.bridge.effectiveDecodeColor("colorDecodeText") : root.cText
     }
 
     // Header column strip.
@@ -200,7 +274,7 @@ Item {
                 Item { Layout.preferredWidth: root.gap }
                 Text {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
-                    color: !modelData ? root.cText : (del.entry.isCQ ? root.cCq : root.cText)
+                    color: root.decodeMessageColor(del.entry)
                     font.pixelSize: root.fSize; font.family: "monospace"
                     elide: Text.ElideRight
                     Layout.fillWidth: true

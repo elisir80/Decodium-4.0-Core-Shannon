@@ -11637,6 +11637,11 @@ Error(%2): %3</source>
         <translation>B4（已通聯）</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <source>Normal decodes</source>
+        <translation>一般解碼</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>支援的變更會立即套用。</translation>
@@ -13999,6 +14004,26 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>FILTER OPTIONS</source>
         <translation>過濾器選項</translation>
     </message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+    <source>Worked on Band:</source>
+    <translation>本波段已通聯:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+    <source>Hide stations already worked on the current band.</source>
+    <translation>隱藏目前波段已通聯的電台。</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+    <source>Worked Today:</source>
+    <translation>今日已通聯:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
+    <source>Hide stations already logged today in UTC.</source>
+    <translation>隱藏今天 UTC 已記錄的電台。</translation>
+</message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>FONT</source>

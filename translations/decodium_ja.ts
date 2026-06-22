@@ -11759,6 +11759,11 @@ Error(%2): %3</source>
         <translation>B4 (交信済み)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <source>Normal decodes</source>
+        <translation>通常のデコード</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>対応している項目の変更はすぐに適用されます。</translation>
@@ -14121,6 +14126,26 @@ QSO 中に余分な CPU を消費します。デフォルト: OFF。</translatio
         <source>FILTER OPTIONS</source>
         <translation>フィルターオプション</translation>
     </message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+    <source>Worked on Band:</source>
+    <translation>バンドで交信済み:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+    <source>Hide stations already worked on the current band.</source>
+    <translation>現在のバンドで交信済みの局を非表示にします。</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+    <source>Worked Today:</source>
+    <translation>本日交信済み:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
+    <source>Hide stations already logged today in UTC.</source>
+    <translation>UTCで本日すでにログ済みの局を非表示にします。</translation>
+</message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>FONT</source>

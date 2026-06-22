@@ -23,10 +23,16 @@ import QtQuick.Window
 Window {
     id: callDialog
     title: qsTr("Chiamate (CALL)")
-    width: 480
-    height: 640
-    minimumWidth: 400
-    minimumHeight: 580
+    readonly property int screenAvailableWidth: (Screen.desktopAvailableWidth > 0
+                                                  ? Screen.desktopAvailableWidth
+                                                  : (Screen.width > 0 ? Screen.width : 1024))
+    readonly property int screenAvailableHeight: (Screen.desktopAvailableHeight > 0
+                                                   ? Screen.desktopAvailableHeight
+                                                   : (Screen.height > 0 ? Screen.height : 768))
+    width: Math.min(560, Math.max(440, Math.round(screenAvailableWidth * 0.52)))
+    height: Math.min(720, Math.max(360, Math.round(screenAvailableHeight * 0.86)))
+    minimumWidth: Math.min(420, width)
+    minimumHeight: Math.min(320, height)
     // Use a normal native window on Windows too. Qt.Dialog with only a close
     // hint can produce a non-movable tool/dialog frame on some Windows themes.
     flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint
@@ -143,37 +149,50 @@ Window {
             anchors.margins: 14
             spacing: 12
 
-            // ====== HEADER ======
-            RowLayout {
+            ScrollView {
+                id: callScroll
                 Layout.fillWidth: true
-                Text {
-                    text: "📞  " + qsTr("Chiamata diretta")
-                    color: callDialog.cText
-                    font.pixelSize: 18
-                    font.bold: true
-                    Layout.fillWidth: true
-                }
-                Rectangle {
-                    visible: bridge && bridge.targetCallActive
-                    readonly property bool armed: bridge && bridge.targetCallArmedWaiting
-                    width: stateLabel.implicitWidth + 16
-                    height: stateLabel.implicitHeight + 6
-                    radius: 4
-                    color: Qt.alpha(armed ? callDialog.cOrange : callDialog.cGreen, 0.25)
-                    border.color: armed ? callDialog.cOrange : callDialog.cGreen
-                    border.width: 1
-                    Text {
-                        id: stateLabel
-                        anchors.centerIn: parent
-                        text: parent.armed ? qsTr("⏳ ARMATO") : qsTr("ATTIVA")
-                        color: parent.armed ? callDialog.cOrange : callDialog.cGreen
-                        font.pixelSize: 11
-                        font.bold: true
-                    }
-                }
-            }
+                Layout.fillHeight: true
+                clip: true
+                contentWidth: availableWidth
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
+                ColumnLayout {
+                    width: Math.max(0, callScroll.availableWidth - 2)
+                    spacing: 12
+
+                    // ====== HEADER ======
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: "📞  " + qsTr("Chiamata diretta")
+                            color: callDialog.cText
+                            font.pixelSize: 18
+                            font.bold: true
+                            Layout.fillWidth: true
+                        }
+                        Rectangle {
+                            visible: bridge && bridge.targetCallActive
+                            readonly property bool armed: bridge && bridge.targetCallArmedWaiting
+                            width: stateLabel.implicitWidth + 16
+                            height: stateLabel.implicitHeight + 6
+                            radius: 4
+                            color: Qt.alpha(armed ? callDialog.cOrange : callDialog.cGreen, 0.25)
+                            border.color: armed ? callDialog.cOrange : callDialog.cGreen
+                            border.width: 1
+                            Text {
+                                id: stateLabel
+                                anchors.centerIn: parent
+                                text: parent.armed ? qsTr("⏳ ARMATO") : qsTr("ATTIVA")
+                                color: parent.armed ? callDialog.cOrange : callDialog.cGreen
+                                font.pixelSize: 11
+                                font.bold: true
+                            }
+                        }
+                    }
+
+                    Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
 
             // ====== TARGET CALLSIGN ======
             ColumnLayout {
@@ -449,7 +468,7 @@ Window {
                 }
             }
 
-            Item { Layout.fillHeight: true } // spacer
+            Item { Layout.preferredHeight: 2 } // spacer
 
             // ====== SEZIONE AUTOCQ GENERICO (riusa esistente) ======
             Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
@@ -495,6 +514,9 @@ Window {
                         onValueModified: if (bridge) bridge.autoCqPauseSec = value
                     }
                 }
+            }
+
+            }
             }
 
             // ====== ACTION BUTTONS ======

@@ -10663,6 +10663,11 @@ Hiba(%2): %3</translation>
         <translation>B4 (Dolgozva)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <source>Normal decodes</source>
+        <translation>Normál dekódolások</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>A módosítások azonnal érvénybe lépnek, ahol támogatott.</translation>
@@ -13025,6 +13030,26 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>FILTER OPTIONS</source>
         <translation>SZŰRŐ OPCIÓK</translation>
     </message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+    <source>Worked on Band:</source>
+    <translation>Sávon már összeköttetve:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+    <source>Hide stations already worked on the current band.</source>
+    <translation>Az aktuális sávon már összeköttetett állomások elrejtése.</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+    <source>Worked Today:</source>
+    <translation>Ma már összeköttetve:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
+    <source>Hide stations already logged today in UTC.</source>
+    <translation>A ma UTC szerint már naplózott állomások elrejtése.</translation>
+</message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>FONT</source>

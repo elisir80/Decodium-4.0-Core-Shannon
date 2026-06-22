@@ -11818,6 +11818,11 @@ Fejl(%2): %3</translation>
         <translation>B4 (Worked)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <source>Normal decodes</source>
+        <translation>Normale afkodninger</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>Ændringer anvendes straks, hvor det understøttes.</translation>
@@ -14180,6 +14185,26 @@ Koster ekstra CPU under QSO&apos;er. Standard: OFF.</translation>
         <source>FILTER OPTIONS</source>
         <translation>FILTERMULIGHEDER</translation>
     </message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+    <source>Worked on Band:</source>
+    <translation>Kørt på bånd:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+    <source>Hide stations already worked on the current band.</source>
+    <translation>Skjul stationer, der allerede er kørt på det aktuelle bånd.</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+    <source>Worked Today:</source>
+    <translation>Kørt i dag:</translation>
+</message>
+<message>
+    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
+    <source>Hide stations already logged today in UTC.</source>
+    <translation>Skjul stationer, der allerede er logget i dag i UTC.</translation>
+</message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>FONT</source>

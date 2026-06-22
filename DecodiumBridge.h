@@ -84,6 +84,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString callsign READ callsign WRITE setCallsign NOTIFY callsignChanged)
     Q_PROPERTY(QString grid READ grid WRITE setGrid NOTIFY gridChanged)
     Q_PROPERTY(double frequency READ frequency WRITE setFrequency NOTIFY frequencyChanged)
+    Q_PROPERTY(double displayFrequency READ displayFrequency NOTIFY displayFrequencyChanged)
     Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)
 
     // === RX/TX STATE ===
@@ -368,6 +369,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString colorDXEntity  READ colorDXEntity  WRITE setColorDXEntity  NOTIFY colorDXEntityChanged)
     Q_PROPERTY(QString color73        READ color73        WRITE setColor73        NOTIFY color73Changed)
     Q_PROPERTY(QString colorB4        READ colorB4        WRITE setColorB4        NOTIFY colorB4Changed)
+    Q_PROPERTY(QString colorDecodeText READ colorDecodeText WRITE setColorDecodeText NOTIFY colorDecodeTextChanged)
 
     // === WSJT-X background highlight colors ===
     Q_PROPERTY(QString colorTxMessage         READ colorTxMessage         WRITE setColorTxMessage         NOTIFY colorTxMessageChanged)
@@ -506,6 +508,7 @@ public:
     QString grid() const;
     void setGrid(const QString&);
     double frequency() const;
+    double displayFrequency() const;
     void setFrequency(double);
     QString mode() const;
     void setMode(const QString&);
@@ -865,6 +868,8 @@ public:
     void setColor73(const QString& v)       { if (m_color73!=v){m_color73=v;emit color73Changed();} }
     QString colorB4()       const { return m_colorB4; }
     void setColorB4(const QString& v)       { if (m_colorB4!=v){m_colorB4=v;emit colorB4Changed();} }
+    QString colorDecodeText() const { return m_colorDecodeText; }
+    void setColorDecodeText(const QString& v) { if (m_colorDecodeText!=v){m_colorDecodeText=v;emit colorDecodeTextChanged();} }
 
     // WSJT-X color getters/setters (inline, trivial)
     QString colorTxMessage() const { return m_colorTxMessage; }
@@ -1342,6 +1347,7 @@ signals:
     void callsignChanged();
     void gridChanged();
     void frequencyChanged();
+    void displayFrequencyChanged();
     void modeChanged();
     void monitoringChanged();
     void transmittingChanged();
@@ -1507,6 +1513,7 @@ signals:
     void colorDXEntityChanged();
     void color73Changed();
     void colorB4Changed();
+    void colorDecodeTextChanged();
     void colorTxMessageChanged();
     void colorNewDxccChanged();
     void colorNewDxccBandChanged();
@@ -2667,6 +2674,7 @@ private:
     QString m_colorDXEntity {"#FFAA33"};
     QString m_color73       {"#5599FF"};
     QString m_colorB4       {"#888888"};
+    QString m_colorDecodeText {"#AFC4D8"};
     bool    m_b4Strikethrough {true};
 
     // === WSJT-X background highlight palette (full 14-color set) ===
@@ -2704,6 +2712,8 @@ private:
         QSet<QString> gridByBand;
         QSet<QString> callByBand;        // call already in m_workedCalls (ever)
         QSet<QString> callByBandMode;    // B4 for the exact call + band + mode
+        QSet<QString> callToday;         // call worked today, by ADIF UTC QSO_DATE
+        QSet<QString> callTodayByBand;   // call worked today on band
         void clear() {
             dxccEver.clear(); dxccByBand.clear();
             continentEver.clear(); continentByBand.clear();
@@ -2712,6 +2722,8 @@ private:
             gridEver.clear(); gridByBand.clear();
             callByBand.clear();
             callByBandMode.clear();
+            callToday.clear();
+            callTodayByBand.clear();
         }
     };
     WorkedSets m_worked;
@@ -2721,7 +2733,8 @@ private:
     // to call after each import (a few hundred lookups for typical logbooks).
     void rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> const& records);
     // Append a single QSO to m_worked. Called from logQsoNow().
-    void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz, const QString& mode);
+    void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz,
+                         const QString& mode, const QString& qsoDateUtc = QString());
 
     // B8 — Alert sounds
     bool                 m_alertSoundsEnabled {false};
@@ -3232,7 +3245,8 @@ private:
     bool prepareHoundTxSelectionForStart(const QString& reason);
     QString defaultLogCommentForQso(const QString& mode,
                                     const QString& rstSent,
-                                    const QString& rstRcvd) const;
+                                    const QString& rstRcvd,
+                                    const QString& dxGrid = QString()) const;
     bool legacyBackendAvailable() const;
     bool ensureLegacyBackendAvailable();
     bool legacyTxBackendRequested() const;

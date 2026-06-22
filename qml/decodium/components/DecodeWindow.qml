@@ -112,6 +112,7 @@ Window {
                 function onColorDXEntityChanged() { decodeWindow.refreshDecodeColors() }
                 function onColor73Changed() { decodeWindow.refreshDecodeColors() }
                 function onColorB4Changed() { decodeWindow.refreshDecodeColors() }
+                function onColorDecodeTextChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorTxMessageChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorNewDxccChanged() { decodeWindow.refreshDecodeColors() }
                 function onColorNewDxccBandChanged() { decodeWindow.refreshDecodeColors() }
@@ -446,7 +447,16 @@ Window {
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted || modelData.dxIsNewCountry || modelData.dxIsNewBand)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        return boostedDecodeTextColor(textPrimary)
+        return boostedDecodeTextColor(effectiveDecodeColor("colorDecodeText"))
+    }
+
+    function decodeEntryBold(modelData) {
+        decodeWindow.decodeColorRevision
+        return !!(modelData && ((modelData.isTx === true) ||
+                                ((modelData.isCQ === true) && bridge.decodeColorEnabled("colorCQ")) ||
+                                rowReallyIsMyCall(modelData) ||
+                                (modelData.dxIsNewCountry === true) ||
+                                (modelData.dxIsMostWanted === true)))
     }
 
     function lotwMarkerColor() {
@@ -1364,7 +1374,7 @@ Component.onCompleted: {
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         // 1.0.144: precomputed in C++ (enrichDecodeEntry)
-                                        font.bold: modelData.isHighlighted === true
+                                        font.bold: decodeWindow.decodeEntryBold(modelData)
                                         // Shannon strikethrough per B4
                                         font.strikeout: modelData.isB4 && bridge.b4Strikethrough
                                         color: getDxccColor(modelData)
@@ -1901,7 +1911,7 @@ Component.onCompleted: {
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 11
                                         // 1.0.144: precomputed in C++ (enrichDecodeEntry)
-                                        font.bold: modelData.isHighlighted === true
+                                        font.bold: decodeWindow.decodeEntryBold(modelData)
                                         font.strikeout: modelData.isB4 && bridge.b4Strikethrough
                                         color: getDxccColor(modelData)
                                         Layout.fillWidth: true

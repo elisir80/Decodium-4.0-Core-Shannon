@@ -1150,7 +1150,8 @@ Dialog {
         { label: qsTr("CQ in Message"),          prop: "colorCQ",               defaultColor: "#33FF33" },
         { label: qsTr("DX Entity"),              prop: "colorDXEntity",         defaultColor: "#FFAA33" },
         { label: qsTr("73 / RR73"),              prop: "color73",               defaultColor: "#5599FF" },
-        { label: qsTr("B4 (Worked)"),            prop: "colorB4",               defaultColor: "#888888" }
+        { label: qsTr("B4 (Worked)"),            prop: "colorB4",               defaultColor: "#888888" },
+        { label: qsTr("Normal decodes"),         prop: "colorDecodeText",       defaultColor: "#AFC4D8" }
     ]
 
     Popup {
@@ -7901,6 +7902,30 @@ Dialog {
                         // ── Opzioni Filtro ──
                         Text { text: qsTr("FILTER OPTIONS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Text { text: qsTr("Worked on Band:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("FiltersHideWorkedBand", false)
+                            onToggled: settingsDialog.setBoolSettingIfChanged("FiltersHideWorkedBand", checked, false)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Hide stations already worked on the current band.")
+                        }
+
+                        Text { text: qsTr("Worked Today:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        CheckBox {
+                            checked: settingsDialog.boolSetting("FiltersHideWorkedToday", false)
+                            onToggled: settingsDialog.setBoolSettingIfChanged("FiltersHideWorkedToday", checked, false)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Hide stations already logged today in UTC.")
+                        }
 
                         Text { text: qsTr("Wait & Pounce:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {

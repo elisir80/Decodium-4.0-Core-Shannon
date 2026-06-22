@@ -1922,6 +1922,7 @@ ApplicationWindow {
         function onColorDXEntityChanged() { mainWindow.refreshDecodeColors() }
         function onColor73Changed() { mainWindow.refreshDecodeColors() }
         function onColorB4Changed() { mainWindow.refreshDecodeColors() }
+        function onColorDecodeTextChanged() { mainWindow.refreshDecodeColors() }
         function onColorTxMessageChanged() { mainWindow.refreshDecodeColors() }
         function onColorNewDxccChanged() { mainWindow.refreshDecodeColors() }
         function onColorNewDxccBandChanged() { mainWindow.refreshDecodeColors() }
@@ -2086,7 +2087,7 @@ ApplicationWindow {
         if ((modelData.dxCountry && String(modelData.dxCountry).length > 0)
             || modelData.dxIsMostWanted === true || modelData.dxIsNewCountry === true || modelData.dxIsNewBand === true)
             return boostedDecodeTextColor(effectiveDecodeColor("colorDXEntity"))
-        return boostedDecodeTextColor(textPrimary)
+        return boostedDecodeTextColor(effectiveDecodeColor("colorDecodeText"))
     }
 
     function decodeHighlightHex(modelData) {
@@ -3231,7 +3232,7 @@ ApplicationWindow {
                                 spacing: 0
 
                                 Repeater {
-                                    model: mainWindow.frequencyDisplayCells(bridge.frequency)
+                                    model: mainWindow.frequencyDisplayCells(bridge.displayFrequency)
 
                                     delegate: Rectangle {
                                         id: frequencyDigitCell
@@ -3283,7 +3284,7 @@ ApplicationWindow {
 
                                         MouseArea {
                                             id: digitUpArea
-                                            enabled: frequencyDigitCell.digitCell
+                                            enabled: frequencyDigitCell.digitCell && !bridge.transmitting && !bridge.tuning
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.top: parent.top
@@ -3295,7 +3296,7 @@ ApplicationWindow {
 
                                         MouseArea {
                                             id: digitDownArea
-                                            enabled: frequencyDigitCell.digitCell
+                                            enabled: frequencyDigitCell.digitCell && !bridge.transmitting && !bridge.tuning
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.bottom: parent.bottom
@@ -6615,8 +6616,9 @@ ApplicationWindow {
 		                    }
 
 		                    function decodeEntryBold(md) {
+		                        mainWindow.decodeColorRevision
 		                        return !!(md && ((md.isTx === true) ||
-		                                        (md.isCQ === true) ||
+		                                        ((md.isCQ === true) && bridge.decodeColorEnabled("colorCQ")) ||
 		                                        (md.isMyCall === true) ||
 		                                        (md.dxIsNewCountry === true) ||
 		                                        (md.dxIsMostWanted === true)))
