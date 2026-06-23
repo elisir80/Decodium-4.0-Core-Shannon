@@ -445,6 +445,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft8DeepDecodeInTx READ ft8DeepDecodeInTx WRITE setFt8DeepDecodeInTx NOTIFY ft8DeepDecodeInTxChanged)
     Q_PROPERTY(bool ft8SubpassHarvest READ ft8SubpassHarvest WRITE setFt8SubpassHarvest NOTIFY ft8SubpassHarvestChanged)
     Q_PROPERTY(bool ft2QuickGiveUpStrong READ ft2QuickGiveUpStrong WRITE setFt2QuickGiveUpStrong NOTIFY ft2QuickGiveUpStrongChanged)
+    Q_PROPERTY(bool ftxWeakSignoffBoost READ ftxWeakSignoffBoost WRITE setFtxWeakSignoffBoost NOTIFY ftxWeakSignoffBoostChanged)
+    Q_PROPERTY(int ftxWeakSnrThreshold READ ftxWeakSnrThreshold WRITE setFtxWeakSnrThreshold NOTIFY ftxWeakSnrThresholdChanged)
+    Q_PROPERTY(int ftxWeakSignoffBonus READ ftxWeakSignoffBonus WRITE setFtxWeakSignoffBonus NOTIFY ftxWeakSignoffBonusChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2NarrowAsyncDecode READ ft2NarrowAsyncDecode WRITE setFt2NarrowAsyncDecode NOTIFY ft2NarrowAsyncDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
@@ -1431,6 +1434,9 @@ signals:
     void ft8DeepDecodeInTxChanged();      // 1.0.299 — deep decode-list-only durante TX
     void ft8SubpassHarvestChanged();      // F0 subpass harvest opt-in
     void ft2QuickGiveUpStrongChanged();   // 1.0.289
+    void ftxWeakSignoffBoostChanged();    // 1.0.437 - extra signoff retries weak partner
+    void ftxWeakSnrThresholdChanged();    // 1.0.437
+    void ftxWeakSignoffBonusChanged();    // 1.0.437
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2NarrowAsyncDecodeChanged();   // Sprint2-1
     void ft2ApHashCacheChanged();         // 1.0.293
@@ -2021,6 +2027,10 @@ private:
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
     bool m_ft2FullDecodeInAutoCq {false};  // #1: piena profondità decode durante attesa AutoCQ
     bool m_ft2QuickGiveUpStrong {false};   // #3: cap RR73 ridotto sui partner forti che spariscono
+    // 1.0.437 - opt-in: bonus signoff retries per partner debole (FTX). Default OFF = byte-identico.
+    bool m_ftxWeakSignoffBoost {false};
+    int  m_ftxWeakSnrThreshold {-15};
+    int  m_ftxWeakSignoffBonus {3};
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
     // Sprint2-1: fast pass narrow-band quando attendi una reply (opt-in).
     bool m_ft2NarrowAsyncDecode {false};
@@ -2976,6 +2986,12 @@ public:
     Q_INVOKABLE void setFt2FullDecodeInAutoCq(bool v);
     Q_INVOKABLE bool ft2QuickGiveUpStrong() const { return m_ft2QuickGiveUpStrong; }
     Q_INVOKABLE void setFt2QuickGiveUpStrong(bool v);
+    Q_INVOKABLE bool ftxWeakSignoffBoost() const { return m_ftxWeakSignoffBoost; }
+    Q_INVOKABLE void setFtxWeakSignoffBoost(bool v);
+    Q_INVOKABLE int  ftxWeakSnrThreshold() const { return m_ftxWeakSnrThreshold; }
+    Q_INVOKABLE void setFtxWeakSnrThreshold(int v);
+    Q_INVOKABLE int  ftxWeakSignoffBonus() const { return m_ftxWeakSignoffBonus; }
+    Q_INVOKABLE void setFtxWeakSignoffBonus(int v);
     Q_INVOKABLE bool ft2AdaptiveDecode() const { return m_ft2AdaptiveDecode; }
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
     Q_INVOKABLE bool ft2NarrowAsyncDecode() const { return m_ft2NarrowAsyncDecode; }

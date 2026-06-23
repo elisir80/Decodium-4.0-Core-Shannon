@@ -4790,7 +4790,7 @@ static int deferredSignoffRetryCapForMode(const QString& mode, int configuredMax
                                            bool quickGiveUpStrong = false,
                                            int ft2SignoffCap = 8,
                                            int ft4SignoffCap = 4,
-                                           int ft8SignoffCap = 3)
+                                           int ft8SignoffCap = 3, bool weakBoost = false, int weakSnrThreshold = -15, int weakBonus = 3)
 {
     Q_UNUSED(configuredMaxRetries)
     QString const normalized = mode.trimmed().toUpper();
@@ -4805,6 +4805,9 @@ static int deferredSignoffRetryCapForMode(const QString& mode, int configuredMax
     else if (normalized == QStringLiteral("FT8")) userCap = ft8SignoffCap;
     if (userCap >= 0) {
         int cap = qBound(1, userCap, 8);
+        // 1.0.437 - opt-in: extra signoff retries per partner debole (default OFF = byte-identico).
+        if (weakBoost && partnerSnrDb != 127 && partnerSnrDb <= weakSnrThreshold)
+            cap = qBound(1, cap + qBound(1, weakBonus, 6), 8);
         if (quickGiveUpStrong && partnerSnrDb != 127 && partnerSnrDb > 0)
             cap = qMin(cap, 4);
         return cap;
@@ -5844,6 +5847,39 @@ void DecodiumBridge::setFt8SignoffRetryCap(int v)
     settings.setValue(QStringLiteral("Ft8SignoffRetryCap"), clamped);
     emit ft8SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT8) = %1").arg(clamped));
+}
+
+// 1.0.437 - opt-in: extra signoff retries per partner debole (FTX). Default OFF = byte-identico.
+void DecodiumBridge::setFtxWeakSignoffBoost(bool v)
+{
+    if (m_ftxWeakSignoffBoost == v) return;
+    m_ftxWeakSignoffBoost = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("FtxWeakSignoffBoost"), v);
+    emit ftxWeakSignoffBoostChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Weak-partner signoff boost (FTX) %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setFtxWeakSnrThreshold(int v)
+{
+    int const clamped = qBound(-30, v, -5);
+    if (m_ftxWeakSnrThreshold == clamped) return;
+    m_ftxWeakSnrThreshold = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("FtxWeakSnrThreshold"), clamped);
+    emit ftxWeakSnrThresholdChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Weak-partner SNR threshold = %1 dB").arg(clamped));
+}
+
+void DecodiumBridge::setFtxWeakSignoffBonus(int v)
+{
+    int const clamped = qBound(1, v, 6);
+    if (m_ftxWeakSignoffBonus == clamped) return;
+    m_ftxWeakSignoffBonus = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("FtxWeakSignoffBonus"), clamped);
+    emit ftxWeakSignoffBonusChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Weak-partner signoff bonus = +%1").arg(clamped));
 }
 
 // 1.0.321 — opt-in FT2 manual one-shot disarm (Salvatore latch fix da 1.0.300).
@@ -26479,7 +26515,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             int const signoffCap = deferredSignoffRetryCapForMode(m_mode, m_maxCallerRetries,
                                                                    m_currentPartnerSnrDb, m_ft2Conservative,
                                                                    m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap,
-                                                                   m_ft4SignoffRetryCap, m_ft8SignoffRetryCap);
+                                                                   m_ft4SignoffRetryCap, m_ft8SignoffRetryCap, m_ftxWeakSignoffBoost, m_ftxWeakSnrThreshold, m_ftxWeakSignoffBonus);
             if (deferredRr73LogOnlyWait && m_nTx73 < signoffCap) {
                 qint64 const periodMs = periodMsForMode(m_mode);
                 qint64 const waitedMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
@@ -28238,6 +28274,10 @@ void DecodiumBridge::loadSettings()
     // 1.0.315 — cap ripetizioni 73/RR73 anche per FT4 (default 4) e FT8 (default 3). Range 1-8.
     m_ft4SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft4SignoffRetryCap"), 4).toInt(), 8);
     m_ft8SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft8SignoffRetryCap"), 3).toInt(), 8);
+    // 1.0.437 - opt-in: extra signoff retries per partner debole (FTX). Default OFF.
+    m_ftxWeakSignoffBoost = s.value(QStringLiteral("FtxWeakSignoffBoost"), false).toBool();
+    m_ftxWeakSnrThreshold = qBound(-30, s.value(QStringLiteral("FtxWeakSnrThreshold"), -15).toInt(), -5);
+    m_ftxWeakSignoffBonus = qBound(1, s.value(QStringLiteral("FtxWeakSignoffBonus"), 3).toInt(), 6);
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
     m_ft2NarrowAsyncDecode = s.value(QStringLiteral("Ft2NarrowAsyncDecode"), false).toBool();

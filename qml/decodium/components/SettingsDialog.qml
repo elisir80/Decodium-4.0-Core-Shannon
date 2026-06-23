@@ -3278,6 +3278,82 @@ Dialog {
                                     ToolTip.text: qsTr("How many times to repeat the final 73/RR73 in FT8.\n\nDefault: 3 (~45s).\n\nIncrease to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).\n\nDoesn't affect FT2/FT4.")
                                 }
 
+                                // 1.0.437 - opt-in: extra signoff retries per partner debole (FTX)
+                                Text {
+                                    text: qsTr("Weak-partner signoff boost (FT2/4/8):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ftxWeakBoostCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ftxWeakSignoffBoost : false
+                                    onCheckedChanged: if (bridge && bridge.ftxWeakSignoffBoost !== checked) bridge.setFtxWeakSignoffBoost(checked)
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.\n\nDefault OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.")
+                                }
+                                Text {
+                                    text: qsTr("  weak SNR threshold (dB):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                    enabled: ftxWeakBoostCheck.checked
+                                }
+                                SpinBox {
+                                    id: ftxWeakSnrSpin
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: -30; to: -5; editable: true
+                                    enabled: ftxWeakBoostCheck.checked
+                                    value: bridge ? bridge.ftxWeakSnrThreshold : -15
+                                    onValueChanged: if (bridge && bridge.ftxWeakSnrThreshold !== value) bridge.setFtxWeakSnrThreshold(value)
+                                    contentItem: TextInput { text: ftxWeakSnrSpin.textFromValue(ftxWeakSnrSpin.value, ftxWeakSnrSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakSnrSpin.editable; validator: ftxWeakSnrSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("A partner whose SNR is at or below this value is treated as 'weak' and receives the extra signoff retries.\n\nDefault: -15 dB.")
+                                }
+                                Text {
+                                    text: qsTr("  extra signoff retries:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                    enabled: ftxWeakBoostCheck.checked
+                                }
+                                SpinBox {
+                                    id: ftxWeakBonusSpin
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 1; to: 6; editable: true
+                                    enabled: ftxWeakBoostCheck.checked
+                                    value: bridge ? bridge.ftxWeakSignoffBonus : 3
+                                    onValueChanged: if (bridge && bridge.ftxWeakSignoffBonus !== value) bridge.setFtxWeakSignoffBonus(value)
+                                    contentItem: TextInput { text: ftxWeakBonusSpin.textFromValue(ftxWeakBonusSpin.value, ftxWeakBonusSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakBonusSpin.editable; validator: ftxWeakBonusSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.\n\nDefault: +3 (capped so the total never exceeds 8).")
+                                }
+
                                 // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283)
                                 Text {
                                     text: qsTr("Immediate TX on click (1.0.283 style):")
