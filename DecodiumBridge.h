@@ -2277,6 +2277,7 @@ private:
     quint64               m_ft2AsyncSmartTxSerial {0};
     qint64                m_ft2AsyncSmartTxDeadlineMs {0};
     int                   m_ft2AsyncSmartTxRetries {0};
+    bool                  m_ft2ManualClickTx1BypassPeriodOnce {false};
     void scheduleSmartFt2AsyncTx(const QString& reason);
     void onAudioLevelForFt2Gate();
     bool                  m_autoSpotEnabled {false};

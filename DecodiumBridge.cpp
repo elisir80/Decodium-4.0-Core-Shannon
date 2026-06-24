@@ -8579,6 +8579,19 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
         bridgeLog("SoundOutput error: " + text);
         emit errorMessage(text);
+        if (m_bridgeAudioLegacyTxActive && m_transmitting) {
+            m_txPlaybackHoldUntilMs = 0;
+            m_txPlaybackHardDeadlineMs = 0;
+            m_txPlaybackReleasePending = false;
+            if (m_txPcmBuffer && m_txPcmBuffer->isOpen()) {
+                m_txPcmBuffer->seek(m_txPcmBuffer->size());
+            }
+            QTimer::singleShot(0, this, [this]() {
+                if (m_bridgeAudioLegacyTxActive && m_transmitting) {
+                    completeTxPlayback(QStringLiteral("sound-output-error"), true);
+                }
+            });
+        }
     });
     connect(m_soundOutput, &SoundOutput::status, this, [](const QString& msg) {
         bridgeLog("SoundOutput: " + msg);
@@ -13425,7 +13438,22 @@ bool DecodiumBridge::selectCurrentTxIfAllowed(int txNum, const QString& reason)
     if (txNum == 6) {
         resetCompletedQsoLatchesForCq(QStringLiteral("set-current-tx6"));
     }
-    if (m_currentTx != txNum) {
+    bool const txStepChanged = (m_currentTx != txNum);
+    if (txStepChanged) {
+        if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
+            // Any delayed FT2 retry belongs to the TX step that scheduled it.
+            // A valid partner decode can advance TX1->TX3 while a safe-slot
+            // timer is still pending; invalidate that old timer so it cannot
+            // replay the stale locator.
+            m_ft2AsyncSmartTxPending = false;
+            ++m_ft2AsyncSmartTxSerial;
+            m_ft2AsyncSmartTxDeadlineMs = 0;
+            m_ft2AsyncSmartTxRetries = 0;
+            m_periodicTxCheckScheduled = false;
+        }
+        if (txNum != 1) {
+            m_ft2ManualClickTx1BypassPeriodOnce = false;
+        }
         m_currentTx = txNum;
         emit currentTxChanged();
         emit currentTxMessageChanged();
@@ -17052,9 +17080,22 @@ void DecodiumBridge::scheduleFt2AsyncTxAtNextSafeSlot(const QString& reason,
     if (m_periodicTxCheckScheduled) {
         return;
     }
+    quint64 const scheduleSerial = m_ft2AsyncSmartTxSerial;
+    int const scheduledTx = m_currentTx;
+    QString const scheduledPayload = buildCurrentTxMessage().trimmed();
     m_periodicTxCheckScheduled = true;
-    QTimer::singleShot(delayMs, this, [this, reason]() {
+    QTimer::singleShot(delayMs, this, [this, reason, scheduleSerial, scheduledTx, scheduledPayload]() {
         m_periodicTxCheckScheduled = false;
+        if (scheduleSerial != m_ft2AsyncSmartTxSerial
+            || scheduledTx != m_currentTx
+            || (!scheduledPayload.isEmpty()
+                && scheduledPayload != buildCurrentTxMessage().trimmed())) {
+            bridgeLog(QStringLiteral("FT2 async late TX guard: stale retry skipped (%1) scheduledTX=%2 currentTX=%3")
+                          .arg(reason)
+                          .arg(scheduledTx)
+                          .arg(m_currentTx));
+            return;
+        }
         if (m_mode == QStringLiteral("FT2")
             && m_asyncTxEnabled
             && m_txEnabled
@@ -17570,8 +17611,17 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         m_asyncLastTxEndMs = QDateTime::currentMSecsSinceEpoch();
         if (!m_periodicTxCheckScheduled) {
             m_periodicTxCheckScheduled = true;
-            QTimer::singleShot(0, this, [this]() {
+            quint64 const postTxSerial = m_ft2AsyncSmartTxSerial;
+            int const postTxFinishedTx = finishedTx;
+            QTimer::singleShot(0, this, [this, postTxSerial, postTxFinishedTx]() {
                 m_periodicTxCheckScheduled = false;
+                if (postTxSerial != m_ft2AsyncSmartTxSerial
+                    || (postTxFinishedTx >= 1
+                        && postTxFinishedTx <= 6
+                        && m_currentTx != postTxFinishedTx
+                        && m_currentTx != 6)) {
+                    return;
+                }
                 if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled &&
                     m_txEnabled && !m_transmitting && !m_tuning) {
                     checkAndStartPeriodicTx();
@@ -24002,6 +24052,7 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     m_lastTransmittedMessage.clear();
     m_lastAutoSeqKey.clear();
     m_lastAutoSeqMs = 0;
+    m_ft2ManualClickTx1BypassPeriodOnce = false;
     m_qsoStartedOn = QDateTime::currentDateTimeUtc();
     clearPendingAutoLogSnapshot();
     if (newQso) {
@@ -24012,6 +24063,16 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     // advanceQsoState imposta currentTx + qsoProgress + resetta watchdog
     if (!advanceQsoState(newCurrentTx)) {
         return;
+    }
+    if (m_mode == QStringLiteral("FT2")
+        && m_asyncTxEnabled
+        && newCurrentTx == 1
+        && !m_autoCqRepeat
+        && !m_multiAnswerMode) {
+        // One-shot manual CQ reply: do not require the global "Immediate TX on
+        // click" option just to catch the current FT2 reply slot. The late-start
+        // guard still enforces the conservative payload window.
+        m_ft2ManualClickTx1BypassPeriodOnce = true;
     }
     updateAutoCqPartnerLock();
 
@@ -26626,7 +26687,14 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // 1.0.314 — opt-in ftxImmediateClickTx: rilassa TX1 (bypass period-gate)
     // = ripristina comportamento 1.0.283 (commit 06f3e8b di 1.0.300 aveva irrigidito a >=2
     // per fixare una race ora mitigata da ed7ffeb "FT2 manual double-click TX latch").
-    int const ft2MinTxForBypass = m_ftxImmediateClickTx ? 1 : 2;
+    bool const ft2ManualClickTx1Bypass =
+        m_ft2ManualClickTx1BypassPeriodOnce
+        && m_currentTx == 1
+        && m_lastNtx != 1
+        && !m_autoCqRepeat
+        && !m_multiAnswerMode
+        && !m_dxCall.trimmed().isEmpty();
+    int const ft2MinTxForBypass = (m_ftxImmediateClickTx || ft2ManualClickTx1Bypass) ? 1 : 2;
     bool inQsoResponse = (m_mode == "FT2" && m_asyncTxEnabled &&
                           m_txEnabled && !m_dxCall.isEmpty() &&
                           m_currentTx >= ft2MinTxForBypass && m_currentTx <= 5);
@@ -26690,6 +26758,55 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                                           elapsedMs,
                                           latestStartMs);
             return;
+        }
+
+        if (m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && !m_autoCqRepeat
+            && !m_multiAnswerMode
+            && !m_dxCall.trimmed().isEmpty()
+            && m_currentTx == 1
+            && m_lastNtx == 1
+            && m_asyncLastTxEndMs > 0) {
+            int const latestAsyncStartMs = latestFt2AsyncTxStartMs(pMs, m_ft2ConservativeTiming);
+            int const replyGraceMs = latestAsyncStartMs > 250
+                ? qBound(250, latestAsyncStartMs - 180, 650)
+                : 250;
+            qint64 const waitMs = static_cast<qint64>(pMs) + replyGraceMs;
+            qint64 const elapsedSinceTxEndMs =
+                QDateTime::currentMSecsSinceEpoch() - m_asyncLastTxEndMs;
+            if (elapsedSinceTxEndMs >= 0 && elapsedSinceTxEndMs < waitMs) {
+                int const retryDelayMs =
+                    qBound(50, static_cast<int>(waitMs - elapsedSinceTxEndMs), replyGraceMs);
+                if (QDateTime::currentMSecsSinceEpoch() - m_ft2RetryDeferLogMs >= pMs) {
+                    m_ft2RetryDeferLogMs = QDateTime::currentMSecsSinceEpoch();
+                    bridgeLog(QStringLiteral("FT2 manual TX1 reply grace: defer locator retry elapsed=%1ms wait=%2ms delay=%3ms")
+                                  .arg(elapsedSinceTxEndMs)
+                                  .arg(waitMs)
+                                  .arg(retryDelayMs));
+                }
+                if (!m_periodicTxCheckScheduled) {
+                    quint64 const graceSerial = m_ft2AsyncSmartTxSerial;
+                    m_periodicTxCheckScheduled = true;
+                    QTimer::singleShot(retryDelayMs, this, [this, graceSerial]() {
+                        m_periodicTxCheckScheduled = false;
+                        if (graceSerial != m_ft2AsyncSmartTxSerial
+                            || m_mode != QStringLiteral("FT2")
+                            || !m_asyncTxEnabled
+                            || m_autoCqRepeat
+                            || m_multiAnswerMode
+                            || m_currentTx != 1
+                            || m_lastNtx != 1
+                            || !m_txEnabled
+                            || m_transmitting
+                            || m_tuning) {
+                            return;
+                        }
+                        checkAndStartPeriodicTx();
+                    });
+                }
+                return;
+            }
         }
 
         // Guardia anti-CQ-consecutivi: dopo un CQ aspetta almeno il periodo RX
@@ -26918,13 +27035,30 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // m_txRetryCount is set to 1 by the first successful send of a TX step.
         // The configured cap is the total number of sends, so equality already
         // means the operator's retry budget has been consumed.
-        // 1.0.429: il cap "Caller retries" e' un limite HARD per-step e vale SEMPRE,
-        // anche col TX Watchdog configurato. Prima, con un watchdog impostato, il
-        // ramo halt era gated da !txWatchdogLimitConfigured() e il cap veniva
-        // ignorato (il TX continuava fino allo scadere del watchdog). Il watchdog
-        // resta un limite GLOBALE indipendente (enforce a parte in checkTxWatchdog,
-        // ~34231): vince il primo che scatta tra cap-per-step e watchdog.
-        if (applyRetryLimit && m_currentTx == m_lastNtx
+        // 1.0.438: se il TX watchdog e' configurato, deve essere il limite
+        // prioritario della sessione TX. Il cap "Caller retries" resta valido
+        // quando il watchdog e' OFF; quando il watchdog e' ON non deve fermare
+        // la chiamata prima del timeout impostato dall'utente (log reali: watchdog
+        // 60min disarmato dopo 3-4min per retry limit TX1).
+        bool const retryLimitOwnedByWatchdog =
+            applyRetryLimit
+            && txWatchdogLimitConfigured()
+            && (m_txWatchdogMode == 1 || m_txWatchdogMode == 2);
+        if (applyRetryLimit && retryLimitOwnedByWatchdog
+            && m_currentTx == m_lastNtx
+            && m_txRetryCount >= effectiveMaxCallerRetries) {
+            if (m_txRetryCount == effectiveMaxCallerRetries
+                || (effectiveMaxCallerRetries > 0
+                    && (m_txRetryCount % effectiveMaxCallerRetries) == 0)) {
+                bridgeLog(QStringLiteral("checkAndStartPeriodicTx: retry limit %1 su TX%2 ignorato: TX watchdog priority mode=%3 limit=%4")
+                              .arg(effectiveMaxCallerRetries)
+                              .arg(m_currentTx)
+                              .arg(m_txWatchdogMode)
+                              .arg(m_txWatchdogMode == 1
+                                       ? QStringLiteral("%1min").arg(m_txWatchdogTime)
+                                       : QStringLiteral("%1 periods").arg(m_txWatchdogCount)));
+            }
+        } else if (applyRetryLimit && m_currentTx == m_lastNtx
             && m_txRetryCount >= effectiveMaxCallerRetries) {
             QString const assistSuffix =
                 (effectiveMaxCallerRetries != m_maxCallerRetries)
@@ -28133,6 +28267,26 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         // Shannon: auto_tx_mode(true) — abilita TX dopo risposta valida da DX
         setTxEnabled(true);
         updateAutoCqPartnerLock();
+        if (m_mode == QStringLiteral("FT2")
+            && m_asyncTxEnabled
+            && m_txEnabled
+            && !m_transmitting
+            && !m_tuning) {
+            quint64 const autoSeqSerial = m_ft2AsyncSmartTxSerial;
+            int const autoSeqTx = nextTx;
+            QTimer::singleShot(0, this, [this, autoSeqSerial, autoSeqTx]() {
+                if (autoSeqSerial != m_ft2AsyncSmartTxSerial
+                    || m_mode != QStringLiteral("FT2")
+                    || !m_asyncTxEnabled
+                    || !m_txEnabled
+                    || m_transmitting
+                    || m_tuning
+                    || m_currentTx != autoSeqTx) {
+                    return;
+                }
+                checkAndStartPeriodicTx();
+            });
+        }
         bridgeLog("autoSeq: TX" + QString::number(nextTx) + " abilitato");
     }
 }

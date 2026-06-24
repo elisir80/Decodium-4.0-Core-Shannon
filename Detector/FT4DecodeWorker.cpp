@@ -3,9 +3,11 @@
 
 #include <algorithm>
 #include <chrono>
+#include <deque>
 #include <future>
 #include <mutex>
 
+#include <QCoreApplication>
 #include <QDate>
 #include <QDateTime>
 #include <QDebug>
@@ -51,6 +53,8 @@ namespace
   constexpr qint64 kFt4HashSeedTailBytes {8 * 1024 * 1024};
   constexpr qint64 kFt4HashSeedRefreshTailBytes {512 * 1024};
   constexpr int kFt4HashSeedMaxCalls {4096};
+  constexpr qint64 kFt4HashSeedInitialSoftBudgetMs {750};
+  constexpr qint64 kFt4HashSeedRefreshSoftBudgetMs {160};
   constexpr qint64 kFt4HashSeedRefreshIntervalMs {10000};
   constexpr int kFt4HashSeedRefreshMaxFiles {6};
   constexpr int kFt4HashSeedPriorityMonths {2};
@@ -168,7 +172,35 @@ namespace
     return hasLetter && hasDigit;
   }
 
-  void remember_hash_seed_call (QStringList& calls, QString call)
+  bool hash_seed_shutdown_requested ()
+  {
+    return QCoreApplication::closingDown ();
+  }
+
+  struct HashSeedCallAccumulator
+  {
+    std::deque<QString> calls;
+
+    QStringList to_list () const
+    {
+      QSet<QString> seen;
+      QStringList result;
+      result.reserve (std::min (static_cast<int> (calls.size ()), kFt4HashSeedMaxCalls));
+      for (auto it = calls.rbegin (); it != calls.rend ()
+           && result.size () < kFt4HashSeedMaxCalls; ++it)
+        {
+          if (!seen.contains (*it))
+            {
+              seen.insert (*it);
+              result.append (*it);
+            }
+        }
+      std::reverse (result.begin (), result.end ());
+      return result;
+    }
+  };
+
+  void remember_hash_seed_call (HashSeedCallAccumulator& accumulator, QString call)
   {
     call = call.trimmed ().toUpper ();
     if (call.startsWith (QLatin1Char ('<')) && call.endsWith (QLatin1Char ('>')))
@@ -179,17 +211,21 @@ namespace
       {
         return;
       }
-    calls.removeAll (call);
-    calls.append (call);
-    while (calls.size () > kFt4HashSeedMaxCalls)
+    accumulator.calls.push_back (call);
+    while (static_cast<int> (accumulator.calls.size ()) > kFt4HashSeedMaxCalls * 4)
       {
-        calls.removeFirst ();
+        accumulator.calls.pop_front ();
       }
   }
 
-  bool collect_hash_seed_calls_from_tail (QString const& path, QStringList& calls,
+  bool collect_hash_seed_calls_from_tail (QString const& path,
+                                          HashSeedCallAccumulator& accumulator,
                                           qint64 tailBytes = kFt4HashSeedTailBytes)
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return false;
+      }
     QFile file {path};
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
       {
@@ -206,9 +242,14 @@ namespace
       QStringLiteral (R"((?:<[A-Z0-9/]{3,13}>|[A-Z0-9/]{3,13}))")
     };
     auto it = tokenRx.globalMatch (text);
+    int scannedTokens = 0;
     while (it.hasNext ())
       {
-        remember_hash_seed_call (calls, it.next ().captured (0));
+        if ((++scannedTokens & 0x3ff) == 0 && hash_seed_shutdown_requested ())
+          {
+            return false;
+          }
+        remember_hash_seed_call (accumulator, it.next ().captured (0));
       }
     return true;
   }
@@ -441,14 +482,24 @@ namespace
     QElapsedTimer timer;
     timer.start ();
     HashSeedSnapshot snapshot;
+    HashSeedCallAccumulator accumulator;
     for (QString const& path : local_hash_seed_paths ())
       {
-        if (collect_hash_seed_calls_from_tail (path, snapshot.calls))
+        if (hash_seed_shutdown_requested ())
+          {
+            break;
+          }
+        if (collect_hash_seed_calls_from_tail (path, accumulator))
           {
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
           }
+        if (timer.elapsed () >= kFt4HashSeedInitialSoftBudgetMs)
+          {
+            break;
+          }
       }
+    snapshot.calls = accumulator.to_list ();
     snapshot.elapsedMs = timer.elapsed ();
     return snapshot;
   }
@@ -458,15 +509,26 @@ namespace
     QElapsedTimer timer;
     timer.start ();
     HashSeedSnapshot snapshot;
+    HashSeedCallAccumulator accumulator;
     for (QString const& path : local_hash_seed_refresh_paths ())
       {
-        if (collect_hash_seed_calls_from_tail (path, snapshot.calls,
+        if (hash_seed_shutdown_requested ())
+          {
+            break;
+          }
+        if (collect_hash_seed_calls_from_tail (path, accumulator,
                                                kFt4HashSeedRefreshTailBytes))
           {
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
           }
+        if (snapshot.filesRead >= kFt4HashSeedRefreshMaxFiles
+            || timer.elapsed () >= kFt4HashSeedRefreshSoftBudgetMs)
+          {
+            break;
+          }
       }
+    snapshot.calls = accumulator.to_list ();
     snapshot.elapsedMs = timer.elapsed ();
     return snapshot;
   }
@@ -483,8 +545,10 @@ namespace
 
   HashSeedAsyncState& hash_seed_async_state ()
   {
-    static HashSeedAsyncState state;
-    return state;
+    // The scan runs on std::async. A function-static future can block and execute
+    // during C++ static destruction, while Qt is already closing down.
+    static HashSeedAsyncState* state = new HashSeedAsyncState;
+    return *state;
   }
 
   template<typename T>
@@ -510,6 +574,10 @@ namespace
 
   void start_ft4_pack77_hash_seed_collection_once ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
     if (state.initialStarted)
@@ -524,6 +592,10 @@ namespace
 
   void apply_ready_ft4_pack77_hash_seed_collection ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashSeedSnapshot snapshot;
     bool haveSnapshot = false;
     {
@@ -554,6 +626,10 @@ namespace
 
   void start_ft4_hash_context_refresh_from_recent_logs ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
@@ -578,6 +654,10 @@ namespace
 
   void apply_ready_ft4_hash_context_refresh ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashSeedSnapshot snapshot;
     bool haveSnapshot = false;
     {
@@ -599,7 +679,7 @@ namespace
 
   void seed_ft4_pack77_hashes_from_rows (QStringList const& rows)
   {
-    QStringList calls;
+    HashSeedCallAccumulator accumulator;
     static QRegularExpression const tokenRx {
       QStringLiteral (R"((?:<[A-Z0-9/]{3,13}>|[A-Z0-9/]{3,13}))")
     };
@@ -608,10 +688,10 @@ namespace
         auto it = tokenRx.globalMatch (row.toUpper ());
         while (it.hasNext ())
           {
-            remember_hash_seed_call (calls, it.next ().captured (0));
+            remember_hash_seed_call (accumulator, it.next ().captured (0));
           }
       }
-    seed_hash_calls (calls);
+    seed_hash_calls (accumulator.to_list ());
   }
 
   QString build_row (QString const& utcPrefix, char marker, int snr, float dt, float freq,

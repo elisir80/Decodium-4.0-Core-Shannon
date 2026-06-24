@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <deque>
 #include <future>
 #include <mutex>
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDateTime>
 #include <QDir>
@@ -71,6 +73,7 @@ namespace
   constexpr qint64 kHashSeedTailBytes {8 * 1024 * 1024};
   constexpr qint64 kHashSeedRefreshTailBytes {512 * 1024};
   constexpr int kHashSeedMaxCalls {4096};
+  constexpr qint64 kHashSeedInitialSoftBudgetMs {750};
   constexpr qint64 kHashSeedRefreshIntervalMs {10000};
   constexpr int kHashSeedRefreshMaxFiles {6};
   constexpr qint64 kHashSeedRefreshSoftBudgetMs {160};
@@ -206,7 +209,35 @@ namespace
     return hasLetter && hasDigit;
   }
 
-  void remember_hash_seed_call (QStringList& calls, QString call)
+  bool hash_seed_shutdown_requested ()
+  {
+    return QCoreApplication::closingDown ();
+  }
+
+  struct HashSeedCallAccumulator
+  {
+    std::deque<QString> calls;
+
+    QStringList to_list () const
+    {
+      QSet<QString> seen;
+      QStringList result;
+      result.reserve (std::min (static_cast<int> (calls.size ()), kHashSeedMaxCalls));
+      for (auto it = calls.rbegin (); it != calls.rend ()
+           && result.size () < kHashSeedMaxCalls; ++it)
+        {
+          if (!seen.contains (*it))
+            {
+              seen.insert (*it);
+              result.append (*it);
+            }
+        }
+      std::reverse (result.begin (), result.end ());
+      return result;
+    }
+  };
+
+  void remember_hash_seed_call (HashSeedCallAccumulator& accumulator, QString call)
   {
     call = call.trimmed ().toUpper ();
     if (call.startsWith (QLatin1Char ('<')) && call.endsWith (QLatin1Char ('>')))
@@ -217,17 +248,21 @@ namespace
       {
         return;
       }
-    calls.removeAll (call);
-    calls.append (call);
-    while (calls.size () > kHashSeedMaxCalls)
+    accumulator.calls.push_back (call);
+    while (static_cast<int> (accumulator.calls.size ()) > kHashSeedMaxCalls * 4)
       {
-        calls.removeFirst ();
+        accumulator.calls.pop_front ();
       }
   }
 
-  bool collect_hash_seed_calls_from_tail (QString const& path, QStringList& calls,
+  bool collect_hash_seed_calls_from_tail (QString const& path,
+                                          HashSeedCallAccumulator& accumulator,
                                           qint64 tailBytes = kHashSeedTailBytes)
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return false;
+      }
     QFile file {path};
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
       {
@@ -244,9 +279,14 @@ namespace
       QStringLiteral (R"((?:<[A-Z0-9/]{3,13}>|[A-Z0-9/]{3,13}))")
     };
     auto it = tokenRx.globalMatch (text);
+    int scannedTokens = 0;
     while (it.hasNext ())
       {
-        remember_hash_seed_call (calls, it.next ().captured (0));
+        if ((++scannedTokens & 0x3ff) == 0 && hash_seed_shutdown_requested ())
+          {
+            return false;
+          }
+        remember_hash_seed_call (accumulator, it.next ().captured (0));
       }
     return true;
   }
@@ -907,14 +947,24 @@ namespace
     QElapsedTimer timer;
     timer.start ();
     HashSeedSnapshot snapshot;
+    HashSeedCallAccumulator accumulator;
     for (QString const& path : local_hash_seed_paths ())
       {
-        if (collect_hash_seed_calls_from_tail (path, snapshot.calls))
+        if (hash_seed_shutdown_requested ())
+          {
+            break;
+          }
+        if (collect_hash_seed_calls_from_tail (path, accumulator))
           {
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
           }
+        if (timer.elapsed () >= kHashSeedInitialSoftBudgetMs)
+          {
+            break;
+          }
       }
+    snapshot.calls = accumulator.to_list ();
     snapshot.elapsedMs = timer.elapsed ();
     return snapshot;
   }
@@ -928,9 +978,14 @@ namespace
     refresh.seedKnownCqReplay = external_known_cq_seed_enabled ();
     refresh.seedExternalA7 = external_a7_seed_enabled ();
 
+    HashSeedCallAccumulator accumulator;
     for (QString const& path : local_hash_seed_paths ())
       {
-        collect_hash_seed_calls_from_tail (path, refresh.calls, kHashSeedRefreshTailBytes);
+        if (hash_seed_shutdown_requested ())
+          {
+            break;
+          }
+        collect_hash_seed_calls_from_tail (path, accumulator, kHashSeedRefreshTailBytes);
         if (refresh.seedKnownCqReplay && external_known_cq_source_allowed (path))
           {
             collect_known_cq_call_seeds_from_tail (path, refresh.cqCallSeeds,
@@ -954,6 +1009,7 @@ namespace
           }
       }
 
+    refresh.calls = accumulator.to_list ();
     refresh.elapsedMs = timer.elapsed ();
     return refresh;
   }
@@ -970,8 +1026,10 @@ namespace
 
   HashSeedAsyncState& hash_seed_async_state ()
   {
-    static HashSeedAsyncState state;
-    return state;
+    // Keep async futures out of C++ static destruction; shutdown can otherwise
+    // block here while Qt globals are already being torn down.
+    static HashSeedAsyncState* state = new HashSeedAsyncState;
+    return *state;
   }
 
   template<typename T>
@@ -983,6 +1041,10 @@ namespace
 
   void start_ft8_pack77_hash_seed_collection_once ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
     if (state.initialStarted)
@@ -997,6 +1059,10 @@ namespace
 
   void apply_ready_ft8_pack77_hash_seed_collection ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashSeedSnapshot snapshot;
     bool haveSnapshot = false;
     {
@@ -1099,6 +1165,10 @@ namespace
 
   void start_ft8_hash_context_refresh_from_recent_logs (int currentNutc)
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
@@ -1123,6 +1193,10 @@ namespace
 
   void apply_ready_ft8_hash_context_refresh ()
   {
+    if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
     HashContextRefresh refresh;
     bool haveRefresh = false;
     {
