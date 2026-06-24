@@ -13,7 +13,8 @@
 namespace
 {
   unsigned const polls_to_stabilize {3};
-  unsigned const transient_poll_failures_to_tolerate {3};
+  unsigned const generic_poll_failures_to_tolerate {3};
+  unsigned const transient_io_poll_failures_to_tolerate {8};
   int const ptt_fast_poll_first_ms {300};
   int const ptt_fast_poll_second_ms {800};
 
@@ -31,6 +32,23 @@ namespace
         seconds = 1;
       }
     return seconds * 1000;
+  }
+
+  bool is_transient_poll_io_failure (QString const& message)
+  {
+    QString const lower = message.toLower ();
+    return lower.contains ("timed out")
+        || lower.contains ("timeout")
+        || lower.contains ("communication timed out")
+        || lower.contains ("io error")
+        || lower.contains ("input/output error")
+        || lower.contains ("device not configured")
+        || lower.contains ("device unavailable")
+        || lower.contains ("resource temporarily unavailable")
+        || lower.contains ("temporarily unavailable")
+        || lower.contains ("read_string_generic")
+        || lower.contains ("write_block")
+        || lower.contains ("read_block");
   }
 }
 
@@ -230,9 +248,15 @@ void PollingTransceiver::handle_timeout ()
     {
       // CAT backends can occasionally miss one poll (USB/serial jitter,
       // temporary rig busy, log/write contention). Avoid full disconnect
-      // unless failures are consecutive.
-      if (++poll_failures_ < transient_poll_failures_to_tolerate)
+      // unless failures are consecutive. Serial/USB timeout storms are common
+      // on Icom CI-V while the rig is busy; keep them local to polling so a
+      // single missed frequency read does not tear down and reopen CAT.
+      unsigned const tolerated_failures = is_transient_poll_io_failure (message)
+          ? transient_io_poll_failures_to_tolerate
+          : generic_poll_failures_to_tolerate;
+      if (++poll_failures_ < tolerated_failures)
         {
+          CAT_WARNING ("poll failure tolerated:" << poll_failures_ << "/" << tolerated_failures << message);
           return;
         }
       poll_failures_ = 0;

@@ -64,8 +64,11 @@ struct ComplexFft32
 
 ComplexFft32& fft32 ()
 {
-  thread_local ComplexFft32 instance;
-  return instance;
+  // FFTW teardown can race macOS/OpenMP TLS finalization during application
+  // shutdown. Keep this tiny per-thread workspace alive until process exit
+  // instead of destroying its FFTW plan from a late thread_local destructor.
+  static thread_local auto* instance = new ComplexFft32;
+  return *instance;
 }
 
 inline float abs2 (Complex const& value)

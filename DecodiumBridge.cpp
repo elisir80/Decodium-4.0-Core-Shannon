@@ -12785,8 +12785,8 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
-        // 1.0.364+ MAM multi-stream nativo (FASE 2): un cambio modo invalida
-        // ogni QSO multi-stream in corso (MAM e' solo FT8).
+        // 1.0.364+ MAM multi-stream nativo: un cambio modo invalida
+        // ogni QSO multi-stream in corso.
         m_mamSlots.clear();
         m_mamMessages.clear();
         m_mamF0sHz.clear();
@@ -14744,6 +14744,14 @@ bool DecodiumBridge::shouldUseBridgeAudioForLegacyDigitalTx() const
 #endif
 }
 
+QString DecodiumBridge::currentBridgeTxRepresentativeMessage() const
+{
+    if (!m_cwTxActive && mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
+        return m_mamMessages.first().trimmed();
+    }
+    return buildCurrentTxMessage();
+}
+
 bool DecodiumBridge::legacyBridgeAudioTxInFlight() const
 {
 #if defined(Q_OS_MAC)
@@ -14787,7 +14795,7 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
     qint64 const swrMs = phaseTimer.elapsed();
 
     phaseTimer.restart();
-    QString msg = buildCurrentTxMessage();
+    QString msg = currentBridgeTxRepresentativeMessage();
     forceRecentRogerReportSignoffIfNeeded(msg,
                                           QStringLiteral("legacyBridgeTxPreflight:%1").arg(reason));
     qint64 const msgMs = phaseTimer.elapsed();
@@ -14978,7 +14986,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
 
     QElapsedTimer phaseTimer;
     phaseTimer.start();
-    QString msg = buildCurrentTxMessage();
+    QString msg = currentBridgeTxRepresentativeMessage();
     forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("legacyBridgeTxAudio:%1").arg(reason));
     msgMs = phaseTimer.elapsed();
     if (msg.trimmed().isEmpty()) {
@@ -16053,7 +16061,7 @@ bool DecodiumBridge::mamMultiStreamSequencerActive() const
         && isMamMultiStreamMode()
         && m_txEnabled
         && (m_autoCqRepeat || m_multiAnswerMode)
-        && !usingLegacyBackendForTx()
+        && (!usingLegacyBackendForTx() || shouldUseBridgeAudioForLegacyDigitalTx())
         && !m_manualTxHold;
 }
 
@@ -16531,9 +16539,9 @@ void DecodiumBridge::mamDispatchPeriod()
         }
     }
 
-    // (5) startTx(): la seam FASE 1 vede multiStreamActive() (>=1) e genera il
-    // wave multi-stream da m_mamMessages/m_mamF0sHz. Il caso 1-slot e quello
-    // N-slot passano entrambi di qui.
+    // (5) startTx(): il generatore vede multiStreamActive() (>=1) e produce
+    // la waveform multi-stream da m_mamMessages/m_mamF0sHz. Il caso 1-slot
+    // e quello N-slot passano entrambi di qui.
     bridgeLog(QStringLiteral("MAM dispatch TX: streams=%1 slots_active=%2 pidx=%3 elapsed=%4ms")
                   .arg(m_mamMessages.size())
                   .arg(m_mamSlots.size())
@@ -17751,16 +17759,7 @@ void DecodiumBridge::startTx()
         }
     }
 
-    QString msg = m_cwTxActive ? m_pendingCwText : buildCurrentTxMessage();
-    // 1.0.364+ MAM multi-stream nativo (FASE 2): in MAM il payload reale e' la
-    // lista m_mamMessages (la seam FASE 1 genera il wave multi-stream da
-    // m_mamMessages/m_mamF0sHz). buildCurrentTxMessage() legge lo stato
-    // single-QSO non popolato in MAM: usa il primo stream come msg
-    // rappresentativo (passa la guard 'msg vuoto', cache key/log/TX-echo).
-    // Gated: senza MAM attivo questo blocco non esiste -> startTx byte-identico.
-    if (!m_cwTxActive && mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
-        msg = m_mamMessages.first();
-    }
+    QString msg = m_cwTxActive ? m_pendingCwText : currentBridgeTxRepresentativeMessage();
     if (!m_cwTxActive) {
         forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     }

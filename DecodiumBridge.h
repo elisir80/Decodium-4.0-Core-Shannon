@@ -3064,7 +3064,7 @@ public:
 
     // 1.0.364+ — MAM multi-stream nativo (FASE 1, solo C++, default OFF).
     // multiStreamActive() e' true solo quando il toggle e' attivo, il modo e'
-    // FT8 e c'e' >=1 messaggio con altrettante frequenze. Quando false (sempre
+    // FT2/FT4/FT8 e c'e' >=1 messaggio con altrettante frequenze. Quando false (sempre
     // se m_mamMultiStream==false, oppure se m_mamMessages e' vuoto) il path TX
     // resta byte-identico al mono single-stream esistente.
     // FASE 2: la soglia e' >=1 (era >=2 in FASE 1) cosi' il caso 1-slot del
@@ -3261,6 +3261,7 @@ private:
     void scheduleTxAudioTelemetryProbe(quint64 txSerial);
     void logTxAudioTelemetrySummary(const QString& reason);
     QString buildCurrentTxMessage() const;
+    QString currentBridgeTxRepresentativeMessage() const;
     bool forceRecentRogerReportSignoffIfNeeded(QString& message, const QString& reason);
     bool repairOrRejectStalePartnerTxMessage(QString& message, const QString& reason);
     bool prepareHoundTxSelectionForStart(const QString& reason);

@@ -1892,7 +1892,11 @@ void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reaso
 
     ++m_transientCatRetryCount;
     m_transientCatReconnectPending = true;
-    int const delayMs = qMin(10000, 1200 * m_transientCatRetryCount);
+    // Polling now absorbs short USB/serial timeout bursts. If the backend still
+    // reaches this path, give the rig/driver time to settle before reopening the
+    // serial session; immediate reconnects can rewrite fake-split state and make
+    // the operator hear CAT activity on the radio.
+    int const delayMs = qMin(30000, 5000 * m_transientCatRetryCount);
     emit statusUpdate(tr("CAT interrotto, riconnessione automatica (%1/%2)...")
                           .arg(m_transientCatRetryCount)
                           .arg(maxRetries));
