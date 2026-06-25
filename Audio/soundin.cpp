@@ -186,6 +186,7 @@ QString audioDeviceIdForKey(QAudioDevice const& device)
   return id.isEmpty() ? QString() : QString::fromLatin1(id.toHex());
 }
 
+#if defined(Q_OS_MACOS)
 bool isSameAudioDevice(QAudioDevice const& lhs, QAudioDevice const& rhs)
 {
   if (lhs.isNull() || rhs.isNull())
@@ -203,7 +204,6 @@ bool isSameAudioDevice(QAudioDevice const& lhs, QAudioDevice const& rhs)
   return lhs.description() == rhs.description();
 }
 
-#if defined(Q_OS_MACOS)
 QString osStatusName(OSStatus status)
 {
   char text[5] {};
