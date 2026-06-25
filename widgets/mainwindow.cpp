@@ -4922,7 +4922,14 @@ void MainWindow::legacySetMode(QString const& mode)
 
 void MainWindow::legacySetDialFrequency(Frequency frequency)
 {
-  if (!frequency || frequency == m_freqNominal) {
+  if (!frequency) {
+    return;
+  }
+  bool const embeddedNoCat = m_embeddedShellMode && !m_embeddedRigControlEnabled;
+  bool const nominalSynced = frequency == m_freqNominal;
+  bool const rigStateSynced = !m_embeddedShellMode || m_rigState.frequency () == frequency;
+  bool const periodSynced = !embeddedNoCat || m_freqNominalPeriod == frequency;
+  if (nominalSynced && rigStateSynced && periodSynced) {
     return;
   }
   if (m_embeddedShellMode)
@@ -5316,7 +5323,9 @@ void MainWindow::legacySetRxInputLevel(int value)
       return;
     }
 
-    QMetaObject::invokeMethod (target, updater, Qt::BlockingQueuedConnection);
+    // Gain changes are not latency-critical. Queue cross-thread updates so the
+    // UI cannot block while CoreAudio/QAudioSource is still opening the device.
+    QMetaObject::invokeMethod (target, updater, Qt::QueuedConnection);
   };
 
   if (m_detector) {
@@ -8155,15 +8164,18 @@ void MainWindow::restartConfiguredAudioStreams (bool resume_monitor, bool force_
                                           , m_downSampleFactor
                                           , m_config.audio_input_channel ());
       };
-      if (m_soundInput
-          && m_soundInput->thread () != QThread::currentThread ()
-          && m_audioThread.isRunning ())
+      if (!m_soundInput
+          || m_soundInput->thread () == QThread::currentThread ()
+          || !m_audioThread.isRunning ())
         {
-          QMetaObject::invokeMethod (m_soundInput, check_input_active, Qt::BlockingQueuedConnection);
+          check_input_active ();
         }
       else
         {
-          check_input_active ();
+          // Do not block the UI while the audio thread may already be inside
+          // CoreAudio/QAudioSource startup. SoundInput::start handles duplicate
+          // starts in its own thread, so a queued start is safer than a freeze.
+          debugToFile (QStringLiteral ("audioRest   active check skipped cross-thread"));
         }
 
       if (force_input_reopen)
@@ -28481,6 +28493,374 @@ void MainWindow::foxTest()
     }
 }
 
+struct LegacyHashResolveCandidate
+{
+  QString timeToken;
+  int audioHz {-1};
+  QString message;
+  QString source;
+};
+
+static QString legacy_hash_clean_message (QString message)
+{
+  static QRegularExpression const apSuffix {R"(\s+a\d+\s*$)", QRegularExpression::CaseInsensitiveOption};
+  static QRegularExpression const trailingMark {R"(\s+[?*#^]\s*$)"};
+  message = message.trimmed ();
+  message.remove (apSuffix);
+  message.remove (trailingMark);
+  return message.simplified ();
+}
+
+static QStringList legacy_hash_read_tail_lines (QString const& path, qint64 tailBytes, int maxLines)
+{
+  if (path.trimmed ().isEmpty () || tailBytes <= 0 || maxLines <= 0) {
+    return {};
+  }
+
+  QFile file {path};
+  if (!file.exists () || !file.open (QIODevice::ReadOnly | QIODevice::Text)) {
+    return {};
+  }
+
+  qint64 const startOffset = qMax<qint64> (0, file.size () - tailBytes);
+  if (!file.seek (startOffset)) {
+    return {};
+  }
+  if (startOffset > 0) {
+    file.readLine ();
+  }
+
+  QStringList lines = QString::fromUtf8 (file.readAll ()).split (QRegularExpression {R"([\r\n]+)"},
+                                                                Qt::SkipEmptyParts);
+  if (lines.size () > maxLines) {
+    lines = lines.mid (lines.size () - maxLines);
+  }
+  return lines;
+}
+
+static bool legacy_hash_parse_alltxt_line (QString const& rawLine,
+                                           LegacyHashResolveCandidate& candidate)
+{
+  QString const line = rawLine.trimmed ();
+  if (line.isEmpty ()) {
+    return false;
+  }
+
+  static QRegularExpression const legacyPattern {
+    R"(^\d{6}_(\d{6})\s+\S+\s+(Rx|Tx|Ck)\s+([A-Z0-9_+\-]+)\s+(-?\d+)\s+(-?\d+(?:\.\d+)?)\s+(\d+)\s+(.+)$)",
+    QRegularExpression::CaseInsensitiveOption
+  };
+  auto match = legacyPattern.match (line);
+  if (match.hasMatch ()) {
+    if (match.captured (2).compare ("Rx", Qt::CaseInsensitive) != 0
+        || match.captured (3).trimmed ().toUpper () != "FT8") {
+      return false;
+    }
+    bool freqOk = false;
+    int const audioHz = match.captured (6).trimmed ().toInt (&freqOk);
+    QString const message = legacy_hash_clean_message (match.captured (7));
+    if (!freqOk || message.isEmpty ()) {
+      return false;
+    }
+    candidate.timeToken = match.captured (1).trimmed ();
+    candidate.audioHz = audioHz;
+    candidate.message = message;
+    return true;
+  }
+
+  static QRegularExpression const jtStylePattern {
+    R"(^\d{6,8}_(\d{6})\s+(-?\d+)\s+(-?\d+(?:\.\d+)?)\s+(\d+)\s+\S+\s+(.+)$)",
+    QRegularExpression::CaseInsensitiveOption
+  };
+  match = jtStylePattern.match (line);
+  if (!match.hasMatch ()) {
+    return false;
+  }
+
+  bool freqOk = false;
+  int const audioHz = match.captured (4).trimmed ().toInt (&freqOk);
+  QString const message = legacy_hash_clean_message (match.captured (5));
+  if (!freqOk || message.isEmpty ()) {
+    return false;
+  }
+  candidate.timeToken = match.captured (1).trimmed ();
+  candidate.audioHz = audioHz;
+  candidate.message = message;
+  return true;
+}
+
+static QStringList legacy_hash_candidate_paths ()
+{
+  QStringList paths;
+  QSet<QString> seen;
+  auto addPath = [&] (QString const& path) {
+    QString const cleaned = path.trimmed ();
+    if (cleaned.isEmpty ()) {
+      return;
+    }
+    QString const absolute = QFileInfo {cleaned}.absoluteFilePath ();
+    if (seen.contains (absolute)) {
+      return;
+    }
+    seen.insert (absolute);
+    paths.append (absolute);
+  };
+
+  QString const generic = QStandardPaths::writableLocation (QStandardPaths::GenericDataLocation);
+  QString const homeSupport = QDir {QDir::homePath ()}.absoluteFilePath ("Library/Application Support");
+  QStringList monthFiles;
+  QDate const currentMonth = QDate::currentDate ();
+  for (int i = 0; i < 2; ++i) {
+    monthFiles.append (currentMonth.addMonths (-i).toString ("yyyyMM") + "_ALL.TXT");
+  }
+  auto addLogDirectory = [&] (QString const& path) {
+    QDir const dir {path};
+    if (!dir.exists ()) {
+      return;
+    }
+    static QStringList const filters {
+      "ALL.TXT",
+      "all.txt",
+      "*_ALL.TXT"
+    };
+    for (QString const& name : dir.entryList (filters, QDir::Files, QDir::Name)) {
+      addPath (dir.absoluteFilePath (name));
+    }
+    for (QString const& monthFile : std::as_const (monthFiles)) {
+      addPath (dir.absoluteFilePath (monthFile));
+    }
+  };
+  auto addExternalEntry = [&] (QString const& path) {
+    QString const cleaned = path.trimmed ();
+    if (cleaned.isEmpty ()) {
+      return;
+    }
+    QFileInfo const info {cleaned};
+    if (info.isDir ()) {
+      QDir const dir {info.absoluteFilePath ()};
+      addLogDirectory (dir.absolutePath ());
+      addLogDirectory (dir.absoluteFilePath ("JTDX"));
+      addLogDirectory (dir.absoluteFilePath ("WSJT-X"));
+      return;
+    }
+    addPath (info.absoluteFilePath ());
+  };
+
+  for (QString const& root : {generic, homeSupport}) {
+    if (root.isEmpty ()) {
+      continue;
+    }
+    QDir const dir {root};
+    for (QString const& monthFile : std::as_const (monthFiles)) {
+      addPath (dir.absoluteFilePath ("JTDX/" + monthFile));
+    }
+    addPath (dir.absoluteFilePath ("JTDX/ALL.TXT"));
+    addPath (dir.absoluteFilePath ("WSJT-X/ALL.TXT"));
+  }
+  for (char const* name : {"DECODIUM_HASH_SEED_PATHS", "DECODIUM_EXTERNAL_LOG_DIRS"}) {
+    QString const value = qEnvironmentVariable (name).trimmed ();
+    if (value.isEmpty ()) {
+      continue;
+    }
+    for (QString const& entry : value.split (QDir::listSeparator (), Qt::SkipEmptyParts)) {
+      addExternalEntry (entry);
+    }
+  }
+
+  return paths;
+}
+
+static int legacy_hash_seconds_from_token (QString const& token)
+{
+  QString const trimmed = token.trimmed ();
+  if (trimmed.size () != 6) {
+    return -1;
+  }
+  bool hhOk = false;
+  bool mmOk = false;
+  bool ssOk = false;
+  int const hh = trimmed.left (2).toInt (&hhOk);
+  int const mm = trimmed.mid (2, 2).toInt (&mmOk);
+  int const ss = trimmed.mid (4, 2).toInt (&ssOk);
+  if (!hhOk || !mmOk || !ssOk || hh < 0 || hh > 23 || mm < 0 || mm > 59 || ss < 0 || ss > 59) {
+    return -1;
+  }
+  return hh * 3600 + mm * 60 + ss;
+}
+
+static int legacy_hash_second_delta (int earlierSeconds, int laterSeconds)
+{
+  int delta = laterSeconds - earlierSeconds;
+  if (delta < -43200) {
+    delta += 86400;
+  } else if (delta > 43200) {
+    delta -= 86400;
+  }
+  return delta;
+}
+
+static bool legacy_hash_placeholder_token (QString const& token)
+{
+  QString const normalized = normalize_call_token (token).trimmed ().toUpper ();
+  return normalized == "..." || normalized == "<...>";
+}
+
+static bool legacy_hash_grid_token (QString const& token)
+{
+  static QRegularExpression const gridPattern {R"(\A(?!RR73)[A-R]{2}[0-9]{2}(?:[A-X]{2})?\z)",
+                                               QRegularExpression::CaseInsensitiveOption};
+  return gridPattern.match (token.trimmed ()).hasMatch ();
+}
+
+static bool legacy_hash_report_or_signoff_token (QString const& token)
+{
+  QString const upper = normalize_call_token (token).trimmed ().toUpper ();
+  static QRegularExpression const reportPattern {R"(\A(?:R)?[-+]\d{1,2}\z)"};
+  return upper == "CQ" || upper == "QRZ" || upper == "DE" || upper == "TU"
+      || upper == "73" || upper == "RR73" || upper == "RRR" || upper == "R"
+      || reportPattern.match (upper).hasMatch ();
+}
+
+static bool legacy_hash_plausible_call_token (QString const& token)
+{
+  QString const upper = normalize_call_token (token).trimmed ().toUpper ();
+  if (upper.size () < 3 || upper.size () > 15
+      || legacy_hash_placeholder_token (upper)
+      || legacy_hash_grid_token (upper)
+      || legacy_hash_report_or_signoff_token (upper)) {
+    return false;
+  }
+
+  bool hasLetter = false;
+  bool hasDigit = false;
+  for (QChar const& ch : upper) {
+    if (ch.isLetter ()) {
+      hasLetter = true;
+    } else if (ch.isDigit ()) {
+      hasDigit = true;
+    } else if (ch != '/' && ch != '-') {
+      return false;
+    }
+  }
+  return hasLetter && hasDigit;
+}
+
+static QStringList legacy_hash_message_tokens (QString const& message)
+{
+  return legacy_hash_clean_message (message).toUpper ().split (QRegularExpression {"\\s+"},
+                                                              Qt::SkipEmptyParts);
+}
+
+static bool legacy_hash_messages_compatible (QString const& hashedMessage,
+                                             QString const& resolvedMessage)
+{
+  if (!hashedMessage.contains ("<...>") || resolvedMessage.contains ("<...>")) {
+    return false;
+  }
+
+  QStringList const hashedTokens = legacy_hash_message_tokens (hashedMessage);
+  QStringList const resolvedTokens = legacy_hash_message_tokens (resolvedMessage);
+  if (hashedTokens.size () != resolvedTokens.size () || hashedTokens.isEmpty ()) {
+    return false;
+  }
+
+  int placeholders = 0;
+  for (int i = 0; i < hashedTokens.size (); ++i) {
+    QString const hashedToken = hashedTokens.at (i).trimmed ().toUpper ();
+    QString const resolvedToken = resolvedTokens.at (i).trimmed ().toUpper ();
+    if (legacy_hash_placeholder_token (hashedToken)) {
+      ++placeholders;
+      if (!legacy_hash_plausible_call_token (resolvedToken)) {
+        return false;
+      }
+      continue;
+    }
+    if (normalize_call_token (hashedToken).trimmed ().toUpper ()
+        != normalize_call_token (resolvedToken).trimmed ().toUpper ()) {
+      return false;
+    }
+  }
+  return placeholders > 0;
+}
+
+static QString legacy_hash_resolve_alltxt_line (QString const& rawLine)
+{
+  QString const line = rawLine.trimmed ();
+  if (!line.contains ("<...>")) {
+    return line;
+  }
+
+  static QRegularExpression const ownLinePattern {
+    R"(^\d{6}_(\d{6})\s+\S+\s+(Rx|Tx|Ck)\s+([A-Z0-9_+\-]+)\s+(-?\d+)\s+(-?\d+(?:\.\d+)?)\s+(\d+)\s+(.+)$)",
+    QRegularExpression::CaseInsensitiveOption
+  };
+  QRegularExpressionMatch const own = ownLinePattern.match (line);
+  if (!own.hasMatch ()
+      || own.captured (2).compare ("Rx", Qt::CaseInsensitive) != 0
+      || own.captured (3).trimmed ().toUpper () != "FT8") {
+    return line;
+  }
+
+  bool freqOk = false;
+  int const targetAudioHz = own.captured (6).trimmed ().toInt (&freqOk);
+  int const targetSeconds = legacy_hash_seconds_from_token (own.captured (1));
+  QString const hashedMessage = legacy_hash_clean_message (own.captured (7));
+  if (!freqOk || targetAudioHz <= 0 || targetSeconds < 0 || hashedMessage.isEmpty ()) {
+    return line;
+  }
+
+  static constexpr qint64 kTailBytes = 8 * 1024 * 1024;
+  static constexpr int kMaxLines = 50000;
+  QString resolvedMessage;
+  QString resolvedSource;
+  int candidateCount = 0;
+  for (QString const& path : legacy_hash_candidate_paths ()) {
+    QFileInfo const info {path};
+    if (!info.exists () || !info.isFile ()) {
+      continue;
+    }
+    for (QString const& candidateLine : legacy_hash_read_tail_lines (info.absoluteFilePath (),
+                                                                     kTailBytes,
+                                                                     kMaxLines)) {
+      LegacyHashResolveCandidate candidate;
+      if (!legacy_hash_parse_alltxt_line (candidateLine, candidate)
+          || candidate.message.contains ("<...>")) {
+        continue;
+      }
+      int const candidateSeconds = legacy_hash_seconds_from_token (candidate.timeToken);
+      if (candidateSeconds < 0
+          || qAbs (legacy_hash_second_delta (candidateSeconds, targetSeconds)) > 2
+          || qAbs (candidate.audioHz - targetAudioHz) > 5
+          || !legacy_hash_messages_compatible (hashedMessage, candidate.message)) {
+        continue;
+      }
+      ++candidateCount;
+      QString const cleanCandidate = legacy_hash_clean_message (candidate.message);
+      if (resolvedMessage.isEmpty ()) {
+        resolvedMessage = cleanCandidate;
+        resolvedSource = info.fileName ();
+      } else if (resolvedMessage.compare (cleanCandidate, Qt::CaseInsensitive) != 0) {
+        return line;
+      }
+    }
+  }
+
+  if (resolvedMessage.isEmpty ()) {
+    return line;
+  }
+
+  QString resolvedLine = line;
+  resolvedLine.replace (own.capturedStart (7), own.capturedLength (7), resolvedMessage);
+  qInfo ().noquote () << QString ("[FT8-HASH] legacy writer resolved time=%1 hz=%2 '%3' -> '%4' source=%5 candidates=%6")
+                            .arg (own.captured (1),
+                                  QString::number (targetAudioHz),
+                                  hashedMessage,
+                                  resolvedMessage,
+                                  resolvedSource.isEmpty () ? QString {"<unknown>"} : resolvedSource)
+                            .arg (candidateCount);
+  return resolvedLine;
+}
+
 void MainWindow::write_all(QString txRx, QString message)
 {
   if (!(ui->actionDisable_writing_of_ALL_TXT->isChecked())) {
@@ -28553,7 +28933,7 @@ void MainWindow::write_all(QString txRx, QString message)
   QFile f{m_config.writeable_data_dir().absoluteFilePath(file_name)};
   if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
     QTextStream out(&f);
-    out << line.trimmed()
+    out << legacy_hash_resolve_alltxt_line (line)
 #if QT_VERSION >= QT_VERSION_CHECK (5, 15, 0)
         << Qt::endl
 #else
@@ -32707,6 +33087,20 @@ void MainWindow::onRemoteSetDialFrequencyRequested(QString const& commandId, qin
       m_rigState.tx_frequency(frequency);
     }
   m_currentBand = m_config.bands()->find(frequency);
+  if (m_embeddedShellMode
+      && !m_embeddedRigControlEnabled
+      && (qEnvironmentVariableIsSet("DECODIUM_RX_RECORD_SECONDS")
+          || qEnvironmentVariableIsSet("DECODIUM_RX_RECORD_DIAL_HZ")))
+    {
+      m_freqNominal = frequency;
+      m_freqTxNominal = frequency;
+      m_freqNominalPeriod = frequency;
+      m_currentBandPeriod = m_currentBand;
+      m_lastMonitoredFrequency = frequency;
+      m_displayBand = true;
+      no_decodes_to_UDP = false;
+      if (m_astroWidget) m_astroWidget->nominal_frequency (m_freqNominal, m_freqTxNominal);
+    }
   if (ui && ui->bandComboBox)
     {
       auto const row = m_config.frequencies()->best_working_frequency(frequency);

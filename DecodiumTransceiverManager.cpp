@@ -158,6 +158,29 @@ QString normalizeDevicePath(QString value)
 #endif
 }
 
+bool truthyEnvironmentFlag(char const* name)
+{
+    QString const value = qEnvironmentVariable(name).trimmed().toLower();
+    return value == QStringLiteral("1")
+        || value == QStringLiteral("true")
+        || value == QStringLiteral("yes")
+        || value == QStringLiteral("on");
+}
+
+bool catSuppressedByEnvironment()
+{
+    return truthyEnvironmentFlag("DECODIUM_DISABLE_CAT")
+        || truthyEnvironmentFlag("DECODIUM_RX_RECORD_DISABLE_CAT");
+}
+
+QString catSuppressionReason()
+{
+    if (truthyEnvironmentFlag("DECODIUM_RX_RECORD_DISABLE_CAT")) {
+        return QObject::tr("CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.");
+    }
+    return QObject::tr("CAT disabilitato da variabile d'ambiente DECODIUM_DISABLE_CAT.");
+}
+
 QString comparablePortName(QString value)
 {
     value = normalizeDevicePath(value);
@@ -1460,9 +1483,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
 #endif
     bool const pwrAndSwrEnabled = configuredPwrAndSwrEnabled();
     int const requestedPollInterval = qBound(1, m->pollInterval(), 99);
-    int const basePollInterval = pwrAndSwrEnabled
-        ? 1
-        : qMax(serialCat ? 2 : 1, requestedPollInterval);
+    int const basePollInterval = qMax(serialCat ? 2 : 1, requestedPollInterval);
     p.rig_name      = m->rigName();
     p.serial_port   = normalizeDevicePath(m->serialPort());
     bool networkEndpointNormalized = false;
@@ -1543,6 +1564,31 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
 // ── connectRig ────────────────────────────────────────────────────────────
 void DecodiumTransceiverManager::connectRig()
 {
+    if (catSuppressedByEnvironment()) {
+        ++m_transientCatReconnectSerial;
+        m_transientCatReconnectPending = false;
+        m_transientCatRetryCount = 0;
+        setConnecting(false);
+        if (m_connected) {
+            m_connected = false;
+            emit connectedChanged();
+        }
+        updateTelemetry(0.0, 0.0);
+        qInfo().noquote()
+            << "[CATDBG] Connect suppressed by environment"
+            << "rig=" << m_rigName
+            << "portType=" << m_portType
+            << "serial=" << m_serialPort
+            << "network=" << m_networkPort
+            << "tci=" << m_tciPort
+            << "DECODIUM_DISABLE_CAT="
+            << qEnvironmentVariable("DECODIUM_DISABLE_CAT")
+            << "DECODIUM_RX_RECORD_DISABLE_CAT="
+            << qEnvironmentVariable("DECODIUM_RX_RECORD_DISABLE_CAT");
+        emit statusUpdate(catSuppressionReason());
+        return;
+    }
+
     if (d->transceiver) {
         if (m_connecting && !m_connected) {
             qint64 const elapsedMs = m_connectAttemptTimer.isValid()
@@ -1838,6 +1884,7 @@ void DecodiumTransceiverManager::connectRig()
 // ── disconnectRig ─────────────────────────────────────────────────────────
 void DecodiumTransceiverManager::disconnectRig()
 {
+    ++m_transientCatReconnectSerial;
     m_transientCatReconnectPending = false;
     setConnecting(false);
     if (!d->transceiver) return;
@@ -1877,6 +1924,81 @@ void DecodiumTransceiverManager::disconnectRig()
     emit statusUpdate("Disconnesso dal transceiver");
 }
 
+void DecodiumTransceiverManager::restartTransientCatConnectionNonBlocking()
+{
+    if (!m_transientCatReconnectPending) {
+        return;
+    }
+
+    m_transientCatReconnectPending = false;
+    quint64 const reconnectSerial = ++m_transientCatReconnectSerial;
+    auto* xcv = d->transceiver;
+    auto* thread = d->xcvThread;
+
+    d->transceiver = nullptr;
+    d->xcvThread = nullptr;
+    d->desired = Transceiver::TransceiverState {};
+    setConnecting(false);
+    if (m_connected) {
+        m_connected = false;
+        emit connectedChanged();
+    }
+    updateTelemetry(0.0, 0.0);
+    emit statusUpdate(QStringLiteral("Disconnesso dal transceiver"));
+
+    auto reconnectDone = std::make_shared<bool>(false);
+    auto reconnectOnce = [this, reconnectSerial, reconnectDone]() {
+        if (*reconnectDone) {
+            return;
+        }
+        *reconnectDone = true;
+        if (reconnectSerial != m_transientCatReconnectSerial) {
+            return;
+        }
+        QTimer::singleShot(0, this, [this, reconnectSerial]() {
+            if (reconnectSerial == m_transientCatReconnectSerial && !d->transceiver) {
+                connectRig();
+            }
+        });
+    };
+
+    if (!thread || !thread->isRunning()) {
+        if (xcv) {
+            xcv->deleteLater();
+        }
+        if (thread) {
+            thread->deleteLater();
+        }
+        reconnectOnce();
+        return;
+    }
+
+    connect(thread, &QThread::finished, this, reconnectOnce, Qt::SingleShotConnection);
+
+    if (xcv) {
+        QMetaObject::invokeMethod(xcv, [xcv]() {
+            xcv->stop();
+        }, Qt::QueuedConnection);
+    } else {
+        thread->quit();
+    }
+
+    QTimer::singleShot(2000, this, [this, thread, reconnectDone]() {
+        if (*reconnectDone || !thread->isRunning()) {
+            return;
+        }
+        qWarning().noquote()
+            << "[CATDBG] Transient reconnect: graceful stop timed out, terminating thread";
+        thread->requestInterruption();
+        thread->quit();
+        QTimer::singleShot(500, this, [thread, reconnectDone]() {
+            if (!*reconnectDone && thread->isRunning()) {
+                thread->terminate();
+            }
+        });
+    });
+}
+
 void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reason)
 {
     if (m_transientCatReconnectPending) {
@@ -1902,12 +2024,7 @@ void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reaso
                           .arg(maxRetries));
 
     QTimer::singleShot(delayMs, this, [this]() {
-        if (!m_transientCatReconnectPending) {
-            return;
-        }
-        m_transientCatReconnectPending = false;
-        disconnectRig();
-        connectRig();
+        restartTransientCatConnectionNonBlocking();
     });
 }
 

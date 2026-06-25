@@ -61,7 +61,7 @@ constexpr float kFt8KnownCallGridFastReplayMaxFreqDelta {2.5f};
 constexpr float kFt8KnownCallGridFastReplayMaxDtDelta {0.10f};
 constexpr float kFt8KnownCallGridFastReplayMinCqScore {3.0f};
 constexpr int kFt8KnownCallGridFastReplayMinSync {9};
-constexpr int kFt8HashCallSeedMemory {4096};
+constexpr int kFt8HashCallSeedMemory {8192};
 constexpr int kFt8MaxLines {200};
 constexpr int kFt8Bits {77};
 constexpr int kFt8DecodedChars {37};

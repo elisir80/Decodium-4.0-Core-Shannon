@@ -40,6 +40,8 @@ private:
   void schedule_transmit_telemetry_burst ();
 
   bool ptt_on_ = false;
+  bool poll_passive_state_ = true;
+  bool poll_ptt_state_ = true;
   bool do_pwr_ = false;
   bool do_pwr2_ = false;
   bool do_swr_ = false;

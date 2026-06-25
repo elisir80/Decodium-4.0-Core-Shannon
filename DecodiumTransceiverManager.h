@@ -215,6 +215,7 @@ private:
     void updateTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void reconnectRigForParameterChange(const QString& reason);
     void scheduleTransientReconnect(const QString& reason);
+    void restartTransientCatConnectionNonBlocking();
     void setConnecting(bool v);
     void abortConnectingRigAfterTimeout(Transceiver* xcv, QThread* thread,
                                         const QString& shownReason);
@@ -261,5 +262,6 @@ private:
     bool    m_hrdStrictRadioMatch {true};
     int     m_transientCatRetryCount {0};
     bool    m_transientCatReconnectPending {false};
+    quint64 m_transientCatReconnectSerial {0};
     QElapsedTimer m_connectAttemptTimer;
 };

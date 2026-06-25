@@ -1742,23 +1742,49 @@ int main(int argc, char* argv[])
             bool quitDelayOk = false;
             int const requestedQuitDelayMs = qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_QUIT_DELAY_MS", &quitDelayOk);
             int const quitDelayMs = quitDelayOk ? qBound(0, requestedQuitDelayMs, 120000) : 1500;
+            bool readyTimeoutOk = false;
+            int const requestedReadyTimeoutMs = qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_READY_TIMEOUT_MS", &readyTimeoutOk);
+            int const readyTimeoutMs = readyTimeoutOk ? qBound(0, requestedReadyTimeoutMs, 120000) : 30000;
             int const seconds = qBound(1, requestedSeconds, 3600);
+            QString const forcedMode = qEnvironmentVariable("DECODIUM_RX_RECORD_MODE").trimmed().toUpper();
+            bool forcedDialOk = false;
+            int const requestedForcedDialHz =
+                qEnvironmentVariableIntValue("DECODIUM_RX_RECORD_DIAL_HZ", &forcedDialOk);
+            int const forcedDialHz = forcedDialOk
+                ? qBound(100000, requestedForcedDialHz, 2000000000)
+                : 0;
             QString const quitText = qEnvironmentVariable("DECODIUM_RX_RECORD_QUIT").trimmed().toLower();
             bool const quitAfter =
                 quitText == QStringLiteral("1")
                 || quitText == QStringLiteral("true")
                 || quitText == QStringLiteral("yes");
-            L(QStringLiteral("[RX-RECORD] armed: delay_ms=%1 align_period_ms=%2 seconds=%3 quit=%4 quit_delay_ms=%5")
+            L(QStringLiteral("[RX-RECORD] armed: delay_ms=%1 align_period_ms=%2 seconds=%3 quit=%4 quit_delay_ms=%5 ready_timeout_ms=%6 forced_mode=%7 forced_dial_hz=%8")
                   .arg(startDelayMs)
                   .arg(alignPeriodMs)
                   .arg(seconds)
                   .arg(quitAfter ? 1 : 0)
                   .arg(quitDelayMs)
+                  .arg(readyTimeoutMs)
+                  .arg(forcedMode.isEmpty() ? QStringLiteral("<none>") : forcedMode)
+                  .arg(forcedDialHz)
                   .toUtf8()
                   .constData());
-            QTimer::singleShot(startDelayMs, &bridge, [&bridge, seconds, quitAfter, quitDelayMs, alignPeriodMs, &app]() {
-                int alignDelayMs = 0;
-                if (alignPeriodMs > 0) {
+              QTimer::singleShot(startDelayMs, &bridge, [&bridge, seconds, quitAfter, quitDelayMs, alignPeriodMs, readyTimeoutMs, forcedMode, forcedDialHz, &app]() {
+                auto applyForcedRecordState = [&bridge, forcedMode, forcedDialHz]() {
+                  if (!forcedMode.isEmpty()) {
+                      qInfo().noquote() << "[RX-RECORD] force_mode=" << forcedMode;
+                      bridge.setMode(forcedMode);
+                  }
+                  if (forcedDialHz > 0) {
+                      qInfo().noquote() << "[RX-RECORD] force_dial_hz=" << forcedDialHz;
+                      bridge.setFrequency(static_cast<double>(forcedDialHz));
+                  }
+                };
+                applyForcedRecordState();
+                auto startAlignedRecording = [&bridge, seconds, quitAfter, quitDelayMs, alignPeriodMs, applyForcedRecordState, &app]() {
+                  applyForcedRecordState();
+                  int alignDelayMs = 0;
+                  if (alignPeriodMs > 0) {
                     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
                     qint64 const remainder = nowMs % alignPeriodMs;
                     alignDelayMs = remainder == 0 ? 0 : int(alignPeriodMs - remainder);
@@ -1783,6 +1809,39 @@ int main(int argc, char* argv[])
                     }
                 });
                 });
+                };
+
+                if (bridge.monitoring()) {
+                    startAlignedRecording();
+                    return;
+                }
+
+                qInfo().noquote() << "[RX-RECORD] waiting_for_monitoring timeout_ms=" << readyTimeoutMs;
+                bridge.setMonitoring(true);
+                auto* readyTimer = new QTimer(&bridge);
+                readyTimer->setInterval(250);
+                auto waitTimer = std::make_shared<QElapsedTimer>();
+                waitTimer->start();
+                QObject::connect(readyTimer, &QTimer::timeout, &bridge,
+                                 [&bridge, readyTimer, waitTimer, readyTimeoutMs, startAlignedRecording]() mutable {
+                    if (bridge.monitoring()) {
+                        qInfo().noquote() << "[RX-RECORD] monitoring_ready elapsed_ms="
+                                          << waitTimer->elapsed();
+                        readyTimer->stop();
+                        readyTimer->deleteLater();
+                        startAlignedRecording();
+                        return;
+                    }
+                    if (readyTimeoutMs > 0 && waitTimer->elapsed() >= readyTimeoutMs) {
+                        qWarning().noquote() << "[RX-RECORD] monitoring_wait_timeout elapsed_ms="
+                                             << waitTimer->elapsed()
+                                             << "starting_recording_anyway=1";
+                        readyTimer->stop();
+                        readyTimer->deleteLater();
+                        startAlignedRecording();
+                    }
+                });
+                readyTimer->start();
             });
         }
     }

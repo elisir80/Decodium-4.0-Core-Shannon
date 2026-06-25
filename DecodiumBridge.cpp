@@ -873,6 +873,21 @@ QTimeZone decodiumUtcTimeZone()
     return QTimeZone(QByteArrayLiteral("UTC"));
 }
 
+bool truthyEnvironmentFlag(char const* name)
+{
+    QString const value = qEnvironmentVariable(name).trimmed().toLower();
+    return value == QStringLiteral("1")
+        || value == QStringLiteral("true")
+        || value == QStringLiteral("yes")
+        || value == QStringLiteral("on");
+}
+
+bool catSuppressedByEnvironment()
+{
+    return truthyEnvironmentFlag("DECODIUM_DISABLE_CAT")
+        || truthyEnvironmentFlag("DECODIUM_RX_RECORD_DISABLE_CAT");
+}
+
 void applyFtOpenMpThreadLimit(int threads)
 {
 #ifdef _OPENMP
@@ -3823,9 +3838,299 @@ static QStringList readTextLinesFromOffset(QString const& path, qint64 startOffs
     return lines;
 }
 
+static QStringList readTextTailLines(QString const& path, qint64 tailBytes, int maxLines)
+{
+    if (path.trimmed().isEmpty() || tailBytes <= 0 || maxLines <= 0) {
+        return {};
+    }
+
+    QFile file(path);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return {};
+    }
+
+    qint64 const size = file.size();
+    qint64 const startOffset = qMax<qint64>(0, size - tailBytes);
+    if (!file.seek(startOffset)) {
+        return {};
+    }
+    if (startOffset > 0) {
+        file.readLine();
+    }
+
+    QByteArray const data = file.readAll();
+    QStringList lines = QString::fromUtf8(data).split(QRegularExpression {R"([\r\n]+)"},
+                                                      Qt::SkipEmptyParts);
+    if (lines.size() > maxLines) {
+        lines = lines.mid(lines.size() - maxLines);
+    }
+    return lines;
+}
+
+struct HashResolveAllTxtCandidate
+{
+    QString timeToken;
+    int audioHz {-1};
+    QString message;
+    QString source;
+};
+
+static QString cleanHashResolveMessage(QString message)
+{
+    QString aptype;
+    message = stripDecodeApAnnotation(message.trimmed(), &aptype).simplified();
+    static const QRegularExpression trailingDecodeMark {R"(\s+[?*#^]\s*$)"};
+    message.remove(trailingDecodeMark);
+    return message.trimmed();
+}
+
+static bool parseHashResolveAllTxtLine(QString const& rawLine,
+                                       HashResolveAllTxtCandidate* candidate)
+{
+    if (!candidate) {
+        return false;
+    }
+
+    QString const line = rawLine.trimmed();
+    if (line.isEmpty()) {
+        return false;
+    }
+
+    static const QRegularExpression legacyPattern {
+        R"(^\d{6}_(\d{6})\s+\S+\s+(Rx|Tx|Ck)\s+([A-Z0-9_+\-]+)\s+(-?\d+)\s+(-?\d+(?:\.\d+)?)\s+(\d+)\s+(.+)$)",
+        QRegularExpression::CaseInsensitiveOption
+    };
+    QRegularExpressionMatch match = legacyPattern.match(line);
+    if (match.hasMatch()) {
+        if (match.captured(2).compare(QStringLiteral("Rx"), Qt::CaseInsensitive) != 0
+            || match.captured(3).trimmed().toUpper() != QStringLiteral("FT8")) {
+            return false;
+        }
+
+        bool freqOk = false;
+        int const audioHz = match.captured(6).trimmed().toInt(&freqOk);
+        QString const message = cleanHashResolveMessage(match.captured(7));
+        if (!freqOk || message.isEmpty()) {
+            return false;
+        }
+        candidate->timeToken = normalizeUtcDisplayToken(match.captured(1));
+        candidate->audioHz = audioHz;
+        candidate->message = message;
+        return true;
+    }
+
+    static const QRegularExpression jtStylePattern {
+        R"(^\d{6,8}_(\d{6})\s+(-?\d+)\s+(-?\d+(?:\.\d+)?)\s+(\d+)\s+\S+\s+(.+)$)",
+        QRegularExpression::CaseInsensitiveOption
+    };
+    match = jtStylePattern.match(line);
+    if (!match.hasMatch()) {
+        return false;
+    }
+
+    bool freqOk = false;
+    int const audioHz = match.captured(4).trimmed().toInt(&freqOk);
+    QString const message = cleanHashResolveMessage(match.captured(5));
+    if (!freqOk || message.isEmpty()) {
+        return false;
+    }
+    candidate->timeToken = normalizeUtcDisplayToken(match.captured(1));
+    candidate->audioHz = audioHz;
+    candidate->message = message;
+    return true;
+}
+
+static QStringList hashResolveLogCandidatePaths(QString const& primaryAllTxtPath)
+{
+    QStringList paths;
+    QSet<QString> seen;
+    auto addPath = [&](QString const& path) {
+        QString const cleaned = path.trimmed();
+        if (cleaned.isEmpty()) {
+            return;
+        }
+        QString const absolute = QFileInfo(cleaned).absoluteFilePath();
+        if (seen.contains(absolute)) {
+            return;
+        }
+        seen.insert(absolute);
+        paths.append(absolute);
+    };
+
+    addPath(primaryAllTxtPath);
+
+    QString const appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString const appLocal = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QString const generic = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    QString const homeSupport = QDir(QDir::homePath()).absoluteFilePath(
+        QStringLiteral("Library/Application Support"));
+
+    for (QString const& root : {appData, appLocal}) {
+        if (root.isEmpty()) {
+            continue;
+        }
+        QDir const dir(root);
+        addPath(dir.absoluteFilePath(QStringLiteral("embedded-ft2/ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("all.txt")));
+    }
+
+    QStringList monthFiles;
+    QDate const currentMonth = QDate::currentDate();
+    for (int i = 0; i < 2; ++i) {
+        monthFiles.append(currentMonth.addMonths(-i).toString(QStringLiteral("yyyyMM"))
+                          + QStringLiteral("_ALL.TXT"));
+    }
+    auto addLogDirectory = [&](QString const& path) {
+        QDir const dir(path);
+        if (!dir.exists()) {
+            return;
+        }
+        static QStringList const filters {
+            QStringLiteral("ALL.TXT"),
+            QStringLiteral("all.txt"),
+            QStringLiteral("*_ALL.TXT")
+        };
+        for (QString const& name : dir.entryList(filters, QDir::Files, QDir::Name)) {
+            addPath(dir.absoluteFilePath(name));
+        }
+        for (QString const& monthFile : std::as_const(monthFiles)) {
+            addPath(dir.absoluteFilePath(monthFile));
+        }
+    };
+    auto addExternalEntry = [&](QString const& path) {
+        QString const cleaned = path.trimmed();
+        if (cleaned.isEmpty()) {
+            return;
+        }
+        QFileInfo const info(cleaned);
+        if (info.isDir()) {
+            QDir const dir(info.absoluteFilePath());
+            addLogDirectory(dir.absolutePath());
+            addLogDirectory(dir.absoluteFilePath(QStringLiteral("JTDX")));
+            addLogDirectory(dir.absoluteFilePath(QStringLiteral("WSJT-X")));
+            return;
+        }
+        addPath(info.absoluteFilePath());
+    };
+
+    for (QString const& root : {generic, homeSupport}) {
+        if (root.isEmpty()) {
+            continue;
+        }
+        QDir const dir(root);
+        for (QString const& monthFile : std::as_const(monthFiles)) {
+            addPath(dir.absoluteFilePath(QStringLiteral("JTDX/") + monthFile));
+        }
+        addPath(dir.absoluteFilePath(QStringLiteral("JTDX/ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("WSJT-X/ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("Decodium/ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("ft2/ALL.TXT")));
+        addPath(dir.absoluteFilePath(QStringLiteral("IU8LMC/ft2/ALL.TXT")));
+    }
+    for (char const* name : {"DECODIUM_HASH_SEED_PATHS", "DECODIUM_EXTERNAL_LOG_DIRS"}) {
+        QString const value = qEnvironmentVariable(name).trimmed();
+        if (value.isEmpty()) {
+            continue;
+        }
+        for (QString const& entry : value.split(QDir::listSeparator(), Qt::SkipEmptyParts)) {
+            addExternalEntry(entry);
+        }
+    }
+
+    return paths;
+}
+
+static QStringList hashResolveMessageTokens(QString const& message)
+{
+    return canonicalDecodeMessage(message).toUpper().split(QRegularExpression("\\s+"),
+                                                           Qt::SkipEmptyParts);
+}
+
+static bool hashResolveMessagesCompatible(QString const& hashedMessage,
+                                          QString const& resolvedMessage)
+{
+    if (!hashedMessage.contains(QStringLiteral("<...>"))
+        || resolvedMessage.contains(QStringLiteral("<...>"))) {
+        return false;
+    }
+
+    QStringList const hashedTokens = hashResolveMessageTokens(hashedMessage);
+    QStringList const resolvedTokens = hashResolveMessageTokens(resolvedMessage);
+    if (hashedTokens.size() != resolvedTokens.size() || hashedTokens.isEmpty()) {
+        return false;
+    }
+
+    int placeholderCount = 0;
+    for (int i = 0; i < hashedTokens.size(); ++i) {
+        QString const hashedToken = hashedTokens.at(i).trimmed().toUpper();
+        QString const resolvedToken = resolvedTokens.at(i).trimmed().toUpper();
+        if (isPlaceholderCallToken(hashedToken)) {
+            ++placeholderCount;
+            if (!isPlausibleDecodedCallsign(resolvedToken)) {
+                return false;
+            }
+            continue;
+        }
+        if (normalizeCallToken(hashedToken).toUpper()
+            != normalizeCallToken(resolvedToken).toUpper()) {
+            return false;
+        }
+    }
+    return placeholderCount > 0;
+}
+
+static QString resolveHashMessageFromCandidates(QString const& timeToken,
+                                                int targetAudioHz,
+                                                QString const& hashedMessage,
+                                                QVector<HashResolveAllTxtCandidate> const& candidates,
+                                                QString* sourceOut)
+{
+    int const targetSeconds = secondsFromUtcDisplayToken(timeToken);
+    if (targetSeconds < 0 || targetAudioHz <= 0) {
+        return hashedMessage;
+    }
+
+    QString resolved;
+    QString resolvedSource;
+    for (HashResolveAllTxtCandidate const& candidate : candidates) {
+        int const candidateSeconds = secondsFromUtcDisplayToken(candidate.timeToken);
+        if (candidateSeconds < 0) {
+            continue;
+        }
+        if (qAbs(signedUtcSecondDelta(candidateSeconds, targetSeconds)) > 2) {
+            continue;
+        }
+        if (qAbs(candidate.audioHz - targetAudioHz) > 5) {
+            continue;
+        }
+        if (!hashResolveMessagesCompatible(hashedMessage, candidate.message)) {
+            continue;
+        }
+
+        QString const candidateMessage = canonicalDecodeMessage(candidate.message);
+        if (resolved.isEmpty()) {
+            resolved = candidateMessage;
+            resolvedSource = candidate.source;
+            continue;
+        }
+        if (resolved.compare(candidateMessage, Qt::CaseInsensitive) != 0) {
+            return hashedMessage;
+        }
+    }
+
+    if (!resolved.isEmpty()) {
+        if (sourceOut) {
+            *sourceOut = resolvedSource;
+        }
+        return resolved;
+    }
+    return hashedMessage;
+}
+
 static QString inferPartnerFromDirectedMessage(QString const& message,
-                                              QString const& myCall,
-                                              QString const& myBase)
+                                               QString const& myCall,
+                                               QString const& myBase)
 {
     QStringList const words = message.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     if (words.size() < 2) {
@@ -8791,11 +9096,16 @@ void DecodiumBridge::runPostQmlStartupServices()
     QString const lastBackend = catLastSettings.value(QStringLiteral("lastSuccessfulCatBackend")).toString();
     bool const sameBackend = (lastBackend == m_catBackend);
     bool const retryLastSuccessfulCat = lastSuccess && sameBackend;
-    bool const startupCatRequested = autoConn || retryLastSuccessfulCat;
-    bridgeLog(QStringLiteral("CAT[%1] autoConnect=%2 retryLastSuccessful=%3")
+    bool const startupCatSuppressed = catSuppressedByEnvironment();
+    bool const startupCatRequested = !startupCatSuppressed && (autoConn || retryLastSuccessfulCat);
+    bridgeLog(QStringLiteral("CAT[%1] autoConnect=%2 retryLastSuccessful=%3 suppressedByEnv=%4")
                   .arg(m_catBackend)
                   .arg(autoConn ? 1 : 0)
-                  .arg(retryLastSuccessfulCat ? 1 : 0));
+                  .arg(retryLastSuccessfulCat ? 1 : 0)
+                  .arg(startupCatSuppressed ? 1 : 0));
+    if (startupCatSuppressed && (autoConn || retryLastSuccessfulCat)) {
+        bridgeLog(QStringLiteral("CAT startup auto-connect suppressed by environment"));
+    }
 
     if ((legacyOwnsRigControl(m_legacyBackend) || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) && startupCatRequested) {
         bridgeLog(QStringLiteral("CAT auto-connect delegated to legacy backend"));
@@ -30186,6 +30496,80 @@ void DecodiumBridge::appendLegacyAllTxtDecodeLine(const QVariantMap& entry) cons
         << '\n';
 }
 
+QString DecodiumBridge::resolveFt8HashPlaceholdersFromRecentAllTxt(const QString& timeToken,
+                                                                   const QString& audioFreq,
+                                                                   const QString& message,
+                                                                   const QString& mode,
+                                                                   QString* sourceOut) const
+{
+    if (sourceOut) {
+        sourceOut->clear();
+    }
+
+    QString const normalizedMode = mode.trimmed().toUpper();
+    if (normalizedMode != QStringLiteral("FT8")
+        || !message.contains(QStringLiteral("<...>"))) {
+        return message;
+    }
+
+    bool freqOk = false;
+    int const targetAudioHz = audioFreq.trimmed().toInt(&freqOk);
+    if (!freqOk || targetAudioHz <= 0
+        || secondsFromUtcDisplayToken(timeToken) < 0) {
+        return message;
+    }
+
+    static constexpr qint64 kHashResolveTailBytes = 8 * 1024 * 1024;
+    static constexpr int kHashResolveMaxLinesPerFile = 50000;
+
+    QElapsedTimer timer;
+    timer.start();
+    QVector<HashResolveAllTxtCandidate> candidates;
+    QStringList const paths = hashResolveLogCandidatePaths(legacyAllTxtPath());
+    for (QString const& path : paths) {
+        QFileInfo const info(path);
+        if (!info.exists() || !info.isFile()) {
+            continue;
+        }
+
+        QStringList const lines = readTextTailLines(info.absoluteFilePath(),
+                                                    kHashResolveTailBytes,
+                                                    kHashResolveMaxLinesPerFile);
+        for (QString const& line : lines) {
+            HashResolveAllTxtCandidate candidate;
+            if (!parseHashResolveAllTxtLine(line, &candidate)
+                || candidate.message.contains(QStringLiteral("<...>"))) {
+                continue;
+            }
+            candidate.source = info.fileName();
+            candidates.append(candidate);
+        }
+    }
+
+    QString source;
+    QString const resolved = resolveHashMessageFromCandidates(normalizeUtcDisplayToken(timeToken),
+                                                             targetAudioHz,
+                                                             message,
+                                                             candidates,
+                                                             &source);
+    if (resolved.compare(message, Qt::CaseInsensitive) != 0) {
+        if (sourceOut) {
+            *sourceOut = source;
+        }
+        bridgeLog(QStringLiteral("[FT8-HASH] resolved from ALL.TXT time=%1 hz=%2 '%3' -> '%4' source=%5 candidates=%6 elapsed_ms=%7")
+                      .arg(normalizeUtcDisplayToken(timeToken),
+                           QString::number(targetAudioHz),
+                           message,
+                           resolved,
+                           source.isEmpty() ? QStringLiteral("<unknown>") : source)
+                      .arg(candidates.size())
+                      .arg(timer.elapsed()));
+        return resolved;
+    }
+
+    return message;
+}
+
 static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid,
                                     double freqHz, const QString& mode,
                                     const QDateTime& timeOnUtc,
@@ -33364,6 +33748,20 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 
         // Calcola proprietà derivate
         QString msg     = f[4];
+        QString const entryTime = (trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0];
+        if (msg.contains(QStringLiteral("<...>"))) {
+            QString hashResolveSource;
+            QString const resolvedMsg =
+                resolveFt8HashPlaceholdersFromRecentAllTxt(entryTime,
+                                                            f[7],
+                                                            msg,
+                                                            decodeMode.isEmpty() ? m_mode : decodeMode,
+                                                            &hashResolveSource);
+            if (resolvedMsg.compare(msg, Qt::CaseInsensitive) != 0) {
+                msg = resolvedMsg;
+                f[4] = msg;
+            }
+        }
         bool isCQ       = msg.startsWith("CQ ", Qt::CaseInsensitive) || msg == "CQ";
         bool const hasUnresolvedPlaceholder = msg.contains(QStringLiteral("<...>"));
         QString const myCallUpper = m_callsign.trimmed().toUpper();
@@ -33374,7 +33772,6 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         }
         QString fromCall = extractDecodedCallsign(msg, isCQ);
 
-        QString const entryTime = (trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0];
         QString const dedupKey = decodeDedupKey(entryTime, f[7], msg);
         if (!legacyUiMirrorActive
             && !dedupKey.isEmpty()

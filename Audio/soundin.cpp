@@ -185,6 +185,47 @@ QString audioDeviceIdForKey(QAudioDevice const& device)
   QByteArray const id = device.id();
   return id.isEmpty() ? QString() : QString::fromLatin1(id.toHex());
 }
+
+bool isSameAudioDevice(QAudioDevice const& lhs, QAudioDevice const& rhs)
+{
+  if (lhs.isNull() || rhs.isNull())
+    {
+      return false;
+    }
+
+  QByteArray const lhsId = lhs.id();
+  QByteArray const rhsId = rhs.id();
+  if (!lhsId.isEmpty() || !rhsId.isEmpty())
+    {
+      return lhsId == rhsId;
+    }
+
+  return lhs.description() == rhs.description();
+}
+
+#if defined(Q_OS_MACOS)
+QString osStatusName(OSStatus status)
+{
+  char text[5] {};
+  auto const bigEndian = static_cast<quint32> (status);
+  text[0] = static_cast<char> ((bigEndian >> 24) & 0xff);
+  text[1] = static_cast<char> ((bigEndian >> 16) & 0xff);
+  text[2] = static_cast<char> ((bigEndian >> 8) & 0xff);
+  text[3] = static_cast<char> (bigEndian & 0xff);
+  bool printable = true;
+  for (int i = 0; i < 4; ++i)
+    {
+      if (text[i] < 32 || text[i] > 126)
+        {
+          printable = false;
+          break;
+        }
+    }
+  return printable
+      ? QStringLiteral("'%1' (%2)").arg(QString::fromLatin1(text, 4)).arg(status)
+      : QString::number(status);
+}
+#endif
 }
 
 bool SoundInput::isActiveFor (QAudioDevice const& device,
@@ -211,6 +252,18 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
       .arg(format.channelCount())
       .arg(static_cast<int>(channel));
   qint64 const now_ms = QDateTime::currentMSecsSinceEpoch ();
+#if defined(Q_OS_MACOS)
+  if (m_audioQueue
+      && m_sink
+      && m_deviceDescription == device.description()
+      && m_deviceId == deviceId
+      && m_sampleRate == format.sampleRate()
+      && m_channelCount == format.channelCount()
+      && m_channelSelector == static_cast<int>(channel))
+    {
+      return true;
+    }
+#endif
   return m_stream
       && (isReusableInputStream(m_stream.data())
           || (m_stream->error () == QAudio::NoError
@@ -223,6 +276,158 @@ bool SoundInput::isActiveFor (QAudioDevice const& device,
       && m_channelCount == format.channelCount()
       && m_channelSelector == static_cast<int>(channel);
 }
+
+#if defined(Q_OS_MACOS)
+void SoundInput::audioQueueInputCallback (void * userData,
+                                          AudioQueueRef queue,
+                                          AudioQueueBufferRef buffer,
+                                          AudioTimeStamp const *,
+                                          UInt32 packetCount,
+                                          AudioStreamPacketDescription const *)
+{
+  auto * self = static_cast<SoundInput *> (userData);
+  if (!self || !buffer)
+    {
+      return;
+    }
+
+  Q_UNUSED (packetCount);
+  if (buffer->mAudioData && buffer->mAudioDataByteSize > 0)
+    {
+      AudioDevice * sink = self->m_sink.data ();
+      if (sink && sink->isOpen ())
+        {
+          sink->write (static_cast<char const *> (buffer->mAudioData),
+                       static_cast<qint64> (buffer->mAudioDataByteSize));
+        }
+    }
+
+  if (self->m_audioQueue == queue)
+    {
+      AudioQueueEnqueueBuffer (queue, buffer, 0, nullptr);
+    }
+}
+
+bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
+                                             QAudioFormat const& format,
+                                             int framesPerBuffer,
+                                             AudioDevice * sink,
+                                             AudioDevice::Channel channel)
+{
+  stopNativeMacInput ();
+
+  if (!sink)
+    {
+      return false;
+    }
+  if (format.sampleFormat () != QAudioFormat::Int16
+      || format.sampleRate () <= 0
+      || format.channelCount () <= 0)
+    {
+      Q_EMIT error (tr ("Native macOS AudioQueue input requires PCM Int16 format, got %1")
+                    .arg (inputFormatSummary (format)));
+      return false;
+    }
+
+  if (!sink->initialize (QIODevice::WriteOnly, channel, format.channelCount ()))
+    {
+      Q_EMIT error (tr ("Native macOS AudioQueue sink initialization failed: input device=\"%1\", requested=%2, selected-channel=%3")
+                    .arg (device.description (),
+                          inputFormatSummary (format),
+                          inputChannelName (static_cast<int> (channel))));
+      return false;
+    }
+
+  AudioStreamBasicDescription asbd {};
+  asbd.mSampleRate = format.sampleRate ();
+  asbd.mFormatID = kAudioFormatLinearPCM;
+  asbd.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+  asbd.mBytesPerPacket = static_cast<UInt32> (format.bytesPerFrame ());
+  asbd.mFramesPerPacket = 1;
+  asbd.mBytesPerFrame = static_cast<UInt32> (format.bytesPerFrame ());
+  asbd.mChannelsPerFrame = static_cast<UInt32> (format.channelCount ());
+  asbd.mBitsPerChannel = 16;
+
+  AudioQueueRef queue {nullptr};
+  OSStatus status = AudioQueueNewInput (&asbd,
+                                        &SoundInput::audioQueueInputCallback,
+                                        this,
+                                        nullptr,
+                                        kCFRunLoopCommonModes,
+                                        0,
+                                        &queue);
+  if (status != noErr || !queue)
+    {
+      Q_EMIT error (tr ("Native macOS AudioQueue input open failed for \"%1\": %2")
+                    .arg (device.description (), osStatusName (status)));
+      return false;
+    }
+
+  m_audioQueue = queue;
+  m_nativeInputFormat = format;
+  m_audioQueueBuffers.clear ();
+
+  int const requestedFrames = framesPerBuffer > 0 ? framesPerBuffer : 2048;
+  int const bufferFrames = qBound (512, requestedFrames, 8192);
+  UInt32 const bufferBytes = static_cast<UInt32> (format.bytesForFrames (bufferFrames));
+  for (int i = 0; i < 4; ++i)
+    {
+      AudioQueueBufferRef bufferRef {nullptr};
+      status = AudioQueueAllocateBuffer (m_audioQueue, bufferBytes, &bufferRef);
+      if (status != noErr || !bufferRef)
+        {
+          Q_EMIT error (tr ("Native macOS AudioQueue buffer allocation failed for \"%1\": %2")
+                        .arg (device.description (), osStatusName (status)));
+          stopNativeMacInput ();
+          return false;
+        }
+      m_audioQueueBuffers.append (bufferRef);
+      status = AudioQueueEnqueueBuffer (m_audioQueue, bufferRef, 0, nullptr);
+      if (status != noErr)
+        {
+          Q_EMIT error (tr ("Native macOS AudioQueue buffer enqueue failed for \"%1\": %2")
+                        .arg (device.description (), osStatusName (status)));
+          stopNativeMacInput ();
+          return false;
+        }
+    }
+
+  sink->setInputGainLinear (m_inputGain);
+  status = AudioQueueStart (m_audioQueue, nullptr);
+  if (status != noErr)
+    {
+      Q_EMIT error (tr ("Native macOS AudioQueue input start failed for \"%1\": %2")
+                    .arg (device.description (), osStatusName (status)));
+      stopNativeMacInput ();
+      return false;
+    }
+
+  qInfo () << "SoundInput: native macOS AudioQueue input active for"
+           << device.description()
+           << "format=" << inputFormatSummary (format)
+           << "bufferFrames=" << bufferFrames;
+  cummulative_lost_usec_ = std::numeric_limits<qint64>::min ();
+  emitStatusIfChanged (tr ("Receiving"), QAudio::ActiveState);
+  return true;
+}
+
+void SoundInput::stopNativeMacInput ()
+{
+  if (!m_audioQueue)
+    {
+      m_audioQueueBuffers.clear ();
+      m_nativeInputFormat = QAudioFormat {};
+      return;
+    }
+
+  AudioQueueRef queue = m_audioQueue;
+  m_audioQueue = nullptr;
+  AudioQueueStop (queue, true);
+  AudioQueueDispose (queue, true);
+  m_audioQueueBuffers.clear ();
+  m_nativeInputFormat = QAudioFormat {};
+}
+#endif
 
 void SoundInput::setInputGain (float gain)
 {
@@ -357,6 +562,23 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       .arg(static_cast<int>(channel));
   qint64 const now_ms = QDateTime::currentMSecsSinceEpoch ();
 
+  if (m_startInProgress)
+    {
+      bool const shouldLogPending =
+          currentStartKey != m_lastDuplicateStartKey
+          || m_lastDuplicateStartLogMs < 0
+          || now_ms - m_lastDuplicateStartLogMs >= 30000;
+      if (shouldLogPending)
+        {
+          qWarning() << "SoundInput: start skipped, previous start still pending for"
+                     << m_deviceDescription
+                     << "new=" << device.description();
+          m_lastDuplicateStartKey = currentStartKey;
+          m_lastDuplicateStartLogMs = now_ms;
+        }
+      return;
+    }
+
   if (m_stream
       && (isReusableInputStream(m_stream.data())
           || (m_stream->error () == QAudio::NoError
@@ -401,7 +623,9 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       return;
     }
 
+  m_startInProgress = true;
   stop ();
+  m_startInProgress = true;
   m_deviceDescription = device.description();
   m_deviceId = deviceId;
   m_sampleRate = format.sampleRate();
@@ -427,13 +651,29 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
                          inputFormatSummary(format),
                          inputFormatSummary(device.preferredFormat()),
                          inputChannelName(static_cast<int>(channel))));
+      m_startInProgress = false;
       return;
     }
 
-  m_stream.reset (new QAudioSource {device, format});
+#if defined(Q_OS_MACOS)
+  QAudioDevice const defaultInput = QMediaDevices::defaultAudioInput();
+  bool const useDefaultInputConstructor = isSameAudioDevice(device, defaultInput);
+  if (useDefaultInputConstructor)
+    {
+      qDebug() << "SoundInput: using native macOS AudioQueue for default input" << device.description();
+      startNativeMacDefaultInput (device, format, framesPerBuffer, sink, channel);
+      m_startInProgress = false;
+      return;
+    }
+  else
+#endif
+    {
+      m_stream.reset (new QAudioSource {device, format});
+    }
   qDebug() << "SoundInput: QAudioSource created, error=" << (int)m_stream->error();
   if (!checkStream ())
     {
+      m_startInProgress = false;
       return;
     }
 
@@ -468,6 +708,7 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
                          inputFormatSummary(format),
                          inputChannelName(m_channelSelector)));
     }
+  m_startInProgress = false;
 }
 
 void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioDevice * sink
@@ -535,6 +776,13 @@ void SoundInput::suspend ()
         }
       checkStream ();
     }
+#if defined(Q_OS_MACOS)
+  else if (m_audioQueue)
+    {
+      AudioQueuePause (m_audioQueue);
+      m_expectedSuspend_ = true;
+    }
+#endif
 }
 
 void SoundInput::resume ()
@@ -555,6 +803,16 @@ void SoundInput::resume ()
     {
       m_sink->reset ();
     }
+
+#if defined(Q_OS_MACOS)
+  if (m_audioQueue)
+    {
+      AudioQueueStart (m_audioQueue, nullptr);
+      m_expectedSuspend_ = false;
+      cummulative_lost_usec_ = std::numeric_limits<qint64>::min ();
+      return;
+    }
+#endif
 
   if (m_stream)
     {
@@ -752,6 +1010,12 @@ void SoundInput::reset (bool report_dropped_frames)
         }
       cummulative_lost_usec_ = elapsed_usecs - m_stream->processedUSecs ();
     }
+#if defined(Q_OS_MACOS)
+  else if (m_audioQueue)
+    {
+      cummulative_lost_usec_ = std::numeric_limits<qint64>::min ();
+    }
+#endif
 }
 
 void SoundInput::stop()
@@ -768,6 +1032,9 @@ void SoundInput::stop()
       return;
     }
 
+#if defined(Q_OS_MACOS)
+  stopNativeMacInput ();
+#endif
   retireCurrentStream ();
   m_deviceDescription.clear ();
   m_deviceId.clear ();
@@ -786,6 +1053,7 @@ void SoundInput::stop()
   m_currentStartKey.clear ();
   m_currentStartRequestedMs = -1;
   m_currentStartSink.clear ();
+  m_startInProgress = false;
 }
 
 SoundInput::~SoundInput ()

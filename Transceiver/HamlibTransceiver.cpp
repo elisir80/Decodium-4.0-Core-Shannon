@@ -115,6 +115,28 @@ namespace
     return 1;			// keep them coming
   }
 
+  bool env_flag_enabled (char const * name)
+  {
+    QByteArray const raw = qgetenv (name).trimmed ().toLower ();
+    return raw == "1" || raw == "true" || raw == "yes" || raw == "on";
+  }
+
+  bool is_icom_serial_cat (unsigned model)
+  {
+    if (RIG_PORT_SERIAL != rig_get_caps_int (model, RIG_CAPS_PORT_TYPE))
+      {
+        return false;
+      }
+    QString const mfg = QString::fromLatin1 (rig_get_caps_cptr (model, RIG_CAPS_MFG_NAME_CPTR)).trimmed ();
+    return 0 == mfg.compare (QStringLiteral ("Icom"), Qt::CaseInsensitive);
+  }
+
+  bool is_icom_serial_cat_ptt (unsigned model, TransceiverFactory::ParameterPack const& params)
+  {
+    return TransceiverFactory::PTT_method_CAT == params.ptt_type
+        && is_icom_serial_cat (model);
+  }
+
   // int frequency_change_callback (RIG * /* rig */, vfo_t vfo, freq_t f, rig_ptr_t arg)
   // {
   //   (void)vfo;			// unused in release build
@@ -507,6 +529,16 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
       throw error {tr ("Hamlib initialisation error")};
     }
 
+  // Icom CI-V passive state reads are fragile on some serial adapters/radios:
+  // one missed response can hold the CAT worker and spam bus errors. D4 already
+  // knows the frequency/mode/split/PTT it commanded, so keep passive polling off
+  // by default for this path while preserving explicit CAT set commands.
+  bool const icom_serial_cat = is_icom_serial_cat (m_->model_);
+  poll_passive_state_ = !icom_serial_cat
+      || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
+  poll_ptt_state_ = !is_icom_serial_cat_ptt (m_->model_, params)
+      || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PTT");
+
   // m_->rig_->state.obj = this;
 
   if (!m_->is_dummy_)
@@ -768,7 +800,9 @@ int HamlibTransceiver::do_start ()
         << "swr=" << hasSwr
         << "alc=" << hasAlc
         << "alcCap=" << hasAlcCap
-        << "alcProbe=" << alc_probe_pending_;
+        << "alcProbe=" << alc_probe_pending_
+        << "passiveStatePoll=" << poll_passive_state_
+        << "passivePttPoll=" << poll_ptt_state_;
     }
 
   // the Net rigctl back end promises all functions work but we must
@@ -1271,7 +1305,9 @@ void HamlibTransceiver::do_poll ()
   pbwidth_t w {RIG_PASSBAND_NORMAL};
   split_t s {RIG_SPLIT_OFF};
 
-  if (m_->get_vfo_works_ && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_VFO))
+  if (poll_passive_state_
+      && m_->get_vfo_works_
+      && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_VFO))
     {
       vfo_t v;
       m_->error_check (rig_get_vfo (m_->rig_.data (), &v), tr ("getting current VFO")); // has side effect of establishing current VFO inside hamlib
@@ -1279,7 +1315,8 @@ void HamlibTransceiver::do_poll ()
       m_->reversed_ = RIG_VFO_B == v;
     }
 
-  if ((WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
+  if (poll_passive_state_
+      && (WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
       && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_SPLIT_VFO) && m_->split_query_works_)
     {
       vfo_t v {RIG_VFO_NONE};		// so we can tell if it doesn't get updated :(
@@ -1308,7 +1345,7 @@ void HamlibTransceiver::do_poll ()
         }
     }
 
-  if (m_->freq_query_works_)
+  if (poll_passive_state_ && m_->freq_query_works_)
     {
       // only read if possible and when receiving or simplex
       if (!state ().ptt () || !state ().split ())
@@ -1342,7 +1379,8 @@ void HamlibTransceiver::do_poll ()
     }
 
   // only read when receiving or simplex if direct VFO addressing unavailable
-  if ((!state ().ptt () || !state ().split ())
+  if (poll_passive_state_
+      && (!state ().ptt () || !state ().split ())
       && m_->mode_query_works_)
     {
       // We have to ignore errors here because Yaesu FTdx... rigs can
@@ -1363,7 +1401,9 @@ void HamlibTransceiver::do_poll ()
         }
     }
 
-  if (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_PTT))
+  if (poll_ptt_state_
+      && RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt
+      && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_PTT))
   {
     ptt_t p;
     auto rc = rig_get_ptt (m_->rig_.data (), RIG_VFO_CURR, &p);
@@ -1377,6 +1417,10 @@ void HamlibTransceiver::do_poll ()
         update_PTT (ptt_on_);
      }
    }
+  else if (!poll_ptt_state_)
+    {
+      update_PTT (ptt_on_);
+    }
 
   // 1.0.204 — throttle PWR/SWR polling: each rig_get_level RIG_LEVEL_SWR /
   // RFPOWER_METER_WATTS takes ~150ms on Yaesu FT-991 at 38400 baud. Running

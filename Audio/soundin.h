@@ -8,8 +8,14 @@
 #include <QDateTime>
 #include <QScopedPointer>
 #include <QPointer>
+#include <QVector>
+#include <QAudioFormat>
 #include <QAudioSource>
 #include <QAudioDevice>
+
+#if defined(Q_OS_MACOS)
+#include <AudioToolbox/AudioToolbox.h>
+#endif
 
 #include "Audio/AudioDevice.hpp"
 
@@ -53,9 +59,23 @@ private:
   bool checkStream ();
   void emitStatusIfChanged (QString const& message, QAudio::State state);
   void retireCurrentStream ();
+#if defined(Q_OS_MACOS)
+  bool startNativeMacDefaultInput (QAudioDevice const&, QAudioFormat const&,
+                                   int framesPerBuffer, AudioDevice *,
+                                   AudioDevice::Channel);
+  void stopNativeMacInput ();
+  static void audioQueueInputCallback (void *, AudioQueueRef, AudioQueueBufferRef,
+                                       AudioTimeStamp const *, UInt32,
+                                       AudioStreamPacketDescription const *);
+#endif
 
   QScopedPointer<QAudioSource> m_stream;
   QPointer<AudioDevice> m_sink;
+#if defined(Q_OS_MACOS)
+  AudioQueueRef m_audioQueue {nullptr};
+  QVector<AudioQueueBufferRef> m_audioQueueBuffers;
+  QAudioFormat m_nativeInputFormat;
+#endif
   qint64 cummulative_lost_usec_;
   qint64 last_dropped_warning_ms_ {-1};
   float m_inputGain {1.0f};
@@ -76,6 +96,7 @@ private:
   int m_suppressedDuplicateStartLogs {0};
   bool m_haveReportedState_ {false};
   bool m_expectedSuspend_ {false};
+  bool m_startInProgress {false};
 };
 
 #endif

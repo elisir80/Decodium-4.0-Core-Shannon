@@ -1739,6 +1739,11 @@ private:
     int legacyDecodeCqHint() const;
     QString legacyAllTxtPath() const;
     void appendLegacyAllTxtDecodeLine(const QVariantMap& entry) const;
+    QString resolveFt8HashPlaceholdersFromRecentAllTxt(const QString& timeToken,
+                                                       const QString& audioFreq,
+                                                       const QString& message,
+                                                       const QString& mode,
+                                                       QString* sourceOut = nullptr) const;
     bool contestDecodeExchangesEnabled() const;
     bool shouldAcceptDecodedMessage(const QString& message,
                                     QString* reason = nullptr,

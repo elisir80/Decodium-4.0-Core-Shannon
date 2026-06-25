@@ -70,17 +70,17 @@ namespace
   constexpr int kBitsPerMessage {77};
   constexpr int kDecodedChars {37};
   constexpr int kFt8StableDspStage {4};
-  constexpr qint64 kHashSeedTailBytes {8 * 1024 * 1024};
-  constexpr qint64 kHashSeedRefreshTailBytes {512 * 1024};
-  constexpr int kHashSeedMaxCalls {4096};
-  constexpr qint64 kHashSeedInitialSoftBudgetMs {750};
+  constexpr qint64 kHashSeedTailBytes {16 * 1024 * 1024};
+  constexpr qint64 kHashSeedRefreshTailBytes {2 * 1024 * 1024};
+  constexpr int kHashSeedMaxCalls {8192};
+  constexpr qint64 kHashSeedInitialSoftBudgetMs {1500};
   constexpr qint64 kHashSeedRefreshIntervalMs {10000};
-  constexpr int kHashSeedRefreshMaxFiles {6};
-  constexpr qint64 kHashSeedRefreshSoftBudgetMs {160};
+  constexpr int kHashSeedRefreshMaxFiles {10};
+  constexpr qint64 kHashSeedRefreshSoftBudgetMs {350};
   constexpr int kExternalA7SeedLimit {96};
   constexpr int kExternalA7PairSeedLimit {48};
   constexpr int kExternalA7InsertLimit {104};
-  constexpr int kHashSeedPriorityMonths {2};
+  constexpr int kHashSeedPriorityMonths {6};
   [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
   void apply_decode_thread_limit (int threads)
@@ -827,6 +827,73 @@ namespace
            + QString::number (info.size ());
   }
 
+  QStringList hash_seed_external_path_entries ()
+  {
+    static QStringList const entries = [] {
+      QStringList result;
+      QSet<QString> seen;
+      auto addEntry = [&] (QString const& path) {
+        QString const trimmed = path.trimmed ();
+        if (trimmed.isEmpty ())
+          {
+            return;
+          }
+        QString const absolute = QFileInfo {trimmed}.absoluteFilePath ();
+        QString const clean = QDir::cleanPath (absolute);
+        if (!clean.isEmpty () && !seen.contains (clean))
+          {
+            seen.insert (clean);
+            result.append (clean);
+          }
+      };
+
+      for (char const* name : {"DECODIUM_HASH_SEED_PATHS", "DECODIUM_EXTERNAL_LOG_DIRS"})
+        {
+          QString const value = qEnvironmentVariable (name).trimmed ();
+          if (value.isEmpty ())
+            {
+              continue;
+            }
+          for (QString const& entry : value.split (QDir::listSeparator (), Qt::SkipEmptyParts))
+            {
+              addEntry (entry);
+            }
+        }
+      return result;
+    } ();
+    return entries;
+  }
+
+  bool hash_seed_path_is_external_override (QString const& path)
+  {
+    QString const cleanPath = QDir::cleanPath (QFileInfo {path}.absoluteFilePath ());
+    if (cleanPath.isEmpty ())
+      {
+        return false;
+      }
+    for (QString const& entry : hash_seed_external_path_entries ())
+      {
+        QFileInfo const info {entry};
+        QString const cleanEntry = QDir::cleanPath (info.absoluteFilePath ());
+        if (cleanEntry.isEmpty ())
+          {
+            continue;
+          }
+        if (info.isDir ())
+          {
+            if (cleanPath == cleanEntry || cleanPath.startsWith (cleanEntry + QLatin1Char ('/')))
+              {
+                return true;
+              }
+          }
+        else if (cleanPath == cleanEntry)
+          {
+            return true;
+          }
+      }
+    return false;
+  }
+
   QStringList local_hash_seed_paths ()
   {
     QStringList paths;
@@ -871,19 +938,37 @@ namespace
         }
     };
 
-    auto addMonthlyAllTxt = [&addPath] (QString const& path, bool priority) {
-      QDir const dir {path};
-      if (!dir.exists ())
+      auto addMonthlyAllTxt = [&addPath] (QString const& path, bool priority) {
+        QDir const dir {path};
+        if (!dir.exists ())
         {
           return;
         }
       for (QString const& name : hash_seed_monthly_all_files ())
         {
           addPath (dir.filePath (name), priority);
-        }
-    };
+          }
+      };
 
-    addLogDir (QStandardPaths::writableLocation (QStandardPaths::AppDataLocation));
+      auto addExternalEntry = [&] (QString const& path) {
+        QFileInfo const info {path};
+        if (info.isDir ())
+          {
+            QDir const dir {info.absoluteFilePath ()};
+            addLogDir (dir.absolutePath (), true);
+            addMonthlyAllTxt (dir.absolutePath (), true);
+            for (QString const& child : {QStringLiteral ("WSJT-X"), QStringLiteral ("JTDX")})
+              {
+                QString const childPath = dir.filePath (child);
+                addLogDir (childPath, true);
+                addMonthlyAllTxt (childPath, true);
+              }
+            return;
+          }
+        addPath (path, true);
+      };
+
+      addLogDir (QStandardPaths::writableLocation (QStandardPaths::AppDataLocation));
 
     QStringList dataRoots;
     auto addDataRoot = [&dataRoots] (QString const& root) {
@@ -904,8 +989,177 @@ namespace
         addLogDir (dir.filePath (QStringLiteral ("WSJT-X")));
         addLogDir (dir.filePath (QStringLiteral ("JTDX")));
         addLogDir (dir.filePath (QStringLiteral ("IU8LMC/Decodium/embedded-ft2")), true);
-        addMonthlyAllTxt (dir.filePath (QStringLiteral ("WSJT-X")), true);
-        addMonthlyAllTxt (dir.filePath (QStringLiteral ("JTDX")), true);
+          addMonthlyAllTxt (dir.filePath (QStringLiteral ("WSJT-X")), true);
+          addMonthlyAllTxt (dir.filePath (QStringLiteral ("JTDX")), true);
+        }
+      for (QString const& path : hash_seed_external_path_entries ())
+        {
+          addExternalEntry (path);
+        }
+      return paths;
+    }
+
+  int hash_seed_path_priority (QString const& path)
+  {
+    QFileInfo const info {path};
+    QString const cleanPath = QDir::cleanPath (path).toUpper ();
+    QString const name = info.fileName ().toUpper ();
+    int priority = 0;
+
+      if (name == QStringLiteral ("CALL3.TXT"))
+        {
+          priority += 10;
+      }
+    if (name == QStringLiteral ("ALL.TXT")
+        || name.endsWith (QStringLiteral ("_ALL.TXT")))
+      {
+        priority += 20;
+      }
+
+    if (cleanPath.contains (QStringLiteral ("/IU8LMC/DECODIUM/EMBEDDED-FT2/")))
+      {
+        priority += 20;
+        if (name == QStringLiteral ("ALL.TXT"))
+          {
+            // Keep Decodium's live embedded ALL.TXT in the selected seed set.
+            // It carries calls decoded during the current run, which lets later
+            // type-2/hash messages resolve without waiting for another app log.
+            priority += 80;
+          }
+      }
+    else if (cleanPath.contains (QStringLiteral ("/IU8LMC/DECODIUM/")))
+      {
+        priority += 10;
+        if (name == QStringLiteral ("ALL.TXT"))
+          {
+            priority += 70;
+          }
+      }
+    if (cleanPath.contains (QStringLiteral ("/WSJT-X/")))
+      {
+        priority += 30;
+      }
+    if (cleanPath.contains (QStringLiteral ("/JTDX/")))
+      {
+          priority += 40;
+        }
+      if (hash_seed_path_is_external_override (path))
+        {
+          priority += 100;
+        }
+
+      QStringList const monthly = hash_seed_monthly_all_files ();
+    if (!monthly.isEmpty () && name == monthly.constLast ().toUpper ())
+      {
+        priority += 50;
+      }
+    else
+      {
+        for (QString const& monthlyName : monthly)
+          {
+            if (name == monthlyName.toUpper ())
+              {
+                priority += 30;
+                break;
+              }
+          }
+      }
+
+    return priority;
+  }
+
+  bool hash_seed_path_is_required_under_budget (QString const& path)
+  {
+    QFileInfo const info {path};
+    QString const cleanPath = QDir::cleanPath (path).toUpper ();
+    QString const name = info.fileName ().toUpper ();
+
+    if (cleanPath.contains (QStringLiteral ("/IU8LMC/DECODIUM/EMBEDDED-FT2/"))
+        && name == QStringLiteral ("ALL.TXT"))
+      {
+        return true;
+      }
+
+    QString const currentMonthly =
+      QDate::currentDate ().toString (QStringLiteral ("yyyyMM")).toUpper ()
+      + QStringLiteral ("_ALL.TXT");
+    return name == currentMonthly
+           && (cleanPath.contains (QStringLiteral ("/JTDX/"))
+               || cleanPath.contains (QStringLiteral ("/WSJT-X/")));
+  }
+
+  bool hash_seed_remaining_required_under_budget (QStringList const& paths,
+                                                  int startIndex)
+  {
+    for (int i = startIndex; i < paths.size (); ++i)
+      {
+        if (hash_seed_path_is_required_under_budget (paths.at (i)))
+          {
+            return true;
+          }
+      }
+    return false;
+  }
+
+  QStringList local_hash_seed_priority_paths (int maxFiles = 0)
+  {
+    struct Candidate
+    {
+      QString path;
+      int priority {};
+      QDateTime modified;
+    };
+
+    QList<Candidate> candidates;
+    for (QString const& path : local_hash_seed_paths ())
+      {
+        QFileInfo const info {path};
+        if (!info.exists () || !info.isFile ())
+          {
+            continue;
+          }
+        candidates.append ({path, hash_seed_path_priority (path), info.lastModified ()});
+      }
+
+    std::sort (candidates.begin (), candidates.end (), [] (Candidate const& lhs,
+                                                            Candidate const& rhs) {
+      if (lhs.priority != rhs.priority)
+        {
+          return lhs.priority > rhs.priority;
+        }
+      if (lhs.modified != rhs.modified)
+        {
+          return lhs.modified > rhs.modified;
+        }
+      return lhs.path < rhs.path;
+    });
+
+    if (maxFiles > 0 && candidates.size () > maxFiles)
+      {
+        candidates.erase (candidates.begin () + maxFiles, candidates.end ());
+      }
+
+    // HashSeedCallAccumulator keeps the most recently processed calls when it
+    // trims. Process the selected set from lower to higher priority so current
+    // monthly JTDX/WSJT-X logs win over older or generic sources.
+    std::sort (candidates.begin (), candidates.end (), [] (Candidate const& lhs,
+                                                            Candidate const& rhs) {
+      if (lhs.priority != rhs.priority)
+        {
+          return lhs.priority < rhs.priority;
+        }
+      if (lhs.modified != rhs.modified)
+        {
+          return lhs.modified < rhs.modified;
+        }
+      return lhs.path < rhs.path;
+    });
+
+    QStringList paths;
+    paths.reserve (candidates.size ());
+    for (Candidate const& candidate : candidates)
+      {
+        paths.append (candidate.path);
       }
     return paths;
   }
@@ -948,10 +1202,22 @@ namespace
     timer.start ();
     HashSeedSnapshot snapshot;
     HashSeedCallAccumulator accumulator;
-    for (QString const& path : local_hash_seed_paths ())
+    QStringList const seedPaths =
+      local_hash_seed_priority_paths (kHashSeedRefreshMaxFiles);
+    for (int i = 0; i < seedPaths.size (); ++i)
       {
+        QString const& path = seedPaths.at (i);
         if (hash_seed_shutdown_requested ())
           {
+            break;
+          }
+        if (timer.elapsed () >= kHashSeedInitialSoftBudgetMs
+            && !hash_seed_path_is_required_under_budget (path))
+          {
+            if (hash_seed_remaining_required_under_budget (seedPaths, i + 1))
+              {
+                continue;
+              }
             break;
           }
         if (collect_hash_seed_calls_from_tail (path, accumulator))
@@ -959,7 +1225,8 @@ namespace
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
           }
-        if (timer.elapsed () >= kHashSeedInitialSoftBudgetMs)
+        if (timer.elapsed () >= kHashSeedInitialSoftBudgetMs
+            && !hash_seed_remaining_required_under_budget (seedPaths, i + 1))
           {
             break;
           }
@@ -979,10 +1246,22 @@ namespace
     refresh.seedExternalA7 = external_a7_seed_enabled ();
 
     HashSeedCallAccumulator accumulator;
-    for (QString const& path : local_hash_seed_paths ())
+    QStringList const seedPaths =
+      local_hash_seed_priority_paths (kHashSeedRefreshMaxFiles);
+    for (int i = 0; i < seedPaths.size (); ++i)
       {
+        QString const& path = seedPaths.at (i);
         if (hash_seed_shutdown_requested ())
           {
+            break;
+          }
+        if (timer.elapsed () >= kHashSeedRefreshSoftBudgetMs
+            && !hash_seed_path_is_required_under_budget (path))
+          {
+            if (hash_seed_remaining_required_under_budget (seedPaths, i + 1))
+              {
+                continue;
+              }
             break;
           }
         collect_hash_seed_calls_from_tail (path, accumulator, kHashSeedRefreshTailBytes);
@@ -1003,7 +1282,8 @@ namespace
           }
         ++refresh.filesRead;
         if (refresh.filesRead >= kHashSeedRefreshMaxFiles
-            || timer.elapsed () >= kHashSeedRefreshSoftBudgetMs)
+            || (timer.elapsed () >= kHashSeedRefreshSoftBudgetMs
+                && !hash_seed_remaining_required_under_budget (seedPaths, i + 1)))
           {
             break;
           }
