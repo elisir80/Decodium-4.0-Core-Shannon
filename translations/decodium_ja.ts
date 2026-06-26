@@ -3980,6 +3980,11 @@ Error(%2): %3</source>
         <translation>コンテストモード</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>ルール: 交信局1局につき1ポイント</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>CQのみ</translation>

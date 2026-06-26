@@ -4054,6 +4054,11 @@ Errore (%2):%3</translation>
         <translation>Modalità Contest</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Regola: 1 punto a stazione</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Solo CQ</translation>

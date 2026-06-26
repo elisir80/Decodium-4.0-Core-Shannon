@@ -3873,6 +3873,11 @@ Error: %2</source>
         <translation>竞赛模式</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>规则：每联通一个台站得1分</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>仅 CQ</translation>

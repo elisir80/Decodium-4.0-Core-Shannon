@@ -4199,6 +4199,11 @@ Error(%2): %3</translation>
         <translation>Modo concurso</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Regla: 1 punto por estación trabajada</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Solo CQ</translation>

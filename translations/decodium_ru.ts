@@ -3949,6 +3949,11 @@ Error(%2): %3</source>
         <translation>Контест-режим</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Правило: 1 очко за каждую проведённую связь</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Только CQ</translation>

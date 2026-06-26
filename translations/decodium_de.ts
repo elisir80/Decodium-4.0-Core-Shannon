@@ -3844,6 +3844,11 @@ Fehler: %2</translation>
         <translation>Contest-Modus</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Regel: 1 Punkt pro gearbeitete Station</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Nur CQ</translation>

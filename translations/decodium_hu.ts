@@ -3818,6 +3818,11 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation>Verseny mód</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="10942"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Szabály: 1 pont összeköttetésenként</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10231"/>
         <source>CQ Only</source>
         <translation>Csak CQ</translation>
