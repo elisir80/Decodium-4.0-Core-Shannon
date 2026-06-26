@@ -1686,8 +1686,14 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   apply_decode_thread_limit (request.threadCount);
   int const activeThreads = active_decode_thread_limit ();
   set_ft8_stage4_cancel (false);
+  bool const pressureLimitedRequest =
+      request.maxDecodeMs > 0
+      && request.maxDecodeMs < 7000;
   start_ft8_pack77_hash_seed_collection_once ();
-  start_ft8_hash_context_refresh_from_recent_logs (request.nutc);
+  if (!pressureLimitedRequest)
+    {
+      start_ft8_hash_context_refresh_from_recent_logs (request.nutc);
+    }
   log_ft8_dsp_rollout_once ();
   QElapsedTimer waitTimer;
   waitTimer.start ();
@@ -1700,9 +1706,14 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
-  apply_ready_ft8_pack77_hash_seed_collection ();
-  apply_ready_ft8_hash_context_refresh ();
-  ftx_ft8_stage4_apply_hash_seed_cache_c ();
+  qint64 const hashPrepStartMs = totalTimer.elapsed ();
+  if (!pressureLimitedRequest)
+    {
+      apply_ready_ft8_pack77_hash_seed_collection ();
+      apply_ready_ft8_hash_context_refresh ();
+      ftx_ft8_stage4_apply_hash_seed_cache_c ();
+    }
+  qint64 const hashPrepMs = totalTimer.elapsed () - hashPrepStartMs;
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
   // The promoted C++ Stage4 path still avoids the full JTDX ft8b subpass
   // engine, but a second candidate cycle with RX-frequency sensitivity 2
@@ -1710,10 +1721,13 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   // live deadline. Keep early and supplemental passes on the cheaper profile.
   constexpr bool effectiveLowThresholds {false};
   bool const effectiveSubpass {request.subpass};  // F0: era hardcoded false; ora pilotato dal toggle ft8SubpassHarvest
+  bool const pressureConstrainedProfile =
+      request.threadCount <= 2 || (request.maxDecodeMs > 0 && request.maxDecodeMs < 7000);
   bool const fullLiveDecode =
       request.ndepth >= 3
       && !request.supplemental
-      && request.maxDecodeMs >= 6000;
+      && !pressureConstrainedProfile
+      && request.maxDecodeMs >= 7000;
   int const effectiveCycles = fullLiveDecode ? 2 : 1;
   int const effectiveRxFreqSensitivity = fullLiveDecode ? 2 : 1;
   ftx_ft8_stage4_set_decode_options_c (effectiveLowThresholds ? 1 : 0,
@@ -1834,7 +1848,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 thread=0x%21 freqpart=%22")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -1855,6 +1869,11 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (request.nft8Cycles)
                  .arg (requestedDepth)
                  .arg (supplementalRequested ? 1 : 0)
+                 .arg (request.maxDecodeMs)
+                 .arg (pressureConstrainedProfile ? 1 : 0)
+                 .arg (hashPrepMs)
+                 .arg (pressureLimitedRequest ? 0 : 1)
+                 .arg (qBound (1, request.ncandthin, 100))
                  .arg (current_thread_id_hex ())
                  .arg (ftx_ft8_freqpart_bins_used_c ());
     }

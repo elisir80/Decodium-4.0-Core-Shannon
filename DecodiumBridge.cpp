@@ -7812,6 +7812,15 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     connect(m_audioDeviceRefreshTimer, &QTimer::timeout, this, [this]() {
         bool const verboseLog = m_pendingAudioDeviceRefreshVerbose;
         m_pendingAudioDeviceRefreshVerbose = false;
+        if (!verboseLog && (m_monitoring || m_transmitting || m_tuning)) {
+            m_audioDeviceCacheDirty = true;
+            bridgeLog(QStringLiteral("audio device refresh deferred: active radio path monitoring=%1 tx=%2 tune=%3")
+                          .arg(m_monitoring ? 1 : 0)
+                          .arg(m_transmitting ? 1 : 0)
+                          .arg(m_tuning ? 1 : 0));
+            m_audioDeviceRefreshTimer->start(30000);
+            return;
+        }
         refreshAudioDeviceCache(QStringLiteral("debounced device refresh"), verboseLog, true);
     });
     auto queueAudioDeviceCacheRefresh = [this]() {
@@ -29971,17 +29980,21 @@ int DecodiumBridge::effectiveFtThreadLimit() const
     int const normalLimit = m_ftThreadsAuto
         ? autoFtThreadCountForCores(cores)
         : qMin(configured, uiReserveCap);
+    int const pressureLimit = cores <= 2 ? 1
+                            : qMin(normalLimit, qMax(2, cores / 2));
+    int const severeLimit = cores <= 2 ? 1
+                          : qMin(normalLimit, 2);
     if (cpuPressureSevereActive()) {
-        return 1;
+        return severeLimit;
     }
     if (m_lowCpuModeEnabled && cpuPressureActive()) {
-        return 1;
+        return severeLimit;
     }
     if (m_lowCpuModeEnabled) {
         return qMin(normalLimit, 2);
     }
     if (cpuPressureActive()) {
-        return qMin(normalLimit, 2);
+        return pressureLimit;
     }
     return normalLimit;
 }
@@ -30115,6 +30128,15 @@ void DecodiumBridge::noteCpuPressure(const QString& reason, int durationMs, bool
     if (severe) {
         m_cpuPressureSevereUntilMs = qMax(m_cpuPressureSevereUntilMs,
                                           nowMs + static_cast<qint64>(qMax(1000, durationMs)));
+    }
+    if (m_mode == QStringLiteral("FT8") && (m_monitoring || m_transmitting || m_tuning)) {
+        int const cooldownSlots = severe ? 8 : 4;
+        m_ft8DeepFollowupCooldownSlots = qMax(m_ft8DeepFollowupCooldownSlots, cooldownSlots);
+        m_ft8PendingDeepFollowups.clear();
+        m_ft8PendingSubpassHarvest.clear();
+        if (severe && m_ft8Worker) {
+            m_ft8Worker->cancelCurrentDecode();
+        }
     }
     applyFtOpenMpThreadLimit(effectiveFtThreadLimit());
 
@@ -33623,6 +33645,9 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                   " rows=" + QString::number(rows.size()) +
                   " elapsedMs=" + QString::number(elapsedMs) +
                   " (processing results)");
+        noteCpuPressure(QStringLiteral("slow FT8 callback %1ms").arg(elapsedMs),
+                        elapsedMs > 12000 ? 45000 : 30000,
+                        elapsedMs > 15000);
     }
     bool const legacyUiMirrorActive = usingLegacyBackendForTx();
     QVector<double> dtSamples;
@@ -33671,6 +33696,51 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     // rilascio. FT8/FT4 restano fuori: sono mode a slot stretti e l'utente si
     // aspetta la lista decode al boundary, non una coda che scivola nello slot
     // successivo.
+    int adaptivePrefilteredRows = 0;
+    if (decodeMode == QStringLiteral("FT8")
+        && !ft8DeepInTxListOnly
+        && !legacyUiMirrorActive
+        && rows.size() > 8
+        && (m_lowCpuModeEnabled || cpuPressureActive() || elapsedMs > 9000)) {
+        QSet<QString> batchDecodeDedupKeys;
+        batchDecodeDedupKeys.reserve(rows.size());
+        QStringList filteredRows;
+        filteredRows.reserve(rows.size());
+        for (const auto& row : std::as_const(rows)) {
+            QStringList const f = parseFt8Row(row);
+            if (f.size() < 8) {
+                filteredRows.append(row);
+                continue;
+            }
+            QString const key = decodeDedupKey((trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0],
+                                               f[7],
+                                               f[4]);
+            if (key.isEmpty()) {
+                filteredRows.append(row);
+                continue;
+            }
+            if (recentDecodeDedupKeys.contains(key) || batchDecodeDedupKeys.contains(key)) {
+                skippedDuplicateDecodeKeys.insert(key);
+                ++adaptivePrefilteredRows;
+                continue;
+            }
+            batchDecodeDedupKeys.insert(key);
+            filteredRows.append(row);
+        }
+        if (adaptivePrefilteredRows > 0) {
+            bridgeLog(QStringLiteral("FT8 adaptive result prefilter: serial=%1 raw=%2 kept=%3 dropped=%4 elapsedMs=%5 pressure=%6")
+                          .arg(serial)
+                          .arg(rows.size())
+                          .arg(filteredRows.size())
+                          .arg(adaptivePrefilteredRows)
+                          .arg(elapsedMs)
+                          .arg(cpuPressureActive() ? 1 : 0));
+            trace.addDetail(QStringLiteral("adaptive_prefilter=%1").arg(adaptivePrefilteredRows));
+            rows = filteredRows;
+            duplicatesSkipped += adaptivePrefilteredRows;
+        }
+    }
+
     const bool useSmoothFlow = m_smoothDecodeFlow
         && rows.size() > 5
         && m_mode != QStringLiteral("FT2")
@@ -36908,6 +36978,28 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.emedelay = 0.0f;
     req.nagain = 0;
     req.lft8apon = (ft8ApEnabled && !txAudioActive) ? 1 : 0;
+    bool const adaptiveFt8Pressure =
+        !txAudioActive && (m_lowCpuModeEnabled || cpuPressureActive());
+    if (adaptiveFt8Pressure) {
+        req.ndepth = qMin(req.ndepth, 2);
+        req.lft8apon = 0;
+        bool const severePressure = cpuPressureSevereActive();
+        int const rxWindowHz = severePressure ? 700 : 1200;
+        int rangeLo = qMax(m_nfa, req.nfqso - rxWindowHz);
+        int rangeHi = qMin(m_nfb, req.nfqso + rxWindowHz);
+        if (req.nftx >= m_nfa && req.nftx <= m_nfb) {
+            int const txGuardHz = severePressure ? 250 : 350;
+            rangeLo = qMin(rangeLo, qMax(m_nfa, req.nftx - txGuardHz));
+            rangeHi = qMax(rangeHi, qMin(m_nfb, req.nftx + txGuardHz));
+        }
+        if (rangeHi - rangeLo >= 200 && rangeHi - rangeLo < req.nfb - req.nfa) {
+            req.nfa = rangeLo;
+            req.nfb = rangeHi;
+        }
+        if (severePressure) {
+            req.ncandthin = 20;
+        }
+    }
     req.lmultift8 = 1;
     req.lapcqonly = cqHint;
     if (m_frequency < 30000000.0) {
@@ -36922,13 +37014,15 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.hiscall = m_dxCall.toLocal8Bit();
     req.hisgrid = m_dxGrid.toLocal8Bit();
     int const boundedDepth = qBound(1, req.ndepth, 4);
-    req.supplemental = !txAudioActive && boundedDepth >= 4;
-    req.subpass = subpassRequested && !txAudioActive && boundedDepth >= 4;  // F1: solo l'harvest chiede subpass
-    req.coherentAvgEnabled = !txAudioActive && m_coherentAvgEnabled;
-    req.neuralSyncEnabled = !txAudioActive && m_neuralSyncEnabled;
-    req.turboFeedbackEnabled = !txAudioActive && m_turboFeedbackEnabled;
+    req.supplemental = !adaptiveFt8Pressure && !txAudioActive && boundedDepth >= 4;
+    req.subpass = !adaptiveFt8Pressure && subpassRequested && !txAudioActive && boundedDepth >= 4;  // F1: solo l'harvest chiede subpass
+    req.coherentAvgEnabled = !adaptiveFt8Pressure && !txAudioActive && m_coherentAvgEnabled;
+    req.neuralSyncEnabled = !adaptiveFt8Pressure && !txAudioActive && m_neuralSyncEnabled;
+    req.turboFeedbackEnabled = !adaptiveFt8Pressure && !txAudioActive && m_turboFeedbackEnabled;
     if (req.nzhsym >= 50) {
-        if (m_lowCpuModeEnabled) {
+        if (adaptiveFt8Pressure) {
+            req.maxDecodeMs = cpuPressureSevereActive() ? 2200 : 2800;
+        } else if (m_lowCpuModeEnabled) {
             req.maxDecodeMs = boundedDepth >= 4 ? 6500
                             : boundedDepth >= 3 ? 5500
                                                 : 3500;
@@ -36946,6 +37040,23 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     }
     if (maxDecodeMsOverride > 0) {
         req.maxDecodeMs = qMin(req.maxDecodeMs, maxDecodeMsOverride);
+    }
+    if (adaptiveFt8Pressure) {
+        static qint64 s_lastFt8AdaptiveRequestLogMs = 0;
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        if (nowMs - s_lastFt8AdaptiveRequestLogMs >= 5000) {
+            s_lastFt8AdaptiveRequestLogMs = nowMs;
+            bridgeLog(QStringLiteral("FT8 adaptive pressure profile: serial=%1 depth=%2 threads=%3 maxMs=%4 range=%5-%6 candThin=%7 pressure=%8 severe=%9")
+                          .arg(serial)
+                          .arg(req.ndepth)
+                          .arg(req.threadCount)
+                          .arg(req.maxDecodeMs)
+                          .arg(req.nfa)
+                          .arg(req.nfb)
+                          .arg(req.ncandthin)
+                          .arg(cpuPressureActive() ? 1 : 0)
+                          .arg(cpuPressureSevereActive() ? 1 : 0));
+        }
     }
 
     if (suppressUiRows) {
