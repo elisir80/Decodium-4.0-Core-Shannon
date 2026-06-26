@@ -28511,6 +28511,16 @@ static QString legacy_hash_clean_message (QString message)
   return message.simplified ();
 }
 
+static QString legacy_alltxt_clean_output_message (QString message)
+{
+  static QRegularExpression const internalSuffix {R"(\s+(?:\?\s*)?(?:a\d+|q\d{1,2})\s*$)",
+                                                  QRegularExpression::CaseInsensitiveOption};
+  static QRegularExpression const trailingMark {R"(\s+[?*#^]\s*$)"};
+  message.remove (internalSuffix);
+  message.remove (trailingMark);
+  return message;
+}
+
 static QStringList legacy_hash_read_tail_lines (QString const& path, qint64 tailBytes, int maxLines)
 {
   if (path.trimmed ().isEmpty () || tailBytes <= 0 || maxLines <= 0) {
@@ -28898,6 +28908,9 @@ void MainWindow::write_all(QString txRx, QString message)
       msg = "               "+message;
     } else {
       msg = msg.mid(0, 15) + msg.mid(18, -1);
+    }
+    if (txRx=="Rx" || txRx=="Ck") {
+      msg = legacy_alltxt_clean_output_message (msg);
     }
 
     t = t.asprintf("%5d",ui->TxFreqSpinBox->value());

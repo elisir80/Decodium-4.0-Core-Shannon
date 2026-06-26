@@ -722,6 +722,131 @@ bool serialPortCurrentlyAvailable(QString const& port)
     return false;
 }
 
+QString serialPortFamilyKey(QString const& port)
+{
+    QString value = comparablePortName(port);
+    if (value.startsWith(QStringLiteral("/dev/")))
+        value.remove(0, 5);
+    if (value.startsWith(QStringLiteral("cu.")))
+        value.remove(0, 3);
+    if (value.startsWith(QStringLiteral("tty.")))
+        value.remove(0, 4);
+
+    int const dash = value.lastIndexOf(QLatin1Char('-'));
+    if (dash > 0)
+        value = value.left(dash);
+
+    while (!value.isEmpty() && value.back().isDigit())
+        value.chop(1);
+
+    return value;
+}
+
+bool serialPortAutoFallbackCandidate(QString const& port)
+{
+    QString const value = comparablePortName(port);
+    if (value.isEmpty()
+        || value == QStringLiteral("cat")
+        || value == QStringLiteral("none")) {
+        return false;
+    }
+
+    static QStringList const excludedMarkers = {
+        QStringLiteral("bluetooth"),
+        QStringLiteral("debug-console"),
+        QStringLiteral("incoming-port"),
+        QStringLiteral("wireless"),
+    };
+    for (auto const& marker : excludedMarkers) {
+        if (value.contains(marker, Qt::CaseInsensitive))
+            return false;
+    }
+    return true;
+}
+
+QString autoFallbackSerialPortForMissing(QString const& missingPort)
+{
+    QStringList rawCandidates;
+    for (QSerialPortInfo const& info : QSerialPortInfo::availablePorts()) {
+        appendUniqueSerialPort(rawCandidates, info.systemLocation());
+        appendUniqueSerialPort(rawCandidates, info.portName());
+    }
+
+#if defined(Q_OS_LINUX)
+    for (QString const& path : enumerateLinuxSerialByIdPaths())
+        appendUniqueSerialPort(rawCandidates, path);
+#endif
+
+#if defined(Q_OS_WIN)
+    QSettings serialMap(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DEVICEMAP\\SERIALCOMM"),
+                        QSettings::NativeFormat);
+    for (QString const& key : serialMap.allKeys())
+        appendUniqueSerialPort(rawCandidates, serialMap.value(key).toString());
+#endif
+
+    QString const missingComparable = comparablePortName(missingPort);
+    QString const missingFamily = serialPortFamilyKey(missingPort);
+
+    QStringList seen;
+    QString onlyUsable;
+    int usableCount = 0;
+    QString best;
+    int bestScore = -100000;
+    bool bestTied = false;
+
+    for (QString const& raw : rawCandidates) {
+        QString const candidate = normalizeDevicePath(raw);
+        QString const comparable = comparablePortName(candidate);
+        if (seen.contains(comparable, Qt::CaseInsensitive))
+            continue;
+        seen << comparable;
+
+        if (!serialPortAutoFallbackCandidate(candidate)
+            || !serialPortCurrentlyAvailable(candidate)
+            || comparable == missingComparable) {
+            continue;
+        }
+
+        ++usableCount;
+        onlyUsable = candidate;
+
+        int score = 0;
+        QString const family = serialPortFamilyKey(candidate);
+        if (!missingFamily.isEmpty() && family == missingFamily)
+            score += 120;
+        if (missingComparable.contains(QStringLiteral("usbserial"))
+            && comparable.contains(QStringLiteral("usbserial"))) {
+            score += 90;
+        } else if (missingComparable.contains(QStringLiteral("usbmodem"))
+                   && comparable.contains(QStringLiteral("usbmodem"))) {
+            score += 90;
+        } else if (missingComparable.contains(QStringLiteral("usb"))
+                   && comparable.contains(QStringLiteral("usb"))) {
+            score += 35;
+        }
+        if (comparable.contains(QStringLiteral("usb")))
+            score += 20;
+        if (candidate.startsWith(QStringLiteral("/dev/cu.")))
+            score += 15;
+        if (candidate.startsWith(QStringLiteral("/dev/tty.")))
+            score -= 5;
+
+        if (score > bestScore) {
+            best = candidate;
+            bestScore = score;
+            bestTied = false;
+        } else if (score == bestScore) {
+            bestTied = true;
+        }
+    }
+
+    if (!best.isEmpty() && !bestTied && bestScore >= 50)
+        return best;
+    if (usableCount == 1)
+        return onlyUsable;
+    return QString();
+}
+
 bool isSerialPortMissingFailure(QString const& reason)
 {
     static QStringList const markers = {
@@ -1631,6 +1756,28 @@ void DecodiumTransceiverManager::connectRig()
     bool const serialTransport =
         lowerPortType == QStringLiteral("serial")
         || lowerPortType == QStringLiteral("usb");
+    if (serialTransport
+        && !isHamRadioDeluxeRig(m_rigName)
+        && !serialPortCurrentlyAvailable(m_serialPort)) {
+        QString const previousPort = m_serialPort;
+        QString const fallbackPort = autoFallbackSerialPortForMissing(previousPort);
+        if (!fallbackPort.isEmpty()) {
+            setSerialPort(fallbackPort);
+            saveSettings();
+            refreshPorts();
+            qInfo().noquote()
+                << "[CATDBG] Serial port auto-fallback"
+                << "rig=" << m_rigName
+                << "portType=" << m_portType
+                << "old=" << previousPort
+                << "new=" << m_serialPort;
+            emit statusUpdate(QStringLiteral("Porta CAT %1 non disponibile: uso %2.")
+                              .arg(previousPort.trimmed().isEmpty()
+                                   ? QStringLiteral("<non impostata>")
+                                   : previousPort.trimmed(),
+                                   m_serialPort));
+        }
+    }
     if (serialTransport
         && !isHamRadioDeluxeRig(m_rigName)
         && !serialPortCurrentlyAvailable(m_serialPort)) {

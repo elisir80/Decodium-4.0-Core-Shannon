@@ -67,6 +67,7 @@ Rectangle {
     property color colorOrange: themeManager ? themeManager.warningColor : "#ff9800"
     readonly property bool compactFooter: width > 0 && width < 1800
     readonly property bool narrowFooter: width > 0 && width < 1450
+    readonly property bool tightFooter: width > 0 && width < 1250
     readonly property int footerMargin: narrowFooter ? 6 : (compactFooter ? 8 : 12)
     readonly property int footerSpacing: narrowFooter ? 6 : (compactFooter ? 10 : 20)
     readonly property int footerSeparatorHeight: compactFooter ? 16 : 20
@@ -74,9 +75,10 @@ Rectangle {
     readonly property int footerMetricValueWidth: narrowFooter ? 28 : 34
     readonly property int footerButtonHeight: compactFooter ? 26 : 30
     readonly property bool showFooterVersion: width >= 1920
-    readonly property bool showFooterFtThreads: width >= 1500
+    readonly property bool showFooterFtThreads: true
     readonly property bool showFooterSignalDb: width >= 1320
     readonly property bool showFooterDxText: width >= 1550
+    readonly property bool showFooterGpuMonitor: gpuMonitorVisible && width >= 1280
 
     Connections {
         target: bridge
@@ -203,7 +205,7 @@ Rectangle {
 
         // Status indicators
         RowLayout {
-            spacing: 12
+            spacing: tightFooter ? 7 : 12
 
             // MON indicator
             Rectangle {
@@ -292,13 +294,14 @@ Rectangle {
             Rectangle {
                 id: ftThreadsLed
                 visible: showFooterFtThreads
-                width: autoMode ? 58 : 40
+                width: tightFooter ? 44 : (autoMode ? 58 : 40)
                 height: 18
                 radius: 9
 
                 property int threadCount: bridge ? bridge.ftThreads : 1
                 property bool autoMode: bridge ? bridge.ftThreadsAuto : false
-                readonly property string displayValue: autoMode ? "AUTO" : threadCount.toString()
+                readonly property string displayValue: autoMode ? (tightFooter ? "A" : "AUTO") : threadCount.toString()
+                readonly property string tooltipValue: autoMode ? "AUTO" : threadCount.toString()
                 property bool isActive: threadCount > 1
 
                 color: isActive ? Qt.rgba(255/255, 152/255, 0/255, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -321,14 +324,14 @@ Rectangle {
 
                     Text {
                         text: "FT"
-                        font.pixelSize: 8
+                        font.pixelSize: tightFooter ? 7 : 8
                         font.bold: true
                         color: ftThreadsLed.isActive ? colorOrange : textSecondary
                     }
 
                     Text {
                         text: ftThreadsLed.displayValue
-                        font.pixelSize: ftThreadsLed.autoMode ? 8 : 9
+                        font.pixelSize: tightFooter ? 8 : (ftThreadsLed.autoMode ? 8 : 9)
                         font.bold: true
                         font.family: decodiumMonoFontFamily
                         color: ftThreadsLed.isActive ? (themeManager && themeManager.isLightTheme ? bgDeep : "#ffffff") : textSecondary
@@ -354,7 +357,7 @@ Rectangle {
                         visible: parent.containsMouse
                         delay: 500
                         text: "FT Decoder Threads: "
-                              + ftThreadsLed.displayValue
+                              + ftThreadsLed.tooltipValue
                               + "\nClick: cycle 1-8 - Right-click: AUTO"
                     }
                 }
@@ -567,7 +570,7 @@ Rectangle {
         // GPU/render activity monitor
         Item {
             id: gpuMonitor
-            visible: statusBarComponent.gpuMonitorVisible
+            visible: showFooterGpuMonitor
             implicitWidth: visible ? gpuMonitorLayout.implicitWidth : 0
             implicitHeight: visible ? gpuMonitorLayout.implicitHeight : 0
 
