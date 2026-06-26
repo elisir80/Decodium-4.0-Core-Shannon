@@ -833,7 +833,7 @@ public:
     int     contestNumber()  const { return m_contestNumber; }
     void    setContestNumber(int v) { if (m_contestNumber!=v){m_contestNumber=v;emit contestNumberChanged();} }
     QStringList contestTypeNames() const {
-        return {"None","ARRL DX","CQ WW","WAE","IARU HF","DARC","FD","SOTA","Custom"};
+        return {"None","ARRL DX","CQ WW","WAE","IARU HF","DARC","FD","SOTA","Custom","Ft2.it Award 2026"};
     }
     QString logAllTxtPath()  const; // implementato in .cpp
 

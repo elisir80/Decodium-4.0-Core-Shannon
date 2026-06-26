@@ -10937,6 +10937,16 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                 onCurrentIndexChanged: bridge.contestType = currentIndex
             }
 
+            // 1.0.441 - regola award selezionato (documenta lo scoring; nessun contatore)
+            Text {
+                text: qsTr("Rule: 1 point per worked station")
+                font.pixelSize: 12
+                color: secondaryCyan
+                wrapMode: Text.WordWrap
+                width: 300
+                visible: bridge.contestTypeNames[bridge.contestType] === "Ft2.it Award 2026"
+            }
+
             Text {
                 text: "Exchange"
                 font.pixelSize: 14
