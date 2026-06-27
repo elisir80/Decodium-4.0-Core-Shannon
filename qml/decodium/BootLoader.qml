@@ -113,6 +113,10 @@ ApplicationWindow {
             // Keep this hidden root object alive so the top-level main window
             // is not garbage-collected. The splash type has no taskbar button.
             bootWindow.visible = false
+            Qt.callLater(function() {
+                if (!bootWindow.visible && typeof bootWindow.releaseResources === "function")
+                    bootWindow.releaseResources()
+            })
         } else if (mainLoadStatus === Component.Error) {
             componentStatusPoller.stop()
             console.log("BootLoader: Main.qml load error: "

@@ -47,6 +47,7 @@ Q_DECLARE_OPAQUE_POINTER(DecodiumDxCluster*)
 
 // Forward declarations
 struct ParsedAdifRecord;
+struct DecodeUserFilterConfig;
 class SoundInput;
 class SoundOutput;
 class DecodiumAudioSink;
@@ -1940,15 +1941,23 @@ private:
     // conta tutte le righe, Signal RX conta solo i decode RX reali: le righe
     // TX locali sono timeline e non devono cancellare ricezioni precedenti.
     static constexpr int kDecodeListCap = 250;
+    static constexpr int kDecodeListRetainRows = 180;
     static constexpr int kRxDecodeListCap = 250;
+    static constexpr int kRxDecodeListRetainRxRows = 180;
+    static constexpr int kRxDecodeListRetainTxRows = 40;
     void trimDecodeListsIfNeeded();
     void moveLegacyAllTxtCursorToEnd();
     // 1.0.142: throttle per decodeListChanged signal nei path high-frequency
     // (FT2 async 5-20Hz, FT8 ready bursts, legacy mirror replace). Riduce
     // rebuild ListView QML da ~20/sec a ~4/sec → fluidità percepita.
-    // I path low-frequency (clear, mode change, DXCC refresh) emettono diretto.
+    // I reset/clear low-frequency emettono diretto; i burst e DXCC usano throttle.
     QTimer* m_decodeListEmitTimer {nullptr};
     bool m_decodeListEmitPending {false};
+    // Signal RX has its own high-frequency path: FT8/FT2 can append many rows
+    // inside one decode callback. Coalesce model rebuilds and side effects.
+    QTimer* m_rxDecodeListEmitTimer {nullptr};
+    bool m_rxDecodeListEmitPending {false};
+    bool m_rxDecodeListNormalizePending {false};
     // 1.0.233 — DevOverlay metrics (Sprint 2). Ring buffer 32 sample frame
     // time (ms), atomic counters per decode rate "received" (enrich) e
     // "committed" (appendDecodeMapToList). Update gated dal flag
@@ -2536,6 +2545,7 @@ private:
     bool m_syncingLegacyBackendDecodeList {false};
     bool m_legacyStateRefreshBurstQueued {false};
     QSet<QString> m_legacyModeChangeClearedDecodeKeys;
+    QSet<QString> m_legacyPrunedBandMirrorKeys;
     QSet<QString> m_legacyClearedRxMirrorKeys;
     QSet<QString> m_clearedRxDecodeKeys;
 
@@ -2919,6 +2929,7 @@ private:
     void enrichDecodeEntry(QVariantMap& entry) const;
     // 1.0.142: throttle helper per decodeListChanged. Vedi commento timer.
     void emitDecodeListChangedThrottled();
+    void emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit = true);
 
     // 1.0.143 fase 2: rebuild dei 2 model nativi dalla m_decodeList.
     void rebuildBandActivityModel();
@@ -3310,6 +3321,10 @@ private:
     QVariantList mirrorLegacyDecodeLines(QStringList const& lines,
                                          bool rxPane,
                                          QVariantList const& previousEntries) const;
+    QVariantList mirrorLegacyDecodeLines(QStringList const& lines,
+                                         bool rxPane,
+                                         QVariantList const& previousEntries,
+                                         DecodeUserFilterConfig const& userFilterConfig) const;
     QVariantList augmentLegacyMirrorWithAllTxt(QVariantList const& mirroredEntries,
                                                bool rxPane) const;
     bool shouldMirrorToRxPane(const QVariantMap& entry) const;

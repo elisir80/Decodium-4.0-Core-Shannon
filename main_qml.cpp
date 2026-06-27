@@ -1846,7 +1846,18 @@ int main(int argc, char* argv[])
         }
     }
 
-    installMainThreadWatchdog(&app, &bridge);
+    auto mainThreadWatchdogInstalled = std::make_shared<bool>(false);
+    QObject::connect(&bridge,
+                     &DecodiumBridge::mainQmlReadyForNativeWindowing,
+                     &app,
+                     [&app, &bridge, mainThreadWatchdogInstalled]() {
+        if (*mainThreadWatchdogInstalled) {
+            return;
+        }
+        *mainThreadWatchdogInstalled = true;
+        installMainThreadWatchdog(&app, &bridge);
+    });
+    qInfo().noquote() << "[MAINWATCH] event loop watchdog waiting for Main.qml ready";
 
     int r = app.exec();
     g_shuttingDown.store(true, std::memory_order_relaxed);
