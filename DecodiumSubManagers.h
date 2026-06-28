@@ -292,7 +292,8 @@ private:
         QStringLiteral("Generic"),
         QStringLiteral("ARRL Field Day"),
         QStringLiteral("RTTY Roundup"),
-        QStringLiteral("EU VHF")
+        QStringLiteral("EU VHF"),
+        QStringLiteral("Ft2.it Award 2026")
     };
     int m_contestId {0};
     int m_serialNumber {1};
