@@ -593,6 +593,15 @@ Dialog {
                         background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     }
 
+                    Text { text: "Keep-alive:"; color: textSecondary; font.pixelSize: 12 }
+                    CheckBox {
+                        id: catKeepAliveCheck
+                        text: "CAT leggero"
+                        checked: bridge.catManager.catKeepAlive
+                        onCheckedChanged: bridge.catManager.catKeepAlive = checked
+                        contentItem: Text { text: parent.text; leftPadding: 4; color: textPrimary; font.pixelSize: 11; verticalAlignment: Text.AlignVCenter }
+                    }
+
                     // Data bits
                     Text { text: "Data bits:"; color: textSecondary; font.pixelSize: 12 }
                     DecoComboBox {
@@ -706,6 +715,7 @@ Dialog {
                     bridge.catManager.networkPort = networkField.text.trim()
                     bridge.catManager.pttPort     = pttPortCombo.editText.trim()
                     bridge.catManager.pollInterval = pollSpin.value
+                    bridge.catManager.catKeepAlive = catKeepAliveCheck.checked
                     bridge.catManager.dataBits    = dataCombo.currentText
                     bridge.catManager.stopBits    = stopCombo.currentText
                     bridge.catManager.handshake   = hsCombo.currentText

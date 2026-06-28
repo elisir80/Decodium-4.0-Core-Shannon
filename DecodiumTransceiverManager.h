@@ -44,6 +44,7 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(QString pttPort    READ pttPort     WRITE setPttPort    NOTIFY pttPortChanged)
     Q_PROPERTY(QString splitMode  READ splitMode   WRITE setSplitMode  NOTIFY splitModeChanged)
     Q_PROPERTY(int civAddress     READ civAddress  NOTIFY civAddressChanged)
+    Q_PROPERTY(bool catKeepAlive  READ catKeepAlive WRITE setCatKeepAlive NOTIFY catKeepAliveChanged)
     Q_PROPERTY(int pollInterval   READ pollInterval WRITE setPollInterval NOTIFY pollIntervalChanged)
 
     // ── Tipo porta (derivato dal rig selezionato) ─────────────────────────
@@ -96,6 +97,7 @@ public:
     QString pttPort()      const { return m_pttPort; }
     QString splitMode()    const { return m_splitMode; }
     int     civAddress()   const { return m_civAddress; }
+    bool    catKeepAlive() const { return m_catKeepAlive; }
     int     pollInterval() const { return m_pollInterval; }
     QString portType()     const { return m_portType; }
 
@@ -137,6 +139,7 @@ public:
     void setPttPort(const QString& v);
     void setSplitMode(const QString& v);
     void setCivAddress(int v);
+    void setCatKeepAlive(bool v)        { if (m_catKeepAlive != v){ m_catKeepAlive = v; emit catKeepAliveChanged(); } }
     void setPollInterval(int v)           { if (m_pollInterval != v){ m_pollInterval = v; emit pollIntervalChanged(); } }
     void setCatAutoConnect(bool v)        { if (m_catAutoConnect != v){ m_catAutoConnect = v; emit catAutoConnectChanged(); } }
     void setAudioAutoStart(bool v)        { if (m_audioAutoStart != v){ m_audioAutoStart = v; emit audioAutoStartChanged(); } }
@@ -189,6 +192,7 @@ signals:
     void pttPortChanged();
     void splitModeChanged();
     void civAddressChanged();
+    void catKeepAliveChanged();
     void pollIntervalChanged();
     void portTypeChanged();
     void portListChanged();
@@ -242,6 +246,7 @@ private:
     QString m_pttPort      {"CAT"};
     QString m_splitMode    {"none"};
     int     m_civAddress   {0};
+    bool    m_catKeepAlive {false};
     int     m_pollInterval {1};
     QString m_portType     {"serial"};
 

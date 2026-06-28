@@ -28,6 +28,7 @@ class DecodiumCatManager : public QObject
     Q_PROPERTY(QString pttPort      READ pttPort         WRITE setPttPort       NOTIFY pttPortChanged)
     Q_PROPERTY(int civAddress       READ civAddress      NOTIFY civAddressChanged)
     Q_PROPERTY(QString splitMode    READ splitMode       WRITE setSplitMode     NOTIFY splitModeChanged)
+    Q_PROPERTY(bool catKeepAlive    READ catKeepAlive    WRITE setCatKeepAlive  NOTIFY catKeepAliveChanged)
     Q_PROPERTY(int pollInterval     READ pollInterval    WRITE setPollInterval  NOTIFY pollIntervalChanged)
     Q_PROPERTY(QString portType     READ portType        CONSTANT)
     Q_PROPERTY(QStringList rigList  READ rigList         CONSTANT)
@@ -80,6 +81,8 @@ public:
     void        setCivAddress(int v)             { if (m_civAddress != v)  { m_civAddress = v;  emit civAddressChanged(); } }
     QString     splitMode()     const { return m_splitMode; }
     void        setSplitMode(const QString& v);
+    bool        catKeepAlive()  const { return m_catKeepAlive; }
+    void        setCatKeepAlive(bool v) { if (m_catKeepAlive != v) { m_catKeepAlive = v; emit catKeepAliveChanged(); } }
     int         pollInterval()  const { return m_pollInterval; }
     void        setPollInterval(int v)           { if (m_pollInterval != v){ m_pollInterval = v; emit pollIntervalChanged(); applyPollInterval(); } }
     QString     portType()      const { return "serial"; }
@@ -136,6 +139,7 @@ signals:
     void pttPortChanged();
     void civAddressChanged();
     void splitModeChanged();
+    void catKeepAliveChanged();
     void pollIntervalChanged();
     void portListChanged();
     void frequencyChanged();
@@ -186,6 +190,7 @@ private:
     QString m_pttPort     {"CAT"};
     int     m_civAddress  {0};       // ICOM CI-V address (0 = non-ICOM)
     QString m_splitMode   {"none"};  // "none" | "rig" | "emulate" (Fake It)
+    bool    m_catKeepAlive{false};   // exposed for the shared CAT settings UI
     int     m_pollInterval{2};
     double  m_frequency   {0.0};
     QString m_mode;

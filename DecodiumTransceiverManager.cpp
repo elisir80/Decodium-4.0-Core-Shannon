@@ -968,6 +968,7 @@ DecodiumTransceiverManager::DecodiumTransceiverManager(QObject* parent)
     connect(this, &DecodiumTransceiverManager::rtsHighChanged,        this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::networkPortChanged,    this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::tciPortChanged,        this, scheduleSave);
+    connect(this, &DecodiumTransceiverManager::catKeepAliveChanged,   this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::pollIntervalChanged,   this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::catAutoConnectChanged, this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::audioAutoStartChanged, this, scheduleSave);
@@ -1647,6 +1648,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
     // "CAT" in PTT Port means "use the same serial port as CAT", as in WSJT-X.
     p.ptt_port      = resolvedPttPort(m);
     p.civ_address   = m->civAddress();
+    p.cat_keep_alive = m->catKeepAlive();
     p.poll_interval = basePollInterval;
     if (pwrAndSwrEnabled)
         p.poll_interval |= do__pwr;
@@ -1682,6 +1684,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
         << "linuxRtsLowGuard=" << linuxRtsLowGuard
 #endif
         << "split=" << splitModeName(p.split_mode)
+        << "catKeepAlive=" << p.cat_keep_alive
         << "poll=" << (p.poll_interval & 0xffff);
     return p;
 }
@@ -1821,6 +1824,7 @@ void DecodiumTransceiverManager::connectRig()
             << "ptt=" << pttMethodName(params.ptt_type)
             << "pttPort=" << params.ptt_port
             << "split=" << splitModeName(params.split_mode)
+            << "catKeepAlive=" << params.cat_keep_alive
             << "poll=" << (params.poll_interval & 0xffff);
         auto uptr = d->factory.create(params, thread);
         xcv = uptr.release();          // trasferisce ownership al thread (via deleteLater)
@@ -2450,6 +2454,7 @@ void DecodiumTransceiverManager::saveSettings()
     s.setValue("pttPort",      pttPort);
     s.setValue("splitMode",    m_splitMode);
     s.setValue("civAddress",   m_civAddress);
+    s.setValue("catKeepAlive", m_catKeepAlive);
     s.setValue("pollInterval", m_pollInterval);
     s.setValue("catAutoConnect", m_catAutoConnect);
     s.setValue("audioAutoStart", m_audioAutoStart);
@@ -2480,6 +2485,7 @@ void DecodiumTransceiverManager::loadSettings()
     m_pttPort      = normalizeDevicePath(get("pttPort",      m_pttPort).toString());
     bool const hasModernSplitMode = s.contains(QStringLiteral("splitMode"));
     m_splitMode    = get("splitMode",    m_splitMode).toString();
+    m_catKeepAlive = get("catKeepAlive", m_catKeepAlive).toBool();
     int const rawPollInterval = get("pollInterval", m_pollInterval).toInt();
     int const secondsPart = rawPollInterval & 0xffff;
     m_pollInterval = qBound(1, secondsPart > 0 ? secondsPart : rawPollInterval, 99);

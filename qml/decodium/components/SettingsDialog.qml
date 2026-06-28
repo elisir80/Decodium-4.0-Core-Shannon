@@ -41,6 +41,7 @@ Dialog {
     readonly property int scrollLeftMargin: 10
     readonly property int scrollTopMargin: 10
     readonly property int scrollRightMargin: 12
+    readonly property int scrollBottomMargin: 96
     property string dataDownloadStatus: ""
     property bool dataDownloadIsError: false
     property string uiFontLabel: bridge.fontSettingLabel("Font", "", 0)
@@ -2256,6 +2257,34 @@ Dialog {
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
+                        Text {
+                            visible: settingsDialog.usesSerialControls()
+                            text: qsTr("CAT keep-alive:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                        }
+                        CheckBox {
+                            visible: settingsDialog.usesSerialControls()
+                            checked: bridge.catManager ? bridge.catManager.catKeepAlive : false
+                            text: qsTr("Light polling for interface activity LEDs")
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            onCheckedChanged: {
+                                if (bridge.catManager && bridge.catManager.catKeepAlive !== checked)
+                                    bridge.catManager.catKeepAlive = checked
+                                settingsDialog.scheduleCatPersist()
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: textPrimary
+                                font.pixelSize: 12
+                                leftPadding: 26
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideRight
+                            }
+                        }
+
                         // ── Parametri Seriali ──
                         Text {
                             visible: settingsDialog.usesSerialControls()
@@ -2658,6 +2687,11 @@ Dialog {
                                 font.pixelSize: 12
                                 wrapMode: Text.Wrap
                             }
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                            Layout.preferredHeight: settingsDialog.scrollBottomMargin
                         }
                     }
                 }

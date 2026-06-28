@@ -538,6 +538,7 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
       || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
   poll_ptt_state_ = !is_icom_serial_cat_ptt (m_->model_, params)
       || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PTT");
+  cat_keep_alive_ = params.cat_keep_alive && icom_serial_cat;
 
   // m_->rig_->state.obj = this;
 
@@ -802,7 +803,8 @@ int HamlibTransceiver::do_start ()
         << "alcCap=" << hasAlcCap
         << "alcProbe=" << alc_probe_pending_
         << "passiveStatePoll=" << poll_passive_state_
-        << "passivePttPoll=" << poll_ptt_state_;
+        << "passivePttPoll=" << poll_ptt_state_
+        << "catKeepAlive=" << cat_keep_alive_;
     }
 
   // the Net rigctl back end promises all functions work but we must
@@ -1422,6 +1424,8 @@ void HamlibTransceiver::do_poll ()
       update_PTT (ptt_on_);
     }
 
+  poll_cat_keep_alive ();
+
   // 1.0.204 — throttle PWR/SWR polling: each rig_get_level RIG_LEVEL_SWR /
   // RFPOWER_METER_WATTS takes ~150ms on Yaesu FT-991 at 38400 baud. Running
   // both every tick made do_poll() ~470ms, which surfaced as main-thread
@@ -1446,6 +1450,53 @@ void HamlibTransceiver::do_poll ()
     }
 
   poll_transmit_telemetry (false);
+}
+
+void HamlibTransceiver::poll_cat_keep_alive ()
+{
+  if (!cat_keep_alive_
+      || poll_passive_state_
+      || !m_->freq_query_works_
+      || ptt_on_
+      || state ().ptt ())
+    {
+      return;
+    }
+
+  if (++cat_keep_alive_tick_ < kCatKeepAliveSkipRatio_)
+    {
+      return;
+    }
+  cat_keep_alive_tick_ = 0;
+
+  freq_t f {0};
+  int const rc = rig_get_freq (m_->rig_.data (), RIG_VFO_CURR, &f);
+  if (RIG_OK == rc)
+    {
+      cat_keep_alive_failures_ = 0;
+      CAT_TRACE ("rig_get_freq CAT keep-alive frequency=" << Radio::frequency (std::round (f)));
+      return;
+    }
+
+  if (-RIG_ENAVAIL == rc || -RIG_ENIMPL == rc)
+    {
+      cat_keep_alive_ = false;
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib CAT keep-alive disabled: rig_get_freq unavailable rc=" << rc;
+      return;
+    }
+
+  ++cat_keep_alive_failures_;
+  qWarning ().noquote ()
+    << "[CATDBG] Hamlib CAT keep-alive failed"
+    << cat_keep_alive_failures_ << "/" << kCatKeepAliveMaxFailures_
+    << "rc=" << rc;
+  if (cat_keep_alive_failures_ >= kCatKeepAliveMaxFailures_)
+    {
+      cat_keep_alive_ = false;
+      qWarning ().noquote ()
+        << "[CATDBG] Hamlib CAT keep-alive disabled for this connection after repeated failures";
+    }
 }
 
 void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)

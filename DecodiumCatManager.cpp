@@ -1040,6 +1040,7 @@ void DecodiumCatManager::saveSettings()
     s.setValue("pttMethod",      m_pttMethod);
     s.setValue("pttPort",        m_pttPort);
     s.setValue("civAddress",     m_civAddress);
+    s.setValue("catKeepAlive",   m_catKeepAlive);
     s.setValue("pollInterval",   m_pollInterval);
     s.setValue("forceDtr",       forceDtrAvailable() && m_forceDtr);
     s.setValue("dtrHigh",        forceDtrAvailable() && m_dtrHigh);
@@ -1083,6 +1084,7 @@ void DecodiumCatManager::loadSettings()
         m_civAddress = defaults->civAddress;
     }
     m_pollInterval   = s.value("pollInterval",    2).toInt();
+    m_catKeepAlive   = s.value("catKeepAlive",    false).toBool();
     m_forceDtr       = s.value("forceDtr",        false).toBool();
     m_dtrHigh        = s.value("dtrHigh",         false).toBool();
     m_forceRts       = s.value("forceRts",        false).toBool();
