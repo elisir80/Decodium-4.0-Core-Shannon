@@ -6187,6 +6187,50 @@ void DecodiumBridge::setFtxWeakSignoffBonus(int v)
     bridgeLog(QStringLiteral("[FT2WS] Weak-partner signoff bonus = +%1").arg(clamped));
 }
 
+// 1.0.446 - opt-in guard: limita i ri-aggganci RRR a un partner appena loggato (caso 9H1SR).
+void DecodiumBridge::setFt2PostLogReengageGuard(bool v)
+{
+    if (m_ft2PostLogReengageGuard == v) return;
+    m_ft2PostLogReengageGuard = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2PostLogReengageGuard"), v);
+    emit ft2PostLogReengageGuardChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Post-log RRR re-engage guard %1").arg(v ? "ON" : "OFF"));
+}
+
+void DecodiumBridge::setFt2PostLogReengageMax(int v)
+{
+    int const clamped = qBound(0, v, 5);
+    if (m_ft2PostLogReengageMax == clamped) return;
+    m_ft2PostLogReengageMax = clamped;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2PostLogReengageMax"), clamped);
+    emit ft2PostLogReengageMaxChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Post-log RRR re-engage max = %1").arg(clamped));
+}
+
+// 1.0.446 - P0-3 opt-in: il TX watchdog logga il QSO in chiusura invece di abbandonarlo.
+void DecodiumBridge::setTxWatchdogLogOnClose(bool v)
+{
+    if (m_txWatchdogLogOnClose == v) return;
+    m_txWatchdogLogOnClose = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("TxWatchdogLogOnClose"), v);
+    emit txWatchdogLogOnCloseChanged();
+    bridgeLog(QStringLiteral("[Watchdog] Log QSO on close at timeout %1").arg(v ? "ON" : "OFF"));
+}
+
+// 1.0.446 - P1-5 opt-in: cap "Caller retries" duro anche con TX watchdog ON.
+void DecodiumBridge::setCallerRetriesAlwaysHard(bool v)
+{
+    if (m_callerRetriesAlwaysHard == v) return;
+    m_callerRetriesAlwaysHard = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("CallerRetriesAlwaysHard"), v);
+    emit callerRetriesAlwaysHardChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Caller retries always hard = %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.321 — opt-in FT2 manual one-shot disarm (Salvatore latch fix da 1.0.300).
 // Default OFF su fork = TX1 ripete fino a maxCallerRetries → no "TX1 stacca su weak signal".
 void DecodiumBridge::setFt2ManualOneShotEnabled(bool v)
@@ -26760,6 +26804,41 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
     });
 }
 
+// 1.0.446 - P2-8: reset stato QSO per la sequenza successiva. Estratto byte-identico dal
+// blocco duplicato nelle 2 lambda finishAutoSequenceQso (checkAndStartPeriodicTx +
+// autoSequenceStep). preserveAutoTx=false => spegne il TX. Reset SNR partner = P2-9.
+void DecodiumBridge::resetQsoStateForNextSequence(bool preserveAutoTx)
+{
+    m_qsoLogged = false;  // reset per il prossimo QSO
+    m_logAfterOwn73 = false;
+    m_ft2DeferredLogPending = false;
+    m_pendingAutoSeqTxAfterActiveTx = 0;
+    // 1.0.225 - reset anche le stringhe pending (BUG #9 agente-tx). Pre-1.0.225 solo
+    // l'integer era resettato; le stringhe associate rimanevano dal QSO precedente ->
+    // completeTxPlayback leggeva STALE m_pendingAutoSeqMessage/PartnerBase/Mode ->
+    // falso positivo "partner does not mention" -> deferred TX legittimo droppato.
+    m_pendingAutoSeqPartnerBase.clear();
+    m_pendingAutoSeqMessage.clear();
+    m_pendingAutoSeqMode.clear();
+    m_quickPeerSignaled = false;
+    if (!preserveAutoTx) {
+        setTxEnabled(false);
+    }
+    if (m_qsoProgress != 6) { m_qsoProgress = 6; emit qsoProgressChanged(); } // IDLE_QSO
+    m_nTx73 = 0;
+    m_autoSeqRogerReportBase.clear();
+    m_txRetryCount = 0;
+    m_lastNtx = -1;
+    m_lastCqPidx = -1;
+    // 1.0.446 - P2-9: azzera l'SNR partner a fine QSO (sentinel 127 = sconosciuto). Senza
+    // questo il cap signoff adattivo del QSO SUCCESSIVO usava l'SNR del partner precedente
+    // finche' il nuovo partner non veniva decodificato.
+    m_currentPartnerSnrDb = 127;
+    clearAutoCqPartnerLock();
+    setDxCall(QString());
+    setDxGrid(QString());
+}
+
 void DecodiumBridge::checkAndStartPeriodicTx()
 {
     // 1.0.256 fix BUG #1 audit agente-tx: guard reentry UNIVERSALE (RAII).
@@ -26779,6 +26858,23 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // mamMultiStreamSequencerActive() -> con MAM OFF questo if non scatta mai
     // e il path single-QSO sottostante resta byte-identico.
     if (mamMultiStreamSequencerActive()) { mamDispatchPeriod(); return; }
+    // 1.0.446 - P1-4 (audit hardening, DIAGNOSTICO solo-logging, nessun blocco): rileva stati
+    // (progress,currentTx) incoerenti al chokepoint TX. Logga solo l'anomalia (rara se la
+    // macchina a stati e' sana). Eccezione QuickQSO (currentTx=3,progress=5) whitelistata.
+    // Misura se il refactor canAdvance serve davvero prima di un eventuale enforcement.
+    {
+        bool const stateCoherent =
+            (m_currentTx == 6 && m_qsoProgress == 1) ||
+            (m_currentTx == 1 && m_qsoProgress == 2) ||
+            (m_currentTx == 2 && m_qsoProgress == 3) ||
+            (m_currentTx == 3 && (m_qsoProgress == 4 || (m_quickQsoEnabled && m_qsoProgress == 5))) ||
+            (m_currentTx == 4 && m_qsoProgress == 5) ||
+            (m_currentTx == 5 && m_qsoProgress == 5);
+        if (!stateCoherent && m_qsoProgress >= 1 && m_qsoProgress <= 5) {
+            bridgeLog(QStringLiteral("[STATE] incoerenza QSO @checkAndStartPeriodicTx: currentTx=%1 progress=%2 quick=%3")
+                          .arg(m_currentTx).arg(m_qsoProgress).arg(m_quickQsoEnabled ? 1 : 0));
+        }
+    }
     // Sprint2-2: AutoCQ col RX morto = chiamare nel vuoto fino al TX watchdog
     // (caso reale 9 giu: 10+ min di CQ con rms=0). Se il watchdog audio segnala
     // RX unhealthy da >=15s, sospendi il REARM del CQ (solo TX6 in fase pura,
@@ -26873,33 +26969,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
         bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
-        m_qsoLogged = false;  // reset per il prossimo QSO
-        m_logAfterOwn73 = false;
-        m_ft2DeferredLogPending = false;
-        m_pendingAutoSeqTxAfterActiveTx = 0;
-        // 1.0.225 — reset anche le stringhe pending (BUG #9 agente-tx).
-        // Pre-1.0.225 solo l'integer m_pendingAutoSeqTxAfterActiveTx era
-        // resettato; le stringhe associate rimanevano dal QSO precedente.
-        // Se nel prossimo QSO il pending era ri-settato (es. TX deferred
-        // durante un nuovo TX attivo), completeTxPlayback leggeva le STALE
-        // m_pendingAutoSeqMessage/PartnerBase/Mode -> falso positivo
-        // "partner does not mention" -> deferred TX legittimo droppato.
-        m_pendingAutoSeqPartnerBase.clear();
-        m_pendingAutoSeqMessage.clear();
-        m_pendingAutoSeqMode.clear();
-        m_quickPeerSignaled = false;
-        if (!preserveAutoTx) {
-            setTxEnabled(false);
-        }
-        if (m_qsoProgress != 6) { m_qsoProgress = 6; emit qsoProgressChanged(); } // IDLE_QSO
-        m_nTx73 = 0;
-        m_autoSeqRogerReportBase.clear();
-        m_txRetryCount = 0;
-        m_lastNtx = -1;
-        m_lastCqPidx = -1;
-        clearAutoCqPartnerLock();
-        setDxCall(QString());
-        setDxGrid(QString());
+        resetQsoStateForNextSequence(preserveAutoTx);
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
@@ -26990,7 +27060,14 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                                                                    m_currentPartnerSnrDb, m_ft2Conservative,
                                                                    m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap,
                                                                    m_ft4SignoffRetryCap, m_ft8SignoffRetryCap, m_ftxWeakSignoffBoost, m_ftxWeakSnrThreshold, m_ftxWeakSignoffBonus);
-            if (deferredRr73LogOnlyWait && m_nTx73 < signoffCap) {
+            // 1.0.446 - P0-2: m_nTx73 sale SOLO a tx-playback-finished pulito; con errore
+            // audio persistente (sink park) resta 0 e il cap signoff non avanzerebbe mai ->
+            // ripetizione fino al solo watchdog. Contatore effettivo = max(m_nTx73,
+            // m_txRetryCount) quando lo step non e' cambiato (anche invii falliti contano).
+            // Caso normale (audio ok): m_txRetryCount==m_nTx73 -> identico.
+            int const effSignoffCount = (m_currentTx == m_lastNtx)
+                ? qMax(m_nTx73, m_txRetryCount) : m_nTx73;
+            if (deferredRr73LogOnlyWait && effSignoffCount < signoffCap) {
                 qint64 const periodMs = periodMsForMode(m_mode);
                 qint64 const waitedMs = m_ft2AutoCqAwaitingPartnerSinceMs > 0
                     ? qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - m_ft2AutoCqAwaitingPartnerSinceMs)
@@ -27009,7 +27086,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                                           .arg(waitedMs), true);
                 return true;
             }
-            if (m_nTx73 < signoffCap) {
+            if (effSignoffCount < signoffCap) {
                 bridgeLog(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 count=%3/%4, waiting for final ack")
                               .arg(m_currentTx)
                               .arg(m_mode)
@@ -27024,7 +27101,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             finishAutoSequenceQso(QStringLiteral("checkAndStartPeriodicTx: deferred signoff TX%1 mode=%2 retry cap %3/%4 -> log anyway, partner left")
                                       .arg(m_currentTx)
                                       .arg(m_mode)
-                                      .arg(m_nTx73)
+                                      .arg(effSignoffCount)
                                       .arg(signoffCap), true);
             return true;
         }
@@ -27396,6 +27473,38 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             return;
         }
 
+        // 1.0.446 - bugfix: in FT2 il TX3 "R+report" (qsoProgress=4 ROGER_REPORT,
+        // payload "R-NN" senza token 73/RR73/RRR) e il TX3 QuickQSO con "TU"
+        // (qsoProgress=5) NON erano cappati da nessuno: completeFinishedSignoffIfReady
+        // esce (payload non-73) e il Caller-retries cap e' disattivato perche'
+        // inSignoffTxStep=true quando qsoProgress==4/5 (guard 1.0.433, voluto: non
+        // azzerare lo stato a TX3 mentre arriva l'RR73 del partner -> evitare RR73
+        // droppato come in 1.0.431). Risultato: il TX3 si ripeteva fino al TX watchdog
+        // (~14x) senza loggare ("troppe chiamate"). Applichiamo qui lo STESSO signoff
+        // cap del ramo TX4-RR73 (spinbox FT2, default 4) usando m_txRetryCount (m_nTx73
+        // resta 0 perche' il payload non e' 73); raggiunto il cap logghiamo il QSO e
+        // fermiamo. SICUREZZA anti-regressione 1.0.431: finishAutoSequenceQso(...,true)
+        // LOGGA prima di azzerare e popola cooldown + recentWorked cache, quindi un
+        // RR73 tardivo viene scartato dal gate cooldown in autoSequenceStep (no doppio
+        // log, no riavvio TX1). Copre QuickQSO (progress5) e R+report normale (progress4).
+        if (m_currentTx == 3
+            && (m_qsoProgress == 4 || m_qsoProgress == 5)
+            && m_mode == QStringLiteral("FT2")) {
+            int const tx3SignoffCap = deferredSignoffRetryCapForMode(m_mode, m_maxCallerRetries,
+                                                                     m_currentPartnerSnrDb, m_ft2Conservative,
+                                                                     m_ft2QuickGiveUpStrong, m_ft2SignoffRetryCap,
+                                                                     m_ft4SignoffRetryCap, m_ft8SignoffRetryCap,
+                                                                     m_ftxWeakSignoffBoost, m_ftxWeakSnrThreshold, m_ftxWeakSignoffBonus);
+            if (m_currentTx == m_lastNtx && m_txRetryCount >= tx3SignoffCap) {
+                finishAutoSequenceQso(QStringLiteral("checkAndStartPeriodicTx: TX3 R+report mode=%1 progress=%2 retry cap %3/%4 -> log anyway, partner left")
+                                          .arg(m_mode)
+                                          .arg(m_qsoProgress)
+                                          .arg(m_txRetryCount)
+                                          .arg(tx3SignoffCap), true);
+                return;
+            }
+        }
+
         // Qualsiasi payload di signoff (RR73/RRR/73) completato >=1 volta chiude il QSO.
         if (completeFinishedSignoffIfReady()) {
             return;
@@ -27455,6 +27564,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         // 60min disarmato dopo 3-4min per retry limit TX1).
         bool const retryLimitOwnedByWatchdog =
             applyRetryLimit
+            && !m_callerRetriesAlwaysHard   // 1.0.446 P1-5: opt-in -> cap duro anche con watchdog
             && txWatchdogLimitConfigured()
             && (m_txWatchdogMode == 1 || m_txWatchdogMode == 2);
         if (applyRetryLimit && retryLimitOwnedByWatchdog
@@ -27692,8 +27802,14 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     // Pulizia periodica cooldown map (previene memory leak su sessioni lunghe)
     {
         qint64 nowPurge = QDateTime::currentMSecsSinceEpoch();
-        for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); )
-            (nowPurge - it.value() > 30000) ? it = m_qsoCooldown.erase(it) : ++it;
+        for (auto it = m_qsoCooldown.begin(); it != m_qsoCooldown.end(); ) {
+            if (nowPurge - it.value() > 30000) {
+                m_postLogReengageCount.remove(it.key());  // 1.0.446 - pulisci contatore ri-aggancio
+                it = m_qsoCooldown.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
     // Anti-collisione: deduplicazione — ignora decode identici processati di recente.
@@ -28118,33 +28234,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         bool const continueQueuedCaller = (m_multiAnswerMode || m_autoCqRepeat) && !m_callerQueue.isEmpty();
         bool const continueAutoCq = autoCqCanRestartTx6();
         bool const preserveAutoTx = continueQueuedCaller || continueAutoCq;
-        m_qsoLogged = false;  // reset per il prossimo QSO
-        m_logAfterOwn73 = false;
-        m_ft2DeferredLogPending = false;
-        m_pendingAutoSeqTxAfterActiveTx = 0;
-        // 1.0.225 — reset anche le stringhe pending (BUG #9 agente-tx).
-        // Pre-1.0.225 solo l'integer m_pendingAutoSeqTxAfterActiveTx era
-        // resettato; le stringhe associate rimanevano dal QSO precedente.
-        // Se nel prossimo QSO il pending era ri-settato (es. TX deferred
-        // durante un nuovo TX attivo), completeTxPlayback leggeva le STALE
-        // m_pendingAutoSeqMessage/PartnerBase/Mode -> falso positivo
-        // "partner does not mention" -> deferred TX legittimo droppato.
-        m_pendingAutoSeqPartnerBase.clear();
-        m_pendingAutoSeqMessage.clear();
-        m_pendingAutoSeqMode.clear();
-        m_quickPeerSignaled = false;
-        if (!preserveAutoTx) {
-            setTxEnabled(false);
-        }
-        if (m_qsoProgress != 6) { m_qsoProgress = 6; emit qsoProgressChanged(); } // IDLE_QSO
-        m_nTx73 = 0;
-        m_autoSeqRogerReportBase.clear();
-        m_txRetryCount = 0;
-        m_lastNtx = -1;
-        m_lastCqPidx = -1;
-        clearAutoCqPartnerLock();
-        setDxCall(QString());
-        setDxGrid(QString());
+        resetQsoStateForNextSequence(preserveAutoTx);
         if (continueQueuedCaller) {
             processNextInQueue();
         } else if (continueAutoCq) {
@@ -28484,6 +28574,23 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             m_autoSeqRogerReportBase.clear();
             nextTx = 3;
         } else {
+            // 1.0.446 - opt-in guard "post-log re-engage" (default OFF): se il partner e' stato
+            // APPENA loggato (entro m_qsoCooldown=30s) e ha gia' ottenuto m_ft2PostLogReengageMax
+            // RRR di cortesia, NON ri-avanzare a TX4/RRR -> evita le "troppe richiamate" quando il
+            // partner non sente il nostro RRR e continua a mandare R+report (caso 9H1SR). Il gate
+            // cooldown is_73 non copre i payload R+report; ri-rispondere 1-2 volte e' corretto.
+            if (m_ft2PostLogReengageGuard
+                && m_mode == QStringLiteral("FT2")
+                && !messagePartnerBase.isEmpty()
+                && m_qsoCooldown.contains(messagePartnerBase)) {
+                int &reengN = m_postLogReengageCount[messagePartnerBase];
+                if (reengN >= m_ft2PostLogReengageMax) {
+                    bridgeLog(QStringLiteral("autoSeq: post-log reengage guard: %1 gia' loggato, ignoro R+report ripetuto (%2/%3)")
+                                  .arg(messagePartnerBase).arg(reengN).arg(m_ft2PostLogReengageMax));
+                    return;
+                }
+                ++reengN;
+            }
             bridgeLog("autoSeq: ricevuto R+report " + last + " (rpt=" + rptValue + ") → TX4 (RR73)");
             setReportReceived(rptValue);
             if (!m_dxCall.isEmpty()) genStdMsgs(m_dxCall, m_dxGrid);
@@ -28845,6 +28952,13 @@ void DecodiumBridge::loadSettings()
     m_ftxWeakSignoffBoost = s.value(QStringLiteral("FtxWeakSignoffBoost"), false).toBool();
     m_ftxWeakSnrThreshold = qBound(-30, s.value(QStringLiteral("FtxWeakSnrThreshold"), -15).toInt(), -5);
     m_ftxWeakSignoffBonus = qBound(1, s.value(QStringLiteral("FtxWeakSignoffBonus"), 3).toInt(), 6);
+    // 1.0.446 - opt-in guard ri-aggancio RRR post-log. Default OFF, max 1 RRR di cortesia.
+    m_ft2PostLogReengageGuard = s.value(QStringLiteral("Ft2PostLogReengageGuard"), false).toBool();
+    m_ft2PostLogReengageMax = qBound(0, s.value(QStringLiteral("Ft2PostLogReengageMax"), 1).toInt(), 5);
+    // 1.0.446 - P0-3 opt-in: watchdog logga QSO in chiusura (progress>=4). Default OFF.
+    m_txWatchdogLogOnClose = s.value(QStringLiteral("TxWatchdogLogOnClose"), false).toBool();
+    // 1.0.446 - P1-5 opt-in: cap Caller-retries duro anche con watchdog ON. Default OFF.
+    m_callerRetriesAlwaysHard = s.value(QStringLiteral("CallerRetriesAlwaysHard"), false).toBool();
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
     m_ft2NarrowAsyncDecode = s.value(QStringLiteral("Ft2NarrowAsyncDecode"), false).toBool();
@@ -35278,7 +35392,26 @@ void DecodiumBridge::onPeriodTimer()
                                            : QString::number(m_txWatchdogCount))
                 .arg(m_txWatchdogMode == 1 ? QStringLiteral("min") : QStringLiteral(" periods"));
             bridgeLog(watchdogReason);
-            if ((m_autoCqRepeat || m_multiAnswerMode) && m_qsoProgress > 1) {
+            // 1.0.446 - P0-3 opt-in (default OFF): se il QSO ha gia' completato lo scambio
+            // report bidirezionale (m_qsoProgress>=4) e il watchdog scatta, LOGGA il QSO
+            // invece di abbandonarlo. 1.0.445 armava solo il late-snapshot (recuperato solo
+            // se il partner re-inviava 73; in QSO manuale nemmeno quello). Replica la parte
+            // log+chiusura di finishAutoSequenceQso(...,true) (lambda non chiamabile qui).
+            if (m_txWatchdogLogOnClose && m_qsoProgress >= 4) {
+                QString wdPartner = inferredPartnerForAutolog();
+                capturePendingAutoLogSnapshot();
+                if (wdPartner.trimmed().isEmpty() && m_pendingAutoLogValid) {
+                    wdPartner = m_pendingAutoLogCall;
+                }
+                markWorldMapQsoClosed(wdPartner, watchdogReason);
+                rememberCompletedAutoCqPartner(wdPartner, true, watchdogReason);
+                logQso();
+                bridgeLog(QStringLiteral("TX watchdog: QSO loggato in chiusura (progress=%1 partner=%2)")
+                              .arg(m_qsoProgress).arg(wdPartner));
+                if (m_qsoProgress != 6) { m_qsoProgress = 6; emit qsoProgressChanged(); }
+                setDxCall(QString());
+                setDxGrid(QString());
+            } else if ((m_autoCqRepeat || m_multiAnswerMode) && m_qsoProgress > 1) {
                 if (m_autoCqRepeat) {
                     armLateAutoLogSnapshot();
                 }

@@ -3388,6 +3388,56 @@ Dialog {
                                     ToolTip.text: qsTr("How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.\n\nDefault: +3 (capped so the total never exceeds 8).")
                                 }
 
+                                // 1.0.446 - opt-in: guard ri-aggancio RRR post-log (caso 9H1SR "troppe richiamate")
+                                Text {
+                                    text: qsTr("Post-log RRR re-engage guard (FT2):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2ReengageGuardCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2PostLogReengageGuard : false
+                                    onCheckedChanged: if (bridge && bridge.ft2PostLogReengageGuard !== checked) bridge.setFt2PostLogReengageGuard(checked)
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("When ON, after a QSO is logged ('partner left') stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).\n\nA few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.")
+                                }
+                                Text {
+                                    text: qsTr("  courtesy RRR max:")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                    enabled: ft2ReengageGuardCheck.checked
+                                }
+                                SpinBox {
+                                    id: ft2ReengageMaxSpin
+                                    Layout.preferredWidth: autoSequenceGrid.valueWidth
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: controlHeight
+                                    from: 0; to: 5; editable: true
+                                    enabled: ft2ReengageGuardCheck.checked
+                                    value: bridge ? bridge.ft2PostLogReengageMax : 1
+                                    onValueChanged: if (bridge && bridge.ft2PostLogReengageMax !== value) bridge.setFt2PostLogReengageMax(value)
+                                    contentItem: TextInput { text: ft2ReengageMaxSpin.textFromValue(ft2ReengageMaxSpin.value, ft2ReengageMaxSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2ReengageMaxSpin.editable; validator: ft2ReengageMaxSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                                    background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.\n\n0 = suppress immediately. Default: 1.")
+                                }
+
                                 // 1.0.314 — opt-in: TX immediato al click (stile 1.0.283)
                                 Text {
                                     text: qsTr("Immediate TX on click (1.0.283 style):")
@@ -3549,6 +3599,33 @@ Dialog {
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
                                     ToolTip.text: qsTr("Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn't reply.\n\nDefault: 10.\n\nFT2 (slot 3.75s): 10 retries ≈ 38s of calling.\nFT8 (slot 15s): 10 retries ≈ 150s.\n\nLower (4-6) = less time wasted on stations that don't reply.\nHigher (15-20) = patience for weak DX / marginal propagation.\n\nNote: with 'FT2 manual one-shot disarm' OFF (default) this is what stops TX1 from looping forever.")
+                                }
+
+                                // 1.0.446 - P1-5 opt-in: cap Caller retries duro anche con TX watchdog ON
+                                Text {
+                                    text: qsTr("Caller retries hard cap (even with watchdog):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: callerRetriesAlwaysHardCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.callerRetriesAlwaysHard : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.callerRetriesAlwaysHard !== checked)
+                                            bridge.setCallerRetriesAlwaysHard(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("When ON, the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.\n\nDefault OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.\n\nEnable for a hard limit on TX repeats regardless of the watchdog.")
                                 }
 
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
@@ -3950,6 +4027,20 @@ Dialog {
                             Component.onCompleted: completed = true
                             contentItem: TextInput { text: txWdCountSpin.textFromValue(txWdCountSpin.value, txWdCountSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdCountSpin.editable; validator: txWdCountSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                        }
+                        // 1.0.446 - P0-3 opt-in: logga il QSO se il watchdog scatta a scambio completato
+                        Text { text: qsTr("Log QSO at watchdog timeout:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        CheckBox {
+                            id: txWdLogOnCloseCheck
+                            implicitHeight: controlHeight
+                            checked: bridge ? bridge.txWatchdogLogOnClose : false
+                            onCheckedChanged: if (bridge && bridge.txWatchdogLogOnClose !== checked) bridge.setTxWatchdogLogOnClose(checked)
+                            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                            contentItem: Text { text: ""; leftPadding: 24 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress >= ROGER_REPORT), the QSO is logged instead of abandoned.\n\nDefault OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).")
                         }
                         Text { text: qsTr("Tune Watchdog (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         RowLayout {

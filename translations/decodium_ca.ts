@@ -473,22 +473,22 @@ Searched paths:
         <translation>Trucades (CALL)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="150"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
         <source>Chiamata diretta</source>
         <translation>Trucada directa</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
         <source>⏳ ARMATO</source>
         <translation>⏳ ARMAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
         <source>ATTIVA</source>
         <translation>ACTIVA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="182"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="201"/>
         <source>Target callsign</source>
         <translation>Target callsign</translation>
     </message>
@@ -497,58 +497,58 @@ Searched paths:
         <translation type="vanished">Intents màx.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="231"/>
         <source>Max chiamate a vuoto</source>
         <translation>Trucades en va màx.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="232"/>
         <source>Timeout totale (s)</source>
         <translation>Temps total (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="228"/>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="445"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="247"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="464"/>
         <source>∞</source>
         <translation>∞</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="276"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="295"/>
         <source>Periodo FT8/FT4</source>
         <translation>Període FT8/FT4</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="282"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="301"/>
         <source>1st (:00/:30)</source>
         <translation>1r (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="312"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="331"/>
         <source>2nd (:15/:45)</source>
         <translation>2n (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="342"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="361"/>
         <source>Alterna</source>
         <translation>Alterna</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="378"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="397"/>
         <source>Pausa fra cicli (s)</source>
         <translation>Pausa entre cicles (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="401"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="420"/>
         <source>DX-watch armato — non chiama subito: aspetta che il target sia decodificato</source>
         <translation>DX-watch armat — no truca de seguida: espera que el target sigui descodificat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="429"/>
         <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>Re-arm: si el target desapareix torna a l'escolta (màx. 3 vegades, després Halt manual)</translation>
+        <translation>Re-arm: si el target desapareix torna a l&apos;escolta (màx. 3 vegades, després Halt manual)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="463"/>
         <source>A vuoto %1 / %2</source>
         <translation>En va %1 / %2</translation>
     </message>
@@ -557,12 +557,12 @@ Searched paths:
         <translation type="vanished">Re-arm: a cada intent sense QSO torna a l&apos;escolta (màx. 3 vegades, després Halt manual)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="455"/>
         <source>⏳ In ascolto: aspetto %1 in decodifica…</source>
         <translation>⏳ A l&apos;escolta: espero %1 en descodificació…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="437"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="456"/>
         <source>Stato: chiamando %1</source>
         <translation>Estat: trucant %1</translation>
     </message>
@@ -571,32 +571,32 @@ Searched paths:
         <translation type="vanished">Intent %1 / %2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="480"/>
         <source>AutoCQ generico (pulsante ACQ)</source>
         <translation>AutoCQ genèric (botó ACQ)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="470"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="489"/>
         <source>Max chiamate CQ (0=∞)</source>
         <translation>Màx. trucades CQ (0=∞)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="486"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="505"/>
         <source>Pausa fra cicli CQ (s)</source>
         <translation>Pausa entre cicles CQ (s)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="507"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
         <source>Chiudi</source>
         <translation>Tanca</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="530"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="552"/>
         <source>Stop</source>
         <translation>Atura</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="560"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="582"/>
         <source>▶ Start</source>
         <translation>▶ Inicia</translation>
     </message>
@@ -1854,37 +1854,37 @@ o contacta amb l&apos;assistència de DXLab a DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23725"/>
+        <location filename="../DecodiumBridge.cpp" line="24421"/>
         <source>TX non avviata</source>
         <translation>TX no iniciada</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23726"/>
+        <location filename="../DecodiumBridge.cpp" line="24422"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Callsign comprimit no resolt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27278"/>
+        <location filename="../DecodiumBridge.cpp" line="28156"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ aturat</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27279"/>
+        <location filename="../DecodiumBridge.cpp" line="28157"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Trucada directa rebuda, però el callsign no està resolt</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32310"/>
+        <location filename="../DecodiumBridge.cpp" line="33351"/>
         <source>Map selection: %1 %2</source>
         <translation>Selecció al mapa: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32311"/>
+        <location filename="../DecodiumBridge.cpp" line="33352"/>
         <source>Map selection: %1</source>
         <translation>Selecció al mapa: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38716"/>
+        <location filename="../DecodiumBridge.cpp" line="39921"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Les comprovacions d&apos;actualització estan desactivades en aquesta versió.</translation>
     </message>
@@ -2190,7 +2190,7 @@ o contacta amb l&apos;assistència de DXLab a DXLab@groups.io.</translation>
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="1896"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="2173"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT interromput, reconnexió automàtica (%1/%2)...</translation>
     </message>
@@ -3120,133 +3120,133 @@ Error: %2</translation>
 <context>
     <name>HamlibTransceiver</name>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="459"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="507"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="481"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="529"/>
         <source>Hamlib initialisation error</source>
         <translation>Error d&apos;inicialització de Hamlib</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="652"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="685"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Error de l&apos;arxiu de configuració de Hamlib: %1 en el desplaçament de caràcters %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="658"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="691"/>
         <source>Hamlib settings file error: top level must be a JSON object</source>
         <translation>Error de l&apos;arxiu de configuració de Hamlib: el nivell superior ha de ser un objecte JSON</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="670"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="703"/>
         <source>Hamlib settings file error: config must be a JSON object</source>
         <translation>Error de l&apos;arxiu de configuració de Hamlib: config ha de ser un objecte JSON</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="581"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="614"/>
         <source>Unsupported CAT type</source>
         <translation>Tipus CAT no admès</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="308"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="330"/>
         <source>Hamlib error: %1 while %2</source>
         <translation>Error de Hamlib: %1 mentre %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="694"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="727"/>
         <source>opening connection to rig</source>
         <translation>connexió d&apos;obertura a l&apos;equip</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="702"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="735"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
         <translation>El rig no està llest — caps null després d&apos;obrir (cap resposta de la radio?)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="809"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="845"/>
         <source>getting current frequency</source>
         <translation>obtenir la freqüència actual</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="813"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="849"/>
         <source>getting current mode</source>
         <translation>obtenir el mode actual</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="842"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="862"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="878"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="898"/>
         <source>exchanging VFOs</source>
         <translation>intercanviant VFOs</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="850"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1337"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="886"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1376"/>
         <source>getting other VFO frequency</source>
         <translation>obtenint una altra freqüència de VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="854"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="890"/>
         <source>getting other VFO mode</source>
         <translation>obtenint un altre mode VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1083"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1119"/>
         <source>setting TX VFO mode</source>
         <translation>configurant el mode VFO de TX</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="329"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="867"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="351"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="903"/>
         <source>setting current VFO</source>
         <translation>ajustar el VFO actual</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="876"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="912"/>
         <source>getting frequency</source>
         <translation>obtenint la freqüència</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="880"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="916"/>
         <source>getting mode</source>
         <translation>obtenint el mode</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="317"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="897"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1277"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="339"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="933"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1315"/>
         <source>getting current VFO</source>
         <translation>obtenir VFO actual</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="948"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="956"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="970"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1316"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="984"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="992"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1006"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1355"/>
         <source>getting current VFO frequency</source>
         <translation>obtenir la freqüència actual del VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="954"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="969"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="976"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1054"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1072"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1139"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="990"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1005"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1012"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1090"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1108"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1175"/>
         <source>setting frequency</source>
         <translation>ajust de freqüència</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1062"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1146"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1224"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1237"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1098"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1182"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1260"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1273"/>
         <source>getting current VFO mode</source>
         <translation>obtenir el mode VFO actual</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1068"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1077"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1152"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1230"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1243"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1104"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1113"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1188"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1266"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1279"/>
         <source>setting current VFO mode</source>
         <translation>ajust del mode VFO actual</translation>
     </message>
@@ -3255,60 +3255,60 @@ Error: %2</translation>
         <translation type="vanished">Configuració del mode VFOB</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1126"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1195"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1162"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1231"/>
         <source>setting/unsetting split mode</source>
         <translation>ajustar/desajustar mode dividid (split)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1137"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1177"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1173"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1213"/>
         <source>setting split mode</source>
         <translation>ajustar mode dividid (Split)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1165"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1201"/>
         <source>setting split TX frequency and mode</source>
         <translation>ajust de freqüència i mode de transmissió dividida (Split)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1170"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1206"/>
         <source>setting split TX frequency</source>
         <translation>ajust de freqüència dividida (Split) en TX</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1248"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1284"/>
         <source>getting split TX VFO mode</source>
         <translation>obtenir el mode dividit (Split) en TX del VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1255"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1291"/>
         <source>setting split TX VFO mode</source>
         <translation>ajustar del mode dividid (Split) en TX del VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1374"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1416"/>
         <source>getting PTT state</source>
         <translation>obtenir l&apos;estat del PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1580"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1675"/>
         <source>setting PTT on</source>
         <translation>activant el PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1682"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1777"/>
         <source>setting PTT off</source>
         <translation>desactivant el PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="352"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="374"/>
         <source>setting a configuration item</source>
         <translation>establir un element de configuració</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="364"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="371"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="386"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="393"/>
         <source>getting a configuration item</source>
         <translation>obtenir un element de configuració</translation>
     </message>
@@ -3901,33 +3901,33 @@ Error(%2): %3</translation>
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10046"/>
+        <location filename="../qml/decodium/Main.qml" line="10083"/>
         <source>About Decodium</source>
         <translation>Quant a Decodium</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10063"/>
+        <location filename="../qml/decodium/Main.qml" line="10100"/>
         <source>Useful Links...</source>
         <translation>Enllaços útils...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10087"/>
-        <location filename="../qml/decodium/Main.qml" line="10939"/>
+        <location filename="../qml/decodium/Main.qml" line="10124"/>
+        <location filename="../qml/decodium/Main.qml" line="10986"/>
         <source>Keyboard Shortcuts</source>
         <translation>Dreceres de teclat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10103"/>
+        <location filename="../qml/decodium/Main.qml" line="10140"/>
         <source>SWL Mode (RX Only)</source>
         <translation>Mode SWL (només RX)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10119"/>
+        <location filename="../qml/decodium/Main.qml" line="10156"/>
         <source>Multi-Answer Mode</source>
         <translation>Mode multiresposta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10135"/>
+        <location filename="../qml/decodium/Main.qml" line="10172"/>
         <source>MAM Window...</source>
         <translation>Finestra MAM...</translation>
     </message>
@@ -3936,8 +3936,8 @@ Error(%2): %3</translation>
         <translation type="vanished">Obre la carpeta ALL.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10175"/>
-        <location filename="../qml/decodium/Main.qml" line="10794"/>
+        <location filename="../qml/decodium/Main.qml" line="10212"/>
+        <location filename="../qml/decodium/Main.qml" line="10831"/>
         <source>TX Watchdog</source>
         <translation>Vigilant TX</translation>
     </message>
@@ -3946,8 +3946,8 @@ Error(%2): %3</translation>
         <translation type="vanished">Mode dividit</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10191"/>
-        <location filename="../qml/decodium/Main.qml" line="10871"/>
+        <location filename="../qml/decodium/Main.qml" line="10228"/>
+        <location filename="../qml/decodium/Main.qml" line="10908"/>
         <source>Contest Mode</source>
         <translation>Mode concurs</translation>
     </message>
@@ -3957,12 +3957,12 @@ Error(%2): %3</translation>
         <translation>Regla: 1 punt per estació treballada</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10231"/>
+        <location filename="../qml/decodium/Main.qml" line="10268"/>
         <source>CQ Only</source>
         <translation>Només CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10247"/>
+        <location filename="../qml/decodium/Main.qml" line="10284"/>
         <source>My Call Only</source>
         <translation>Només el meu indicatiu</translation>
     </message>
@@ -3971,100 +3971,100 @@ Error(%2): %3</translation>
         <translation type="vanished">Mode ZAP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10271"/>
+        <location filename="../qml/decodium/Main.qml" line="10308"/>
         <source>Deep Search</source>
         <translation>Cerca profunda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10287"/>
+        <location filename="../qml/decodium/Main.qml" line="10324"/>
         <source>Avg Decode</source>
         <translation>Decodificació mitjana</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10321"/>
+        <location filename="../qml/decodium/Main.qml" line="10358"/>
         <source>VHF/UHF Features</source>
         <translation>Funcions VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10345"/>
+        <location filename="../qml/decodium/Main.qml" line="10382"/>
         <source>Record RX</source>
         <translation>Enregistra RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10361"/>
+        <location filename="../qml/decodium/Main.qml" line="10398"/>
         <source>Record TX</source>
         <translation>Enregistra TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12130"/>
+        <location filename="../qml/decodium/Main.qml" line="12177"/>
         <source>decodes</source>
         <translation>descodificacions</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12863"/>
+        <location filename="../qml/decodium/Main.qml" line="12910"/>
         <source>msgs</source>
         <translation>msg</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12144"/>
-        <location filename="../qml/decodium/Main.qml" line="12878"/>
+        <location filename="../qml/decodium/Main.qml" line="12191"/>
+        <location filename="../qml/decodium/Main.qml" line="12925"/>
         <source>Clear</source>
         <translation>Neteja</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="886"/>
+        <location filename="../qml/decodium/Main.qml" line="891"/>
         <source>Schermo intero</source>
         <translation>Pantalla completa</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1727"/>
+        <location filename="../qml/decodium/Main.qml" line="1732"/>
         <source>Open WAV file for decoding</source>
         <translation>Obre fitxer WAV per descodificar</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1729"/>
+        <location filename="../qml/decodium/Main.qml" line="1734"/>
         <source>File WAV (*.wav)</source>
         <translation>Fitxer WAV (*.wav)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1729"/>
+        <location filename="../qml/decodium/Main.qml" line="1734"/>
         <source>All files (*)</source>
         <translation>Tots els fitxers (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1737"/>
+        <location filename="../qml/decodium/Main.qml" line="1742"/>
         <source>Select folder with WAV files</source>
         <translation>Selecciona la carpeta amb els fitxers WAV</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3569"/>
+        <location filename="../qml/decodium/Main.qml" line="3612"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
         <translation>Clic: sincronitza NTP ara per alinear DT (FT8/FT4)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3652"/>
+        <location filename="../qml/decodium/Main.qml" line="3695"/>
         <source>Auto RX level active</source>
         <translation>Nivell RX automàtic actiu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3653"/>
+        <location filename="../qml/decodium/Main.qml" line="3696"/>
         <source>Auto RX level disabled</source>
         <translation>Nivell RX automàtic desactivat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4146"/>
+        <location filename="../qml/decodium/Main.qml" line="4189"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
         <translation>Clic: obre un fitxer WAV
 Clic dret: descodifica una carpeta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4246"/>
+        <location filename="../qml/decodium/Main.qml" line="4289"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
         <translation>Restableix el disseny (Ctrl+Shift+L)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4278"/>
+        <location filename="../qml/decodium/Main.qml" line="4321"/>
         <source>Decode history (Ctrl+Shift+H)</source>
         <translation>Historial de descodificació (Ctrl+Shift+H)</translation>
     </message>
@@ -4073,17 +4073,17 @@ Clic dret: descodifica una carpeta</translation>
         <translation type="vanished">Equilibrat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Weak-signal / DX</source>
         <translation>Weak-signal / DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Contest</source>
         <translation>Contest</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>CPU-limited</source>
         <translation>CPU limitada</translation>
     </message>
@@ -4096,82 +4096,82 @@ Clic dret: descodifica una carpeta</translation>
         <translation type="vanished">Perfils preparats — apliquen en bloc els commutadors FT2/descodificació. Detalls a Setup → FT2.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Balanced</source>
         <translation>Equilibrat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4374"/>
+        <location filename="../qml/decodium/Main.qml" line="4417"/>
         <source>Profiles...</source>
         <translation>Perfils...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4379"/>
+        <location filename="../qml/decodium/Main.qml" line="4422"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Perfils preparats: apliqueu els toggles de FT2/decode en grup. Detalls a Setup -&gt; TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4617"/>
+        <location filename="../qml/decodium/Main.qml" line="4660"/>
         <source>Drag to reposition the clock</source>
         <translation>Arrossega per reposicionar el rellotge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4808"/>
+        <location filename="../qml/decodium/Main.qml" line="4851"/>
         <source>Cerca città...</source>
         <translation>Cerca ciutat...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4916"/>
+        <location filename="../qml/decodium/Main.qml" line="4959"/>
         <source>Type a city name</source>
         <translation>Escriviu el nom d&apos;una ciutat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4916"/>
+        <location filename="../qml/decodium/Main.qml" line="4959"/>
         <source>No matching city</source>
         <translation>Cap ciutat coincident</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4951"/>
+        <location filename="../qml/decodium/Main.qml" line="4994"/>
         <source>Analog clock</source>
         <translation>Rellotge analògic</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4955"/>
+        <location filename="../qml/decodium/Main.qml" line="4998"/>
         <source>Digital clock</source>
         <translation>Rellotge digital</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4959"/>
+        <location filename="../qml/decodium/Main.qml" line="5002"/>
         <source>City labels</source>
         <translation>Etiquetes de ciutats</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4966"/>
+        <location filename="../qml/decodium/Main.qml" line="5009"/>
         <source>Hide clock</source>
         <translation>Amaga el rellotge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5014"/>
+        <location filename="../qml/decodium/Main.qml" line="5057"/>
         <source>Restore Waterfall</source>
         <translation>Restaura el Waterfall</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5066"/>
+        <location filename="../qml/decodium/Main.qml" line="5109"/>
         <source>Restore QSO Log</source>
         <translation>Restaura el QSO Log</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5118"/>
+        <location filename="../qml/decodium/Main.qml" line="5161"/>
         <source>Restore astronomical data</source>
         <translation>Restaura les dades astronòmiques</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5175"/>
+        <location filename="../qml/decodium/Main.qml" line="5218"/>
         <source>Restore Live Map</source>
         <translation>Restaura la Live Map</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5316"/>
+        <location filename="../qml/decodium/Main.qml" line="5359"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
@@ -4180,113 +4180,113 @@ Clic esquerre: obre i connecta
 Clic dret: desconnecta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5393"/>
+        <location filename="../qml/decodium/Main.qml" line="5436"/>
         <source>Disable filter bypass</source>
         <translation>Desactiva l&apos;omissió de filtres</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5394"/>
+        <location filename="../qml/decodium/Main.qml" line="5437"/>
         <source>Bypass CQ/My Call and setup filters</source>
         <translation>Omet els filtres de CQ/My Call i de configuració</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5441"/>
+        <location filename="../qml/decodium/Main.qml" line="5484"/>
         <source>Restore Macro configuration</source>
         <translation>Restaura la configuració de Macros</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5493"/>
+        <location filename="../qml/decodium/Main.qml" line="5536"/>
         <source>Restore Rig Control</source>
         <translation>Restaura el Rig Control</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5546"/>
+        <location filename="../qml/decodium/Main.qml" line="5589"/>
         <source>Restore Full Spectrum</source>
         <translation>Restaura el Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5598"/>
+        <location filename="../qml/decodium/Main.qml" line="5641"/>
         <source>Restore Period 2</source>
         <translation>Restaura el Període 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5649"/>
+        <location filename="../qml/decodium/Main.qml" line="5692"/>
         <source>Restore Signal RX</source>
         <translation>Restaura el Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5701"/>
+        <location filename="../qml/decodium/Main.qml" line="5744"/>
         <source>Restore TX panel</source>
         <translation>Restaura el panell TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5956"/>
+        <location filename="../qml/decodium/Main.qml" line="5999"/>
         <source>Clock</source>
         <translation>Rellotge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7337"/>
-        <location filename="../qml/decodium/Main.qml" line="8130"/>
-        <location filename="../qml/decodium/Main.qml" line="12188"/>
-        <location filename="../qml/decodium/Main.qml" line="12922"/>
+        <location filename="../qml/decodium/Main.qml" line="7376"/>
+        <location filename="../qml/decodium/Main.qml" line="8169"/>
+        <location filename="../qml/decodium/Main.qml" line="12235"/>
+        <location filename="../qml/decodium/Main.qml" line="12969"/>
         <source>Return to normal row height</source>
         <translation>Torna a l&apos;alçada de fila normal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7338"/>
-        <location filename="../qml/decodium/Main.qml" line="8131"/>
-        <location filename="../qml/decodium/Main.qml" line="12189"/>
-        <location filename="../qml/decodium/Main.qml" line="12923"/>
+        <location filename="../qml/decodium/Main.qml" line="7377"/>
+        <location filename="../qml/decodium/Main.qml" line="8170"/>
+        <location filename="../qml/decodium/Main.qml" line="12236"/>
+        <location filename="../qml/decodium/Main.qml" line="12970"/>
         <source>Compact rows (2x visible decodes)</source>
         <translation>Files compactes (2x descodificacions visibles)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7368"/>
+        <location filename="../qml/decodium/Main.qml" line="7407"/>
         <source>Detach Full Spectrum</source>
         <translation>Separa el Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7910"/>
+        <location filename="../qml/decodium/Main.qml" line="7949"/>
         <source>Go to the latest decode</source>
         <translation>Vés a la darrera descodificació</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8096"/>
+        <location filename="../qml/decodium/Main.qml" line="8135"/>
         <source>Clear Signal RX</source>
         <translation>Neteja el Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8161"/>
+        <location filename="../qml/decodium/Main.qml" line="8200"/>
         <source>Detach Signal RX</source>
         <translation>Separa el Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8575"/>
+        <location filename="../qml/decodium/Main.qml" line="8612"/>
         <source>Stacca</source>
         <translation>Separa</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8587"/>
+        <location filename="../qml/decodium/Main.qml" line="8624"/>
         <source>Stacca il DX Cluster in finestra</source>
         <translation>Separa el DX Cluster en una finestra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8849"/>
+        <location filename="../qml/decodium/Main.qml" line="8886"/>
         <source>Drag to swap the column</source>
         <translation>Arrossega per intercanviar la columna</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9052"/>
+        <location filename="../qml/decodium/Main.qml" line="9089"/>
         <source>Detach TX panel</source>
         <translation>Separa el panell TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9194"/>
+        <location filename="../qml/decodium/Main.qml" line="9231"/>
         <source>Reset Layout</source>
         <translation>Restableix el disseny</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9210"/>
+        <location filename="../qml/decodium/Main.qml" line="9247"/>
         <source>Riportare tutte le finestre flottanti dentro la finestra principale
 e ricentrare Decodium sul monitor principale?
 
@@ -4297,81 +4297,81 @@ i recentrar Decodium al monitor principal?
 Les coordenades desades s&apos;esborraran.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9511"/>
+        <location filename="../qml/decodium/Main.qml" line="9548"/>
         <source>Notifica</source>
         <translation>Notificació</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10151"/>
+        <location filename="../qml/decodium/Main.qml" line="10188"/>
         <source>Apri cartella ALL.TXT</source>
         <translation>Obre la carpeta ALL.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10215"/>
+        <location filename="../qml/decodium/Main.qml" line="10252"/>
         <source>Bypass Filters</source>
         <translation>Omet els filtres</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10431"/>
+        <location filename="../qml/decodium/Main.qml" line="10468"/>
         <source>Update checks disabled</source>
         <translation>Comprovacions d&apos;actualització desactivades</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10446"/>
+        <location filename="../qml/decodium/Main.qml" line="10483"/>
         <source>Esporta Cabrillo...</source>
         <translation>Exporta Cabrillo...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10474"/>
+        <location filename="../qml/decodium/Main.qml" line="10511"/>
         <source>Mostra orologio</source>
         <translation>Mostra el rellotge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10489"/>
+        <location filename="../qml/decodium/Main.qml" line="10526"/>
         <source>Mostra DX Cluster</source>
         <translation>Mostra el DX Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10504"/>
+        <location filename="../qml/decodium/Main.qml" line="10541"/>
         <source>Mostra PSK Reporter</source>
         <translation>Mostra el PSK Reporter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10656"/>
+        <location filename="../qml/decodium/Main.qml" line="10693"/>
         <source>Waterfall / Panadapter</source>
         <translation>Waterfall / Panadapter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10701"/>
+        <location filename="../qml/decodium/Main.qml" line="10738"/>
         <source>DecoSyncTime Monitor</source>
         <translation>Monitor DecoSyncTime</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11269"/>
-        <location filename="../qml/decodium/Main.qml" line="12214"/>
-        <location filename="../qml/decodium/Main.qml" line="12936"/>
-        <location filename="../qml/decodium/Main.qml" line="12949"/>
-        <location filename="../qml/decodium/Main.qml" line="13478"/>
+        <location filename="../qml/decodium/Main.qml" line="11316"/>
+        <location filename="../qml/decodium/Main.qml" line="12261"/>
+        <location filename="../qml/decodium/Main.qml" line="12983"/>
+        <location filename="../qml/decodium/Main.qml" line="12996"/>
+        <location filename="../qml/decodium/Main.qml" line="13525"/>
         <source>Dock</source>
         <translation>Acobla</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13487"/>
+        <location filename="../qml/decodium/Main.qml" line="13534"/>
         <source>Dock TX panel</source>
         <translation>Ancora el panell TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13954"/>
+        <location filename="../qml/decodium/Main.qml" line="14001"/>
         <source>Inserisci nel layout:</source>
         <translation>Insereix al disseny:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13961"/>
+        <location filename="../qml/decodium/Main.qml" line="14008"/>
         <source>◧ accanto a Full Spectrum</source>
         <translation>◧ al costat de Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13962"/>
+        <location filename="../qml/decodium/Main.qml" line="14009"/>
         <source>◧ accanto a Signal RX</source>
         <translation>◧ al costat de Signal RX</translation>
     </message>
@@ -4380,27 +4380,27 @@ Les coordenades desades s&apos;esborraran.</translation>
         <translation type="vanished">Acobla panell TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10304"/>
+        <location filename="../qml/decodium/Main.qml" line="10341"/>
         <source>Hide ASYNC icon</source>
         <translation>Amaga la icona ASYNC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10305"/>
+        <location filename="../qml/decodium/Main.qml" line="10342"/>
         <source>Show ASYNC icon</source>
         <translation>Mostra la icona ASYNC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10385"/>
+        <location filename="../qml/decodium/Main.qml" line="10422"/>
         <source>Alert on CQ</source>
         <translation>Alerta en CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10406"/>
+        <location filename="../qml/decodium/Main.qml" line="10443"/>
         <source>Color Highlighting...</source>
         <translation>Ressaltat de colors...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10418"/>
+        <location filename="../qml/decodium/Main.qml" line="10455"/>
         <source>QSY...</source>
         <translation>QSY...</translation>
     </message>
@@ -4417,12 +4417,12 @@ Les coordenades desades s&apos;esborraran.</translation>
         <translation type="vanished">Exporta Cabrillo...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10458"/>
+        <location filename="../qml/decodium/Main.qml" line="10495"/>
         <source>cty.dat downloading...</source>
         <translation>Baixant cty.dat...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10458"/>
+        <location filename="../qml/decodium/Main.qml" line="10495"/>
         <source>Update cty.dat</source>
         <translation>Actualitza cty.dat</translation>
     </message>
@@ -4439,17 +4439,17 @@ Les coordenades desades s&apos;esborraran.</translation>
         <translation type="vanished">Mostra PSK Reporter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10628"/>
+        <location filename="../qml/decodium/Main.qml" line="10665"/>
         <source>Time Sync Panel</source>
         <translation>Panell de sincronització horària</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10642"/>
+        <location filename="../qml/decodium/Main.qml" line="10679"/>
         <source>Active Stations</source>
         <translation>Estacions actives</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10671"/>
+        <location filename="../qml/decodium/Main.qml" line="10708"/>
         <source>Live Map</source>
         <translation>Mapa en directe</translation>
     </message>
@@ -4462,17 +4462,17 @@ Les coordenades desades s&apos;esborraran.</translation>
         <translation type="vanished">Mode Hound</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10686"/>
+        <location filename="../qml/decodium/Main.qml" line="10723"/>
         <source>Astro / EME</source>
         <translation>Astro / EME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10715"/>
+        <location filename="../qml/decodium/Main.qml" line="10752"/>
         <source>DX Cluster Panel</source>
         <translation>Panell DX Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10729"/>
+        <location filename="../qml/decodium/Main.qml" line="10766"/>
         <source>Alert on My Call</source>
         <translation>Alerta en el meu indicatiu</translation>
     </message>
@@ -4485,15 +4485,15 @@ Les coordenades desades s&apos;esborraran.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="52"/>
-        <location filename="../widgets/mainwindow.cpp" line="10169"/>
-        <location filename="../widgets/mainwindow.cpp" line="10172"/>
-        <location filename="../widgets/mainwindow.cpp" line="22677"/>
-        <location filename="../widgets/mainwindow.cpp" line="22794"/>
-        <location filename="../widgets/mainwindow.cpp" line="22878"/>
-        <location filename="../widgets/mainwindow.cpp" line="23214"/>
-        <location filename="../widgets/mainwindow.cpp" line="23462"/>
-        <location filename="../widgets/mainwindow.cpp" line="23526"/>
-        <location filename="../widgets/mainwindow.cpp" line="23695"/>
+        <location filename="../widgets/mainwindow.cpp" line="10225"/>
+        <location filename="../widgets/mainwindow.cpp" line="10228"/>
+        <location filename="../widgets/mainwindow.cpp" line="22776"/>
+        <location filename="../widgets/mainwindow.cpp" line="22893"/>
+        <location filename="../widgets/mainwindow.cpp" line="22977"/>
+        <location filename="../widgets/mainwindow.cpp" line="23313"/>
+        <location filename="../widgets/mainwindow.cpp" line="23561"/>
+        <location filename="../widgets/mainwindow.cpp" line="23625"/>
+        <location filename="../widgets/mainwindow.cpp" line="23794"/>
         <source>Band Activity</source>
         <translation>Activitat a la banda</translation>
     </message>
@@ -4505,13 +4505,13 @@ Les coordenades desades s&apos;esborraran.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="195"/>
-        <location filename="../widgets/mainwindow.cpp" line="10173"/>
-        <location filename="../widgets/mainwindow.cpp" line="22678"/>
-        <location filename="../widgets/mainwindow.cpp" line="22793"/>
-        <location filename="../widgets/mainwindow.cpp" line="22877"/>
-        <location filename="../widgets/mainwindow.cpp" line="23209"/>
-        <location filename="../widgets/mainwindow.cpp" line="23463"/>
-        <location filename="../widgets/mainwindow.cpp" line="23527"/>
+        <location filename="../widgets/mainwindow.cpp" line="10229"/>
+        <location filename="../widgets/mainwindow.cpp" line="22777"/>
+        <location filename="../widgets/mainwindow.cpp" line="22892"/>
+        <location filename="../widgets/mainwindow.cpp" line="22976"/>
+        <location filename="../widgets/mainwindow.cpp" line="23308"/>
+        <location filename="../widgets/mainwindow.cpp" line="23562"/>
+        <location filename="../widgets/mainwindow.cpp" line="23626"/>
         <source>Rx Frequency</source>
         <translation>Freqüència de RX</translation>
     </message>
@@ -5015,7 +5015,7 @@ No està disponible per als titulars de indicatiu no estàndard.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="1650"/>
-        <location filename="../widgets/mainwindow.cpp" line="23249"/>
+        <location filename="../widgets/mainwindow.cpp" line="23348"/>
         <source>Fox</source>
         <translation>Guineu</translation>
     </message>
@@ -5493,10 +5493,10 @@ La llista es pot mantenir a la configuració (F2).</translation>
         <location filename="../widgets/mainwindow.ui" line="3138"/>
         <location filename="../widgets/mainwindow.ui" line="3145"/>
         <location filename="../widgets/mainwindow.ui" line="4208"/>
-        <location filename="../widgets/mainwindow.cpp" line="6381"/>
-        <location filename="../widgets/mainwindow.cpp" line="20859"/>
-        <location filename="../widgets/mainwindow.cpp" line="23939"/>
-        <location filename="../widgets/mainwindow.cpp" line="26840"/>
+        <location filename="../widgets/mainwindow.cpp" line="6434"/>
+        <location filename="../widgets/mainwindow.cpp" line="20958"/>
+        <location filename="../widgets/mainwindow.cpp" line="24038"/>
+        <location filename="../widgets/mainwindow.cpp" line="26944"/>
         <source>Random</source>
         <translation>a l’atzar</translation>
     </message>
@@ -7478,21 +7478,21 @@ La llista es pot mantenir a la configuració (F2).</translation>
         <translation>Guia d&apos;inici ràpid de WSJT-X 2.5.0 i MAP65 3.0</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2311"/>
-        <location filename="../widgets/mainwindow.cpp" line="24888"/>
+        <location filename="../widgets/mainwindow.cpp" line="2355"/>
+        <location filename="../widgets/mainwindow.cpp" line="24987"/>
         <source>Rig Control Error</source>
         <translation>Error del control del equip</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2436"/>
-        <location filename="../widgets/mainwindow.cpp" line="17311"/>
-        <location filename="../widgets/mainwindow.cpp" line="26677"/>
+        <location filename="../widgets/mainwindow.cpp" line="2480"/>
+        <location filename="../widgets/mainwindow.cpp" line="17410"/>
+        <location filename="../widgets/mainwindow.cpp" line="26781"/>
         <source>Receiving</source>
         <translation>Rebent</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2796"/>
-        <location filename="../widgets/mainwindow.cpp" line="24889"/>
+        <location filename="../widgets/mainwindow.cpp" line="2840"/>
+        <location filename="../widgets/mainwindow.cpp" line="24988"/>
         <source>Do you want to reconfigure the radio interface?</source>
         <translation>Vols reconfigurar la interfície de la ràdio ?</translation>
     </message>
@@ -7505,47 +7505,47 @@ La llista es pot mantenir a la configuració (F2).</translation>
         <translation type="vanished">Log ADIF escanejat, %1 funcionava abans de la creació de registres. CTY: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3560"/>
+        <location filename="../widgets/mainwindow.cpp" line="3604"/>
         <source>Error Loading LotW Users Data</source>
         <translation>S&apos;ha produït un error al carregar les dades dels usuaris de LotW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3646"/>
+        <location filename="../widgets/mainwindow.cpp" line="3690"/>
         <source>Error Writing WAV File</source>
         <translation>S&apos;ha produït un error al escriure l&apos;arxiu WAV</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3681"/>
+        <location filename="../widgets/mainwindow.cpp" line="3725"/>
         <source>Enumerating audio devices</source>
         <translation>Enumeració de dispositius d’àudio</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3702"/>
+        <location filename="../widgets/mainwindow.cpp" line="3746"/>
         <source>Configurations...</source>
         <translation>Configuracions...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
-        <location filename="../widgets/mainwindow.cpp" line="3802"/>
-        <location filename="../widgets/mainwindow.cpp" line="22782"/>
-        <location filename="../widgets/mainwindow.cpp" line="22869"/>
-        <location filename="../widgets/mainwindow.cpp" line="22879"/>
-        <location filename="../widgets/mainwindow.cpp" line="23201"/>
-        <location filename="../widgets/mainwindow.cpp" line="23215"/>
-        <location filename="../widgets/mainwindow.cpp" line="23369"/>
-        <location filename="../widgets/mainwindow.cpp" line="23370"/>
-        <location filename="../widgets/mainwindow.cpp" line="23444"/>
-        <location filename="../widgets/mainwindow.cpp" line="23445"/>
-        <location filename="../widgets/mainwindow.cpp" line="23451"/>
-        <location filename="../widgets/mainwindow.cpp" line="23452"/>
-        <location filename="../widgets/mainwindow.cpp" line="23594"/>
-        <location filename="../widgets/mainwindow.cpp" line="23595"/>
-        <location filename="../widgets/mainwindow.cpp" line="23686"/>
-        <location filename="../widgets/mainwindow.cpp" line="23687"/>
-        <location filename="../widgets/mainwindow.cpp" line="25696"/>
-        <location filename="../widgets/mainwindow.cpp" line="25699"/>
-        <location filename="../widgets/mainwindow.cpp" line="25704"/>
-        <location filename="../widgets/mainwindow.cpp" line="25707"/>
+        <location filename="../widgets/mainwindow.cpp" line="3846"/>
+        <location filename="../widgets/mainwindow.cpp" line="22881"/>
+        <location filename="../widgets/mainwindow.cpp" line="22968"/>
+        <location filename="../widgets/mainwindow.cpp" line="22978"/>
+        <location filename="../widgets/mainwindow.cpp" line="23300"/>
+        <location filename="../widgets/mainwindow.cpp" line="23314"/>
+        <location filename="../widgets/mainwindow.cpp" line="23468"/>
+        <location filename="../widgets/mainwindow.cpp" line="23469"/>
+        <location filename="../widgets/mainwindow.cpp" line="23543"/>
+        <location filename="../widgets/mainwindow.cpp" line="23544"/>
+        <location filename="../widgets/mainwindow.cpp" line="23550"/>
+        <location filename="../widgets/mainwindow.cpp" line="23551"/>
+        <location filename="../widgets/mainwindow.cpp" line="23693"/>
+        <location filename="../widgets/mainwindow.cpp" line="23694"/>
+        <location filename="../widgets/mainwindow.cpp" line="23785"/>
+        <location filename="../widgets/mainwindow.cpp" line="23786"/>
+        <location filename="../widgets/mainwindow.cpp" line="25795"/>
+        <location filename="../widgets/mainwindow.cpp" line="25798"/>
+        <location filename="../widgets/mainwindow.cpp" line="25803"/>
+        <location filename="../widgets/mainwindow.cpp" line="25806"/>
         <source>Message</source>
         <translation>Missatge</translation>
     </message>
@@ -7566,111 +7566,111 @@ La llista es pot mantenir a la configuració (F2).</translation>
         <translation type="vanished">Fes clic a D&apos;acord per tornar-ho a provar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6463"/>
-        <location filename="../widgets/mainwindow.cpp" line="23647"/>
+        <location filename="../widgets/mainwindow.cpp" line="6516"/>
+        <location filename="../widgets/mainwindow.cpp" line="23746"/>
         <source>Improper mode</source>
         <translation>Mode inadequat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6816"/>
-        <location filename="../widgets/mainwindow.cpp" line="28281"/>
+        <location filename="../widgets/mainwindow.cpp" line="6869"/>
+        <location filename="../widgets/mainwindow.cpp" line="28385"/>
         <source>File Open Error</source>
         <translation>Error al obrir l&apos;arxiu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6817"/>
-        <location filename="../widgets/mainwindow.cpp" line="26743"/>
-        <location filename="../widgets/mainwindow.cpp" line="27267"/>
-        <location filename="../widgets/mainwindow.cpp" line="28282"/>
-        <location filename="../widgets/mainwindow.cpp" line="28473"/>
+        <location filename="../widgets/mainwindow.cpp" line="6870"/>
+        <location filename="../widgets/mainwindow.cpp" line="26847"/>
+        <location filename="../widgets/mainwindow.cpp" line="27371"/>
+        <location filename="../widgets/mainwindow.cpp" line="28386"/>
+        <location filename="../widgets/mainwindow.cpp" line="28958"/>
         <source>Cannot open &quot;%1&quot; for append: %2</source>
         <translation>No es pot obrir &quot;%1&quot; per annexar: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7081"/>
+        <location filename="../widgets/mainwindow.cpp" line="7134"/>
         <source>Error saving c2 file</source>
         <translation>Error en desar l&apos;arxiu c2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8055"/>
-        <location filename="../widgets/mainwindow.cpp" line="8058"/>
+        <location filename="../widgets/mainwindow.cpp" line="8108"/>
+        <location filename="../widgets/mainwindow.cpp" line="8111"/>
         <source>Error in Sound Input</source>
         <translation>Error a la entrada de so</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8067"/>
-        <location filename="../widgets/mainwindow.cpp" line="8070"/>
+        <location filename="../widgets/mainwindow.cpp" line="8120"/>
+        <location filename="../widgets/mainwindow.cpp" line="8123"/>
         <source>Error in Sound Output</source>
         <translation>Error en la sortida de so</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8768"/>
-        <location filename="../widgets/mainwindow.cpp" line="10165"/>
+        <location filename="../widgets/mainwindow.cpp" line="8824"/>
+        <location filename="../widgets/mainwindow.cpp" line="10221"/>
         <source>Single-Period Decodes</source>
         <translation>Descodificacions d&apos;un sol període</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8769"/>
-        <location filename="../widgets/mainwindow.cpp" line="10166"/>
+        <location filename="../widgets/mainwindow.cpp" line="8825"/>
+        <location filename="../widgets/mainwindow.cpp" line="10222"/>
         <source>Average Decodes</source>
         <translation>Mitjans descodificats</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9896"/>
+        <location filename="../widgets/mainwindow.cpp" line="9952"/>
         <source>Change Operator</source>
         <translation>Canvi d&apos;Operador</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9896"/>
+        <location filename="../widgets/mainwindow.cpp" line="9952"/>
         <source>New operator:</source>
         <translation>Operador Nou:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10132"/>
+        <location filename="../widgets/mainwindow.cpp" line="10188"/>
         <source>Status File Error</source>
         <translation>Error d&apos;estat de l&apos;arxiu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10133"/>
-        <location filename="../widgets/mainwindow.cpp" line="20664"/>
+        <location filename="../widgets/mainwindow.cpp" line="10189"/>
+        <location filename="../widgets/mainwindow.cpp" line="20763"/>
         <source>Cannot open &quot;%1&quot; for writing: %2</source>
         <translation>No es pot obrir &quot;%1&quot; per escriure: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10170"/>
+        <location filename="../widgets/mainwindow.cpp" line="10226"/>
         <source>Decodes containing My Call</source>
         <translation>Descodifica que conté La meva trucada</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10453"/>
+        <location filename="../widgets/mainwindow.cpp" line="10509"/>
         <source>Subprocess Error</source>
         <translation>Error de subprocés</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10454"/>
+        <location filename="../widgets/mainwindow.cpp" line="10510"/>
         <source>Subprocess failed with exit code %1</source>
         <translation>Ha fallat el subprocés amb el codi de sortida %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10456"/>
-        <location filename="../widgets/mainwindow.cpp" line="10502"/>
+        <location filename="../widgets/mainwindow.cpp" line="10512"/>
+        <location filename="../widgets/mainwindow.cpp" line="10558"/>
         <source>Running: %1
 %2</source>
         <translation>Corrent: %1
 %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10501"/>
+        <location filename="../widgets/mainwindow.cpp" line="10557"/>
         <source>Subprocess error</source>
         <translation>Error de subprocés</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10626"/>
+        <location filename="../widgets/mainwindow.cpp" line="10682"/>
         <source>Reference spectrum saved</source>
         <translation>Guarda l&apos;espectre de referència</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10715"/>
+        <location filename="../widgets/mainwindow.cpp" line="10771"/>
         <source>It is very important to avoid audio harmonics and distorted audio signals.
 This is usually achieved by the following step-by-step approach:
 
@@ -7719,22 +7719,22 @@ Si és possible, comproveu la vostra transmissió de tant en tant amb un webSDR
 per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10731"/>
+        <location filename="../widgets/mainwindow.cpp" line="10787"/>
         <source>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</source>
         <translation>&lt;b&gt;Configuració d&apos;àudio recomanada&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10795"/>
+        <location filename="../widgets/mainwindow.cpp" line="10851"/>
         <source>Invalid data in fmt.all at line %1</source>
         <translation>Les dades no són vàlides a fmt.all a la línia %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10801"/>
+        <location filename="../widgets/mainwindow.cpp" line="10857"/>
         <source>Good Calibration Solution</source>
         <translation>Solució de bona calibració</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10802"/>
+        <location filename="../widgets/mainwindow.cpp" line="10858"/>
         <source>&lt;pre&gt;%1%L2 ±%L3 ppm
 %4%L5 ±%L6 Hz
 
@@ -7747,12 +7747,12 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
 %9%L10 Hz&lt;/pre&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10816"/>
+        <location filename="../widgets/mainwindow.cpp" line="10872"/>
         <source>Delete Calibration Measurements</source>
         <translation>Suprimeix les mesures de calibració</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10817"/>
+        <location filename="../widgets/mainwindow.cpp" line="10873"/>
         <source>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</source>
         <translation>L&apos;arxiu &quot;fmt.all&quot; serà renombrat com a &quot;fmt.bak&quot;</translation>
     </message>
@@ -7765,22 +7765,22 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
 &quot;Els algoritmes, el codi font, l&apos;aparença de WSJT-X, els programes relacionats i les especificacions de protocol per als modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 són Copyright (C) 2001-2021 per un o més dels següents autors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q i altres membres del grup de desenvolupament WSJT. &quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11541"/>
+        <location filename="../widgets/mainwindow.cpp" line="11597"/>
         <source>No data read from disk. Wrong file format?</source>
         <translation>No es llegeixen dades del disc. Format de l&apos;arxiu incorrecte ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11548"/>
+        <location filename="../widgets/mainwindow.cpp" line="11604"/>
         <source>Confirm Delete</source>
         <translation>Confirma Esborrar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11549"/>
+        <location filename="../widgets/mainwindow.cpp" line="11605"/>
         <source>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</source>
         <translation>Estàs segur que vols esborrar tots els arxius *.wav i *.c2&quot;%1&quot; ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11586"/>
+        <location filename="../widgets/mainwindow.cpp" line="11642"/>
         <source>Keyboard Shortcuts</source>
         <translation>Dreceres de teclat</translation>
     </message>
@@ -7878,7 +7878,7 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11648"/>
+        <location filename="../widgets/mainwindow.cpp" line="11704"/>
         <source>Special Mouse Commands</source>
         <translation>Ordres especials del ratolí</translation>
     </message>
@@ -7948,13 +7948,13 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="12382"/>
+        <location filename="../widgets/mainwindow.cpp" line="12438"/>
         <source>No more files to open.</source>
         <translation>No s’obriran més arxius.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15891"/>
-        <location filename="../widgets/mainwindow.cpp" line="27313"/>
+        <location filename="../widgets/mainwindow.cpp" line="15990"/>
+        <location filename="../widgets/mainwindow.cpp" line="27417"/>
         <source>Spotting to PSK Reporter unavailable</source>
         <translation>No hi ha espots a PSK Reporter</translation>
     </message>
@@ -7963,7 +7963,7 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
         <translation type="vanished">Tria una altra freqüència de TX. El WSJT-X no transmetrà de manera conscient un altre mode a la sub-banda WSPR a 30 m.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16120"/>
+        <location filename="../widgets/mainwindow.cpp" line="16219"/>
         <source>WSPR Guard Band</source>
         <translation>Banda de Guàrdia WSPR</translation>
     </message>
@@ -7972,7 +7972,7 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
         <translation type="vanished">Tria una altra freqüència de treball. WSJT-X no funcionarà en mode Fox a les sub-bandes FT8 estàndard.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11650"/>
+        <location filename="../widgets/mainwindow.cpp" line="11706"/>
         <source>&lt;table cellpadding=5&gt;
   &lt;tr&gt;
     &lt;th align=&quot;right&quot;&gt;Click on&lt;/th&gt;
@@ -8198,8 +8198,8 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16139"/>
-        <location filename="../widgets/mainwindow.cpp" line="16156"/>
+        <location filename="../widgets/mainwindow.cpp" line="16238"/>
+        <location filename="../widgets/mainwindow.cpp" line="16255"/>
         <source>Fox Mode warning</source>
         <translation>Avís de mode Fox</translation>
     </message>
@@ -8208,7 +8208,7 @@ per assegurar-vos que el senyal estigui net i no estigui distorsionat.</translat
         <translation type="vanished">Últim TX: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17998"/>
+        <location filename="../widgets/mainwindow.cpp" line="18097"/>
         <source>This station transmits in the same time slot as you do.
 
 You must not start a QSO if both stations Tx even/1st
@@ -8224,7 +8224,7 @@ o Tx impar/2nd, mentre la casella de selecció Tx par/1r està desactivada.
 Feu clic al botó del mode MSK144 per tornar a habilitar la casella Tx parell/1st.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18624"/>
+        <location filename="../widgets/mainwindow.cpp" line="18723"/>
         <source>Should you switch to EU VHF Contest mode?
 
 To do so, check &apos;Special operating activity&apos; and
@@ -8235,35 +8235,35 @@ Per fer-ho, comprova &quot;Activitat operativa especial&quot; i
  Concurs EU VHF a la Configuració | Pestanya avançada.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18643"/>
+        <location filename="../widgets/mainwindow.cpp" line="18742"/>
         <source>Should you switch to ARRL Field Day mode?</source>
         <translation>Has de canviar al mode de Field Day de l&apos;ARRL ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18648"/>
+        <location filename="../widgets/mainwindow.cpp" line="18747"/>
         <source>Should you switch to RTTY contest mode?</source>
         <translation>Has de canviar al mode de concurs RTTY?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20626"/>
-        <location filename="../widgets/mainwindow.cpp" line="20645"/>
-        <location filename="../widgets/mainwindow.cpp" line="20663"/>
-        <location filename="../widgets/mainwindow.cpp" line="20690"/>
+        <location filename="../widgets/mainwindow.cpp" line="20725"/>
+        <location filename="../widgets/mainwindow.cpp" line="20744"/>
+        <location filename="../widgets/mainwindow.cpp" line="20762"/>
+        <location filename="../widgets/mainwindow.cpp" line="20789"/>
         <source>Add to CALL3.TXT</source>
         <translation>Afegeix a CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20627"/>
+        <location filename="../widgets/mainwindow.cpp" line="20726"/>
         <source>Please enter a valid grid locator</source>
         <translation>Introduïu un locator vàlid</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20646"/>
+        <location filename="../widgets/mainwindow.cpp" line="20745"/>
         <source>Cannot open &quot;%1&quot; for read/write: %2</source>
         <translation>No es pot obrir &quot;%1&quot; per llegir o escriure: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20688"/>
+        <location filename="../widgets/mainwindow.cpp" line="20787"/>
         <source>%1
 is already in CALL3.TXT, do you wish to replace it?</source>
         <translation>%1
@@ -8274,294 +8274,294 @@ ja és a CALL3.TXT, vols substituir-lo ?</translation>
         <translation type="vanished">Avís:  el camp de indicatiu DX està buit.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3151"/>
-        <location filename="../widgets/mainwindow.cpp" line="22343"/>
+        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="22442"/>
         <source>Log file error</source>
         <translation>Error a l&apos;arxiu de log</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="1219"/>
-        <location filename="../widgets/mainwindow.cpp" line="28926"/>
+        <location filename="../widgets/mainwindow.cpp" line="29411"/>
         <source>Async L2 Mode On</source>
         <translation>Mode asíncron L2 activat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2720"/>
+        <location filename="../widgets/mainwindow.cpp" line="2764"/>
         <source>Language</source>
         <translation>Llengua</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2760"/>
+        <location filename="../widgets/mainwindow.cpp" line="2804"/>
         <source>Language changed</source>
         <translation>El llenguatge ha canviat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2761"/>
+        <location filename="../widgets/mainwindow.cpp" line="2805"/>
         <source>Please restart the application for the language change to take effect.</source>
         <translation>Si us plau, reinicieu l&apos;aplicació perquè el canvi d&apos;idioma tingui efecte.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2821"/>
+        <location filename="../widgets/mainwindow.cpp" line="2865"/>
         <source>Idle</source>
         <translation>Inactiu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2911"/>
+        <location filename="../widgets/mainwindow.cpp" line="2955"/>
         <source>Error scanning logbook</source>
         <translation>Error en escanejar el llibre de registre</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2916"/>
+        <location filename="../widgets/mainwindow.cpp" line="2960"/>
         <source>Scanned logbook, %1 worked-before records created. CTY: %2</source>
         <translation>Llibre de registre escanejat, %1 treballat abans de crear registres. CTY: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3146"/>
+        <location filename="../widgets/mainwindow.cpp" line="3190"/>
         <source>Error</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3146"/>
+        <location filename="../widgets/mainwindow.cpp" line="3190"/>
         <source>parts != 4</source>
         <translation>parts != 4</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3151"/>
-        <location filename="../widgets/mainwindow.cpp" line="22344"/>
+        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="22443"/>
         <source>Cannot open &quot;%1&quot;</source>
         <translation>No es pot obrir &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3163"/>
-        <location filename="../widgets/mainwindow.cpp" line="3168"/>
-        <location filename="../widgets/mainwindow.cpp" line="22387"/>
-        <location filename="../widgets/mainwindow.cpp" line="22395"/>
+        <location filename="../widgets/mainwindow.cpp" line="3207"/>
+        <location filename="../widgets/mainwindow.cpp" line="3212"/>
+        <location filename="../widgets/mainwindow.cpp" line="22486"/>
+        <location filename="../widgets/mainwindow.cpp" line="22494"/>
         <source>Error sending log to N1MM</source>
         <translation>Error al enviar el log a N1MM</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3164"/>
-        <location filename="../widgets/mainwindow.cpp" line="22388"/>
+        <location filename="../widgets/mainwindow.cpp" line="3208"/>
+        <location filename="../widgets/mainwindow.cpp" line="22487"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
         <translation>No s&apos;ha pogut resoldre &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3168"/>
-        <location filename="../widgets/mainwindow.cpp" line="22396"/>
+        <location filename="../widgets/mainwindow.cpp" line="3212"/>
+        <location filename="../widgets/mainwindow.cpp" line="22495"/>
         <source>Write returned &quot;%1&quot;</source>
         <translation>Escriptura retornada &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="3239"/>
         <source>AutoSpot</source>
         <translation>AutoSpot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3197"/>
+        <location filename="../widgets/mainwindow.cpp" line="3241"/>
         <source>Invia spot al cluster configurato dopo il log QSO (73 confermato).</source>
         <translation>Invia el lloc al clúster configurat després del registre QSO (73 confirmat).</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3235"/>
+        <location filename="../widgets/mainwindow.cpp" line="3279"/>
         <source>Remote Web disabled: invalid configured HTTP port %1</source>
         <translation>Web remota desactivada: port HTTP configurat no vàlid %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3289"/>
+        <location filename="../widgets/mainwindow.cpp" line="3333"/>
         <source>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</source>
         <translation>WS remot: FT2_REMOTE_WS_BIND=&quot;%1&quot; no vàlid (utilitzant 0.0.0.0)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3300"/>
+        <location filename="../widgets/mainwindow.cpp" line="3344"/>
         <source>Remote Web disabled: non-loopback bind requires token authentication.</source>
         <translation>Web remota desactivada: l&apos;enllaç sense bucle requereix autenticació de testimoni.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3305"/>
+        <location filename="../widgets/mainwindow.cpp" line="3349"/>
         <source>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</source>
         <translation>Web remota desactivada: el testimoni ha de tenir almenys 12 caràcters a l&apos;enllaç LAN/WAN.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3389"/>
+        <location filename="../widgets/mainwindow.cpp" line="3433"/>
         <source>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</source>
         <translation>HTTP remot: FT2_REMOTE_HTTP_PORT=&quot;%1&quot; no vàlid (utilitzant ws+1 predeterminat)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3441"/>
+        <location filename="../widgets/mainwindow.cpp" line="3485"/>
         <source>Remote WS disabled: failed to bind %1:%2</source>
         <translation>WS remot desactivat: no s&apos;ha pogut vincular %1:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3447"/>
+        <location filename="../widgets/mainwindow.cpp" line="3491"/>
         <source>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</source>
         <translation>Avís web remot: el trànsit és normal HTTP/WS. Utilitzeu només una LAN/VPN de confiança o un servidor intermediari invers TLS.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3453"/>
+        <location filename="../widgets/mainwindow.cpp" line="3497"/>
         <source>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</source>
         <translation>WS remot desactivat: FT2_REMOTE_WS_PORT=&quot;%1&quot; no vàlid</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5226"/>
+        <location filename="../widgets/mainwindow.cpp" line="5277"/>
         <source>Audio input refreshed after device reconnect.</source>
         <translation>Entrada d&apos;àudio actualitzada després de tornar a connectar el dispositiu.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5230"/>
-        <location filename="../widgets/mainwindow.cpp" line="5238"/>
+        <location filename="../widgets/mainwindow.cpp" line="5281"/>
+        <location filename="../widgets/mainwindow.cpp" line="5289"/>
         <source>Audio output refreshed after device reconnect.</source>
         <translation>Sortida d&apos;àudio actualitzada després de tornar a connectar el dispositiu.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6081"/>
+        <location filename="../widgets/mainwindow.cpp" line="6134"/>
         <source>Decodium v3.0 FT2 Raptor</source>
         <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6082"/>
+        <location filename="../widgets/mainwindow.cpp" line="6135"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
         <translation>Hi ha d&apos;haver un callsign a la
  DX Call Box per enviar una sol·licitud de QSY</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8499"/>
+        <location filename="../widgets/mainwindow.cpp" line="8555"/>
         <source>Audio input resumed after system wake.</source>
         <translation>L&apos;entrada d&apos;àudio es va reprendre després de l&apos;activació del sistema.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8958"/>
+        <location filename="../widgets/mainwindow.cpp" line="9014"/>
         <source>Check for updates...</source>
         <translation>Comprova si hi ha actualitzacions...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9042"/>
-        <location filename="../widgets/mainwindow.cpp" line="9483"/>
+        <location filename="../widgets/mainwindow.cpp" line="9098"/>
+        <location filename="../widgets/mainwindow.cpp" line="9539"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Les comprovacions d&apos;actualització estan desactivades en aquesta versió.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9061"/>
+        <location filename="../widgets/mainwindow.cpp" line="9117"/>
         <source>An update check is already in progress.</source>
         <translation>Ja hi ha una comprovació d&apos;actualitzacions en curs.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9075"/>
+        <location filename="../widgets/mainwindow.cpp" line="9131"/>
         <source>Checking for updates...</source>
         <translation>S&apos;estan comprovant les actualitzacions...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9326"/>
+        <location filename="../widgets/mainwindow.cpp" line="9382"/>
         <source>A new Decodium release is available.</source>
         <translation>Hi ha una nova versió de Decodium disponible.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9328"/>
+        <location filename="../widgets/mainwindow.cpp" line="9384"/>
         <source>Installed version: %1
 Latest version: %2%3</source>
         <translation>Versió instal·lada: %1
 Última versió: %2%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9337"/>
+        <location filename="../widgets/mainwindow.cpp" line="9393"/>
         <source>Direct download: %1</source>
         <translation>Baixada directa: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9341"/>
+        <location filename="../widgets/mainwindow.cpp" line="9397"/>
         <source>Selected asset: %1
 </source>
         <translation>Fitxer seleccionat: %1
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9345"/>
+        <location filename="../widgets/mainwindow.cpp" line="9401"/>
         <source>Release page: %1</source>
         <translation>Pàgina de la versió: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9350"/>
+        <location filename="../widgets/mainwindow.cpp" line="9406"/>
         <source>Download page: %1</source>
         <translation>Pàgina de baixada: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9358"/>
+        <location filename="../widgets/mainwindow.cpp" line="9414"/>
         <source>Download</source>
         <translation>Baixa</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9359"/>
+        <location filename="../widgets/mainwindow.cpp" line="9415"/>
         <source>Remind me later</source>
         <translation>Recorda-m&apos;ho més tard</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9360"/>
+        <location filename="../widgets/mainwindow.cpp" line="9416"/>
         <source>Skip this version</source>
         <translation>Omet aquesta versió</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9404"/>
-        <location filename="../widgets/mainwindow.cpp" line="9418"/>
-        <location filename="../widgets/mainwindow.cpp" line="9444"/>
+        <location filename="../widgets/mainwindow.cpp" line="9460"/>
+        <location filename="../widgets/mainwindow.cpp" line="9474"/>
+        <location filename="../widgets/mainwindow.cpp" line="9500"/>
         <source>Update check failed.</source>
         <translation>La comprovació d&apos;actualitzacions ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9419"/>
+        <location filename="../widgets/mainwindow.cpp" line="9475"/>
         <source>The release metadata returned by GitHub could not be parsed.</source>
         <translation>No s&apos;han pogut analitzar les metadades de la versió retornades per GitHub.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9445"/>
+        <location filename="../widgets/mainwindow.cpp" line="9501"/>
         <source>Unable to compare version numbers.</source>
         <translation>No s&apos;han pogut comparar els números de versió.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9446"/>
+        <location filename="../widgets/mainwindow.cpp" line="9502"/>
         <source>Installed: %1
 Remote tag: %2</source>
         <translation>Instal·lada: %1
 Etiqueta remota: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9459"/>
+        <location filename="../widgets/mainwindow.cpp" line="9515"/>
         <source>You are up to date.</source>
         <translation>Ja tens la versió més recent.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9460"/>
+        <location filename="../widgets/mainwindow.cpp" line="9516"/>
         <source>Installed version: %1</source>
         <translation>Versió instal·lada: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9470"/>
+        <location filename="../widgets/mainwindow.cpp" line="9526"/>
         <source>Update available: %1</source>
         <translation>Actualització disponible: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10450"/>
+        <location filename="../widgets/mainwindow.cpp" line="10506"/>
         <source>No subprocess diagnostic output was captured.</source>
         <translation>No s&apos;ha capturat cap sortida de diagnòstic de subprocés.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10831"/>
+        <location filename="../widgets/mainwindow.cpp" line="10887"/>
         <source>Load Decodium Certificate</source>
         <translation>Carrega el certificat Decodium</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10833"/>
+        <location filename="../widgets/mainwindow.cpp" line="10889"/>
         <source>Decodium Certificate (*.decodium);;All files (*)</source>
         <translation>Certificat Decodium (*.decodium);;Tots els fitxers (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10877"/>
-        <location filename="../widgets/mainwindow.cpp" line="10891"/>
-        <location filename="../widgets/mainwindow.cpp" line="10903"/>
+        <location filename="../widgets/mainwindow.cpp" line="10933"/>
+        <location filename="../widgets/mainwindow.cpp" line="10947"/>
+        <location filename="../widgets/mainwindow.cpp" line="10959"/>
         <source>DXped Certificate Manager</source>
         <translation>Gestor de certificats DXped</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10878"/>
+        <location filename="../widgets/mainwindow.cpp" line="10934"/>
         <source>DXpedCertManager.py was not found.
 
 Expected locations:
@@ -8576,63 +8576,63 @@ Ubicacions esperades:
 - tools/ del directori de dades escrivible</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10892"/>
+        <location filename="../widgets/mainwindow.cpp" line="10948"/>
         <source>Python 3 was not found in PATH.
 Please install Python and try again.</source>
         <translation>No s&apos;ha trobat Python 3 al PATH.
 Instal·la Python i torna-ho a provar.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10904"/>
+        <location filename="../widgets/mainwindow.cpp" line="10960"/>
         <source>Failed to start DXped Certificate Manager.</source>
         <translation>No s&apos;ha pogut iniciar el Gestor de certificats DXped.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10908"/>
+        <location filename="../widgets/mainwindow.cpp" line="10964"/>
         <source>DXped Certificate Manager started</source>
         <translation>Gestor de certificats DXped iniciat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10925"/>
-        <location filename="../widgets/mainwindow.cpp" line="20253"/>
+        <location filename="../widgets/mainwindow.cpp" line="10981"/>
+        <location filename="../widgets/mainwindow.cpp" line="20352"/>
         <source>Invalid Certificate</source>
         <translation>Certificat no vàlid</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10926"/>
+        <location filename="../widgets/mainwindow.cpp" line="10982"/>
         <source>The Decodium certificate file is invalid or the signature verification failed.</source>
         <translation>El fitxer del certificat Decodium no és vàlid o la verificació de la signatura ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10952"/>
+        <location filename="../widgets/mainwindow.cpp" line="11008"/>
         <source>Decodium certificate loaded but expired: %1 (%2)</source>
         <translation>Certificat Decodium carregat però caducat: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10958"/>
-        <location filename="../widgets/mainwindow.cpp" line="20262"/>
+        <location filename="../widgets/mainwindow.cpp" line="11014"/>
+        <location filename="../widgets/mainwindow.cpp" line="20361"/>
         <source>Certificate Expired</source>
         <translation>Certificat caducat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10959"/>
+        <location filename="../widgets/mainwindow.cpp" line="11015"/>
         <source>The Decodium certificate for %1 expired on %2.</source>
         <translation>El certificat Decodium de %1 va caducar el %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10971"/>
+        <location filename="../widgets/mainwindow.cpp" line="11027"/>
         <source>Decodium certificate loaded for %1, current callsign is %2</source>
         <translation>Certificat Decodium carregat per a %1; l&apos;indicatiu actual és %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10977"/>
-        <location filename="../widgets/mainwindow.cpp" line="10997"/>
-        <location filename="../widgets/mainwindow.cpp" line="20284"/>
+        <location filename="../widgets/mainwindow.cpp" line="11033"/>
+        <location filename="../widgets/mainwindow.cpp" line="11053"/>
+        <location filename="../widgets/mainwindow.cpp" line="20383"/>
         <source>Certificate Loaded</source>
         <translation>Certificat carregat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10978"/>
+        <location filename="../widgets/mainwindow.cpp" line="11034"/>
         <source>Certificate loaded successfully.
 
 Certificate call: %1
@@ -8651,12 +8651,12 @@ Caduca: %4
 El certificat és actiu, però no coincideix amb l&apos;indicatiu de l&apos;operador actual.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10991"/>
+        <location filename="../widgets/mainwindow.cpp" line="11047"/>
         <source>Decodium certificate active: %1 (%2)</source>
         <translation>Certificat Decodium actiu: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10998"/>
+        <location filename="../widgets/mainwindow.cpp" line="11054"/>
         <source>Certificate loaded successfully.
 
 Call: %1
@@ -8669,12 +8669,12 @@ Nivell: %2
 Caduca: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11067"/>
+        <location filename="../widgets/mainwindow.cpp" line="11123"/>
         <source>No Decodium certificate loaded.</source>
         <translation>No hi ha cap certificat Decodium carregat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11071"/>
+        <location filename="../widgets/mainwindow.cpp" line="11127"/>
         <source>Call: %1
 Tier: %2
 Expires: %3</source>
@@ -8683,21 +8683,21 @@ Nivell: %2
 Caduca: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11076"/>
+        <location filename="../widgets/mainwindow.cpp" line="11132"/>
         <source>
 Path: %1</source>
         <translation>
 Camí: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11079"/>
+        <location filename="../widgets/mainwindow.cpp" line="11135"/>
         <source>
 Current operator: %1</source>
         <translation>
 Operador actual: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11098"/>
+        <location filename="../widgets/mainwindow.cpp" line="11154"/>
         <source>If you make fair use of any part of WSJT-X under terms of the GNU General Public License, you must display the following copyright notice prominently in your derivative work:
 
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</source>
@@ -8706,42 +8706,42 @@ Operador actual: %1</translation>
 &quot;Els algorismes, el codi font, l&apos;aspecte de WSJT-X i els programes relacionats, i les especificacions de protocol per als modes FSK441, FST, J8M, J8M, JT6T, JT6T JT65, JTMS, QRA64, Q65, MSK144 són Copyright (C) 2001-2025 d&apos;un o més dels següents autors: Joseph Taylor, K1JT, G4WJS, Nico Palermo, IV3NWV, Michael, KI7; KA9Q; Uwe Risse, DG2YCB; Roger Rehr, W3SZ;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22070"/>
+        <location filename="../widgets/mainwindow.cpp" line="22169"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
         <translation>AutoSpot enviat al node del cluster per a %1 a %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32268"/>
+        <location filename="../widgets/mainwindow.cpp" line="32827"/>
         <source>Remote caller queued: %1</source>
         <translation>Trucador remot a la cua: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32295"/>
+        <location filename="../widgets/mainwindow.cpp" line="32854"/>
         <source>Remote CW (audio): %1 (%2 WPM)</source>
         <translation>CW remot (àudio): %1 (%2 WPM)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32303"/>
+        <location filename="../widgets/mainwindow.cpp" line="32862"/>
         <source>CW audio: messaggio vuoto</source>
         <translation>CW àudio: missatge buit</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32312"/>
+        <location filename="../widgets/mainwindow.cpp" line="32871"/>
         <source>CW audio: TX RTTY in corso, riprova</source>
         <translation>CW àudio: TX RTTY en curs, torneu-ho a provar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32321"/>
+        <location filename="../widgets/mainwindow.cpp" line="32880"/>
         <source>CW audio: impossibile generare &quot;%1&quot;</source>
         <translation>CW àudio: no es pot generar &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32336"/>
+        <location filename="../widgets/mainwindow.cpp" line="32895"/>
         <source>CW audio: TX gia&apos; attivo, comando ignorato</source>
         <translation>CW àudio: TX ja actiu, ordre ignorada</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32387"/>
+        <location filename="../widgets/mainwindow.cpp" line="32946"/>
         <source>CW audio non disponibile con audio TCI</source>
         <translation>CW àudio no disponible amb àudio TCI</translation>
     </message>
@@ -8847,7 +8847,7 @@ Operador actual: %1</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11588"/>
+        <location filename="../widgets/mainwindow.cpp" line="11644"/>
         <source>&lt;table cellspacing=1&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
@@ -8949,27 +8949,27 @@ Operador actual: %1</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="13788"/>
+        <location filename="../widgets/mainwindow.cpp" line="13887"/>
         <source>Embedded WSPR decoder unavailable.</source>
         <translation>El descodificador WSPR incrustat no està disponible.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16096"/>
+        <location filename="../widgets/mainwindow.cpp" line="16195"/>
         <source>Async L2: starting queued call %1</source>
         <translation>Async L2: inici de trucada a la cua %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16098"/>
+        <location filename="../widgets/mainwindow.cpp" line="16197"/>
         <source>Async L2: starting queued call</source>
         <translation>Async L2: inici de trucada a la cua</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16116"/>
+        <location filename="../widgets/mainwindow.cpp" line="16215"/>
         <source>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</source>
         <translation>Si us plau, trieu una altra freqüència de transmissió. Decodium v3.0 FT2 Raptor no transmetrà conscientment un altre mode a la subbanda WSPR a 30 m.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16134"/>
+        <location filename="../widgets/mainwindow.cpp" line="16233"/>
         <source>Please choose another dial frequency.
 Must be 3Khz away from %1.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
@@ -8980,7 +8980,7 @@ Decodium v3.0 FT2 Raptor no funcionarà en mode Fox
 superposant-se a les subbandes estàndard FT8.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16152"/>
+        <location filename="../widgets/mainwindow.cpp" line="16251"/>
         <source>Please choose another dial frequency.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</source>
@@ -8989,23 +8989,23 @@ Decodium v3.0 FT2 Raptor no funcionarà en mode Fox
 superposant les subbandes WSPR.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17948"/>
+        <location filename="../widgets/mainwindow.cpp" line="18047"/>
         <source>Async L2: %1 queued, waiting free TX slot</source>
         <translation>Async L2: %1 a la cua, esperant ranura de transmissió lliure</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17950"/>
+        <location filename="../widgets/mainwindow.cpp" line="18049"/>
         <source>Async L2: caller queued, waiting free TX slot</source>
         <translation>Async L2: trucant a la cua, esperant ranura de TX lliure</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20167"/>
-        <location filename="../widgets/mainwindow.cpp" line="20180"/>
+        <location filename="../widgets/mainwindow.cpp" line="20266"/>
+        <location filename="../widgets/mainwindow.cpp" line="20279"/>
         <source>DXpedition Certificate Required</source>
         <translation>Certificat d&apos;expedició obligatori</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20168"/>
+        <location filename="../widgets/mainwindow.cpp" line="20267"/>
         <source>To activate DXpedition mode you must load a valid .dxcert certificate for your callsign.
 
 Load certificate now?</source>
@@ -9014,44 +9014,44 @@ Load certificate now?</source>
 Veu carregar el certificat ara?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20181"/>
+        <location filename="../widgets/mainwindow.cpp" line="20280"/>
         <source>DXpedition mode was not activated because no valid certificate is loaded.</source>
         <translation>El mode DXpedition no s&apos;ha activat perquè no s&apos;ha carregat cap certificat vàlid.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20244"/>
+        <location filename="../widgets/mainwindow.cpp" line="20343"/>
         <source>Load DXpedition Certificate</source>
         <translation>Carregueu el certificat d&apos;expedició DX</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20246"/>
+        <location filename="../widgets/mainwindow.cpp" line="20345"/>
         <source>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</source>
         <translation>Certificat DXped (*.dxcert);;Fitxers JSON (*.json);;Tots els fitxers (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20254"/>
+        <location filename="../widgets/mainwindow.cpp" line="20353"/>
         <source>The certificate file is invalid or the signature verification failed.</source>
         <translation>El fitxer del certificat no és vàlid o la verificació de la signatura ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20263"/>
+        <location filename="../widgets/mainwindow.cpp" line="20362"/>
         <source>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</source>
         <translation>El certificat per %1 està caducat o encara no és vàlid.
 Vàlid des de %2 fins a %3.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20275"/>
+        <location filename="../widgets/mainwindow.cpp" line="20374"/>
         <source>Unauthorized Operator</source>
         <translation>Operador no autoritzat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20276"/>
+        <location filename="../widgets/mainwindow.cpp" line="20375"/>
         <source>Your callsign %1 is not listed in this certificate for DXpedition %2.</source>
         <translation>El vostre indicatiu %1 no apareix en aquest certificat per a l&apos;expedició DX %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20285"/>
+        <location filename="../widgets/mainwindow.cpp" line="20384"/>
         <source>Certificate loaded successfully.
 
 DXpedition: %1 (%2)
@@ -9070,57 +9070,57 @@ Vàlid: %6 a %7
 Empremta digital: %8</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21498"/>
+        <location filename="../widgets/mainwindow.cpp" line="21597"/>
         <source>DX Call field is empty</source>
         <translation>El camp DX Call és buit</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21499"/>
+        <location filename="../widgets/mainwindow.cpp" line="21598"/>
         <source>The logger received a manual log request without a DX callsign.</source>
         <translation>El logger ha rebut una sol·licitud de log manual sense un callsign DX.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21500"/>
+        <location filename="../widgets/mainwindow.cpp" line="21599"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
         <translation>Seleccioneu un missatge rebut o escriviu el callsign DX abans de registrar el QSO.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21745"/>
+        <location filename="../widgets/mainwindow.cpp" line="21844"/>
         <source>AutoSpot skipped: invalid DX cluster endpoint</source>
         <translation>S&apos;ha omès AutoSpot: punt final del clúster DX no vàlid</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21746"/>
+        <location filename="../widgets/mainwindow.cpp" line="21845"/>
         <source>SKIP invalid endpoint</source>
         <translation>SALTAR el punt final no vàlid</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21778"/>
+        <location filename="../widgets/mainwindow.cpp" line="21877"/>
         <source>AutoSpot skipped: empty DX cluster host</source>
         <translation>AutoSpot omès: amfitrió del clúster DX buit</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21779"/>
+        <location filename="../widgets/mainwindow.cpp" line="21878"/>
         <source>SKIP empty host</source>
         <translation>SALTAR host buit</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21787"/>
+        <location filename="../widgets/mainwindow.cpp" line="21886"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>AutoSpot s&apos;ha omès: %1:%2 és només de lectura. Configureu un punt final de clúster DX que es pugui escriure.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21807"/>
+        <location filename="../widgets/mainwindow.cpp" line="21906"/>
         <source>AutoSpot skipped: empty MyCall</source>
         <translation>AutoSpot s&apos;ha omès: buida MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21808"/>
+        <location filename="../widgets/mainwindow.cpp" line="21907"/>
         <source>SKIP empty MyCall</source>
         <translation>SALTAR MyCall buit</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21815"/>
+        <location filename="../widgets/mainwindow.cpp" line="21914"/>
         <source>SUBMIT %1:%2 | %3</source>
         <translation>ENVIAR %1:%2 | %3</translation>
     </message>
@@ -9129,139 +9129,139 @@ Empremta digital: %8</translation>
         <translation type="vanished">AutoSpot acceptat pel node del clúster per a %1 a %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22072"/>
+        <location filename="../widgets/mainwindow.cpp" line="22171"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>AutoSpot rebutjat per %1 a %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22336"/>
+        <location filename="../widgets/mainwindow.cpp" line="22435"/>
         <source>Duplicate log suppressed for %1 (%2 s window)</source>
         <translation>S&apos;ha suprimit el registre duplicat per a %1 (finestra %2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22947"/>
+        <location filename="../widgets/mainwindow.cpp" line="23046"/>
         <source>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</source>
         <translation>Terminal %1 en bauds Baudot. Marqueu %2 Hz, canvieu els bits de parada %3 Hz, %4, %5. El text rebut apareix a dalt; escriviu el text que voleu enviar a continuació.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22951"/>
+        <location filename="../widgets/mainwindow.cpp" line="23050"/>
         <source>reverse</source>
         <translation>revés</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22951"/>
+        <location filename="../widgets/mainwindow.cpp" line="23050"/>
         <source>normal</source>
         <translation>normal</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22996"/>
+        <location filename="../widgets/mainwindow.cpp" line="23095"/>
         <source>RTTY text contains no encodable Baudot characters</source>
         <translation>El text RTTY no conté caràcters Baudot codificables</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23141"/>
+        <location filename="../widgets/mainwindow.cpp" line="23240"/>
         <source>RTTY Received Text</source>
         <translation>RTTY Text rebut</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23142"/>
+        <location filename="../widgets/mainwindow.cpp" line="23241"/>
         <source>RTTY Transmitted Text</source>
         <translation>RTTY Text transmès</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23211"/>
+        <location filename="../widgets/mainwindow.cpp" line="23310"/>
         <source>Stations calling DXpedition %1</source>
         <translation>Estacions que criden a DXpedition %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23245"/>
+        <location filename="../widgets/mainwindow.cpp" line="23344"/>
         <source>Show Already Worked</source>
         <translation>Mostra ja treballat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23247"/>
+        <location filename="../widgets/mainwindow.cpp" line="23346"/>
         <source>Super Fox</source>
         <translation>Super Fox</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23265"/>
+        <location filename="../widgets/mainwindow.cpp" line="23364"/>
         <source>Super Hound</source>
         <translation>Super Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23276"/>
+        <location filename="../widgets/mainwindow.cpp" line="23375"/>
         <source>Hound</source>
         <translation>Gos</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23696"/>
+        <location filename="../widgets/mainwindow.cpp" line="23795"/>
         <source>Tx Messages</source>
         <translation>Missatges de TX</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24159"/>
-        <location filename="../widgets/mainwindow.cpp" line="24170"/>
-        <location filename="../widgets/mainwindow.cpp" line="24209"/>
-        <location filename="../widgets/mainwindow.cpp" line="24219"/>
-        <location filename="../widgets/mainwindow.cpp" line="31152"/>
-        <location filename="../widgets/mainwindow.cpp" line="31198"/>
+        <location filename="../widgets/mainwindow.cpp" line="24258"/>
+        <location filename="../widgets/mainwindow.cpp" line="24269"/>
+        <location filename="../widgets/mainwindow.cpp" line="24308"/>
+        <location filename="../widgets/mainwindow.cpp" line="24318"/>
+        <location filename="../widgets/mainwindow.cpp" line="31711"/>
+        <location filename="../widgets/mainwindow.cpp" line="31757"/>
         <source>Confirm Erase</source>
         <translation>Confirma Esborrar</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24160"/>
+        <location filename="../widgets/mainwindow.cpp" line="24259"/>
         <source>Are you sure you want to erase file ALL.TXT?</source>
         <translation>Estàs segur que vols esborrar l&apos;arxiu ALL.TXT ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24171"/>
+        <location filename="../widgets/mainwindow.cpp" line="24270"/>
         <source>Are you sure you want to erase the list of Q65 callers?</source>
         <translation>Esteu segur que voleu esborrar la llista de trucades Q65?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24180"/>
-        <location filename="../widgets/mainwindow.cpp" line="27445"/>
+        <location filename="../widgets/mainwindow.cpp" line="24279"/>
+        <location filename="../widgets/mainwindow.cpp" line="27549"/>
         <source>Confirm Reset</source>
         <translation>Confirma que vols Restablir</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24181"/>
+        <location filename="../widgets/mainwindow.cpp" line="24280"/>
         <source>Are you sure you want to erase your contest log?</source>
         <translation>Estàs segur que vols esborrar el log del concurs ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24182"/>
+        <location filename="../widgets/mainwindow.cpp" line="24281"/>
         <source>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</source>
         <translation>Si fas això, suprimiràs tots els registres de QSO del concurs actual. Es conservaran a l&apos;arxiu de log ADIF, però no es podran exportar al log de Cabrillo.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24202"/>
+        <location filename="../widgets/mainwindow.cpp" line="24301"/>
         <source>Cabrillo Log saved</source>
         <translation>Log Cabrillo desat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24210"/>
+        <location filename="../widgets/mainwindow.cpp" line="24309"/>
         <source>Are you sure you want to erase file decodium_log.adi?</source>
         <translation>Esteu segur que voleu esborrar el fitxer decodium_log.adi?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29463"/>
+        <location filename="../widgets/mainwindow.cpp" line="30022"/>
         <source>Embedded WSPR decoder failed: %1</source>
         <translation>El descodificador WSPR incrustat ha fallat: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29598"/>
+        <location filename="../widgets/mainwindow.cpp" line="30157"/>
         <source>SuperFox TX generation failed.</source>
         <translation>La generació de TX de SuperFox ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30227"/>
-        <location filename="../widgets/mainwindow.cpp" line="30285"/>
+        <location filename="../widgets/mainwindow.cpp" line="30786"/>
+        <location filename="../widgets/mainwindow.cpp" line="30844"/>
         <source>Cannot write decodium_log_config.ini file</source>
         <translation>No es pot escriure el fitxer decodium_log_config.ini</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31332"/>
+        <location filename="../widgets/mainwindow.cpp" line="31891"/>
         <source>Call sign and LOTW password are required.
 
 Enter these in Settings at the Reporting tab.</source>
@@ -9270,99 +9270,99 @@ Enter these in Settings at the Reporting tab.</source>
 Introduïu-los a Configuració a la pestanya Informes.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31340"/>
+        <location filename="../widgets/mainwindow.cpp" line="31899"/>
         <source>Upload QSOs to LOTW first, and *wait* for LOTW to update.</source>
         <translation>Pengeu primer QSO a LOTW i *espera* que s&apos;actualitzi LOTW.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31357"/>
+        <location filename="../widgets/mainwindow.cpp" line="31916"/>
         <source>Downloading from LOTW...</source>
         <translation>S&apos;està baixant des de LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31449"/>
+        <location filename="../widgets/mainwindow.cpp" line="32008"/>
         <source>Download QSOs from LOTW succeeded.</source>
         <translation>La descàrrega de QSO de LOTW s&apos;ha aconseguit.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31462"/>
+        <location filename="../widgets/mainwindow.cpp" line="32021"/>
         <source>Download QSOs from LOTW failed.</source>
         <translation>La baixada de QSO de LOTW ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31537"/>
-        <location filename="../widgets/mainwindow.cpp" line="31549"/>
-        <location filename="../widgets/mainwindow.cpp" line="31572"/>
+        <location filename="../widgets/mainwindow.cpp" line="32096"/>
+        <location filename="../widgets/mainwindow.cpp" line="32108"/>
+        <location filename="../widgets/mainwindow.cpp" line="32131"/>
         <source>Unable to open file</source>
         <translation>No es pot obrir el fitxer</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31608"/>
+        <location filename="../widgets/mainwindow.cpp" line="32167"/>
         <source>Download QSLs from LOTW succeeded.</source>
         <translation>La descàrrega de QSL de LOTW s&apos;ha aconseguit.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31615"/>
+        <location filename="../widgets/mainwindow.cpp" line="32174"/>
         <source>Download QSLs from LOTW failed.</source>
         <translation>La baixada de QSL de LOTW ha fallat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31636"/>
+        <location filename="../widgets/mainwindow.cpp" line="32195"/>
         <source>No QSOs to upload to LOTW</source>
         <translation>No hi ha QSO per carregar a LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31680"/>
+        <location filename="../widgets/mainwindow.cpp" line="32239"/>
         <source>Upload to LOTW Error</source>
         <translation>Error de càrrega a LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31688"/>
+        <location filename="../widgets/mainwindow.cpp" line="32247"/>
         <source>Uploading to LOTW...</source>
         <translation>S&apos;està carregant a LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31785"/>
+        <location filename="../widgets/mainwindow.cpp" line="32344"/>
         <source>LOTW process error</source>
         <translation>Error de procés LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31856"/>
+        <location filename="../widgets/mainwindow.cpp" line="32415"/>
         <source>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</source>
         <translation>Error de xarxa: es denega la redirecció per a la sol·licitud LOTW amb credencial:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31865"/>
+        <location filename="../widgets/mainwindow.cpp" line="32424"/>
         <source>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</source>
         <translation>Error de xarxa - El suport SSL/TLS no està instal·lat, no es pot recuperar:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31875"/>
+        <location filename="../widgets/mainwindow.cpp" line="32434"/>
         <source>Network Error - Too many redirects:
 &apos;%1&apos;</source>
         <translation>Error de xarxa - Massa redireccions:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31889"/>
+        <location filename="../widgets/mainwindow.cpp" line="32448"/>
         <source>Network Error:
 %1</source>
         <translation>Error de xarxa:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31896"/>
+        <location filename="../widgets/mainwindow.cpp" line="32455"/>
         <source>File System Error - Cannot commit changes to:
 &quot;%1&quot;</source>
         <translation>Error de sistema d&apos;arxius: no es poden confirmar els canvis a:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31925"/>
+        <location filename="../widgets/mainwindow.cpp" line="32484"/>
         <source>File System Error - Cannot open file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -9371,7 +9371,7 @@ Error(%2): %3</source>
 Error(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31933"/>
+        <location filename="../widgets/mainwindow.cpp" line="32492"/>
         <source>File System Error - Cannot write to file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -9380,17 +9380,17 @@ Error(%2): %3</source>
 Error(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31996"/>
+        <location filename="../widgets/mainwindow.cpp" line="32555"/>
         <source>Unable to open incremental log file</source>
         <translation>No es pot obrir el fitxer de registre incremental</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32152"/>
+        <location filename="../widgets/mainwindow.cpp" line="32711"/>
         <source>Remote waterfall stream enabled</source>
         <translation>S&apos;ha activat el flux de cascada remot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32153"/>
+        <location filename="../widgets/mainwindow.cpp" line="32712"/>
         <source>Remote waterfall stream disabled</source>
         <translation>El corrent de cascada remot s&apos;ha desactivat</translation>
     </message>
@@ -9399,277 +9399,277 @@ Error(%2): %3</translation>
         <translation type="vanished">Trucada remota FT2 a la cua: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32438"/>
+        <location filename="../widgets/mainwindow.cpp" line="32997"/>
         <source>Remote mode request ignored: RTTY is hidden in this release</source>
         <translation>S&apos;ha ignorat la sol·licitud de mode remot: RTTY està amagat en aquesta versió</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32444"/>
+        <location filename="../widgets/mainwindow.cpp" line="33003"/>
         <source>Remote mode set: %1</source>
         <translation>Configuració del mode remot: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32490"/>
+        <location filename="../widgets/mainwindow.cpp" line="33049"/>
         <source>Remote band ignored: invalid band &quot;%1&quot;</source>
         <translation>Banda remota ignorada: banda no vàlida &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32494"/>
+        <location filename="../widgets/mainwindow.cpp" line="33053"/>
         <source>Remote band set: 160m</source>
         <translation>Conjunt de banda remota: 160m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32495"/>
+        <location filename="../widgets/mainwindow.cpp" line="33054"/>
         <source>Remote band set: 80m</source>
         <translation>Conjunt de banda remota: 80m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32496"/>
+        <location filename="../widgets/mainwindow.cpp" line="33055"/>
         <source>Remote band set: 60m</source>
         <translation>Conjunt de banda remota: 60m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32497"/>
+        <location filename="../widgets/mainwindow.cpp" line="33056"/>
         <source>Remote band set: 40m</source>
         <translation>Conjunt de banda remota: 40m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32498"/>
+        <location filename="../widgets/mainwindow.cpp" line="33057"/>
         <source>Remote band set: 30m</source>
         <translation>Conjunt de banda remota: 30m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32499"/>
+        <location filename="../widgets/mainwindow.cpp" line="33058"/>
         <source>Remote band set: 20m</source>
         <translation>Conjunt de banda remota: 20m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32500"/>
+        <location filename="../widgets/mainwindow.cpp" line="33059"/>
         <source>Remote band set: 17m</source>
         <translation>Conjunt de banda remota: 17m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32501"/>
+        <location filename="../widgets/mainwindow.cpp" line="33060"/>
         <source>Remote band set: 15m</source>
         <translation>Conjunt de banda remota: 15m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32502"/>
+        <location filename="../widgets/mainwindow.cpp" line="33061"/>
         <source>Remote band set: 12m</source>
         <translation>Conjunt de banda remota: 12m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32503"/>
+        <location filename="../widgets/mainwindow.cpp" line="33062"/>
         <source>Remote band set: 10m</source>
         <translation>Conjunt de banda remota: 10m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32504"/>
+        <location filename="../widgets/mainwindow.cpp" line="33063"/>
         <source>Remote band set: 6m</source>
         <translation>Conjunt de banda remota: 6m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32505"/>
+        <location filename="../widgets/mainwindow.cpp" line="33064"/>
         <source>Remote band set: 2m</source>
         <translation>Conjunt de banda remota: 2m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32506"/>
+        <location filename="../widgets/mainwindow.cpp" line="33065"/>
         <source>Remote band set: 70cm</source>
         <translation>Conjunt de bandes a distància: 70 cm</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32508"/>
+        <location filename="../widgets/mainwindow.cpp" line="33067"/>
         <source>Remote band ignored: unsupported band &quot;%1&quot;</source>
         <translation>Banda remota ignorada: banda no compatible &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32560"/>
+        <location filename="../widgets/mainwindow.cpp" line="33133"/>
         <source>Remote dial frequency set: %1 MHz</source>
         <translation>Freqüència de dial remota definida: %1 MHz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32579"/>
+        <location filename="../widgets/mainwindow.cpp" line="33152"/>
         <source>Remote Rx frequency set: %1 Hz</source>
         <translation>Conjunt de freqüència de Rx remota: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32597"/>
+        <location filename="../widgets/mainwindow.cpp" line="33170"/>
         <source>Remote Tx frequency set: %1 Hz</source>
         <translation>Conjunt de freqüència de Tx remota: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32683"/>
+        <location filename="../widgets/mainwindow.cpp" line="33256"/>
         <source>Remote TX enabled</source>
         <translation>TX remota habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32683"/>
+        <location filename="../widgets/mainwindow.cpp" line="33256"/>
         <source>Remote TX disabled</source>
         <translation>Transmissió remota desactivada</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32700"/>
+        <location filename="../widgets/mainwindow.cpp" line="33273"/>
         <source>Remote Auto CQ enabled</source>
         <translation>CQ automàtic remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32700"/>
+        <location filename="../widgets/mainwindow.cpp" line="33273"/>
         <source>Remote Auto CQ disabled</source>
         <translation>CQ automàtic remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32726"/>
+        <location filename="../widgets/mainwindow.cpp" line="33299"/>
         <source>Remote AutoSpot enabled</source>
         <translation>AutoSpot remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32726"/>
+        <location filename="../widgets/mainwindow.cpp" line="33299"/>
         <source>Remote AutoSpot disabled</source>
         <translation>AutoSpot remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32727"/>
+        <location filename="../widgets/mainwindow.cpp" line="33300"/>
         <source>AutoSpot enabled</source>
         <translation>AutoSpot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32727"/>
+        <location filename="../widgets/mainwindow.cpp" line="33300"/>
         <source>AutoSpot disabled</source>
         <translation>AutoSpot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32745"/>
+        <location filename="../widgets/mainwindow.cpp" line="33318"/>
         <source>Remote Monitoring ignored: cannot enable while transmitting</source>
         <translation>Supervisió remota ignorada: no es pot activar durant la transmissió</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32759"/>
+        <location filename="../widgets/mainwindow.cpp" line="33332"/>
         <source>Remote Monitoring enabled</source>
         <translation>Monitorització remota activada</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32759"/>
+        <location filename="../widgets/mainwindow.cpp" line="33332"/>
         <source>Remote Monitoring disabled</source>
         <translation>Monitorització remota desactivada</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32771"/>
+        <location filename="../widgets/mainwindow.cpp" line="33344"/>
         <source>Remote Async L2 ignored: not in FT2 mode</source>
         <translation>Remote Async L2 ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32779"/>
+        <location filename="../widgets/mainwindow.cpp" line="33352"/>
         <source>Remote Async L2 ignored: mandatory in FT2 mode</source>
         <translation>Remote Async L2 ignorat: obligatori en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32783"/>
+        <location filename="../widgets/mainwindow.cpp" line="33356"/>
         <source>Remote Async L2 enabled (mandatory in FT2)</source>
         <translation>Remote Async L2 habilitat (obligatori a FT2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32795"/>
+        <location filename="../widgets/mainwindow.cpp" line="33368"/>
         <source>Remote Dual Carrier ignored: not in FT2 mode</source>
         <translation>Doble operador remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32799"/>
+        <location filename="../widgets/mainwindow.cpp" line="33372"/>
         <source>Remote Dual Carrier enabled</source>
         <translation>Portador dual remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32799"/>
+        <location filename="../widgets/mainwindow.cpp" line="33372"/>
         <source>Remote Dual Carrier disabled</source>
         <translation>Portador dual remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32811"/>
+        <location filename="../widgets/mainwindow.cpp" line="33384"/>
         <source>Remote Alt 1/2 ignored: not available in FT2 mode</source>
         <translation>Remote Alt 1/2 ignorat: no disponible en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32815"/>
+        <location filename="../widgets/mainwindow.cpp" line="33388"/>
         <source>Remote Alt 1/2 enabled</source>
         <translation>Alt 1/2 remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32815"/>
+        <location filename="../widgets/mainwindow.cpp" line="33388"/>
         <source>Remote Alt 1/2 disabled</source>
         <translation>Alt 1/2 remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32827"/>
+        <location filename="../widgets/mainwindow.cpp" line="33400"/>
         <source>Remote Manual TX ignored: not in FT2 mode</source>
         <translation>Manual TX remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32831"/>
+        <location filename="../widgets/mainwindow.cpp" line="33404"/>
         <source>Remote Manual TX enabled</source>
         <translation>Manual TX remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32831"/>
+        <location filename="../widgets/mainwindow.cpp" line="33404"/>
         <source>Remote Manual TX disabled</source>
         <translation>Manual TX remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32843"/>
+        <location filename="../widgets/mainwindow.cpp" line="33416"/>
         <source>Remote Speedy ignored: not in FT2 mode</source>
         <translation>Speedy remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32847"/>
+        <location filename="../widgets/mainwindow.cpp" line="33420"/>
         <source>Remote Speedy enabled</source>
         <translation>Speedy remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32847"/>
+        <location filename="../widgets/mainwindow.cpp" line="33420"/>
         <source>Remote Speedy disabled</source>
         <translation>Speedy remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32859"/>
+        <location filename="../widgets/mainwindow.cpp" line="33432"/>
         <source>Remote D-CW ignored: not in FT2 mode</source>
         <translation>D-CW remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32863"/>
+        <location filename="../widgets/mainwindow.cpp" line="33436"/>
         <source>Remote D-CW enabled</source>
         <translation>D-CW remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32863"/>
+        <location filename="../widgets/mainwindow.cpp" line="33436"/>
         <source>Remote D-CW disabled</source>
         <translation>D-CW remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32875"/>
+        <location filename="../widgets/mainwindow.cpp" line="33448"/>
         <source>Remote Quick QSO ignored: not in FT2 mode</source>
         <translation>Quick QSO remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32879"/>
+        <location filename="../widgets/mainwindow.cpp" line="33452"/>
         <source>Remote Quick QSO enabled</source>
         <translation>Quick QSO remot habilitat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32879"/>
+        <location filename="../widgets/mainwindow.cpp" line="33452"/>
         <source>Remote Quick QSO disabled</source>
         <translation>Quick QSO remot desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32891"/>
+        <location filename="../widgets/mainwindow.cpp" line="33464"/>
         <source>Remote QSO profile ignored: not in FT2 mode</source>
         <translation>Perfil QSO remot ignorat: no en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32902"/>
+        <location filename="../widgets/mainwindow.cpp" line="33475"/>
         <source>Remote QSO profile ignored: unsupported FT2 count %1</source>
         <translation>Perfil QSO remot ignorat: recompte FT2 %1 no compatible</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32907"/>
+        <location filename="../widgets/mainwindow.cpp" line="33480"/>
         <source>Remote QSO profile set to %1 msg</source>
         <translation>Perfil QSO remot establert a %1 msg</translation>
     </message>
@@ -9678,29 +9678,29 @@ Error(%2): %3</translation>
         <translation type="vanished">Estàs segur que vols esborrar l&apos;arxiu wsjtx_log.adi ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24220"/>
+        <location filename="../widgets/mainwindow.cpp" line="24319"/>
         <source>Are you sure you want to erase the WSPR hashtable?</source>
         <translation>Estàs segur que vols esborrar la taula del WSPR ?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24239"/>
+        <location filename="../widgets/mainwindow.cpp" line="24338"/>
         <source>ChronoGPS not found</source>
         <translation>No s&apos;ha trobat ChronoGPS</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24240"/>
+        <location filename="../widgets/mainwindow.cpp" line="24339"/>
         <source>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</source>
         <translation>ChronoGPS.exe no s&apos;ha trobat al directori de l&apos;aplicació.
 Assegureu-vos que ChronoGPS.exe es troba a la mateixa carpeta que Decodium.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24734"/>
+        <location filename="../widgets/mainwindow.cpp" line="24833"/>
         <source>%1 W</source>
         <translation>%1 W</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24753"/>
+        <location filename="../widgets/mainwindow.cpp" line="24852"/>
         <source>SWR &gt; 2.5 !!!
 
 Transmission was stopped
@@ -9713,116 +9713,116 @@ La transmissió s&apos;ha aturat
 Comprova la teva antena</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24870"/>
+        <location filename="../widgets/mainwindow.cpp" line="24969"/>
         <source>CAT disconnected, reconnecting (%1/3)...</source>
         <translation>CAT desconnectat, tornant a connectar (%1/3)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25420"/>
+        <location filename="../widgets/mainwindow.cpp" line="25519"/>
         <source>Tune digital gain </source>
         <translation>Guany de sintonització digital </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25422"/>
+        <location filename="../widgets/mainwindow.cpp" line="25521"/>
         <source>Transmit digital gain </source>
         <translation>Guany digital de transmissió </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25452"/>
+        <location filename="../widgets/mainwindow.cpp" line="25551"/>
         <source>Prefixes</source>
         <translation>Prefixos</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26569"/>
+        <location filename="../widgets/mainwindow.cpp" line="26673"/>
         <source>Network Error</source>
         <translation>Error de xarxa</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26570"/>
+        <location filename="../widgets/mainwindow.cpp" line="26674"/>
         <source>Error: %1
 UDP server %2:%3</source>
         <translation>Error: %1
 Servidor UDP %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26742"/>
+        <location filename="../widgets/mainwindow.cpp" line="26846"/>
         <source>File Error</source>
         <translation>Error a l&apos;arxiu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27036"/>
+        <location filename="../widgets/mainwindow.cpp" line="27140"/>
         <source>Phase Training Disabled</source>
         <translation>Entrenament de fase Desactivat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27039"/>
+        <location filename="../widgets/mainwindow.cpp" line="27143"/>
         <source>Phase Training Enabled</source>
         <translation>Entrenament de fase activat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27186"/>
+        <location filename="../widgets/mainwindow.cpp" line="27290"/>
         <source> WD:0m </source>
         <translation> WD: 0 m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27189"/>
+        <location filename="../widgets/mainwindow.cpp" line="27293"/>
         <source> Runaway Tx watchdog </source>
         <translation> Gos guardià Runaway Tx </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27206"/>
+        <location filename="../widgets/mainwindow.cpp" line="27310"/>
         <source> WD:%1m </source>
         <translation> WD:%1m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27456"/>
-        <location filename="../widgets/mainwindow.cpp" line="27459"/>
+        <location filename="../widgets/mainwindow.cpp" line="27560"/>
+        <location filename="../widgets/mainwindow.cpp" line="27563"/>
         <source>Free Text Message</source>
         <translation>Missatge de text gratuït</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27457"/>
-        <location filename="../widgets/mainwindow.cpp" line="27460"/>
+        <location filename="../widgets/mainwindow.cpp" line="27561"/>
+        <location filename="../widgets/mainwindow.cpp" line="27564"/>
         <source>Message:</source>
         <translation>Missatge:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27478"/>
+        <location filename="../widgets/mainwindow.cpp" line="27582"/>
         <source>Directional calls not yet supported in SuperFox mode</source>
         <translation>Les trucades direccionals encara no són compatibles amb el mode SuperFox</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27497"/>
+        <location filename="../widgets/mainwindow.cpp" line="27601"/>
         <source>TOTP: No seed entered in fox configuration to generate verification code.</source>
         <translation>TOTP: No s&apos;ha introduït cap llavor a la configuració de la guineu per generar el codi de verificació.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="28904"/>
+        <location filename="../widgets/mainwindow.cpp" line="29389"/>
         <source>Async L2 is mandatory in FT2 mode</source>
         <translation>Async L2 és obligatori en mode FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29591"/>
+        <location filename="../widgets/mainwindow.cpp" line="30150"/>
         <source>TOTP SF: seed not long enough.</source>
         <translation>TOTP SF: llavor no prou llarga.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29725"/>
+        <location filename="../widgets/mainwindow.cpp" line="30284"/>
         <source>Unable to open log file</source>
         <translation>No es pot obrir el fitxer de registre</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31153"/>
+        <location filename="../widgets/mainwindow.cpp" line="31712"/>
         <source>Are you sure you want to erase the Tx Log?</source>
         <translation>Esteu segur que voleu esborrar el registre de transmissió?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31178"/>
+        <location filename="../widgets/mainwindow.cpp" line="31737"/>
         <source>&quot;%1&quot; added to Ignore List</source>
         <translation>S&apos;ha afegit &quot;%1&quot; a la llista Ignora</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31199"/>
+        <location filename="../widgets/mainwindow.cpp" line="31758"/>
         <source>Are you sure you want to erase the Ignore List?</source>
         <translation>Esteu segur que voleu esborrar la llista d&apos;ignoracions?</translation>
     </message>
@@ -9831,13 +9831,13 @@ Servidor UDP %2:%3</translation>
         <translation type="vanished">WD:%1m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27270"/>
-        <location filename="../widgets/mainwindow.cpp" line="28476"/>
+        <location filename="../widgets/mainwindow.cpp" line="27374"/>
+        <location filename="../widgets/mainwindow.cpp" line="28961"/>
         <source>Log File Error</source>
         <translation>Error a l&apos;arxiu de log</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27446"/>
+        <location filename="../widgets/mainwindow.cpp" line="27550"/>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Segur que vols esborrar les cues de QSO?</translation>
     </message>
@@ -10023,7 +10023,7 @@ Servidor UDP %2:%3</translation>
 <context>
     <name>PollingTransceiver</name>
     <message>
-        <location filename="../Transceiver/PollingTransceiver.cpp" line="227"/>
+        <location filename="../Transceiver/PollingTransceiver.cpp" line="245"/>
         <source>Unexpected rig error</source>
         <translation>Error d&apos;equip inesperat</translation>
     </message>
@@ -10111,25 +10111,25 @@ Servidor UDP %2:%3</translation>
         <translation>el clúster no ha retornat cap dada</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
-        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../DecodiumPropagationManager.cpp" line="176"/>
         <source>empty reply</source>
         <translation>resposta buida</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
-        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../DecodiumPropagationManager.cpp" line="182"/>
         <source>reply too large</source>
         <translation>resposta massa gran</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
-        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../DecodiumPropagationManager.cpp" line="188"/>
         <source>reply exceeds limit</source>
         <translation>resposta supera el límit</translation>
@@ -10210,32 +10210,32 @@ Servidor UDP %2:%3</translation>
         <translation>No s&apos;ha pogut esborrar secret-tool</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22115"/>
+        <location filename="../widgets/mainwindow.cpp" line="22214"/>
         <location filename="../DecodiumDxCluster.cpp" line="896"/>
         <source>timeout waiting for cluster response</source>
         <translation>temps d&apos;espera a l&apos;espera de la resposta del clúster</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22116"/>
+        <location filename="../widgets/mainwindow.cpp" line="22215"/>
         <location filename="../DecodiumDxCluster.cpp" line="897"/>
         <source>timeout waiting for cluster response: %1</source>
         <translation>temps d&apos;espera per a la resposta del clúster: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22150"/>
+        <location filename="../widgets/mainwindow.cpp" line="22249"/>
         <location filename="../DecodiumDxCluster.cpp" line="932"/>
         <source>cluster verification response exceeded the safety limit</source>
         <translation>la resposta de verificació del cluster ha superat el límit de seguretat</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22257"/>
+        <location filename="../widgets/mainwindow.cpp" line="22356"/>
         <location filename="../DecodiumDxCluster.cpp" line="1030"/>
         <location filename="../DecodiumDxCluster.cpp" line="1050"/>
         <source>published in show/dx</source>
         <translation>publicat a show/dx</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22262"/>
+        <location filename="../widgets/mainwindow.cpp" line="22361"/>
         <location filename="../DecodiumDxCluster.cpp" line="1033"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
         <translation>el node ha acceptat l&apos;ordre; show/dx encara no l&apos;ha retornada</translation>
@@ -10249,13 +10249,13 @@ Servidor UDP %2:%3</translation>
         <translation type="vanished">node ha acceptat l&apos;ordre però el punt no és visible a show/dx: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22287"/>
+        <location filename="../widgets/mainwindow.cpp" line="22386"/>
         <location filename="../DecodiumDxCluster.cpp" line="1059"/>
         <source>connection closed before cluster confirmation</source>
         <translation>connexió tancada abans de la confirmació del clúster</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22288"/>
+        <location filename="../widgets/mainwindow.cpp" line="22387"/>
         <location filename="../DecodiumDxCluster.cpp" line="1060"/>
         <source>connection closed before cluster confirmation: %1</source>
         <translation>connexió tancada abans de la confirmació del clúster: %1</translation>
@@ -10400,74 +10400,74 @@ El fitxer baixat supera el límit de %1 MiB:
         <translation>Error de socket UDP</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20740"/>
+        <location filename="../DecodiumBridge.cpp" line="21433"/>
         <source>Invalid frequency</source>
         <translation>Freqüència no vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20742"/>
+        <location filename="../DecodiumBridge.cpp" line="21435"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Data/hora no vàlida. Useu el format ISO o yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20744"/>
+        <location filename="../DecodiumBridge.cpp" line="21437"/>
         <source>Invalid frequency row</source>
         <translation>Fila de freqüència no vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20803"/>
+        <location filename="../DecodiumBridge.cpp" line="21496"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>No s&apos;ha pogut analitzar el fitxer JSON de freqüències: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20811"/>
+        <location filename="../DecodiumBridge.cpp" line="21504"/>
         <source>No frequencies were found</source>
         <translation>No s&apos;ha trobat cap freqüència</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20817"/>
-        <location filename="../DecodiumBridge.cpp" line="20919"/>
-        <location filename="../DecodiumBridge.cpp" line="20946"/>
+        <location filename="../DecodiumBridge.cpp" line="21510"/>
+        <location filename="../DecodiumBridge.cpp" line="21612"/>
+        <location filename="../DecodiumBridge.cpp" line="21639"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>El fitxer de freqüències conté massa files (%1, límit %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20858"/>
+        <location filename="../DecodiumBridge.cpp" line="21551"/>
         <source>Frequency file does not exist</source>
         <translation>El fitxer de freqüències no existeix</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20864"/>
+        <location filename="../DecodiumBridge.cpp" line="21557"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>El fitxer de freqüències és massa gran (%1 bytes, límit %2 bytes)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20874"/>
+        <location filename="../DecodiumBridge.cpp" line="21567"/>
         <source>Cannot open frequency file: %1</source>
         <translation>No es pot obrir el fitxer de freqüències: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20884"/>
+        <location filename="../DecodiumBridge.cpp" line="21577"/>
         <source>No valid working frequencies found</source>
         <translation>No s&apos;ha trobat cap freqüència de treball vàlida</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20898"/>
+        <location filename="../DecodiumBridge.cpp" line="21591"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>No és un fitxer de freqüències vàlid: magic de fitxer incorrecte</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20905"/>
+        <location filename="../DecodiumBridge.cpp" line="21598"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>No és un fitxer de freqüències vàlid: la versió és massa nova</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20913"/>
+        <location filename="../DecodiumBridge.cpp" line="21606"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>No és un fitxer de freqüències vàlid: no es pot llegir el nombre de files</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20940"/>
+        <location filename="../DecodiumBridge.cpp" line="21633"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>No és un fitxer de freqüències vàlid: contingut corrupte</translation>
     </message>
@@ -10535,6 +10535,16 @@ El fitxer baixat supera el límit de %1 MiB:
         <location filename="../DecodiumTransceiverManager.cpp" line="132"/>
         <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
         <translation>Comunicació CAT interrompuda amb el rig. Verifiqueu el cable USB, el port COM, el baud rate i que el rig estigui encès. (traça hamlib: %1)</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="179"/>
+        <source>CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.</source>
+        <translation>CAT desactivat per a la prova RX/enregistrament: el port sèrie continua disponible per a JTDX.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="181"/>
+        <source>CAT disabilitato da variabile d&apos;ambiente DECODIUM_DISABLE_CAT.</source>
+        <translation>CAT desactivat per la variable d&apos;entorn DECODIUM_DISABLE_CAT.</translation>
     </message>
 </context>
 <context>
@@ -11180,503 +11190,503 @@ Error (%2): %3</translation>
     <name>SettingsDialog</name>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1389"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1391"/>
         <source>Settings</source>
         <translation>Configuració</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
         <source>Select AzEl directory</source>
         <translation>Selecciona el directori AzEl</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
         <source>Select save directory</source>
         <translation>Selecciona el directori on desar</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
         <source>Merge Working Frequencies</source>
         <translation>Fusiona Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
         <source>Load Working Frequencies</source>
         <translation>Carrega Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="544"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
         <translation>Fitxers de freqüències (*.qrg *.qrg.json)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="544"/>
         <source>All files (*)</source>
         <translation>Tots els fitxers (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="542"/>
         <source>Save Working Frequencies</source>
         <translation>Desa Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="724"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="725"/>
         <source>Auto</source>
         <translation>Auto</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1135"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
         <source>Transmitted Message</source>
         <translation>Missatge transmès</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
         <source>My Callsign</source>
         <translation>El meu callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
         <source>New DXCC on Band</source>
         <translation>Nou DXCC a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
         <source>New DXCC</source>
         <translation>Nou DXCC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
         <source>New Continent on Band</source>
         <translation>Nou continent a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
         <source>New Continent</source>
         <translation>Nou continent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
         <source>New CQ Zone on Band</source>
         <translation>Nova zona CQ a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
         <source>New CQ Zone</source>
         <translation>Nova zona CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
         <source>New ITU Zone on Band</source>
         <translation>Nova zona ITU a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
         <source>New ITU Zone</source>
         <translation>Nova zona ITU</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
         <source>New Grid on Band</source>
         <translation>Nou grid a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
         <source>New Grid</source>
         <translation>Nou grid</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
         <source>New Callsign on Band</source>
         <translation>Nou callsign a la banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
         <source>New Callsign</source>
         <translation>Nou callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
         <source>LoTW marker</source>
         <translation>Marcador LoTW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
         <source>CQ in Message</source>
         <translation>CQ al missatge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
         <source>DX Entity</source>
         <translation>Entitat DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
         <source>73 / RR73</source>
         <translation>73 / RR73</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
         <source>B4 (Worked)</source>
         <translation>B4 (Treballat)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1155"/>
         <source>Normal decodes</source>
         <translation>Descodificacions normals</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1422"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>Els canvis s’apliquen immediatament quan és compatible.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1436"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1438"/>
         <source>Close</source>
         <translation>Tanca</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Station</source>
         <translation>Estació</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Radio</source>
         <translation>Ràdio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Audio</source>
         <translation>Àudio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>TX</source>
         <translation>TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Display</source>
         <translation>Pantalla</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Decode</source>
         <translation>Descodifica</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Reporting</source>
         <translation>Informes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Colors</source>
         <translation>Colors</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Advanced</source>
         <translation>Avançat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Alerts</source>
         <translation>Alertes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Filters</source>
         <translation>Filtres</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
         <source>Choose Decoded Font</source>
         <translation>Tria el font decodificat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
         <source>Choose Font</source>
         <translation>Tria el font</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1186"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1188"/>
         <source>Search:</source>
         <translation>Cerca:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1196"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1198"/>
         <source>filter by name</source>
         <translation>filtra per nom</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
         <source>Monospaced fonts:</source>
         <translation>Fonts monoespaiats:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
         <source>Fonts:</source>
         <translation>Fonts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1260"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1262"/>
         <source>Selected:</source>
         <translation>Seleccionat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1272"/>
         <source>Size:</source>
         <translation>Mida:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1333"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1335"/>
         <source>Cancel</source>
         <translation>Cancel·la</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1340"/>
         <source>Apply</source>
         <translation>Aplica</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Frequencies</source>
         <translation>Freqüències</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>UI Buttons</source>
         <translation>Botons d&apos;UI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1866"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1868"/>
         <source>Search radio, model or brand...</source>
         <translation>Cerca ràdio, model o marca...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1603"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1605"/>
         <source>STATION INFO</source>
         <translation>INFO ESTACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1608"/>
         <source>Station Name:</source>
         <translation>Nom de l’estació:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4378"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4414"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4616"/>
         <source>Choose</source>
         <translation>Tria</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3888"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4090"/>
         <source>2x Tone Spacing:</source>
         <translation>2x espaiat entre tons:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5282"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5484"/>
         <source>4-digit Grids:</source>
         <translation>Locators de 4 caràcters:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4104"/>
         <source>4x Tone Spacing:</source>
         <translation>Espaiat de to 4x:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5935"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
         <source>ALIGNMENT</source>
         <translation>ALINEACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8022"/>
         <source>ALWAYS PASS</source>
         <translation>PASAR SEMPRE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4911"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5113"/>
         <source>AP Decode:</source>
         <translation>Descodificació AP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5107"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5155"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5309"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5357"/>
         <source>API Key:</source>
         <translation>Clau API:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5298"/>
         <source>API URL:</source>
         <translation>API URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7525"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7755"/>
         <source>AUDIO ALERTS</source>
         <translation>ÀUDIO ALERTS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2680"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2715"/>
         <source>AUDIO DEVICES</source>
         <translation>DISPOSITIUS D&apos;ÀUDIO</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3053"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3088"/>
         <source>AUTO SEQUENCE</source>
         <translation>SEQUÈNCIA AUTOMÀTICA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5705"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5907"/>
         <source>Accept UDP:</source>
         <translation>Accepteu UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5611"/>
         <source>Access token:</source>
         <translation>Fitxa d&apos;accés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7213"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7443"/>
         <source>Activity:</source>
         <translation>Activitat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4799"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5001"/>
         <source>Aggressive:</source>
         <translation>Agressiu:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7758"/>
         <source>Alerts Enabled:</source>
         <translation>Alertes activades:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4786"/>
         <source>Align Steps 2:</source>
         <translation>Alinea els passos 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4574"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4776"/>
         <source>Align Steps:</source>
         <translation>Alinea els passos:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4769"/>
         <source>Align:</source>
         <translation>Alinear:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5510"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
         <source>All interfaces</source>
         <translation>Totes les interfícies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2984"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3019"/>
         <source>Allow TX QSY:</source>
         <translation>Permet TX QSY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7131"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7361"/>
         <source>Alt Erase Btn:</source>
         <translation>Alt Erase Btn:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3923"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4125"/>
         <source>Alt F1-F6 Bind:</source>
         <translation>Alt F1-F6 Enllaçar:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7835"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8065"/>
         <source>Always Pass 10:</source>
         <translation>Passa sempre 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7839"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8069"/>
         <source>Always Pass 11:</source>
         <translation>Passa sempre 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8072"/>
         <source>Always Pass 12:</source>
         <translation>Passa sempre 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7804"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8034"/>
         <source>Always Pass 1:</source>
         <translation>Passa sempre 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1988"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1990"/>
         <source>Refresh serial ports</source>
         <translation>Actualitza els ports sèrie</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2090"/>
         <source>HRD Radio:</source>
         <translation>Radio HRD:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2099"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
         <translation>Coincidència estricta (avorta si la radio configurada no és l&apos;actual a HRD)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2509"/>
         <source>SWR max:</source>
         <translation>SWR màx.:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
         <source>Connecting...</source>
         <translation>Connectant...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2546"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2576"/>
         <source>ALC AUTO CALIBRATION</source>
         <translation>CALIBRATGE AUTOMÀTIC D&apos;ALC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2591"/>
         <source>ALC target:</source>
         <translation>Target d&apos;ALC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2597"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
         <translation>Escala ALC 0-100. FT8/dades: típicament 15-25. Valors &gt;60 arrisquen sobreexcitar el PA.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2647"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
         <translation>Transmet una portadora i ajusta automàticament el nivell d&apos;àudio TX fins que l&apos;ALC de la radio arriba al target. D&apos;un sol cop. Requereix Hamlib CAT connectat.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2621"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2651"/>
         <source>Cancel calibration</source>
         <translation>Cancel·la el calibratge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2622"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2652"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>Calibra l&apos;ALC (transmet una portadora)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2840"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2875"/>
         <source>Auto RX level active</source>
         <translation>Nivell RX automàtic actiu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2841"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2876"/>
         <source>Auto RX level disabled</source>
         <translation>Nivell RX automàtic desactivat</translation>
     </message>
@@ -11709,7 +11719,7 @@ Error (%2): %3</translation>
         <translation type="vanished">close strong partners ON · salta fi de slot ON (latència mínima) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3013"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3048"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
         <translation>CPU limitada (Decodium Console / mini PC)</translation>
     </message>
@@ -11722,12 +11732,12 @@ Error (%2): %3</translation>
         <translation type="vanished">● actiu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3172"/>
         <source>Resume QSO on partner reply:</source>
         <translation>Reprèn el QSO en respondre el partner:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3160"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3195"/>
         <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
 
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
@@ -11740,17 +11750,17 @@ Només s&apos;aplica a FT8/FT4/FT2 i només a l&apos;estat de QSO desat.
 Per defecte: OFF (= Halt atura completament la seqüència per defecte).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3199"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3234"/>
         <source>FT2 UTILITY</source>
         <translation>FT2 UTILITY</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3204"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3239"/>
         <source>FT2: signoff retries (73/RR73):</source>
         <translation>FT2: signoff retries (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3260"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -11769,12 +11779,12 @@ Més alt = més pacient amb partners febles/amb QSB.
 No afecta FT8/FT4.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3265"/>
         <source>FT4: signoff retries (73/RR73):</source>
         <translation>FT4: signoff retries (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3251"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3286"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -11791,12 +11801,12 @@ Augmenteu a 6-8 per a partners febles/amb QSB (substitueix els antics extres aut
 No afecta FT2/FT8.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3256"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3291"/>
         <source>FT8: signoff retries (73/RR73):</source>
         <translation>FT8: signoff retries (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3312"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -11813,12 +11823,82 @@ Augmenteu a 6-8 per a partners febles/amb QSB (substitueix els antics extres aut
 No afecta FT2/FT4.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3282"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3317"/>
+        <source>Weak-partner signoff boost (FT2/4/8):</source>
+        <translation>Reforç de signoff per a socis febles (FT2/4/8):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
+        <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
+
+Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
+        <translation>Quan està activat, concedeix automàticament reintents finals 73/RR73 addicionals quan el soci actiu és feble (SNR igual o inferior al llindar de sota), donant als QSO fràgils més oportunitats de tancar.
+
+Per defecte DESACTIVAT = comportament sense canvis. S&apos;aplica a FT2/FT4/FT8, sempre limitat a 8 màx. i encara acotat pel watchdog TX.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3339"/>
+        <source>  weak SNR threshold (dB):</source>
+        <translation>  llindar de SNR feble (dB):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3362"/>
+        <source>A partner whose SNR is at or below this value is treated as &apos;weak&apos; and receives the extra signoff retries.
+
+Default: -15 dB.</source>
+        <translation>Un soci amb un SNR igual o inferior a aquest valor es tracta com a &apos;feble&apos; i rep els reintents de signoff addicionals.
+
+Per defecte: -15 dB.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3365"/>
+        <source>  extra signoff retries:</source>
+        <translation>  reintents de signoff addicionals:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3388"/>
+        <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
+
+Default: +3 (capped so the total never exceeds 8).</source>
+        <translation>Quants reintents finals 73/RR73 addicionals afegir per damunt del límit per mode per als socis febles.
+
+Per defecte: +3 (limitat perquè el total no superi mai 8).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3393"/>
+        <source>Post-log RRR re-engage guard (FT2):</source>
+        <translation>Guarda de reenganxament RRR després del registre (FT2):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <source>When ON, after a QSO is logged (&apos;partner left&apos;) stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
+
+A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
+        <translation>Quan està activat, després de registrar un QSO (&apos;soci ha marxat&apos;) atura el reenviament de RR73 a un soci que continua cridant-te amb R+informe perquè no ha copiat el teu comiat (el cas 9H1SR de massa trucades).
+
+Encara es permeten algunes repeticions de cortesia (vegeu màx.), després suprimides dins del refredament de 30 s. Per defecte DESACTIVAT. Només FT2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3415"/>
+        <source>  courtesy RRR max:</source>
+        <translation>  RRR de cortesia màx.:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3438"/>
+        <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
+
+0 = suppress immediately. Default: 1.</source>
+        <translation>Quants RR73 de cortesia enviar encara a un soci tot just registrat abans de suprimir més reenganxaments.
+
+0 = suprimir immediatament. Per defecte: 1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3443"/>
         <source>Immediate TX on click (1.0.283 style):</source>
         <translation>TX immediat en fer clic (estil 1.0.283):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3304"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3465"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -11837,12 +11917,12 @@ Per defecte: OFF (= comportament upstream segur).
 Activeu-ho si us molesta esperar 1 cicle després del clic.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3309"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3470"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
         <translation>Registra RR73 encara que el partner marxi (FT2):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3331"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3492"/>
         <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
 
 Matches TX5/73 and sync mode behaviour.
@@ -11855,12 +11935,12 @@ Coincideix amb el comportament de TX5/73 i del mode sync.
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3497"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
         <translation>FT8: seqüències ràpides (estil WSJT-X/JTDX):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3358"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3519"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -11881,12 +11961,12 @@ SEGURETAT: sota pressió de CPU el clamp preexistent força marge ≥900ms (segu
 Per defecte: OFF (= comportament upstream conservador, fiabilitat de descodificació màxima).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3363"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3524"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
         <translation>FT2: finestra TX conservadora (sense frames truncats):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3385"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3546"/>
         <source>Controls how late in a slot the async FT2 TX may start.
 
 • ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
@@ -11901,12 +11981,12 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 Activeu OFF només si voleu la reactivitat màxima i accepteu alguna TX tardana no descodificable ocasional.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3551"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
         <translation>FT2: desarmament manual d&apos;un sol cop (1.0.300+):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
         <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
 
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
@@ -11919,12 +11999,12 @@ Quan està OFF (per defecte en aquest fork, pre-1.0.300): la TX1 es repeteix fin
 Activeu-ho només si feu doble clic a estacions que responen de manera constant al primer intent.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3417"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
         <source>Caller retries (max TX repeats per step):</source>
         <translation>Caller retries (màx. repeticions de TX per pas):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3440"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3601"/>
         <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
 
 Default: 10.
@@ -11949,12 +12029,30 @@ Més alt (15-20) = paciència per a DX feble / propagació marginal.
 Nota: amb &apos;FT2 manual one-shot disarm&apos; OFF (per defecte) això és el que evita que la TX1 entri en bucle per sempre.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3606"/>
+        <source>Caller retries hard cap (even with watchdog):</source>
+        <translation>Límit estricte de reintents del trucador (fins i tot amb watchdog):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <source>When ON, the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.
+
+Default OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.
+
+Enable for a hard limit on TX repeats regardless of the watchdog.</source>
+        <translation>Quan està activat, el límit de &apos;Reintents del trucador&apos; a TX1/TX2 atura la trucada encara que el watchdog TX estigui habilitat.
+
+Per defecte DESACTIVAT (comportament 1.0.438): quan el watchdog TX està activat té prioritat i ignora el límit de reintents del trucador fins al seu propi temps d&apos;espera, de manera que una trucada pot repetir-se durant tota la durada del watchdog.
+
+Activa&apos;l per a un límit estricte de les repeticions TX independent del watchdog.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3636"/>
         <source>Conservative FT2 (weak-signal mode):</source>
         <translation>Conservative FT2 (mode weak-signal):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3469"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3657"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
@@ -11969,12 +12067,12 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 Per defecte: OFF — activeu-ho si teniu partners DX febles o propagació marginal.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3662"/>
         <source>FT2: full decode in AutoCQ:</source>
         <translation>FT2: full decode a AutoCQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3683"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
@@ -11987,12 +12085,12 @@ Ajuda a sentir responents febles. Es redueix automàticament sota pressió de CP
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3688"/>
         <source>FT2: close strong partners earlier:</source>
         <translation>FT2: tanca abans els partners forts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3709"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
@@ -12005,12 +12103,12 @@ Els partners febles conserven les repeticions anti-QSB extra.
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3714"/>
         <source>FT2: adaptive decode (CPU saver):</source>
         <translation>FT2: adaptive decode (estalvi de CPU):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3735"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -12027,12 +12125,12 @@ Quan s&apos;espera una resposta (AutoCQ/QSO) es manté a la cadència màxima. N
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3552"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3740"/>
         <source>FT2: narrow reply decode (experimental):</source>
         <translation>FT2: descodificació de resposta estreta (experimental):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3761"/>
         <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
 
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
@@ -12045,12 +12143,12 @@ La resposta es descodifica abans dins del slot (menys CPU per intent), de manera
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3766"/>
         <source>FT2: AP cache rescue (experimental):</source>
         <translation>FT2: AP cache rescue (experimental):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3599"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
         <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
 
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
@@ -12063,12 +12161,12 @@ Gate de seguretat: les files rescatades per l&apos;AP cache es mostren/auditen, 
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3792"/>
         <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
         <translation>FT2: salta la descodificació redundant de fi de slot (redueix la latència d&apos;enganxada):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3816"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
 Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
@@ -12085,12 +12183,12 @@ Cost: per als slots ja coberts per async perdeu el pas complet de weak-averaging
 Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3635"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3823"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
         <translation>FT2/FT8 MAM multi-stream (MSHV, experimental):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3847"/>
         <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
 
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
@@ -12103,12 +12201,12 @@ Això és una opció MAM ADDICIONAL: MAM (Multi-Answer Mode) o AutoCQ ha d&apos;
 EXPERIMENTAL. Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3852"/>
         <source>MAM multi-stream: max stream simultanei:</source>
         <translation>MAM multi-stream: màx. streams simultanis:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3692"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3880"/>
         <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
 
 Range 2-5. Default: 3.
@@ -12121,12 +12219,12 @@ Rang 2-5. Per defecte: 3.
 Valors més alts requereixen més CPU per generar streams d&apos;àudio solapats. Habilitat només quan MAM multi-stream està actiu.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3885"/>
         <source>FT2 partner-memory (anti-QSB):</source>
         <translation>FT2 partner-memory (anti-QSB):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3907"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
@@ -12139,12 +12237,12 @@ Requereix Conservative FT2 actiu.
 Per defecte: OFF (opt-in després de la reversió de la 1.0.186 — gate estricte + log [FT2WS-F]). Es desactiva automàticament si Conservative està OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3724"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3912"/>
         <source>FT2 TX2 re-send on stall:</source>
         <translation>FT2 reenviament de TX2 en bloqueig:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3934"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
@@ -12157,112 +12255,126 @@ Ajuda amb partners febles que no van confirmar el primer cop. Limitat a 1 reenvi
 Requereix Conservative FT2 actiu. Per defecte: ON sota Conservative.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3754"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3942"/>
         <source>Smooth decode flow:</source>
         <translation>Smooth decode flow:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3775"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3963"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
         <translation>Reparteix les descodificacions FT8/FT4 del lot final de fi de període en streaming continu amb fade animat (~100 ms per fila). L&apos;async de FT2 no canvia perquè ja fa streaming. Per defecte: ON; auto-fallback si es detecten bloquejos d&apos;UI en PC modestos. Desactiveu-ho per al comportament de lot antic.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3972"/>
         <source>TX Watchdog Mode:</source>
         <translation>Mode TX Watchdog:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Time</source>
         <translation>Temps</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Count</source>
         <translation>Recompte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3807"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3995"/>
         <source>TX Watchdog Time (min):</source>
         <translation>Temps TX Watchdog (min):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4013"/>
         <source>TX Watchdog Count:</source>
         <translation>Recompte TX Watchdog:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3954"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4032"/>
+        <source>Log QSO at watchdog timeout:</source>
+        <translation>Registra el QSO en esgotar-se el watchdog:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4043"/>
+        <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
+
+Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
+        <translation>Quan està activat, si el watchdog TX es dispara mentre un QSO ja ha completat l&apos;intercanvi bidireccional d&apos;informes (tots dos informes intercanviats, progrés &gt;= ROGER_REPORT), el QSO es registra en lloc d&apos;abandonar-se.
+
+Per defecte DESACTIVAT = comportament 1.0.445 (només una instantània diferida, recuperada únicament si el soci reenvia 73; en un QSO manual es perd).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4156"/>
         <source>ASPETTO / TEMA</source>
         <translation>ASPECTE / TEMA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3957"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4159"/>
         <source>Theme:</source>
         <translation>Tema:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4187"/>
         <source>Accent:</source>
         <translation>Accent:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4022"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4224"/>
         <source>Density:</source>
         <translation>Densitat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4063"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4265"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
         <translation>DX-Pedition Workspace (disseny tàctic de 3 columnes)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4078"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4280"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
         <translation>Vista d&apos;operador alternativa d&apos;un sol panell optimitzada per a pile-ups de DX: un tauler tàctic de 3 columnes (Cluster / Waterfall / TX) en lloc de l&apos;espai de treball clàssic. Opt-in, per defecte OFF: el disseny estàndard no canvia quan està desactivat.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4082"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4284"/>
         <source>UI Scale:</source>
         <translation>Escala d&apos;UI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4316"/>
         <source>↻ restart to apply</source>
         <translation>↻ reinicieu per aplicar</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4121"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4323"/>
         <source>BANDE OPERATIVE</source>
         <translation>BANDES OPERATIVES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4326"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
         <translation>Clic per mostrar/amagar bandes al selector. Les bandes desseleccionades desapareixen de la barra HF / V-U / SHF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4355"/>
         <source>visible (click to hide)</source>
         <translation>visible (clic per amagar)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4355"/>
         <source>hidden (click to show)</source>
         <translation>amagat (clic per mostrar)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4162"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4364"/>
         <source>UI — PERFORMANCE</source>
         <translation>UI — RENDIMENT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4166"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4368"/>
         <source>UI Quality preset:</source>
         <translation>Preset de qualitat d&apos;UI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4385"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
@@ -12275,32 +12387,32 @@ High = totes les animacions disponibles.
 Per defecte: Medium.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4188"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4390"/>
         <source>Priorità processo:</source>
         <translation>Prioritat del procés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Normale</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Sopra il normale</source>
         <translation>Per sobre del normal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Alta (consigliata)</source>
         <translation>Alta (recomanada)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Tempo reale ⚠️</source>
         <translation>Temps real ⚠️</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4202"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4404"/>
         <source>Priorità di scheduling CPU del processo (Windows).
 
 Normale / Sopra il normale (default) = sicure.
@@ -12317,12 +12429,12 @@ Temps real ⚠️ = fluïdesa màxima PERÒ pot fer que el PC no respongui (rato
 Si no n&apos;esteu segur useu &apos;Alta&apos;.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4207"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
         <source>UI Style (restart):</source>
         <translation>UI Style (reinici):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4432"/>
         <source>QML Quick Controls style (requires restart):
 • Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
@@ -12335,12 +12447,12 @@ Si no n&apos;esteu segur useu &apos;Alta&apos;.</translation>
 • Fusion — escriptori neutre multiplataforma</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4241"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4443"/>
         <source>Frameless pop-out:</source>
         <translation>Pop-out sense marc:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4254"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4456"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
@@ -12353,12 +12465,12 @@ Estètica de Windows 11.
 Per defecte: OFF. Requereix tancar i tornar a obrir la finestra.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4259"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4461"/>
         <source>Detach Full Spectrum:</source>
         <translation>Separa Full Spectrum:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4474"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
@@ -12371,27 +12483,27 @@ Redueix els bloquejos en PC modestos.
 Per defecte: OFF. Requereix reinici.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
         <source>Schermo intero:</source>
         <translation>Pantalla completa:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4281"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4483"/>
         <source>Attiva (F11)</source>
         <translation>Activa (F11)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4488"/>
         <source>Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.</source>
         <translation>Porta Decodium a pantalla completa. Per sortir: F11, Esc, o el botó ✕ a dalt. No es memoritza: en reiniciar tornes a la finestra normal.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4291"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4493"/>
         <source>Spectrum FPS cap:</source>
         <translation>Límit d&apos;FPS de l&apos;espectre:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4311"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4513"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -12408,22 +12520,22 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 Quan el Full Spectrum està separat, el fil de render separat manté 30 fps sense afectar el descodificador.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4519"/>
         <source>Eventi CPU pressure:</source>
         <translation>Esdeveniments de pressió de CPU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4331"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4533"/>
         <source>totale=%1 · severi=%2 (sessione)</source>
         <translation>total=%1 · greus=%2 (sessió)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4334"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4536"/>
         <source>totale=0 · severi=0</source>
         <translation>total=0 · greus=0</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4344"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4546"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
@@ -12432,118 +12544,118 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
 Els greus (≥1100ms o ràfega de 4+ bloquejos curts) són el senyal més fort: si en veieu ≥5 després d&apos;una hora d&apos;ús, baixeu la qualitat d&apos;UI a Low o el límit d&apos;FPS de l&apos;espectre a 15.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4438"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4640"/>
         <source>US State:</source>
         <translation>US State:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4452"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7001"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7022"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7231"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7252"/>
         <source>Updating...</source>
         <translation>Actualitzant...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4453"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4655"/>
         <source>%1 calls</source>
         <translation>%1 trucades</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4454"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7003"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4656"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7233"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7254"/>
         <source>Not loaded</source>
         <translation>No carregat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4463"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6084"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6283"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6485"/>
         <source>Update</source>
         <translation>Actualitza</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4681"/>
         <source>Waterfall Calls:</source>
         <translation>Trucades al Waterfall:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4487"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
         <source>FS Dist:</source>
         <translation>FS Dist:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4697"/>
         <source>FS Az:</source>
         <translation>FS Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4705"/>
         <source>RX Freq:</source>
         <translation>Freq RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4713"/>
         <source>RX Dist:</source>
         <translation>Dist RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4721"/>
         <source>RX Az:</source>
         <translation>Az RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4816"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>SERVIDOR WEB REMOT (iPad / PWA mòbil)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4819"/>
         <source>Abilita Web Server:</source>
         <translation>Habilita el servidor web:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4839"/>
         <source>Porta TCP:</source>
         <translation>Port TCP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4850"/>
         <source>URL accesso:</source>
         <translation>URL d&apos;accés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4861"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4888"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>VISUALITZACIÓ DE LA LLISTA DE DESCODIFICACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4891"/>
         <source>Colored period separator:</source>
         <translation>Separador de període acolorit:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4905"/>
         <source>Newest first:</source>
         <translation>El més nou primer:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4859"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5061"/>
         <source>CQ filter:</source>
         <translation>Filtre CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4934"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5136"/>
         <source>Deep decode in TX:</source>
         <translation>Deep decode a TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5148"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -12556,835 +12668,836 @@ Recupera estacions de tercers que el pas ràpid es perdria durant l&apos;operaci
 Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5130"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5332"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5346"/>
         <source>Replace duplicates:</source>
         <translation>Substitueix duplicats:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5177"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5379"/>
         <source>Testing...</source>
         <translation>Provant...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5177"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7536"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5379"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7766"/>
         <source>Test</source>
         <translation>Prova</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5392"/>
         <source>Testing QRZ API key...</source>
         <translation>Provant la clau API de QRZ...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5430"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5632"/>
         <source>Client ID:</source>
         <translation>Client ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5452"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5654"/>
         <source>Preset:</source>
         <translation>Preset:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5596"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5798"/>
         <source>Tertiary UDP:</source>
         <translation>UDP terciari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5806"/>
         <source>Tertiary Server:</source>
         <translation>Servidor terciari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5816"/>
         <source>Tertiary Port:</source>
         <translation>Port terciari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5625"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5827"/>
         <source>Tertiary TTL:</source>
         <translation>TTL terciari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5839"/>
         <source>Tertiary Interface:</source>
         <translation>Interfície terciària:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5860"/>
         <source>Tertiary ADIF:</source>
         <translation>ADIF terciari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5671"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5873"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5674"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5876"/>
         <source>Enable N1MM:</source>
         <translation>Habilita N1MM:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5682"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5884"/>
         <source>N1MM Port:</source>
         <translation>Port N1MM:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5694"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5896"/>
         <source>N1MM Server:</source>
         <translation>Servidor N1MM:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5994"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>CALIBRATGE DE FREQÜÈNCIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5800"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6002"/>
         <source>Refresh</source>
         <translation>Actualitza</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5826"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6028"/>
         <source>Slope:</source>
         <translation>Pendent:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5844"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6046"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5846"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6048"/>
         <source>Intercept:</source>
         <translation>Intercept:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6066"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6085"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
         <translation>Restableix el calibratge (slope=0, intercept=0). La freqüència s&apos;escriu al rig sense correcció (camí ràpid).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5895"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6097"/>
         <source>Preview correzione:</source>
         <translation>Vista prèvia de la correcció:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5906"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6108"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5921"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6123"/>
         <source>WORKING FREQUENCIES</source>
         <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5929"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6131"/>
         <source>Load</source>
         <translation>Carrega</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6140"/>
         <source>Merge</source>
         <translation>Fusiona</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5947"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6149"/>
         <source>Save as</source>
         <translation>Desa com a</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5956"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6158"/>
         <source>Defaults</source>
         <translation>Per defecte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5986"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6188"/>
         <source>Region:</source>
         <translation>Regió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6001"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
         <source>Freq MHz:</source>
         <translation>Freq MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6021"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6223"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6351"/>
         <source>Pref</source>
         <translation>Pref</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6232"/>
         <source>Description:</source>
         <translation>Descripció:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6044"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6246"/>
         <source>Start:</source>
         <translation>Inici:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6055"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6257"/>
         <source>End:</source>
         <translation>Fi:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6074"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6276"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6476"/>
         <source>Add</source>
         <translation>Afegeix</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6095"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6293"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6297"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6495"/>
         <source>Delete</source>
         <translation>Suprimeix</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6307"/>
         <source>New</source>
         <translation>Nou</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6348"/>
         <source>IARU Region</source>
         <translation>Regió IARU</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6349"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6148"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6350"/>
         <source>Frequency</source>
         <translation>Freqüència</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6150"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6352"/>
         <source>Description</source>
         <translation>Descripció</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6353"/>
         <source>Start Date/Time</source>
         <translation>Data/hora d&apos;inici</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6354"/>
         <source>End Date/Time</source>
         <translation>Data/hora de fi</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6205"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6407"/>
         <source>STATION INFORMATION</source>
         <translation>INFORMACIÓ DE L&apos;ESTACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6414"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>El band offset és el desplaçament de freqüència del transverter/estació per a aquella banda; useu 0.000000 quan no s&apos;usa.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6438"/>
         <source>Band:</source>
         <translation>Banda:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6244"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6446"/>
         <source>Offset MHz:</source>
         <translation>Offset MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6323"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6525"/>
         <source>Band</source>
         <translation>Banda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6526"/>
         <source>Offset</source>
         <translation>Offset</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6325"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6527"/>
         <source>Antenna Description</source>
         <translation>Descripció de l&apos;antena</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6443"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6646"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
         <translation>Usa aquest color de descodificació específic. Quan està OFF, aquesta categoria fa servir el color per defecte compartit.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6759"/>
         <source>BG:</source>
         <translation>BG:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6773"/>
         <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
         <translation>Acoloreix el FONS de la fila (a més del text) per a aquesta categoria. OFF = sense fons personalitzat.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6859"/>
         <source>Decode Boost:</source>
         <translation>Decode Boost:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6886"/>
         <source>Visual contrast only; it does not change decoder sensitivity.</source>
         <translation>Només contrast visual; no modifica la sensibilitat del descodificador.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6937"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>COLORS DE LA INTERFÍCIE (fons + text)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6942"/>
         <source>Usa colori personalizzati:</source>
         <translation>Usa colors personalitzats:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6949"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>(sobreescriu el fons i el text del tema)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6956"/>
         <source>Background:</source>
         <translation>Fons:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6976"/>
         <source>Text:</source>
         <translation>Text:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7068"/>
         <source>Download CALL3.TXT...</source>
         <translation>Descarrega CALL3.TXT...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
         <source>Direct Visual:</source>
         <translation>Direct Visual:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7196"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
         <translation>Panadapter visual ràpid. En mode antic pot obrir una segona captura d&apos;àudio; en mode normal només augmenta la taxa de refresc visual. Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6971"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7201"/>
         <source>Low CPU:</source>
         <translation>Low CPU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7210"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
         <translation>Perfil per a PC lents: màxim 2 fils FT, waterfall més lent, descodificació early/deep reduïda. Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7215"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>Redueix els fils FT, el refresc del waterfall i el render de QML durant monitor/TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6996"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7226"/>
         <source>DATA UPDATES</source>
         <translation>ACTUALITZACIONS DE DADES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6999"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
         <source>LotW Users:</source>
         <translation>Usuaris LoTW:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7232"/>
         <source>%1 users</source>
         <translation>%1 usuaris</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7012"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7033"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7263"/>
         <source>Force Update</source>
         <translation>Força l&apos;actualització</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7250"/>
         <source>US States:</source>
         <translation>US States:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7253"/>
         <source>%1 calls, %2 locators</source>
         <translation>%1 indicatius, %2 locators</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7566"/>
         <source>RF self-calibration:</source>
         <translation>Autocalibratge RF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7341"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7571"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
         <translation>Usa els valors DT de les descodificacions rebudes només com a pista secundària de sincronització horària després que NTP/HTTPS ja estigui bloquejat. Per defecte: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7346"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7576"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
         <translation>Només pista secundària; no pot crear el primer bloqueig horari.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7354"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7584"/>
         <source>ADV DECODING</source>
         <translation>ADV DECODING</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7357"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7587"/>
         <source>Auto Mode:</source>
         <translation>Auto Mode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7361"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7591"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>AUTO - habilita les 3 tecnologies quan calgui</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7374"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7604"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>Quan està ON, les 3 funcions de sota es gestionen automàticament. Trigger: Neural+Turbo quan les descodificacions &lt; 2/slot durant 4 slots. Coherent quan el SNR de Q65 &lt; -22 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7382"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
         <source>Live state:</source>
         <translation>Estat en viu:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7384"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7614"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7386"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7388"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7618"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7392"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7622"/>
         <source>Coherent Avg:</source>
         <translation>Coherent Avg:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7397"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7627"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>Acumula averaging multi-slot per a descodificacions Q65/JT65 (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7648"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7653"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync (descodificador OSD de FT8)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7667"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>Força la descodificació FT8 amb OSD (+2-3 dB en senyals al límit)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7444"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7674"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo Feedback:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7449"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7679"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo Feedback (iteracions LDPC ampliades)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7463"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7693"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>Iteracions LDPC ampliades per a la recuperació de descodificació marginal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7807"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8037"/>
         <source>Always Pass 2:</source>
         <translation>Passa sempre 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8041"/>
         <source>Always Pass 3:</source>
         <translation>Passa sempre 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7814"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8044"/>
         <source>Always Pass 4:</source>
         <translation>Passa sempre 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8048"/>
         <source>Always Pass 5:</source>
         <translation>Passa sempre 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7821"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8051"/>
         <source>Always Pass 6:</source>
         <translation>Passa sempre 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8055"/>
         <source>Always Pass 7:</source>
         <translation>Passa sempre 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8058"/>
         <source>Always Pass 8:</source>
         <translation>Passa sempre 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7832"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8062"/>
         <source>Always Pass 9:</source>
         <translation>Passa sempre 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7956"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8210"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7957"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8211"/>
         <source>Setup (⚙)</source>
         <translation>Setup (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7963"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8217"/>
         <source>Layout (window reset)</source>
         <translation>Layout (reset de finestra)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7964"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8218"/>
         <source>History (decode history)</source>
         <translation>History (historial de descodificació)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8220"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8222"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX Cluster (barra d&apos;eines)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8223"/>
         <source>World Clock</source>
         <translation>World Clock</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8227"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>Mostra o amaga els botons d&apos;UI com prefereixis. Els canvis són immediats i es desen automàticament.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7979"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8233"/>
         <source>TOP TOOLBAR</source>
         <translation>BARRA D&apos;EINES SUPERIOR</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7998"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8252"/>
         <source>TOOLBAR BUTTON ORDER</source>
         <translation>ORDRE DELS BOTONS DE LA BARRA D&apos;EINES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8256"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
         <translation>Arrossega els botons de la barra d&apos;eines superior (premut llarg) per reordenar-los. Useu el botó de sota per restaurar l&apos;ordre per defecte.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8274"/>
         <source>Restore default button order</source>
         <translation>Restaura l&apos;ordre per defecte dels botons</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8050"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8304"/>
         <source>Restore default TX panel order</source>
         <translation>Restaura l&apos;ordre per defecte del panell TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1640"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6256"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1642"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6458"/>
         <source>Antenna:</source>
         <translation>Antena:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5419"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5621"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>Cal reiniciar l&apos;aplicació. Per a LAN/WAN, utilitzeu un testimoni d&apos;almenys 12 caràcters.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7148"/>
         <source>Auto Astro:</source>
         <translation>Auto Astro:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1567"/>
         <source>Auto Grid:</source>
         <translation>Locator automàtic:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5463"/>
         <source>Auto Log:</source>
         <translation>Registre automàtic:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3107"/>
         <source>Auto Sequence:</source>
         <translation>Seqüència automàtica:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4922"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
         <source>Avg Decode:</source>
         <translation>Decodificació mitjana:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2918"/>
         <source>AzEl Directory:</source>
         <translation>Directori AzEl:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6628"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6846"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 Tallat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1684"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1686"/>
         <source>BACKEND CAT</source>
         <translation>BACKEND CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7042"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7272"/>
         <source>BEHAVIOR</source>
         <translation>COMPORTAMENT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7911"/>
         <source>BLACKLIST</source>
         <translation>LLISTA NEGRA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1687"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1689"/>
         <source>Backend:</source>
         <translation>Backend:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2938"/>
         <source>Band TX Memory:</source>
         <translation>Banda TX Memòria:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2910"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2945"/>
         <source>Band Tune Mem:</source>
         <translation>Band Tune Mem:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1993"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1995"/>
         <source>Baud Rate:</source>
         <translation>Velocitat de transmissió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6782"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7012"/>
         <source>Black Level:</source>
         <translation>Nivell de negres:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7725"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7955"/>
         <source>Blacklist 10:</source>
         <translation>Llista negra 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7959"/>
         <source>Blacklist 11:</source>
         <translation>Llista negra 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7962"/>
         <source>Blacklist 12:</source>
         <translation>Llista negra 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7694"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7924"/>
         <source>Blacklist 1:</source>
         <translation>Llista negra 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7927"/>
         <source>Blacklist 2:</source>
         <translation>Llista negra 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7701"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7931"/>
         <source>Blacklist 3:</source>
         <translation>Llista negra 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7704"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7934"/>
         <source>Blacklist 4:</source>
         <translation>Llista negra 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7708"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7938"/>
         <source>Blacklist 5:</source>
         <translation>Llista negra 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7711"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7941"/>
         <source>Blacklist 6:</source>
         <translation>Llista negra 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7945"/>
         <source>Blacklist 7:</source>
         <translation>Llista negra 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7948"/>
         <source>Blacklist 8:</source>
         <translation>Llista negra 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7952"/>
         <source>Blacklist 9:</source>
         <translation>Llista negra 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6698"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6928"/>
         <source>Blue Calls:</source>
         <translation>Indicatius blaus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1294"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6743"/>
         <source>Bold</source>
         <translation>Atrevit</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="872"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Both</source>
         <translation>Tots dos</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1766"/>
         <source>CAT CONTROL</source>
         <translation>CONTROL CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2027"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2029"/>
         <source>CI-V Addr:</source>
         <translation>CI-V Adreça:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5283"/>
         <source>CLOUDLOG</source>
         <translation>CLOUDLOG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7440"/>
         <source>CONTEST</source>
         <translation>CONCURS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4848"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5050"/>
         <source>CQ Only:</source>
         <translation>Només CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7625"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7855"/>
         <source>CQ Zone Band:</source>
         <translation>CQ Zona de banda:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7558"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7788"/>
         <source>CQ in Msg:</source>
         <translation>CQ al missatge:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4066"/>
         <source>CW ID</source>
         <translation>ID CW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4076"/>
         <source>CW ID Interval (min):</source>
         <translation>Interval d&apos;ID de CW (min):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4069"/>
         <source>CW ID after 73:</source>
         <translation>ID de CW després del 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8171"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
         <translation>Wait &amp;amp; Pounce escolta descodificacions de CQ filtrades, però només inicia una resposta quan TX/CQ ja està armat per l&apos;operador.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7919"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8173"/>
         <source>W&amp;P Filters Only:</source>
         <translation>W&amp;amp;P Filters Only:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8181"/>
         <source>Calling Only:</source>
         <translation>Només estacions que criden:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2456"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2486"/>
         <source>Check SWR:</source>
         <translation>Comproveu SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7344"/>
         <source>Clear DX Call:</source>
         <translation>Neteja indicatiu DX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7335"/>
         <source>Clear DX Grid:</source>
         <translation>Neteja locator DX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4757"/>
         <source>Click TX:</source>
         <translation>Feu clic a TX:</translation>
     </message>
@@ -13405,7 +13518,7 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Color DX Entitat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6788"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7018"/>
         <source>Color Gain:</source>
         <translation>Guany de color:</translation>
     </message>
@@ -13414,131 +13527,131 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Color del meu indicatiu:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5039"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5241"/>
         <source>Connect</source>
         <translation>Connecta&apos;t</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5232"/>
         <source>Connected</source>
         <translation>Connectat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7244"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
         <source>Contest Name:</source>
         <translation>Nom del concurs:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5491"/>
         <source>Contest Only:</source>
         <translation>Només concurs:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6794"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
         <source>Contrast:</source>
         <translation>Contrast:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
         <source>Custom Server:</source>
         <translation>Servidor personalitzat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6801"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7031"/>
         <source>DATA DOWNLOAD</source>
         <translation>DESCÀRREGA DE DADES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6391"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6593"/>
         <source>DECODE COLORS</source>
         <translation>DESCODIFICAR COLORS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4845"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5047"/>
         <source>DECODE FILTERS</source>
         <translation>DECODIFICAR FILTRES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4914"/>
         <source>DECODE PARAMETERS</source>
         <translation>DECODIFICAR PARÀMETRES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4427"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4629"/>
         <source>DECODES</source>
         <translation>DECODIFICACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2453"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2483"/>
         <source>DIAGNOSTICS</source>
         <translation>DIAGNÒSTIC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2899"/>
         <source>DIRECTORY</source>
         <translation>DIRECTORI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4989"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5191"/>
         <source>DX CLUSTER</source>
         <translation>CLUSTER DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7878"/>
         <source>DX Call/Grid:</source>
         <translation>Indicatiu/locator DX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2276"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2306"/>
         <source>Data Bits:</source>
         <translation>Bits de dades:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5438"/>
         <source>Days Upload:</source>
         <translation>Dies de càrrega:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
         <source>Decode Depth:</source>
         <translation>Profunditat de descodificació:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4968"/>
         <source>Decode at 52s:</source>
         <translation>Descodificar a 52 s:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4389"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4591"/>
         <source>Decoded Font:</source>
         <translation>Font descodificada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Deep</source>
         <translation>Profunda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
         <source>Deep Search:</source>
         <translation>Cerca profunda:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="656"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="860"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="861"/>
         <source>Default</source>
         <translation>Per defecte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4834"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5036"/>
         <source>Degrade S/N:</source>
         <translation>Degrada S/N:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5070"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5272"/>
         <source>Detail:</source>
         <translation>Detall:</translation>
     </message>
@@ -13547,1002 +13660,1012 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Registre directe QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3163"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3198"/>
         <source>Disable TX after 73:</source>
         <translation>Desactiveu TX després de 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2506"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5059"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2536"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
         <source>Disconnect</source>
         <translation>Desconnecta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5232"/>
         <source>Disconnected</source>
         <translation>Desconnectat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7068"/>
         <source>Download CALL3.TXT</source>
         <translation>Descarrega CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7529"/>
         <source>Empty = automatic public servers</source>
         <translation>Buit = servidors públics automàtics</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7502"/>
         <source>Enable NTP:</source>
         <translation>Habilita NTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5736"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
         <source>Enable TCP ADIF:</source>
         <translation>Activa TCP ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5084"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5133"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5364"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7684"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7740"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7795"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5566"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7970"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8025"/>
         <source>Enabled:</source>
         <translation>Habilitat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7327"/>
         <source>Erase Band Act:</source>
         <translation>Erase Band Act:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4790"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4992"/>
         <source>Erasure Patterns:</source>
         <translation>Patrons d&apos;esborrat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2262"/>
+        <source>CAT keep-alive:</source>
+        <translation>Keep-alive de CAT:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2270"/>
+        <source>Light polling for interface activity LEDs</source>
+        <translation>Sondeig lleuger per als LED d&apos;activitat de la interfície</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3030"/>
         <source>READY PROFILES</source>
         <translation>PERFILS PREPARATS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3042"/>
         <source>Balanced (daily QSO) - default</source>
         <translation>Equilibrat (QSO diari) - per defecte</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3043"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
         <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3044"/>
         <source>Weak-signal / DX hunting</source>
         <translation>Senyal feble / caça de DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3045"/>
         <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
         <translation>Com Equilibrat, però: caller retries 7 · adaptive decode OFF (sensibilitat màxima) · AP cache rescue ON (accepta alguns falsos positius) · skip end-slot OFF (no perdre descodificacions tardanes).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3046"/>
         <source>Contest / high density</source>
         <translation>Concurs / alta densitat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3047"/>
         <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
         <translation>close strong partners ON · skip end-slot ON (latència mínima) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3049"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
         <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · la resta als valors per defecte. Watchdogs sense canvis.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
         <source>● active</source>
         <translation>● actiu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
         <source>FD Exchange:</source>
         <translation>FD Canvi:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8077"/>
         <source>EXCLUDE TERRITORY</source>
         <translation>EXCLOU TERRITORI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7850"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8080"/>
         <source>Europe:</source>
         <translation>Europa:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8088"/>
         <source>Africa:</source>
         <translation>Àfrica:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8097"/>
         <source>Oceania:</source>
         <translation>Oceania:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7875"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8105"/>
         <source>Asia:</source>
         <translation>Àsia:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7884"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8114"/>
         <source>North America:</source>
         <translation>Amèrica del Nord:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7892"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8122"/>
         <source>South America:</source>
         <translation>Amèrica del Sud:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8132"/>
         <source>FILTER OPTIONS</source>
         <translation>OPCIONS DE FILTRE</translation>
     </message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
-    <source>Worked on Band:</source>
-    <translation>Treballades a la banda:</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
-    <source>Hide stations already worked on the current band.</source>
-    <translation>Amaga les estacions ja treballades a la banda actual.</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
-    <source>Worked Today:</source>
-    <translation>Treballades avui:</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
-    <source>Hide stations already logged today in UTC.</source>
-    <translation>Amaga les estacions ja registrades avui en UTC.</translation>
-</message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8135"/>
+        <source>Worked on Band:</source>
+        <translation>Treballades a la banda:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8144"/>
+        <source>Hide stations already worked on the current band.</source>
+        <translation>Amaga les estacions ja treballades a la banda actual.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8147"/>
+        <source>Worked Today:</source>
+        <translation>Treballades avui:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8156"/>
+        <source>Hide stations already logged today in UTC.</source>
+        <translation>Amaga les estacions ja registrades avui en UTC.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4552"/>
         <source>FONT</source>
         <translation>FONT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2936"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2971"/>
         <source>FREQUENCY AND TIMING</source>
         <translation>FREQÜÈNCIA I TEMPORITZACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="840"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
         <source>Fake It</source>
         <translation>Falseja-ho</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Fast</source>
         <translation>Ràpid</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Field Day</source>
         <translation>Dia de camp</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
         <source>First (:00/:30)</source>
         <translation>Primer (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4353"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4555"/>
         <source>Font:</source>
         <translation>Font:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7067"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7297"/>
         <source>Force Call 1st:</source>
         <translation>Força indicatiu primer:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2340"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2370"/>
         <source>Force DTR:</source>
         <translation>Força DTR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2362"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2392"/>
         <source>Force RTS:</source>
         <translation>Força RTS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Fox</source>
         <translation>Guineu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7168"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7398"/>
         <source>Fox Mode:</source>
         <translation>Mode Fox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="876"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="877"/>
         <source>Front/Mic</source>
         <translation>Front/Mic</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Full</source>
         <translation>Complet</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4741"/>
         <source>Greyline:</source>
         <translation>Línia grisa:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6894"/>
         <source>HIGHLIGHTING</source>
         <translation>DESTACAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6921"/>
         <source>HL Blue:</source>
         <translation>HL Blau:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6676"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6906"/>
         <source>HL Orange:</source>
         <translation>HL Taronja:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5371"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5573"/>
         <source>HTTP port:</source>
         <translation>Port HTTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
         <source>Hamlib (300+ radios)</source>
         <translation>Hamlib (més de 300 ràdios)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2512"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2542"/>
         <source>Hamlib:</source>
         <translation>Hamlib:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2315"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2345"/>
         <source>Handshake:</source>
         <translation>Encaixada de mans:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="663"/>
         <source>Hardware</source>
         <translation>Maquinari</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6943"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>High DPI:</source>
         <translation>DPI alt:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
         <source>High Freq (Hz):</source>
         <translation>Freqüència alta (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6667"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6897"/>
         <source>Highlight 73:</source>
         <translation>Destacat 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2062"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2064"/>
         <source>Host:Port:</source>
         <translation>Amfitrió:Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Hound</source>
         <translation>Gos</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7179"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7409"/>
         <source>Hound Mode:</source>
         <translation>Mode Hound:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1574"/>
         <source>IARU Region:</source>
         <translation>Regió IARU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7870"/>
         <source>ITU Zone Band:</source>
         <translation>Banda de la zona ITU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7251"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
         <source>Indiv Name:</source>
         <translation>Nom individual:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2761"/>
         <source>Input Channel:</source>
         <translation>Canal d&apos;entrada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2706"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2741"/>
         <source>Input Device:</source>
         <translation>Dispositiu d&apos;entrada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5507"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5709"/>
         <source>Interface Used:</source>
         <translation>Interfície utilitzada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1301"/>
         <source>Italic</source>
         <translation>Cursiva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4989"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2782"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2817"/>
         <source>LEVELS</source>
         <translation>NIVELLS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5449"/>
         <source>LOGGING</source>
         <translation>REGISTRE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5410"/>
         <source>LOTW</source>
         <translation>LOTW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7182"/>
         <source>Larger Tab:</source>
         <translation>Pestanya més gran:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7330"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7560"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>Deixeu el servidor buit per utilitzar automàticament pool.ntp.org, Apple, Cloudflare i Google.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="868"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Left</source>
         <translation>Esquerra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5690"/>
         <source>Listen Port:</source>
         <translation>Port d&apos;escolta:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5476"/>
         <source>Log as RTTY:</source>
         <translation>Inicieu sessió com a RTTY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5211"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5413"/>
         <source>LotW Enabled:</source>
         <translation>LotW activat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4934"/>
         <source>Low Freq (Hz):</source>
         <translation>Freqüència baixa (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Low Sidelobes</source>
         <translation>Lòbuls laterals baixos</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4529"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4731"/>
         <source>MAP AND DISTANCE</source>
         <translation>MAPA I DISTANCIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3181"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3216"/>
         <source>MSK/Q65 TX until 73:</source>
         <translation>MSK/Q65 TX fins al 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4749"/>
         <source>Map All Msgs:</source>
         <translation>Mapa tots els missatges:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Max Sensitivity</source>
         <translation>Sensibilitat màxima</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4532"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4734"/>
         <source>Miles:</source>
         <translation>Milles:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2411"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5993"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2441"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6195"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6909"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7139"/>
         <source>Monitor Last:</source>
         <translation>Últim monitor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7130"/>
         <source>Monitor OFF:</source>
         <translation>Monitor apagat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="866"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Mono</source>
         <translation>Mono</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5699"/>
         <source>Multicast TTL:</source>
         <translation>Multidifusió TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
         <source>My Call Only:</source>
         <translation>Només el meu indicatiu:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1544"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7795"/>
         <source>My Call:</source>
         <translation>El meu indicatiu:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1553"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1555"/>
         <source>My Grid:</source>
         <translation>El meu locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7259"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC Sprint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4967"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5169"/>
         <source>NETWORK SERVICES</source>
         <translation>SERVEIS DE XARXA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7269"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7499"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP SINCRONITZACIÓ HORA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
         <source>Native (15 radios)</source>
         <translation>Natiu (15 ràdios)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7618"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7848"/>
         <source>New CQ Zone:</source>
         <translation>Nova zona CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7610"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7840"/>
         <source>New Cont Band:</source>
         <translation>Nova banda de control:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7603"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7833"/>
         <source>New Continent:</source>
         <translation>Nou continent:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7810"/>
         <source>New DXCC Band:</source>
         <translation>Nova banda DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7803"/>
         <source>New DXCC:</source>
         <translation>Nou DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7825"/>
         <source>New Grid Band:</source>
         <translation>Nou locator per banda:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7588"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
         <source>New Grid:</source>
         <translation>Nou locator:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7863"/>
         <source>New ITU Zone:</source>
         <translation>Nova Zona ITU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7369"/>
         <source>No Btn Color:</source>
         <translation>Sense color Btn:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
         <source>No message</source>
         <translation>Cap missatge</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5431"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="658"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="858"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="859"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>None</source>
         <translation>Cap</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Normal</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5917"/>
         <source>Notify Request:</source>
         <translation>Sol·licitud de notificació:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1460"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1462"/>
         <source>OK</source>
         <translation>D&apos;acord</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7381"/>
         <source>OPERATING MODE</source>
         <translation>MODE DE FUNCIONAMENT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7701"/>
         <source>OTP</source>
         <translation>OTP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7704"/>
         <source>OTP Enabled:</source>
         <translation>OTP activat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7719"/>
         <source>OTP Interval:</source>
         <translation>OTP Interval:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7711"/>
         <source>OTP Seed:</source>
         <translation>OTP Llavor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7728"/>
         <source>OTP URL:</source>
         <translation>URL OTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="864"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Off</source>
         <translation>Apagat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="862"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="863"/>
         <source>On</source>
         <translation>Encès</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1593"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1595"/>
         <source>Op Call:</source>
         <translation>Indicatiu operador:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2556"/>
         <source>Open Hamlib update</source>
         <translation>Obriu l&apos;actualització Hamlib</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
         <source>Orange Calls:</source>
         <translation>Indicatius taronja:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2799"/>
         <source>Output Channel:</source>
         <translation>Canal de sortida:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2779"/>
         <source>Output Device:</source>
         <translation>Dispositiu de sortida:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2935"/>
         <source>POWER MEMORY</source>
         <translation>MEMÒRIA DE POTÈNCIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4970"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5172"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2167"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2169"/>
         <source>PTT Method:</source>
         <translation>PTT Mètode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2214"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2216"/>
         <source>PTT Port:</source>
         <translation>Port PTT:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2468"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
         <source>PWR and SWR:</source>
         <translation>PWR i SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6996"/>
         <source>Palette:</source>
         <translation>Paleta:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5423"/>
         <source>Password:</source>
         <translation>Contrasenya:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2245"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2247"/>
         <source>Poll Interval (s):</source>
         <translation>Interval (s):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
         <source>Port:</source>
         <translation>Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1652"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1654"/>
         <source>Power (W):</source>
         <translation>Potència (W):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6935"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7165"/>
         <source>Progress Red:</source>
         <translation>Vermell de progrés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5250"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5452"/>
         <source>Prompt to Log:</source>
         <translation>Sol·licitud de registre:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7655"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7885"/>
         <source>QSY Message:</source>
         <translation>Missatge QSY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1619"/>
         <source>QTH:</source>
         <translation>QTH:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7059"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
         <source>Quick Call:</source>
         <translation>Crida ràpida:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3149"/>
         <source>Quick QSO:</source>
         <translation>Ràpida QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5526"/>
         <source>RECORDING</source>
         <translation>ENREGISTRAMENT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5361"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5563"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>TAULIER WEB REMUT (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7466"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY Canvi:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4757"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4959"/>
         <source>RX Bandwidth:</source>
         <translation>RX Ample de banda:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2820"/>
         <source>RX Input Level:</source>
         <translation>RX Nivell d&apos;entrada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2153"/>
         <source>RX/TX via TCI</source>
         <translation>RX/TX mitjançant TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7352"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;TX després de QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="875"/>
         <source>Rear/Data</source>
         <translation>posterior/Dades</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5327"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5529"/>
         <source>Record RX:</source>
         <translation>Registre RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5337"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5539"/>
         <source>Record TX:</source>
         <translation>Registre TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5413"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5615"/>
         <source>Required for LAN/WAN</source>
         <translation>Necessari per a LAN/WAN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4385"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4421"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5868"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6517"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6070"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6720"/>
         <source>Reset</source>
         <translation>Restablir</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5723"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5925"/>
         <source>Restore Win:</source>
         <translation>Restaura Win:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="839"/>
         <source>Rig</source>
         <translation>Equip</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1631"/>
         <source>Rig Info:</source>
         <translation>Informació de la plataforma:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1769"/>
         <source>Rig:</source>
         <translation>Equip:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="870"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="871"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Right</source>
         <translation>Dreta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2291"/>
         <source>SERIAL PARAMETERS</source>
         <translation>PARÀMETRES DE SÈRIE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4819"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5021"/>
         <source>SIDELOBE CONTROL</source>
         <translation>CONTROL DEL LÒBUL LATERAL</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6993"/>
         <source>SPECTRUM</source>
         <translation>ESPECTRE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2384"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2414"/>
         <source>SPLIT OPERATION</source>
         <translation>FUNCIONAMENT DIVISIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7113"/>
         <source>STARTUP</source>
         <translation>INICIACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1541"/>
         <source>STATION DETAILS</source>
         <translation>DETALLS DE L&apos;ESTACIÓ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2902"/>
         <source>Save Directory:</source>
         <translation>Desa el directori:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
         <source>Second (:15/:45)</source>
         <translation>Segon (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5789"/>
         <source>Secondary ADIF:</source>
         <translation>ADIF secundària:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5569"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5771"/>
         <source>Secondary Interface:</source>
         <translation>Interfície secundària:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5550"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5752"/>
         <source>Secondary Port:</source>
         <translation>Port secundari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5542"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
         <source>Secondary Server:</source>
         <translation>Servidor secundari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5559"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5761"/>
         <source>Secondary TTL:</source>
         <translation>TTL secundari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5736"/>
         <source>Secondary UDP:</source>
         <translation>UDP secundària:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5525"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5727"/>
         <source>Send ADIF:</source>
         <translation>Envia ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3093"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3128"/>
         <source>Send RR73:</source>
         <translation>Envia RR73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1919"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1921"/>
         <source>Serial Port:</source>
         <translation>Port sèrie:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5673"/>
         <source>Server Name:</source>
         <translation>Nom del servidor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5478"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
         <source>Server Port:</source>
         <translation>Port del servidor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4992"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5194"/>
         <source>Server:</source>
         <translation>Servidor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4430"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4632"/>
         <source>Show DXCC:</source>
         <translation>Mostra DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7198"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7428"/>
         <source>Show OTP:</source>
         <translation>Mostra OTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4822"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5024"/>
         <source>Sidelobe Mode:</source>
         <translation>Mode lòbul lateral:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4976"/>
         <source>Single Decode:</source>
         <translation>Descodificació única:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5501"/>
         <source>Spec Op Cmts:</source>
         <translation>Cmts d&apos;opcions especificacions:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2387"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2417"/>
         <source>Split:</source>
         <translation>Divisió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5118"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5320"/>
         <source>Station ID:</source>
         <translation>ID de l&apos;estació:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5023"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5169"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1739"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5371"/>
         <source>Status:</source>
         <translation>Estat:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2296"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2326"/>
         <source>Stop Bits:</source>
         <translation>Bits d&apos;aturada:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7420"/>
         <source>SuperFox:</source>
         <translation>SuperFox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7314"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7544"/>
         <source>Sync Now</source>
         <translation>Sincronitza ara</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2440"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
         <source>TCI Audio</source>
         <translation>Àudio TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2143"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2145"/>
         <source>TCI Audio:</source>
         <translation>Àudio TCI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2119"/>
         <source>TCI Host:Port:</source>
         <translation>Amfitrió TCI:Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5946"/>
         <source>TCP Port:</source>
         <translation>Port TCP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5958"/>
         <source>TCP Server:</source>
         <translation>Servidor TCP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5182"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP:</translation>
     </message>
@@ -14551,42 +14674,42 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">TERRITORI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3885"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4087"/>
         <source>TONE SPACING</source>
         <translation>ESPACIACIÓ DE TONS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2424"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2454"/>
         <source>TX Audio Src:</source>
         <translation>TX Audio Sr:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2467"/>
         <source>TX Audio:</source>
         <translation>TX Àudio:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3004"/>
         <source>TX Delay (s):</source>
         <translation>TX Retard (s):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2974"/>
         <source>TX Frequency:</source>
         <translation>TX Freqüència:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4673"/>
         <source>TX Msg to RX:</source>
         <translation>TX Missatge a RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2845"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2880"/>
         <source>TX Output Level:</source>
         <translation>TX Nivell de sortida:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2987"/>
         <source>TX Slot:</source>
         <translation>Ranura TX:</translation>
     </message>
@@ -14611,172 +14734,172 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Territori 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1731"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1733"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
         <translation>Consell: tanqueu OmniRig des de la icona de la safata de Windows i torneu a prémer Connecta.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3843"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4045"/>
         <source>Tune Watchdog (s):</source>
         <translation>Tune Watchdog (s):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4809"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5011"/>
         <source>Two-Pass:</source>
         <translation>Dues passades:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Type 1 prefix</source>
         <translation>Prefix tipus 1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1583"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
         <source>Type 2 Msg Gen:</source>
         <translation>Tipus 2 Msg Gen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Type 2 prefix</source>
         <translation>Prefix tipus 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5427"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5629"/>
         <source>UDP SERVER</source>
         <translation>SERVIDOR UDP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5401"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5603"/>
         <source>Username:</source>
         <translation>Nom d&apos;usuari:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7076"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7306"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3781"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3969"/>
         <source>WATCHDOG</source>
         <translation>GOS GUARDIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7967"/>
         <source>WHITELIST</source>
         <translation>LLISTA BLANCA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5394"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5596"/>
         <source>WS bind:</source>
         <translation>Enllaç WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5381"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5583"/>
         <source>WS socket port:</source>
         <translation>Port de presa WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5348"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5550"/>
         <source>WSPR Upload:</source>
         <translation>Càrrega WSPR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8159"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Espera i salta:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7318"/>
         <source>Wait Features:</source>
         <translation>Funcions d&apos;espera:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7780"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8010"/>
         <source>Whitelist 10:</source>
         <translation>Llista blanca 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8014"/>
         <source>Whitelist 11:</source>
         <translation>Llista blanca 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8017"/>
         <source>Whitelist 12:</source>
         <translation>Llista blanca 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7979"/>
         <source>Whitelist 1:</source>
         <translation>Llista blanca 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7752"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7982"/>
         <source>Whitelist 2:</source>
         <translation>Llista blanca 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7986"/>
         <source>Whitelist 3:</source>
         <translation>Llista blanca 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7759"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7989"/>
         <source>Whitelist 4:</source>
         <translation>Llista blanca 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7993"/>
         <source>Whitelist 5:</source>
         <translation>Llista blanca 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7996"/>
         <source>Whitelist 6:</source>
         <translation>Llista blanca 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7770"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8000"/>
         <source>Whitelist 7:</source>
         <translation>Llista blanca 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8003"/>
         <source>Whitelist 8:</source>
         <translation>Llista blanca 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7777"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8007"/>
         <source>Whitelist 9:</source>
         <translation>Llista blanca 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2537"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
         <translation>Windows: DLL actualitzada des del lloc Hamlib. macOS/Linux: documentació oficial i versions.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5314"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
         <source>ZZ00:</source>
         <translation>ZZ00:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4890"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5092"/>
         <source>Zap:</source>
         <translation>Zap:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5306"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5508"/>
         <source>dB in Cmts:</source>
         <translation>dB en cmts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6926"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7156"/>
         <source>kHz no k:</source>
         <translation>kHz no k:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
         <source>↻  Refresh</source>
         <translation>↻  Actualitza</translation>
     </message>
@@ -14808,53 +14931,84 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Error a l&apos;inicialitzar el dispositiu de descarrega d&apos;àudio</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="275"/>
+        <location filename="../Audio/soundin.cpp" line="480"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
         <translation>Error en obrir l&apos;entrada d&apos;àudio RX: Qt no ha pogut obrir el dispositiu d&apos;entrada seleccionat. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="279"/>
+        <location filename="../Audio/soundin.cpp" line="484"/>
         <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
         <translation>Error de lectura de l&apos;entrada d&apos;àudio RX: Qt ha informat d&apos;un error d&apos;E/S en llegir mostres. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="283"/>
+        <location filename="../Audio/soundin.cpp" line="488"/>
         <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
         <translation>Error fatal de l&apos;entrada d&apos;àudio RX: el dispositiu d&apos;entrada seleccionat no és utilitzable ara. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="289"/>
+        <location filename="../Audio/soundin.cpp" line="494"/>
         <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
         <translation>Underrun de l&apos;entrada d&apos;àudio RX: la captura ha quedat enrere però continuarà. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="425"/>
+        <location filename="../Audio/soundin.cpp" line="649"/>
         <source>Audio RX format unsupported: device=&quot;%1&quot; does not accept requested=%2; preferred=%3; selected-channel=%4</source>
         <translation>Format d&apos;àudio RX no admès: device=&quot;%1&quot; no accepta requested=%2; preferred=%3; selected-channel=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="466"/>
+        <location filename="../Audio/soundin.cpp" line="706"/>
         <source>Audio RX sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
         <translation>Ha fallat la inicialització del sink d&apos;àudio RX: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="630"/>
+        <location filename="../Audio/soundin.cpp" line="888"/>
         <source>Idle</source>
         <translation>Inactiu</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="635"/>
-        <location filename="../Audio/soundin.cpp" line="639"/>
+        <location filename="../Audio/soundin.cpp" line="410"/>
+        <location filename="../Audio/soundin.cpp" line="893"/>
+        <location filename="../Audio/soundin.cpp" line="897"/>
         <source>Receiving</source>
         <translation>Rebent</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="639"/>
+        <location filename="../Audio/soundin.cpp" line="327"/>
+        <source>Native macOS AudioQueue input requires PCM Int16 format, got %1</source>
+        <translation>L&apos;entrada AudioQueue nativa de macOS requereix el format PCM Int16, s&apos;ha rebut %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="334"/>
+        <source>Native macOS AudioQueue sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
+        <translation>Ha fallat la inicialització del sink AudioQueue natiu de macOS: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="361"/>
+        <source>Native macOS AudioQueue input open failed for &quot;%1&quot;: %2</source>
+        <translation>Ha fallat l&apos;obertura de l&apos;entrada AudioQueue nativa de macOS per a &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="379"/>
+        <source>Native macOS AudioQueue buffer allocation failed for &quot;%1&quot;: %2</source>
+        <translation>Ha fallat l&apos;assignació del búfer AudioQueue natiu de macOS per a &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="388"/>
+        <source>Native macOS AudioQueue buffer enqueue failed for &quot;%1&quot;: %2</source>
+        <translation>Ha fallat l&apos;encuament del búfer AudioQueue natiu de macOS per a &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="399"/>
+        <source>Native macOS AudioQueue input start failed for &quot;%1&quot;: %2</source>
+        <translation>Ha fallat l&apos;inici de l&apos;entrada AudioQueue nativa de macOS per a &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="897"/>
         <source>Suspended</source>
         <translation>Suspès</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="645"/>
+        <location filename="../Audio/soundin.cpp" line="903"/>
         <source>Audio RX input stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>L&apos;entrada d&apos;àudio RX s&apos;ha aturat amb un error: device=&quot;%1&quot;, state=%2</translation>
     </message>
@@ -14867,7 +15021,7 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <translation type="vanished">Error</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="652"/>
+        <location filename="../Audio/soundin.cpp" line="910"/>
         <source>Stopped</source>
         <translation>Aturat</translation>
     </message>
@@ -15082,14 +15236,14 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="469"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="472"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
         <translation>Mesurador d&apos;ALC 0..100
 &gt;60 = ALC excessiu (potència TX massa alta)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="470"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="473"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>Hamlib no informa de l&apos;ALC per a aquest rig/backend</translation>
     </message>
@@ -16043,1124 +16197,1405 @@ Premut llarg: edita el missatge</translation>
         <translation type="vanished">Configuració</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="30"/>
         <source>Genera&amp;l</source>
-        <translation type="vanished">Genera&amp;l</translation>
+        <translation>Genera&amp;l</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="33"/>
         <source>General station details and settings.</source>
-        <translation type="vanished">Detalls i configuració generals de l&apos;estació.</translation>
+        <translation>Detalls i configuració generals de l&apos;estació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="39"/>
         <source>Station Details</source>
-        <translation type="vanished">Detalls de l&apos;estació</translation>
+        <translation>Detalls de l&apos;estació</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="49"/>
         <source>My C&amp;all:</source>
-        <translation type="vanished">El meu Indic&amp;atiu:</translation>
+        <translation>El meu Indic&amp;atiu:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="59"/>
         <source>Station callsign.</source>
-        <translation type="vanished">Indicatiu de l&apos;estació.</translation>
+        <translation>Indicatiu de l&apos;estació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="70"/>
         <source>M&amp;y Grid:</source>
-        <translation type="vanished">El meu L&amp;ocator:</translation>
+        <translation>El meu L&amp;ocator:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="80"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maidenhead locator, preferably 6 characters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Locator Maidenhead, preferiblement de 6 caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Locator Maidenhead, preferiblement de 6 caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="89"/>
         <source>Check to allow grid changes from external programs</source>
-        <translation type="vanished">Comprova que permets els canvis de Locator de programes externs</translation>
+        <translation>Comprova que permets els canvis de Locator de programes externs</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="92"/>
         <source>AutoGrid</source>
-        <translation type="vanished">Locator Automàtic</translation>
+        <translation>Locator Automàtic</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="101"/>
         <source>IARU Region:</source>
-        <translation type="vanished">Regió IARU:</translation>
+        <translation>Regió IARU:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="111"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select your IARU region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selecciona la teva regió IARU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selecciona la teva regió IARU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="124"/>
         <source>Message generation for type 2 compound callsign holders:</source>
-        <translation type="vanished">Generació de missatges per a indicatius de tipus 2:</translation>
+        <translation>Generació de missatges per a indicatius de tipus 2:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="140"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type 2 compound callsigns are those with prefixes or suffixes not included in the allowed shortlist (See Help-&amp;gt;Add-on prefixes and suffixes).&lt;/p&gt;&lt;p&gt;This option determines which generated messages should contain your full type 2 compound call sign rather than your base callsign. It only applies if you have a type 2 compound callsign.&lt;/p&gt;&lt;p&gt;This option controls the way the messages that are used to answer CQ calls are generated. Generated messages 6 (CQ) and 5 (73) will always contain your full callsign. The JT65 and JT9 protocols allow for some standard messages with your full call at the expense of another piece of information such as the DX call or your locator.&lt;/p&gt;&lt;p&gt;Choosing message 1 omits the DX callsign which may be an issue when replying to CQ calls. Choosing message 3 also omits the DX callsign and many versions of this and other software will not extract the report. Choosing neither means that your full callsign only goes in your message 5 (73) so your QSO partner may log the wrong callsign.&lt;/p&gt;&lt;p&gt;None of these options are perfect, message 3 is usually best but be aware your QSO partner may not log the report you send them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Els indicatius compostos del tipus 2 són aquells amb prefixos o sufixos no inclosos a la llista prèvia permesa (Consulta Ajuda,Prefixos i sufixos addicionals).&lt;/p&gt;&lt;p&gt;Aquesta opció determina quins missatges generats han de contenir el teu indicatiu de tipus complet 2 en lloc del teu indicatiu base. Només s’aplica si tens un indicatiu compost de tipus 2.&lt;/p&gt;&lt;p&gt;Aquesta opció controla la manera com es generen els missatges que s’utilitzen per respondre trucades de CQ. Els missatges generats 6 (CQ) i 5 (73) sempre contindran el teu indicatiu complet. Els protocols JT65 i JT9 permeten alguns missatges estàndard amb el teu indicatiu complet a costa d’una altra informació, com ara la trucada DX o el locator.&lt;/p&gt;&lt;p&gt;L&apos;elecció del missatge 1 omet l&apos;indicatiu de DX, que pot ser un problema quan es respon a les trucades de CQ. L&apos;elecció del missatge 3 també omet l&apos;indicatiu de DX i moltes versions d&apos;aquest altre programari no extreuran l&apos;informe. Si esculls cap, no significa que només el teu indicatiu complet aparegui al missatge 5 (73) de manera que l&apos;altra operador de QSO pot registrar l&apos;indicatiu erròni.&lt;/p&gt;&lt;p&gt;Cap d’aquestes opcions és perfecta, el missatge 3 sol ser el millor, però tingues en compte que l&apos;altra operador de QSO pot no registrar l’informe que li envies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Els indicatius compostos del tipus 2 són aquells amb prefixos o sufixos no inclosos a la llista prèvia permesa (Consulta Ajuda,Prefixos i sufixos addicionals).&lt;/p&gt;&lt;p&gt;Aquesta opció determina quins missatges generats han de contenir el teu indicatiu de tipus complet 2 en lloc del teu indicatiu base. Només s’aplica si tens un indicatiu compost de tipus 2.&lt;/p&gt;&lt;p&gt;Aquesta opció controla la manera com es generen els missatges que s’utilitzen per respondre trucades de CQ. Els missatges generats 6 (CQ) i 5 (73) sempre contindran el teu indicatiu complet. Els protocols JT65 i JT9 permeten alguns missatges estàndard amb el teu indicatiu complet a costa d’una altra informació, com ara la trucada DX o el locator.&lt;/p&gt;&lt;p&gt;L&apos;elecció del missatge 1 omet l&apos;indicatiu de DX, que pot ser un problema quan es respon a les trucades de CQ. L&apos;elecció del missatge 3 també omet l&apos;indicatiu de DX i moltes versions d&apos;aquest altre programari no extreuran l&apos;informe. Si esculls cap, no significa que només el teu indicatiu complet aparegui al missatge 5 (73) de manera que l&apos;altra operador de QSO pot registrar l&apos;indicatiu erròni.&lt;/p&gt;&lt;p&gt;Cap d’aquestes opcions és perfecta, el missatge 3 sol ser el millor, però tingues en compte que l&apos;altra operador de QSO pot no registrar l’informe que li envies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="147"/>
         <source>Full call in Tx1</source>
-        <translation type="vanished">Indicatiu complet a TX1</translation>
+        <translation>Indicatiu complet a TX1</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="152"/>
         <source>Full call in Tx3</source>
-        <translation type="vanished">Indicatiu complet a TX3</translation>
+        <translation>Indicatiu complet a TX3</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="157"/>
         <source>Full call in Tx5 only</source>
-        <translation type="vanished">Indicatiu complet a TX5 només</translation>
+        <translation>Indicatiu complet a TX5 només</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="177"/>
         <source>Display</source>
-        <translation type="vanished">Pantalla</translation>
+        <translation>Pantalla</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="277"/>
         <source>Show outgoing transmitted messages in the Rx frequency window.</source>
-        <translation type="vanished">Mostra els missatges transmesos sortints a la finestra de freqüència de RX.</translation>
+        <translation>Mostra els missatges transmesos sortints a la finestra de freqüència de RX.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="280"/>
         <source>&amp;Tx messages to Rx frequency window</source>
-        <translation type="vanished">Missatges de &amp;TX a la finestra de la freqüència de RX</translation>
+        <translation>Missatges de &amp;TX a la finestra de la freqüència de RX</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="183"/>
         <source>Show if decoded stations are new DXCC entities or worked before.</source>
-        <translation type="vanished">Mostra si les estacions descodificades són entitats DXCC noves o les has treballat abans.</translation>
+        <translation>Mostra si les estacions descodificades són entitats DXCC noves o les has treballat abans.</translation>
     </message>
     <message>
         <source>Show &amp;DXCC, grid, and worked-before status</source>
         <translation type="vanished">Mostra &amp;DXCC, Locator i si s&apos;ha treballat abans</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="250"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to have decodes for a new period start at the top of the Band Activity window and not scroll off the top when the window is full.&lt;/p&gt;&lt;p&gt;This is to aid selecting decodes to double-click while decoding is still in progress. Use the Band Activity vertical scroll bar to reveal decodes past the bottom of the window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Comprova que tinguis descodificacions per començar un nou període a la part superior de la finestra d&apos;Activitat de banda i no moguis la part superior quan la finestra estigui plena.&lt;/p&gt;&lt;p&gt;Això serveix per ajudar a seleccionar descodificacions, pots fer doble clic mentre la descodificació encara està en curs. Utilitza la barra de desplaçament vertical d&apos;Activitat de banda per veure descodificacions passades a la part inferior de la finestra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Comprova que tinguis descodificacions per començar un nou període a la part superior de la finestra d&apos;Activitat de banda i no moguis la part superior quan la finestra estigui plena.&lt;/p&gt;&lt;p&gt;Això serveix per ajudar a seleccionar descodificacions, pots fer doble clic mentre la descodificació encara està en curs. Utilitza la barra de desplaçament vertical d&apos;Activitat de banda per veure descodificacions passades a la part inferior de la finestra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="253"/>
         <source>Start new period decodes at top</source>
-        <translation type="vanished">Inicia un nou període de descodificacions a la part superior</translation>
+        <translation>Inicia un nou període de descodificacions a la part superior</translation>
     </message>
     <message>
         <source>Show principal prefix instead of country name</source>
         <translation type="vanished">Mostra el prefix principal en lloc del nom del país</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="206"/>
         <source>Set the font characteristics for the application.</source>
-        <translation type="vanished">Defineix les característiques del tipus de lletra per a l&apos;aplicació.</translation>
+        <translation>Defineix les característiques del tipus de lletra per a l&apos;aplicació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="209"/>
         <source>Font...</source>
-        <translation type="vanished">Font...</translation>
+        <translation>Font...</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="240"/>
         <source>Set the font characteristics for the Band Activity and Rx Frequency areas.</source>
-        <translation type="vanished">Defineix les característiques del tipus de lletra per a les àrees de freqüència i activitat de la banda.</translation>
+        <translation>Defineix les característiques del tipus de lletra per a les àrees de freqüència i activitat de la banda.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="243"/>
         <source>Decoded Text Font...</source>
-        <translation type="vanished">Tipus de font a l&apos;àrea de descodificat ...</translation>
+        <translation>Tipus de font a l&apos;àrea de descodificat ...</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="196"/>
         <source>Include a separator line between periods in the band activity window.</source>
-        <translation type="vanished">Inclou una línia separadora entre períodes a la finestra d&apos;activitat de la banda.</translation>
+        <translation>Inclou una línia separadora entre períodes a la finestra d&apos;activitat de la banda.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="199"/>
         <source>&amp;Blank line between decoding periods</source>
-        <translation type="vanished">Línia en &amp;blanc entre els períodes de descodificació</translation>
+        <translation>Línia en &amp;blanc entre els períodes de descodificació</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="230"/>
         <source>Show distance to DX station in miles rather than kilometers.</source>
-        <translation type="vanished">Mostra la distància a l&apos;estació de DX en milles i no en quilòmetres.</translation>
+        <translation>Mostra la distància a l&apos;estació de DX en milles i no en quilòmetres.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="233"/>
         <source>Display dista&amp;nce in miles</source>
-        <translation type="vanished">Distà&amp;ncia de visualització en milles</translation>
+        <translation>Distà&amp;ncia de visualització en milles</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="317"/>
         <source>Behavior</source>
-        <translation type="vanished">Comportament</translation>
+        <translation>Comportament</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="438"/>
         <source>Decode after EME delay</source>
-        <translation type="vanished">Descodificar després del retard d&apos;EME</translation>
+        <translation>Descodificar després del retard d&apos;EME</translation>
     </message>
     <message>
         <source>Tx watchdog:</source>
         <translation type="vanished">Seguretat de TX:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="506"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of minutes before unattended transmissions are aborted&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de minuts abans que s’abandonin les transmissions sense atenció&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de minuts abans que s’abandonin les transmissions sense atenció&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="509"/>
         <source>Disabled</source>
-        <translation type="vanished">Desactivat</translation>
+        <translation>Desactivat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="512"/>
         <source> minutes</source>
-        <translation type="vanished"> minuts</translation>
+        <translation> minuts</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="445"/>
         <source>Single decode</source>
-        <translation type="vanished">Descodificació única</translation>
+        <translation>Descodificació única</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="428"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some rigs are not able to process CAT commands while transmitting. This means that if you are operating in split mode you may have to uncheck this option.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alguns equips no poden processar ordres CAT durant la transmissió. Això significa que si estàs operant en mode dividit (split), potser hauràs de desmarcar aquesta opció.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alguns equips no poden processar ordres CAT durant la transmissió. Això significa que si estàs operant en mode dividit (split), potser hauràs de desmarcar aquesta opció.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="431"/>
         <source>Allow Tx frequency changes while transmitting</source>
-        <translation type="vanished">Permet canviar la freqüència de TX durant la transmissió</translation>
+        <translation>Permet canviar la freqüència de TX durant la transmissió</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="323"/>
         <source>Don&apos;t start decoding until the monitor button is clicked.</source>
-        <translation type="vanished">No comença a descodificar fins que no facis clic al botó de monitor.</translation>
+        <translation>No comença a descodificar fins que no facis clic al botó de monitor.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="326"/>
         <source>Mon&amp;itor off at startup</source>
-        <translation type="vanished">Monitor apa&amp;gat a l&apos;inici</translation>
+        <translation>Monitor apa&amp;gat a l&apos;inici</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="336"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this if you wish to automatically return to the last monitored frequency when monitor is enabled, leave it unchecked if you wish to have the current rig frequency maintained.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Comprova-ho si vols tornar automàticament a l’última freqüència controlada quan el monitor estigui habilitat, deixa-ho sense marcar si vols mantenir la freqüència actual de l&apos;equip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Comprova-ho si vols tornar automàticament a l’última freqüència controlada quan el monitor estigui habilitat, deixa-ho sense marcar si vols mantenir la freqüència actual de l&apos;equip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="339"/>
         <source>Monitor returns to last used frequency</source>
-        <translation type="vanished">El monitor torna a la darrera freqüència utilitzada</translation>
+        <translation>El monitor torna a la darrera freqüència utilitzada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="363"/>
         <source>Alternate F1-F6 bindings</source>
-        <translation type="vanished">Enllaços alternatius F1-F6</translation>
+        <translation>Enllaços alternatius F1-F6</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="380"/>
         <source>Turns off automatic transmissions after sending a 73 or any other free
 text message.</source>
-        <translation type="vanished">Desactiva les transmissions automàtiques després d’enviar un 73 o qualsevol altre
+        <translation>Desactiva les transmissions automàtiques després d’enviar un 73 o qualsevol altre
 missatge de text lliure.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="384"/>
         <source>Di&amp;sable Tx after sending 73</source>
-        <translation type="vanished">Desa&amp;ctiva TX després d’enviar 73</translation>
+        <translation>Desa&amp;ctiva TX després d’enviar 73</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="527"/>
         <source>Send a CW ID after every 73 or free text message.</source>
-        <translation type="vanished">Envia un ID de CW després de cada 73 o un missatge de text lluire.</translation>
+        <translation>Envia un ID de CW després de cada 73 o un missatge de text lluire.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="530"/>
         <source>CW ID a&amp;fter 73</source>
-        <translation type="vanished">CW ID després del &amp;73</translation>
+        <translation>CW ID després del &amp;73</translation>
     </message>
     <message>
         <source>Periodic CW ID Inter&amp;val:</source>
         <translation type="vanished">Inter&amp;val d&apos;ID periòdic en CW:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="555"/>
         <source>Send a CW ID periodically every few minutes.
 This might be required under your countries licence regulations.
 It will not interfere with other users as it is always sent in the
 quiet period when decoding is done.</source>
-        <translation type="vanished">Envia un ID de CW periòdicament cada pocs minuts.
+        <translation>Envia un ID de CW periòdicament cada pocs minuts.
 Pot ser que es requereixi a les regulacions de llicència del teu país.
 No interferirà amb altres usuaris ja que s&apos;envia sempre en el
 període tranquil quan es fa la descodificació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="370"/>
         <source>Automatic transmission mode.</source>
-        <translation type="vanished">Mode de transmissió automàtica.</translation>
+        <translation>Mode de transmissió automàtica.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="20"/>
+        <source>Decodium Setup</source>
+        <translation>Configuració de Decodium</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="186"/>
         <source>Show &amp;DXCC, grid, and worked-before status    </source>
-        <translation type="vanished">Mostra &amp;DXCC, quadrícula i estat treballat abans    </translation>
+        <translation>Mostra &amp;DXCC, quadrícula i estat treballat abans    </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="216"/>
         <source>Highlight DX Grid in message</source>
-        <translation type="vanished">Ressalteu DX Grid al missatge</translation>
+        <translation>Ressalteu DX Grid al missatge</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="223"/>
         <source>Show DXCC for all messages</source>
-        <translation type="vanished">Mostra DXCC per a tots els missatges</translation>
+        <translation>Mostra DXCC per a tots els missatges</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="260"/>
         <source>Show the separator line between periods with time stamp of the decode period.</source>
-        <translation type="vanished">Mostra la línia separadora entre períodes amb marca de temps del període de descodificació.</translation>
+        <translation>Mostra la línia separadora entre períodes amb marca de temps del període de descodificació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="263"/>
         <source>Show blank line with time stamp</source>
-        <translation type="vanished">Mostra una línia en blanc amb segell de temps</translation>
+        <translation>Mostra una línia en blanc amb segell de temps</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="270"/>
         <source>Show principal prefix instead of country name        </source>
-        <translation type="vanished">Mostra el prefix principal en lloc del nom del país        </translation>
+        <translation>Mostra el prefix principal en lloc del nom del país        </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="287"/>
         <source>Highlight DX Call in message</source>
-        <translation type="vanished">Ressalteu DX Call al missatge</translation>
+        <translation>Ressalteu DX Call al missatge</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="294"/>
         <source>Enable day/night shadow (greyline) on the world map panel.</source>
-        <translation type="vanished">Activa l&apos;ombra dia/nit (línia grisa) al tauler del mapa del món.</translation>
+        <translation>Activa l&apos;ombra dia/nit (línia grisa) al tauler del mapa del món.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="297"/>
         <source>Show greyline on world map</source>
-        <translation type="vanished">Mostra la línia grisa al mapa del món</translation>
+        <translation>Mostra la línia grisa al mapa del món</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="346"/>
         <source>If enabled, map single-click starts Tx and double-click only fills DX fields.</source>
-        <translation type="vanished">Si està activat, el mapa amb un sol clic inicia Tx i el doble clic només omple els camps DX.</translation>
+        <translation>Si està activat, el mapa amb un sol clic inicia Tx i el doble clic només omple els camps DX.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="349"/>
         <source>Map: single click starts Tx</source>
-        <translation type="vanished">Mapa: un sol clic comença Tx</translation>
+        <translation>Mapa: un sol clic comença Tx</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="373"/>
         <source>Doubl&amp;e-click on call sets Tx enable</source>
-        <translation type="vanished">Fes dobl&amp;e clic sobre els conjunts d&apos;indicatius de TX habilitat</translation>
+        <translation>Fes dobl&amp;e clic sobre els conjunts d&apos;indicatius de TX habilitat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="391"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the Astronomical Data window automatically when switching to Q65 or JT65 mode and Decode after EME delay is enabled, and close it when no longer needed.&lt;/p&gt;&lt;p&gt;Open the QSYMessage Creator automatically if the VHF Features are enabled and such QSY messages are applicable.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the Astronomical Data window automatically when switching to Q65 or JT65 mode and Decode after EME delay is enabled, and close it when no longer needed.&lt;/p&gt;&lt;p&gt;Open the QSYMessage Creator automatically if the VHF Features are enabled and such QSY messages are applicable.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the Astronomical Data window automatically when switching to Q65 or JT65 mode and Decode after EME delay is enabled, and close it when no longer needed.&lt;/p&gt;&lt;p&gt;Open the QSYMessage Creator automatically if the VHF Features are enabled and such QSY messages are applicable.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="394"/>
         <source>Auto-open/close Astronomical data window</source>
-        <translation type="vanished">Obre/tanca automàticament la finestra de dades astronòmiques</translation>
+        <translation>Obre/tanca automàticament la finestra de dades astronòmiques</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="401"/>
         <source>Calling CQ forces Call 1st</source>
-        <translation type="vanished">Trucar a CQ obliga a trucar primer</translation>
+        <translation>Trucar a CQ obliga a trucar primer</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="408"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx until 73 is received when in MSK144 or Q65 mode. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx fins que es rebi 73 en mode MSK144 o Q65. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx fins que es rebi 73 en mode MSK144 o Q65. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="411"/>
         <source>MSK144/Q65: Tx until 73 is received</source>
-        <translation type="vanished">MSK144/Q65: Tx fins a rebre el 73</translation>
+        <translation>MSK144/Q65: Tx fins a rebre el 73</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="418"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allow kHz frequency offset entry without &apos;k&apos; suffix.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Permetre l&apos;entrada de desplaçament de freqüència kHz sense el sufix &apos;k&apos;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Permetre l&apos;entrada de desplaçament de freqüència kHz sense el sufix &apos;k&apos;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="421"/>
         <source>kHz entry without k (restart required)</source>
-        <translation type="vanished">Entrada kHz sense k (cal reiniciar)</translation>
+        <translation>Entrada kHz sense k (cal reiniciar)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="454"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable the Tune watchdog.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Desactivar el gos de control Tune.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Desactivar el gos de control Tune.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="457"/>
         <source>Tune watchdog   </source>
-        <translation type="vanished">Sintonitza el gos guardià   </translation>
+        <translation>Sintonitza el gos guardià   </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="464"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of seconds before Tune is aborted&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de segons abans que s&apos;avorti Tune&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de segons abans que s&apos;avorti Tune&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="467"/>
         <source> seconds</source>
-        <translation type="vanished"> segons</translation>
+        <translation> segons</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="496"/>
         <source>Tx watchdog: </source>
-        <translation type="vanished">Tx watchdog: </translation>
+        <translation>Tx watchdog: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="545"/>
         <source>ID Inter&amp;val:</source>
-        <translation type="vanished">ID Inter&amp;val:</translation>
+        <translation>ID Inter&amp;val:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="567"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn the progress bar red while transmitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gira la barra de progrés en vermell durant la transmissió.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gira la barra de progrés en vermell durant la transmissió.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="570"/>
         <source>Turn progress bar red while transmitting</source>
-        <translation type="vanished">Gireu la barra de progrés en vermell mentre transmeteu</translation>
+        <translation>Gireu la barra de progrés en vermell mentre transmeteu</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="593"/>
         <source>Additional features</source>
-        <translation type="vanished">Característiques addicionals</translation>
+        <translation>Característiques addicionals</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="599"/>
         <source>Set Rx frequency to Tx frequency after QSO</source>
-        <translation type="vanished">Establiu la freqüència Rx a la freqüència Tx després de QSO</translation>
+        <translation>Establiu la freqüència Rx a la freqüència Tx després de QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="606"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a station sends locator, calculate and show the distance in Band Activity pane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si una estació envia un localitzador, calculeu i mostreu la distància al panell Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si una estació envia un localitzador, calculeu i mostreu la distància al panell Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="609"/>
         <source>Show distance in messages with grid</source>
-        <translation type="vanished">Mostra la distància als missatges amb quadrícula</translation>
+        <translation>Mostra la distància als missatges amb quadrícula</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="616"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase Band Activity and Rx frequency windows after band change.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Esborra les finestres d&apos;activitat de banda i freqüència de recepció després del canvi de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Esborra les finestres d&apos;activitat de banda i freqüència de recepció després del canvi de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="619"/>
         <source>Erase decodes after band change</source>
-        <translation type="vanished">Esborra les descodificacions després del canvi de banda</translation>
+        <translation>Esborra les descodificacions després del canvi de banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="626"/>
         <source>Clear DX Grid after QSO</source>
-        <translation type="vanished">Netegeu DX Grid després de QSO</translation>
+        <translation>Netegeu DX Grid després de QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="633"/>
         <source>Show U.S. States in messages with grid</source>
-        <translation type="vanished">Mostra els estats dels EUA als missatges amb quadrícula</translation>
+        <translation>Mostra els estats dels EUA als missatges amb quadrícula</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="640"/>
         <source>Map Grid locator to U.S. State</source>
-        <translation type="vanished">Localitzador de quadrícula de mapa a l&apos;estat dels EUA</translation>
+        <translation>Localitzador de quadrícula de mapa a l&apos;estat dels EUA</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="647"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Align the text for DXCC, distance and azimuth.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alinea el text per a DXCC, distància i azimut.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alinea el text per a DXCC, distància i azimut.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="650"/>
         <source>Align DXCC/distance/azimuth</source>
-        <translation type="vanished">Alineeu DXCC/distància/azimut</translation>
+        <translation>Alineeu DXCC/distància/azimut</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="657"/>
         <source>Alternate Erase button behavior</source>
-        <translation type="vanished">Comportament alternatiu del botó Esborra</translation>
+        <translation>Comportament alternatiu del botó Esborra</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="664"/>
         <source>Clear DX Call after QSO</source>
-        <translation type="vanished">Esborra la trucada DX després del QSO</translation>
+        <translation>Esborra la trucada DX després del QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="671"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increase or decrease the space between message text and DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augmentar o reduir l&apos;espai entre el text del missatge i DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augmentar o reduir l&apos;espai entre el text del missatge i DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="687"/>
         <source>Enable Wait features</source>
-        <translation type="vanished">Activa les funcions d&apos;espera</translation>
+        <translation>Activa les funcions d&apos;espera</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="694"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a station sends a valid Maidenhead locator, calculate and show the great-circle azimuth in Band Activity pane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si una estació envia un localitzador de Maidenhead vàlid, calculeu i mostreu l&apos;azimut del cercle gran al panell Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Si una estació envia un localitzador de Maidenhead vàlid, calculeu i mostreu l&apos;azimut del cercle gran al panell Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="697"/>
         <source>Show azimuth in messages with grid</source>
-        <translation type="vanished">Mostra l&apos;azimut als missatges amb quadrícula</translation>
+        <translation>Mostra l&apos;azimut als missatges amb quadrícula</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="704"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increase or decrease the space between DXCC and distance/azimuth.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augmentar o disminuir l&apos;espai entre DXCC i la distància/azimut.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augmentar o disminuir l&apos;espai entre DXCC i la distància/azimut.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="717"/>
         <source>Less button coloring (restart required)</source>
-        <translation type="vanished">Menys colors de botons (cal reiniciar)</translation>
+        <translation>Menys colors de botons (cal reiniciar)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="728"/>
         <source>&amp;Radio</source>
-        <translation type="vanished">&amp;Ràdio</translation>
+        <translation>&amp;Ràdio</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="731"/>
         <source>Radio interface configuration settings.</source>
-        <translation type="vanished">Paràmetres de configuració de la interfície de ràdio.</translation>
+        <translation>Paràmetres de configuració de la interfície de ràdio.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="756"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use only VFO A for split operation (the program temporarily changes the QRG of your rig during transmission).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitzeu només VFO A per a l&apos;operació dividida (el programa canvia temporalment el QRG de la vostra plataforma durant la transmissió).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitzeu només VFO A per a l&apos;operació dividida (el programa canvia temporalment el QRG de la vostra plataforma durant la transmissió).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="772"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use VFO A+B for split operation (works with many rigs, but requires the use of both VFOs).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza VFO A+B per a l&apos;operació dividida (funciona amb molts equips, però requereix l&apos;ús dels dos VFO).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza VFO A+B per a l&apos;operació dividida (funciona amb molts equips, però requereix l&apos;ús dels dos VFO).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="785"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Don&apos;t use split (not recommended).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No utilitzeu split (no recomanat).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No utilitzeu split (no recomanat).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="896"/>
         <source>Settings that control your CAT interface.</source>
-        <translation type="vanished">Configuració que controla el teu interfície CAT.</translation>
+        <translation>Configuració que controla el teu interfície CAT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="899"/>
         <source>CAT Control</source>
-        <translation type="vanished">Control CAT</translation>
+        <translation>Control CAT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="910"/>
+        <location filename="../Configuration.ui" line="1445"/>
         <source>Port:</source>
-        <translation type="vanished">Port:</translation>
+        <translation>Port:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="926"/>
         <source>Serial port used for CAT control.</source>
-        <translation type="vanished">Port sèrie utilitzat per al control CAT.</translation>
+        <translation>Port sèrie utilitzat per al control CAT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="950"/>
+        <location filename="../Configuration.ui" line="953"/>
         <source>Serial Port Parameters</source>
-        <translation type="vanished">Paràmetres de port sèrie</translation>
+        <translation>Paràmetres de port sèrie</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="964"/>
         <source>Baud Rate:</source>
-        <translation type="vanished">Velocitat de transmissió:</translation>
+        <translation>Velocitat de transmissió:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="980"/>
         <source>Serial port data rate which must match the setting of your radio.</source>
-        <translation type="vanished">Velocitat de dades del port sèrie que ha de coincidir amb la configuració del equip.</translation>
+        <translation>Velocitat de dades del port sèrie que ha de coincidir amb la configuració del equip.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="987"/>
         <source>1200</source>
-        <translation type="vanished">1200</translation>
+        <translation>1200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="992"/>
         <source>2400</source>
-        <translation type="vanished">2400</translation>
+        <translation>2400</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="997"/>
         <source>4800</source>
-        <translation type="vanished">4800</translation>
+        <translation>4800</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1002"/>
         <source>9600</source>
-        <translation type="vanished">9600</translation>
+        <translation>9600</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1007"/>
         <source>19200</source>
-        <translation type="vanished">19200</translation>
+        <translation>19200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1012"/>
         <source>38400</source>
-        <translation type="vanished">38400</translation>
+        <translation>38400</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1017"/>
         <source>57600</source>
-        <translation type="vanished">57600</translation>
+        <translation>57600</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1022"/>
         <source>115200</source>
-        <translation type="vanished">115200</translation>
+        <translation>115200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1032"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of data bits used to communicate with your radio&apos;s CAT interface (usually eight).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de bits de dades utilitzats per a comunicar-se amb la interfície CAT del equip (generalment vuit).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de bits de dades utilitzats per a comunicar-se amb la interfície CAT del equip (generalment vuit).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1035"/>
         <source>Data bits</source>
-        <translation type="vanished">Bits de dades</translation>
+        <translation>Bits de dades</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1038"/>
         <source>Data Bits</source>
-        <translation type="vanished">Bits de dades</translation>
+        <translation>Bits de dades</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1044"/>
         <source>D&amp;efault</source>
-        <translation type="vanished">&amp;Per defecte</translation>
+        <translation>&amp;Per defecte</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1057"/>
         <source>Se&amp;ven</source>
-        <translation type="vanished">S&amp;et</translation>
+        <translation>S&amp;et</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1070"/>
         <source>E&amp;ight</source>
-        <translation type="vanished">&amp;Vuit</translation>
+        <translation>&amp;Vuit</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1086"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of stop bits used when communicating with your radio&apos;s CAT interface&lt;/p&gt;&lt;p&gt;(consult you radio&apos;s manual for details).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de bits de parada utilitzats per a comunicar-se amb la interfície CAT del equip&lt;/p&gt;&lt;p&gt;(consulta el manual del equip per a més detalls).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre de bits de parada utilitzats per a comunicar-se amb la interfície CAT del equip&lt;/p&gt;&lt;p&gt;(consulta el manual del equip per a més detalls).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1089"/>
         <source>Stop bits</source>
-        <translation type="vanished">Bits de parada</translation>
+        <translation>Bits de parada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1092"/>
         <source>Stop Bits</source>
-        <translation type="vanished">Bits de parada</translation>
+        <translation>Bits de parada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1098"/>
+        <location filename="../Configuration.ui" line="1149"/>
         <source>Default</source>
-        <translation type="vanished">Per defecte</translation>
+        <translation>Per defecte</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1111"/>
         <source>On&amp;e</source>
-        <translation type="vanished">U&amp;n</translation>
+        <translation>U&amp;n</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1121"/>
         <source>T&amp;wo</source>
-        <translation type="vanished">D&amp;os</translation>
+        <translation>D&amp;os</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1137"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Flow control protocol used between this computer and your radio&apos;s CAT interface (usually &amp;quot;None&amp;quot; but some require &amp;quot;Hardware&amp;quot;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Protocol de control de flux que s’utilitza entre aquest ordinador i la interfície CAT del equip (generalment &amp;quot;Cap&amp;quot; però alguns requereixen &amp;quot;Maquinari&amp;quot;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Protocol de control de flux que s’utilitza entre aquest ordinador i la interfície CAT del equip (generalment &amp;quot;Cap&amp;quot; però alguns requereixen &amp;quot;Maquinari&amp;quot;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1140"/>
+        <location filename="../Configuration.ui" line="1143"/>
         <source>Handshake</source>
-        <translation type="vanished">Encaixada de mans</translation>
+        <translation>Encaixada de mans</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1162"/>
         <source>&amp;None</source>
-        <translation type="vanished">&amp;Cap</translation>
+        <translation>&amp;Cap</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1175"/>
         <source>Software flow control (very rare on CAT interfaces).</source>
-        <translation type="vanished">Control de flux de programari (molt rar a les interfícies CAT).</translation>
+        <translation>Control de flux de programari (molt rar a les interfícies CAT).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1178"/>
         <source>XON/XOFF</source>
-        <translation type="vanished">XON/XOFF</translation>
+        <translation>XON/XOFF</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1188"/>
         <source>Flow control using the RTS and CTS RS-232 control lines
 not often used but some radios have it as an option and 
 a few, particularly some Kenwood rigs, require it).</source>
-        <translation type="vanished">Control de flux usant les línies de control RTS i CTS RS-232
+        <translation>Control de flux usant les línies de control RTS i CTS RS-232
 no s’utilitza sovint, però alguns equips ho tenen com a opció i
 uns pocs, particularment alguns equips de Kenwood, ho requereixen.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1193"/>
         <source>&amp;Hardware</source>
-        <translation type="vanished">Ma&amp;quinari</translation>
+        <translation>Ma&amp;quinari</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1206"/>
         <source>Special control of CAT port control lines.</source>
-        <translation type="vanished">Control especial de les línies de control de ports CAT.</translation>
+        <translation>Control especial de les línies de control de ports CAT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1209"/>
+        <location filename="../Configuration.ui" line="1212"/>
         <source>Force Control Lines</source>
-        <translation type="vanished">Línies de control de força</translation>
+        <translation>Línies de control de força</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1229"/>
+        <location filename="../Configuration.ui" line="1272"/>
         <source>High</source>
-        <translation type="vanished">Alt</translation>
+        <translation>Alt</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1234"/>
+        <location filename="../Configuration.ui" line="1277"/>
         <source>Low</source>
-        <translation type="vanished">Baix</translation>
+        <translation>Baix</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1242"/>
         <source>DTR:</source>
-        <translation type="vanished">DTR:</translation>
+        <translation>DTR:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1256"/>
         <source>RTS:</source>
-        <translation type="vanished">RTS:</translation>
+        <translation>RTS:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1485"/>
+        <location filename="../Configuration.ui" line="1517"/>
         <source>Update Hamlib</source>
-        <translation type="vanished">Actualitza Hamlib</translation>
+        <translation>Actualitza Hamlib</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1491"/>
         <source>32-bit</source>
-        <translation type="vanished">32 bits</translation>
+        <translation>32 bits</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1498"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Revert the last Hamlib update. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reverteix l&apos;última actualització de Hamlib. &lt;/p&gt;&lt;p&gt;Nota: aquesta funció només està disponible a Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reverteix l&apos;última actualització de Hamlib. &lt;/p&gt;&lt;p&gt;Nota: aquesta funció només està disponible a Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1501"/>
         <source>Revert Update</source>
-        <translation type="vanished">Revertir l&apos;actualització</translation>
+        <translation>Revertir l&apos;actualització</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1514"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Download the latest libhamlib-4.dll file from https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descarregueu l&apos;últim fitxer libhamlib-4.dll des de https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Nota: aquesta funció només està disponible a Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descarregueu l&apos;últim fitxer libhamlib-4.dll des de https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Nota: aquesta funció només està disponible a Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1526"/>
         <source>In use:</source>
-        <translation type="vanished">En ús:</translation>
+        <translation>En ús:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1546"/>
         <source>Backed up:</source>
-        <translation type="vanished">Còpia de seguretat:</translation>
+        <translation>Còpia de seguretat:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1562"/>
         <source>64-bit</source>
-        <translation type="vanished">64 bits</translation>
+        <translation>64 bits</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1653"/>
         <source>Rig Data</source>
-        <translation type="vanished">Dades de plataforma</translation>
+        <translation>Dades de plataforma</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1659"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop transmitting immediately when SWR exceeds 2.5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Deixa de transmetre immediatament quan SWR supera 2,5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Deixa de transmetre immediatament quan SWR supera 2,5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1662"/>
         <source>Halt Tx when SWR &gt; 2.5</source>
-        <translation type="vanished">Atura Tx quan SWR &gt; 2,5</translation>
+        <translation>Atura Tx quan SWR &gt; 2,5</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1682"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Read and display transmit PWR and SWR of your rig.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Llegiu i visualitzeu la transmissió de PWR i SWR de la vostra plataforma.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Llegiu i visualitzeu la transmissió de PWR i SWR de la vostra plataforma.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1685"/>
         <source>Read and display PWR and SWR</source>
-        <translation type="vanished">Llegiu i visualitzeu PWR i SWR</translation>
+        <translation>Llegiu i visualitzeu PWR i SWR</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1871"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Refresh audio device list.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actualitza la llista de dispositius d&apos;àudio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Actualitza la llista de dispositius d&apos;àudio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1874"/>
         <source>Refresh</source>
-        <translation type="vanished">Actualitza</translation>
+        <translation>Actualitza</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1883"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use TCI Audio when available.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza TCI Audio quan estigui disponible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza TCI Audio quan estigui disponible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1886"/>
         <source>Use TCI Audio (restart required)</source>
-        <translation type="vanished">Utilitza TCI Audio (cal reiniciar)</translation>
+        <translation>Utilitza TCI Audio (cal reiniciar)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1893"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rx audio level&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rx nivell d&apos;àudio&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rx nivell d&apos;àudio&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1902"/>
         <source>Rx </source>
-        <translation type="vanished">Rx </translation>
+        <translation>Rx </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1934"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sort audio device names alphabetically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ordena els noms dels dispositius d&apos;àudio alfabèticament.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ordena els noms dels dispositius d&apos;àudio alfabèticament.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1937"/>
         <source>Sort alphabetically</source>
-        <translation type="vanished">Ordena alfabèticament</translation>
+        <translation>Ordena alfabèticament</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1944"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hide the usually unusable ALSA CARD subdevices on Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amaga els subdispositius ALSA CARD normalment inutilitzables a Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amaga els subdispositius ALSA CARD normalment inutilitzables a Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1947"/>
         <source>Hide ALSA CARD subdevices (Linux only)</source>
-        <translation type="vanished">Amaga els subdispositius ALSA CARD (només Linux)</translation>
+        <translation>Amaga els subdispositius ALSA CARD (només Linux)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2064"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables additional line in azel.dat for Dpol parameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Habilita la línia addicional a azel.dat per al paràmetre Dpol.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Habilita la línia addicional a azel.dat per al paràmetre Dpol.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2067"/>
         <source>Enable extra line in azel.dat</source>
-        <translation type="vanished">Activa la línia addicional a azel.dat</translation>
+        <translation>Activa la línia addicional a azel.dat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2223"/>
         <source>LOTW password:</source>
-        <translation type="vanished">Contrasenya LOTW:</translation>
+        <translation>Contrasenya LOTW:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2233"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your Logbook of the World password (required for LOTW download).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;La contrasenya del diari del món (necessari per a la descàrrega de LOTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;La contrasenya del diari del món (necessari per a la descàrrega de LOTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2240"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also download from LOTW any QSOs that have not been QSL&apos;d in the last 30 days, to try these callers again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descarregueu també de LOTW qualsevol QSO que no s&apos;hagi fet amb QSL durant els darrers 30 dies, per tornar-ho a provar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Descarregueu també de LOTW qualsevol QSO que no s&apos;hagi fet amb QSL durant els darrers 30 dies, per tornar-ho a provar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2243"/>
         <source>Also download non-QSL&apos;d callers</source>
-        <translation type="vanished">També descarregueu les persones que trucen no QSL</translation>
+        <translation>També descarregueu les persones que trucen no QSL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2256"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this option to note any Special Operating Activity in the comments field.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marqueu aquesta opció per anotar qualsevol activitat operativa especial al camp de comentaris.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marqueu aquesta opció per anotar qualsevol activitat operativa especial al camp de comentaris.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2259"/>
         <source>Special operating activity to comments</source>
-        <translation type="vanished">Activitat operativa especial a comentaris</translation>
+        <translation>Activitat operativa especial a comentaris</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2296"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Log &apos;ZZ00&apos; as grid if the other station doesn&apos;t send you a grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Registra &apos;ZZ00&apos; com a graella si l&apos;altra estació no t&apos;envia cap graella.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Registra &apos;ZZ00&apos; com a graella si l&apos;altra estació no t&apos;envia cap graella.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2299"/>
         <source>Fill missing grids with &apos;ZZ00&apos;</source>
-        <translation type="vanished">Omple les graelles que falten amb &quot;ZZ00&quot;</translation>
+        <translation>Omple les graelles que falten amb &quot;ZZ00&quot;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2334"/>
         <source>Log automatically</source>
-        <translation type="vanished">Inicieu sessió automàticament</translation>
+        <translation>Inicieu sessió automàticament</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2341"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use &apos;Log automatically&apos; only for special operating activities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza &quot;Registra automàticament&quot; només per a activitats operatives especials.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza &quot;Registra automàticament&quot; només per a activitats operatives especials.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2344"/>
         <source>Contesting only</source>
-        <translation type="vanished">Només concursant</translation>
+        <translation>Només concursant</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2366"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some logging programs will not accept Decodium v3.0 SE KP5 mode names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alguns programes de registre no acceptaran noms de mode Decodium v3.0 SE KP5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alguns programes de registre no acceptaran noms de mode Decodium v3.0 SE KP5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2376"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shorten 6-digit grid entries and log 4-digit grids instead.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Escurça les entrades de quadrícula de 6 dígits i registra les quadrícules de 4 en lloc d&apos;això.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Escurça les entrades de quadrícula de 6 dígits i registra les quadrícules de 4 en lloc d&apos;això.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2379"/>
         <source>Log 4-digit grids</source>
-        <translation type="vanished">Registre quadrícules de 4 dígits</translation>
+        <translation>Registre quadrícules de 4 dígits</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the service port number of the UDP server that WSJT-X should send updates to. If this is zero no updates will be sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introdueix el número de port del servei del servidor UDP al qual WSJT-X hauria d&apos;enviar les actualitzacions. Si és zero, no s&apos;enviaran les actualitzacions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2476"/>
         <source>Outgoing interfaces:</source>
-        <translation type="vanished">Interfícies de sortida:</translation>
+        <translation>Interfícies de sortida:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with WSJT-X. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A l&apos;enviar actualitzacions a una adreça de grup de multidifusió, cal especificar a quina interfície de xarxa enviar. Si la interfície de bucle de retorn té capacitat de multidifusió, es seleccionarà el menys aquesta.&lt;/p&gt;&lt;p&gt;Per a la majoria dels usuaris, la interfície de bucle de retorn és tot el que es necessita, el que permetrà que moltes altres aplicacions en la mateixa màquina interoperin amb WSJT-X. Si les aplicacions que s&apos;executen en altres hosts han de rebre actualitzacions d&apos;estat, s&apos;ha d&apos;utilitzar una interfície de xarxa adequada.&lt;/p&gt;&lt;p&gt;En alguns sistemes Linux, pot ser necessari habilitar la multidifusió a la interfície de xarxa de bucle de retorn.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2503"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the number or router hops that multicast datagrams are allowed to make. Almost everyone should set this to 1 to keep outgoing multicast traffic withn the local subnet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estableix el nombre de salts de l&apos;encaminador que els datagrames de multidifusió poden realitzar. Gairebé tothom hauria d&apos;establir això en 1 per a mantenir el trànsit de multidifusió sortint dins de la subxarxa local.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estableix el nombre de salts de l&apos;encaminador que els datagrames de multidifusió poden realitzar. Gairebé tothom hauria d&apos;establir això en 1 per a mantenir el trànsit de multidifusió sortint dins de la subxarxa local.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2493"/>
         <source>Multicast TTL:</source>
-        <translation type="vanished">Multidifusió TTL:</translation>
+        <translation>Multidifusió TTL:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3082"/>
         <source>Days since last upload</source>
-        <translation type="vanished">Dies des de la darrera càrrega</translation>
+        <translation>Dies des de la darrera càrrega</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1374"/>
         <source>How this program activates the PTT on your radio?</source>
-        <translation type="vanished">Com activa aquest programa el PTT del teu equip ?</translation>
+        <translation>Com activa aquest programa el PTT del teu equip ?</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1377"/>
         <source>PTT Method</source>
-        <translation type="vanished">Mètode PTT</translation>
+        <translation>Mètode PTT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1383"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No PTT activation, instead the radio&apos;s automatic VOX is used to key the transmitter.&lt;/p&gt;&lt;p&gt;Use this if you have no radio interface hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No hi ha cap activació PTT, en canvi, el VOX automàtic de l&apos;equip s&apos;utilitza per teclejar el transmissor.&lt;/p&gt;&lt;p&gt;Fes-la servir si no tens maquinari d&apos;interfície de l&apos;equip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No hi ha cap activació PTT, en canvi, el VOX automàtic de l&apos;equip s&apos;utilitza per teclejar el transmissor.&lt;/p&gt;&lt;p&gt;Fes-la servir si no tens maquinari d&apos;interfície de l&apos;equip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1386"/>
         <source>VO&amp;X</source>
-        <translation type="vanished">VO&amp;X</translation>
+        <translation>VO&amp;X</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1396"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the RS-232 DTR control line to toggle your radio&apos;s PTT, requires hardware to interface the line.&lt;/p&gt;&lt;p&gt;Some commercial interface units also use this method.&lt;/p&gt;&lt;p&gt;The DTR control line of the CAT serial port may be used for this or a DTR control line on a different serial port may be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza la línia de control RS-232 DTR per alternar el PTT del teu equip, requereix maquinari per interconnectar la línia.&lt;/p&gt;&lt;p&gt;Algunes unitats d&apos;interfície comercial també utilitzen aquest mètode.&lt;/p&gt;&lt;p&gt;Es pot utilitzar la línia de control DTR del port sèrie CAT o es pot utilitzar una línia de control DTR en un port sèrie diferent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza la línia de control RS-232 DTR per alternar el PTT del teu equip, requereix maquinari per interconnectar la línia.&lt;/p&gt;&lt;p&gt;Algunes unitats d&apos;interfície comercial també utilitzen aquest mètode.&lt;/p&gt;&lt;p&gt;Es pot utilitzar la línia de control DTR del port sèrie CAT o es pot utilitzar una línia de control DTR en un port sèrie diferent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1399"/>
         <source>&amp;DTR</source>
-        <translation type="vanished">&amp;DTR</translation>
+        <translation>&amp;DTR</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1412"/>
         <source>Some radios support PTT via CAT commands,
 use this option if your radio supports it and you have no
 other hardware interface for PTT.</source>
-        <translation type="vanished">Alguns equips admeten PTT mitjançant ordres CAT,
+        <translation>Alguns equips admeten PTT mitjançant ordres CAT,
 utilitza aquesta opció si l&apos;equip li dóna suport i no en tens cap
 altra interfície de maquinari per a PTT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1417"/>
         <source>C&amp;AT</source>
-        <translation type="vanished">C&amp;AT</translation>
+        <translation>C&amp;AT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1427"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the RS-232 RTS control line to toggle your radio&apos;s PTT, requires hardware to interface the line.&lt;/p&gt;&lt;p&gt;Some commercial interface units also use this method.&lt;/p&gt;&lt;p&gt;The RTS control line of the CAT serial port may be used for this or a RTS control line on a different serial port may be used. Note that this option is not available on the CAT serial port when hardware flow control is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza la línia de control RS-232 RTS per canviar el PTT del teu equip, requereix que el maquinari interfereixi a la línia.&lt;/p&gt;&lt;p&gt;Algunes unitats d&apos;interfície comercial també utilitzen aquest mètode.&lt;/p&gt;&lt;p&gt;Es pot utilitzar la línia de control RTS del port sèrie CAT o es pot utilitzar una línia de control RTS en un port sèrie diferent. Tingues en compte que aquesta opció no està disponible al port sèrie CAT quan s&apos;utilitza el control del flux de maquinari.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza la línia de control RS-232 RTS per canviar el PTT del teu equip, requereix que el maquinari interfereixi a la línia.&lt;/p&gt;&lt;p&gt;Algunes unitats d&apos;interfície comercial també utilitzen aquest mètode.&lt;/p&gt;&lt;p&gt;Es pot utilitzar la línia de control RTS del port sèrie CAT o es pot utilitzar una línia de control RTS en un port sèrie diferent. Tingues en compte que aquesta opció no està disponible al port sèrie CAT quan s&apos;utilitza el control del flux de maquinari.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1430"/>
         <source>R&amp;TS</source>
-        <translation type="vanished">R&amp;TS</translation>
+        <translation>R&amp;TS</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1461"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the RS-232 serial port utilised for PTT control, this option is available when DTR or RTS is selected above as a transmit method.&lt;/p&gt;&lt;p&gt;This port can be the same one as the one used for CAT control.&lt;/p&gt;&lt;p&gt;For some interface types the special value CAT may be chosen, this is used for non-serial CAT interfaces that can control serial port control lines remotely (OmniRig for example).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selecciona el port sèrie RS-232 utilitzat per al control PTT, aquesta opció està disponible quan es selecciona DTR o RTS a dalt com a mètode de transmissió.&lt;/p&gt;&lt;p&gt;Aquest port pot ser el que s&apos;utilitza per al control CAT.&lt;/p&gt;&lt;p&gt;Per a alguns tipus d&apos;interfície es pot triar el valor especial CAT, aquest s&apos;utilitza per a interfícies CAT no serials que puguin controlar les línies de control de ports sèrie de forma remota (per exemple, OmniRig).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selecciona el port sèrie RS-232 utilitzat per al control PTT, aquesta opció està disponible quan es selecciona DTR o RTS a dalt com a mètode de transmissió.&lt;/p&gt;&lt;p&gt;Aquest port pot ser el que s&apos;utilitza per al control CAT.&lt;/p&gt;&lt;p&gt;Per a alguns tipus d&apos;interfície es pot triar el valor especial CAT, aquest s&apos;utilitza per a interfícies CAT no serials que puguin controlar les línies de control de ports sèrie de forma remota (per exemple, OmniRig).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="820"/>
         <source>Modulation mode selected on radio.</source>
-        <translation type="vanished">Mode de modulació seleccionat al equip.</translation>
+        <translation>Mode de modulació seleccionat al equip.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="823"/>
         <source>Mode</source>
-        <translation type="vanished">Mode</translation>
+        <translation>Mode</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="829"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;USB is usually the correct modulation mode,&lt;/p&gt;&lt;p&gt;unless the radio has a special data or packet mode setting&lt;/p&gt;&lt;p&gt;for AFSK operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;USB sol ser el mode de modulació correcte,&lt;/p&gt;&lt;p&gt;tret que l&apos;equip tingui una configuració especial del mode de dades o paquets&lt;/p&gt;&lt;p&gt;per a l’operació AFSK.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;USB sol ser el mode de modulació correcte,&lt;/p&gt;&lt;p&gt;tret que l&apos;equip tingui una configuració especial del mode de dades o paquets&lt;/p&gt;&lt;p&gt;per a l’operació AFSK.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="832"/>
         <source>US&amp;B</source>
-        <translation type="vanished">US&amp;B</translation>
+        <translation>US&amp;B</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="845"/>
         <source>Don&apos;t allow the program to set the radio mode
 (not recommended but use if the wrong mode
 or bandwidth is selected).</source>
-        <translation type="vanished">No permetis que el programa configuri el mode de l&apos;equip
+        <translation>No permetis que el programa configuri el mode de l&apos;equip
 (No es recomana però es fa servir si el mode és incorrecte
 o es selecciona l&apos;ample de banda).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="788"/>
+        <location filename="../Configuration.ui" line="850"/>
         <source>None</source>
-        <translation type="vanished">Cap</translation>
+        <translation>Cap</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="860"/>
         <source>If this is available then it is usually the correct mode for this program.</source>
-        <translation type="vanished">Si està disponible, normalment és el mode correcte per a aquest programa.</translation>
+        <translation>Si està disponible, normalment és el mode correcte per a aquest programa.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="863"/>
         <source>Data/P&amp;kt</source>
-        <translation type="vanished">Dades/P&amp;kt</translation>
+        <translation>Dades/P&amp;kt</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1708"/>
         <source>Some radios can select the audio input using a CAT command,
 this setting allows you to select which audio input will be used
 (if it is available then generally the Rear/Data option is best).</source>
-        <translation type="vanished">Alguns equips poden seleccionar l&apos;entrada d&apos;àudio mitjançant una ordre CAT,
+        <translation>Alguns equips poden seleccionar l&apos;entrada d&apos;àudio mitjançant una ordre CAT,
 aquest paràmetre et permet seleccionar quina entrada d&apos;àudio s&apos;utilitzarà
 (si està disponible, en general, l&apos;opció posterior/dades és la millor).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1713"/>
         <source>Transmit Audio Source</source>
-        <translation type="vanished">Font d’àudio de transmissió</translation>
+        <translation>Font d’àudio de transmissió</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1719"/>
         <source>Rear&amp;/Data</source>
-        <translation type="vanished">Part poster&amp;ior/dades</translation>
+        <translation>Part poster&amp;ior/dades</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1729"/>
         <source>&amp;Front/Mic</source>
-        <translation type="vanished">&amp;Frontal/Micròfon</translation>
+        <translation>&amp;Frontal/Micròfon</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1577"/>
         <source>Rig:</source>
-        <translation type="vanished">Equip:</translation>
+        <translation>Equip:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1597"/>
         <source>Poll Interval:</source>
-        <translation type="vanished">Interval de sondeig:</translation>
+        <translation>Interval de sondeig:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1607"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval to poll rig for status. Longer intervals will mean that changes to the rig will take longer to be detected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval del sondeig de l&apos;equip per a l&apos;estat. Intervals més llargs significa que els canvis a l&apos;equip triguen més a detectar-se.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval del sondeig de l&apos;equip per a l&apos;estat. Intervals més llargs significa que els canvis a l&apos;equip triguen més a detectar-se.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1610"/>
         <source> s</source>
-        <translation type="vanished"> s</translation>
+        <translation> s</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1305"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attempt to connect to the radio with these settings.&lt;/p&gt;&lt;p&gt;The button will turn green if the connection is successful or red if there is a problem.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Intenta connectar-te a l&apos;equip amb aquests paràmetres.&lt;/p&gt;&lt;p&gt;El botó es posarà de color verd si la connexió és correcta o vermella si hi ha algun problema.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Intenta connectar-te a l&apos;equip amb aquests paràmetres.&lt;/p&gt;&lt;p&gt;El botó es posarà de color verd si la connexió és correcta o vermella si hi ha algun problema.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1308"/>
         <source>Test CAT</source>
-        <translation type="vanished">Prova de CAT</translation>
+        <translation>Prova de CAT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1331"/>
         <source>Attempt to activate the transmitter.
 Click again to deactivate. Normally no power should be
 output since there is no audio being generated at this time.
 Check that any Tx indication on your radio and/or your
 radio interface behave as expected.</source>
-        <translation type="vanished">Intenta activar el transmissor.
+        <translation>Intenta activar el transmissor.
 Fes clic de nou per desactivar. Normalment no hi hauria d&apos;haver
 potència de sortida ja que no hi ha àudio generat en aquest moment.
 Comprova que hi hagi alguna indicació de TX a l&apos;equip i el teu
 interfície de ràdio funcioni correctament.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1349"/>
         <source>Test PTT</source>
-        <translation type="vanished">Prova PTT</translation>
+        <translation>Prova PTT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="750"/>
         <source>Split Operation</source>
-        <translation type="vanished">Operació Split</translation>
+        <translation>Operació Split</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="759"/>
         <source>Fake It</source>
-        <translation type="vanished">Falseja-ho</translation>
+        <translation>Falseja-ho</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="775"/>
         <source>Rig</source>
-        <translation type="vanished">Equip</translation>
+        <translation>Equip</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1746"/>
         <source>A&amp;udio</source>
-        <translation type="vanished">À&amp;udio</translation>
+        <translation>À&amp;udio</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1749"/>
         <source>Audio interface settings</source>
-        <translation type="vanished">Configuració de la interfície d&apos;àudio</translation>
+        <translation>Configuració de la interfície d&apos;àudio</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1755"/>
         <source>Souncard</source>
-        <translation type="vanished">Targeta de so</translation>
+        <translation>Targeta de so</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1758"/>
         <source>Soundcard</source>
-        <translation type="vanished">Targeta de so</translation>
+        <translation>Targeta de so</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1860"/>
         <source>Select the audio CODEC to use for transmitting.
 If this is your default device for system sounds then
 ensure that all system sounds are disabled otherwise
 you will broadcast any systems sounds generated during
 transmitting periods.</source>
-        <translation type="vanished">Selecciona el CODEC d’àudio a utilitzar per a la transmissió.
+        <translation>Selecciona el CODEC d’àudio a utilitzar per a la transmissió.
 Si aquest és el dispositiu predeterminat per als sons del sistema,
 llavors assegura&apos;t de que tots els sons del sistema quedin
 desactivats, en cas contrari emetreu els sons del sistema
 generats durant els períodes de transmissió.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1847"/>
         <source>Select the audio CODEC to use for receiving.</source>
-        <translation type="vanished">Selecciona el CODEC d&apos;àudio que cal utilitzar per rebre.</translation>
+        <translation>Selecciona el CODEC d&apos;àudio que cal utilitzar per rebre.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1764"/>
         <source>&amp;Input:</source>
-        <translation type="vanished">&amp;Entrada:</translation>
+        <translation>&amp;Entrada:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1814"/>
         <source>Select the channel to use for receiving.</source>
-        <translation type="vanished">Selecciona el canal a utilitzar per a rebre.</translation>
+        <translation>Selecciona el canal a utilitzar per a rebre.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1791"/>
+        <location filename="../Configuration.ui" line="1818"/>
         <source>Mono</source>
-        <translation type="vanished">Mono</translation>
+        <translation>Mono</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1796"/>
+        <location filename="../Configuration.ui" line="1823"/>
         <source>Left</source>
-        <translation type="vanished">Esquerra</translation>
+        <translation>Esquerra</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1801"/>
+        <location filename="../Configuration.ui" line="1828"/>
         <source>Right</source>
-        <translation type="vanished">Dreta</translation>
+        <translation>Dreta</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1806"/>
+        <location filename="../Configuration.ui" line="1833"/>
         <source>Both</source>
-        <translation type="vanished">Tots dos</translation>
+        <translation>Tots dos</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1784"/>
         <source>Select the audio channel used for transmission.
 Unless you have multiple radios connected on different
 channels; then you will usually want to select mono or
 both here.</source>
-        <translation type="vanished">Selecciona el canal d&apos;àudio que s&apos;utilitza per a la transmissió.
+        <translation>Selecciona el canal d&apos;àudio que s&apos;utilitza per a la transmissió.
 A menys de que tinguis diversos equips connectats a diferents
 canals, llavors normalment voldràs seleccionar mono o
 els dos canals.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="356"/>
         <source>Enable VHF and submode features</source>
-        <translation type="vanished">Activa les funcions de VHF i submode</translation>
+        <translation>Activa les funcions de VHF i submode</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1774"/>
         <source>Ou&amp;tput:</source>
-        <translation type="vanished">Sor&amp;tida:</translation>
+        <translation>Sor&amp;tida:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1959"/>
+        <location filename="../Configuration.ui" line="1962"/>
         <source>Save Directory</source>
-        <translation type="vanished">Directori de Guardar</translation>
+        <translation>Directori de Guardar</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1968"/>
         <source>Loc&amp;ation:</source>
-        <translation type="vanished">Ubic&amp;ació:</translation>
+        <translation>Ubic&amp;ació:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1984"/>
         <source>Path to which .WAV files are saved.</source>
-        <translation type="vanished">Ruta a la qual es desen els arxius .WAV.</translation>
+        <translation>Ruta a la qual es desen els arxius .WAV.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1994"/>
+        <location filename="../Configuration.ui" line="2048"/>
         <source>TextLabel</source>
-        <translation type="vanished">Etiqueta de text</translation>
+        <translation>Etiqueta de text</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2001"/>
         <source>Click to select a different save directory for .WAV files.</source>
-        <translation type="vanished">Fes clic per seleccionar un directori diferent per desar els arxius .WAV.</translation>
+        <translation>Fes clic per seleccionar un directori diferent per desar els arxius .WAV.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2004"/>
         <source>S&amp;elect</source>
-        <translation type="vanished">Sele&amp;cciona</translation>
+        <translation>Sele&amp;cciona</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2014"/>
+        <location filename="../Configuration.ui" line="2017"/>
         <source>AzEl Directory</source>
-        <translation type="vanished">Directori AzEl</translation>
+        <translation>Directori AzEl</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2028"/>
         <source>Location:</source>
-        <translation type="vanished">Ubicació:</translation>
+        <translation>Ubicació:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2055"/>
         <source>Select</source>
-        <translation type="vanished">Selecciona</translation>
+        <translation>Selecciona</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2077"/>
         <source>Power Memory By Band</source>
-        <translation type="vanished">Memòria de potència per banda</translation>
+        <translation>Memòria de potència per banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2080"/>
         <source>Remember power settings by band</source>
-        <translation type="vanished">Recorda els ajustos de potència per banda</translation>
+        <translation>Recorda els ajustos de potència per banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2086"/>
         <source>Enable power memory during transmit</source>
-        <translation type="vanished">Habilita la memòria de potència durant la transmissió</translation>
+        <translation>Habilita la memòria de potència durant la transmissió</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2089"/>
         <source>Transmit</source>
-        <translation type="vanished">Transmetre</translation>
+        <translation>Transmetre</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2096"/>
         <source>Enable power memory during tuning</source>
-        <translation type="vanished">Habilita la memòria de potència durant la sintonització</translation>
+        <translation>Habilita la memòria de potència durant la sintonització</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2099"/>
         <source>Tune</source>
-        <translation type="vanished">Sintonitzar</translation>
+        <translation>Sintonitzar</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2123"/>
         <source>Tx &amp;Macros</source>
-        <translation type="vanished">&amp;Macros de TX</translation>
+        <translation>&amp;Macros de TX</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2126"/>
         <source>Canned free text messages setup</source>
-        <translation type="vanished">Configuració de missatges de text lliures</translation>
+        <translation>Configuració de missatges de text lliures</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2132"/>
         <source>&amp;Add</source>
-        <translation type="vanished">&amp;Afegir</translation>
+        <translation>&amp;Afegir</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2142"/>
         <source>&amp;Delete</source>
-        <translation type="vanished">&amp;Esborrar</translation>
+        <translation>&amp;Esborrar</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2152"/>
         <source>Drag and drop items to rearrange order
 Right click for item specific actions
 Click, SHIFT+Click and, CRTL+Click to select items</source>
-        <translation type="vanished">Arrossega i deixa anar els elements per reorganitzar l&apos;ordre.
+        <translation>Arrossega i deixa anar els elements per reorganitzar l&apos;ordre.
 Fes clic amb el botó dret per a les accions específiques de l’element.
 Fes clic, MAJ. + clic i, CTRL+clic per seleccionar els elements</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2205"/>
         <source>Reportin&amp;g</source>
-        <translation type="vanished">Informe&amp;s</translation>
+        <translation>Informe&amp;s</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2208"/>
         <source>Reporting and logging settings</source>
-        <translation type="vanished">Configuració d&apos;informes i registres</translation>
+        <translation>Configuració d&apos;informes i registres</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2214"/>
         <source>Logging</source>
-        <translation type="vanished">Registres</translation>
+        <translation>Registres</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2279"/>
         <source>The program will pop up a partially completed Log QSO dialog when you send a 73 or free text message.</source>
-        <translation type="vanished">El programa apareixerà un diàleg de QSO de registre parcialment completat quan enviïs un missatge de text 73 o lliure.</translation>
+        <translation>El programa apareixerà un diàleg de QSO de registre parcialment completat quan enviïs un missatge de text 73 o lliure.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2282"/>
         <source>Promp&amp;t me to log QSO</source>
-        <translation type="vanished">Regis&amp;tra el QSO</translation>
+        <translation>Regis&amp;tra el QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2306"/>
         <source>Op Call:</source>
-        <translation type="vanished">Indicatiu de l&apos;Operador:</translation>
+        <translation>Indicatiu de l&apos;Operador:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2316"/>
         <source>Some logging programs will not accept the type of reports
 saved by this program.
 Check this option to save the sent and received reports in the
 comments field.</source>
-        <translation type="vanished">Alguns programes de log no acceptaran el tipus d’informes
+        <translation>Alguns programes de log no acceptaran el tipus d’informes
 desats per aquest programa.
 Comprova aquesta opció per desar els informes enviats i rebuts
 al camp de comentaris.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2322"/>
         <source>d&amp;B reports to comments</source>
-        <translation type="vanished">informa dels d&amp;B&apos;s als comentaris</translation>
+        <translation>informa dels d&amp;B&apos;s als comentaris</translation>
     </message>
     <message>
         <source>Check this option to force the clearing of the DX Call
@@ -17177,904 +17612,1147 @@ Indicatiu DX i Locator DX quan s’envia un missatge de text 73 o lliure.</trans
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alguns programes de log no accepten noms del mode WSJT-X.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2369"/>
         <source>Con&amp;vert mode to RTTY</source>
-        <translation type="vanished">Con&amp;verteix el mode a RTTY</translation>
+        <translation>Con&amp;verteix el mode a RTTY</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2289"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The callsign of the operator, if different from the station callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L&apos;Indicatiu de l&apos;operador, si és diferent del indicatiu de l&apos;estació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L&apos;Indicatiu de l&apos;operador, si és diferent del indicatiu de l&apos;estació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2331"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to have QSOs logged automatically, when complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca perquè els QSO&apos;s es registrin automàticament, quan es completin.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca perquè els QSO&apos;s es registrin automàticament, quan es completin.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Log automatically (contesting only)</source>
         <translation type="vanished">Log automàtic (només concurs)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2396"/>
         <source>Network Services</source>
-        <translation type="vanished">Serveis de xarxa</translation>
+        <translation>Serveis de xarxa</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2402"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The program can send your station details and all decoded signals with grid squares as spots to the http://pskreporter.info web site.&lt;/p&gt;&lt;p&gt;This is used for reverse beacon analysis which is very useful for assessing propagation and system performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El programa pot enviar els detalls de l&apos;estació i tots els senyals descodificats amb locators com a spots a la web http://pskreporter.info.&lt;/p&gt;&lt;p&gt;S&apos;utilitza per a l&apos;anàlisi de balises inverses, que és molt útil per avaluar la propagació i el rendiment del sistema.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El programa pot enviar els detalls de l&apos;estació i tots els senyals descodificats amb locators com a spots a la web http://pskreporter.info.&lt;/p&gt;&lt;p&gt;S&apos;utilitza per a l&apos;anàlisi de balises inverses, que és molt útil per avaluar la propagació i el rendiment del sistema.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2405"/>
         <source>Enable &amp;PSK Reporter Spotting</source>
-        <translation type="vanished">Activa &amp;PSK Reporter</translation>
+        <translation>Activa &amp;PSK Reporter</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2412"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this option if a reliable connection is needed&lt;/p&gt;&lt;p&gt;Most users do not need this, the default uses UDP which is more efficient. Only check this if you have evidence that UDP traffic from you to PSK Reporter is being lost.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca aquesta opció si cal una connexió fiable&lt;/p&gt;&lt;p&gt;La majoria dels usuaris no ho necessiten, el valor per defecte utilitza UDP, que és més eficient. Comprova-ho només si tens proves que es perd el trànsit UDP que envies a PSK Reporter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca aquesta opció si cal una connexió fiable&lt;/p&gt;&lt;p&gt;La majoria dels usuaris no ho necessiten, el valor per defecte utilitza UDP, que és més eficient. Comprova-ho només si tens proves que es perd el trànsit UDP que envies a PSK Reporter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2415"/>
         <source>Use TCP/IP connection</source>
-        <translation type="vanished">Utilitza la connexió TCP/IP</translation>
+        <translation>Utilitza la connexió TCP/IP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2425"/>
         <source>UDP Server</source>
-        <translation type="vanished">Servidor UDP</translation>
+        <translation>Servidor UDP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2436"/>
         <source>UDP Server:</source>
-        <translation type="vanished">Servidor UDP:</translation>
+        <translation>Servidor UDP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2446"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optional hostname of network service to receive decodes.&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 multicast group address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 multicast group address&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Clearing this field will disable the broadcasting of UDP status updates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nom de l&apos;amfitrió opcional del servei de xarxa per rebre descodificacions.&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nom d&apos;amfitrió&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv6&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Si esborreu aquest camp, es desactivarà la difusió de les actualitzacions d’estat d’UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nom de l&apos;amfitrió opcional del servei de xarxa per rebre descodificacions.&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nom d&apos;amfitrió&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv6&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Si esborreu aquest camp, es desactivarà la difusió de les actualitzacions d’estat d’UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2456"/>
         <source>UDP Server port number:</source>
-        <translation type="vanished">Número de port del servidor UDP:</translation>
+        <translation>Número de port del servidor UDP:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled WSJT-X will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amb aquesta habilitat, WSJT-X acceptarà de nou algunes sol·licituds d’un servidor UDP que rep missatges de descodificació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2546"/>
         <source>Accept UDP requests</source>
-        <translation type="vanished">Accepta sol·licituds UDP</translation>
+        <translation>Accepta sol·licituds UDP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2553"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indicate acceptance of an incoming UDP request. The effect of this option varies depending on the operating system and window manager, its intent is to notify the acceptance of an incoming UDP request even if this application is minimized or hidden.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indica l&apos;acceptació d&apos;una sol·licitud UDP entrant. L’efecte d’aquesta opció varia en funció del sistema operatiu i del gestor de finestres, la seva intenció és notificar l’acceptació d’una sol·licitud UDP entrant encara que aquesta aplicació estigui minimitzada o oculta.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indica l&apos;acceptació d&apos;una sol·licitud UDP entrant. L’efecte d’aquesta opció varia en funció del sistema operatiu i del gestor de finestres, la seva intenció és notificar l’acceptació d’una sol·licitud UDP entrant encara que aquesta aplicació estigui minimitzada o oculta.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2556"/>
         <source>Notify on accepted UDP request</source>
-        <translation type="vanished">Notifica-la sobre la sol·licitud acceptada d’UDP</translation>
+        <translation>Notifica-la sobre la sol·licitud acceptada d’UDP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2563"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restore the window from minimized if an UDP request is accepted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restaura la finestra al mínim si s’accepta una sol·licitud UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restaura la finestra al mínim si s’accepta una sol·licitud UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2566"/>
         <source>Accepted UDP request restores window</source>
-        <translation type="vanished">La finestra de restauració de la sol·licitud UDP es acceptada</translation>
+        <translation>La finestra de restauració de la sol·licitud UDP es acceptada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2578"/>
         <source>Secondary UDP Server (deprecated)</source>
-        <translation type="vanished">Servidor UDP secundari (obsolet)</translation>
+        <translation>Servidor UDP secundari (obsolet)</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, WSJT-X will broadcast a logged contact in ADIF format to the configured hostname and port. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quan es marca, WSJT-X transmetrà un contacte registrat en format ADIF al nom d&apos;amfitrió i port configurats. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2587"/>
         <source>Enable logged contact ADIF broadcast</source>
-        <translation type="vanished">Habilita la transmissió ADIF de contacte registrad</translation>
+        <translation>Habilita la transmissió ADIF de contacte registrad</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2594"/>
         <source>Server name or IP address:</source>
-        <translation type="vanished">Nom del servidor o adreça IP:</translation>
+        <translation>Nom del servidor o adreça IP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2604"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optional host name of N1MM Logger+ program to receive ADIF UDP broadcasts. This is usually &apos;localhost&apos; or ip address 127.0.0.1&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 multicast group address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 multicast group address&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Clearing this field will disable broadcasting of ADIF information via UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nom d&apos;amfitrió opcional del programa N1MM Logger+ per rebre transmissions ADIF UDP. Generalment és &quot;localhost&quot; o adreça IP 127.0.0.1&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nom d&apos;amfitrió&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv6&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Si esborres aquest camp, es desactivarà la transmissió d’informació ADIF a través d’UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nom d&apos;amfitrió opcional del programa N1MM Logger+ per rebre transmissions ADIF UDP. Generalment és &quot;localhost&quot; o adreça IP 127.0.0.1&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nom d&apos;amfitrió&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;adreça IPv6&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Adreça de grup multicast IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Si esborres aquest camp, es desactivarà la transmissió d’informació ADIF a través d’UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2611"/>
         <source>Server port number:</source>
-        <translation type="vanished">Número de port del servidor:</translation>
+        <translation>Número de port del servidor:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that WSJT-X should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introdueix el número de port que hauria d’utilitzar WSJT-X per a les emissions d&apos;UDP d’informació de registre ADIF. Per N1MM Logger+, aquest valor hauria de ser 2333. Si aquest és zero, no es transmetran actualitzacions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2648"/>
         <source>Frequencies</source>
-        <translation type="vanished">Freqüències</translation>
+        <translation>Freqüències</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2651"/>
         <source>Default frequencies and band specific station details setup</source>
-        <translation type="vanished">Configuració predeterminada de les freqüències i bandes amb detalls específics de l&apos;estació</translation>
+        <translation>Configuració predeterminada de les freqüències i bandes amb detalls específics de l&apos;estació</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the WSJT-X User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Veure &amp;quot;Freqüència de Calibració&amp;quot; a la Guia de l&apos;usuari de WSJT-X per obtenir més informació sobre com determinar aquests paràmetres per al teu equip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2660"/>
         <source>Frequency Calibration</source>
-        <translation type="vanished">Freqüència de Calibració</translation>
+        <translation>Freqüència de Calibració</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2668"/>
         <source>Slope:</source>
-        <translation type="vanished">Pendent:</translation>
+        <translation>Pendent:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2681"/>
         <source> ppm</source>
-        <translation type="vanished"> ppm</translation>
+        <translation> ppm</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2707"/>
         <source>Intercept:</source>
-        <translation type="vanished">Intercepte:</translation>
+        <translation>Intercepte:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2720"/>
         <source> Hz</source>
-        <translation type="vanished"> Hz</translation>
+        <translation> Hz</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2757"/>
         <source>Working Frequencies</source>
-        <translation type="vanished">Freqüències de treball</translation>
+        <translation>Freqüències de treball</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2772"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Right click to maintain the working frequencies list.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic amb el botó dret per mantenir la llista de freqüències de treball.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic amb el botó dret per mantenir la llista de freqüències de treball.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2800"/>
         <source>Station Information</source>
-        <translation type="vanished">Informació de l&apos;estació</translation>
+        <translation>Informació de l&apos;estació</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2812"/>
         <source>Items may be edited.
 Right click for insert and delete options.</source>
-        <translation type="vanished">Es poden editar ítems.
+        <translation>Es poden editar ítems.
 Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2860"/>
         <source>Colors</source>
-        <translation type="vanished">Colors</translation>
+        <translation>Colors</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2866"/>
         <source>Decode Highlightling</source>
-        <translation type="vanished">Ressaltar Descodificar</translation>
+        <translation>Ressaltar Descodificar</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2891"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to scan the wsjtx_log.adi ADIF file again for worked before information&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic per analitzar l&apos;arxiu ADIF wsjtx_log.adi de nou per obtenir la informació abans treballada&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic per analitzar l&apos;arxiu ADIF wsjtx_log.adi de nou per obtenir la informació abans treballada&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2894"/>
         <source>Rescan ADIF Log</source>
-        <translation type="vanished">Escaneig de nou el log ADIF</translation>
+        <translation>Escaneig de nou el log ADIF</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2874"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Push to reset all highlight items above to default values and priorities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prem per restablir tots els elements destacats anteriors als valors i prioritats predeterminats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prem per restablir tots els elements destacats anteriors als valors i prioritats predeterminats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Reset Highlighting</source>
         <translation type="vanished">Restableix Ressaltat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2915"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable or disable using the check boxes and right-click an item to change or unset the foreground color, background color, or reset the item to default values. Drag and drop the items to change their priority, higher in the list is higher in priority.&lt;/p&gt;&lt;p&gt;Note that each foreground or background color may be either set or unset, unset means that it is not allocated for that item&apos;s type and lower priority items may apply.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activar o desactivar l&apos;ús de les caselles de verificació fes clic amb el botó dret en un element per canviar o desactivar el color del primer pla, el color de fons o restablir l&apos;element als valors predeterminats. Arrossega i deixa anar els elements per canviar la seva prioritat, major a la llista és major en prioritat.&lt;/p&gt;&lt;p&gt;Recorda que cada color de primer pla o de fons pot estar configurat o no, el que vol dir que no està assignat per al tipus d&apos;element i poden aplicar-se elements de menor prioritat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activar o desactivar l&apos;ús de les caselles de verificació fes clic amb el botó dret en un element per canviar o desactivar el color del primer pla, el color de fons o restablir l&apos;element als valors predeterminats. Arrossega i deixa anar els elements per canviar la seva prioritat, major a la llista és major en prioritat.&lt;/p&gt;&lt;p&gt;Recorda que cada color de primer pla o de fons pot estar configurat o no, el que vol dir que no està assignat per al tipus d&apos;element i poden aplicar-se elements de menor prioritat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2982"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to indicate new DXCC entities, grid squares, and callsigns per mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca per indicar noves entitats DXCC, Locators i indicatius per modes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marca per indicar noves entitats DXCC, Locators i indicatius per modes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2985"/>
         <source>Highlight by Mode</source>
-        <translation type="vanished">Ressaltar per mode</translation>
+        <translation>Ressaltar per mode</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2968"/>
         <source>Include extra WAE entities</source>
-        <translation type="vanished">Incloure entitats WAE addicionals</translation>
+        <translation>Incloure entitats WAE addicionals</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2526"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 0 = porta casuale, compatibile con il comportamento storico WSJT-X/CQRLOG. Imposta un valore fisso solo se un controller esterno lo richiede esplicitamente.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Port fix on Decodium escolta les ordres entrants de UDP (p. ex., de DecoAlert). Per defecte 0 = port aleatori, compatible amb el comportament històric de WSJT-X/CQRLOG. Establiu un valor fix només si un controlador extern ho sol·licita explícitament.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Port fix on Decodium escolta les ordres entrants de UDP (p. ex., de DecoAlert). Per defecte 0 = port aleatori, compatible amb el comportament històric de WSJT-X/CQRLOG. Establiu un valor fix només si un controlador extern ho sol·licita explícitament.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2942"/>
         <source>Check to for grid highlighting to only apply to unworked grid fields</source>
-        <translation type="vanished">Marca perquè el ressaltat de Locator només s&apos;aplica als camps de Locator no treballats</translation>
+        <translation>Marca perquè el ressaltat de Locator només s&apos;aplica als camps de Locator no treballats</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2945"/>
         <source>Only grid Fields sought</source>
-        <translation type="vanished">Només camps de Locator buscats</translation>
+        <translation>Només camps de Locator buscats</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3031"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls for Logbook of the World user lookup.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls per a la recerca d&apos;usuaris de Logbook of the World (LoTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls per a la recerca d&apos;usuaris de Logbook of the World (LoTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3034"/>
         <source>Logbook of the World User Validation</source>
-        <translation type="vanished">Validació de l’usuari a Logbook of the World (LoTW)</translation>
+        <translation>Validació de l’usuari a Logbook of the World (LoTW)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3040"/>
         <source>Users CSV file URL:</source>
-        <translation type="vanished">URL de l&apos;arxiu CSV dels usuaris:</translation>
+        <translation>URL de l&apos;arxiu CSV dels usuaris:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3052"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL of the ARRL LotW user&apos;s last upload dates and times data file which is used to highlight decodes from stations that are known to upload their log file to LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL de l&apos;últim arxiu de dades de dates i hores de càrrega de ARRL LotW que s&apos;utilitza per ressaltar descodificacions d&apos;estacions que se sap que carreguen el seu arxiu de log a LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL de l&apos;últim arxiu de dades de dates i hores de càrrega de ARRL LotW que s&apos;utilitza per ressaltar descodificacions d&apos;estacions que se sap que carreguen el seu arxiu de log a LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3055"/>
         <source>URL</source>
-        <translation type="vanished">URL</translation>
+        <translation>URL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3058"/>
         <source>https://lotw.arrl.org/lotw-user-activity.csv</source>
-        <translation type="vanished">https://lotw.arrl.org/lotw-user-activity.csv</translation>
+        <translation>https://lotw.arrl.org/lotw-user-activity.csv</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3065"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Push this button to fetch the latest LotW user&apos;s upload date and time data file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic sobre aquest botó per obtenir l&apos;últim arxiu de dades de data i hora de càrrega dels usuaris de LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes clic sobre aquest botó per obtenir l&apos;últim arxiu de dades de data i hora de càrrega dels usuaris de LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3068"/>
         <source>Fetch Now</source>
-        <translation type="vanished">Obtenir ara</translation>
+        <translation>Obtenir ara</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3129"/>
         <source>Age of last upload less than:</source>
-        <translation type="vanished">Edat de la darrera càrrega inferior a:</translation>
+        <translation>Edat de la darrera càrrega inferior a:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3079"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjust this spin box to set the age threshold of LotW user&apos;s last upload date that is accepted as a current LotW user.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ajusta aquest quadre de selecció per establir el llindar d&apos;edat de l&apos;última data de càrrega dels usuaris de LotW que s&apos;accepta com a usuari actual de LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ajusta aquest quadre de selecció per establir el llindar d&apos;edat de l&apos;última data de càrrega dels usuaris de LotW que s&apos;accepta com a usuari actual de LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3085"/>
         <source> days</source>
-        <translation type="vanished"> dies</translation>
+        <translation> dies</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3215"/>
         <source>Advanced</source>
-        <translation type="vanished">Avançat</translation>
+        <translation>Avançat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3221"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User-selectable parameters for JT65 VHF/UHF/Microwave decoding.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Paràmetres seleccionables per l&apos;usuari per descodificació JT65 VHF/UHF/Microones.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Paràmetres seleccionables per l&apos;usuari per descodificació JT65 VHF/UHF/Microones.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3224"/>
         <source>JT65 VHF/UHF/Microwave decoding parameters</source>
-        <translation type="vanished">Paràmetres de descodificació JT65 VHF/UHF/Microones</translation>
+        <translation>Paràmetres de descodificació JT65 VHF/UHF/Microones</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3230"/>
         <source>Random erasure patterns:</source>
-        <translation type="vanished">Patrons d&apos;esborrament aleatoris:</translation>
+        <translation>Patrons d&apos;esborrament aleatoris:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3240"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of erasure patterns for stochastic soft-decision Reed Solomon decoder is 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre màxim de patrons d&apos;esborrat per al descodificador estoic de decisió suau Reed Solomon és 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;El nombre màxim de patrons d&apos;esborrat per al descodificador estoic de decisió suau Reed Solomon és 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3256"/>
         <source>Aggressive decoding level:</source>
-        <translation type="vanished">Nivell de descodificació agressiu:</translation>
+        <translation>Nivell de descodificació agressiu:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3266"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Higher levels will increase the probability of decoding, but will also increase probability of a false decode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A nivells més elevats augmentarà la probabilitat de descodificació, però també augmentarà la probabilitat de fals descodificació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A nivells més elevats augmentarà la probabilitat de descodificació, però també augmentarà la probabilitat de fals descodificació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3276"/>
         <source>Two-pass decoding</source>
-        <translation type="vanished">Descodificació a dos passos</translation>
+        <translation>Descodificació a dos passos</translation>
     </message>
     <message>
         <source>Special operating activity:  Generation of FT4, FT8, and MSK144 messages</source>
         <translation type="vanished">Activitat operativa especial: Generació de missatges FT4, FT8 i MSK144</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3628"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT8 DXpedition mode:  Hound operator calling the DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mode FT8 DXpedition: operador Hound que truca al DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mode FT8 DXpedition: operador Hound que truca al DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3631"/>
+        <location filename="../Configuration.ui" line="3634"/>
         <source>Hound</source>
-        <translation type="vanished">Gos</translation>
+        <translation>Gos</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3841"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;North American VHF/UHF/Microwave contests and others in which a 4-character grid locator is the required exchange.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concursos de VHF/UHF/Microones nord-americans i altres en què es necessita un intercanvi de locators de quatre caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concursos de VHF/UHF/Microones nord-americans i altres en què es necessita un intercanvi de locators de quatre caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3844"/>
         <source>NA VHF Contest</source>
-        <translation type="vanished">Concurs NA VHF</translation>
+        <translation>Concurs NA VHF</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3857"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT8 DXpedition mode:  Fox (DXpedition) operator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mode FT8 DXpedition: operador Fox (DXpedition).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mode FT8 DXpedition: operador Fox (DXpedition).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3860"/>
+        <location filename="../Configuration.ui" line="3863"/>
         <source>Fox</source>
-        <translation type="vanished">Guineu</translation>
+        <translation>Guineu</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3737"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;European VHF+ contests requiring a signal report, serial number, and 6-character locator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concursos europeus de VHF i superiors que requereixen el informe de senyal, número de sèrie i locator de 6 caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concursos europeus de VHF i superiors que requereixen el informe de senyal, número de sèrie i locator de 6 caràcters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3740"/>
+        <location filename="../Configuration.ui" line="3743"/>
         <source>EU VHF Contest</source>
-        <translation type="vanished">Concurs EU VHF</translation>
+        <translation>Concurs EU VHF</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL RTTY Roundup and similar contests.  Exchange is US state, Canadian province, or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL RTTY Roundup i concursos similars. L’intercanvi és estat nord-americà, província canadenca o &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3667"/>
         <source>R T T Y Roundup</source>
-        <translation type="vanished">Arrodoniment R T T Y</translation>
+        <translation>Arrodoniment R T T Y</translation>
     </message>
     <message>
         <source>RTTY Roundup messages</source>
         <translation type="vanished">Missatges d&apos;arrodoniment RTTY</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3695"/>
         <source>RTTY Roundup exchange</source>
-        <translation type="vanished">Intercanvi d&apos;arrodoniment RTTY</translation>
+        <translation>Intercanvi d&apos;arrodoniment RTTY</translation>
     </message>
     <message>
         <source>RTTY RU Exch:</source>
         <translation type="vanished">Intercanvi RTTY RU:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3717"/>
         <source>NJ</source>
-        <translation type="vanished">NJ</translation>
+        <translation>NJ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3559"/>
+        <location filename="../Configuration.ui" line="3609"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Field Day exchange: number of transmitters, Class, and ARRL/RAC section or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Field Day exchange: nombre de transmissors, classe i secció ARRL / RAC o &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Field Day exchange: nombre de transmissors, classe i secció ARRL / RAC o &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3562"/>
         <source>A R R L Field Day</source>
-        <translation type="vanished">A R R L Dia de camp</translation>
+        <translation>A R R L Dia de camp</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3565"/>
         <source>ARRL Field Day</source>
-        <translation type="vanished">Dia de camp ARRL</translation>
+        <translation>Dia de camp ARRL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3590"/>
         <source>Field Day exchange</source>
-        <translation type="vanished">Intercanvi Field Day</translation>
+        <translation>Intercanvi Field Day</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3593"/>
         <source>FD Exch:</source>
-        <translation type="vanished">Intercanvi FD:</translation>
+        <translation>Intercanvi FD:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3612"/>
         <source>6A SNJ</source>
-        <translation type="vanished">6A SNJ</translation>
+        <translation>6A SNJ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3531"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World-Wide Digi-mode contest&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concurs World-Wide Digi-mode&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Concurs World-Wide Digi-mode&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3534"/>
         <source>WW Digital Contest</source>
-        <translation type="vanished">Concurs digital WW</translation>
+        <translation>Concurs digital WW</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3537"/>
         <source>WW Digi Contest</source>
-        <translation type="vanished">Concurs WW Digi</translation>
+        <translation>Concurs WW Digi</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4146"/>
         <source>Miscellaneous</source>
-        <translation type="vanished">Divers</translation>
+        <translation>Divers</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4152"/>
         <source>Degrade S/N of .wav file: </source>
-        <translation type="vanished">Grau S/N de l&apos;arxiu .wav: </translation>
+        <translation>Grau S/N de l&apos;arxiu .wav: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4162"/>
+        <location filename="../Configuration.ui" line="4188"/>
         <source>For offline sensitivity tests</source>
-        <translation type="vanished">Per a proves de sensibilitat fora de línia</translation>
+        <translation>Per a proves de sensibilitat fora de línia</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1899"/>
+        <location filename="../Configuration.ui" line="4165"/>
         <source> dB</source>
-        <translation type="vanished"> dB</translation>
+        <translation> dB</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2466"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the service port number of the UDP server that Decodium v3.0 SE KP5 should send updates to. If this is zero no updates will be sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introduïu el número de port de servei del servidor UDP al qual Decodium v3.0 SE KP5 hauria d&apos;enviar actualitzacions. Si això és zero, no s&apos;enviaran actualitzacions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introduïu el número de port de servei del servidor UDP al qual Decodium v3.0 SE KP5 hauria d&apos;enviar actualitzacions. Si això és zero, no s&apos;enviaran actualitzacions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2486"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with Decodium v3.0 SE KP5. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quan s&apos;envien actualitzacions a una adreça de grup multicast, cal especificar a quina interfície de xarxa cal enviar-les. Si la interfície de retrocés és capaç de multidifusió, almenys aquesta se seleccionarà.&lt;/p&gt;&lt;p&gt;Per a la majoria d&apos;usuaris, la interfície de loop-back és tot el que es necessita, la qual cosa permetrà que diverses altres aplicacions de la mateixa màquina puguin interoperar amb Decodium v3.0 SE KP5. Si les aplicacions que s&apos;executen en altres amfitrions han de rebre actualitzacions d&apos;estat, s&apos;hauria d&apos;utilitzar una interfície de xarxa adequada.&lt;/p&gt;&lt;p&gt;En alguns sistemes Linux pot ser necessari habilitar la multidifusió a la interfície de xarxa de bucle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quan s&apos;envien actualitzacions a una adreça de grup multicast, cal especificar a quina interfície de xarxa cal enviar-les. Si la interfície de retrocés és capaç de multidifusió, almenys aquesta se seleccionarà.&lt;/p&gt;&lt;p&gt;Per a la majoria d&apos;usuaris, la interfície de loop-back és tot el que es necessita, la qual cosa permetrà que diverses altres aplicacions de la mateixa màquina puguin interoperar amb Decodium v3.0 SE KP5. Si les aplicacions que s&apos;executen en altres amfitrions han de rebre actualitzacions d&apos;estat, s&apos;hauria d&apos;utilitzar una interfície de xarxa adequada.&lt;/p&gt;&lt;p&gt;En alguns sistemes Linux pot ser necessari habilitar la multidifusió a la interfície de xarxa de bucle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2516"/>
         <source>UDP Listen Port:</source>
-        <translation type="vanished">Port d&apos;escolta UDP:</translation>
+        <translation>Port d&apos;escolta UDP:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 2238. 0 = porta casuale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fixa a la qual Decodium ascolta comand UDP in ingresso (es. da DecoAlert). Per defecte 2238. 0 = porta casual.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2543"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled Decodium v3.0 SE KP5 will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amb aquesta activació Decodium v3.0 SE KP5 acceptarà determinades sol·licituds d&apos;un servidor UDP que rep missatges de descodificació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amb aquesta activació Decodium v3.0 SE KP5 acceptarà determinades sol·licituds d&apos;un servidor UDP que rep missatges de descodificació.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2584"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, Decodium v3.0 SE KP5 will broadcast a logged contact in ADIF format to the configured hostname and port. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quan està marcat, Decodium v3.0 SE KP5 emetrà un contacte registrat en format ADIF al nom d&apos;amfitrió i al port configurats. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Quan està marcat, Decodium v3.0 SE KP5 emetrà un contacte registrat en format ADIF al nom d&apos;amfitrió i al port configurats. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2621"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that Decodium v3.0 SE KP5 should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introduïu el número de port que Decodium v3.0 SE KP5 hauria d&apos;utilitzar per a les emissions UDP d&apos;informació de registre ADIF. Per a N1MM Logger+, aquest valor hauria de ser 2333. Si és zero, no s&apos;emetrà cap actualització.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Introduïu el número de port que Decodium v3.0 SE KP5 hauria d&apos;utilitzar per a les emissions UDP d&apos;informació de registre ADIF. Per a N1MM Logger+, aquest valor hauria de ser 2333. Si és zero, no s&apos;emetrà cap actualització.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2657"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the Decodium v3.0 SE KP5 User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vegeu &amp;quot;Calibració de freqüència&amp;quot; a la Guia d&apos;usuari de Decodium v3.0 SE KP5 per obtenir detalls sobre com determinar aquests paràmetres per a la vostra ràdio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vegeu &amp;quot;Calibració de freqüència&amp;quot; a la Guia d&apos;usuari de Decodium v3.0 SE KP5 per obtenir detalls sobre com determinar aquests paràmetres per a la vostra ràdio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2877"/>
         <source>Reset Highlighting to Decodium v3.0 SE KP5 default</source>
-        <translation type="vanished">Restableix el ressaltat a Decodium v3.0 SE KP5 predeterminat</translation>
+        <translation>Restableix el ressaltat a Decodium v3.0 SE KP5 predeterminat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2884"/>
         <source>Reset Highlighting to Decodium v3.0 SE KP5 Improved default</source>
-        <translation type="vanished">Restableix el ressaltat a Decodium v3.0 SE KP5 Predeterminat millorat</translation>
+        <translation>Restableix el ressaltat a Decodium v3.0 SE KP5 Predeterminat millorat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2975"/>
         <source>Highlight also messages with 73 or RR73</source>
-        <translation type="vanished">Ressalteu també missatges amb 73 o RR73</translation>
+        <translation>Ressalteu també missatges amb 73 o RR73</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2992"/>
+        <location filename="../Configuration.ui" line="3012"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Highlight callsigns or grids with orange background color. Callsigns and/or grids must be separated by a comma, and there must be a comma after each callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resalta els indicatius o quadrícules amb un fons taronja. Els indicatius i/o les quadrícules han d&apos;estar separats per una coma i hi ha d&apos;haver una coma després de cada indicatiu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resalta els indicatius o quadrícules amb un fons taronja. Els indicatius i/o les quadrícules han d&apos;estar separats per una coma i hi ha d&apos;haver una coma després de cada indicatiu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2995"/>
         <source>Highlight orange:</source>
-        <translation type="vanished">Ressaltar taronja:</translation>
+        <translation>Ressaltar taronja:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3002"/>
+        <location filename="../Configuration.ui" line="3019"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Highlight callsigns or grids with blue background color. Callsigns and/or grids must be separated by a comma, and there must be a comma after each callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resalta els indicatius o quadrícules amb un color de fons blau. Els indicatius i/o les quadrícules han d&apos;estar separats per una coma i hi ha d&apos;haver una coma després de cada indicatiu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resalta els indicatius o quadrícules amb un color de fons blau. Els indicatius i/o les quadrícules han d&apos;estar separats per una coma i hi ha d&apos;haver una coma després de cada indicatiu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3005"/>
         <source>Highlight blue:</source>
-        <translation type="vanished">Ressalta el blau:</translation>
+        <translation>Ressalta el blau:</translation>
     </message>
     <message>
         <source>http://lotw.arrl.org/lotw-user-activity.csv</source>
         <translation type="vanished">http://lotw.arrl.org/lotw-user-activity.csv</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3155"/>
         <source>CTY File Download</source>
-        <translation type="vanished">Descarregar fitxers CTY</translation>
+        <translation>Descarregar fitxers CTY</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3161"/>
         <source>CTY File Version: </source>
-        <translation type="vanished">Versió del fitxer CTY: </translation>
+        <translation>Versió del fitxer CTY: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3168"/>
         <source>Download Latest CTY.dat</source>
-        <translation type="vanished">Baixeu l&apos;últim CTY.dat</translation>
+        <translation>Baixeu l&apos;últim CTY.dat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3178"/>
         <source>CALL3 File Download</source>
-        <translation type="vanished">Descarregar fitxer CALL3</translation>
+        <translation>Descarregar fitxer CALL3</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3184"/>
         <source>CALL3 File Version:</source>
-        <translation type="vanished">Versió del fitxer CALL3:</translation>
+        <translation>Versió del fitxer CALL3:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3191"/>
         <source>Dowload latest CALL3.TXT file.</source>
-        <translation type="vanished">Baixeu l&apos;últim fitxer CALL3.TXT.</translation>
+        <translation>Baixeu l&apos;últim fitxer CALL3.TXT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3194"/>
         <source>Download CALL3.TXT for terrestrial use</source>
-        <translation type="vanished">Descarrega CALL3.TXT per a ús terrestre</translation>
+        <translation>Descarrega CALL3.TXT per a ús terrestre</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3201"/>
         <source>Dowload latest CALL3.TXT file for EME. This version is suitable for JT65 Deep Search.</source>
-        <translation type="vanished">Baixeu l&apos;últim fitxer CALL3.TXT per a EME. Aquesta versió és adequada per a JT65 Deep Search.</translation>
+        <translation>Baixeu l&apos;últim fitxer CALL3.TXT per a EME. Aquesta versió és adequada per a JT65 Deep Search.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3204"/>
         <source>Download CALL3.TXT for EME</source>
-        <translation type="vanished">Baixeu CALL3.TXT per a EME</translation>
+        <translation>Baixeu CALL3.TXT per a EME</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3289"/>
         <source>GUI tweaks for high-resolution monitors</source>
-        <translation type="vanished">Ajustos de la GUI per a monitors d&apos;alta resolució</translation>
+        <translation>Ajustos de la GUI per a monitors d&apos;alta resolució</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3295"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;HighDPI scaling enables a larger and more proportionally correct display of the controls on 4K monitors (if supported by the OS).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L&apos;escalat HighDPI permet una visualització més gran i proporcionalment correcta dels controls en monitors 4K (si és compatible amb el sistema operatiu).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L&apos;escalat HighDPI permet una visualització més gran i proporcionalment correcta dels controls en monitors 4K (si és compatible amb el sistema operatiu).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3298"/>
         <source>HighDPI scaling (restart required)</source>
-        <translation type="vanished">Escalat d&apos;alt DPI (cal reiniciar)</translation>
+        <translation>Escalat d&apos;alt DPI (cal reiniciar)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3305"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increased height of some control elements.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augment de l&apos;alçada d&apos;alguns elements de control.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Augment de l&apos;alçada d&apos;alguns elements de control.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3308"/>
         <source>Increased height of the tab widget (restart required)</source>
-        <translation type="vanished">Augment de l&apos;alçada del giny de la pestanya (cal reiniciar)</translation>
+        <translation>Augment de l&apos;alçada del giny de la pestanya (cal reiniciar)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3318"/>
+        <location filename="../Configuration.ui" line="4070"/>
         <source>Clock compensation limits (FT2/FT4/FT8)</source>
-        <translation type="vanished">Límits de compensació del rellotge (FT2/FT4/FT8)</translation>
+        <translation>Límits de compensació del rellotge (FT2/FT4/FT8)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3330"/>
+        <location filename="../Configuration.ui" line="4076"/>
         <source>Max DT correction with NTP sync:</source>
-        <translation type="vanished">Correcció màxima de DT amb sincronització NTP:</translation>
+        <translation>Correcció màxima de DT amb sincronització NTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3340"/>
+        <location filename="../Configuration.ui" line="4086"/>
         <source>Limits automatic DT correction when NTP is synced. Increase for remote stations with stable extra latency.</source>
-        <translation type="vanished">Limita la correcció automàtica de DT quan es sincronitza NTP. Augment per a estacions remotes amb una latència addicional estable.</translation>
+        <translation>Limita la correcció automàtica de DT quan es sincronitza NTP. Augment per a estacions remotes amb una latència addicional estable.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3343"/>
+        <location filename="../Configuration.ui" line="3375"/>
+        <location filename="../Configuration.ui" line="4089"/>
+        <location filename="../Configuration.ui" line="4121"/>
         <source> ms</source>
-        <translation type="vanished"> ms</translation>
+        <translation> ms</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3362"/>
+        <location filename="../Configuration.ui" line="4108"/>
         <source>Max DT correction without NTP sync:</source>
-        <translation type="vanished">Correcció màxima de DT sense sincronització NTP:</translation>
+        <translation>Correcció màxima de DT sense sincronització NTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3372"/>
+        <location filename="../Configuration.ui" line="4118"/>
         <source>Limits automatic DT correction when NTP is unavailable. Use a higher value only if needed.</source>
-        <translation type="vanished">Limita la correcció automàtica de DT quan NTP no està disponible. Utilitzeu un valor més alt només si cal.</translation>
+        <translation>Limita la correcció automàtica de DT quan NTP no està disponible. Utilitzeu un valor més alt només si cal.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3409"/>
         <source>Enable Cloudlog Features</source>
-        <translation type="vanished">Activa les funcions de Cloudlog</translation>
+        <translation>Activa les funcions de Cloudlog</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3423"/>
         <source>API URL: </source>
-        <translation type="vanished">URL de l&apos;API: </translation>
+        <translation>URL de l&apos;API: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3430"/>
         <source>API Key: </source>
-        <translation type="vanished">Clau de l&apos;API: </translation>
+        <translation>Clau de l&apos;API: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3437"/>
         <source>Station ID: </source>
-        <translation type="vanished">ID de l&apos;estació: </translation>
+        <translation>ID de l&apos;estació: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3472"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Test the Cloudlog API key.&lt;/p&gt;&lt;p&gt;The button will turn green if the API key is writable. It will turn orange if the API key is read-only. If the API key is invalid it will turn red.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prova la clau de l&apos;API de Cloudlog.&lt;/p&gt;&lt;p&gt;El botó es tornarà verd si la clau de l&apos;API es pot escriure. Es tornarà taronja si la clau de l&apos;API és només de lectura. Si la clau API no és vàlida, es tornarà vermella.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prova la clau de l&apos;API de Cloudlog.&lt;/p&gt;&lt;p&gt;El botó es tornarà verd si la clau de l&apos;API es pot escriure. Es tornarà taronja si la clau de l&apos;API és només de lectura. Si la clau API no és vàlida, es tornarà vermella.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3475"/>
         <source>Test API Key</source>
-        <translation type="vanished">Prova la clau de l&apos;API</translation>
+        <translation>Prova la clau de l&apos;API</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3500"/>
         <source>Special operating activity</source>
-        <translation type="vanished">Activitat operativa especial</translation>
+        <translation>Activitat operativa especial</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3512"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL International Digital Contest&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Concurs digital internacional&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Concurs digital internacional&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3515"/>
         <source>ARRL Digi Contest</source>
-        <translation type="vanished">Concurs ARRL Digi</translation>
+        <translation>Concurs ARRL Digi</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3547"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle the NCCC Sprint FT4 short message protocol On/Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activar/desactivar el protocol de missatges curts NCCC Sprint FT4.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Activar/desactivar el protocol de missatges curts NCCC Sprint FT4.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3550"/>
         <source>NCCC Sprint</source>
-        <translation type="vanished">NCCC Sprint</translation>
+        <translation>NCCC Sprint</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3664"/>
+        <location filename="../Configuration.ui" line="3714"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup and similar contests. Exchange is US state, Canadian province, or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup i concursos similars. L&apos;intercanvi és l&apos;estat dels Estats Units, la província canadenca o &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup i concursos similars. L&apos;intercanvi és l&apos;estat dels Estats Units, la província canadenca o &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3670"/>
         <source>FT Roundup messages</source>
-        <translation type="vanished">Missatges de FT Roundup</translation>
+        <translation>Missatges de FT Roundup</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3698"/>
         <source>FT RU Exch:</source>
-        <translation type="vanished">FT RU Exch:</translation>
+        <translation>FT RU Exch:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3753"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this box to transmit (Fox) or receive (Hound) the SuperFox waveform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marqueu aquesta casella per transmetre (Fox) o rebre (Hound) la forma d&apos;ona SuperFox.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marqueu aquesta casella per transmetre (Fox) o rebre (Hound) la forma d&apos;ona SuperFox.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3756"/>
         <source>SuperFox mode</source>
-        <translation type="vanished">Mode SuperFox</translation>
+        <translation>Mode SuperFox</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3765"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show OTP messages in the Band Activity window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mostrar missatges OTP a la finestra Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mostrar missatges OTP a la finestra Activitat de banda.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3768"/>
         <source>Show OTP messages</source>
-        <translation type="vanished">Mostra missatges OTP</translation>
+        <translation>Mostra missatges OTP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3794"/>
         <source>OTP URL:</source>
-        <translation type="vanished">URL OTP:</translation>
+        <translation>URL OTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3823"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL used to verify OTP codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL utilitzat per verificar els codis OTP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL utilitzat per verificar els codis OTP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3826"/>
         <source>https://www.9dx.cc</source>
-        <translation type="vanished">https://www.9dx.cc</translation>
+        <translation>https://www.9dx.cc</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3847"/>
         <source>NA VHF</source>
-        <translation type="vanished">NA VHF</translation>
+        <translation>NA VHF</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3881"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to enable OTP method of Fox verification. Requires internet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Feu clic per activar el mètode OTP de verificació Fox. Requereix internet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Feu clic per activar el mètode OTP de verificació Fox. Requereix internet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3884"/>
         <source>OTP</source>
-        <translation type="vanished">OTP</translation>
+        <translation>OTP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3910"/>
         <source>Key:</source>
-        <translation type="vanished">Clau:</translation>
+        <translation>Clau:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3923"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fox&apos;s key to generate OTP Codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clau de Fox per generar codis OTP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clau de Fox per generar codis OTP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3926"/>
         <source>M2ZUU5CW6EVOY2HU</source>
-        <translation type="vanished">M2ZUU5CW6EVOY2HU</translation>
+        <translation>M2ZUU5CW6EVOY2HU</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3949"/>
         <source>Interval</source>
-        <translation type="vanished">Interval</translation>
+        <translation>Interval</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3956"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval at which the OTP messages are sent. Select 1 to sign every message.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval en què s&apos;envien els missatges OTP. Seleccioneu 1 per signar tots els missatges.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval en què s&apos;envien els missatges OTP. Seleccioneu 1 per signar tots els missatges.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3989"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Call CQ with an individual contest name instead of TEST, RU, or WW (for example CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
 </source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Truqueu a CQ amb un nom de concurs individual en lloc de TEST, RU o WW (per exemple, CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Truqueu a CQ amb un nom de concurs individual en lloc de TEST, RU o WW (per exemple, CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
 </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3993"/>
         <source>CQ with individual contest name</source>
-        <translation type="vanished">CQ amb nom individual del concurs</translation>
+        <translation>CQ amb nom individual del concurs</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4015"/>
         <source>Contest name:</source>
-        <translation type="vanished">Nom del concurs:</translation>
+        <translation>Nom del concurs:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4054"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Exchange 4-character locator instead of signal report.  Provides q3-level sensitivities for the DX operator.  Especially useful for 6m EME DXpeditions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Canvi de localitzador de 4 caràcters en lloc d&apos;informe de senyal.  Proporciona sensibilitats de nivell q3 per a l&apos;operador DX.  Especialment útil per a expedicions EME DX de 6 m.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Canvi de localitzador de 4 caràcters en lloc d&apos;informe de senyal.  Proporciona sensibilitats de nivell q3 per a l&apos;operador DX.  Especialment útil per a expedicions EME DX de 6 m.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4057"/>
         <source>Q65 Pileup</source>
-        <translation type="vanished">Q65 Pileup</translation>
+        <translation>Q65 Pileup</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4178"/>
         <source>Receiver bandwidth:</source>
-        <translation type="vanished">Amplada de banda del receptor:</translation>
+        <translation>Amplada de banda del receptor:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4191"/>
         <source>  Hz</source>
-        <translation type="vanished">  Hz</translation>
+        <translation>  Hz</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4207"/>
         <source>Tx delay:</source>
-        <translation type="vanished">Retard de TX:</translation>
+        <translation>Retard de TX:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4217"/>
         <source>Minimum delay between assertion of PTT and start of Tx audio.</source>
-        <translation type="vanished">Retard mínim entre el PTT i l&apos;inici de l&apos;àudio TX.</translation>
+        <translation>Retard mínim entre el PTT i l&apos;inici de l&apos;àudio TX.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4220"/>
         <source>  s</source>
-        <translation type="vanished">  s</translation>
+        <translation>  s</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4245"/>
+        <location filename="../Configuration.ui" line="4248"/>
         <source>Tone spacing</source>
-        <translation type="vanished">Espaiat de to</translation>
+        <translation>Espaiat de to</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4254"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate Tx audio with twice the normal tone spacing.  Intended for special LF/MF transmitters that use a divide-by-2 before generating RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Genera l’àudio de TX amb el doble de l&apos;espaiament normal. Destinat a transmissors especials de LF/MF que utilitzen un dividit per 2 abans de generar la RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Genera l’àudio de TX amb el doble de l&apos;espaiament normal. Destinat a transmissors especials de LF/MF que utilitzen un dividit per 2 abans de generar la RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4257"/>
         <source>x 2</source>
-        <translation type="vanished">x 2</translation>
+        <translation>x 2</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4267"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate Tx audio with four times the normal tone spacing. Intended for special LF/MF transmitters that use a divide-by-4 before generating RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Genera l&apos;àudio de TX amb quatre vegades l&apos;espaiat del to normal. Destinat a transmissors especials de LF/MF que usen una divisió per 4 abans de generar la RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Genera l&apos;àudio de TX amb quatre vegades l&apos;espaiat del to normal. Destinat a transmissors especials de LF/MF que usen una divisió per 4 abans de generar la RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4270"/>
         <source>x 4 </source>
-        <translation type="vanished">x 4 </translation>
+        <translation>x 4 </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4286"/>
+        <location filename="../Configuration.ui" line="4289"/>
         <source>Waterfall spectra</source>
-        <translation type="vanished">Espectres de cascades</translation>
+        <translation>Espectres de cascades</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4295"/>
         <source>Low sidelobes</source>
-        <translation type="vanished">Lòbuls laterals baixos</translation>
+        <translation>Lòbuls laterals baixos</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4305"/>
         <source>Most sensitive</source>
-        <translation type="vanished">El més sensible</translation>
+        <translation>El més sensible</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4319"/>
         <source>Alerts</source>
-        <translation type="vanished">Alertes</translation>
+        <translation>Alertes</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4325"/>
         <source>Alert categories above the line require to have the box &quot;Show DXCC, grid, and worked-before status&quot; on the General tab checked.</source>
-        <translation type="vanished">Les categories d&apos;alertes a sobre de la línia requereixen que la casella &quot;Mostra DXCC, quadrícula i estat de treball abans&quot; a la pestanya General marcada.</translation>
+        <translation>Les categories d&apos;alertes a sobre de la línia requereixen que la casella &quot;Mostra DXCC, quadrícula i estat de treball abans&quot; a la pestanya General marcada.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4332"/>
         <source>THIS FEATURE IS FOR EXPERIENCED USERS ONLY</source>
-        <translation type="vanished">AQUESTA CARACTERÍSTICA ÉS PER A USUARIS EXPERIMENTATS</translation>
+        <translation>AQUESTA CARACTERÍSTICA ÉS PER A USUARIS EXPERIMENTATS</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4339"/>
         <source>Ensure that you have made meaningful settings on the Colors tab, so that you see which message triggered the alert.</source>
-        <translation type="vanished">Assegureu-vos que heu fet una configuració significativa a la pestanya Colors, de manera que vegeu quin missatge ha activat l&apos;alerta.</translation>
+        <translation>Assegureu-vos que heu fet una configuració significativa a la pestanya Colors, de manera que vegeu quin missatge ha activat l&apos;alerta.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4346"/>
         <source>Ensure that your rig is NOT connected via &quot;Default Device&quot;.</source>
-        <translation type="vanished">Assegureu-vos que la vostra plataforma NO estigui connectada mitjançant &quot;Dispositiu predeterminat&quot;.</translation>
+        <translation>Assegureu-vos que la vostra plataforma NO estigui connectada mitjançant &quot;Dispositiu predeterminat&quot;.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4359"/>
         <source>Audio Alerts</source>
-        <translation type="vanished">Alertes d&apos;àudio</translation>
+        <translation>Alertes d&apos;àudio</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4380"/>
+        <location filename="../Configuration.ui" line="4383"/>
         <source>New ITU Zone on Band</source>
-        <translation type="vanished">Nova Zona ITU en banda</translation>
+        <translation>Nova Zona ITU en banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4390"/>
+        <location filename="../Configuration.ui" line="4393"/>
         <source>New Continent</source>
-        <translation type="vanished">Nou Continent</translation>
+        <translation>Nou Continent</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4400"/>
+        <location filename="../Configuration.ui" line="4403"/>
         <source>DX Call or DX Grid in message</source>
-        <translation type="vanished">DX Call o DX Grid al missatge</translation>
+        <translation>DX Call o DX Grid al missatge</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4410"/>
+        <location filename="../Configuration.ui" line="4413"/>
         <source>New Grid</source>
-        <translation type="vanished">Nou Locator</translation>
+        <translation>Nou Locator</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4420"/>
+        <location filename="../Configuration.ui" line="4423"/>
         <source>New Continent on Band</source>
-        <translation type="vanished">Nou Continent en banda</translation>
+        <translation>Nou Continent en banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4430"/>
         <source>Message received</source>
-        <translation type="vanished">Missatge rebut</translation>
+        <translation>Missatge rebut</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4437"/>
+        <location filename="../Configuration.ui" line="4440"/>
         <source>New ITU Zone</source>
-        <translation type="vanished">Nova Zona ITU</translation>
+        <translation>Nova Zona ITU</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4447"/>
+        <location filename="../Configuration.ui" line="4450"/>
         <source>New CQ Zone</source>
-        <translation type="vanished">Nova Zona CQ</translation>
+        <translation>Nova Zona CQ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4457"/>
+        <location filename="../Configuration.ui" line="4460"/>
         <source>New DXCC on Band</source>
-        <translation type="vanished">Nou DXCC en banda</translation>
+        <translation>Nou DXCC en banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4467"/>
         <source>My Call in message</source>
-        <translation type="vanished">El meu Indicatiu en el missatge</translation>
+        <translation>El meu Indicatiu en el missatge</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4470"/>
         <source>My Call</source>
-        <translation type="vanished">La meva trucada</translation>
+        <translation>La meva trucada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4477"/>
+        <location filename="../Configuration.ui" line="4480"/>
         <source>New CQ Zone on Band</source>
-        <translation type="vanished">Nova Zona CQ en banda</translation>
+        <translation>Nova Zona CQ en banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4487"/>
+        <location filename="../Configuration.ui" line="4490"/>
         <source>New DXCC</source>
-        <translation type="vanished">Nou DXCC</translation>
+        <translation>Nou DXCC</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4497"/>
+        <location filename="../Configuration.ui" line="4500"/>
         <source>New Grid on Band</source>
-        <translation type="vanished">Nou Locator en banda</translation>
+        <translation>Nou Locator en banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4514"/>
+        <location filename="../Configuration.ui" line="4517"/>
         <source>CQ in message</source>
-        <translation type="vanished">CQ al missatge</translation>
+        <translation>CQ al missatge</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4530"/>
         <source>Toggle Audio Alerts on/off. Alerts will be played on &quot;DefaultAudioDevice&quot;. DON&apos;T ENABLE AUDIO ALERTS WHEN YOUR RIG IS CONNECTED VIA THIS SOUNDCARD !!!</source>
-        <translation type="vanished">Activa/desactiva les alertes d&apos;àudio. Les alertes es reproduiran a &quot;DefaultAudioDevice&quot;. NO HABILITEU LES ALERTES D&apos;ÀUDIO QUAN EL VOSTRE RIG ESTÀ CONNECTAT MITJANÇANT AQUESTA TARGETA DE SO!!!</translation>
+        <translation>Activa/desactiva les alertes d&apos;àudio. Les alertes es reproduiran a &quot;DefaultAudioDevice&quot;. NO HABILITEU LES ALERTES D&apos;ÀUDIO QUAN EL VOSTRE RIG ESTÀ CONNECTAT MITJANÇANT AQUESTA TARGETA DE SO!!!</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4545"/>
         <source>Enable Audio Alerts</source>
-        <translation type="vanished">Activa les alertes d&apos;àudio</translation>
+        <translation>Activa les alertes d&apos;àudio</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4574"/>
         <source>This requirement is fulfilled when your rig is connected via USB audio.</source>
-        <translation type="vanished">Aquest requisit es compleix quan el vostre equip està connectat mitjançant àudio USB.</translation>
+        <translation>Aquest requisit es compleix quan el vostre equip està connectat mitjançant àudio USB.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4581"/>
         <source>Audio Alerts will be played on the default audio device (usually the loudspeaker of your PC).</source>
-        <translation type="vanished">Les alertes d&apos;àudio es reproduiran al dispositiu d&apos;àudio predeterminat (normalment l&apos;altaveu del vostre ordinador).</translation>
+        <translation>Les alertes d&apos;àudio es reproduiran al dispositiu d&apos;àudio predeterminat (normalment l&apos;altaveu del vostre ordinador).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4588"/>
         <source>IMPORTANT NOTES</source>
-        <translation type="vanished">NOTES IMPORTANTS</translation>
+        <translation>NOTES IMPORTANTS</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4595"/>
         <source>Use of this feature requires that your computer is equipped with two sound cards.</source>
-        <translation type="vanished">L&apos;ús d&apos;aquesta funció requereix que l&apos;ordinador estigui equipat amb dues targetes de so.</translation>
+        <translation>L&apos;ús d&apos;aquesta funció requereix que l&apos;ordinador estigui equipat amb dues targetes de so.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4603"/>
         <source>Filters</source>
-        <translation type="vanished">Filtres</translation>
+        <translation>Filtres</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4632"/>
         <source>Territories 1-4 for the Hide checkboxes in the View menu</source>
-        <translation type="vanished">Territoris 1-4 per a les caselles de selecció Amaga del menú Visualitza</translation>
+        <translation>Territoris 1-4 per a les caselles de selecció Amaga del menú Visualitza</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4639"/>
         <source>Blacklist</source>
-        <translation type="vanished">Llista negra</translation>
+        <translation>Llista negra</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4658"/>
         <source>Filters for the Band Activity window</source>
-        <translation type="vanished">Filtres per a la finestra Activitat de banda</translation>
+        <translation>Filtres per a la finestra Activitat de banda</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4696"/>
         <source>Hide messages containing the following callsigns or keywords:</source>
-        <translation type="vanished">Amaga els missatges que contenen els indicatius o paraules clau següents:</translation>
+        <translation>Amaga els missatges que contenen els indicatius o paraules clau següents:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4715"/>
         <source>Show only messages containing the following callsigns or keywords:</source>
-        <translation type="vanished">Mostra només els missatges que continguin els indicatius o paraules clau següents:</translation>
+        <translation>Mostra només els missatges que continguin els indicatius o paraules clau següents:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4731"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitzar filtres per a Wait and Pounce, CQ: primer, etc. només (tots els missatges encara es mostren).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitzar filtres per a Wait and Pounce, CQ: primer, etc. només (tots els missatges encara es mostren).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4734"/>
         <source>Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed)</source>
-        <translation type="vanished">Utilitzeu filtres per a Wait and Pounce, CQ: primer, etc. només (tots els missatges encara es mostren)</translation>
+        <translation>Utilitzeu filtres per a Wait and Pounce, CQ: primer, etc. només (tots els missatges encara es mostren)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4799"/>
         <source>Always pass messages with the following keywords:</source>
-        <translation type="vanished">Passeu sempre missatges amb les paraules clau següents:</translation>
+        <translation>Passeu sempre missatges amb les paraules clau següents:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4824"/>
         <source>Whitelist</source>
-        <translation type="vanished">Llista blanca</translation>
+        <translation>Llista blanca</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4837"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply filters only to the callsigns of the calling stations. Usually the second word of the messages is analyzed, for directional calls the third word.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aplica filtres només als indicatius de les estacions de trucada. Normalment s&apos;analitza la segona paraula dels missatges, per a les trucades direccionals la tercera paraula.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aplica filtres només als indicatius de les estacions de trucada. Normalment s&apos;analitza la segona paraula dels missatges, per a les trucades direccionals la tercera paraula.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4840"/>
         <source>Apply filters only to the callsigns of the calling stations</source>
-        <translation type="vanished">Apliqueu filtres només als indicatius de les estacions de trucada</translation>
+        <translation>Apliqueu filtres només als indicatius de les estacions de trucada</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4859"/>
         <source>Always Pass</source>
-        <translation type="vanished">Passeu sempre</translation>
+        <translation>Passeu sempre</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4875"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use “worked today and yesterday” instead of “worked today” for the 3 related Quick Filters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza &quot;va treballar avui i ahir&quot; en lloc de &quot;va treballar avui&quot; per als 3 filtres ràpids relacionats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Utilitza &quot;va treballar avui i ahir&quot; en lloc de &quot;va treballar avui&quot; per als 3 filtres ràpids relacionats.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4878"/>
         <source>Quick Filters: Hide/Ignore/Highlight &quot;worked today and yesterday&quot; instead of &quot;worked today&quot; (UTC)</source>
-        <translation type="vanished">Filtres ràpids: Amaga/Ignora/Resalta &quot;va funcionar avui i ahir&quot; en lloc de &quot;va treballar avui&quot; (UTC)</translation>
+        <translation>Filtres ràpids: Amaga/Ignora/Resalta &quot;va funcionar avui i ahir&quot; en lloc de &quot;va treballar avui&quot; (UTC)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4891"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Discard (Cancel) or apply (OK) configuration changes including&lt;/p&gt;&lt;p&gt;resetting the radio interface and applying any soundcard changes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Eliminar (Cancel·la) o aplicar (D&apos;acord) canvis de configuració inclosos.&lt;/p&gt;&lt;p&gt;Restablint la interfície de ràdio i aplicant els canvis a la targeta de so&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Eliminar (Cancel·la) o aplicar (D&apos;acord) canvis de configuració inclosos.&lt;/p&gt;&lt;p&gt;Restablint la interfície de ràdio i aplicant els canvis a la targeta de so&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -18251,12 +18929,14 @@ Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</tr
 <context>
     <name>wf_palette_design_dialog</name>
     <message>
+        <location filename="../wf_palette_design_dialog.ui" line="14"/>
         <source>Palette Designer</source>
-        <translation type="vanished">Dissenyador de paletes</translation>
+        <translation>Dissenyador de paletes</translation>
     </message>
     <message>
+        <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes doble clic sobre un color per editar-lo.&lt;/p&gt;&lt;p&gt;Fes clic amb el botó dret per inserir o eliminar els colors.&lt;/p&gt;&lt;p&gt;Els colors a la part superior representen senyals febles,&lt;/p&gt;&lt;p&gt;i els colors a la part inferior representen senyals fortes.&lt;/p&gt;&lt;p&gt;Pot tenir fins a 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fes doble clic sobre un color per editar-lo.&lt;/p&gt;&lt;p&gt;Fes clic amb el botó dret per inserir o eliminar els colors.&lt;/p&gt;&lt;p&gt;Els colors a la part superior representen senyals febles,&lt;/p&gt;&lt;p&gt;i els colors a la part inferior representen senyals fortes.&lt;/p&gt;&lt;p&gt;Pot tenir fins a 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>

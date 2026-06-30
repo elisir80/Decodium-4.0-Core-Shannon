@@ -476,22 +476,22 @@ Searched paths:
         <translation>Вызовы (CALL)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="150"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
         <source>Chiamata diretta</source>
         <translation>Прямой вызов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
         <source>⏳ ARMATO</source>
         <translation>⏳ ВЗВЕДЕНО</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="168"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
         <source>ATTIVA</source>
         <translation>АКТИВНО</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="182"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="201"/>
         <source>Target callsign</source>
         <translation>Целевой callsign</translation>
     </message>
@@ -500,58 +500,58 @@ Searched paths:
         <translation type="vanished">Макс. попыток</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="212"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="231"/>
         <source>Max chiamate a vuoto</source>
         <translation>Макс. безответных вызовов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="213"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="232"/>
         <source>Timeout totale (s)</source>
         <translation>Общий таймаут (с)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="228"/>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="445"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="247"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="464"/>
         <source>∞</source>
         <translation>∞</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="276"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="295"/>
         <source>Periodo FT8/FT4</source>
         <translation>Период FT8/FT4</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="282"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="301"/>
         <source>1st (:00/:30)</source>
         <translation>1-й (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="312"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="331"/>
         <source>2nd (:15/:45)</source>
         <translation>2-й (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="342"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="361"/>
         <source>Alterna</source>
         <translation>Чередовать</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="378"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="397"/>
         <source>Pausa fra cicli (s)</source>
         <translation>Пауза между циклами (с)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="401"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="420"/>
         <source>DX-watch armato — non chiama subito: aspetta che il target sia decodificato</source>
         <translation>DX-watch взведён — не вызывает сразу: ждёт, пока цель будет декодирована</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="410"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="429"/>
         <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
         <translation>Re-arm: если цель исчезает, возврат в приём (макс. 3 раза, затем ручной Halt)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="444"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="463"/>
         <source>A vuoto %1 / %2</source>
         <translation>Без ответа %1 / %2</translation>
     </message>
@@ -560,12 +560,12 @@ Searched paths:
         <translation type="vanished">Re-arm: после попытки без QSO возвращается в приём (макс. 3 раза, затем ручной Halt)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="436"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="455"/>
         <source>⏳ In ascolto: aspetto %1 in decodifica…</source>
         <translation>⏳ Прослушивание: жду декодирования %1…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="437"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="456"/>
         <source>Stato: chiamando %1</source>
         <translation>Состояние: вызываю %1</translation>
     </message>
@@ -574,32 +574,32 @@ Searched paths:
         <translation type="vanished">Попытка %1 / %2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="461"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="480"/>
         <source>AutoCQ generico (pulsante ACQ)</source>
         <translation>Универсальный AutoCQ (кнопка ACQ)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="470"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="489"/>
         <source>Max chiamate CQ (0=∞)</source>
         <translation>Макс. вызовов CQ (0=∞)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="486"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="505"/>
         <source>Pausa fra cicli CQ (s)</source>
         <translation>Пауза между циклами CQ (с)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="507"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
         <source>Chiudi</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="530"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="552"/>
         <source>Stop</source>
         <translation>Стоп</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="560"/>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="582"/>
         <source>▶ Start</source>
         <translation>▶ Старт</translation>
     </message>
@@ -1849,37 +1849,37 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23725"/>
+        <location filename="../DecodiumBridge.cpp" line="24421"/>
         <source>TX non avviata</source>
         <translation>TX не запущена</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="23726"/>
+        <location filename="../DecodiumBridge.cpp" line="24422"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Сжатый callsign не разрешён</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27278"/>
+        <location filename="../DecodiumBridge.cpp" line="28156"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ остановлен</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27279"/>
+        <location filename="../DecodiumBridge.cpp" line="28157"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Получен прямой вызов, но callsign не разрешён</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32310"/>
+        <location filename="../DecodiumBridge.cpp" line="33351"/>
         <source>Map selection: %1 %2</source>
         <translation>Выбор на карте: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="32311"/>
+        <location filename="../DecodiumBridge.cpp" line="33352"/>
         <source>Map selection: %1</source>
         <translation>Выбор на карте: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="38716"/>
+        <location filename="../DecodiumBridge.cpp" line="39921"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Проверка обновлений отключена в этой сборке.</translation>
     </message>
@@ -2185,7 +2185,7 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="1896"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="2173"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT прерван, автоматическое переподключение (%1/%2)...</translation>
     </message>
@@ -3115,134 +3115,134 @@ Error: %2</source>
 <context>
     <name>HamlibTransceiver</name>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="459"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="507"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="481"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="529"/>
         <source>Hamlib initialisation error</source>
         <translation>Ошибка инициализации Hamlib</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="652"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="685"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Ошибка файла настроек Hamlib : %1 со смещением символа %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="658"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="691"/>
         <source>Hamlib settings file error: top level must be a JSON object</source>
         <translation>
 Ошибка файла настроек Hamlib: верхний уровень должен быть объектом JSON</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="670"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="703"/>
         <source>Hamlib settings file error: config must be a JSON object</source>
         <translation>Ошибка файла настроек Hamlib: config должен быть объектом JSON</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="581"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="614"/>
         <source>Unsupported CAT type</source>
         <translation>Не поддердерживаемый тип CAT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="308"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="330"/>
         <source>Hamlib error: %1 while %2</source>
         <translation>Ошибка Hamlib %1 while %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="694"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="727"/>
         <source>opening connection to rig</source>
         <translation>текущее соединение с трансивером</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="702"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="735"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
         <translation>Rig не готов — caps пусты после открытия (нет ответа от радио?)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="809"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="845"/>
         <source>getting current frequency</source>
         <translation>получение текущей частоты</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="813"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="849"/>
         <source>getting current mode</source>
         <translation>получение текущего режима</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="842"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="862"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="878"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="898"/>
         <source>exchanging VFOs</source>
         <translation>обмен VFOs</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="850"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1337"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="886"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1376"/>
         <source>getting other VFO frequency</source>
         <translation>получение частоты другого VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="854"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="890"/>
         <source>getting other VFO mode</source>
         <translation>Получение режима другого VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1083"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1119"/>
         <source>setting TX VFO mode</source>
         <translation>установка режима TX VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="329"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="867"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="351"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="903"/>
         <source>setting current VFO</source>
         <translation>установка текущего VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="876"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="912"/>
         <source>getting frequency</source>
         <translation>получение частоты</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="880"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="916"/>
         <source>getting mode</source>
         <translation>получение режима</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="317"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="897"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1277"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="339"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="933"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1315"/>
         <source>getting current VFO</source>
         <translation>выбор текущего VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="948"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="956"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="970"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1316"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="984"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="992"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1006"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1355"/>
         <source>getting current VFO frequency</source>
         <translation>получение частоты текущего VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="954"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="969"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="976"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1054"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1072"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1139"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="990"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1005"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1012"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1090"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1108"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1175"/>
         <source>setting frequency</source>
         <translation>установка частоты</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1062"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1146"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1224"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1237"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1098"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1182"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1260"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1273"/>
         <source>getting current VFO mode</source>
         <translation>получение режима текущего VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1068"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1077"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1152"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1230"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1243"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1104"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1113"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1188"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1266"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1279"/>
         <source>setting current VFO mode</source>
         <translation>установка тежима текущего VFO</translation>
     </message>
@@ -3251,60 +3251,60 @@ Error: %2</source>
         <translation type="vanished">настройка режима VFOB</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1126"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1195"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1162"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1231"/>
         <source>setting/unsetting split mode</source>
         <translation>установить/снять режим split</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1137"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1177"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1173"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1213"/>
         <source>setting split mode</source>
         <translation>установить режим split</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1165"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1201"/>
         <source>setting split TX frequency and mode</source>
         <translation>установка split для частоты и режима TX</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1170"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1206"/>
         <source>setting split TX frequency</source>
         <translation>установка split для частоты TX</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1248"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1284"/>
         <source>getting split TX VFO mode</source>
         <translation>получение режима split TX VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1255"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1291"/>
         <source>setting split TX VFO mode</source>
         <translation>установка режима split TX VFO</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1374"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1416"/>
         <source>getting PTT state</source>
         <translation>получение статуса PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1580"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1675"/>
         <source>setting PTT on</source>
         <translation>активирование PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1682"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1777"/>
         <source>setting PTT off</source>
         <translation>деактивация PTT</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="352"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="374"/>
         <source>setting a configuration item</source>
         <translation>настройка элементов конфигурации</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="364"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="371"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="386"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="393"/>
         <source>getting a configuration item</source>
         <translation>считывание элементов конфигурации</translation>
     </message>
@@ -3898,33 +3898,33 @@ Error(%2): %3</source>
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10046"/>
+        <location filename="../qml/decodium/Main.qml" line="10083"/>
         <source>About Decodium</source>
         <translation>О Decodium</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10063"/>
+        <location filename="../qml/decodium/Main.qml" line="10100"/>
         <source>Useful Links...</source>
         <translation>Полезные ссылки...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10087"/>
-        <location filename="../qml/decodium/Main.qml" line="10939"/>
+        <location filename="../qml/decodium/Main.qml" line="10124"/>
+        <location filename="../qml/decodium/Main.qml" line="10986"/>
         <source>Keyboard Shortcuts</source>
         <translation>Сочетания клавиш</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10103"/>
+        <location filename="../qml/decodium/Main.qml" line="10140"/>
         <source>SWL Mode (RX Only)</source>
         <translation>Режим SWL (только RX)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10119"/>
+        <location filename="../qml/decodium/Main.qml" line="10156"/>
         <source>Multi-Answer Mode</source>
         <translation>Режим многоответа</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10135"/>
+        <location filename="../qml/decodium/Main.qml" line="10172"/>
         <source>MAM Window...</source>
         <translation>Окно MAM...</translation>
     </message>
@@ -3933,8 +3933,8 @@ Error(%2): %3</source>
         <translation type="vanished">Открыть папку ALL.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10175"/>
-        <location filename="../qml/decodium/Main.qml" line="10794"/>
+        <location filename="../qml/decodium/Main.qml" line="10212"/>
+        <location filename="../qml/decodium/Main.qml" line="10831"/>
         <source>TX Watchdog</source>
         <translation>Сторож TX</translation>
     </message>
@@ -3943,8 +3943,8 @@ Error(%2): %3</source>
         <translation type="vanished">Раздельный режим</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10191"/>
-        <location filename="../qml/decodium/Main.qml" line="10871"/>
+        <location filename="../qml/decodium/Main.qml" line="10228"/>
+        <location filename="../qml/decodium/Main.qml" line="10908"/>
         <source>Contest Mode</source>
         <translation>Контест-режим</translation>
     </message>
@@ -3954,12 +3954,12 @@ Error(%2): %3</source>
         <translation>Правило: 1 очко за каждую проведённую связь</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10231"/>
+        <location filename="../qml/decodium/Main.qml" line="10268"/>
         <source>CQ Only</source>
         <translation>Только CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10247"/>
+        <location filename="../qml/decodium/Main.qml" line="10284"/>
         <source>My Call Only</source>
         <translation>Только мой позывной</translation>
     </message>
@@ -3968,100 +3968,100 @@ Error(%2): %3</source>
         <translation type="vanished">Режим ZAP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10271"/>
+        <location filename="../qml/decodium/Main.qml" line="10308"/>
         <source>Deep Search</source>
         <translation>Глубокий поиск</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10287"/>
+        <location filename="../qml/decodium/Main.qml" line="10324"/>
         <source>Avg Decode</source>
         <translation>Усредненное декодирование</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10321"/>
+        <location filename="../qml/decodium/Main.qml" line="10358"/>
         <source>VHF/UHF Features</source>
         <translation>Функции VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10345"/>
+        <location filename="../qml/decodium/Main.qml" line="10382"/>
         <source>Record RX</source>
         <translation>Записывать RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10361"/>
+        <location filename="../qml/decodium/Main.qml" line="10398"/>
         <source>Record TX</source>
         <translation>Записывать TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12130"/>
+        <location filename="../qml/decodium/Main.qml" line="12177"/>
         <source>decodes</source>
         <translation>декодов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12863"/>
+        <location filename="../qml/decodium/Main.qml" line="12910"/>
         <source>msgs</source>
         <translation>сообщ.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12144"/>
-        <location filename="../qml/decodium/Main.qml" line="12878"/>
+        <location filename="../qml/decodium/Main.qml" line="12191"/>
+        <location filename="../qml/decodium/Main.qml" line="12925"/>
         <source>Clear</source>
         <translation>Очистить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="886"/>
+        <location filename="../qml/decodium/Main.qml" line="891"/>
         <source>Schermo intero</source>
         <translation>Полный экран</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1727"/>
+        <location filename="../qml/decodium/Main.qml" line="1732"/>
         <source>Open WAV file for decoding</source>
         <translation>Открыть WAV-файл для декодирования</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1729"/>
+        <location filename="../qml/decodium/Main.qml" line="1734"/>
         <source>File WAV (*.wav)</source>
         <translation>Файл WAV (*.wav)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1729"/>
+        <location filename="../qml/decodium/Main.qml" line="1734"/>
         <source>All files (*)</source>
         <translation>Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1737"/>
+        <location filename="../qml/decodium/Main.qml" line="1742"/>
         <source>Select folder with WAV files</source>
         <translation>Выбрать папку с WAV-файлами</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3569"/>
+        <location filename="../qml/decodium/Main.qml" line="3612"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
         <translation>Клик: синхронизировать NTP сейчас для выравнивания DT (FT8/FT4)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3652"/>
+        <location filename="../qml/decodium/Main.qml" line="3695"/>
         <source>Auto RX level active</source>
         <translation>Авто-уровень RX активен</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3653"/>
+        <location filename="../qml/decodium/Main.qml" line="3696"/>
         <source>Auto RX level disabled</source>
         <translation>Авто-уровень RX отключён</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4146"/>
+        <location filename="../qml/decodium/Main.qml" line="4189"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
         <translation>Клик: открыть WAV-файл
 Правый клик: декодировать папку</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4246"/>
+        <location filename="../qml/decodium/Main.qml" line="4289"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
         <translation>Сбросить раскладку (Ctrl+Shift+L)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4278"/>
+        <location filename="../qml/decodium/Main.qml" line="4321"/>
         <source>Decode history (Ctrl+Shift+H)</source>
         <translation>История декодирования (Ctrl+Shift+H)</translation>
     </message>
@@ -4070,17 +4070,17 @@ Right-click: decode a folder</source>
         <translation type="vanished">Сбалансированный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Weak-signal / DX</source>
         <translation>Слабый сигнал / DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Contest</source>
         <translation>Contest</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>CPU-limited</source>
         <translation>Ограничение CPU</translation>
     </message>
@@ -4093,82 +4093,82 @@ Right-click: decode a folder</source>
         <translation type="vanished">Готовые профили — применяют разом переключатели FT2/декодирования. Подробности в Setup → FT2.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4373"/>
+        <location filename="../qml/decodium/Main.qml" line="4416"/>
         <source>Balanced</source>
         <translation>Сбалансированный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4374"/>
+        <location filename="../qml/decodium/Main.qml" line="4417"/>
         <source>Profiles...</source>
         <translation>Профили...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4379"/>
+        <location filename="../qml/decodium/Main.qml" line="4422"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Готовые профили — применяют переключатели FT2/декодирования группой. Подробности в Setup -&gt; TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4617"/>
+        <location filename="../qml/decodium/Main.qml" line="4660"/>
         <source>Drag to reposition the clock</source>
         <translation>Перетащите для перемещения часов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4808"/>
+        <location filename="../qml/decodium/Main.qml" line="4851"/>
         <source>Cerca città...</source>
         <translation>Найти город...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4916"/>
+        <location filename="../qml/decodium/Main.qml" line="4959"/>
         <source>Type a city name</source>
         <translation>Введите название города</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4916"/>
+        <location filename="../qml/decodium/Main.qml" line="4959"/>
         <source>No matching city</source>
         <translation>Подходящих городов нет</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4951"/>
+        <location filename="../qml/decodium/Main.qml" line="4994"/>
         <source>Analog clock</source>
         <translation>Аналоговые часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4955"/>
+        <location filename="../qml/decodium/Main.qml" line="4998"/>
         <source>Digital clock</source>
         <translation>Цифровые часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4959"/>
+        <location filename="../qml/decodium/Main.qml" line="5002"/>
         <source>City labels</source>
         <translation>Подписи городов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4966"/>
+        <location filename="../qml/decodium/Main.qml" line="5009"/>
         <source>Hide clock</source>
         <translation>Скрыть часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5014"/>
+        <location filename="../qml/decodium/Main.qml" line="5057"/>
         <source>Restore Waterfall</source>
         <translation>Восстановить Waterfall</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5066"/>
+        <location filename="../qml/decodium/Main.qml" line="5109"/>
         <source>Restore QSO Log</source>
         <translation>Восстановить журнал QSO</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5118"/>
+        <location filename="../qml/decodium/Main.qml" line="5161"/>
         <source>Restore astronomical data</source>
         <translation>Восстановить астрономические данные</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5175"/>
+        <location filename="../qml/decodium/Main.qml" line="5218"/>
         <source>Restore Live Map</source>
         <translation>Восстановить Live Map</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5316"/>
+        <location filename="../qml/decodium/Main.qml" line="5359"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
@@ -4177,113 +4177,113 @@ Right-click: disconnect</source>
 Правый клик: отключить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5393"/>
+        <location filename="../qml/decodium/Main.qml" line="5436"/>
         <source>Disable filter bypass</source>
         <translation>Отключить обход фильтра</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5394"/>
+        <location filename="../qml/decodium/Main.qml" line="5437"/>
         <source>Bypass CQ/My Call and setup filters</source>
         <translation>Обойти фильтры CQ/My Call и настроек</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5441"/>
+        <location filename="../qml/decodium/Main.qml" line="5484"/>
         <source>Restore Macro configuration</source>
         <translation>Восстановить конфигурацию Macro</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5493"/>
+        <location filename="../qml/decodium/Main.qml" line="5536"/>
         <source>Restore Rig Control</source>
         <translation>Восстановить Rig Control</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5546"/>
+        <location filename="../qml/decodium/Main.qml" line="5589"/>
         <source>Restore Full Spectrum</source>
         <translation>Восстановить Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5598"/>
+        <location filename="../qml/decodium/Main.qml" line="5641"/>
         <source>Restore Period 2</source>
         <translation>Восстановить Period 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5649"/>
+        <location filename="../qml/decodium/Main.qml" line="5692"/>
         <source>Restore Signal RX</source>
         <translation>Восстановить Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5701"/>
+        <location filename="../qml/decodium/Main.qml" line="5744"/>
         <source>Restore TX panel</source>
         <translation>Восстановить панель TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5956"/>
+        <location filename="../qml/decodium/Main.qml" line="5999"/>
         <source>Clock</source>
         <translation>Часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7337"/>
-        <location filename="../qml/decodium/Main.qml" line="8130"/>
-        <location filename="../qml/decodium/Main.qml" line="12188"/>
-        <location filename="../qml/decodium/Main.qml" line="12922"/>
+        <location filename="../qml/decodium/Main.qml" line="7376"/>
+        <location filename="../qml/decodium/Main.qml" line="8169"/>
+        <location filename="../qml/decodium/Main.qml" line="12235"/>
+        <location filename="../qml/decodium/Main.qml" line="12969"/>
         <source>Return to normal row height</source>
         <translation>Вернуться к нормальной высоте строк</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7338"/>
-        <location filename="../qml/decodium/Main.qml" line="8131"/>
-        <location filename="../qml/decodium/Main.qml" line="12189"/>
-        <location filename="../qml/decodium/Main.qml" line="12923"/>
+        <location filename="../qml/decodium/Main.qml" line="7377"/>
+        <location filename="../qml/decodium/Main.qml" line="8170"/>
+        <location filename="../qml/decodium/Main.qml" line="12236"/>
+        <location filename="../qml/decodium/Main.qml" line="12970"/>
         <source>Compact rows (2x visible decodes)</source>
         <translation>Компактные строки (2x видимых декодирований)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7368"/>
+        <location filename="../qml/decodium/Main.qml" line="7407"/>
         <source>Detach Full Spectrum</source>
         <translation>Отстыковать Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7910"/>
+        <location filename="../qml/decodium/Main.qml" line="7949"/>
         <source>Go to the latest decode</source>
         <translation>Перейти к последнему декодированию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8096"/>
+        <location filename="../qml/decodium/Main.qml" line="8135"/>
         <source>Clear Signal RX</source>
         <translation>Очистить Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8161"/>
+        <location filename="../qml/decodium/Main.qml" line="8200"/>
         <source>Detach Signal RX</source>
         <translation>Отстыковать Signal RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8575"/>
+        <location filename="../qml/decodium/Main.qml" line="8612"/>
         <source>Stacca</source>
         <translation>Отстыковать</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8587"/>
+        <location filename="../qml/decodium/Main.qml" line="8624"/>
         <source>Stacca il DX Cluster in finestra</source>
         <translation>Отстыковать DX Cluster в окно</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8849"/>
+        <location filename="../qml/decodium/Main.qml" line="8886"/>
         <source>Drag to swap the column</source>
         <translation>Перетащите для смены столбца</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9052"/>
+        <location filename="../qml/decodium/Main.qml" line="9089"/>
         <source>Detach TX panel</source>
         <translation>Отстыковать панель TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9194"/>
+        <location filename="../qml/decodium/Main.qml" line="9231"/>
         <source>Reset Layout</source>
         <translation>Сбросить раскладку</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9210"/>
+        <location filename="../qml/decodium/Main.qml" line="9247"/>
         <source>Riportare tutte le finestre flottanti dentro la finestra principale
 e ricentrare Decodium sul monitor principale?
 
@@ -4294,81 +4294,81 @@ Le coordinate salvate verranno cancellate.</source>
 Сохранённые координаты будут удалены.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9511"/>
+        <location filename="../qml/decodium/Main.qml" line="9548"/>
         <source>Notifica</source>
         <translation>Уведомление</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10151"/>
+        <location filename="../qml/decodium/Main.qml" line="10188"/>
         <source>Apri cartella ALL.TXT</source>
         <translation>Открыть папку ALL.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10215"/>
+        <location filename="../qml/decodium/Main.qml" line="10252"/>
         <source>Bypass Filters</source>
         <translation>Обход фильтров</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10431"/>
+        <location filename="../qml/decodium/Main.qml" line="10468"/>
         <source>Update checks disabled</source>
         <translation>Проверка обновлений отключена</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10446"/>
+        <location filename="../qml/decodium/Main.qml" line="10483"/>
         <source>Esporta Cabrillo...</source>
         <translation>Экспорт Cabrillo...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10474"/>
+        <location filename="../qml/decodium/Main.qml" line="10511"/>
         <source>Mostra orologio</source>
         <translation>Показать часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10489"/>
+        <location filename="../qml/decodium/Main.qml" line="10526"/>
         <source>Mostra DX Cluster</source>
         <translation>Показать DX Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10504"/>
+        <location filename="../qml/decodium/Main.qml" line="10541"/>
         <source>Mostra PSK Reporter</source>
         <translation>Показать PSK Reporter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10656"/>
+        <location filename="../qml/decodium/Main.qml" line="10693"/>
         <source>Waterfall / Panadapter</source>
         <translation>Waterfall / Panadapter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10701"/>
+        <location filename="../qml/decodium/Main.qml" line="10738"/>
         <source>DecoSyncTime Monitor</source>
         <translation>Монитор DecoSyncTime</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11269"/>
-        <location filename="../qml/decodium/Main.qml" line="12214"/>
-        <location filename="../qml/decodium/Main.qml" line="12936"/>
-        <location filename="../qml/decodium/Main.qml" line="12949"/>
-        <location filename="../qml/decodium/Main.qml" line="13478"/>
+        <location filename="../qml/decodium/Main.qml" line="11316"/>
+        <location filename="../qml/decodium/Main.qml" line="12261"/>
+        <location filename="../qml/decodium/Main.qml" line="12983"/>
+        <location filename="../qml/decodium/Main.qml" line="12996"/>
+        <location filename="../qml/decodium/Main.qml" line="13525"/>
         <source>Dock</source>
         <translation>Закрепить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13487"/>
+        <location filename="../qml/decodium/Main.qml" line="13534"/>
         <source>Dock TX panel</source>
         <translation>Закрепить панель TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13954"/>
+        <location filename="../qml/decodium/Main.qml" line="14001"/>
         <source>Inserisci nel layout:</source>
         <translation>Вставить в раскладку:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13961"/>
+        <location filename="../qml/decodium/Main.qml" line="14008"/>
         <source>◧ accanto a Full Spectrum</source>
         <translation>◧ рядом с Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13962"/>
+        <location filename="../qml/decodium/Main.qml" line="14009"/>
         <source>◧ accanto a Signal RX</source>
         <translation>◧ рядом с Signal RX</translation>
     </message>
@@ -4377,27 +4377,27 @@ Le coordinate salvate verranno cancellate.</source>
         <translation type="vanished">Закрепить панель TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10304"/>
+        <location filename="../qml/decodium/Main.qml" line="10341"/>
         <source>Hide ASYNC icon</source>
         <translation>Скрыть значок ASYNC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10305"/>
+        <location filename="../qml/decodium/Main.qml" line="10342"/>
         <source>Show ASYNC icon</source>
         <translation>Показать значок ASYNC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10385"/>
+        <location filename="../qml/decodium/Main.qml" line="10422"/>
         <source>Alert on CQ</source>
         <translation>Оповещение на CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10406"/>
+        <location filename="../qml/decodium/Main.qml" line="10443"/>
         <source>Color Highlighting...</source>
         <translation>Цветовая подсветка...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10418"/>
+        <location filename="../qml/decodium/Main.qml" line="10455"/>
         <source>QSY...</source>
         <translation>QSY...</translation>
     </message>
@@ -4414,12 +4414,12 @@ Le coordinate salvate verranno cancellate.</source>
         <translation type="vanished">Экспорт Cabrillo...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10458"/>
+        <location filename="../qml/decodium/Main.qml" line="10495"/>
         <source>cty.dat downloading...</source>
         <translation>Загрузка cty.dat...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10458"/>
+        <location filename="../qml/decodium/Main.qml" line="10495"/>
         <source>Update cty.dat</source>
         <translation>Обновить cty.dat</translation>
     </message>
@@ -4436,17 +4436,17 @@ Le coordinate salvate verranno cancellate.</source>
         <translation type="vanished">Показать PSK Reporter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10628"/>
+        <location filename="../qml/decodium/Main.qml" line="10665"/>
         <source>Time Sync Panel</source>
         <translation>Панель синхронизации времени</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10642"/>
+        <location filename="../qml/decodium/Main.qml" line="10679"/>
         <source>Active Stations</source>
         <translation>Активные станции</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10671"/>
+        <location filename="../qml/decodium/Main.qml" line="10708"/>
         <source>Live Map</source>
         <translation>Живая карта</translation>
     </message>
@@ -4459,17 +4459,17 @@ Le coordinate salvate verranno cancellate.</source>
         <translation type="vanished">Режим Hound</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10686"/>
+        <location filename="../qml/decodium/Main.qml" line="10723"/>
         <source>Astro / EME</source>
         <translation>Astro / EME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10715"/>
+        <location filename="../qml/decodium/Main.qml" line="10752"/>
         <source>DX Cluster Panel</source>
         <translation>Панель DX Cluster</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10729"/>
+        <location filename="../qml/decodium/Main.qml" line="10766"/>
         <source>Alert on My Call</source>
         <translation>Оповещение на мой позывной</translation>
     </message>
@@ -4478,15 +4478,15 @@ Le coordinate salvate verranno cancellate.</source>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="52"/>
-        <location filename="../widgets/mainwindow.cpp" line="10169"/>
-        <location filename="../widgets/mainwindow.cpp" line="10172"/>
-        <location filename="../widgets/mainwindow.cpp" line="22677"/>
-        <location filename="../widgets/mainwindow.cpp" line="22794"/>
-        <location filename="../widgets/mainwindow.cpp" line="22878"/>
-        <location filename="../widgets/mainwindow.cpp" line="23214"/>
-        <location filename="../widgets/mainwindow.cpp" line="23462"/>
-        <location filename="../widgets/mainwindow.cpp" line="23526"/>
-        <location filename="../widgets/mainwindow.cpp" line="23695"/>
+        <location filename="../widgets/mainwindow.cpp" line="10225"/>
+        <location filename="../widgets/mainwindow.cpp" line="10228"/>
+        <location filename="../widgets/mainwindow.cpp" line="22776"/>
+        <location filename="../widgets/mainwindow.cpp" line="22893"/>
+        <location filename="../widgets/mainwindow.cpp" line="22977"/>
+        <location filename="../widgets/mainwindow.cpp" line="23313"/>
+        <location filename="../widgets/mainwindow.cpp" line="23561"/>
+        <location filename="../widgets/mainwindow.cpp" line="23625"/>
+        <location filename="../widgets/mainwindow.cpp" line="23794"/>
         <source>Band Activity</source>
         <translation>Декодирование в полосе обзора</translation>
     </message>
@@ -4498,13 +4498,13 @@ Le coordinate salvate verranno cancellate.</source>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="195"/>
-        <location filename="../widgets/mainwindow.cpp" line="10173"/>
-        <location filename="../widgets/mainwindow.cpp" line="22678"/>
-        <location filename="../widgets/mainwindow.cpp" line="22793"/>
-        <location filename="../widgets/mainwindow.cpp" line="22877"/>
-        <location filename="../widgets/mainwindow.cpp" line="23209"/>
-        <location filename="../widgets/mainwindow.cpp" line="23463"/>
-        <location filename="../widgets/mainwindow.cpp" line="23527"/>
+        <location filename="../widgets/mainwindow.cpp" line="10229"/>
+        <location filename="../widgets/mainwindow.cpp" line="22777"/>
+        <location filename="../widgets/mainwindow.cpp" line="22892"/>
+        <location filename="../widgets/mainwindow.cpp" line="22976"/>
+        <location filename="../widgets/mainwindow.cpp" line="23308"/>
+        <location filename="../widgets/mainwindow.cpp" line="23562"/>
+        <location filename="../widgets/mainwindow.cpp" line="23626"/>
         <source>Rx Frequency</source>
         <translation>Декодировавние на частоте RX</translation>
     </message>
@@ -5161,7 +5161,7 @@ Not available to nonstandard callsign holders.</source>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="1650"/>
-        <location filename="../widgets/mainwindow.cpp" line="23249"/>
+        <location filename="../widgets/mainwindow.cpp" line="23348"/>
         <source>Fox</source>
         <translation>Фокс</translation>
     </message>
@@ -5623,10 +5623,10 @@ list. The list can be maintained in Settings (F2).</source>
         <location filename="../widgets/mainwindow.ui" line="3138"/>
         <location filename="../widgets/mainwindow.ui" line="3145"/>
         <location filename="../widgets/mainwindow.ui" line="4208"/>
-        <location filename="../widgets/mainwindow.cpp" line="6381"/>
-        <location filename="../widgets/mainwindow.cpp" line="20859"/>
-        <location filename="../widgets/mainwindow.cpp" line="23939"/>
-        <location filename="../widgets/mainwindow.cpp" line="26840"/>
+        <location filename="../widgets/mainwindow.cpp" line="6434"/>
+        <location filename="../widgets/mainwindow.cpp" line="20958"/>
+        <location filename="../widgets/mainwindow.cpp" line="24038"/>
+        <location filename="../widgets/mainwindow.cpp" line="26944"/>
         <source>Random</source>
         <translation>Случайный</translation>
     </message>
@@ -7467,21 +7467,21 @@ list. The list can be maintained in Settings (F2).</source>
         <translation>Краткое руководство по  WSJT-X 2.5.0 и MAP65 3.0</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2311"/>
-        <location filename="../widgets/mainwindow.cpp" line="24888"/>
+        <location filename="../widgets/mainwindow.cpp" line="2355"/>
+        <location filename="../widgets/mainwindow.cpp" line="24987"/>
         <source>Rig Control Error</source>
         <translation>Ошибка управления трансивером</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2436"/>
-        <location filename="../widgets/mainwindow.cpp" line="17311"/>
-        <location filename="../widgets/mainwindow.cpp" line="26677"/>
+        <location filename="../widgets/mainwindow.cpp" line="2480"/>
+        <location filename="../widgets/mainwindow.cpp" line="17410"/>
+        <location filename="../widgets/mainwindow.cpp" line="26781"/>
         <source>Receiving</source>
         <translation>Прием</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2796"/>
-        <location filename="../widgets/mainwindow.cpp" line="24889"/>
+        <location filename="../widgets/mainwindow.cpp" line="2840"/>
+        <location filename="../widgets/mainwindow.cpp" line="24988"/>
         <source>Do you want to reconfigure the radio interface?</source>
         <translation>Хотите перенастроить радиоинтерфейс?</translation>
     </message>
@@ -7494,47 +7494,47 @@ list. The list can be maintained in Settings (F2).</source>
         <translation type="vanished">Просканирован лог ADIF, %1 работал до создания записей</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3560"/>
+        <location filename="../widgets/mainwindow.cpp" line="3604"/>
         <source>Error Loading LotW Users Data</source>
         <translation>Ошибка при загрузке данных пользователей LotW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3646"/>
+        <location filename="../widgets/mainwindow.cpp" line="3690"/>
         <source>Error Writing WAV File</source>
         <translation>Ошибка записи файла WAV</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3681"/>
+        <location filename="../widgets/mainwindow.cpp" line="3725"/>
         <source>Enumerating audio devices</source>
         <translation>Перечисление аудиоустройств</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3702"/>
+        <location filename="../widgets/mainwindow.cpp" line="3746"/>
         <source>Configurations...</source>
         <translation>Конфигурация ...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
-        <location filename="../widgets/mainwindow.cpp" line="3802"/>
-        <location filename="../widgets/mainwindow.cpp" line="22782"/>
-        <location filename="../widgets/mainwindow.cpp" line="22869"/>
-        <location filename="../widgets/mainwindow.cpp" line="22879"/>
-        <location filename="../widgets/mainwindow.cpp" line="23201"/>
-        <location filename="../widgets/mainwindow.cpp" line="23215"/>
-        <location filename="../widgets/mainwindow.cpp" line="23369"/>
-        <location filename="../widgets/mainwindow.cpp" line="23370"/>
-        <location filename="../widgets/mainwindow.cpp" line="23444"/>
-        <location filename="../widgets/mainwindow.cpp" line="23445"/>
-        <location filename="../widgets/mainwindow.cpp" line="23451"/>
-        <location filename="../widgets/mainwindow.cpp" line="23452"/>
-        <location filename="../widgets/mainwindow.cpp" line="23594"/>
-        <location filename="../widgets/mainwindow.cpp" line="23595"/>
-        <location filename="../widgets/mainwindow.cpp" line="23686"/>
-        <location filename="../widgets/mainwindow.cpp" line="23687"/>
-        <location filename="../widgets/mainwindow.cpp" line="25696"/>
-        <location filename="../widgets/mainwindow.cpp" line="25699"/>
-        <location filename="../widgets/mainwindow.cpp" line="25704"/>
-        <location filename="../widgets/mainwindow.cpp" line="25707"/>
+        <location filename="../widgets/mainwindow.cpp" line="3846"/>
+        <location filename="../widgets/mainwindow.cpp" line="22881"/>
+        <location filename="../widgets/mainwindow.cpp" line="22968"/>
+        <location filename="../widgets/mainwindow.cpp" line="22978"/>
+        <location filename="../widgets/mainwindow.cpp" line="23300"/>
+        <location filename="../widgets/mainwindow.cpp" line="23314"/>
+        <location filename="../widgets/mainwindow.cpp" line="23468"/>
+        <location filename="../widgets/mainwindow.cpp" line="23469"/>
+        <location filename="../widgets/mainwindow.cpp" line="23543"/>
+        <location filename="../widgets/mainwindow.cpp" line="23544"/>
+        <location filename="../widgets/mainwindow.cpp" line="23550"/>
+        <location filename="../widgets/mainwindow.cpp" line="23551"/>
+        <location filename="../widgets/mainwindow.cpp" line="23693"/>
+        <location filename="../widgets/mainwindow.cpp" line="23694"/>
+        <location filename="../widgets/mainwindow.cpp" line="23785"/>
+        <location filename="../widgets/mainwindow.cpp" line="23786"/>
+        <location filename="../widgets/mainwindow.cpp" line="25795"/>
+        <location filename="../widgets/mainwindow.cpp" line="25798"/>
+        <location filename="../widgets/mainwindow.cpp" line="25803"/>
+        <location filename="../widgets/mainwindow.cpp" line="25806"/>
         <source>Message</source>
         <translation>Сообщение</translation>
     </message>
@@ -7555,111 +7555,111 @@ list. The list can be maintained in Settings (F2).</source>
         <translation type="vanished">Нажмите OK, чтобы повторить попытку.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6463"/>
-        <location filename="../widgets/mainwindow.cpp" line="23647"/>
+        <location filename="../widgets/mainwindow.cpp" line="6516"/>
+        <location filename="../widgets/mainwindow.cpp" line="23746"/>
         <source>Improper mode</source>
         <translation>Неправильный режим</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6816"/>
-        <location filename="../widgets/mainwindow.cpp" line="28281"/>
+        <location filename="../widgets/mainwindow.cpp" line="6869"/>
+        <location filename="../widgets/mainwindow.cpp" line="28385"/>
         <source>File Open Error</source>
         <translation>Ошибка открытия файла</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6817"/>
-        <location filename="../widgets/mainwindow.cpp" line="26743"/>
-        <location filename="../widgets/mainwindow.cpp" line="27267"/>
-        <location filename="../widgets/mainwindow.cpp" line="28282"/>
-        <location filename="../widgets/mainwindow.cpp" line="28473"/>
+        <location filename="../widgets/mainwindow.cpp" line="6870"/>
+        <location filename="../widgets/mainwindow.cpp" line="26847"/>
+        <location filename="../widgets/mainwindow.cpp" line="27371"/>
+        <location filename="../widgets/mainwindow.cpp" line="28386"/>
+        <location filename="../widgets/mainwindow.cpp" line="28958"/>
         <source>Cannot open &quot;%1&quot; for append: %2</source>
         <translation>Не удается открыть &quot;%1&quot; для добавления: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7081"/>
+        <location filename="../widgets/mainwindow.cpp" line="7134"/>
         <source>Error saving c2 file</source>
         <translation>Ошибка сохранения c2 файла</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8055"/>
-        <location filename="../widgets/mainwindow.cpp" line="8058"/>
+        <location filename="../widgets/mainwindow.cpp" line="8108"/>
+        <location filename="../widgets/mainwindow.cpp" line="8111"/>
         <source>Error in Sound Input</source>
         <translation>Ошибка в SoundInput</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8067"/>
-        <location filename="../widgets/mainwindow.cpp" line="8070"/>
+        <location filename="../widgets/mainwindow.cpp" line="8120"/>
+        <location filename="../widgets/mainwindow.cpp" line="8123"/>
         <source>Error in Sound Output</source>
         <translation>Ошибка в SoundOutput</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8768"/>
-        <location filename="../widgets/mainwindow.cpp" line="10165"/>
+        <location filename="../widgets/mainwindow.cpp" line="8824"/>
+        <location filename="../widgets/mainwindow.cpp" line="10221"/>
         <source>Single-Period Decodes</source>
         <translation>Однопериодные декодирования</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8769"/>
-        <location filename="../widgets/mainwindow.cpp" line="10166"/>
+        <location filename="../widgets/mainwindow.cpp" line="8825"/>
+        <location filename="../widgets/mainwindow.cpp" line="10222"/>
         <source>Average Decodes</source>
         <translation>Среднее декодирование</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9896"/>
+        <location filename="../widgets/mainwindow.cpp" line="9952"/>
         <source>Change Operator</source>
         <translation>Изменить оператора</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9896"/>
+        <location filename="../widgets/mainwindow.cpp" line="9952"/>
         <source>New operator:</source>
         <translation>Новый оператор</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10132"/>
+        <location filename="../widgets/mainwindow.cpp" line="10188"/>
         <source>Status File Error</source>
         <translation>Ошибка файла состояния</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10133"/>
-        <location filename="../widgets/mainwindow.cpp" line="20664"/>
+        <location filename="../widgets/mainwindow.cpp" line="10189"/>
+        <location filename="../widgets/mainwindow.cpp" line="20763"/>
         <source>Cannot open &quot;%1&quot; for writing: %2</source>
         <translation>Невозможно открыть &quot;%1&quot; для записи: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10170"/>
+        <location filename="../widgets/mainwindow.cpp" line="10226"/>
         <source>Decodes containing My Call</source>
         <translation>Декодирует, содержащий Мой звонок</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10453"/>
+        <location filename="../widgets/mainwindow.cpp" line="10509"/>
         <source>Subprocess Error</source>
         <translation>Ошибка подпроцесса</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10454"/>
+        <location filename="../widgets/mainwindow.cpp" line="10510"/>
         <source>Subprocess failed with exit code %1</source>
         <translation>Сбой подпроцесса с кодом выхода %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10456"/>
-        <location filename="../widgets/mainwindow.cpp" line="10502"/>
+        <location filename="../widgets/mainwindow.cpp" line="10512"/>
+        <location filename="../widgets/mainwindow.cpp" line="10558"/>
         <source>Running: %1
 %2</source>
         <translation>Запуск: %1
 %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10501"/>
+        <location filename="../widgets/mainwindow.cpp" line="10557"/>
         <source>Subprocess error</source>
         <translation>Ошибка подпроцесса</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10626"/>
+        <location filename="../widgets/mainwindow.cpp" line="10682"/>
         <source>Reference spectrum saved</source>
         <translation>Сохраненный эталонный спектр</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10715"/>
+        <location filename="../widgets/mainwindow.cpp" line="10771"/>
         <source>It is very important to avoid audio harmonics and distorted audio signals.
 This is usually achieved by the following step-by-step approach:
 
@@ -7708,23 +7708,23 @@ to ensure the signal is clean and not distorted.</source>
 , чтобы убедиться, что сигнал чистый и не искажен.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10731"/>
+        <location filename="../widgets/mainwindow.cpp" line="10787"/>
         <source>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</source>
         <translation>&lt;b&gt;Рекомендуемые настройки звука&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10795"/>
+        <location filename="../widgets/mainwindow.cpp" line="10851"/>
         <source>Invalid data in fmt.all at line %1</source>
         <translation>
 Неверные данные в fmt.all в строке %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10801"/>
+        <location filename="../widgets/mainwindow.cpp" line="10857"/>
         <source>Good Calibration Solution</source>
         <translation>Хорошее калибровочное решение</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10802"/>
+        <location filename="../widgets/mainwindow.cpp" line="10858"/>
         <source>&lt;pre&gt;%1%L2 ±%L3 ppm
 %4%L5 ±%L6 Hz
 
@@ -7737,13 +7737,13 @@ to ensure the signal is clean and not distorted.</source>
 %9%L10 Гц&lt;/pre&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10816"/>
+        <location filename="../widgets/mainwindow.cpp" line="10872"/>
         <source>Delete Calibration Measurements</source>
         <translation>
 Удалить калибровочные измерения</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10817"/>
+        <location filename="../widgets/mainwindow.cpp" line="10873"/>
         <source>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</source>
         <translation>Файл «fmt.all» будет переименован в «fmt.bak».</translation>
     </message>
@@ -7756,22 +7756,22 @@ to ensure the signal is clean and not distorted.</source>
 «Алгоритмы, исходный код, внешний вид WSJT-X и связанных с ним программ, а также спецификации протоколов для режимов FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 защищены авторским правом ( C) 2001–2021 годы одним или несколькими из следующих авторов: Джозеф Тейлор, K1JT; Билл Сомервилль, G4WJS; Стивен Франке, K9AN; Нико Палермо, IV3NWV; Грег Бим, KI7MT; Майкл Блэк, W9MDB; Эдсон Перейра, PY2SDR; Филипп. Karn, KA9Q и другие члены группы разработчиков WSJT».</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11541"/>
+        <location filename="../widgets/mainwindow.cpp" line="11597"/>
         <source>No data read from disk. Wrong file format?</source>
         <translation>Данные не считываются с диска. Неверный формат файла?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11548"/>
+        <location filename="../widgets/mainwindow.cpp" line="11604"/>
         <source>Confirm Delete</source>
         <translation>Подтвердите удаление</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11549"/>
+        <location filename="../widgets/mainwindow.cpp" line="11605"/>
         <source>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</source>
         <translation>Вы уверены, что хотите удалить все файлы *.wav и *.c2 в &quot;%1&quot;?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11586"/>
+        <location filename="../widgets/mainwindow.cpp" line="11642"/>
         <source>Keyboard Shortcuts</source>
         <translation>Горячие клавиши</translation>
     </message>
@@ -7869,7 +7869,7 @@ to ensure the signal is clean and not distorted.</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11648"/>
+        <location filename="../widgets/mainwindow.cpp" line="11704"/>
         <source>Special Mouse Commands</source>
         <translation>Специальные команды мыши</translation>
     </message>
@@ -7938,13 +7938,13 @@ to ensure the signal is clean and not distorted.</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="12382"/>
+        <location filename="../widgets/mainwindow.cpp" line="12438"/>
         <source>No more files to open.</source>
         <translation>Нет больше файлов для открытия.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15891"/>
-        <location filename="../widgets/mainwindow.cpp" line="27313"/>
+        <location filename="../widgets/mainwindow.cpp" line="15990"/>
+        <location filename="../widgets/mainwindow.cpp" line="27417"/>
         <source>Spotting to PSK Reporter unavailable</source>
         <translation>Споттинг для PSK Reporter недоступен</translation>
     </message>
@@ -7953,12 +7953,12 @@ to ensure the signal is clean and not distorted.</source>
         <translation type="vanished">Пожалуйста, выберите другую частоту Tx. WSJT-X не будет сознательно передавать в другом режиме в поддиапазоне WSPR на 30 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16120"/>
+        <location filename="../widgets/mainwindow.cpp" line="16219"/>
         <source>WSPR Guard Band</source>
         <translation>WSPR участок, в нем заблокирована передача другими видами модуляции</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11650"/>
+        <location filename="../widgets/mainwindow.cpp" line="11706"/>
         <source>&lt;table cellpadding=5&gt;
   &lt;tr&gt;
     &lt;th align=&quot;right&quot;&gt;Click on&lt;/th&gt;
@@ -8184,7 +8184,7 @@ to ensure the signal is clean and not distorted.</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11588"/>
+        <location filename="../widgets/mainwindow.cpp" line="11644"/>
         <source>&lt;table cellspacing=1&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
@@ -8286,13 +8286,13 @@ to ensure the signal is clean and not distorted.</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="13788"/>
+        <location filename="../widgets/mainwindow.cpp" line="13887"/>
         <source>Embedded WSPR decoder unavailable.</source>
         <translation>Встроенный декодер WSPR недоступен.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16139"/>
-        <location filename="../widgets/mainwindow.cpp" line="16156"/>
+        <location filename="../widgets/mainwindow.cpp" line="16238"/>
+        <location filename="../widgets/mainwindow.cpp" line="16255"/>
         <source>Fox Mode warning</source>
         <translation>Предупреждение о режиме лисы</translation>
     </message>
@@ -8301,7 +8301,7 @@ to ensure the signal is clean and not distorted.</source>
         <translation type="vanished">ПослдTx: </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17998"/>
+        <location filename="../widgets/mainwindow.cpp" line="18097"/>
         <source>This station transmits in the same time slot as you do.
 
 You must not start a QSO if both stations Tx even/1st
@@ -8318,7 +8318,7 @@ checkbox, or choose another station.</source>
 , или выберите другую станцию.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18624"/>
+        <location filename="../widgets/mainwindow.cpp" line="18723"/>
         <source>Should you switch to EU VHF Contest mode?
 
 To do so, check &apos;Special operating activity&apos; and
@@ -8329,35 +8329,35 @@ To do so, check &apos;Special operating activity&apos; and
 «EU VHF Contest» в настройках | Продвинутая вкладка.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18643"/>
+        <location filename="../widgets/mainwindow.cpp" line="18742"/>
         <source>Should you switch to ARRL Field Day mode?</source>
         <translation>Стоит ли переключаться в режим ARRL Field Day?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18648"/>
+        <location filename="../widgets/mainwindow.cpp" line="18747"/>
         <source>Should you switch to RTTY contest mode?</source>
         <translation>Стоит ли переключаться в режим соревнований RTTY?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20626"/>
-        <location filename="../widgets/mainwindow.cpp" line="20645"/>
-        <location filename="../widgets/mainwindow.cpp" line="20663"/>
-        <location filename="../widgets/mainwindow.cpp" line="20690"/>
+        <location filename="../widgets/mainwindow.cpp" line="20725"/>
+        <location filename="../widgets/mainwindow.cpp" line="20744"/>
+        <location filename="../widgets/mainwindow.cpp" line="20762"/>
+        <location filename="../widgets/mainwindow.cpp" line="20789"/>
         <source>Add to CALL3.TXT</source>
         <translation>Добавить в CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20627"/>
+        <location filename="../widgets/mainwindow.cpp" line="20726"/>
         <source>Please enter a valid grid locator</source>
         <translation>Пожалуйста, введите корректный локатор</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20646"/>
+        <location filename="../widgets/mainwindow.cpp" line="20745"/>
         <source>Cannot open &quot;%1&quot; for read/write: %2</source>
         <translation>Невозможно открыть &quot;%1&quot; для чтения/записи: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20688"/>
+        <location filename="../widgets/mainwindow.cpp" line="20787"/>
         <source>%1
 is already in CALL3.TXT, do you wish to replace it?</source>
         <translation>%1
@@ -8368,294 +8368,294 @@ is already in CALL3.TXT, do you wish to replace it?</source>
         <translation type="vanished">Предупреждение: Поле DX Call пусто.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3151"/>
-        <location filename="../widgets/mainwindow.cpp" line="22343"/>
+        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="22442"/>
         <source>Log file error</source>
         <translation>Ошибка файла лога</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="1219"/>
-        <location filename="../widgets/mainwindow.cpp" line="28926"/>
+        <location filename="../widgets/mainwindow.cpp" line="29411"/>
         <source>Async L2 Mode On</source>
         <translation>Асинхронный режим L2 включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2720"/>
+        <location filename="../widgets/mainwindow.cpp" line="2764"/>
         <source>Language</source>
         <translation>Язык</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2760"/>
+        <location filename="../widgets/mainwindow.cpp" line="2804"/>
         <source>Language changed</source>
         <translation>Язык изменен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2761"/>
+        <location filename="../widgets/mainwindow.cpp" line="2805"/>
         <source>Please restart the application for the language change to take effect.</source>
         <translation>Пожалуйста, перезапустите приложение, чтобы изменение языка вступило в силу.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2821"/>
+        <location filename="../widgets/mainwindow.cpp" line="2865"/>
         <source>Idle</source>
         <translation>Простой</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2911"/>
+        <location filename="../widgets/mainwindow.cpp" line="2955"/>
         <source>Error scanning logbook</source>
         <translation>Ошибка сканирования журнала</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2916"/>
+        <location filename="../widgets/mainwindow.cpp" line="2960"/>
         <source>Scanned logbook, %1 worked-before records created. CTY: %2</source>
         <translation>Отсканированный журнал, %1 записи о работе до создания. CTY: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3146"/>
+        <location filename="../widgets/mainwindow.cpp" line="3190"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3146"/>
+        <location filename="../widgets/mainwindow.cpp" line="3190"/>
         <source>parts != 4</source>
         <translation>части != 4</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3151"/>
-        <location filename="../widgets/mainwindow.cpp" line="22344"/>
+        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="22443"/>
         <source>Cannot open &quot;%1&quot;</source>
         <translation>Не удается открыть &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3163"/>
-        <location filename="../widgets/mainwindow.cpp" line="3168"/>
-        <location filename="../widgets/mainwindow.cpp" line="22387"/>
-        <location filename="../widgets/mainwindow.cpp" line="22395"/>
+        <location filename="../widgets/mainwindow.cpp" line="3207"/>
+        <location filename="../widgets/mainwindow.cpp" line="3212"/>
+        <location filename="../widgets/mainwindow.cpp" line="22486"/>
+        <location filename="../widgets/mainwindow.cpp" line="22494"/>
         <source>Error sending log to N1MM</source>
         <translation>Ошибка отправки лога в N1MM</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3164"/>
-        <location filename="../widgets/mainwindow.cpp" line="22388"/>
+        <location filename="../widgets/mainwindow.cpp" line="3208"/>
+        <location filename="../widgets/mainwindow.cpp" line="22487"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
         <translation>Не удалось разрешить &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3168"/>
-        <location filename="../widgets/mainwindow.cpp" line="22396"/>
+        <location filename="../widgets/mainwindow.cpp" line="3212"/>
+        <location filename="../widgets/mainwindow.cpp" line="22495"/>
         <source>Write returned &quot;%1&quot;</source>
         <translation>Запись возвращает &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3195"/>
+        <location filename="../widgets/mainwindow.cpp" line="3239"/>
         <source>AutoSpot</source>
         <translation>Автоспот</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3197"/>
+        <location filename="../widgets/mainwindow.cpp" line="3241"/>
         <source>Invia spot al cluster configurato dopo il log QSO (73 confermato).</source>
         <translation>Сделайте запрос на настройку кластера и сохраните журнал QSO (73 подтверждения).</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3235"/>
+        <location filename="../widgets/mainwindow.cpp" line="3279"/>
         <source>Remote Web disabled: invalid configured HTTP port %1</source>
         <translation>Удаленный доступ через Интернет отключен: неверно настроен HTTP-порт %1.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3289"/>
+        <location filename="../widgets/mainwindow.cpp" line="3333"/>
         <source>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</source>
         <translation>Удаленный WS: неверный FT2_REMOTE_WS_BIND=&quot;%1&quot; (с использованием 0.0.0.0)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3300"/>
+        <location filename="../widgets/mainwindow.cpp" line="3344"/>
         <source>Remote Web disabled: non-loopback bind requires token authentication.</source>
         <translation>Удаленная сеть отключена: привязка без обратной связи требует аутентификации по токену.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3305"/>
+        <location filename="../widgets/mainwindow.cpp" line="3349"/>
         <source>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</source>
         <translation>Удаленная сеть отключена: токен должен содержать не менее 12 символов при привязке LAN/WAN.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3389"/>
+        <location filename="../widgets/mainwindow.cpp" line="3433"/>
         <source>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</source>
         <translation>Удаленный HTTP: неверный FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (используется ws+1 по умолчанию)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3441"/>
+        <location filename="../widgets/mainwindow.cpp" line="3485"/>
         <source>Remote WS disabled: failed to bind %1:%2</source>
         <translation>Удаленный WS отключен: не удалось привязать %1:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3447"/>
+        <location filename="../widgets/mainwindow.cpp" line="3491"/>
         <source>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</source>
         <translation>Уведомление об удаленном веб-интерфейсе: трафик представляет собой обычный HTTP/WS. Используйте только доверенную локальную сеть/VPN или обратный прокси-сервер TLS.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3453"/>
+        <location filename="../widgets/mainwindow.cpp" line="3497"/>
         <source>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</source>
         <translation>Удаленный WS отключен: неверный FT2_REMOTE_WS_PORT=&quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5226"/>
+        <location filename="../widgets/mainwindow.cpp" line="5277"/>
         <source>Audio input refreshed after device reconnect.</source>
         <translation>Аудиовход обновлён после переподключения устройства.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5230"/>
-        <location filename="../widgets/mainwindow.cpp" line="5238"/>
+        <location filename="../widgets/mainwindow.cpp" line="5281"/>
+        <location filename="../widgets/mainwindow.cpp" line="5289"/>
         <source>Audio output refreshed after device reconnect.</source>
         <translation>Аудиовыход обновлён после переподключения устройства.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6081"/>
+        <location filename="../widgets/mainwindow.cpp" line="6134"/>
         <source>Decodium v3.0 FT2 Raptor</source>
         <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6082"/>
+        <location filename="../widgets/mainwindow.cpp" line="6135"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
         <translation>В поле DX Call Box должен быть callsign,
  чтобы отправить запрос QSY</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8499"/>
+        <location filename="../widgets/mainwindow.cpp" line="8555"/>
         <source>Audio input resumed after system wake.</source>
         <translation>Аудиовход возобновился после пробуждения системы.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8958"/>
+        <location filename="../widgets/mainwindow.cpp" line="9014"/>
         <source>Check for updates...</source>
         <translation>Проверить обновления...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9042"/>
-        <location filename="../widgets/mainwindow.cpp" line="9483"/>
+        <location filename="../widgets/mainwindow.cpp" line="9098"/>
+        <location filename="../widgets/mainwindow.cpp" line="9539"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Проверка обновлений отключена в этой сборке.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9061"/>
+        <location filename="../widgets/mainwindow.cpp" line="9117"/>
         <source>An update check is already in progress.</source>
         <translation>Проверка обновлений уже выполняется.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9075"/>
+        <location filename="../widgets/mainwindow.cpp" line="9131"/>
         <source>Checking for updates...</source>
         <translation>Проверка обновлений...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9326"/>
+        <location filename="../widgets/mainwindow.cpp" line="9382"/>
         <source>A new Decodium release is available.</source>
         <translation>Доступен новый релиз Decodium.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9328"/>
+        <location filename="../widgets/mainwindow.cpp" line="9384"/>
         <source>Installed version: %1
 Latest version: %2%3</source>
         <translation>Установленная версия: %1
 Последняя версия: %2%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9337"/>
+        <location filename="../widgets/mainwindow.cpp" line="9393"/>
         <source>Direct download: %1</source>
         <translation>Прямая загрузка: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9341"/>
+        <location filename="../widgets/mainwindow.cpp" line="9397"/>
         <source>Selected asset: %1
 </source>
         <translation>Выбранный файл: %1
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9345"/>
+        <location filename="../widgets/mainwindow.cpp" line="9401"/>
         <source>Release page: %1</source>
         <translation>Страница релиза: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9350"/>
+        <location filename="../widgets/mainwindow.cpp" line="9406"/>
         <source>Download page: %1</source>
         <translation>Страница загрузки: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9358"/>
+        <location filename="../widgets/mainwindow.cpp" line="9414"/>
         <source>Download</source>
         <translation>Скачать</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9359"/>
+        <location filename="../widgets/mainwindow.cpp" line="9415"/>
         <source>Remind me later</source>
         <translation>Напомнить позже</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9360"/>
+        <location filename="../widgets/mainwindow.cpp" line="9416"/>
         <source>Skip this version</source>
         <translation>Пропустить эту версию</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9404"/>
-        <location filename="../widgets/mainwindow.cpp" line="9418"/>
-        <location filename="../widgets/mainwindow.cpp" line="9444"/>
+        <location filename="../widgets/mainwindow.cpp" line="9460"/>
+        <location filename="../widgets/mainwindow.cpp" line="9474"/>
+        <location filename="../widgets/mainwindow.cpp" line="9500"/>
         <source>Update check failed.</source>
         <translation>Проверка обновлений не удалась.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9419"/>
+        <location filename="../widgets/mainwindow.cpp" line="9475"/>
         <source>The release metadata returned by GitHub could not be parsed.</source>
         <translation>Не удалось разобрать метаданные релиза, полученные от GitHub.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9445"/>
+        <location filename="../widgets/mainwindow.cpp" line="9501"/>
         <source>Unable to compare version numbers.</source>
         <translation>Не удалось сравнить номера версий.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9446"/>
+        <location filename="../widgets/mainwindow.cpp" line="9502"/>
         <source>Installed: %1
 Remote tag: %2</source>
         <translation>Установлено: %1
 Удалённый тег: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9459"/>
+        <location filename="../widgets/mainwindow.cpp" line="9515"/>
         <source>You are up to date.</source>
         <translation>У вас установлена актуальная версия.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9460"/>
+        <location filename="../widgets/mainwindow.cpp" line="9516"/>
         <source>Installed version: %1</source>
         <translation>Установленная версия: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9470"/>
+        <location filename="../widgets/mainwindow.cpp" line="9526"/>
         <source>Update available: %1</source>
         <translation>Доступно обновление: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10450"/>
+        <location filename="../widgets/mainwindow.cpp" line="10506"/>
         <source>No subprocess diagnostic output was captured.</source>
         <translation>Выводы диагностики подпроцесса не были записаны.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10831"/>
+        <location filename="../widgets/mainwindow.cpp" line="10887"/>
         <source>Load Decodium Certificate</source>
         <translation>Загрузить сертификат Decodium</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10833"/>
+        <location filename="../widgets/mainwindow.cpp" line="10889"/>
         <source>Decodium Certificate (*.decodium);;All files (*)</source>
         <translation>Сертификат Decodium (*.decodium);;Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10877"/>
-        <location filename="../widgets/mainwindow.cpp" line="10891"/>
-        <location filename="../widgets/mainwindow.cpp" line="10903"/>
+        <location filename="../widgets/mainwindow.cpp" line="10933"/>
+        <location filename="../widgets/mainwindow.cpp" line="10947"/>
+        <location filename="../widgets/mainwindow.cpp" line="10959"/>
         <source>DXped Certificate Manager</source>
         <translation>Менеджер сертификатов DXped</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10878"/>
+        <location filename="../widgets/mainwindow.cpp" line="10934"/>
         <source>DXpedCertManager.py was not found.
 
 Expected locations:
@@ -8670,63 +8670,63 @@ Expected locations:
 - tools/ в каталоге данных с записью</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10892"/>
+        <location filename="../widgets/mainwindow.cpp" line="10948"/>
         <source>Python 3 was not found in PATH.
 Please install Python and try again.</source>
         <translation>Python 3 не найден в PATH.
 Установите Python и повторите попытку.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10904"/>
+        <location filename="../widgets/mainwindow.cpp" line="10960"/>
         <source>Failed to start DXped Certificate Manager.</source>
         <translation>Не удалось запустить менеджер сертификатов DXped.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10908"/>
+        <location filename="../widgets/mainwindow.cpp" line="10964"/>
         <source>DXped Certificate Manager started</source>
         <translation>Менеджер сертификатов DXped запущен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10925"/>
-        <location filename="../widgets/mainwindow.cpp" line="20253"/>
+        <location filename="../widgets/mainwindow.cpp" line="10981"/>
+        <location filename="../widgets/mainwindow.cpp" line="20352"/>
         <source>Invalid Certificate</source>
         <translation>Недействительный сертификат</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10926"/>
+        <location filename="../widgets/mainwindow.cpp" line="10982"/>
         <source>The Decodium certificate file is invalid or the signature verification failed.</source>
         <translation>Файл сертификата Decodium недействителен или проверка подписи не прошла.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10952"/>
+        <location filename="../widgets/mainwindow.cpp" line="11008"/>
         <source>Decodium certificate loaded but expired: %1 (%2)</source>
         <translation>Сертификат Decodium загружен, но просрочен: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10958"/>
-        <location filename="../widgets/mainwindow.cpp" line="20262"/>
+        <location filename="../widgets/mainwindow.cpp" line="11014"/>
+        <location filename="../widgets/mainwindow.cpp" line="20361"/>
         <source>Certificate Expired</source>
         <translation>Срок действия сертификата истёк</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10959"/>
+        <location filename="../widgets/mainwindow.cpp" line="11015"/>
         <source>The Decodium certificate for %1 expired on %2.</source>
         <translation>Срок действия сертификата Decodium для %1 истёк %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10971"/>
+        <location filename="../widgets/mainwindow.cpp" line="11027"/>
         <source>Decodium certificate loaded for %1, current callsign is %2</source>
         <translation>Сертификат Decodium загружен для %1, текущий позывной %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10977"/>
-        <location filename="../widgets/mainwindow.cpp" line="10997"/>
-        <location filename="../widgets/mainwindow.cpp" line="20284"/>
+        <location filename="../widgets/mainwindow.cpp" line="11033"/>
+        <location filename="../widgets/mainwindow.cpp" line="11053"/>
+        <location filename="../widgets/mainwindow.cpp" line="20383"/>
         <source>Certificate Loaded</source>
         <translation>Сертификат загружен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10978"/>
+        <location filename="../widgets/mainwindow.cpp" line="11034"/>
         <source>Certificate loaded successfully.
 
 Certificate call: %1
@@ -8745,12 +8745,12 @@ The certificate is active, but it does not match the current operator callsign.<
 Сертификат активен, но не совпадает с позывным текущего оператора.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10991"/>
+        <location filename="../widgets/mainwindow.cpp" line="11047"/>
         <source>Decodium certificate active: %1 (%2)</source>
         <translation>Сертификат Decodium активен: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10998"/>
+        <location filename="../widgets/mainwindow.cpp" line="11054"/>
         <source>Certificate loaded successfully.
 
 Call: %1
@@ -8763,12 +8763,12 @@ Expires: %3</source>
 Действует до: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11067"/>
+        <location filename="../widgets/mainwindow.cpp" line="11123"/>
         <source>No Decodium certificate loaded.</source>
         <translation>Сертификат Decodium не загружен.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11071"/>
+        <location filename="../widgets/mainwindow.cpp" line="11127"/>
         <source>Call: %1
 Tier: %2
 Expires: %3</source>
@@ -8777,21 +8777,21 @@ Expires: %3</source>
 Действует до: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11076"/>
+        <location filename="../widgets/mainwindow.cpp" line="11132"/>
         <source>
 Path: %1</source>
         <translation>
 Путь: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11079"/>
+        <location filename="../widgets/mainwindow.cpp" line="11135"/>
         <source>
 Current operator: %1</source>
         <translation>
 Текущий оператор: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11098"/>
+        <location filename="../widgets/mainwindow.cpp" line="11154"/>
         <source>If you make fair use of any part of WSJT-X under terms of the GNU General Public License, you must display the following copyright notice prominently in your derivative work:
 
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</source>
@@ -8800,42 +8800,42 @@ Current operator: %1</source>
 . QRA64, Q65, MSK144 принадлежат (C) 2001–2025 одному или нескольким из следующих авторов: Джозефу Тейлору, K1JT; Стивену Франке, K9AN; Грегу Биму, KI7MT; Эдсону Перейре, PY2SDR; Рисс, DG2YCB; Брайан Моран, N9ADG; Роджер Рер, W3SZ и другие члены группы развития WSJT».</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22070"/>
+        <location filename="../widgets/mainwindow.cpp" line="22169"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
         <translation>AutoSpot отправлен на узел кластера для %1 на %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32268"/>
+        <location filename="../widgets/mainwindow.cpp" line="32827"/>
         <source>Remote caller queued: %1</source>
         <translation>Удалённый вызывающий в очереди: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32295"/>
+        <location filename="../widgets/mainwindow.cpp" line="32854"/>
         <source>Remote CW (audio): %1 (%2 WPM)</source>
         <translation>Удалённый CW (аудио): %1 (%2 WPM)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32303"/>
+        <location filename="../widgets/mainwindow.cpp" line="32862"/>
         <source>CW audio: messaggio vuoto</source>
         <translation>CW аудио: пустое сообщение</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32312"/>
+        <location filename="../widgets/mainwindow.cpp" line="32871"/>
         <source>CW audio: TX RTTY in corso, riprova</source>
         <translation>CW аудио: идёт TX RTTY, повторите</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32321"/>
+        <location filename="../widgets/mainwindow.cpp" line="32880"/>
         <source>CW audio: impossibile generare &quot;%1&quot;</source>
         <translation>CW аудио: невозможно сгенерировать &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32336"/>
+        <location filename="../widgets/mainwindow.cpp" line="32895"/>
         <source>CW audio: TX gia&apos; attivo, comando ignorato</source>
         <translation>CW аудио: TX уже активна, команда проигнорирована</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32387"/>
+        <location filename="../widgets/mainwindow.cpp" line="32946"/>
         <source>CW audio non disponibile con audio TCI</source>
         <translation>CW аудио недоступно с аудио TCI</translation>
     </message>
@@ -8941,22 +8941,22 @@ Current operator: %1</source>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16096"/>
+        <location filename="../widgets/mainwindow.cpp" line="16195"/>
         <source>Async L2: starting queued call %1</source>
         <translation>Асинхронный L2: запуск вызова в очереди %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16098"/>
+        <location filename="../widgets/mainwindow.cpp" line="16197"/>
         <source>Async L2: starting queued call</source>
         <translation>Асинхронный L2: запуск вызова в очереди</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16116"/>
+        <location filename="../widgets/mainwindow.cpp" line="16215"/>
         <source>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</source>
         <translation>Пожалуйста, выберите другую частоту передачи. Decodium v3.0 FT2 Raptor сознательно не будет передавать другой режим в поддиапазоне WSPR на 30 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16134"/>
+        <location filename="../widgets/mainwindow.cpp" line="16233"/>
         <source>Please choose another dial frequency.
 Must be 3Khz away from %1.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
@@ -8967,7 +8967,7 @@ Decodium v3.0 FT2 Raptor не будет работать в режиме Fox
 , перекрывая стандартные поддиапазоны FT8.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16152"/>
+        <location filename="../widgets/mainwindow.cpp" line="16251"/>
         <source>Please choose another dial frequency.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</source>
@@ -8976,23 +8976,23 @@ Decodium v3.0 FT2 Raptor не будет работать в режиме Fox
 , перекрывая поддиапазоны WSPR.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17948"/>
+        <location filename="../widgets/mainwindow.cpp" line="18047"/>
         <source>Async L2: %1 queued, waiting free TX slot</source>
         <translation>Асинхронный L2: %1 в очереди, ожидание свободного слота TX</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="17950"/>
+        <location filename="../widgets/mainwindow.cpp" line="18049"/>
         <source>Async L2: caller queued, waiting free TX slot</source>
         <translation>Асинхронный L2: вызывающий абонент поставлен в очередь, ожидая свободного слота TX</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20167"/>
-        <location filename="../widgets/mainwindow.cpp" line="20180"/>
+        <location filename="../widgets/mainwindow.cpp" line="20266"/>
+        <location filename="../widgets/mainwindow.cpp" line="20279"/>
         <source>DXpedition Certificate Required</source>
         <translation>Требуется сертификат DX-экспедиции</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20168"/>
+        <location filename="../widgets/mainwindow.cpp" line="20267"/>
         <source>To activate DXpedition mode you must load a valid .dxcert certificate for your callsign.
 
 Load certificate now?</source>
@@ -9001,44 +9001,44 @@ Load certificate now?</source>
 Загрузить сертификат сейчас?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20181"/>
+        <location filename="../widgets/mainwindow.cpp" line="20280"/>
         <source>DXpedition mode was not activated because no valid certificate is loaded.</source>
         <translation>Режим DX-экспедиции не был активирован, поскольку не загружен действительный сертификат.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20244"/>
+        <location filename="../widgets/mainwindow.cpp" line="20343"/>
         <source>Load DXpedition Certificate</source>
         <translation>Загрузить сертификат DX-экспедиции</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20246"/>
+        <location filename="../widgets/mainwindow.cpp" line="20345"/>
         <source>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</source>
         <translation>Сертификат DXped (*.dxcert);;Файлы JSON (*.json);;Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20254"/>
+        <location filename="../widgets/mainwindow.cpp" line="20353"/>
         <source>The certificate file is invalid or the signature verification failed.</source>
         <translation>Файл сертификата недействителен или проверка подписи не удалась.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20263"/>
+        <location filename="../widgets/mainwindow.cpp" line="20362"/>
         <source>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</source>
         <translation>Срок действия сертификата для %1 истек или еще не действителен. 
 Действителен с %2 по %3.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20275"/>
+        <location filename="../widgets/mainwindow.cpp" line="20374"/>
         <source>Unauthorized Operator</source>
         <translation>Неавторизованный оператор</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20276"/>
+        <location filename="../widgets/mainwindow.cpp" line="20375"/>
         <source>Your callsign %1 is not listed in this certificate for DXpedition %2.</source>
         <translation>Ваш позывной %1 не указан в этом сертификате DX-экспедиции %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20285"/>
+        <location filename="../widgets/mainwindow.cpp" line="20384"/>
         <source>Certificate loaded successfully.
 
 DXpedition: %1 (%2)
@@ -9057,57 +9057,57 @@ DX-экспедиция: %1 (%2)
 Отпечаток пальца: %8</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21498"/>
+        <location filename="../widgets/mainwindow.cpp" line="21597"/>
         <source>DX Call field is empty</source>
         <translation>Поле DX Call пустое</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21499"/>
+        <location filename="../widgets/mainwindow.cpp" line="21598"/>
         <source>The logger received a manual log request without a DX callsign.</source>
         <translation>Журнал получил запрос ручной записи без callsign DX.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21500"/>
+        <location filename="../widgets/mainwindow.cpp" line="21599"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
         <translation>Выберите принятое сообщение или введите callsign DX перед записью QSO.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21745"/>
+        <location filename="../widgets/mainwindow.cpp" line="21844"/>
         <source>AutoSpot skipped: invalid DX cluster endpoint</source>
         <translation>AutoSpot пропущен: неверная конечная точка кластера DX.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21746"/>
+        <location filename="../widgets/mainwindow.cpp" line="21845"/>
         <source>SKIP invalid endpoint</source>
         <translation>ПРОПУСТИТЬ недействительную конечную точку</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21778"/>
+        <location filename="../widgets/mainwindow.cpp" line="21877"/>
         <source>AutoSpot skipped: empty DX cluster host</source>
         <translation>AutoSpot пропущен: пустой хост кластера DX</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21779"/>
+        <location filename="../widgets/mainwindow.cpp" line="21878"/>
         <source>SKIP empty host</source>
         <translation>ПРОПУСТИТЬ пустой хост</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21787"/>
+        <location filename="../widgets/mainwindow.cpp" line="21886"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>AutoSpot пропущен: %1:%2 доступен только для чтения. Настройте доступную для записи конечную точку кластера DX.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21807"/>
+        <location filename="../widgets/mainwindow.cpp" line="21906"/>
         <source>AutoSpot skipped: empty MyCall</source>
         <translation>AutoSpot пропущен: пустой MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21808"/>
+        <location filename="../widgets/mainwindow.cpp" line="21907"/>
         <source>SKIP empty MyCall</source>
         <translation>ПРОПУСТИТЬ пустой MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21815"/>
+        <location filename="../widgets/mainwindow.cpp" line="21914"/>
         <source>SUBMIT %1:%2 | %3</source>
         <translation>ОТПРАВИТЬ %1:%2 | %3</translation>
     </message>
@@ -9116,139 +9116,139 @@ DX-экспедиция: %1 (%2)
         <translation type="vanished">AutoSpot принят узлом кластера для %1 на %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22072"/>
+        <location filename="../widgets/mainwindow.cpp" line="22171"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>AutoSpot отклонен для %1 на %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22336"/>
+        <location filename="../widgets/mainwindow.cpp" line="22435"/>
         <source>Duplicate log suppressed for %1 (%2 s window)</source>
         <translation>Дублирование журнала подавлено для %1 (окно %2 s)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22947"/>
+        <location filename="../widgets/mainwindow.cpp" line="23046"/>
         <source>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</source>
         <translation>%1 бод Терминал Baudot. Отметьте %2 Гц, сдвиньте стоповые биты %3 Гц, %4, %5. Полученный текст отображается выше; введите текст для отправки ниже.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22951"/>
+        <location filename="../widgets/mainwindow.cpp" line="23050"/>
         <source>reverse</source>
         <translation>обеспечить регресс</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22951"/>
+        <location filename="../widgets/mainwindow.cpp" line="23050"/>
         <source>normal</source>
         <translation>нормальный</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22996"/>
+        <location filename="../widgets/mainwindow.cpp" line="23095"/>
         <source>RTTY text contains no encodable Baudot characters</source>
         <translation>Текст RTTY не ​​содержит кодируемых символов Baudot.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23141"/>
+        <location filename="../widgets/mainwindow.cpp" line="23240"/>
         <source>RTTY Received Text</source>
         <translation>RTTY Получен текст</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23142"/>
+        <location filename="../widgets/mainwindow.cpp" line="23241"/>
         <source>RTTY Transmitted Text</source>
         <translation>RTTY Передаваемый текст</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23211"/>
+        <location filename="../widgets/mainwindow.cpp" line="23310"/>
         <source>Stations calling DXpedition %1</source>
         <translation>Станции, вызывающие DXpedition %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23245"/>
+        <location filename="../widgets/mainwindow.cpp" line="23344"/>
         <source>Show Already Worked</source>
         <translation>Показать уже сработано</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23247"/>
+        <location filename="../widgets/mainwindow.cpp" line="23346"/>
         <source>Super Fox</source>
         <translation>Супер Фокс</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23265"/>
+        <location filename="../widgets/mainwindow.cpp" line="23364"/>
         <source>Super Hound</source>
         <translation>Супер гончая</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23276"/>
+        <location filename="../widgets/mainwindow.cpp" line="23375"/>
         <source>Hound</source>
         <translation>Гончая</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23696"/>
+        <location filename="../widgets/mainwindow.cpp" line="23795"/>
         <source>Tx Messages</source>
         <translation>Tx-сообщения</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24159"/>
-        <location filename="../widgets/mainwindow.cpp" line="24170"/>
-        <location filename="../widgets/mainwindow.cpp" line="24209"/>
-        <location filename="../widgets/mainwindow.cpp" line="24219"/>
-        <location filename="../widgets/mainwindow.cpp" line="31152"/>
-        <location filename="../widgets/mainwindow.cpp" line="31198"/>
+        <location filename="../widgets/mainwindow.cpp" line="24258"/>
+        <location filename="../widgets/mainwindow.cpp" line="24269"/>
+        <location filename="../widgets/mainwindow.cpp" line="24308"/>
+        <location filename="../widgets/mainwindow.cpp" line="24318"/>
+        <location filename="../widgets/mainwindow.cpp" line="31711"/>
+        <location filename="../widgets/mainwindow.cpp" line="31757"/>
         <source>Confirm Erase</source>
         <translation>Подтвердите очистку</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24160"/>
+        <location filename="../widgets/mainwindow.cpp" line="24259"/>
         <source>Are you sure you want to erase file ALL.TXT?</source>
         <translation>Вы уверены, что хотите стереть файл ALL.TXT?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24171"/>
+        <location filename="../widgets/mainwindow.cpp" line="24270"/>
         <source>Are you sure you want to erase the list of Q65 callers?</source>
         <translation>Вы уверены, что хотите удалить список абонентов Q65?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24180"/>
-        <location filename="../widgets/mainwindow.cpp" line="27445"/>
+        <location filename="../widgets/mainwindow.cpp" line="24279"/>
+        <location filename="../widgets/mainwindow.cpp" line="27549"/>
         <source>Confirm Reset</source>
         <translation>Подтвердите сброс</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24181"/>
+        <location filename="../widgets/mainwindow.cpp" line="24280"/>
         <source>Are you sure you want to erase your contest log?</source>
         <translation>Вы уверены, что хотите стереть лог соревнований?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24182"/>
+        <location filename="../widgets/mainwindow.cpp" line="24281"/>
         <source>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</source>
         <translation>Это приведет к удалению всех записей QSO для текущего контеста. Они будут храниться в файле журнала ADIF, но не будут доступны для экспорта в лог Cabrillo.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24202"/>
+        <location filename="../widgets/mainwindow.cpp" line="24301"/>
         <source>Cabrillo Log saved</source>
         <translation>Лог Cabrillo сохранен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24210"/>
+        <location filename="../widgets/mainwindow.cpp" line="24309"/>
         <source>Are you sure you want to erase file decodium_log.adi?</source>
         <translation>Вы уверены, что хотите удалить файл decodium_log.adi?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29463"/>
+        <location filename="../widgets/mainwindow.cpp" line="30022"/>
         <source>Embedded WSPR decoder failed: %1</source>
         <translation>Сбой встроенного декодера WSPR: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29598"/>
+        <location filename="../widgets/mainwindow.cpp" line="30157"/>
         <source>SuperFox TX generation failed.</source>
         <translation>Не удалось сгенерировать TX SuperFox.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30227"/>
-        <location filename="../widgets/mainwindow.cpp" line="30285"/>
+        <location filename="../widgets/mainwindow.cpp" line="30786"/>
+        <location filename="../widgets/mainwindow.cpp" line="30844"/>
         <source>Cannot write decodium_log_config.ini file</source>
         <translation>Не удалось записать файл decodium_log_config.ini</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31332"/>
+        <location filename="../widgets/mainwindow.cpp" line="31891"/>
         <source>Call sign and LOTW password are required.
 
 Enter these in Settings at the Reporting tab.</source>
@@ -9257,99 +9257,99 @@ Enter these in Settings at the Reporting tab.</source>
 Введите их в настройках на вкладке «Отчетность».</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31340"/>
+        <location filename="../widgets/mainwindow.cpp" line="31899"/>
         <source>Upload QSOs to LOTW first, and *wait* for LOTW to update.</source>
         <translation>Сначала загрузите QSO в LOTW и *подождите* обновления LOTW.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31357"/>
+        <location filename="../widgets/mainwindow.cpp" line="31916"/>
         <source>Downloading from LOTW...</source>
         <translation>Загрузка с LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31449"/>
+        <location filename="../widgets/mainwindow.cpp" line="32008"/>
         <source>Download QSOs from LOTW succeeded.</source>
         <translation>Загрузить связи с LOTW удалось.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31462"/>
+        <location filename="../widgets/mainwindow.cpp" line="32021"/>
         <source>Download QSOs from LOTW failed.</source>
         <translation>Загрузить QSO с LOTW не удалось.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31537"/>
-        <location filename="../widgets/mainwindow.cpp" line="31549"/>
-        <location filename="../widgets/mainwindow.cpp" line="31572"/>
+        <location filename="../widgets/mainwindow.cpp" line="32096"/>
+        <location filename="../widgets/mainwindow.cpp" line="32108"/>
+        <location filename="../widgets/mainwindow.cpp" line="32131"/>
         <source>Unable to open file</source>
         <translation>Невозможно открыть файл</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31608"/>
+        <location filename="../widgets/mainwindow.cpp" line="32167"/>
         <source>Download QSLs from LOTW succeeded.</source>
         <translation>Загрузить QSL от LOTW удалось.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31615"/>
+        <location filename="../widgets/mainwindow.cpp" line="32174"/>
         <source>Download QSLs from LOTW failed.</source>
         <translation>Загрузить QSL от LOTW не удалось.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31636"/>
+        <location filename="../widgets/mainwindow.cpp" line="32195"/>
         <source>No QSOs to upload to LOTW</source>
         <translation>Нет связей для загрузки в LOTW.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31680"/>
+        <location filename="../widgets/mainwindow.cpp" line="32239"/>
         <source>Upload to LOTW Error</source>
         <translation>Ошибка загрузки в LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31688"/>
+        <location filename="../widgets/mainwindow.cpp" line="32247"/>
         <source>Uploading to LOTW...</source>
         <translation>Загрузка в LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31785"/>
+        <location filename="../widgets/mainwindow.cpp" line="32344"/>
         <source>LOTW process error</source>
         <translation>Ошибка процесса LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31856"/>
+        <location filename="../widgets/mainwindow.cpp" line="32415"/>
         <source>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</source>
         <translation>Сетевая ошибка — отказ в перенаправлении для запроса LOTW с учетными данными: 
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31865"/>
+        <location filename="../widgets/mainwindow.cpp" line="32424"/>
         <source>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</source>
         <translation>Ошибка сети - Поддержка SSL/TLS не установлена, получить данные нельзя:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31875"/>
+        <location filename="../widgets/mainwindow.cpp" line="32434"/>
         <source>Network Error - Too many redirects:
 &apos;%1&apos;</source>
         <translation>Ошибка сети - Слишком много перенаправлений:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31889"/>
+        <location filename="../widgets/mainwindow.cpp" line="32448"/>
         <source>Network Error:
 %1</source>
         <translation>Ошибка сети:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31896"/>
+        <location filename="../widgets/mainwindow.cpp" line="32455"/>
         <source>File System Error - Cannot commit changes to:
 &quot;%1&quot;</source>
         <translation>Ошибка файловой системы — не удается зафиксировать изменения в:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31925"/>
+        <location filename="../widgets/mainwindow.cpp" line="32484"/>
         <source>File System Error - Cannot open file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -9358,7 +9358,7 @@ Error(%2): %3</source>
 Ошибка(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31933"/>
+        <location filename="../widgets/mainwindow.cpp" line="32492"/>
         <source>File System Error - Cannot write to file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -9367,17 +9367,17 @@ Error(%2): %3</source>
 Ошибка(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31996"/>
+        <location filename="../widgets/mainwindow.cpp" line="32555"/>
         <source>Unable to open incremental log file</source>
         <translation>Невозможно открыть файл инкрементного журнала</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32152"/>
+        <location filename="../widgets/mainwindow.cpp" line="32711"/>
         <source>Remote waterfall stream enabled</source>
         <translation>Удаленный каскадный поток включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32153"/>
+        <location filename="../widgets/mainwindow.cpp" line="32712"/>
         <source>Remote waterfall stream disabled</source>
         <translation>Удаленный водопадный поток отключен.</translation>
     </message>
@@ -9386,277 +9386,277 @@ Error(%2): %3</source>
         <translation type="vanished">Удаленный абонент FT2 поставлен в очередь: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32438"/>
+        <location filename="../widgets/mainwindow.cpp" line="32997"/>
         <source>Remote mode request ignored: RTTY is hidden in this release</source>
         <translation>Запрос удаленного режима игнорируется: RTTY скрыт в этом выпуске.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32444"/>
+        <location filename="../widgets/mainwindow.cpp" line="33003"/>
         <source>Remote mode set: %1</source>
         <translation>Установлен удаленный режим: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32490"/>
+        <location filename="../widgets/mainwindow.cpp" line="33049"/>
         <source>Remote band ignored: invalid band &quot;%1&quot;</source>
         <translation>Удаленный диапазон игнорируется: неверный диапазон «%1»</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32494"/>
+        <location filename="../widgets/mainwindow.cpp" line="33053"/>
         <source>Remote band set: 160m</source>
         <translation>Набор удаленных диапазонов: 160 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32495"/>
+        <location filename="../widgets/mainwindow.cpp" line="33054"/>
         <source>Remote band set: 80m</source>
         <translation>Набор дистанционных диапазонов: 80 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32496"/>
+        <location filename="../widgets/mainwindow.cpp" line="33055"/>
         <source>Remote band set: 60m</source>
         <translation>Набор дистанционных диапазонов: 60 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32497"/>
+        <location filename="../widgets/mainwindow.cpp" line="33056"/>
         <source>Remote band set: 40m</source>
         <translation>Набор дистанционных диапазонов: 40 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32498"/>
+        <location filename="../widgets/mainwindow.cpp" line="33057"/>
         <source>Remote band set: 30m</source>
         <translation>Набор дистанционных диапазонов: 30 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32499"/>
+        <location filename="../widgets/mainwindow.cpp" line="33058"/>
         <source>Remote band set: 20m</source>
         <translation>Набор дистанционных диапазонов: 20 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32500"/>
+        <location filename="../widgets/mainwindow.cpp" line="33059"/>
         <source>Remote band set: 17m</source>
         <translation>Набор дистанционных диапазонов: 17 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32501"/>
+        <location filename="../widgets/mainwindow.cpp" line="33060"/>
         <source>Remote band set: 15m</source>
         <translation>Набор дистанционных диапазонов: 15 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32502"/>
+        <location filename="../widgets/mainwindow.cpp" line="33061"/>
         <source>Remote band set: 12m</source>
         <translation>Набор дистанционных диапазонов: 12 м.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32503"/>
+        <location filename="../widgets/mainwindow.cpp" line="33062"/>
         <source>Remote band set: 10m</source>
         <translation>Набор дистанционных диапазонов: 10 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32504"/>
+        <location filename="../widgets/mainwindow.cpp" line="33063"/>
         <source>Remote band set: 6m</source>
         <translation>Набор дистанционных диапазонов: 6 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32505"/>
+        <location filename="../widgets/mainwindow.cpp" line="33064"/>
         <source>Remote band set: 2m</source>
         <translation>Набор дистанционных диапазонов: 2 м</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32506"/>
+        <location filename="../widgets/mainwindow.cpp" line="33065"/>
         <source>Remote band set: 70cm</source>
         <translation>Набор дистанционных ремешков: 70 см.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32508"/>
+        <location filename="../widgets/mainwindow.cpp" line="33067"/>
         <source>Remote band ignored: unsupported band &quot;%1&quot;</source>
         <translation>Удаленный диапазон игнорируется: неподдерживаемый диапазон «%1»</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32560"/>
+        <location filename="../widgets/mainwindow.cpp" line="33133"/>
         <source>Remote dial frequency set: %1 MHz</source>
         <translation>Установлена удалённая частота настройки: %1 MHz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32579"/>
+        <location filename="../widgets/mainwindow.cpp" line="33152"/>
         <source>Remote Rx frequency set: %1 Hz</source>
         <translation>Установленная частота дистанционного приема: %1 Гц</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32597"/>
+        <location filename="../widgets/mainwindow.cpp" line="33170"/>
         <source>Remote Tx frequency set: %1 Hz</source>
         <translation>Установленная частота удаленной передачи: %1 Гц</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32683"/>
+        <location filename="../widgets/mainwindow.cpp" line="33256"/>
         <source>Remote TX enabled</source>
         <translation>Удаленная передача включена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32683"/>
+        <location filename="../widgets/mainwindow.cpp" line="33256"/>
         <source>Remote TX disabled</source>
         <translation>Удаленная передача отключена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32700"/>
+        <location filename="../widgets/mainwindow.cpp" line="33273"/>
         <source>Remote Auto CQ enabled</source>
         <translation>Удаленный автоматический CQ включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32700"/>
+        <location filename="../widgets/mainwindow.cpp" line="33273"/>
         <source>Remote Auto CQ disabled</source>
         <translation>Удаленный автоматический CQ отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32726"/>
+        <location filename="../widgets/mainwindow.cpp" line="33299"/>
         <source>Remote AutoSpot enabled</source>
         <translation>Удаленное автоопределение включено</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32726"/>
+        <location filename="../widgets/mainwindow.cpp" line="33299"/>
         <source>Remote AutoSpot disabled</source>
         <translation>Удаленное автопоиск отключено</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32727"/>
+        <location filename="../widgets/mainwindow.cpp" line="33300"/>
         <source>AutoSpot enabled</source>
         <translation>Автоспот включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32727"/>
+        <location filename="../widgets/mainwindow.cpp" line="33300"/>
         <source>AutoSpot disabled</source>
         <translation>Автопоиск отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32745"/>
+        <location filename="../widgets/mainwindow.cpp" line="33318"/>
         <source>Remote Monitoring ignored: cannot enable while transmitting</source>
         <translation>Удаленный мониторинг игнорируется: невозможно включить во время передачи</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32759"/>
+        <location filename="../widgets/mainwindow.cpp" line="33332"/>
         <source>Remote Monitoring enabled</source>
         <translation>Удаленный мониторинг включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32759"/>
+        <location filename="../widgets/mainwindow.cpp" line="33332"/>
         <source>Remote Monitoring disabled</source>
         <translation>Удаленный мониторинг отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32771"/>
+        <location filename="../widgets/mainwindow.cpp" line="33344"/>
         <source>Remote Async L2 ignored: not in FT2 mode</source>
         <translation>Удаленный асинхронный L2 игнорируется: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32779"/>
+        <location filename="../widgets/mainwindow.cpp" line="33352"/>
         <source>Remote Async L2 ignored: mandatory in FT2 mode</source>
         <translation>Remote Async L2 игнорируется: обязательно в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32783"/>
+        <location filename="../widgets/mainwindow.cpp" line="33356"/>
         <source>Remote Async L2 enabled (mandatory in FT2)</source>
         <translation>Удаленная асинхронная синхронизация L2 включена (обязательно в FT2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32795"/>
+        <location filename="../widgets/mainwindow.cpp" line="33368"/>
         <source>Remote Dual Carrier ignored: not in FT2 mode</source>
         <translation>Удаленная двойная несущая игнорируется: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32799"/>
+        <location filename="../widgets/mainwindow.cpp" line="33372"/>
         <source>Remote Dual Carrier enabled</source>
         <translation>Удаленная поддержка двойной несущей включена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32799"/>
+        <location filename="../widgets/mainwindow.cpp" line="33372"/>
         <source>Remote Dual Carrier disabled</source>
         <translation>Удаленная двойная несущая отключена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32811"/>
+        <location filename="../widgets/mainwindow.cpp" line="33384"/>
         <source>Remote Alt 1/2 ignored: not available in FT2 mode</source>
         <translation>Удаленный Alt 1/2 игнорируется: недоступен в режиме FT2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32815"/>
+        <location filename="../widgets/mainwindow.cpp" line="33388"/>
         <source>Remote Alt 1/2 enabled</source>
         <translation>Удаленный Alt 1/2 включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32815"/>
+        <location filename="../widgets/mainwindow.cpp" line="33388"/>
         <source>Remote Alt 1/2 disabled</source>
         <translation>Удаленный Alt 1/2 отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32827"/>
+        <location filename="../widgets/mainwindow.cpp" line="33400"/>
         <source>Remote Manual TX ignored: not in FT2 mode</source>
         <translation>Удаленный Manual TX проигнорирован: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32831"/>
+        <location filename="../widgets/mainwindow.cpp" line="33404"/>
         <source>Remote Manual TX enabled</source>
         <translation>Удаленный Manual TX включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32831"/>
+        <location filename="../widgets/mainwindow.cpp" line="33404"/>
         <source>Remote Manual TX disabled</source>
         <translation>Удаленный Manual TX отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32843"/>
+        <location filename="../widgets/mainwindow.cpp" line="33416"/>
         <source>Remote Speedy ignored: not in FT2 mode</source>
         <translation>Удаленный Speedy проигнорирован: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32847"/>
+        <location filename="../widgets/mainwindow.cpp" line="33420"/>
         <source>Remote Speedy enabled</source>
         <translation>Удаленный Speedy включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32847"/>
+        <location filename="../widgets/mainwindow.cpp" line="33420"/>
         <source>Remote Speedy disabled</source>
         <translation>Удаленный Speedy отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32859"/>
+        <location filename="../widgets/mainwindow.cpp" line="33432"/>
         <source>Remote D-CW ignored: not in FT2 mode</source>
         <translation>Удаленный D-CW проигнорирован: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32863"/>
+        <location filename="../widgets/mainwindow.cpp" line="33436"/>
         <source>Remote D-CW enabled</source>
         <translation>Удаленный D-CW включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32863"/>
+        <location filename="../widgets/mainwindow.cpp" line="33436"/>
         <source>Remote D-CW disabled</source>
         <translation>Удаленный D-CW отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32875"/>
+        <location filename="../widgets/mainwindow.cpp" line="33448"/>
         <source>Remote Quick QSO ignored: not in FT2 mode</source>
         <translation>Удаленный Quick QSO проигнорирован: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32879"/>
+        <location filename="../widgets/mainwindow.cpp" line="33452"/>
         <source>Remote Quick QSO enabled</source>
         <translation>Удаленный Quick QSO включен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32879"/>
+        <location filename="../widgets/mainwindow.cpp" line="33452"/>
         <source>Remote Quick QSO disabled</source>
         <translation>Удаленный Quick QSO отключен</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32891"/>
+        <location filename="../widgets/mainwindow.cpp" line="33464"/>
         <source>Remote QSO profile ignored: not in FT2 mode</source>
         <translation>Удаленный профиль QSO проигнорирован: не в режиме FT2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32902"/>
+        <location filename="../widgets/mainwindow.cpp" line="33475"/>
         <source>Remote QSO profile ignored: unsupported FT2 count %1</source>
         <translation>Удаленный профиль QSO проигнорирован: значение FT2 %1 не поддерживается</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32907"/>
+        <location filename="../widgets/mainwindow.cpp" line="33480"/>
         <source>Remote QSO profile set to %1 msg</source>
         <translation>Удаленный профиль QSO установлен на %1 msg</translation>
     </message>
@@ -9665,29 +9665,29 @@ Error(%2): %3</source>
         <translation type="vanished">Вы уверены, что хотите стереть файл wsjtx_log.adi?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24220"/>
+        <location filename="../widgets/mainwindow.cpp" line="24319"/>
         <source>Are you sure you want to erase the WSPR hashtable?</source>
         <translation>Вы уверены, что хотите стереть хеш-таблицу WSPR?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24239"/>
+        <location filename="../widgets/mainwindow.cpp" line="24338"/>
         <source>ChronoGPS not found</source>
         <translation>ХроноGPS не найден</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24240"/>
+        <location filename="../widgets/mainwindow.cpp" line="24339"/>
         <source>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</source>
         <translation>ChronoGPS.exe не найден в каталоге приложения. 
 Убедитесь, что ChronoGPS.exe находится в той же папке, что и Decodium.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24734"/>
+        <location filename="../widgets/mainwindow.cpp" line="24833"/>
         <source>%1 W</source>
         <translation>%1 Вт</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24753"/>
+        <location filename="../widgets/mainwindow.cpp" line="24852"/>
         <source>SWR &gt; 2.5 !!!
 
 Transmission was stopped
@@ -9700,116 +9700,116 @@ Check your antenna</source>
 Проверьте антенну</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24870"/>
+        <location filename="../widgets/mainwindow.cpp" line="24969"/>
         <source>CAT disconnected, reconnecting (%1/3)...</source>
         <translation>CAT отключен, происходит повторное подключение (%1/3)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25420"/>
+        <location filename="../widgets/mainwindow.cpp" line="25519"/>
         <source>Tune digital gain </source>
         <translation>Уровень звука режима настройки</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25422"/>
+        <location filename="../widgets/mainwindow.cpp" line="25521"/>
         <source>Transmit digital gain </source>
         <translation>Уровень звука передачи сообщения</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25452"/>
+        <location filename="../widgets/mainwindow.cpp" line="25551"/>
         <source>Prefixes</source>
         <translation>Префиксы</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26569"/>
+        <location filename="../widgets/mainwindow.cpp" line="26673"/>
         <source>Network Error</source>
         <translation>Ошибка сети</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26570"/>
+        <location filename="../widgets/mainwindow.cpp" line="26674"/>
         <source>Error: %1
 UDP server %2:%3</source>
         <translation>Ошибка: %1
 UDP-сервер %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26742"/>
+        <location filename="../widgets/mainwindow.cpp" line="26846"/>
         <source>File Error</source>
         <translation>Ошибка файла</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27036"/>
+        <location filename="../widgets/mainwindow.cpp" line="27140"/>
         <source>Phase Training Disabled</source>
         <translation>Фаза обучения отключена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27039"/>
+        <location filename="../widgets/mainwindow.cpp" line="27143"/>
         <source>Phase Training Enabled</source>
         <translation>Фаза обучения включена</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27186"/>
+        <location filename="../widgets/mainwindow.cpp" line="27290"/>
         <source> WD:0m </source>
         <translation> ВД:0м </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27189"/>
+        <location filename="../widgets/mainwindow.cpp" line="27293"/>
         <source> Runaway Tx watchdog </source>
         <translation> Сторожевой таймер Runaway Tx </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27206"/>
+        <location filename="../widgets/mainwindow.cpp" line="27310"/>
         <source> WD:%1m </source>
         <translation> ВД:%1m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27456"/>
-        <location filename="../widgets/mainwindow.cpp" line="27459"/>
+        <location filename="../widgets/mainwindow.cpp" line="27560"/>
+        <location filename="../widgets/mainwindow.cpp" line="27563"/>
         <source>Free Text Message</source>
         <translation>Бесплатное текстовое сообщение</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27457"/>
-        <location filename="../widgets/mainwindow.cpp" line="27460"/>
+        <location filename="../widgets/mainwindow.cpp" line="27561"/>
+        <location filename="../widgets/mainwindow.cpp" line="27564"/>
         <source>Message:</source>
         <translation>Сообщение:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27478"/>
+        <location filename="../widgets/mainwindow.cpp" line="27582"/>
         <source>Directional calls not yet supported in SuperFox mode</source>
         <translation>Направленные вызовы пока не поддерживаются в режиме SuperFox.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27497"/>
+        <location filename="../widgets/mainwindow.cpp" line="27601"/>
         <source>TOTP: No seed entered in fox configuration to generate verification code.</source>
         <translation>TOTP: в конфигурации Fox не введено начальное значение для генерации кода проверки.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="28904"/>
+        <location filename="../widgets/mainwindow.cpp" line="29389"/>
         <source>Async L2 is mandatory in FT2 mode</source>
         <translation>Асинхронный L2 обязателен в режиме FT2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29591"/>
+        <location filename="../widgets/mainwindow.cpp" line="30150"/>
         <source>TOTP SF: seed not long enough.</source>
         <translation>TOTP SF: семя недостаточно длинное.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29725"/>
+        <location filename="../widgets/mainwindow.cpp" line="30284"/>
         <source>Unable to open log file</source>
         <translation>Невозможно открыть файл журнала</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31153"/>
+        <location filename="../widgets/mainwindow.cpp" line="31712"/>
         <source>Are you sure you want to erase the Tx Log?</source>
         <translation>Вы уверены, что хотите удалить журнал передачи?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31178"/>
+        <location filename="../widgets/mainwindow.cpp" line="31737"/>
         <source>&quot;%1&quot; added to Ignore List</source>
         <translation>«%1» добавлен в список игнорирования</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31199"/>
+        <location filename="../widgets/mainwindow.cpp" line="31758"/>
         <source>Are you sure you want to erase the Ignore List?</source>
         <translation>Вы уверены, что хотите удалить список игнорируемых?</translation>
     </message>
@@ -9818,13 +9818,13 @@ UDP-сервер %2:%3</translation>
         <translation type="vanished">ВД:%1m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27270"/>
-        <location filename="../widgets/mainwindow.cpp" line="28476"/>
+        <location filename="../widgets/mainwindow.cpp" line="27374"/>
+        <location filename="../widgets/mainwindow.cpp" line="28961"/>
         <source>Log File Error</source>
         <translation>Ошибка файла лога</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27446"/>
+        <location filename="../widgets/mainwindow.cpp" line="27550"/>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Вы уверены, что хотите очистить очереди QSO?</translation>
     </message>
@@ -10006,7 +10006,7 @@ UDP-сервер %2:%3</translation>
 <context>
     <name>PollingTransceiver</name>
     <message>
-        <location filename="../Transceiver/PollingTransceiver.cpp" line="227"/>
+        <location filename="../Transceiver/PollingTransceiver.cpp" line="245"/>
         <source>Unexpected rig error</source>
         <translation>Непредвиденная ошибка трансивера</translation>
     </message>
@@ -10094,25 +10094,25 @@ UDP-сервер %2:%3</translation>
         <translation>кластер не вернул данных</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
-        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../DecodiumPropagationManager.cpp" line="176"/>
         <source>empty reply</source>
         <translation>пустой ответ</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
-        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../DecodiumPropagationManager.cpp" line="182"/>
         <source>reply too large</source>
         <translation>ответ слишком большой</translation>
     </message>
     <message>
+        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
-        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../DecodiumPropagationManager.cpp" line="188"/>
         <source>reply exceeds limit</source>
         <translation>ответ превышает лимит</translation>
@@ -10193,32 +10193,32 @@ UDP-сервер %2:%3</translation>
         <translation>Ошибка очистки secret-tool</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22115"/>
+        <location filename="../widgets/mainwindow.cpp" line="22214"/>
         <location filename="../DecodiumDxCluster.cpp" line="896"/>
         <source>timeout waiting for cluster response</source>
         <translation>таймаут ожидания ответа кластера</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22116"/>
+        <location filename="../widgets/mainwindow.cpp" line="22215"/>
         <location filename="../DecodiumDxCluster.cpp" line="897"/>
         <source>timeout waiting for cluster response: %1</source>
         <translation>таймаут ожидания ответа кластера: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22150"/>
+        <location filename="../widgets/mainwindow.cpp" line="22249"/>
         <location filename="../DecodiumDxCluster.cpp" line="932"/>
         <source>cluster verification response exceeded the safety limit</source>
         <translation>ответ на проверку кластера превысил предел безопасности</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22257"/>
+        <location filename="../widgets/mainwindow.cpp" line="22356"/>
         <location filename="../DecodiumDxCluster.cpp" line="1030"/>
         <location filename="../DecodiumDxCluster.cpp" line="1050"/>
         <source>published in show/dx</source>
         <translation>опубликовано в show/dx</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22262"/>
+        <location filename="../widgets/mainwindow.cpp" line="22361"/>
         <location filename="../DecodiumDxCluster.cpp" line="1033"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
         <translation>узел принял команду; show/dx ещё не отобразил её</translation>
@@ -10232,13 +10232,13 @@ UDP-сервер %2:%3</translation>
         <translation type="vanished">узел принял команду, но место не отображается в show/dx: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22287"/>
+        <location filename="../widgets/mainwindow.cpp" line="22386"/>
         <location filename="../DecodiumDxCluster.cpp" line="1059"/>
         <source>connection closed before cluster confirmation</source>
         <translation>соединение закрыто до подтверждения кластера</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22288"/>
+        <location filename="../widgets/mainwindow.cpp" line="22387"/>
         <location filename="../DecodiumDxCluster.cpp" line="1060"/>
         <source>connection closed before cluster confirmation: %1</source>
         <translation>соединение закрыто до подтверждения кластера: %1</translation>
@@ -10383,74 +10383,74 @@ Downloaded file exceeds limit of %1 MiB:
         <translation>UDP ошибка сокета</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20740"/>
+        <location filename="../DecodiumBridge.cpp" line="21433"/>
         <source>Invalid frequency</source>
         <translation>Неверная частота</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20742"/>
+        <location filename="../DecodiumBridge.cpp" line="21435"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Неверные дата/время. Используйте формат ISO или yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20744"/>
+        <location filename="../DecodiumBridge.cpp" line="21437"/>
         <source>Invalid frequency row</source>
         <translation>Неверная строка частоты</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20803"/>
+        <location filename="../DecodiumBridge.cpp" line="21496"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>Не удалось разобрать JSON-файл частот: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20811"/>
+        <location filename="../DecodiumBridge.cpp" line="21504"/>
         <source>No frequencies were found</source>
         <translation>Частоты не найдены</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20817"/>
-        <location filename="../DecodiumBridge.cpp" line="20919"/>
-        <location filename="../DecodiumBridge.cpp" line="20946"/>
+        <location filename="../DecodiumBridge.cpp" line="21510"/>
+        <location filename="../DecodiumBridge.cpp" line="21612"/>
+        <location filename="../DecodiumBridge.cpp" line="21639"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>Файл частот содержит слишком много строк (%1, лимит %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20858"/>
+        <location filename="../DecodiumBridge.cpp" line="21551"/>
         <source>Frequency file does not exist</source>
         <translation>Файл частот не существует</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20864"/>
+        <location filename="../DecodiumBridge.cpp" line="21557"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>Файл частот слишком велик (%1 байт, лимит %2 байт)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20874"/>
+        <location filename="../DecodiumBridge.cpp" line="21567"/>
         <source>Cannot open frequency file: %1</source>
         <translation>Невозможно открыть файл частот: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20884"/>
+        <location filename="../DecodiumBridge.cpp" line="21577"/>
         <source>No valid working frequencies found</source>
         <translation>Действительные рабочие частоты не найдены</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20898"/>
+        <location filename="../DecodiumBridge.cpp" line="21591"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Недействительный файл частот: неверная сигнатура файла</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20905"/>
+        <location filename="../DecodiumBridge.cpp" line="21598"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Недействительный файл частот: версия слишком новая</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20913"/>
+        <location filename="../DecodiumBridge.cpp" line="21606"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Недействительный файл частот: невозможно прочитать число строк</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="20940"/>
+        <location filename="../DecodiumBridge.cpp" line="21633"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Недействительный файл частот: содержимое повреждено</translation>
     </message>
@@ -10518,6 +10518,16 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../DecodiumTransceiverManager.cpp" line="132"/>
         <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
         <translation>Связь CAT с rig прервана. Проверьте USB-кабель, COM-порт, baud rate и что rig включён. (trace hamlib: %1)</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="179"/>
+        <source>CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.</source>
+        <translation>CAT отключён для теста RX/записи: последовательный порт остаётся доступным для JTDX.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="181"/>
+        <source>CAT disabilitato da variabile d&apos;ambiente DECODIUM_DISABLE_CAT.</source>
+        <translation>CAT отключён переменной окружения DECODIUM_DISABLE_CAT.</translation>
     </message>
 </context>
 <context>
@@ -11164,503 +11174,503 @@ Error(%2): %3</source>
     <name>SettingsDialog</name>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1389"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1391"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
         <source>Select AzEl directory</source>
         <translation>Выбрать каталог AzEl</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
         <source>Select save directory</source>
         <translation>Выбрать каталог сохранения</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
         <source>Merge Working Frequencies</source>
         <translation>Объединить Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="531"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
         <source>Load Working Frequencies</source>
         <translation>Загрузить Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="544"/>
         <source>Frequency files (*.qrg *.qrg.json)</source>
         <translation>Файлы частот (*.qrg *.qrg.json)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="533"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="544"/>
         <source>All files (*)</source>
         <translation>Все файлы (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="542"/>
         <source>Save Working Frequencies</source>
         <translation>Сохранить Working Frequencies</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="724"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="725"/>
         <source>Auto</source>
         <translation>Авто</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1135"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
         <source>Transmitted Message</source>
         <translation>Передаваемое сообщение</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
         <source>My Callsign</source>
         <translation>Мой Callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
         <source>New DXCC on Band</source>
         <translation>Новый DXCC на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
         <source>New DXCC</source>
         <translation>Новый DXCC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
         <source>New Continent on Band</source>
         <translation>Новый континент на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
         <source>New Continent</source>
         <translation>Новый континент</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
         <source>New CQ Zone on Band</source>
         <translation>Новая CQ Zone на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
         <source>New CQ Zone</source>
         <translation>Новая CQ Zone</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
         <source>New ITU Zone on Band</source>
         <translation>Новая ITU Zone на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
         <source>New ITU Zone</source>
         <translation>Новая ITU Zone</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
         <source>New Grid on Band</source>
         <translation>Новый grid на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
         <source>New Grid</source>
         <translation>Новый grid</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
         <source>New Callsign on Band</source>
         <translation>Новый callsign на диапазоне</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
         <source>New Callsign</source>
         <translation>Новый callsign</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
         <source>LoTW marker</source>
         <translation>Маркер LoTW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
         <source>CQ in Message</source>
         <translation>CQ в сообщении</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
         <source>DX Entity</source>
         <translation>DX-объект</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
         <source>73 / RR73</source>
         <translation>73 / RR73</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
         <source>B4 (Worked)</source>
         <translation>B4 (Проведено)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1155"/>
         <source>Normal decodes</source>
         <translation>Обычные декодирования</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1420"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1422"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>Изменения применяются сразу, где это поддерживается.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1436"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1438"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Station</source>
         <translation>Станция</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Radio</source>
         <translation>Радио</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Audio</source>
         <translation>Аудио</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>TX</source>
         <translation>TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Display</source>
         <translation>Дисплей</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Decode</source>
         <translation>Декодирование</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Reporting</source>
         <translation>Отчеты</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Colors</source>
         <translation>Цвета</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Advanced</source>
         <translation>Дополнительно</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Alerts</source>
         <translation>Оповещения</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Filters</source>
         <translation>Фильтры</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
         <source>Choose Decoded Font</source>
         <translation>Выбрать шрифт декодирования</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1178"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
         <source>Choose Font</source>
         <translation>Выбрать шрифт</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1186"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1188"/>
         <source>Search:</source>
         <translation>Поиск:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1196"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1198"/>
         <source>filter by name</source>
         <translation>фильтр по имени</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
         <source>Monospaced fonts:</source>
         <translation>Моноширинные шрифты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
         <source>Fonts:</source>
         <translation>Шрифты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1260"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1262"/>
         <source>Selected:</source>
         <translation>Выбрано:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1272"/>
         <source>Size:</source>
         <translation>Размер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1333"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1335"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1340"/>
         <source>Apply</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>Frequencies</source>
         <translation>Частоты</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1501"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
         <source>UI Buttons</source>
         <translation>Кнопки UI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1866"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1868"/>
         <source>Search radio, model or brand...</source>
         <translation>Поиск радио, модели или марки...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1603"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1605"/>
         <source>STATION INFO</source>
         <translation>ИНФО СТАНЦИИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1608"/>
         <source>Station Name:</source>
         <translation>Название станции:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4378"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4414"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4616"/>
         <source>Choose</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3888"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4090"/>
         <source>2x Tone Spacing:</source>
         <translation>2x интервал между тонами:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5282"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5484"/>
         <source>4-digit Grids:</source>
         <translation>4-символьные локаторы:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4104"/>
         <source>4x Tone Spacing:</source>
         <translation>4-кратный интервал между тонами:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5935"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4564"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
         <source>ALIGNMENT</source>
         <translation>ВЫРАВНИВАНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8022"/>
         <source>ALWAYS PASS</source>
         <translation>ВСЕГДА ПРОХОДИТЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4911"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5113"/>
         <source>AP Decode:</source>
         <translation>Декодирование AP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5107"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5155"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5309"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5357"/>
         <source>API Key:</source>
         <translation>Ключ API:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5298"/>
         <source>API URL:</source>
         <translation>API URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7525"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7755"/>
         <source>AUDIO ALERTS</source>
         <translation>АУДИО ALERTS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2680"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2715"/>
         <source>AUDIO DEVICES</source>
         <translation>АУДИО УСТРОЙСТВА</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3053"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3088"/>
         <source>AUTO SEQUENCE</source>
         <translation>АВТО ПОСЛЕДОВАТЕЛЬНОСТЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5705"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5907"/>
         <source>Accept UDP:</source>
         <translation>Примите UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5611"/>
         <source>Access token:</source>
         <translation>Токен доступа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7213"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7443"/>
         <source>Activity:</source>
         <translation>Деятельность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4799"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5001"/>
         <source>Aggressive:</source>
         <translation>Агрессивный:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7758"/>
         <source>Alerts Enabled:</source>
         <translation>Оповещения включены:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4584"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4786"/>
         <source>Align Steps 2:</source>
         <translation>Выровняйте шаги 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4574"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4776"/>
         <source>Align Steps:</source>
         <translation>Выровнять шаги:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4769"/>
         <source>Align:</source>
         <translation>Выровнять:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5510"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5842"/>
         <source>All interfaces</source>
         <translation>Все интерфейсы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2984"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3019"/>
         <source>Allow TX QSY:</source>
         <translation>Разрешить TX QSY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7131"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7361"/>
         <source>Alt Erase Btn:</source>
         <translation>Альтернативная кнопка стирания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3923"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4125"/>
         <source>Alt F1-F6 Bind:</source>
         <translation>Alt F1-F6 Привязка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7835"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8065"/>
         <source>Always Pass 10:</source>
         <translation>Всегда проходите 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7839"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8069"/>
         <source>Always Pass 11:</source>
         <translation>Всегда проходите 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8072"/>
         <source>Always Pass 12:</source>
         <translation>Всегда проходите 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7804"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8034"/>
         <source>Always Pass 1:</source>
         <translation>Всегда проходить 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1988"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1990"/>
         <source>Refresh serial ports</source>
         <translation>Обновить последовательные порты</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2090"/>
         <source>HRD Radio:</source>
         <translation>Радио HRD:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2099"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
         <translation>Строгое совпадение (прервать, если настроенное радио не текущее в HRD)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2509"/>
         <source>SWR max:</source>
         <translation>Макс. SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2546"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2576"/>
         <source>ALC AUTO CALIBRATION</source>
         <translation>АВТОКАЛИБРОВКА ALC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2561"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2591"/>
         <source>ALC target:</source>
         <translation>Цель ALC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2597"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
         <translation>Шкала ALC 0-100. FT8/data: обычно 15-25. Значения &gt;60 рискуют перегрузить PA.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2647"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
         <translation>Передаёт несущую настройки и авто-регулирует уровень TX-аудио, пока ALC радио не достигнет цели. Однократно. Требует подключённого Hamlib CAT.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2621"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2651"/>
         <source>Cancel calibration</source>
         <translation>Отменить калибровку</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2622"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2652"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>Калибровать ALC (передаёт несущую)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2840"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2875"/>
         <source>Auto RX level active</source>
         <translation>Авто-уровень RX активен</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2841"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2876"/>
         <source>Auto RX level disabled</source>
         <translation>Авто-уровень RX отключён</translation>
     </message>
@@ -11693,7 +11703,7 @@ Error(%2): %3</source>
         <translation type="vanished">close strong partners ON · пропуск конца слота ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3013"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3048"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
         <translation>Ограничение CPU (Decodium Console / mini PC)</translation>
     </message>
@@ -11706,12 +11716,12 @@ Error(%2): %3</source>
         <translation type="vanished">● активен</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3172"/>
         <source>Resume QSO on partner reply:</source>
         <translation>Возобновить QSO при ответе партнёра:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3160"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3195"/>
         <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
 
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
@@ -11724,17 +11734,17 @@ Default: OFF (= Halt fully stops the sequence by default).</source>
 По умолчанию: OFF (= Halt по умолчанию полностью останавливает последовательность).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3199"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3234"/>
         <source>FT2 UTILITY</source>
         <translation>FT2 UTILITY</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3204"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3239"/>
         <source>FT2: signoff retries (73/RR73):</source>
         <translation>FT2: повторы signoff (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3260"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -11753,12 +11763,12 @@ Doesn&apos;t affect FT8/FT4.</source>
 Не влияет на FT8/FT4.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3265"/>
         <source>FT4: signoff retries (73/RR73):</source>
         <translation>FT4: повторы signoff (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3251"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3286"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -11775,12 +11785,12 @@ Doesn&apos;t affect FT2/FT8.</source>
 Не влияет на FT2/FT8.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3256"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3291"/>
         <source>FT8: signoff retries (73/RR73):</source>
         <translation>FT8: повторы signoff (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3312"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -11797,12 +11807,82 @@ Doesn&apos;t affect FT2/FT4.</source>
 Не влияет на FT2/FT4.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3282"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3317"/>
+        <source>Weak-partner signoff boost (FT2/4/8):</source>
+        <translation>Усиление завершения для слабых партнёров (FT2/4/8):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
+        <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
+
+Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
+        <translation>Когда включено, автоматически добавляет дополнительные финальные повторы 73/RR73, если активный партнёр слабый (SNR на уровне порога ниже или ниже него), давая хрупким QSO больше шансов на завершение.
+
+По умолчанию ВЫКЛ = поведение без изменений. Применяется к FT2/FT4/FT8, всегда ограничено максимумом 8 и по-прежнему ограничено TX watchdog.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3339"/>
+        <source>  weak SNR threshold (dB):</source>
+        <translation>  порог слабого SNR (dB):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3362"/>
+        <source>A partner whose SNR is at or below this value is treated as &apos;weak&apos; and receives the extra signoff retries.
+
+Default: -15 dB.</source>
+        <translation>Партнёр, чей SNR равен этому значению или ниже, считается &apos;слабым&apos; и получает дополнительные повторы завершения.
+
+По умолчанию: -15 dB.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3365"/>
+        <source>  extra signoff retries:</source>
+        <translation>  дополнительные повторы завершения:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3388"/>
+        <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
+
+Default: +3 (capped so the total never exceeds 8).</source>
+        <translation>Сколько дополнительных финальных повторов 73/RR73 добавлять сверх лимита по режиму для слабых партнёров.
+
+По умолчанию: +3 (ограничено так, что итог никогда не превышает 8).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3393"/>
+        <source>Post-log RRR re-engage guard (FT2):</source>
+        <translation>Защита от повторного захода RRR после лога (FT2):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <source>When ON, after a QSO is logged (&apos;partner left&apos;) stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
+
+A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
+        <translation>Когда включено, после записи QSO в лог (&apos;партнёр ушёл&apos;) прекращает повторную отправку RR73 партнёру, который продолжает вызывать вас с R+рапортом, потому что не принял ваше завершение (случай 9H1SR со слишком многими вызовами).
+
+Несколько вежливых повторов всё ещё разрешены (см. макс.), затем подавляются в течение паузы 30 с. По умолчанию ВЫКЛ. Только FT2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3415"/>
+        <source>  courtesy RRR max:</source>
+        <translation>  макс. вежливых RRR:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3438"/>
+        <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
+
+0 = suppress immediately. Default: 1.</source>
+        <translation>Сколько вежливых RR73 ещё отправить только что записанному в лог партнёру, прежде чем подавлять дальнейшие повторные заходы.
+
+0 = подавлять сразу. По умолчанию: 1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3443"/>
         <source>Immediate TX on click (1.0.283 style):</source>
         <translation>Немедленная TX по клику (стиль 1.0.283):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3304"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3465"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -11821,12 +11901,12 @@ Enable if it bothers you to wait 1 cycle after the click.</source>
 Включите, если вас раздражает ожидание 1 цикла после клика.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3309"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3470"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
         <translation>Записывать RR73, даже если партнёр уходит (FT2):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3331"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3492"/>
         <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
 
 Matches TX5/73 and sync mode behaviour.
@@ -11839,12 +11919,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3497"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
         <translation>FT8: быстрые последовательности (стиль WSJT-X/JTDX):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3358"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3519"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -11865,12 +11945,12 @@ Default: OFF (= conservative upstream behaviour, max decode reliability).</sourc
 По умолчанию: OFF (= консервативное upstream-поведение, макс. надёжность декодирования).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3363"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3524"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
         <translation>FT2: консервативное окно TX (без усечённых кадров):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3385"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3546"/>
         <source>Controls how late in a slot the async FT2 TX may start.
 
 • ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
@@ -11885,12 +11965,12 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 Включайте OFF, только если хотите максимальную реактивность и принимаете случайные недекодируемые поздние TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3390"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3551"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
         <translation>FT2: ручное one-shot разоружение (1.0.300+):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
         <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
 
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
@@ -11903,12 +11983,12 @@ Enable only if you double-click stations that consistently reply on the first at
 Включайте, только если кликаете дважды по станциям, которые стабильно отвечают с первой попытки.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3417"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
         <source>Caller retries (max TX repeats per step):</source>
         <translation>Caller retries (макс. повторов TX на шаг):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3440"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3601"/>
         <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
 
 Default: 10.
@@ -11933,12 +12013,30 @@ FT8 (слот 15с): 10 повторов ≈ 150с.
 Примечание: при &apos;FT2 manual one-shot disarm&apos; OFF (по умолчанию) именно это останавливает бесконечное зацикливание TX1.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3606"/>
+        <source>Caller retries hard cap (even with watchdog):</source>
+        <translation>Жёсткий лимит повторов вызывающего (даже с watchdog):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <source>When ON, the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.
+
+Default OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.
+
+Enable for a hard limit on TX repeats regardless of the watchdog.</source>
+        <translation>Когда включено, лимит &apos;Повторы вызывающего&apos; для TX1/TX2 останавливает вызов, даже если TX Watchdog включён.
+
+По умолчанию ВЫКЛ (поведение 1.0.438): когда TX Watchdog включён, он имеет приоритет и игнорирует лимит повторов вызывающего до собственного тайм-аута, поэтому вызов может повторяться всё время работы watchdog.
+
+Включите для жёсткого ограничения повторов TX независимо от watchdog.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3636"/>
         <source>Conservative FT2 (weak-signal mode):</source>
         <translation>Conservative FT2 (режим слабого сигнала):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3469"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3657"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
@@ -11953,12 +12051,12 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 По умолчанию: OFF — включите, если у вас слабые DX-партнёры или маргинальное прохождение.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3662"/>
         <source>FT2: full decode in AutoCQ:</source>
         <translation>FT2: full decode в AutoCQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3683"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
@@ -11971,12 +12069,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3688"/>
         <source>FT2: close strong partners earlier:</source>
         <translation>FT2: закрывать сильных партнёров раньше:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3709"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
@@ -11989,12 +12087,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3714"/>
         <source>FT2: adaptive decode (CPU saver):</source>
         <translation>FT2: adaptive decode (экономия CPU):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3735"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -12011,12 +12109,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3552"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3740"/>
         <source>FT2: narrow reply decode (experimental):</source>
         <translation>FT2: узкое декодирование ответа (экспериментально):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3761"/>
         <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
 
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
@@ -12029,12 +12127,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3766"/>
         <source>FT2: AP cache rescue (experimental):</source>
         <translation>FT2: AP cache rescue (экспериментально):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3599"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
         <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
 
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
@@ -12047,12 +12145,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3792"/>
         <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
         <translation>FT2: пропускать избыточное декодирование конца слота (снижает задержку захвата):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3816"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
 Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
@@ -12069,12 +12167,12 @@ Default: OFF.</source>
 По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3635"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3823"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
         <translation>FT2/FT8 MAM multi-stream (MSHV, экспериментально):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3847"/>
         <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
 
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
@@ -12087,12 +12185,12 @@ EXPERIMENTAL. Default: OFF.</source>
 ЭКСПЕРИМЕНТАЛЬНО. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3852"/>
         <source>MAM multi-stream: max stream simultanei:</source>
         <translation>MAM multi-stream: макс. одновременных потоков:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3692"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3880"/>
         <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
 
 Range 2-5. Default: 3.
@@ -12105,12 +12203,12 @@ Higher values require more CPU to generate overlapping audio streams. Enabled on
 Более высокие значения требуют больше CPU для генерации перекрывающихся аудиопотоков. Включено только когда MAM multi-stream активен.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3885"/>
         <source>FT2 partner-memory (anti-QSB):</source>
         <translation>FT2 partner-memory (анти-QSB):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3907"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
@@ -12123,12 +12221,12 @@ Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). 
 По умолчанию: OFF (opt-in после отката 1.0.186 — строгий шлюз + лог [FT2WS-F]). Автоматически отключается, если Conservative OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3724"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3912"/>
         <source>FT2 TX2 re-send on stall:</source>
         <translation>FT2 повторная отправка TX2 при зависании:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3934"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
@@ -12141,112 +12239,126 @@ Requires Conservative FT2 active. Default: ON under Conservative.</source>
 Требует активного Conservative FT2. По умолчанию: ON при Conservative.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3754"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3942"/>
         <source>Smooth decode flow:</source>
         <translation>Smooth decode flow:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3775"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3963"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
         <translation>Распределяет декодирования FT8/FT4 из финального пакета конца периода в непрерывный поток с анимированным затуханием (~100 мс на строку). FT2 async без изменений, так как уже потоковый. По умолчанию: ON; авто-откат, если на скромных PC обнаружены подвисания UI. Отключите для прежнего пакетного поведения.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3972"/>
         <source>TX Watchdog Mode:</source>
         <translation>Режим TX Watchdog:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Time</source>
         <translation>Время</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Count</source>
         <translation>Количество</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3807"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3995"/>
         <source>TX Watchdog Time (min):</source>
         <translation>Время TX Watchdog (мин):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4013"/>
         <source>TX Watchdog Count:</source>
         <translation>Количество TX Watchdog:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3954"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4032"/>
+        <source>Log QSO at watchdog timeout:</source>
+        <translation>Записать QSO при тайм-ауте watchdog:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4043"/>
+        <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
+
+Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
+        <translation>Когда включено, если TX watchdog срабатывает, когда QSO уже завершило двусторонний обмен рапортами (оба рапорта переданы, прогресс &gt;= ROGER_REPORT), QSO записывается в лог вместо отбрасывания.
+
+По умолчанию ВЫКЛ = поведение 1.0.445 (только отложенный снимок, восстанавливается только если партнёр повторно отправляет 73; в ручном QSO теряется).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4156"/>
         <source>ASPETTO / TEMA</source>
         <translation>ВНЕШНИЙ ВИД / ТЕМА</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3957"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4159"/>
         <source>Theme:</source>
         <translation>Тема:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4187"/>
         <source>Accent:</source>
         <translation>Акцент:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4022"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4224"/>
         <source>Density:</source>
         <translation>Плотность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4063"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4265"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
         <translation>DX-Pedition Workspace (3-колоночная тактическая раскладка)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4078"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4280"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
         <translation>Альтернативный однопанельный вид оператора, оптимизированный для DX pile-up: тактическая 3-колоночная панель (Cluster / Waterfall / TX) вместо классического рабочего пространства. Opt-in, по умолчанию OFF: стандартная раскладка не меняется при отключении.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4082"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4284"/>
         <source>UI Scale:</source>
         <translation>Масштаб UI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4316"/>
         <source>↻ restart to apply</source>
         <translation>↻ перезапуск для применения</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4121"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4323"/>
         <source>BANDE OPERATIVE</source>
         <translation>РАБОЧИЕ ДИАПАЗОНЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4124"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4326"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
         <translation>Клик, чтобы показать/скрыть диапазоны в селекторе. Снятые диапазоны исчезают из панели HF / V-U / SHF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4355"/>
         <source>visible (click to hide)</source>
         <translation>виден (клик чтобы скрыть)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4355"/>
         <source>hidden (click to show)</source>
         <translation>скрыт (клик чтобы показать)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4162"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4364"/>
         <source>UI — PERFORMANCE</source>
         <translation>UI — ПРОИЗВОДИТЕЛЬНОСТЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4166"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4368"/>
         <source>UI Quality preset:</source>
         <translation>Пресет качества UI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4183"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4385"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
@@ -12259,32 +12371,32 @@ High = все доступные анимации.
 По умолчанию: Medium.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4188"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4390"/>
         <source>Priorità processo:</source>
         <translation>Приоритет процесса:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Normale</source>
         <translation>Нормальный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Sopra il normale</source>
         <translation>Выше нормального</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Alta (consigliata)</source>
         <translation>Высокий (рекомендуется)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4395"/>
         <source>Tempo reale ⚠️</source>
         <translation>Реального времени ⚠️</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4202"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4404"/>
         <source>Priorità di scheduling CPU del processo (Windows).
 
 Normale / Sopra il normale (default) = sicure.
@@ -12301,12 +12413,12 @@ Se non sei sicuro usa &apos;Alta&apos;.</source>
 Если не уверены, используйте &apos;Высокий&apos;.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4207"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
         <source>UI Style (restart):</source>
         <translation>Стиль UI (перезапуск):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4230"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4432"/>
         <source>QML Quick Controls style (requires restart):
 • Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
@@ -12319,12 +12431,12 @@ Se non sei sicuro usa &apos;Alta&apos;.</source>
 • Fusion — нейтральный кросс-платформенный desktop</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4241"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4443"/>
         <source>Frameless pop-out:</source>
         <translation>Frameless pop-out:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4254"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4456"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
@@ -12337,12 +12449,12 @@ Default: OFF. Requires closing and reopening the window.</source>
 По умолчанию: OFF. Требует закрытия и повторного открытия окна.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4259"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4461"/>
         <source>Detach Full Spectrum:</source>
         <translation>Detach Full Spectrum:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4474"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
@@ -12355,27 +12467,27 @@ Default: OFF. Requires restart.</source>
 По умолчанию: OFF. Требует перезапуска.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
         <source>Schermo intero:</source>
         <translation>Полный экран:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4281"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4483"/>
         <source>Attiva (F11)</source>
         <translation>Включить (F11)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4488"/>
         <source>Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.</source>
         <translation>Развернуть Decodium на полный экран. Для выхода: F11, Esc или кнопка ✕ вверху. Не запоминается: при перезапуске вернётся в обычное окно.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4291"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4493"/>
         <source>Spectrum FPS cap:</source>
         <translation>Предел FPS спектра:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4311"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4513"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -12392,22 +12504,22 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 Когда Full Spectrum отстыкован, отдельный поток рендеринга держит 30 fps, не влияя на декодер.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4519"/>
         <source>Eventi CPU pressure:</source>
         <translation>События CPU pressure:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4331"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4533"/>
         <source>totale=%1 · severi=%2 (sessione)</source>
         <translation>всего=%1 · серьёзных=%2 (сессия)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4334"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4536"/>
         <source>totale=0 · severi=0</source>
         <translation>всего=0 · серьёзных=0</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4344"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4546"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
@@ -12416,118 +12528,118 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
 Серьёзные (≥1100мс или серия из 4+ коротких подвисаний) — самый сильный сигнал: если видите ≥5 после часа использования, снизьте UI Quality до Low или предел FPS спектра до 15.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4438"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4640"/>
         <source>US State:</source>
         <translation>US State:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4452"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7001"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7022"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7231"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7252"/>
         <source>Updating...</source>
         <translation>Обновление...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4453"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4655"/>
         <source>%1 calls</source>
         <translation>%1 вызовов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4454"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7003"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4656"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7233"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7254"/>
         <source>Not loaded</source>
         <translation>Не загружено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4463"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6084"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6283"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6485"/>
         <source>Update</source>
         <translation>Обновить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4479"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4681"/>
         <source>Waterfall Calls:</source>
         <translation>Waterfall Calls:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4487"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
         <source>FS Dist:</source>
         <translation>FS Dist:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4495"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4697"/>
         <source>FS Az:</source>
         <translation>FS Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4705"/>
         <source>RX Freq:</source>
         <translation>RX Freq:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4511"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4713"/>
         <source>RX Dist:</source>
         <translation>RX Dist:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4721"/>
         <source>RX Az:</source>
         <translation>RX Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4816"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>УДАЛЁННЫЙ ВЕБ-СЕРВЕР (iPad / mobile PWA)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4819"/>
         <source>Abilita Web Server:</source>
         <translation>Включить веб-сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4839"/>
         <source>Porta TCP:</source>
         <translation>TCP-порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4850"/>
         <source>URL accesso:</source>
         <translation>URL доступа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4861"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4888"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>ОТОБРАЖЕНИЕ СПИСКА ДЕКОДИРОВАНИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4891"/>
         <source>Colored period separator:</source>
         <translation>Цветной разделитель периодов:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4703"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4905"/>
         <source>Newest first:</source>
         <translation>Сначала новые:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4859"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5061"/>
         <source>CQ filter:</source>
         <translation>CQ filter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4934"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5136"/>
         <source>Deep decode in TX:</source>
         <translation>Deep decode в TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5148"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -12540,835 +12652,836 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 Требует дополнительного CPU во время QSO. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5130"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5332"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ LOGBOOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5346"/>
         <source>Replace duplicates:</source>
         <translation>Заменять дубликаты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5177"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5379"/>
         <source>Testing...</source>
         <translation>Тестирование...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5177"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7536"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5379"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7766"/>
         <source>Test</source>
         <translation>Тест</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5392"/>
         <source>Testing QRZ API key...</source>
         <translation>Тестирование ключа API QRZ...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5430"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5632"/>
         <source>Client ID:</source>
         <translation>Client ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5452"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5654"/>
         <source>Preset:</source>
         <translation>Пресет:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5596"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5798"/>
         <source>Tertiary UDP:</source>
         <translation>Tertiary UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5806"/>
         <source>Tertiary Server:</source>
         <translation>Tertiary Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5816"/>
         <source>Tertiary Port:</source>
         <translation>Tertiary Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5625"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5827"/>
         <source>Tertiary TTL:</source>
         <translation>Tertiary TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5839"/>
         <source>Tertiary Interface:</source>
         <translation>Tertiary Interface:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5860"/>
         <source>Tertiary ADIF:</source>
         <translation>Tertiary ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5671"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5873"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5674"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5876"/>
         <source>Enable N1MM:</source>
         <translation>Включить N1MM:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5682"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5884"/>
         <source>N1MM Port:</source>
         <translation>N1MM Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5694"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5896"/>
         <source>N1MM Server:</source>
         <translation>N1MM Server:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5792"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5994"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>КАЛИБРОВКА ЧАСТОТЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5800"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6002"/>
         <source>Refresh</source>
         <translation>Обновить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5826"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6028"/>
         <source>Slope:</source>
         <translation>Наклон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5844"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6046"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5846"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6048"/>
         <source>Intercept:</source>
         <translation>Сдвиг:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6066"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6085"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
         <translation>Сбросить калибровку (slope=0, intercept=0). Частота записывается в rig без коррекции (быстрый путь).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5895"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6097"/>
         <source>Preview correzione:</source>
         <translation>Предпросмотр коррекции:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5906"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6108"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5921"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6123"/>
         <source>WORKING FREQUENCIES</source>
         <translation>WORKING FREQUENCIES</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5929"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6131"/>
         <source>Load</source>
         <translation>Загрузить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6140"/>
         <source>Merge</source>
         <translation>Объединить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5947"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6149"/>
         <source>Save as</source>
         <translation>Сохранить как</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5956"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6158"/>
         <source>Defaults</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5986"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6188"/>
         <source>Region:</source>
         <translation>Region:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6001"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
         <source>Freq MHz:</source>
         <translation>Частота MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6021"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6223"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6351"/>
         <source>Pref</source>
         <translation>Pref</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6232"/>
         <source>Description:</source>
         <translation>Описание:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6044"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6246"/>
         <source>Start:</source>
         <translation>Начало:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6055"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6257"/>
         <source>End:</source>
         <translation>Конец:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6074"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6276"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6476"/>
         <source>Add</source>
         <translation>Добавить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6095"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6293"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6297"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6495"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6307"/>
         <source>New</source>
         <translation>Новый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6348"/>
         <source>IARU Region</source>
         <translation>IARU Region</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6349"/>
         <source>Mode</source>
         <translation>Режим</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6148"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6350"/>
         <source>Frequency</source>
         <translation>Частота</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6150"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6352"/>
         <source>Description</source>
         <translation>Описание</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6353"/>
         <source>Start Date/Time</source>
         <translation>Дата/время начала</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6354"/>
         <source>End Date/Time</source>
         <translation>Дата/время конца</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6205"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6407"/>
         <source>STATION INFORMATION</source>
         <translation>ИНФОРМАЦИЯ О СТАНЦИИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6414"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>Band offset — это сдвиг частоты transverter/станции для данного диапазона; используйте 0.000000, если не применяется.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6438"/>
         <source>Band:</source>
         <translation>Диапазон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6244"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6446"/>
         <source>Offset MHz:</source>
         <translation>Offset MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6323"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6525"/>
         <source>Band</source>
         <translation>Диапазон</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6526"/>
         <source>Offset</source>
         <translation>Offset</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6325"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6527"/>
         <source>Antenna Description</source>
         <translation>Описание антенны</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6443"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6646"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
         <translation>Использовать этот конкретный цвет декодирования. Когда OFF, эта категория использует общий цвет по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6759"/>
         <source>BG:</source>
         <translation>BG:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6773"/>
         <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
         <translation>Окрашивать ФОН строки (помимо текста) для этой категории. OFF = без пользовательского фона.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6859"/>
         <source>Decode Boost:</source>
         <translation>Decode Boost:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6886"/>
         <source>Visual contrast only; it does not change decoder sensitivity.</source>
         <translation>Только визуальный контраст; чувствительность декодера не изменяется.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6707"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6937"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>ЦВЕТА ИНТЕРФЕЙСА (фон + текст)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6942"/>
         <source>Usa colori personalizzati:</source>
         <translation>Использовать пользовательские цвета:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6719"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6949"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>(переопределяет фон и текст темы)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6956"/>
         <source>Background:</source>
         <translation>Фон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6746"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6976"/>
         <source>Text:</source>
         <translation>Текст:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7068"/>
         <source>Download CALL3.TXT...</source>
         <translation>Скачать CALL3.TXT...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
         <source>Direct Visual:</source>
         <translation>Direct Visual:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7196"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
         <translation>Быстрый визуальный panadapter. В legacy-режиме может открыть второй аудиозахват; в обычном режиме только увеличивает частоту визуального обновления. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6971"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7201"/>
         <source>Low CPU:</source>
         <translation>Low CPU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7210"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
         <translation>Профиль для медленных PC: максимум 2 FT-потока, более медленный waterfall, сокращённое раннее/глубокое декодирование. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7215"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>Сокращает FT-потоки, обновление waterfall и рендеринг QML во время monitor/TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6996"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7226"/>
         <source>DATA UPDATES</source>
         <translation>ОБНОВЛЕНИЕ ДАННЫХ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6999"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
         <source>LotW Users:</source>
         <translation>Пользователи LotW:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7232"/>
         <source>%1 users</source>
         <translation>%1 пользователей</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7012"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7033"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7263"/>
         <source>Force Update</source>
         <translation>Принудительно обновить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7250"/>
         <source>US States:</source>
         <translation>US States:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7253"/>
         <source>%1 calls, %2 locators</source>
         <translation>%1 позывных, %2 локаторов</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7566"/>
         <source>RF self-calibration:</source>
         <translation>RF самокалибровка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7341"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7571"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
         <translation>Использовать значения DT принятых декодирований только как вторичную подсказку синхронизации времени после того, как NTP/HTTPS уже зафиксированы. По умолчанию: OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7346"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7576"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
         <translation>Только вторичная подсказка; она не может создать первую фиксацию времени.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7354"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7584"/>
         <source>ADV DECODING</source>
         <translation>ADV DECODING</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7357"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7587"/>
         <source>Auto Mode:</source>
         <translation>Auto Mode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7361"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7591"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>AUTO - включать 3 технологии при необходимости</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7374"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7604"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>Когда ON, 3 функции ниже управляются автоматически. Триггер: Neural+Turbo при декодированиях &lt; 2/slot в течение 4 слотов. Coherent при Q65 SNR &lt; -22 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7382"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7612"/>
         <source>Live state:</source>
         <translation>Текущее состояние:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7384"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7614"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7386"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7616"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7388"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7618"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7392"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7622"/>
         <source>Coherent Avg:</source>
         <translation>Coherent Avg:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7397"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7627"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>Накапливает многослотовое усреднение для декодирований Q65/JT65 (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7648"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7653"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync (FT8 OSD-декодер)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7667"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>Форсирует OSD-ориентированное декодирование FT8 (+2-3 dB на пограничных сигналах)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7444"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7674"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo Feedback:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7449"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7679"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo Feedback (расширенные итерации LDPC)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7463"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7693"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>Расширенные итерации LDPC для восстановления маргинального декодирования</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7807"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8037"/>
         <source>Always Pass 2:</source>
         <translation>Всегда пас 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8041"/>
         <source>Always Pass 3:</source>
         <translation>Всегда проходите 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7814"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8044"/>
         <source>Always Pass 4:</source>
         <translation>Всегда проходите 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8048"/>
         <source>Always Pass 5:</source>
         <translation>Всегда проходите 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7821"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8051"/>
         <source>Always Pass 6:</source>
         <translation>Всегда проходите 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8055"/>
         <source>Always Pass 7:</source>
         <translation>Всегда проходите 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7828"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8058"/>
         <source>Always Pass 8:</source>
         <translation>Всегда проходите 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7832"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8062"/>
         <source>Always Pass 9:</source>
         <translation>Всегда проходите 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7956"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8210"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Монитор (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7957"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8211"/>
         <source>Setup (⚙)</source>
         <translation>Настройка (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7963"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8217"/>
         <source>Layout (window reset)</source>
         <translation>Раскладка (сброс окон)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7964"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8218"/>
         <source>History (decode history)</source>
         <translation>История (история декодирования)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8220"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8222"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX Cluster (toolbar)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8223"/>
         <source>World Clock</source>
         <translation>Мировые часы</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8227"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>Показывайте или скрывайте кнопки UI по своему усмотрению. Изменения применяются сразу и сохраняются автоматически.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7979"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8233"/>
         <source>TOP TOOLBAR</source>
         <translation>ВЕРХНЯЯ ПАНЕЛЬ ИНСТРУМЕНТОВ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7998"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8252"/>
         <source>TOOLBAR BUTTON ORDER</source>
         <translation>ПОРЯДОК КНОПОК ПАНЕЛИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8256"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
         <translation>Перетаскивайте кнопки верхней панели (долгое нажатие) для их переупорядочивания. Используйте кнопку ниже для восстановления порядка по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8020"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8274"/>
         <source>Restore default button order</source>
         <translation>Восстановить порядок кнопок по умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8050"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8304"/>
         <source>Restore default TX panel order</source>
         <translation>Восстановить порядок панели TX по умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1640"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6256"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1642"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6458"/>
         <source>Antenna:</source>
         <translation>Антенна:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5419"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5621"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>Требуется перезапуск приложения. Для LAN/WAN используйте токен длиной не менее 12 символов.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7148"/>
         <source>Auto Astro:</source>
         <translation>Авто Астро:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1567"/>
         <source>Auto Grid:</source>
         <translation>Автолокатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5463"/>
         <source>Auto Log:</source>
         <translation>Автоматический журнал:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3107"/>
         <source>Auto Sequence:</source>
         <translation>Автоматическая последовательность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4922"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
         <source>Avg Decode:</source>
         <translation>Среднее декодирование:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2918"/>
         <source>AzEl Directory:</source>
         <translation>Каталог AzEl:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6628"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6846"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 Зачеркивание:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1684"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1686"/>
         <source>BACKEND CAT</source>
         <translation>БЕЗОПАСНОСТЬ CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7042"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7272"/>
         <source>BEHAVIOR</source>
         <translation>ПОВЕДЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7911"/>
         <source>BLACKLIST</source>
         <translation>ЧЕРНЫЙ СПИСОК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1687"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1689"/>
         <source>Backend:</source>
         <translation>Бэкэнд:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2938"/>
         <source>Band TX Memory:</source>
         <translation>Группа TX Память:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2910"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2945"/>
         <source>Band Tune Mem:</source>
         <translation>Память настройки группы:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1993"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1995"/>
         <source>Baud Rate:</source>
         <translation>Скорость:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6782"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7012"/>
         <source>Black Level:</source>
         <translation>Уровень черного:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7725"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7955"/>
         <source>Blacklist 10:</source>
         <translation>Черный список 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7729"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7959"/>
         <source>Blacklist 11:</source>
         <translation>Черный список 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7962"/>
         <source>Blacklist 12:</source>
         <translation>Черный список 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7694"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7924"/>
         <source>Blacklist 1:</source>
         <translation>Черный список 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7697"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7927"/>
         <source>Blacklist 2:</source>
         <translation>Черный список 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7701"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7931"/>
         <source>Blacklist 3:</source>
         <translation>Черный список 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7704"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7934"/>
         <source>Blacklist 4:</source>
         <translation>Черный список 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7708"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7938"/>
         <source>Blacklist 5:</source>
         <translation>Черный список 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7711"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7941"/>
         <source>Blacklist 6:</source>
         <translation>Черный список 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7945"/>
         <source>Blacklist 7:</source>
         <translation>Черный список 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7948"/>
         <source>Blacklist 8:</source>
         <translation>Черный список 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7722"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7952"/>
         <source>Blacklist 9:</source>
         <translation>Черный список 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6698"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6928"/>
         <source>Blue Calls:</source>
         <translation>Синие позывные:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1294"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6743"/>
         <source>Bold</source>
         <translation>Жирный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="872"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Both</source>
         <translation>Оба</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1766"/>
         <source>CAT CONTROL</source>
         <translation>CAT УПРАВЛЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2027"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2029"/>
         <source>CI-V Addr:</source>
         <translation>CI-V Адрес:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5283"/>
         <source>CLOUDLOG</source>
         <translation>ОБЛАЧНЫЙ ЛОГ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7440"/>
         <source>CONTEST</source>
         <translation>КОНКУРС</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4848"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5050"/>
         <source>CQ Only:</source>
         <translation>CQ Только:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7625"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7855"/>
         <source>CQ Zone Band:</source>
         <translation>CQ Зонный диапазон:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7558"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7788"/>
         <source>CQ in Msg:</source>
         <translation>CQ в сообщении:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4066"/>
         <source>CW ID</source>
         <translation>идентификатор CW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4076"/>
         <source>CW ID Interval (min):</source>
         <translation>Интервал идентификатора CW (мин):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4069"/>
         <source>CW ID after 73:</source>
         <translation>CW ID после 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8171"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
         <translation>Wait &amp;amp; Pounce прослушивает отфильтрованные декодирования CQ, но начинает ответ только когда TX/CQ уже взведена оператором.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7919"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8173"/>
         <source>W&amp;P Filters Only:</source>
         <translation>W&amp;amp;P только фильтры:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8181"/>
         <source>Calling Only:</source>
         <translation>Только вызывающие станции:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2456"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2486"/>
         <source>Check SWR:</source>
         <translation>Проверьте SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7344"/>
         <source>Clear DX Call:</source>
         <translation>Очистить DX-позывной:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7335"/>
         <source>Clear DX Grid:</source>
         <translation>Очистить DX-локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4757"/>
         <source>Click TX:</source>
         <translation>Нажмите TX:</translation>
     </message>
@@ -13389,7 +13502,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Цвет DX Объект:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6788"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7018"/>
         <source>Color Gain:</source>
         <translation>Усиление цвета:</translation>
     </message>
@@ -13398,131 +13511,131 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Цвет моего позывного:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5039"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5241"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5232"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7244"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
         <source>Contest Name:</source>
         <translation>Название конкурса:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5491"/>
         <source>Contest Only:</source>
         <translation>Только конкурс:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6794"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7024"/>
         <source>Contrast:</source>
         <translation>Контраст:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
         <source>Custom Server:</source>
         <translation>Пользовательский сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6801"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7031"/>
         <source>DATA DOWNLOAD</source>
         <translation>ЗАГРУЗКА ДАННЫХ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6391"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6593"/>
         <source>DECODE COLORS</source>
         <translation>ДЕКОДИРОВАТЬ ЦВЕТА</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4845"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5047"/>
         <source>DECODE FILTERS</source>
         <translation>ФИЛЬТРЫ ДЕКОДИРОВАНИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4712"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4914"/>
         <source>DECODE PARAMETERS</source>
         <translation>ПАРАМЕТРЫ ДЕКОДИРОВАНИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4427"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4629"/>
         <source>DECODES</source>
         <translation>ДЕКОДИРОВАНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2453"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2483"/>
         <source>DIAGNOSTICS</source>
         <translation>ДИАГНОСТИКА</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2899"/>
         <source>DIRECTORY</source>
         <translation>СПРАВОЧНИК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4989"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5191"/>
         <source>DX CLUSTER</source>
         <translation>DX КЛАСТЕР</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7648"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7878"/>
         <source>DX Call/Grid:</source>
         <translation>DX-позывной/локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2276"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2306"/>
         <source>Data Bits:</source>
         <translation>Биты данных:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5438"/>
         <source>Days Upload:</source>
         <translation>Дни загрузки:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
         <source>Decode Depth:</source>
         <translation>Глубина декодирования:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4968"/>
         <source>Decode at 52s:</source>
         <translation>Декодирование на 52 с:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4389"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4591"/>
         <source>Decoded Font:</source>
         <translation>Декодированный шрифт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Deep</source>
         <translation>Глубокий</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
         <source>Deep Search:</source>
         <translation>Глубокий поиск:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="656"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="860"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="861"/>
         <source>Default</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4834"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5036"/>
         <source>Degrade S/N:</source>
         <translation>Ухудшить S/N:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5070"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5272"/>
         <source>Detail:</source>
         <translation>Деталь:</translation>
     </message>
@@ -13531,1002 +13644,1012 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Прямой журнал QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3163"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3198"/>
         <source>Disable TX after 73:</source>
         <translation>Отключить TX после 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1747"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2506"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5059"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2536"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5261"/>
         <source>Disconnect</source>
         <translation>Отключить</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1741"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5232"/>
         <source>Disconnected</source>
         <translation>Отключено</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7068"/>
         <source>Download CALL3.TXT</source>
         <translation>Скачать CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7529"/>
         <source>Empty = automatic public servers</source>
         <translation>Пусто = автоматические общедоступные серверы.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7502"/>
         <source>Enable NTP:</source>
         <translation>Включите NTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5736"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
         <source>Enable TCP ADIF:</source>
         <translation>Включите TCP ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5084"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5133"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5364"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7684"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7740"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7795"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5566"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7970"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8025"/>
         <source>Enabled:</source>
         <translation>Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7327"/>
         <source>Erase Band Act:</source>
         <translation>Закон о стирании полосы:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4790"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4992"/>
         <source>Erasure Patterns:</source>
         <translation>Шаблоны стирания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2995"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2262"/>
+        <source>CAT keep-alive:</source>
+        <translation>CAT keep-alive:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2270"/>
+        <source>Light polling for interface activity LEDs</source>
+        <translation>Лёгкий опрос для светодиодов активности интерфейса</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3030"/>
         <source>READY PROFILES</source>
         <translation>ГОТОВЫЕ ПРОФИЛИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3007"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3042"/>
         <source>Balanced (daily QSO) - default</source>
         <translation>Сбалансированный (ежедневные QSO) — по умолчанию</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3043"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
         <translation>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3009"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3044"/>
         <source>Weak-signal / DX hunting</source>
         <translation>Слабый сигнал / охота за DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3010"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3045"/>
         <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
         <translation>Как Сбалансированный, но: caller retries 7 · adaptive decode OFF (максимальная чувствительность) · AP cache rescue ON (допускает несколько ложных) · skip end-slot OFF (не терять поздние декодирования).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3046"/>
         <source>Contest / high density</source>
         <translation>Contest / высокая плотность</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3012"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3047"/>
         <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
         <translation>close strong partners ON · skip end-slot ON (минимальная задержка) · MAM multi-stream ON (2 потока, экспериментально) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3014"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3049"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
         <translation>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · остальное по умолчанию. Watchdog без изменений.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3037"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
         <source>● active</source>
         <translation>● активен</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
         <source>FD Exchange:</source>
         <translation>FD Обмен:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7847"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8077"/>
         <source>EXCLUDE TERRITORY</source>
         <translation>ИСКЛЮЧИТЬ ТЕРРИТОРИЮ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7850"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8080"/>
         <source>Europe:</source>
         <translation>Европа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8088"/>
         <source>Africa:</source>
         <translation>Африка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8097"/>
         <source>Oceania:</source>
         <translation>Океания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7875"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8105"/>
         <source>Asia:</source>
         <translation>Азия:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7884"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8114"/>
         <source>North America:</source>
         <translation>Северная Америка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7892"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8122"/>
         <source>South America:</source>
         <translation>Южная Америка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8132"/>
         <source>FILTER OPTIONS</source>
         <translation>ВАРИАНТЫ ФИЛЬТРА</translation>
     </message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
-    <source>Worked on Band:</source>
-    <translation>Работали на диапазоне:</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7914"/>
-    <source>Hide stations already worked on the current band.</source>
-    <translation>Скрывать станции, уже сработанные на текущем диапазоне.</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
-    <source>Worked Today:</source>
-    <translation>Работали сегодня:</translation>
-</message>
-<message>
-    <location filename="../qml/decodium/components/SettingsDialog.qml" line="7926"/>
-    <source>Hide stations already logged today in UTC.</source>
-    <translation>Скрывать станции, уже занесенные в журнал сегодня по UTC.</translation>
-</message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8135"/>
+        <source>Worked on Band:</source>
+        <translation>Работали на диапазоне:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8144"/>
+        <source>Hide stations already worked on the current band.</source>
+        <translation>Скрывать станции, уже сработанные на текущем диапазоне.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8147"/>
+        <source>Worked Today:</source>
+        <translation>Работали сегодня:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8156"/>
+        <source>Hide stations already logged today in UTC.</source>
+        <translation>Скрывать станции, уже занесенные в журнал сегодня по UTC.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4552"/>
         <source>FONT</source>
         <translation>ШРИФТ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2936"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2971"/>
         <source>FREQUENCY AND TIMING</source>
         <translation>ЧАСТОТА И ТАЙМИНГ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="840"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
         <source>Fake It</source>
         <translation>Подделать это</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Fast</source>
         <translation>Быстрый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Field Day</source>
         <translation>День поля</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
         <source>First (:00/:30)</source>
         <translation>Первый (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4353"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4555"/>
         <source>Font:</source>
         <translation>Шрифт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7067"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7297"/>
         <source>Force Call 1st:</source>
         <translation>Принудительно позывной первым:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2340"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2370"/>
         <source>Force DTR:</source>
         <translation>Принудительно DTR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2362"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2392"/>
         <source>Force RTS:</source>
         <translation>Принудительно RTS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Fox</source>
         <translation>Фокс</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7168"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7398"/>
         <source>Fox Mode:</source>
         <translation>Режим Fox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="876"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="877"/>
         <source>Front/Mic</source>
         <translation>Фронтальный/Микрофон</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Full</source>
         <translation>Полный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4741"/>
         <source>Greyline:</source>
         <translation>Серая линия:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6664"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6894"/>
         <source>HIGHLIGHTING</source>
         <translation>МЕЛИРОВАНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6921"/>
         <source>HL Blue:</source>
         <translation>ХЛ Синий:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6676"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6906"/>
         <source>HL Orange:</source>
         <translation>ХЛ Оранжевый:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5371"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5573"/>
         <source>HTTP port:</source>
         <translation>HTTP-порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
         <source>Hamlib (300+ radios)</source>
         <translation>Hamlib (более 300 радиостанций)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2512"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2542"/>
         <source>Hamlib:</source>
         <translation>Hamlib:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2315"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2345"/>
         <source>Handshake:</source>
         <translation>Рукопожатие:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="662"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="663"/>
         <source>Hardware</source>
         <translation>Аппаратное обеспечение</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6943"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7173"/>
         <source>High DPI:</source>
         <translation>Высокое разрешение:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4946"/>
         <source>High Freq (Hz):</source>
         <translation>Высокая частота (Гц):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6667"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6897"/>
         <source>Highlight 73:</source>
         <translation>Выделение 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2062"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2064"/>
         <source>Host:Port:</source>
         <translation>Хост:Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>Hound</source>
         <translation>Гончая</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7179"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7409"/>
         <source>Hound Mode:</source>
         <translation>Режим Hound:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1574"/>
         <source>IARU Region:</source>
         <translation>IARU регион:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7640"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7870"/>
         <source>ITU Zone Band:</source>
         <translation>Зональный диапазон МСЭ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7251"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
         <source>Indiv Name:</source>
         <translation>Имя Индива:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2761"/>
         <source>Input Channel:</source>
         <translation>Входной канал:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2706"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2741"/>
         <source>Input Device:</source>
         <translation>Устройство ввода:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5507"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5709"/>
         <source>Interface Used:</source>
         <translation>Используемый интерфейс:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1301"/>
         <source>Italic</source>
         <translation>Курсив</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4989"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2782"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2817"/>
         <source>LEVELS</source>
         <translation>УРОВНИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5449"/>
         <source>LOGGING</source>
         <translation>РЕГИСТРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5410"/>
         <source>LOTW</source>
         <translation>ЛОТВ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7182"/>
         <source>Larger Tab:</source>
         <translation>Большая вкладка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7330"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7560"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>Оставьте сервер пустым, чтобы автоматически использовать Pool.ntp.org, Apple, Cloudflare и Google.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="868"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="869"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Left</source>
         <translation>Левый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5690"/>
         <source>Listen Port:</source>
         <translation>Слушать порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5476"/>
         <source>Log as RTTY:</source>
         <translation>Войдите как RTTY:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5211"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5413"/>
         <source>LotW Enabled:</source>
         <translation>LotW Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4732"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4934"/>
         <source>Low Freq (Hz):</source>
         <translation>Низкая частота (Гц):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Low Sidelobes</source>
         <translation>Низкие боковые лепестки</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4529"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4731"/>
         <source>MAP AND DISTANCE</source>
         <translation>КАРТА И РАССТОЯНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3181"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3216"/>
         <source>MSK/Q65 TX until 73:</source>
         <translation>MSK/Q65 TX до 73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4749"/>
         <source>Map All Msgs:</source>
         <translation>Сопоставить все сообщения:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5027"/>
         <source>Max Sensitivity</source>
         <translation>Макс. чувствительность</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4532"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4734"/>
         <source>Miles:</source>
         <translation>Майлз:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2411"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5993"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2441"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6195"/>
         <source>Mode:</source>
         <translation>Режим:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6909"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7139"/>
         <source>Monitor Last:</source>
         <translation>Последний мониторинг:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7130"/>
         <source>Monitor OFF:</source>
         <translation>Монитор ВЫКЛ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="866"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Mono</source>
         <translation>Моно</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5699"/>
         <source>Multicast TTL:</source>
         <translation>Многоадресный TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
         <source>My Call Only:</source>
         <translation>Только мой позывной:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1542"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7565"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1544"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7795"/>
         <source>My Call:</source>
         <translation>Мой позывной:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1553"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1555"/>
         <source>My Grid:</source>
         <translation>Мой локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7259"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC Спринт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4967"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5169"/>
         <source>NETWORK SERVICES</source>
         <translation>СЕТЕВЫЕ УСЛУГИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7269"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7499"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP СИНХРОНИЗАЦИЯ ВРЕМЕНИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
         <source>Native (15 radios)</source>
         <translation>Родной (15 радиостанций)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7618"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7848"/>
         <source>New CQ Zone:</source>
         <translation>Новая зона CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7610"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7840"/>
         <source>New Cont Band:</source>
         <translation>Новая группа продолжения:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7603"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7833"/>
         <source>New Continent:</source>
         <translation>Новый Континент:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7810"/>
         <source>New DXCC Band:</source>
         <translation>Новый ремешок DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7803"/>
         <source>New DXCC:</source>
         <translation>Новый DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7825"/>
         <source>New Grid Band:</source>
         <translation>Новый локатор по диапазону:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7588"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7818"/>
         <source>New Grid:</source>
         <translation>Новый локатор:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7863"/>
         <source>New ITU Zone:</source>
         <translation>Новая зона МСЭ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7369"/>
         <source>No Btn Color:</source>
         <translation>Нет цвета кнопки:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
         <source>No message</source>
         <translation>Нет сообщения</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5229"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5431"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="658"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="858"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="659"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="859"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7446"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4718"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4920"/>
         <source>Normal</source>
         <translation>Нормальный</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5917"/>
         <source>Notify Request:</source>
         <translation>Уведомить запрос:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1460"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1462"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7381"/>
         <source>OPERATING MODE</source>
         <translation>РЕЖИМ РАБОТЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7701"/>
         <source>OTP</source>
         <translation>ОТП</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7704"/>
         <source>OTP Enabled:</source>
         <translation>OTP Включено:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7719"/>
         <source>OTP Interval:</source>
         <translation>OTP Интервал:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7481"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7711"/>
         <source>OTP Seed:</source>
         <translation>OTP Сид:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7728"/>
         <source>OTP URL:</source>
         <translation>URL-адрес OTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="864"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3975"/>
         <source>Off</source>
         <translation>Выкл.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="862"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="863"/>
         <source>On</source>
         <translation>Вкл.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1593"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1595"/>
         <source>Op Call:</source>
         <translation>Позывной оператора:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2526"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2556"/>
         <source>Open Hamlib update</source>
         <translation>Откройте обновление Hamlib.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
         <source>Orange Calls:</source>
         <translation>Оранжевые позывные:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2799"/>
         <source>Output Channel:</source>
         <translation>Выходной канал:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2779"/>
         <source>Output Device:</source>
         <translation>Устройство вывода:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2935"/>
         <source>POWER MEMORY</source>
         <translation>ПИТАНИЕ ПАМЯТЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4970"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5172"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2167"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2169"/>
         <source>PTT Method:</source>
         <translation>PTT Метод:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2214"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2216"/>
         <source>PTT Port:</source>
         <translation>PTT Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2468"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
         <source>PWR and SWR:</source>
         <translation>PWR и SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6996"/>
         <source>Palette:</source>
         <translation>Палитра:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5221"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5423"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2245"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2247"/>
         <source>Poll Interval (s):</source>
         <translation>Интервал опроса (сек):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5208"/>
         <source>Port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1652"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1654"/>
         <source>Power (W):</source>
         <translation>Мощность (Вт):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6935"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7165"/>
         <source>Progress Red:</source>
         <translation>Прогресс Красный:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5250"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5452"/>
         <source>Prompt to Log:</source>
         <translation>Подсказка для входа:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7655"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7885"/>
         <source>QSY Message:</source>
         <translation>QSY Сообщение:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1619"/>
         <source>QTH:</source>
         <translation>QTH:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7059"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7289"/>
         <source>Quick Call:</source>
         <translation>Быстрый вызов:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3114"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3149"/>
         <source>Quick QSO:</source>
         <translation>Быстрый QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5324"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5526"/>
         <source>RECORDING</source>
         <translation>ЗАПИСЬ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5361"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5563"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>УДАЛЕННАЯ ВЕБ-ПАНЕЛЬ (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7466"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY Обмен:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4757"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4959"/>
         <source>RX Bandwidth:</source>
         <translation>RX Пропускная способность:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2820"/>
         <source>RX Input Level:</source>
         <translation>RX Уровень ввода:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2153"/>
         <source>RX/TX via TCI</source>
         <translation>RX/TX через TCI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7352"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;TX после QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="874"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="875"/>
         <source>Rear/Data</source>
         <translation>Задний/данные</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5327"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5529"/>
         <source>Record RX:</source>
         <translation>Запишите RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5337"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5539"/>
         <source>Record TX:</source>
         <translation>Запишите TX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5413"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5615"/>
         <source>Required for LAN/WAN</source>
         <translation>Требуется для LAN/WAN</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4385"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4421"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5868"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6517"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4623"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6070"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6720"/>
         <source>Reset</source>
         <translation>Сброс</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5723"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5925"/>
         <source>Restore Win:</source>
         <translation>Восстановить победу:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="838"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="839"/>
         <source>Rig</source>
         <translation>Трансивер</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1629"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1631"/>
         <source>Rig Info:</source>
         <translation>Информация о буровой установке:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1769"/>
         <source>Rig:</source>
         <translation>Трансивер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="870"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2729"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="871"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
         <source>Right</source>
         <translation>Правый</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2261"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2291"/>
         <source>SERIAL PARAMETERS</source>
         <translation>СЕРИЙНЫЕ ПАРАМЕТРЫ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4819"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5021"/>
         <source>SIDELOBE CONTROL</source>
         <translation>БОКОВОЕ УПРАВЛЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6993"/>
         <source>SPECTRUM</source>
         <translation>СПЕКТР</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2384"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2414"/>
         <source>SPLIT OPERATION</source>
         <translation>РАЗДЕЛЕННАЯ ОПЕРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6883"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7113"/>
         <source>STARTUP</source>
         <translation>СТАРТАП</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1541"/>
         <source>STATION DETAILS</source>
         <translation>ДАННЫЕ СТАНЦИИ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2867"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2902"/>
         <source>Save Directory:</source>
         <translation>Сохранить каталог:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2955"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
         <source>Second (:15/:45)</source>
         <translation>Второй (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5789"/>
         <source>Secondary ADIF:</source>
         <translation>Вторичный ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5569"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5771"/>
         <source>Secondary Interface:</source>
         <translation>Вторичный интерфейс:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5550"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5752"/>
         <source>Secondary Port:</source>
         <translation>Вторичный порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5542"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
         <source>Secondary Server:</source>
         <translation>Вторичный сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5559"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5761"/>
         <source>Secondary TTL:</source>
         <translation>Вторичный срок жизни:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5534"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5736"/>
         <source>Secondary UDP:</source>
         <translation>Вторичный UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5525"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5727"/>
         <source>Send ADIF:</source>
         <translation>Отправьте ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3093"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3128"/>
         <source>Send RR73:</source>
         <translation>Отправьте RR73:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1919"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1921"/>
         <source>Serial Port:</source>
         <translation>COM порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5673"/>
         <source>Server Name:</source>
         <translation>Имя сервера:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5478"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5680"/>
         <source>Server Port:</source>
         <translation>Порт сервера:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4992"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5194"/>
         <source>Server:</source>
         <translation>Сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4430"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4632"/>
         <source>Show DXCC:</source>
         <translation>Показать DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7198"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7428"/>
         <source>Show OTP:</source>
         <translation>Показать OTP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4822"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5024"/>
         <source>Sidelobe Mode:</source>
         <translation>Режим бокового лепестка:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4976"/>
         <source>Single Decode:</source>
         <translation>Одиночное декодирование:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5299"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5501"/>
         <source>Spec Op Cmts:</source>
         <translation>Технические характеристики:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2387"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2417"/>
         <source>Split:</source>
         <translation>Сплит:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5118"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5320"/>
         <source>Station ID:</source>
         <translation>Идентификатор станции:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1737"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5023"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5169"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1739"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5371"/>
         <source>Status:</source>
         <translation>Статус:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2296"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2326"/>
         <source>Stop Bits:</source>
         <translation>Стоп-биты:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7420"/>
         <source>SuperFox:</source>
         <translation>SuperFox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7314"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7544"/>
         <source>Sync Now</source>
         <translation>Синхронизировать сейчас</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2440"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
         <source>TCI Audio</source>
         <translation>ТЦИ Аудио</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2143"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2145"/>
         <source>TCI Audio:</source>
         <translation>ТКИ Аудио:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2117"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2119"/>
         <source>TCI Host:Port:</source>
         <translation>Хост TCI:Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5946"/>
         <source>TCP Port:</source>
         <translation>TCP Порт:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5958"/>
         <source>TCP Server:</source>
         <translation>TCP Сервер:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4980"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5182"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP:</translation>
     </message>
@@ -14535,42 +14658,42 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">ТЕРРИТОРИЯ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3885"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4087"/>
         <source>TONE SPACING</source>
         <translation>РАЗМЕЩЕНИЕ ТОНОВ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2424"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2454"/>
         <source>TX Audio Src:</source>
         <translation>TX Источник звука:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2437"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2467"/>
         <source>TX Audio:</source>
         <translation>TX Аудио:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2969"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3004"/>
         <source>TX Delay (s):</source>
         <translation>TX Задержка (с):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2974"/>
         <source>TX Frequency:</source>
         <translation>TX Частота:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4471"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4673"/>
         <source>TX Msg to RX:</source>
         <translation>TX Сообщение RX:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2845"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2880"/>
         <source>TX Output Level:</source>
         <translation>TX Уровень вывода:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2987"/>
         <source>TX Slot:</source>
         <translation>Слот TX:</translation>
     </message>
@@ -14595,172 +14718,172 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Территория 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1731"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1733"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
         <translation>Совет: закройте OmniRig с помощью значка на панели задач Windows, затем снова нажмите «Подключиться».</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3843"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4045"/>
         <source>Tune Watchdog (s):</source>
         <translation>Настройте сторожевого пса(ов):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4809"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5011"/>
         <source>Two-Pass:</source>
         <translation>Двухпроходной:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Type 1 prefix</source>
         <translation>Префикс типа 1</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1583"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
         <source>Type 2 Msg Gen:</source>
         <translation>Тип 2 Генерация сообщений:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
         <source>Type 2 prefix</source>
         <translation>Префикс типа 2</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5427"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5629"/>
         <source>UDP SERVER</source>
         <translation>UDP СЕРВЕР</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5401"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5603"/>
         <source>Username:</source>
         <translation>Имя пользователя:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7076"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7306"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3781"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3969"/>
         <source>WATCHDOG</source>
         <translation>СТОРОЖЕВОЙ ПЕС</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7967"/>
         <source>WHITELIST</source>
         <translation>БЕЛЫЙ СПИСОК</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5394"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5596"/>
         <source>WS bind:</source>
         <translation>Привязка WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5381"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5583"/>
         <source>WS socket port:</source>
         <translation>Разъем WS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5348"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5550"/>
         <source>WSPR Upload:</source>
         <translation>WSPR Загрузить:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7905"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8159"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Подождите и набросьтесь:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7318"/>
         <source>Wait Features:</source>
         <translation>Особенности ожидания:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7780"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8010"/>
         <source>Whitelist 10:</source>
         <translation>Белый список 10:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7784"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8014"/>
         <source>Whitelist 11:</source>
         <translation>Белый список 11:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7787"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8017"/>
         <source>Whitelist 12:</source>
         <translation>Белый список 12:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7749"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7979"/>
         <source>Whitelist 1:</source>
         <translation>Белый список 1:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7752"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7982"/>
         <source>Whitelist 2:</source>
         <translation>Белый список 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7756"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7986"/>
         <source>Whitelist 3:</source>
         <translation>Белый список 3:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7759"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7989"/>
         <source>Whitelist 4:</source>
         <translation>Белый список 4:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7993"/>
         <source>Whitelist 5:</source>
         <translation>Белый список 5:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7996"/>
         <source>Whitelist 6:</source>
         <translation>Белый список 6:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7770"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8000"/>
         <source>Whitelist 7:</source>
         <translation>Белый список 7:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8003"/>
         <source>Whitelist 8:</source>
         <translation>Белый список 8:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7777"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8007"/>
         <source>Whitelist 9:</source>
         <translation>Белый список 9:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2537"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
         <translation>Windows: DLL обновлена с сайта Hamlib. macOS/Linux: официальная документация и выпуски.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5314"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5516"/>
         <source>ZZ00:</source>
         <translation>ЗЗ00:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4890"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5092"/>
         <source>Zap:</source>
         <translation>Зап:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5306"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5508"/>
         <source>dB in Cmts:</source>
         <translation>dB в Cmts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6926"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7156"/>
         <source>kHz no k:</source>
         <translation>kHz нет к:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2691"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
         <source>↻  Refresh</source>
         <translation>↻  Обновить</translation>
     </message>
@@ -14794,53 +14917,84 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Не удалось инициализировать звуковую карту</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="275"/>
+        <location filename="../Audio/soundin.cpp" line="480"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
         <translation>Ошибка открытия аудиовхода RX: Qt не удалось открыть выбранное устройство ввода. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="279"/>
+        <location filename="../Audio/soundin.cpp" line="484"/>
         <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
         <translation>Ошибка чтения аудиовхода RX: Qt сообщил о сбое ввода-вывода при чтении сэмплов. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="283"/>
+        <location filename="../Audio/soundin.cpp" line="488"/>
         <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
         <translation>Фатальная ошибка аудиовхода RX: выбранное устройство ввода сейчас непригодно. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="289"/>
+        <location filename="../Audio/soundin.cpp" line="494"/>
         <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
         <translation>Underrun аудиовхода RX: захват отстал, но продолжится. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="425"/>
+        <location filename="../Audio/soundin.cpp" line="649"/>
         <source>Audio RX format unsupported: device=&quot;%1&quot; does not accept requested=%2; preferred=%3; selected-channel=%4</source>
         <translation>Формат аудио RX не поддерживается: device=&quot;%1&quot; не принимает requested=%2; preferred=%3; selected-channel=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="466"/>
+        <location filename="../Audio/soundin.cpp" line="706"/>
         <source>Audio RX sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
         <translation>Не удалось инициализировать sink аудио RX: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="630"/>
+        <location filename="../Audio/soundin.cpp" line="888"/>
         <source>Idle</source>
         <translation>Простой</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="635"/>
-        <location filename="../Audio/soundin.cpp" line="639"/>
+        <location filename="../Audio/soundin.cpp" line="410"/>
+        <location filename="../Audio/soundin.cpp" line="893"/>
+        <location filename="../Audio/soundin.cpp" line="897"/>
         <source>Receiving</source>
         <translation>Прием</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="639"/>
+        <location filename="../Audio/soundin.cpp" line="327"/>
+        <source>Native macOS AudioQueue input requires PCM Int16 format, got %1</source>
+        <translation>Нативному вводу macOS AudioQueue требуется формат PCM Int16, получено %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="334"/>
+        <source>Native macOS AudioQueue sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
+        <translation>Не удалось инициализировать sink macOS AudioQueue: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="361"/>
+        <source>Native macOS AudioQueue input open failed for &quot;%1&quot;: %2</source>
+        <translation>Не удалось открыть ввод macOS AudioQueue для &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="379"/>
+        <source>Native macOS AudioQueue buffer allocation failed for &quot;%1&quot;: %2</source>
+        <translation>Не удалось выделить буфер macOS AudioQueue для &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="388"/>
+        <source>Native macOS AudioQueue buffer enqueue failed for &quot;%1&quot;: %2</source>
+        <translation>Не удалось поставить буфер macOS AudioQueue в очередь для &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="399"/>
+        <source>Native macOS AudioQueue input start failed for &quot;%1&quot;: %2</source>
+        <translation>Не удалось запустить ввод macOS AudioQueue для &quot;%1&quot;: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="897"/>
         <source>Suspended</source>
         <translation>Приостановленный</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="645"/>
+        <location filename="../Audio/soundin.cpp" line="903"/>
         <source>Audio RX input stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>Аудиовход RX остановлен с ошибкой: device=&quot;%1&quot;, state=%2</translation>
     </message>
@@ -14853,7 +15007,7 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <translation type="vanished">Ошибка</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="652"/>
+        <location filename="../Audio/soundin.cpp" line="910"/>
         <source>Stopped</source>
         <translation>Остановлено</translation>
     </message>
@@ -15068,14 +15222,14 @@ Costs extra CPU during QSOs. Default: OFF.</source>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="469"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="472"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
         <translation>Измеритель ALC 0..100
 &gt;60 = чрезмерный ALC (мощность TX слишком высока)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="470"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="473"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>ALC не сообщается Hamlib для этого rig/backend</translation>
     </message>
@@ -16030,142 +16184,174 @@ Long-press: edit message</source>
         <translation type="vanished">Настройки</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="30"/>
         <source>Genera&amp;l</source>
-        <translation type="vanished">Общие</translation>
+        <translation>Общие</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="33"/>
         <source>General station details and settings.</source>
-        <translation type="vanished">Подробная информация и настройка станции.</translation>
+        <translation>Подробная информация и настройка станции.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="39"/>
         <source>Station Details</source>
-        <translation type="vanished">Описание станции</translation>
+        <translation>Описание станции</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="49"/>
         <source>My C&amp;all:</source>
-        <translation type="vanished">Мой п&amp;озывной:</translation>
+        <translation>Мой п&amp;озывной:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="59"/>
         <source>Station callsign.</source>
-        <translation type="vanished">Позывной станции</translation>
+        <translation>Позывной станции</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="70"/>
         <source>M&amp;y Grid:</source>
-        <translation type="vanished">Мо&amp;й QTH локатор:</translation>
+        <translation>Мо&amp;й QTH локатор:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="80"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maidenhead locator, preferably 6 characters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">
+        <translation>
 &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ваш локатор, желательно 6 символов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="89"/>
         <source>Check to allow grid changes from external programs</source>
-        <translation type="vanished">Установите этот флажок, чтобы разрешить изменения локатора из внешних программ.</translation>
+        <translation>Установите этот флажок, чтобы разрешить изменения локатора из внешних программ.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="92"/>
         <source>AutoGrid</source>
-        <translation type="vanished">АвтоЛокатор</translation>
+        <translation>АвтоЛокатор</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="101"/>
         <source>IARU Region:</source>
-        <translation type="vanished">IARU регион:</translation>
+        <translation>IARU регион:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="111"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select your IARU region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выберите свой регион IARU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выберите свой регион IARU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="124"/>
         <source>Message generation for type 2 compound callsign holders:</source>
-        <translation type="vanished">Создание сообщений при испрользовании дробного позывного 2-ого типа :</translation>
+        <translation>Создание сообщений при испрользовании дробного позывного 2-ого типа :</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="140"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type 2 compound callsigns are those with prefixes or suffixes not included in the allowed shortlist (See Help-&amp;gt;Add-on prefixes and suffixes).&lt;/p&gt;&lt;p&gt;This option determines which generated messages should contain your full type 2 compound call sign rather than your base callsign. It only applies if you have a type 2 compound callsign.&lt;/p&gt;&lt;p&gt;This option controls the way the messages that are used to answer CQ calls are generated. Generated messages 6 (CQ) and 5 (73) will always contain your full callsign. The JT65 and JT9 protocols allow for some standard messages with your full call at the expense of another piece of information such as the DX call or your locator.&lt;/p&gt;&lt;p&gt;Choosing message 1 omits the DX callsign which may be an issue when replying to CQ calls. Choosing message 3 also omits the DX callsign and many versions of this and other software will not extract the report. Choosing neither means that your full callsign only goes in your message 5 (73) so your QSO partner may log the wrong callsign.&lt;/p&gt;&lt;p&gt;None of these options are perfect, message 3 is usually best but be aware your QSO partner may not log the report you send them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Составные(дробные) позывные второго типа - это те, у которых есть префиксы или суффиксы, не включенные в разрешенный список (см. Помощь-&gt;Список дополнительных префиксов и суффиксов)&lt;/p&gt;&lt;p&gt;Эта опция определяет, какие созданные сообщения должны содержать Ваш полный составной позывной второго типа вместо Вашего основного(домашнего) позывного. Эта настройка применяется только если Вы используете составной позывной второго типа.&lt;/p&gt;&lt;p&gt;Этот опция определяет способ создания сообщений, которые используются для ответа на вызовы CQ. Сгенерированные сообщения Tx6 (CQ) и Tx5 ​​(73) всегда будут содержать Ваш полный составной позывной. Протоколы JT65 и JT9 позволяют использовать некоторые стандартные сообщения с Вашим полным составным позывным в ущерб другой информации, такой как позывной корреспондента или Ваш QTH квадрат.&lt;/p&gt;&lt;p&gt;При выбор сообщения Tx1 исключается позывной корреспондента, что может быть проблемой при ответе на сообщения CQ. Выбор сообщения Tx3 также исключает позывной корреспондента, и разные версии этого и другого программного обеспечения не будут извлекать из принятого сообщения рапорт. Выбрав Tx5, Ваш полный позывной будет передан только в сообщении 73, поэтому Ваш корреспондент может внести QSO в свой лог с Вашим неполным(домашним) позывным.&lt;/p&gt;&lt;p&gt;Среди этих вариантов нет идеального, лучше использовать сообщение Tx3, но помните что в этом случае Ваш корреспондент может забыть внести в лог принятый от Вас рапорт.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Составные(дробные) позывные второго типа - это те, у которых есть префиксы или суффиксы, не включенные в разрешенный список (см. Помощь-&gt;Список дополнительных префиксов и суффиксов)&lt;/p&gt;&lt;p&gt;Эта опция определяет, какие созданные сообщения должны содержать Ваш полный составной позывной второго типа вместо Вашего основного(домашнего) позывного. Эта настройка применяется только если Вы используете составной позывной второго типа.&lt;/p&gt;&lt;p&gt;Этот опция определяет способ создания сообщений, которые используются для ответа на вызовы CQ. Сгенерированные сообщения Tx6 (CQ) и Tx5 ​​(73) всегда будут содержать Ваш полный составной позывной. Протоколы JT65 и JT9 позволяют использовать некоторые стандартные сообщения с Вашим полным составным позывным в ущерб другой информации, такой как позывной корреспондента или Ваш QTH квадрат.&lt;/p&gt;&lt;p&gt;При выбор сообщения Tx1 исключается позывной корреспондента, что может быть проблемой при ответе на сообщения CQ. Выбор сообщения Tx3 также исключает позывной корреспондента, и разные версии этого и другого программного обеспечения не будут извлекать из принятого сообщения рапорт. Выбрав Tx5, Ваш полный позывной будет передан только в сообщении 73, поэтому Ваш корреспондент может внести QSO в свой лог с Вашим неполным(домашним) позывным.&lt;/p&gt;&lt;p&gt;Среди этих вариантов нет идеального, лучше использовать сообщение Tx3, но помните что в этом случае Ваш корреспондент может забыть внести в лог принятый от Вас рапорт.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="147"/>
         <source>Full call in Tx1</source>
-        <translation type="vanished">Полный позывной в Tx1</translation>
+        <translation>Полный позывной в Tx1</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="152"/>
         <source>Full call in Tx3</source>
-        <translation type="vanished">Полный позывной в Tx3</translation>
+        <translation>Полный позывной в Tx3</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="157"/>
         <source>Full call in Tx5 only</source>
-        <translation type="vanished">Полный позывной только в Tx5</translation>
+        <translation>Полный позывной только в Tx5</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="177"/>
         <source>Display</source>
-        <translation type="vanished">Отображать</translation>
+        <translation>Отображать</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="277"/>
         <source>Show outgoing transmitted messages in the Rx frequency window.</source>
-        <translation type="vanished">Показать исходящие переданные сообщения в окне частоты приема.</translation>
+        <translation>Показать исходящие переданные сообщения в окне частоты приема.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="280"/>
         <source>&amp;Tx messages to Rx frequency window</source>
-        <translation type="vanished">Показывать переданные сообщения в окне Rx</translation>
+        <translation>Показывать переданные сообщения в окне Rx</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="183"/>
         <source>Show if decoded stations are new DXCC entities or worked before.</source>
-        <translation type="vanished">Показать, являются ли декодированные станции новыми объектами DXCC или работали ранее.</translation>
+        <translation>Показать, являются ли декодированные станции новыми объектами DXCC или работали ранее.</translation>
     </message>
     <message>
         <source>Show &amp;DXCC, grid, and worked-before status</source>
         <translation type="vanished">Показать &amp;DXCC, локатор и B4 (работал ранее)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="250"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to have decodes for a new period start at the top of the Band Activity window and not scroll off the top when the window is full.&lt;/p&gt;&lt;p&gt;This is to aid selecting decodes to double-click while decoding is still in progress. Use the Band Activity vertical scroll bar to reveal decodes past the bottom of the window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Установите флажок, чтобы декодирование нового периода начиналось в верхней части окна «Декодирование в полосе обзора» и не прокручивалось вверх, когда окно заполнено.&lt;/p&gt;&lt;p&gt;Это предназначен для облегчения выбора декодирования двойным щелчком, когда декодирование все еще выполняется. Используйте вертикальную полосу прокрутки , чтобы показать декодирование за нижней частью окна.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Установите флажок, чтобы декодирование нового периода начиналось в верхней части окна «Декодирование в полосе обзора» и не прокручивалось вверх, когда окно заполнено.&lt;/p&gt;&lt;p&gt;Это предназначен для облегчения выбора декодирования двойным щелчком, когда декодирование все еще выполняется. Используйте вертикальную полосу прокрутки , чтобы показать декодирование за нижней частью окна.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="253"/>
         <source>Start new period decodes at top</source>
-        <translation type="vanished">Начать декодирование нового периода сверху</translation>
+        <translation>Начать декодирование нового периода сверху</translation>
     </message>
     <message>
         <source>Show principal prefix instead of country name</source>
         <translation type="vanished">Показывать основной префикс вместо названия страны</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="206"/>
         <source>Set the font characteristics for the application.</source>
-        <translation type="vanished">Выберите шрифт для надписей программы.</translation>
+        <translation>Выберите шрифт для надписей программы.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="209"/>
         <source>Font...</source>
-        <translation type="vanished">Шрифт приложения</translation>
+        <translation>Шрифт приложения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="240"/>
         <source>Set the font characteristics for the Band Activity and Rx Frequency areas.</source>
-        <translation type="vanished">Выберите шрифт для показа сообщений
+        <translation>Выберите шрифт для показа сообщений
 в полосе обзора и окне приемной частоты.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="243"/>
         <source>Decoded Text Font...</source>
-        <translation type="vanished">Шрифт декодированная...</translation>
+        <translation>Шрифт декодированная...</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="196"/>
         <source>Include a separator line between periods in the band activity window.</source>
-        <translation type="vanished">Разделительная линия между периодами декодирования</translation>
+        <translation>Разделительная линия между периодами декодирования</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="199"/>
         <source>&amp;Blank line between decoding periods</source>
-        <translation type="vanished">Разделительная  строка между периодами декодирования</translation>
+        <translation>Разделительная  строка между периодами декодирования</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="230"/>
         <source>Show distance to DX station in miles rather than kilometers.</source>
-        <translation type="vanished">Показывать расстояние до корреспондента в милях вместо километров.</translation>
+        <translation>Показывать расстояние до корреспондента в милях вместо километров.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="233"/>
         <source>Display dista&amp;nce in miles</source>
-        <translation type="vanished">Показывать расстояние в милях</translation>
+        <translation>Показывать расстояние в милях</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="317"/>
         <source>Behavior</source>
-        <translation type="vanished">Режим</translation>
+        <translation>Режим</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="438"/>
         <source>Decode after EME delay</source>
-        <translation type="vanished">Декодировать после задержки EME</translation>
+        <translation>Декодировать после задержки EME</translation>
     </message>
     <message>
         <source>Tx watchdog:</source>
@@ -16173,616 +16359,770 @@ Long-press: edit message</source>
 при отсутствии активности пользователя</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="506"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of minutes before unattended transmissions are aborted&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество минут до прерывания автоматической передачи&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество минут до прерывания автоматической передачи&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="509"/>
         <source>Disabled</source>
-        <translation type="vanished">Отключено</translation>
+        <translation>Отключено</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="512"/>
         <source> minutes</source>
-        <translation type="vanished"> минут</translation>
+        <translation> минут</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="445"/>
         <source>Single decode</source>
-        <translation type="vanished">Одиночное декодирование</translation>
+        <translation>Одиночное декодирование</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="428"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some rigs are not able to process CAT commands while transmitting. This means that if you are operating in split mode you may have to uncheck this option.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Некоторые трансиверы не могут обрабатывать CAT-команды во время передачи. Это означает, что если вы работаете в режиме разделения, вам, возможно, придется снять этот флажок.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Некоторые трансиверы не могут обрабатывать CAT-команды во время передачи. Это означает, что если вы работаете в режиме разделения, вам, возможно, придется снять этот флажок.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="431"/>
         <source>Allow Tx frequency changes while transmitting</source>
-        <translation type="vanished">Разрешить изменение частоты Tx во время передачи</translation>
+        <translation>Разрешить изменение частоты Tx во время передачи</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="323"/>
         <source>Don&apos;t start decoding until the monitor button is clicked.</source>
-        <translation type="vanished">Декодирование не начнется пока не будет
+        <translation>Декодирование не начнется пока не будет
 включена кнопка Монитор.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="326"/>
         <source>Mon&amp;itor off at startup</source>
-        <translation type="vanished">Отключ&amp;ить прием сигналов  при запуске</translation>
+        <translation>Отключ&amp;ить прием сигналов  при запуске</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="336"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this if you wish to automatically return to the last monitored frequency when monitor is enabled, leave it unchecked if you wish to have the current rig frequency maintained.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте этот флажок, если вы хотите автоматически возвращаться к последней отслеживаемой частоте при включении монитора, оставьте этот флажок снятым, если вы хотите сохранить текущую частоту установки.&lt;/p&gt;&lt; /тело&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте этот флажок, если вы хотите автоматически возвращаться к последней отслеживаемой частоте при включении монитора, оставьте этот флажок снятым, если вы хотите сохранить текущую частоту установки.&lt;/p&gt;&lt; /тело&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="339"/>
         <source>Monitor returns to last used frequency</source>
-        <translation type="vanished">Монитор возвращается к последней использовавшейся частоте</translation>
+        <translation>Монитор возвращается к последней использовавшейся частоте</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="363"/>
         <source>Alternate F1-F6 bindings</source>
-        <translation type="vanished">Альтернативные привязки F1-F6</translation>
+        <translation>Альтернативные привязки F1-F6</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="380"/>
         <source>Turns off automatic transmissions after sending a 73 or any other free
 text message.</source>
-        <translation type="vanished">Отключает передачу после отправки 73 или любого другого бесплатного
+        <translation>Отключает передачу после отправки 73 или любого другого бесплатного
 текстовое сообщение.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="384"/>
         <source>Di&amp;sable Tx after sending 73</source>
-        <translation type="vanished">Отключает передачу после отправки 73</translation>
+        <translation>Отключает передачу после отправки 73</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="527"/>
         <source>Send a CW ID after every 73 or free text message.</source>
-        <translation type="vanished">JT65: Передать свой позывной в CW после сообщения 73
+        <translation>JT65: Передать свой позывной в CW после сообщения 73
 или свободного текстового сообщения.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="530"/>
         <source>CW ID a&amp;fter 73</source>
-        <translation type="vanished">CW ID после 73</translation>
+        <translation>CW ID после 73</translation>
     </message>
     <message>
         <source>Periodic CW ID Inter&amp;val:</source>
         <translation type="vanished">Периодический CW ID интер&amp;вал:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="555"/>
         <source>Send a CW ID periodically every few minutes.
 This might be required under your countries licence regulations.
 It will not interfere with other users as it is always sent in the
 quiet period when decoding is done.</source>
-        <translation type="vanished">Передавайте CW ID периодически каждые несколько минут.
+        <translation>Передавайте CW ID периодически каждые несколько минут.
 Это может потребоваться в соответствии с лицензионным законодательством вашей страны.
 Он не будет мешать другим пользователям, так как он всегда отправляется в
 тихий период, когда декодирование сделано.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="370"/>
         <source>Automatic transmission mode.</source>
-        <translation type="vanished">Автоматический режим передачи.</translation>
+        <translation>Автоматический режим передачи.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="20"/>
+        <source>Decodium Setup</source>
+        <translation>Настройка Decodium</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="186"/>
         <source>Show &amp;DXCC, grid, and worked-before status    </source>
-        <translation type="vanished">Показать &amp;DXCC, сетку и статус «обработано до»    </translation>
+        <translation>Показать &amp;DXCC, сетку и статус «обработано до»    </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="216"/>
         <source>Highlight DX Grid in message</source>
-        <translation type="vanished">Выделить сетку DX в сообщении</translation>
+        <translation>Выделить сетку DX в сообщении</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="223"/>
         <source>Show DXCC for all messages</source>
-        <translation type="vanished">Показывать DXCC для всех сообщений</translation>
+        <translation>Показывать DXCC для всех сообщений</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="260"/>
         <source>Show the separator line between periods with time stamp of the decode period.</source>
-        <translation type="vanished">Покажите разделительную линию между периодами с отметкой времени периода декодирования.</translation>
+        <translation>Покажите разделительную линию между периодами с отметкой времени периода декодирования.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="263"/>
         <source>Show blank line with time stamp</source>
-        <translation type="vanished">Показать пустую строку с отметкой времени</translation>
+        <translation>Показать пустую строку с отметкой времени</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="270"/>
         <source>Show principal prefix instead of country name        </source>
-        <translation type="vanished">Показывать основной префикс вместо названия страны</translation>
+        <translation>Показывать основной префикс вместо названия страны</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="287"/>
         <source>Highlight DX Call in message</source>
-        <translation type="vanished">Выделите DX-вызов в сообщении</translation>
+        <translation>Выделите DX-вызов в сообщении</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="373"/>
         <source>Doubl&amp;e-click on call sets Tx enable</source>
-        <translation type="vanished">Двойной клик на позывном разрешает вызов и активирует TX</translation>
+        <translation>Двойной клик на позывном разрешает вызов и активирует TX</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="391"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open the Astronomical Data window automatically when switching to Q65 or JT65 mode and Decode after EME delay is enabled, and close it when no longer needed.&lt;/p&gt;&lt;p&gt;Open the QSYMessage Creator automatically if the VHF Features are enabled and such QSY messages are applicable.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Автоматически открывать окно астрономических данных при переключении в режим Q65 или JT65 и включать декодирование после задержки EME и закрывать его, когда оно больше не требуется.&lt;/p&gt;&lt;p&gt;Открывать QSYMessage Creator автоматически, если включены функции VHF и такие сообщения QSY применимы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Автоматически открывать окно астрономических данных при переключении в режим Q65 или JT65 и включать декодирование после задержки EME и закрывать его, когда оно больше не требуется.&lt;/p&gt;&lt;p&gt;Открывать QSYMessage Creator автоматически, если включены функции VHF и такие сообщения QSY применимы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="394"/>
         <source>Auto-open/close Astronomical data window</source>
-        <translation type="vanished">Автоматическое открытие/закрытие окна астрономических данных</translation>
+        <translation>Автоматическое открытие/закрытие окна астрономических данных</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="401"/>
         <source>Calling CQ forces Call 1st</source>
-        <translation type="vanished">Вызов CQ заставляет Call 1st</translation>
+        <translation>Вызов CQ заставляет Call 1st</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="408"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx until 73 is received when in MSK144 or Q65 mode. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx until 73 is received when in MSK144 or Q65 mode. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tx until 73 is received when in MSK144 or Q65 mode. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="411"/>
         <source>MSK144/Q65: Tx until 73 is received</source>
-        <translation type="vanished">MSK144/Q65: Передача до получения 73</translation>
+        <translation>MSK144/Q65: Передача до получения 73</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="418"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allow kHz frequency offset entry without &apos;k&apos; suffix.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allow kHz frequency offset entry without &apos;k&apos; suffix.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allow kHz frequency offset entry without &apos;k&apos; suffix.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="421"/>
         <source>kHz entry without k (restart required)</source>
-        <translation type="vanished">ввод кГц без k (требуется перезагрузка)</translation>
+        <translation>ввод кГц без k (требуется перезагрузка)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="454"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable the Tune watchdog.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отключить сторожевой таймер настройки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отключить сторожевой таймер настройки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="457"/>
         <source>Tune watchdog   </source>
-        <translation type="vanished">Настройте сторожевой таймер   </translation>
+        <translation>Настройте сторожевой таймер   </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="464"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of seconds before Tune is aborted&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество секунд до прерывания настройки&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество секунд до прерывания настройки&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="467"/>
         <source> seconds</source>
-        <translation type="vanished"> секунды</translation>
+        <translation> секунды</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="496"/>
         <source>Tx watchdog: </source>
-        <translation type="vanished">Контрольный таймер передачи:</translation>
+        <translation>Контрольный таймер передачи:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="545"/>
         <source>ID Inter&amp;val:</source>
-        <translation type="vanished">Идентификатор Inter&amp;val:</translation>
+        <translation>Идентификатор Inter&amp;val:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="567"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn the progress bar red while transmitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Во время передачи индикатор выполнения становится красным.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Во время передачи индикатор выполнения становится красным.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="570"/>
         <source>Turn progress bar red while transmitting</source>
-        <translation type="vanished">Во время передачи индикатор выполнения становится красным</translation>
+        <translation>Во время передачи индикатор выполнения становится красным</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="593"/>
         <source>Additional features</source>
-        <translation type="vanished">Дополнительные возможности</translation>
+        <translation>Дополнительные возможности</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="599"/>
         <source>Set Rx frequency to Tx frequency after QSO</source>
-        <translation type="vanished">Установите частоту Rx на частоту Tx после QSO</translation>
+        <translation>Установите частоту Rx на частоту Tx после QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="606"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a station sends locator, calculate and show the distance in Band Activity pane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если станция отправляет локатор, рассчитайте и отобразите расстояние на панели активности диапазона.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если станция отправляет локатор, рассчитайте и отобразите расстояние на панели активности диапазона.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="609"/>
         <source>Show distance in messages with grid</source>
-        <translation type="vanished">Показывать расстояние в сообщениях с сеткой</translation>
+        <translation>Показывать расстояние в сообщениях с сеткой</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="616"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase Band Activity and Rx frequency windows after band change.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase Band Activity and Rx frequency windows after band change.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase Band Activity and Rx frequency windows after band change.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="619"/>
         <source>Erase decodes after band change</source>
-        <translation type="vanished">Стереть декодирование после смены диапазона</translation>
+        <translation>Стереть декодирование после смены диапазона</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="626"/>
         <source>Clear DX Grid after QSO</source>
-        <translation type="vanished">Очистить сетку DX после QSO</translation>
+        <translation>Очистить сетку DX после QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="633"/>
         <source>Show U.S. States in messages with grid</source>
-        <translation type="vanished">Показывать штаты США в сообщениях с сеткой</translation>
+        <translation>Показывать штаты США в сообщениях с сеткой</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="640"/>
         <source>Map Grid locator to U.S. State</source>
-        <translation type="vanished">Сопоставить локатор сетки со штатом США</translation>
+        <translation>Сопоставить локатор сетки со штатом США</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="647"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Align the text for DXCC, distance and azimuth.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выровняйте текст для DXCC, расстояния и азимута.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выровняйте текст для DXCC, расстояния и азимута.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="650"/>
         <source>Align DXCC/distance/azimuth</source>
-        <translation type="vanished">Выровнять DXCC/расстояние/азимут</translation>
+        <translation>Выровнять DXCC/расстояние/азимут</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="657"/>
         <source>Alternate Erase button behavior</source>
-        <translation type="vanished">Альтернативное поведение кнопки «Стереть»</translation>
+        <translation>Альтернативное поведение кнопки «Стереть»</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="664"/>
         <source>Clear DX Call after QSO</source>
-        <translation type="vanished">Очистить вызов DX после QSO</translation>
+        <translation>Очистить вызов DX после QSO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="671"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increase or decrease the space between message text and DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличение или уменьшение интервала между текстом сообщения и DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличение или уменьшение интервала между текстом сообщения и DXCC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="687"/>
         <source>Enable Wait features</source>
-        <translation type="vanished">Включить функции ожидания</translation>
+        <translation>Включить функции ожидания</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="694"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a station sends a valid Maidenhead locator, calculate and show the great-circle azimuth in Band Activity pane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если станция отправляет действительный локатор Мейденхеда, вычислите и отобразите азимут большого круга на панели активности диапазона.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если станция отправляет действительный локатор Мейденхеда, вычислите и отобразите азимут большого круга на панели активности диапазона.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="697"/>
         <source>Show azimuth in messages with grid</source>
-        <translation type="vanished">Показывать азимут в сообщениях с сеткой</translation>
+        <translation>Показывать азимут в сообщениях с сеткой</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="704"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increase or decrease the space between DXCC and distance/azimuth.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличьте или уменьшите расстояние между DXCC и расстоянием/азимутом.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличьте или уменьшите расстояние между DXCC и расстоянием/азимутом.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="717"/>
         <source>Less button coloring (restart required)</source>
-        <translation type="vanished">Меньше цвета кнопок (требуется перезагрузка)</translation>
+        <translation>Меньше цвета кнопок (требуется перезагрузка)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="728"/>
         <source>&amp;Radio</source>
-        <translation type="vanished">&amp;Радио</translation>
+        <translation>&amp;Радио</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="731"/>
         <source>Radio interface configuration settings.</source>
-        <translation type="vanished">Настройки конфигурации радиоинтерфейса.</translation>
+        <translation>Настройки конфигурации радиоинтерфейса.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="756"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use only VFO A for split operation (the program temporarily changes the QRG of your rig during transmission).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use only VFO A for split operation (the program temporarily changes the QRG of your rig during transmission).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use only VFO A for split operation (the program temporarily changes the QRG of your rig during transmission).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="772"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use VFO A+B for split operation (works with many rigs, but requires the use of both VFOs).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Используйте VFO A+B для работы в режиме разделения (работает со многими установками, но требует использования обоих VFO).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Используйте VFO A+B для работы в режиме разделения (работает со многими установками, но требует использования обоих VFO).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="785"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Don&apos;t use split (not recommended).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Не используйте разделение (не рекомендуется).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Не используйте разделение (не рекомендуется).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="896"/>
         <source>Settings that control your CAT interface.</source>
-        <translation type="vanished">Настройки управления Вашим CAT интерфейсом.</translation>
+        <translation>Настройки управления Вашим CAT интерфейсом.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="899"/>
         <source>CAT Control</source>
-        <translation type="vanished">Управление CAT</translation>
+        <translation>Управление CAT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="910"/>
+        <location filename="../Configuration.ui" line="1445"/>
         <source>Port:</source>
-        <translation type="vanished">Порт:</translation>
+        <translation>Порт:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="926"/>
         <source>Serial port used for CAT control.</source>
-        <translation type="vanished">COM порт для управления CAT.</translation>
+        <translation>COM порт для управления CAT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="950"/>
+        <location filename="../Configuration.ui" line="953"/>
         <source>Serial Port Parameters</source>
-        <translation type="vanished">Параметры COM порта</translation>
+        <translation>Параметры COM порта</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="964"/>
         <source>Baud Rate:</source>
-        <translation type="vanished">Скорость:</translation>
+        <translation>Скорость:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="980"/>
         <source>Serial port data rate which must match the setting of your radio.</source>
-        <translation type="vanished">Скорость COM порта . Должна соответствовать установленной скорости в трансивере.</translation>
+        <translation>Скорость COM порта . Должна соответствовать установленной скорости в трансивере.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="987"/>
         <source>1200</source>
-        <translation type="vanished">1200</translation>
+        <translation>1200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="992"/>
         <source>2400</source>
-        <translation type="vanished">2400</translation>
+        <translation>2400</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="997"/>
         <source>4800</source>
-        <translation type="vanished">4800</translation>
+        <translation>4800</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1002"/>
         <source>9600</source>
-        <translation type="vanished">9600</translation>
+        <translation>9600</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1007"/>
         <source>19200</source>
-        <translation type="vanished">19200</translation>
+        <translation>19200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1012"/>
         <source>38400</source>
-        <translation type="vanished">38400</translation>
+        <translation>38400</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1017"/>
         <source>57600</source>
-        <translation type="vanished">57600</translation>
+        <translation>57600</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1022"/>
         <source>115200</source>
-        <translation type="vanished">115200</translation>
+        <translation>115200</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1032"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of data bits used to communicate with your radio&apos;s CAT interface (usually eight).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество битов данных, используемых для связи с CAT-интерфейсом трансивера (обычно восемь).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество битов данных, используемых для связи с CAT-интерфейсом трансивера (обычно восемь).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1038"/>
         <source>Data Bits</source>
-        <translation type="vanished">Бит данных</translation>
+        <translation>Бит данных</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1044"/>
         <source>D&amp;efault</source>
-        <translation type="vanished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1057"/>
         <source>Se&amp;ven</source>
-        <translation type="vanished">Семь</translation>
+        <translation>Семь</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1070"/>
         <source>E&amp;ight</source>
-        <translation type="vanished">Восемь</translation>
+        <translation>Восемь</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1086"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of stop bits used when communicating with your radio&apos;s CAT interface&lt;/p&gt;&lt;p&gt;(consult you radio&apos;s manual for details).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество стоповых битов, используемых при обмене данными с CAT-интерфейсом трансивера&lt;/p&gt;&lt;p&gt;(подробности см. в руководстве по радиостанции).&lt;/p&gt;&lt;/body&gt;&lt; /html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество стоповых битов, используемых при обмене данными с CAT-интерфейсом трансивера&lt;/p&gt;&lt;p&gt;(подробности см. в руководстве по радиостанции).&lt;/p&gt;&lt;/body&gt;&lt; /html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1092"/>
         <source>Stop Bits</source>
-        <translation type="vanished">Стоп бит</translation>
+        <translation>Стоп бит</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1098"/>
+        <location filename="../Configuration.ui" line="1149"/>
         <source>Default</source>
-        <translation type="vanished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1111"/>
         <source>On&amp;e</source>
-        <translation type="vanished">Один</translation>
+        <translation>Один</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1121"/>
         <source>T&amp;wo</source>
-        <translation type="vanished">Два</translation>
+        <translation>Два</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1137"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Flow control protocol used between this computer and your radio&apos;s CAT interface (usually &amp;quot;None&amp;quot; but some require &amp;quot;Hardware&amp;quot;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Протокол управления потоком данных, используемый между этим компьютером и CAT-интерфейсом радиостанции (обычно &quot;Нет&quot;, но для некоторых требуется &quot;Аппаратная поддержка&quot;).&lt;/p&gt;&lt;/body&gt;&lt;/ HTML&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Протокол управления потоком данных, используемый между этим компьютером и CAT-интерфейсом радиостанции (обычно &quot;Нет&quot;, но для некоторых требуется &quot;Аппаратная поддержка&quot;).&lt;/p&gt;&lt;/body&gt;&lt;/ HTML&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1140"/>
+        <location filename="../Configuration.ui" line="1143"/>
         <source>Handshake</source>
-        <translation type="vanished">Управление потоком</translation>
+        <translation>Управление потоком</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1162"/>
         <source>&amp;None</source>
-        <translation type="vanished">Отключено</translation>
+        <translation>Отключено</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1175"/>
         <source>Software flow control (very rare on CAT interfaces).</source>
-        <translation type="vanished">Программное управление потоком передачи
+        <translation>Программное управление потоком передачи
 данных через последовательный порт.
 Применяется крайне редко на CAT интерфейсе.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1178"/>
         <source>XON/XOFF</source>
-        <translation type="vanished">Программное</translation>
+        <translation>Программное</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1188"/>
         <source>Flow control using the RTS and CTS RS-232 control lines
 not often used but some radios have it as an option and 
 a few, particularly some Kenwood rigs, require it).</source>
-        <translation type="vanished">Аппаратное управление потоком передачи данных
+        <translation>Аппаратное управление потоком передачи данных
 с использованием линий RTS и CTS RS-232,
 применяется редко, но некоторые трансиверы имеют
 его в качестве опции и немногие, в том числе
 некоторые Kenwood, требуют этого управления.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1193"/>
         <source>&amp;Hardware</source>
-        <translation type="vanished">Аппаратное</translation>
+        <translation>Аппаратное</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1206"/>
         <source>Special control of CAT port control lines.</source>
-        <translation type="vanished">Управление линиями DTR/RTS CAT порта, уровень</translation>
+        <translation>Управление линиями DTR/RTS CAT порта, уровень</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1209"/>
+        <location filename="../Configuration.ui" line="1212"/>
         <source>Force Control Lines</source>
-        <translation type="vanished">Управление линиями DTR/RTS CAT порта.</translation>
+        <translation>Управление линиями DTR/RTS CAT порта.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1229"/>
+        <location filename="../Configuration.ui" line="1272"/>
         <source>High</source>
-        <translation type="vanished">Высокий</translation>
+        <translation>Высокий</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1234"/>
+        <location filename="../Configuration.ui" line="1277"/>
         <source>Low</source>
-        <translation type="vanished">Низкий</translation>
+        <translation>Низкий</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1242"/>
         <source>DTR:</source>
-        <translation type="vanished">ДТР:</translation>
+        <translation>ДТР:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1256"/>
         <source>RTS:</source>
-        <translation type="vanished">РТС:</translation>
+        <translation>РТС:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1374"/>
         <source>How this program activates the PTT on your radio?</source>
-        <translation type="vanished">Управление PTT</translation>
+        <translation>Управление PTT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1377"/>
         <source>PTT Method</source>
-        <translation type="vanished">Управление PTT</translation>
+        <translation>Управление PTT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1383"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No PTT activation, instead the radio&apos;s automatic VOX is used to key the transmitter.&lt;/p&gt;&lt;p&gt;Use this if you have no radio interface hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Для управления передатчиком используется автоматический VOX трансивера.&lt;/p&gt;&lt;p&gt;Используйте это, если у вас нет аппаратного радиоинтерфейса.&lt;/p&gt; &lt;/тело&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Для управления передатчиком используется автоматический VOX трансивера.&lt;/p&gt;&lt;p&gt;Используйте это, если у вас нет аппаратного радиоинтерфейса.&lt;/p&gt; &lt;/тело&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1386"/>
         <source>VO&amp;X</source>
-        <translation type="vanished">VO&amp;X</translation>
+        <translation>VO&amp;X</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1396"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the RS-232 DTR control line to toggle your radio&apos;s PTT, requires hardware to interface the line.&lt;/p&gt;&lt;p&gt;Some commercial interface units also use this method.&lt;/p&gt;&lt;p&gt;The DTR control line of the CAT serial port may be used for this or a DTR control line on a different serial port may be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте линию управления RS-232 DTR для переключения PTT вашего радио, требуется аппаратное обеспечение интерфейса линии.&lt;/p&gt;&lt;p&gt;Некоторые коммерческие интерфейсные устройства также используют этот метод. &lt;/p&gt;&lt;p&gt;Для этого можно использовать линию управления DTR последовательного порта CAT или линию управления DTR на другом последовательном порту.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте линию управления RS-232 DTR для переключения PTT вашего радио, требуется аппаратное обеспечение интерфейса линии.&lt;/p&gt;&lt;p&gt;Некоторые коммерческие интерфейсные устройства также используют этот метод. &lt;/p&gt;&lt;p&gt;Для этого можно использовать линию управления DTR последовательного порта CAT или линию управления DTR на другом последовательном порту.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1399"/>
         <source>&amp;DTR</source>
-        <translation type="vanished">&amp;DTR</translation>
+        <translation>&amp;DTR</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1412"/>
         <source>Some radios support PTT via CAT commands,
 use this option if your radio supports it and you have no
 other hardware interface for PTT.</source>
-        <translation type="vanished">Некоторые трансиверы поддерживают управление PTT
+        <translation>Некоторые трансиверы поддерживают управление PTT
 через команды CAT, используйте эту опцию, если Ваше
 радио поддерживает ее  и у Вас нет другого аппаратного
 интерфейса для управления PTT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1417"/>
         <source>C&amp;AT</source>
-        <translation type="vanished">C&amp;AT</translation>
+        <translation>C&amp;AT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1427"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the RS-232 RTS control line to toggle your radio&apos;s PTT, requires hardware to interface the line.&lt;/p&gt;&lt;p&gt;Some commercial interface units also use this method.&lt;/p&gt;&lt;p&gt;The RTS control line of the CAT serial port may be used for this or a RTS control line on a different serial port may be used. Note that this option is not available on the CAT serial port when hardware flow control is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте управляющую линию RTS COM порта для переключения PTT вашего трансивера. Для реализации данного метода требуется аппаратная поддержка (COM порт компьютера). 
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте управляющую линию RTS COM порта для переключения PTT вашего трансивера. Для реализации данного метода требуется аппаратная поддержка (COM порт компьютера). 
 Некоторые коммерческие интерфейсы также используют этот метод. 
 Для этого может использоваться линия управления RTS последовательного порта CAT, или может использоваться линия управления RTS другого COM порта. Обратите внимание, что эта опция недоступна на последовательном порту CAT при использовании аппаратного управления потоком. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1430"/>
         <source>R&amp;TS</source>
-        <translation type="vanished">R&amp;TS</translation>
+        <translation>R&amp;TS</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1461"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the RS-232 serial port utilised for PTT control, this option is available when DTR or RTS is selected above as a transmit method.&lt;/p&gt;&lt;p&gt;This port can be the same one as the one used for CAT control.&lt;/p&gt;&lt;p&gt;For some interface types the special value CAT may be chosen, this is used for non-serial CAT interfaces that can control serial port control lines remotely (OmniRig for example).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выберите последовательный порт RS-232, используемый для управления PTT. Этот параметр доступен, когда в качестве метода передачи выбран DTR или RTS.&lt;/p&gt;&lt;p&gt;Этот порт может быть тем же, что и для управления CAT.&lt;/p&gt;&lt;p&gt;Для некоторых типов интерфейсов может быть выбрано специальное значение CAT, которое используется для непоследовательных интерфейсов CAT, которые могут удаленно управлять линиями управления последовательного порта ( OmniRig, например).&lt;/p&gt;&lt;/body&gt;&lt;/html</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выберите последовательный порт RS-232, используемый для управления PTT. Этот параметр доступен, когда в качестве метода передачи выбран DTR или RTS.&lt;/p&gt;&lt;p&gt;Этот порт может быть тем же, что и для управления CAT.&lt;/p&gt;&lt;p&gt;Для некоторых типов интерфейсов может быть выбрано специальное значение CAT, которое используется для непоследовательных интерфейсов CAT, которые могут удаленно управлять линиями управления последовательного порта ( OmniRig, например).&lt;/p&gt;&lt;/body&gt;&lt;/html</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="820"/>
         <source>Modulation mode selected on radio.</source>
-        <translation type="vanished">Режим модуляции, выбранный на трансивере.</translation>
+        <translation>Режим модуляции, выбранный на трансивере.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="823"/>
         <source>Mode</source>
-        <translation type="vanished">Режим</translation>
+        <translation>Режим</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="829"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;USB is usually the correct modulation mode,&lt;/p&gt;&lt;p&gt;unless the radio has a special data or packet mode setting&lt;/p&gt;&lt;p&gt;for AFSK operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обычно режим USB является основным режимом модуляции,&lt;/p&gt;&lt;p&gt;если трансивер не имеет специального режима DATA или Packet&lt;/p&gt;&lt;p&gt;для работы AFSK.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обычно режим USB является основным режимом модуляции,&lt;/p&gt;&lt;p&gt;если трансивер не имеет специального режима DATA или Packet&lt;/p&gt;&lt;p&gt;для работы AFSK.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="832"/>
         <source>US&amp;B</source>
-        <translation type="vanished">US&amp;B</translation>
+        <translation>US&amp;B</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="845"/>
         <source>Don&apos;t allow the program to set the radio mode
 (not recommended but use if the wrong mode
 or bandwidth is selected).</source>
-        <translation type="vanished">Запретить программе устанавливать режим радио 
+        <translation>Запретить программе устанавливать режим радио 
  (не рекомендуется, но используйте, если выбран неправильный режим 
  или полоса пропускания).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="788"/>
+        <location filename="../Configuration.ui" line="850"/>
         <source>None</source>
-        <translation type="vanished">Отключено</translation>
+        <translation>Отключено</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="860"/>
         <source>If this is available then it is usually the correct mode for this program.</source>
-        <translation type="vanished">Если это доступно, то обычно это правильный режим для этой программы.</translation>
+        <translation>Если это доступно, то обычно это правильный режим для этой программы.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="863"/>
         <source>Data/P&amp;kt</source>
-        <translation type="vanished">Данные/P&amp;kt</translation>
+        <translation>Данные/P&amp;kt</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1708"/>
         <source>Some radios can select the audio input using a CAT command,
 this setting allows you to select which audio input will be used
 (if it is available then generally the Rear/Data option is best).</source>
-        <translation type="vanished">Для некоторых трансиверов есть возможность выбора аудиовхода с помощью CAT команды,
+        <translation>Для некоторых трансиверов есть возможность выбора аудиовхода с помощью CAT команды,
 если выбор доступен, то обычно лучше использовать параметр «Rear/Data».</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1713"/>
         <source>Transmit Audio Source</source>
-        <translation type="vanished">Подключение звуковой карты к трансиверу</translation>
+        <translation>Подключение звуковой карты к трансиверу</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1719"/>
         <source>Rear&amp;/Data</source>
-        <translation type="vanished">Задний&amp;/данные</translation>
+        <translation>Задний&amp;/данные</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1729"/>
         <source>&amp;Front/Mic</source>
-        <translation type="vanished">&amp;Передний/Микрофон</translation>
+        <translation>&amp;Передний/Микрофон</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1577"/>
         <source>Rig:</source>
-        <translation type="vanished">Трансивер:</translation>
+        <translation>Трансивер:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1597"/>
         <source>Poll Interval:</source>
-        <translation type="vanished">Интервал опроса:</translation>
+        <translation>Интервал опроса:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1607"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval to poll rig for status. Longer intervals will mean that changes to the rig will take longer to be detected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Интервал для опроса состояния трансивера. Более длительные интервалы означают, что изменения в трансивере будут обнаружены дольше.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Интервал для опроса состояния трансивера. Более длительные интервалы означают, что изменения в трансивере будут обнаружены дольше.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1610"/>
         <source> s</source>
-        <translation type="vanished"> c</translation>
+        <translation> c</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1305"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Attempt to connect to the radio with these settings.&lt;/p&gt;&lt;p&gt;The button will turn green if the connection is successful or red if there is a problem.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Попробуйте подключиться к трансиверу с этими настройками.&lt;/p&gt;&lt;p&gt;Кнопка станет зеленой, если подключение выполнено успешно, или красной, если возникла проблема.&lt;/ р&gt;&lt;/тело&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Попробуйте подключиться к трансиверу с этими настройками.&lt;/p&gt;&lt;p&gt;Кнопка станет зеленой, если подключение выполнено успешно, или красной, если возникла проблема.&lt;/ р&gt;&lt;/тело&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1308"/>
         <source>Test CAT</source>
-        <translation type="vanished">Тест CAT</translation>
+        <translation>Тест CAT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1331"/>
         <source>Attempt to activate the transmitter.
 Click again to deactivate. Normally no power should be
 output since there is no audio being generated at this time.
 Check that any Tx indication on your radio and/or your
 radio interface behave as expected.</source>
-        <translation type="vanished">Попытайтесь активировать передатчик.
+        <translation>Попытайтесь активировать передатчик.
 Нажмите еще раз, чтобы деактивировать. В норме мощность не должна быть
 выход, так как в это время звук не генерируется.
 Убедитесь, что любая индикация Tx на вашей радиостанции и/или на вашем
 радиоинтерфейс ведет себя так, как ожидалось.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1349"/>
         <source>Test PTT</source>
-        <translation type="vanished">Тест PTT</translation>
+        <translation>Тест PTT</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="750"/>
         <source>Split Operation</source>
-        <translation type="vanished">Разнос частот VFO</translation>
+        <translation>Разнос частот VFO</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="759"/>
         <source>Fake It</source>
-        <translation type="vanished">Подделать это</translation>
+        <translation>Подделать это</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="775"/>
         <source>Rig</source>
-        <translation type="vanished">Трансивер</translation>
+        <translation>Трансивер</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1746"/>
         <source>A&amp;udio</source>
-        <translation type="vanished">Звук</translation>
+        <translation>Звук</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1749"/>
         <source>Audio interface settings</source>
-        <translation type="vanished">Настройки звуковой карты</translation>
+        <translation>Настройки звуковой карты</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1755"/>
         <source>Souncard</source>
-        <translation type="vanished">Звуковая карта</translation>
+        <translation>Звуковая карта</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1758"/>
         <source>Soundcard</source>
-        <translation type="vanished">Звуковая карта</translation>
+        <translation>Звуковая карта</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1860"/>
         <source>Select the audio CODEC to use for transmitting.
 If this is your default device for system sounds then
 ensure that all system sounds are disabled otherwise
 you will broadcast any systems sounds generated during
 transmitting periods.</source>
-        <translation type="vanished">Выбор аудиокодека для передачи.
+        <translation>Выбор аудиокодека для передачи.
 Если это звуковое устройство установлено
 в операционной системе устройством по умолчанию,
 то убедитесь, что все системные звуки отключены,
@@ -16794,316 +17134,397 @@ transmitting periods.</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Введите номер порта службы UDP-сервера, на который WSJT-X должен отправлять обновления. Если это значение равно нулю, обновления отправляться не будут.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2476"/>
         <source>Outgoing interfaces:</source>
-        <translation type="vanished">Исходящие интерфейсы:</translation>
+        <translation>Исходящие интерфейсы:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with WSJT-X. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;При отправке обновлений на групповой адрес многоадресной рассылки необходимо указать, на какие сетевые интерфейсы их отправлять. Если интерфейс обратной связи поддерживает многоадресную рассылку, то будет выбран как минимум этот интерфейс.&lt;/p&gt;&lt;p&gt;Для большинства пользователей интерфейс обратной связи — это все, что нужно, что позволит нескольким другим приложениям на одном компьютере взаимодействовать с WSJT-X. Если приложения, работающие на других хостах, должны получать обновления статуса, следует использовать подходящий сетевой интерфейс.&lt;/p&gt;&lt;p&gt;В некоторых системах Linux может потребоваться включить многоадресную рассылку на сетевом интерфейсе обратной связи.&lt;/p&gt; &lt;/тело&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2503"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the number or router hops that multicast datagrams are allowed to make. Almost everyone should set this to 1 to keep outgoing multicast traffic withn the local subnet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the number or router hops that multicast datagrams are allowed to make. Almost everyone should set this to 1 to keep outgoing multicast traffic withn the local subnet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sets the number or router hops that multicast datagrams are allowed to make. Almost everyone should set this to 1 to keep outgoing multicast traffic withn the local subnet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2493"/>
         <source>Multicast TTL:</source>
-        <translation type="vanished">Многоадресный TTL:</translation>
+        <translation>Многоадресный TTL:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3082"/>
         <source>Days since last upload</source>
-        <translation type="vanished">Дней с момента последней загрузки</translation>
+        <translation>Дней с момента последней загрузки</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1847"/>
         <source>Select the audio CODEC to use for receiving.</source>
-        <translation type="vanished">Выбор аудио кодека для приема.</translation>
+        <translation>Выбор аудио кодека для приема.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1764"/>
         <source>&amp;Input:</source>
-        <translation type="vanished">Вход</translation>
+        <translation>Вход</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1814"/>
         <source>Select the channel to use for receiving.</source>
-        <translation type="vanished">Выбор канала для приема.</translation>
+        <translation>Выбор канала для приема.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1791"/>
+        <location filename="../Configuration.ui" line="1818"/>
         <source>Mono</source>
-        <translation type="vanished">Моно</translation>
+        <translation>Моно</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1796"/>
+        <location filename="../Configuration.ui" line="1823"/>
         <source>Left</source>
-        <translation type="vanished">Левый</translation>
+        <translation>Левый</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1801"/>
+        <location filename="../Configuration.ui" line="1828"/>
         <source>Right</source>
-        <translation type="vanished">Правый</translation>
+        <translation>Правый</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1806"/>
+        <location filename="../Configuration.ui" line="1833"/>
         <source>Both</source>
-        <translation type="vanished">Оба</translation>
+        <translation>Оба</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1784"/>
         <source>Select the audio channel used for transmission.
 Unless you have multiple radios connected on different
 channels; then you will usually want to select mono or
 both here.</source>
-        <translation type="vanished">Выбор канала, используемого для передачи.
+        <translation>Выбор канала, используемого для передачи.
 Обычно используется моно либо оба канала,
 если у Вас несколько передатчиков то можно
 использовать левый и правый каналы.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="356"/>
         <source>Enable VHF and submode features</source>
-        <translation type="vanished">Включить функции VHF и подрежима</translation>
+        <translation>Включить функции VHF и подрежима</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1035"/>
         <source>Data bits</source>
-        <translation type="vanished">Бит данных</translation>
+        <translation>Бит данных</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1089"/>
         <source>Stop bits</source>
-        <translation type="vanished">Стоп бит</translation>
+        <translation>Стоп бит</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1485"/>
+        <location filename="../Configuration.ui" line="1517"/>
         <source>Update Hamlib</source>
-        <translation type="vanished">Обновить Хамлиб</translation>
+        <translation>Обновить Хамлиб</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1491"/>
         <source>32-bit</source>
-        <translation type="vanished">32-битный</translation>
+        <translation>32-битный</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1498"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Revert the last Hamlib update. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отменить последнее обновление Hamlib. &lt;/p&gt;&lt;p&gt;Примечание. Эта функция доступна только в Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отменить последнее обновление Hamlib. &lt;/p&gt;&lt;p&gt;Примечание. Эта функция доступна только в Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1501"/>
         <source>Revert Update</source>
-        <translation type="vanished">Отменить обновление</translation>
+        <translation>Отменить обновление</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1514"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Download the latest libhamlib-4.dll file from https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Download the latest libhamlib-4.dll file from https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Download the latest libhamlib-4.dll file from https://n0nb.users.sourceforge.net/. &lt;/p&gt;&lt;p&gt;Note: This function is only available on Windows.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1526"/>
         <source>In use:</source>
-        <translation type="vanished">В использовании:</translation>
+        <translation>В использовании:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1546"/>
         <source>Backed up:</source>
-        <translation type="vanished">Резервное копирование:</translation>
+        <translation>Резервное копирование:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1562"/>
         <source>64-bit</source>
-        <translation type="vanished">64-битная</translation>
+        <translation>64-битная</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1653"/>
         <source>Rig Data</source>
-        <translation type="vanished">Данные буровой установки</translation>
+        <translation>Данные буровой установки</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1659"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop transmitting immediately when SWR exceeds 2.5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Немедленно прекратите передачу, когда КСВ превысит 2,5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Немедленно прекратите передачу, когда КСВ превысит 2,5.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1662"/>
         <source>Halt Tx when SWR &gt; 2.5</source>
-        <translation type="vanished">Остановить передачу, когда КСВ &gt; 2,5</translation>
+        <translation>Остановить передачу, когда КСВ &gt; 2,5</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1682"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Read and display transmit PWR and SWR of your rig.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Read and display transmit PWR and SWR of your rig.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Read and display transmit PWR and SWR of your rig.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1685"/>
         <source>Read and display PWR and SWR</source>
-        <translation type="vanished">Чтение и отображение PWR и КСВ</translation>
+        <translation>Чтение и отображение PWR и КСВ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1774"/>
         <source>Ou&amp;tput:</source>
-        <translation type="vanished">Выход:</translation>
+        <translation>Выход:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1871"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Refresh audio device list.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обновить список аудиоустройств.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обновить список аудиоустройств.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1874"/>
         <source>Refresh</source>
-        <translation type="vanished">Обновить</translation>
+        <translation>Обновить</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1883"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use TCI Audio when available.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте TCI Audio, если доступно.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Используйте TCI Audio, если доступно.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1886"/>
         <source>Use TCI Audio (restart required)</source>
-        <translation type="vanished">Использовать TCI Audio (требуется перезагрузка)</translation>
+        <translation>Использовать TCI Audio (требуется перезагрузка)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1893"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rx audio level&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Уровень звука Rx&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Уровень звука Rx&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1902"/>
         <source>Rx </source>
-        <translation type="vanished">прием </translation>
+        <translation>прием </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1934"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sort audio device names alphabetically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Сортировка названий аудиоустройств в алфавитном порядке.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Сортировка названий аудиоустройств в алфавитном порядке.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1937"/>
         <source>Sort alphabetically</source>
-        <translation type="vanished">Сортировать по алфавиту</translation>
+        <translation>Сортировать по алфавиту</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1944"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hide the usually unusable ALSA CARD subdevices on Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hide the usually unusable ALSA CARD subdevices on Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hide the usually unusable ALSA CARD subdevices on Linux.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1947"/>
         <source>Hide ALSA CARD subdevices (Linux only)</source>
-        <translation type="vanished">Скрыть подустройства ALSA CARD (только Linux)</translation>
+        <translation>Скрыть подустройства ALSA CARD (только Linux)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1959"/>
+        <location filename="../Configuration.ui" line="1962"/>
         <source>Save Directory</source>
-        <translation type="vanished">Сохранить папку</translation>
+        <translation>Сохранить папку</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1968"/>
         <source>Loc&amp;ation:</source>
-        <translation type="vanished">Расположение:</translation>
+        <translation>Расположение:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1984"/>
         <source>Path to which .WAV files are saved.</source>
-        <translation type="vanished">Путь для сохранения .WAV файлов.</translation>
+        <translation>Путь для сохранения .WAV файлов.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1994"/>
+        <location filename="../Configuration.ui" line="2048"/>
         <source>TextLabel</source>
-        <translation type="vanished">Текстовая метка</translation>
+        <translation>Текстовая метка</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2001"/>
         <source>Click to select a different save directory for .WAV files.</source>
-        <translation type="vanished">Нажмите, чтобы выбрать другue. папку для сохранения файлов .WAV.
+        <translation>Нажмите, чтобы выбрать другue. папку для сохранения файлов .WAV.
 Nazhmite, ch</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2004"/>
         <source>S&amp;elect</source>
-        <translation type="vanished">Выбор</translation>
+        <translation>Выбор</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2014"/>
+        <location filename="../Configuration.ui" line="2017"/>
         <source>AzEl Directory</source>
-        <translation type="vanished">AzEl папка</translation>
+        <translation>AzEl папка</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2028"/>
         <source>Location:</source>
-        <translation type="vanished">Расположение:</translation>
+        <translation>Расположение:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2055"/>
         <source>Select</source>
-        <translation type="vanished">Выбор</translation>
+        <translation>Выбор</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2064"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables additional line in azel.dat for Dpol parameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables additional line in azel.dat for Dpol parameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables additional line in azel.dat for Dpol parameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2067"/>
         <source>Enable extra line in azel.dat</source>
-        <translation type="vanished">Включить дополнительную строку в azel.dat</translation>
+        <translation>Включить дополнительную строку в azel.dat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2077"/>
         <source>Power Memory By Band</source>
-        <translation type="vanished">Запомнить мощность по диапазонам</translation>
+        <translation>Запомнить мощность по диапазонам</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2080"/>
         <source>Remember power settings by band</source>
-        <translation type="vanished">Запомнить уровень сигнала на передачу по диапазонам и видам излучения</translation>
+        <translation>Запомнить уровень сигнала на передачу по диапазонам и видам излучения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2086"/>
         <source>Enable power memory during transmit</source>
-        <translation type="vanished">Запомнить уровень звука при передаче сообщений</translation>
+        <translation>Запомнить уровень звука при передаче сообщений</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2089"/>
         <source>Transmit</source>
-        <translation type="vanished">Передача сообщений</translation>
+        <translation>Передача сообщений</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2096"/>
         <source>Enable power memory during tuning</source>
-        <translation type="vanished">Запомнить уровень звука при настройке</translation>
+        <translation>Запомнить уровень звука при настройке</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2099"/>
         <source>Tune</source>
-        <translation type="vanished">Настройка передатчика</translation>
+        <translation>Настройка передатчика</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2123"/>
         <source>Tx &amp;Macros</source>
-        <translation type="vanished">Tx макросы</translation>
+        <translation>Tx макросы</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2126"/>
         <source>Canned free text messages setup</source>
-        <translation type="vanished">Настройка готовых свободных текстовых сообщений</translation>
+        <translation>Настройка готовых свободных текстовых сообщений</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2132"/>
         <source>&amp;Add</source>
-        <translation type="vanished">Добавить</translation>
+        <translation>Добавить</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2142"/>
         <source>&amp;Delete</source>
-        <translation type="vanished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2152"/>
         <source>Drag and drop items to rearrange order
 Right click for item specific actions
 Click, SHIFT+Click and, CRTL+Click to select items</source>
-        <translation type="vanished">Перетащите элементы, чтобы изменить порядок
+        <translation>Перетащите элементы, чтобы изменить порядок
 Щелкните правой кнопкой мыши для определенных действий с элементом
 Нажмите, SHIFT+щелчок и, CRTL+щелчок, чтобы выбрать элементы</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2205"/>
         <source>Reportin&amp;g</source>
-        <translation type="vanished">Лог</translation>
+        <translation>Лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2208"/>
         <source>Reporting and logging settings</source>
-        <translation type="vanished">Настройка записи QSO в лог</translation>
+        <translation>Настройка записи QSO в лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2214"/>
         <source>Logging</source>
-        <translation type="vanished">Внtсенние в лог</translation>
+        <translation>Внtсенние в лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2256"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this option to note any Special Operating Activity in the comments field.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте эту опцию, чтобы отмечать любые особые эксплуатационные действия в поле комментариев.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте эту опцию, чтобы отмечать любые особые эксплуатационные действия в поле комментариев.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2259"/>
         <source>Special operating activity to comments</source>
-        <translation type="vanished">Специальная оперативная деятельность по комментариям</translation>
+        <translation>Специальная оперативная деятельность по комментариям</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2279"/>
         <source>The program will pop up a partially completed Log QSO dialog when you send a 73 or free text message.</source>
-        <translation type="vanished">Программа выведет частично заполненное диалоговое окно Log QSO, когда вы отправляете 73 или произвольное текстовое сообщение.</translation>
+        <translation>Программа выведет частично заполненное диалоговое окно Log QSO, когда вы отправляете 73 или произвольное текстовое сообщение.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2282"/>
         <source>Promp&amp;t me to log QSO</source>
-        <translation type="vanished">Приглашение внести QSO в лог</translation>
+        <translation>Приглашение внести QSO в лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2296"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Log &apos;ZZ00&apos; as grid if the other station doesn&apos;t send you a grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Log &apos;ZZ00&apos; as grid if the other station doesn&apos;t send you a grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Log &apos;ZZ00&apos; as grid if the other station doesn&apos;t send you a grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2299"/>
         <source>Fill missing grids with &apos;ZZ00&apos;</source>
-        <translation type="vanished">Заполните недостающие сетки с помощью «ZZ00».</translation>
+        <translation>Заполните недостающие сетки с помощью «ZZ00».</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2306"/>
         <source>Op Call:</source>
-        <translation type="vanished">Операционный звонок:</translation>
+        <translation>Операционный звонок:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2316"/>
         <source>Some logging programs will not accept the type of reports
 saved by this program.
 Check this option to save the sent and received reports in the
 comments field.</source>
-        <translation type="vanished">Некоторые логи не принимают рапорт в децибелах.
+        <translation>Некоторые логи не принимают рапорт в децибелах.
 Эта опция позволяет сохранить отправленный
 и полученный рапорт в поле комментариев.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2322"/>
         <source>d&amp;B reports to comments</source>
-        <translation type="vanished">Добавить рапорта дБ в комментарии</translation>
+        <translation>Добавить рапорта дБ в комментарии</translation>
     </message>
     <message>
         <source>Check this option to force the clearing of the DX Call
@@ -17120,85 +17541,103 @@ and DX Grid fields when a 73 or free text message is sent.</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Некоторые программы логов не принимают виды режимов WSJT-X.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2369"/>
         <source>Con&amp;vert mode to RTTY</source>
-        <translation type="vanished">Преобразовать моду в RTTY</translation>
+        <translation>Преобразовать моду в RTTY</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2289"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The callsign of the operator, if different from the station callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позывной оператора, если он отличается от позывного станции.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позывной оператора, если он отличается от позывного станции.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2331"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to have QSOs logged automatically, when complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Установите флажок, чтобы QSO регистрировались автоматически по завершении.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Установите флажок, чтобы QSO регистрировались автоматически по завершении.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Log automatically (contesting only)</source>
         <translation type="vanished">Автотматиическая запись в лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2396"/>
         <source>Network Services</source>
-        <translation type="vanished">Сетевой сервис</translation>
+        <translation>Сетевой сервис</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2402"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The program can send your station details and all decoded signals with grid squares as spots to the http://pskreporter.info web site.&lt;/p&gt;&lt;p&gt;This is used for reverse beacon analysis which is very useful for assessing propagation and system performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Программа может отправлять информацию о вашей станции и все декодированные сигналы с локаторами как спот на веб-сайт http://psreporter.info.&lt;/p&gt;&lt;p&gt;Это используется для анализа обратного маяка, который очень полезен для оценки распространения и производительности системы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Программа может отправлять информацию о вашей станции и все декодированные сигналы с локаторами как спот на веб-сайт http://psreporter.info.&lt;/p&gt;&lt;p&gt;Это используется для анализа обратного маяка, который очень полезен для оценки распространения и производительности системы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2405"/>
         <source>Enable &amp;PSK Reporter Spotting</source>
-        <translation type="vanished">Отправлять споты 
+        <translation>Отправлять споты 
 на сервер &amp;PSK Reporter</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2412"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this option if a reliable connection is needed&lt;/p&gt;&lt;p&gt;Most users do not need this, the default uses UDP which is more efficient. Only check this if you have evidence that UDP traffic from you to PSK Reporter is being lost.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте этот параметр, если требуется надежное соединение&lt;/p&gt;&lt;p&gt;Большинству пользователей это не нужно, по умолчанию используется более эффективный протокол UDP. Проверяйте это только в том случае, если у вас есть доказательства того, что трафик UDP от вас к PSK Reporter теряется.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте этот параметр, если требуется надежное соединение&lt;/p&gt;&lt;p&gt;Большинству пользователей это не нужно, по умолчанию используется более эффективный протокол UDP. Проверяйте это только в том случае, если у вас есть доказательства того, что трафик UDP от вас к PSK Reporter теряется.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2415"/>
         <source>Use TCP/IP connection</source>
-        <translation type="vanished">Использовать соединение TCP/IP</translation>
+        <translation>Использовать соединение TCP/IP</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2425"/>
         <source>UDP Server</source>
-        <translation type="vanished">UDP-сервер</translation>
+        <translation>UDP-сервер</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2436"/>
         <source>UDP Server:</source>
-        <translation type="vanished">UDP-сервер:</translation>
+        <translation>UDP-сервер:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2446"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optional hostname of network service to receive decodes.&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 multicast group address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 multicast group address&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Clearing this field will disable the broadcasting of UDP status updates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Необязательное имя хоста сетевой службы для получения декодирования.&lt;/p&gt;&lt;p&gt;Форматы:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; поле-слева: 0px; поле-справа: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin- справа:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;имя хоста&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin -right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px ; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left :0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;адрес многоадресной группы IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px ; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Адрес многоадресной группы IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Очистка этого поля отключит широковещательная рассылка обновлений статуса UDP.&lt;/p &gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Необязательное имя хоста сетевой службы для получения декодирования.&lt;/p&gt;&lt;p&gt;Форматы:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; поле-слева: 0px; поле-справа: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin- справа:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;имя хоста&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin -right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px ; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left :0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;адрес многоадресной группы IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px ; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Адрес многоадресной группы IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Очистка этого поля отключит широковещательная рассылка обновлений статуса UDP.&lt;/p &gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2456"/>
         <source>UDP Server port number:</source>
-        <translation type="vanished">Номер порта UDP сервера:</translation>
+        <translation>Номер порта UDP сервера:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled WSJT-X will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта функция включена, WSJT-X будет принимать определенные запросы от сервера UDP, который получает декодированные сообщения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2546"/>
         <source>Accept UDP requests</source>
-        <translation type="vanished">Разрешить принимать UDP-запросы</translation>
+        <translation>Разрешить принимать UDP-запросы</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2553"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indicate acceptance of an incoming UDP request. The effect of this option varies depending on the operating system and window manager, its intent is to notify the acceptance of an incoming UDP request even if this application is minimized or hidden.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Указывает на принятие входящего запроса UDP. Действие этой опции зависит от операционной системы и оконного менеджера. Ее цель — уведомить о принятии входящего UDP-запроса, даже если это приложение свернуто или скрыто.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Указывает на принятие входящего запроса UDP. Действие этой опции зависит от операционной системы и оконного менеджера. Ее цель — уведомить о принятии входящего UDP-запроса, даже если это приложение свернуто или скрыто.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2556"/>
         <source>Notify on accepted UDP request</source>
-        <translation type="vanished">Уведомить о получении UDP запроса</translation>
+        <translation>Уведомить о получении UDP запроса</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2563"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Restore the window from minimized if an UDP request is accepted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Восстановление окна из свернутого состояния, если принят запрос UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Восстановление окна из свернутого состояния, если принят запрос UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2566"/>
         <source>Accepted UDP request restores window</source>
-        <translation type="vanished">Восстановить окно при получении UDP запроса</translation>
+        <translation>Восстановить окно при получении UDP запроса</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2578"/>
         <source>Secondary UDP Server (deprecated)</source>
-        <translation type="vanished">Вторичный UDP-сервер (устарело)</translation>
+        <translation>Вторичный UDP-сервер (устарело)</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, WSJT-X will broadcast a logged contact in ADIF format to the configured hostname and port. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -17206,874 +17645,1113 @@ and DX Grid fields when a 73 or free text message is sent.</source>
 &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если этот флажок установлен, WSJT-X будет транслировать зарегистрированный контакт в формате ADIF на настроенное имя хоста и порт. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2587"/>
         <source>Enable logged contact ADIF broadcast</source>
-        <translation type="vanished">Разрешить передачу данных QSO в ADIF формате</translation>
+        <translation>Разрешить передачу данных QSO в ADIF формате</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2594"/>
         <source>Server name or IP address:</source>
-        <translation type="vanished">Имя сервера или IP-адрес:</translation>
+        <translation>Имя сервера или IP-адрес:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2604"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optional host name of N1MM Logger+ program to receive ADIF UDP broadcasts. This is usually &apos;localhost&apos; or ip address 127.0.0.1&lt;/p&gt;&lt;p&gt;Formats:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv4 multicast group address&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;IPv6 multicast group address&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Clearing this field will disable broadcasting of ADIF information via UDP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Необязательное имя хоста программы N1MM Logger+ для приема широковещательных сообщений ADIF UDP. Обычно это «localhost» или IP-адрес 127.0.0.1&lt;/p&gt;&lt;p&gt;Форматы:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin- справа: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent :0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block- отступ:0; text-indent:0px;&quot;&gt;IPv4-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt- block-indent:0; text-indent:0px;&quot;&gt;IPv6-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; - qt-block-indent:0; text-indent:0px;&quot;&gt;адрес многоадресной группы IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right :0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Адрес многоадресной группы IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Очистка этого поля отключит широковещательную передачу информации ADIF через UDP.&lt;/p &gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Необязательное имя хоста программы N1MM Logger+ для приема широковещательных сообщений ADIF UDP. Обычно это «localhost» или IP-адрес 127.0.0.1&lt;/p&gt;&lt;p&gt;Форматы:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin- справа: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent :0; text-indent:0px;&quot;&gt;hostname&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block- отступ:0; text-indent:0px;&quot;&gt;IPv4-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt- block-indent:0; text-indent:0px;&quot;&gt;IPv6-адрес&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; - qt-block-indent:0; text-indent:0px;&quot;&gt;адрес многоадресной группы IPv4&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right :0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Адрес многоадресной группы IPv6&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Очистка этого поля отключит широковещательную передачу информации ADIF через UDP.&lt;/p &gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2611"/>
         <source>Server port number:</source>
-        <translation type="vanished">Номер порта сервера:</translation>
+        <translation>Номер порта сервера:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that WSJT-X should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Введите номер порта, который WSJT-X должен использовать для UDP-трансляций информации журнала ADIF. Для N1MM Logger+ это значение должно быть равно 2333. Если оно равно нулю, обновления не будут транслироваться.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2648"/>
         <source>Frequencies</source>
-        <translation type="vanished">Частоты</translation>
+        <translation>Частоты</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2651"/>
         <source>Default frequencies and band specific station details setup</source>
-        <translation type="vanished">Частоты по умолчанию и настройка параметров станции для конкретных диапазонов</translation>
+        <translation>Частоты по умолчанию и настройка параметров станции для конкретных диапазонов</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the WSJT-X User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;См. &amp;quot;Калибровка частоты&amp;quot;для получения подробной информации смотрите  в Руководстве пользователя WSJT-X , как определить эти параметры для вашего nhfycbdthf.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2660"/>
         <source>Frequency Calibration</source>
-        <translation type="vanished">Калибровка по частоте</translation>
+        <translation>Калибровка по частоте</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2668"/>
         <source>Slope:</source>
-        <translation type="vanished">Наклон:</translation>
+        <translation>Наклон:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2681"/>
         <source> ppm</source>
-        <translation type="vanished"> ppm</translation>
+        <translation> ppm</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2707"/>
         <source>Intercept:</source>
-        <translation type="vanished">Cмещение:</translation>
+        <translation>Cмещение:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2720"/>
         <source> Hz</source>
-        <translation type="vanished">Гц</translation>
+        <translation>Гц</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2757"/>
         <source>Working Frequencies</source>
-        <translation type="vanished">Рабочие частоты</translation>
+        <translation>Рабочие частоты</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2772"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Right click to maintain the working frequencies list.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Щелкните правой кнопкой мыши, чтобы сохранить список рабочих частот.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Щелкните правой кнопкой мыши, чтобы сохранить список рабочих частот.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2800"/>
         <source>Station Information</source>
-        <translation type="vanished">Информация о станции</translation>
+        <translation>Информация о станции</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2812"/>
         <source>Items may be edited.
 Right click for insert and delete options.</source>
-        <translation type="vanished">Информация для отображения
+        <translation>Информация для отображения
 на сайте pskreporter.info
 Элементы могут быть отредактированы.
 Используйте правую кнопку мыши
 для добавления/удаления строк.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2860"/>
         <source>Colors</source>
-        <translation type="vanished">Цвета</translation>
+        <translation>Цвета</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2866"/>
         <source>Decode Highlightling</source>
-        <translation type="vanished">Выделение цветом декодированных сообщений</translation>
+        <translation>Выделение цветом декодированных сообщений</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2891"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to scan the wsjtx_log.adi ADIF file again for worked before information&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы снова просмотреть ADIF-файл wsjtx_log.adi на предмет обработанной ранее информации&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы снова просмотреть ADIF-файл wsjtx_log.adi на предмет обработанной ранее информации&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2894"/>
         <source>Rescan ADIF Log</source>
-        <translation type="vanished">Пересканировать ADIF лог</translation>
+        <translation>Пересканировать ADIF лог</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2874"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Push to reset all highlight items above to default values and priorities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы сбросить все выделенные выше элементы до значений и приоритетов по умолчанию.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы сбросить все выделенные выше элементы до значений и приоритетов по умолчанию.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Reset Highlighting</source>
         <translation type="vanished">Сбросить выделение</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2915"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable or disable using the check boxes and right-click an item to change or unset the foreground color, background color, or reset the item to default values. Drag and drop the items to change their priority, higher in the list is higher in priority.&lt;/p&gt;&lt;p&gt;Note that each foreground or background color may be either set or unset, unset means that it is not allocated for that item&apos;s type and lower priority items may apply.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включите или отключите с помощью флажков и щелкните элемент правой кнопкой мыши, чтобы изменить или отключить цвет переднего плана, цвет фона или восстановить значения элемента по умолчанию. Перетащите элементы, чтобы изменить их приоритет. Чем выше в списке, тем выше приоритет.&lt;/p&gt;&lt;p&gt;Обратите внимание, что каждый цвет переднего плана или фона может быть либо установлен, либо не установлен. Не установлен означает, что он не назначен для этого элемента. могут применяться элементы типа и более низкого приоритета.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включите или отключите с помощью флажков и щелкните элемент правой кнопкой мыши, чтобы изменить или отключить цвет переднего плана, цвет фона или восстановить значения элемента по умолчанию. Перетащите элементы, чтобы изменить их приоритет. Чем выше в списке, тем выше приоритет.&lt;/p&gt;&lt;p&gt;Обратите внимание, что каждый цвет переднего плана или фона может быть либо установлен, либо не установлен. Не установлен означает, что он не назначен для этого элемента. могут применяться элементы типа и более низкого приоритета.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2982"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to indicate new DXCC entities, grid squares, and callsigns per mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте, чтобы указать новые объекты DXCC, локаторы и позывные для каждого режима.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отметьте, чтобы указать новые объекты DXCC, локаторы и позывные для каждого режима.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2985"/>
         <source>Highlight by Mode</source>
-        <translation type="vanished">Выделение по режимам</translation>
+        <translation>Выделение по режимам</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2968"/>
         <source>Include extra WAE entities</source>
-        <translation type="vanished">Включить дополнительные объекты WAE</translation>
+        <translation>Включить дополнительные объекты WAE</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2526"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 0 = porta casuale, compatibile con il comportamento storico WSJT-X/CQRLOG. Imposta un valore fisso solo se un controller esterno lo richiede esplicitamente.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Фиксированный порт, на котором Decodium прослушивает входящие команды UDP (например, от DecoAlert). По умолчанию 0 = произвольный порт, совместимый с историческим поведением WSJT-X/CQRLOG. Устанавливайте фиксированное значение только в том случае, если внешний контроллер явно запрашивает это.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Фиксированный порт, на котором Decodium прослушивает входящие команды UDP (например, от DecoAlert). По умолчанию 0 = произвольный порт, совместимый с историческим поведением WSJT-X/CQRLOG. Устанавливайте фиксированное значение только в том случае, если внешний контроллер явно запрашивает это.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2942"/>
         <source>Check to for grid highlighting to only apply to unworked grid fields</source>
-        <translation type="vanished">Отметьте, чтобы подсветка локатора применялась только к необработанным полям локатора.</translation>
+        <translation>Отметьте, чтобы подсветка локатора применялась только к необработанным полям локатора.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2945"/>
         <source>Only grid Fields sought</source>
-        <translation type="vanished">Искомые поля только в локаторе</translation>
+        <translation>Искомые поля только в локаторе</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3031"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls for Logbook of the World user lookup.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Элементы управления поиском пользователей в LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Элементы управления поиском пользователей в LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3034"/>
         <source>Logbook of the World User Validation</source>
-        <translation type="vanished">Мировой лог LotW</translation>
+        <translation>Мировой лог LotW</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3040"/>
         <source>Users CSV file URL:</source>
-        <translation type="vanished">URL-адрес файла CSV пользователя:</translation>
+        <translation>URL-адрес файла CSV пользователя:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3052"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL of the ARRL LotW user&apos;s last upload dates and times data file which is used to highlight decodes from stations that are known to upload their log file to LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL файла данных о датах и ​​времени последней загрузки пользователя ARRL LotW, который используется для выделения декодирования со станций, которые, как известно, загружают свой файл журнала в LotW.&lt;/p&gt;&lt; /тело&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL файла данных о датах и ​​времени последней загрузки пользователя ARRL LotW, который используется для выделения декодирования со станций, которые, как известно, загружают свой файл журнала в LotW.&lt;/p&gt;&lt; /тело&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3055"/>
         <source>URL</source>
-        <translation type="vanished">URL-адрес</translation>
+        <translation>URL-адрес</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3058"/>
         <source>https://lotw.arrl.org/lotw-user-activity.csv</source>
-        <translation type="vanished">https://lotw.arrl.org/lotw-user-activity.csv</translation>
+        <translation>https://lotw.arrl.org/lotw-user-activity.csv</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3065"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Push this button to fetch the latest LotW user&apos;s upload date and time data file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите эту кнопку, чтобы получить последний файл данных о дате и времени загрузки пользователя LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите эту кнопку, чтобы получить последний файл данных о дате и времени загрузки пользователя LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3068"/>
         <source>Fetch Now</source>
-        <translation type="vanished">Скачать сейчас</translation>
+        <translation>Скачать сейчас</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3129"/>
         <source>Age of last upload less than:</source>
-        <translation type="vanished">Файл CSV загружен не ранее:</translation>
+        <translation>Файл CSV загружен не ранее:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3079"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjust this spin box to set the age threshold of LotW user&apos;s last upload date that is accepted as a current LotW user.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Настройте этот счетчик, чтобы установить дату последней загрузки пользователя LotW, которая принимается в качестве текущего пользователя LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Настройте этот счетчик, чтобы установить дату последней загрузки пользователя LotW, которая принимается в качестве текущего пользователя LotW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3085"/>
         <source> days</source>
-        <translation type="vanished"> день (дня) (дней)</translation>
+        <translation> день (дня) (дней)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3215"/>
         <source>Advanced</source>
-        <translation type="vanished">Расш.</translation>
+        <translation>Расш.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3221"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User-selectable parameters for JT65 VHF/UHF/Microwave decoding.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выбираемые пользователем параметры для декодирования JT65 VHF/UHF/Microwave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выбираемые пользователем параметры для декодирования JT65 VHF/UHF/Microwave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3224"/>
         <source>JT65 VHF/UHF/Microwave decoding parameters</source>
-        <translation type="vanished">Параметры декодирования JT65 VHF/UHF/СВЧ</translation>
+        <translation>Параметры декодирования JT65 VHF/UHF/СВЧ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3230"/>
         <source>Random erasure patterns:</source>
-        <translation type="vanished">Выбранные стили декодера:</translation>
+        <translation>Выбранные стили декодера:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3240"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of erasure patterns for stochastic soft-decision Reed Solomon decoder is 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество шаблонов стирания для стохастического декодера Рида-Соломона с мягким решением – 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество шаблонов стирания для стохастического декодера Рида-Соломона с мягким решением – 10^(n/2).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3256"/>
         <source>Aggressive decoding level:</source>
-        <translation type="vanished">Уровень агрессивного декодирования:</translation>
+        <translation>Уровень агрессивного декодирования:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3266"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Higher levels will increase the probability of decoding, but will also increase probability of a false decode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Более высокие уровни увеличивают вероятность декодирования, но также увеличивают вероятность ложного декодирования.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Более высокие уровни увеличивают вероятность декодирования, но также увеличивают вероятность ложного декодирования.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3276"/>
         <source>Two-pass decoding</source>
-        <translation type="vanished">Двухпроходное декодирование</translation>
+        <translation>Двухпроходное декодирование</translation>
     </message>
     <message>
         <source>Special operating activity:  Generation of FT4, FT8, and MSK144 messages</source>
         <translation type="vanished">Специальная оперативная деятельность: Генерация сообщений FT4, FT8 и MSK144.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3628"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT8 DXpedition mode:  Hound operator calling the DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Режим DX-экспедиции FT8: оператор Hound, вызывающий DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Режим DX-экспедиции FT8: оператор Hound, вызывающий DX.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3631"/>
+        <location filename="../Configuration.ui" line="3634"/>
         <source>Hound</source>
-        <translation type="vanished">гончая</translation>
+        <translation>гончая</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3841"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;North American VHF/UHF/Microwave contests and others in which a 4-character grid locator is the required exchange.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Североамериканские соревнования VHF/UHF/Microwave и другие, в которых требуется обмен 4-символьным локатором.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Североамериканские соревнования VHF/UHF/Microwave и другие, в которых требуется обмен 4-символьным локатором.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3844"/>
         <source>NA VHF Contest</source>
-        <translation type="vanished">Конкурс НА УКВ</translation>
+        <translation>Конкурс НА УКВ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3857"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT8 DXpedition mode:  Fox (DXpedition) operator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Режим DX-экспедиции FT8: оператор Fox (DX-экспедиция).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Режим DX-экспедиции FT8: оператор Fox (DX-экспедиция).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3860"/>
+        <location filename="../Configuration.ui" line="3863"/>
         <source>Fox</source>
-        <translation type="vanished">Фокс</translation>
+        <translation>Фокс</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3737"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;European VHF+ contests requiring a signal report, serial number, and 6-character locator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Европейские соревнования VHF+, в качестве контрольного номера требующие уровень сигнала, серийного номера и 6-значного локатора.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Европейские соревнования VHF+, в качестве контрольного номера требующие уровень сигнала, серийного номера и 6-значного локатора.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3740"/>
+        <location filename="../Configuration.ui" line="3743"/>
         <source>EU VHF Contest</source>
-        <translation type="vanished">Конкурс ЕС по УКВ</translation>
+        <translation>Конкурс ЕС по УКВ</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL RTTY Roundup and similar contests.  Exchange is US state, Canadian province, or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL RTTY Roundup и подобные конкурсы. Обмен — это штат США, провинция Канады или &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3667"/>
         <source>R T T Y Roundup</source>
-        <translation type="vanished">Р Т Т Ю Обзор</translation>
+        <translation>Р Т Т Ю Обзор</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3695"/>
         <source>RTTY Roundup exchange</source>
-        <translation type="vanished">Обмен RTTY Roundup</translation>
+        <translation>Обмен RTTY Roundup</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3717"/>
         <source>NJ</source>
-        <translation type="vanished">Нью-Джерси</translation>
+        <translation>Нью-Джерси</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3559"/>
+        <location filename="../Configuration.ui" line="3609"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL Field Day exchange: number of transmitters, Class, and ARRL/RAC section or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обмен ARRL Field Day: количество передатчиков, секция ARRL/RAC или &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обмен ARRL Field Day: количество передатчиков, секция ARRL/RAC или &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3562"/>
         <source>A R R L Field Day</source>
-        <translation type="vanished">A R R L День поля</translation>
+        <translation>A R R L День поля</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3565"/>
         <source>ARRL Field Day</source>
-        <translation type="vanished">День поля ARRL</translation>
+        <translation>День поля ARRL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3590"/>
         <source>Field Day exchange</source>
-        <translation type="vanished">Обмен на День поля</translation>
+        <translation>Обмен на День поля</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3593"/>
         <source>FD Exch:</source>
-        <translation type="vanished">ФД биржа:</translation>
+        <translation>ФД биржа:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3612"/>
         <source>6A SNJ</source>
-        <translation type="vanished">6А СНЖ</translation>
+        <translation>6А СНЖ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3531"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World-Wide Digi-mode contest&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World-Wide Digi-mode contest&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World-Wide Digi-mode contest&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3534"/>
         <source>WW Digital Contest</source>
-        <translation type="vanished">WW Цифровой конкурс</translation>
+        <translation>WW Цифровой конкурс</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3537"/>
         <source>WW Digi Contest</source>
-        <translation type="vanished">WW Digi-конкурс</translation>
+        <translation>WW Digi-конкурс</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4146"/>
         <source>Miscellaneous</source>
-        <translation type="vanished">Разное</translation>
+        <translation>Разное</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4152"/>
         <source>Degrade S/N of .wav file: </source>
-        <translation type="vanished">Ухудшить S/N .wav файла </translation>
+        <translation>Ухудшить S/N .wav файла </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4162"/>
+        <location filename="../Configuration.ui" line="4188"/>
         <source>For offline sensitivity tests</source>
-        <translation type="vanished">Для автономных тестов чувствительности</translation>
+        <translation>Для автономных тестов чувствительности</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1899"/>
+        <location filename="../Configuration.ui" line="4165"/>
         <source> dB</source>
-        <translation type="vanished">дБ</translation>
+        <translation>дБ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="294"/>
         <source>Enable day/night shadow (greyline) on the world map panel.</source>
-        <translation type="vanished">Включите дневную/ночную тень (серую линию) на панели карты мира.</translation>
+        <translation>Включите дневную/ночную тень (серую линию) на панели карты мира.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="297"/>
         <source>Show greyline on world map</source>
-        <translation type="vanished">Показать серую линию на карте мира</translation>
+        <translation>Показать серую линию на карте мира</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="346"/>
         <source>If enabled, map single-click starts Tx and double-click only fills DX fields.</source>
-        <translation type="vanished">Если этот параметр включен, один щелчок карты запускает Tx, а двойной щелчок только заполняет поля DX.</translation>
+        <translation>Если этот параметр включен, один щелчок карты запускает Tx, а двойной щелчок только заполняет поля DX.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="349"/>
         <source>Map: single click starts Tx</source>
-        <translation type="vanished">Карта: один щелчок запускает передачу</translation>
+        <translation>Карта: один щелчок запускает передачу</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2223"/>
         <source>LOTW password:</source>
-        <translation type="vanished">Пароль ЛОТВ:</translation>
+        <translation>Пароль ЛОТВ:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2233"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your Logbook of the World password (required for LOTW download).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пароль вашего бортового журнала мира (требуется для загрузки LOTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пароль вашего бортового журнала мира (требуется для загрузки LOTW).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2240"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also download from LOTW any QSOs that have not been QSL&apos;d in the last 30 days, to try these callers again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also download from LOTW any QSOs that have not been QSL&apos;d in the last 30 days, to try these callers again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also download from LOTW any QSOs that have not been QSL&apos;d in the last 30 days, to try these callers again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2243"/>
         <source>Also download non-QSL&apos;d callers</source>
-        <translation type="vanished">Также загрузите абонентов, не получивших QSL</translation>
+        <translation>Также загрузите абонентов, не получивших QSL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2334"/>
         <source>Log automatically</source>
-        <translation type="vanished">Автоматический вход в систему</translation>
+        <translation>Автоматический вход в систему</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2341"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use &apos;Log automatically&apos; only for special operating activities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use &apos;Log automatically&apos; only for special operating activities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use &apos;Log automatically&apos; only for special operating activities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2344"/>
         <source>Contesting only</source>
-        <translation type="vanished">Только соревнование</translation>
+        <translation>Только соревнование</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2366"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some logging programs will not accept Decodium v3.0 SE KP5 mode names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some logging programs will not accept Decodium v3.0 SE KP5 mode names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some logging programs will not accept Decodium v3.0 SE KP5 mode names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2376"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shorten 6-digit grid entries and log 4-digit grids instead.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shorten 6-digit grid entries and log 4-digit grids instead.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shorten 6-digit grid entries and log 4-digit grids instead.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2379"/>
         <source>Log 4-digit grids</source>
-        <translation type="vanished">Логировать 4-значные сетки</translation>
+        <translation>Логировать 4-значные сетки</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2466"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the service port number of the UDP server that Decodium v3.0 SE KP5 should send updates to. If this is zero no updates will be sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the service port number of the UDP server that Decodium v3.0 SE KP5 should send updates to. If this is zero no updates will be sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the service port number of the UDP server that Decodium v3.0 SE KP5 should send updates to. If this is zero no updates will be sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2486"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with Decodium v3.0 SE KP5. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with Decodium v3.0 SE KP5. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When sending updates to a multicast group address it is necessary to specify which network interface(s) to send them to. If the loop-back interface is multicast capable then at least that one will be selected.&lt;/p&gt;&lt;p&gt;For most users the loop-back interface is all that is needed, that will allow multiple other applications on the same machine to interoperate with Decodium v3.0 SE KP5. If applications running on other hosts are to receive status updates then a suitable network interface should be used.&lt;/p&gt;&lt;p&gt;On some Linux systems it may be necessary to enable multicast on the loop-back network interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2516"/>
         <source>UDP Listen Port:</source>
-        <translation type="vanished">Порт прослушивания UDP:</translation>
+        <translation>Порт прослушивания UDP:</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 2238. 0 = porta casuale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 2238. 0 = porta casuale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2543"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled Decodium v3.0 SE KP5 will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;При включенном Decodium v3.0 SE KP5 будет принимать определенные запросы обратно от UDP-сервера, который получает сообщения декодирования.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;При включенном Decodium v3.0 SE KP5 будет принимать определенные запросы обратно от UDP-сервера, который получает сообщения декодирования.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2584"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, Decodium v3.0 SE KP5 will broadcast a logged contact in ADIF format to the configured hostname and port. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Если этот флажок установлен, Decodium v3.0 SE KP5 будет транслировать зарегистрированный контакт в формате ADIF на настроенное имя хоста и порт. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Если этот флажок установлен, Decodium v3.0 SE KP5 будет транслировать зарегистрированный контакт в формате ADIF на настроенное имя хоста и порт. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2621"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that Decodium v3.0 SE KP5 should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that Decodium v3.0 SE KP5 should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter the port number that Decodium v3.0 SE KP5 should use for UDP broadcasts of ADIF log information. For N1MM Logger+, this value should be 2333. If this is zero,  no updates will be broadcast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2657"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the Decodium v3.0 SE KP5 User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the Decodium v3.0 SE KP5 User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &amp;quot;Frequency Calibration&amp;quot; in the Decodium v3.0 SE KP5 User Guide for details of how to determine these parameters for your radio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2877"/>
         <source>Reset Highlighting to Decodium v3.0 SE KP5 default</source>
-        <translation type="vanished">Сбросить выделение до Decodium v3.0 SE KP5 по умолчанию</translation>
+        <translation>Сбросить выделение до Decodium v3.0 SE KP5 по умолчанию</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2884"/>
         <source>Reset Highlighting to Decodium v3.0 SE KP5 Improved default</source>
-        <translation type="vanished">Сбросить выделение до Decodium v3.0 SE KP5 Улучшенное значение по умолчанию</translation>
+        <translation>Сбросить выделение до Decodium v3.0 SE KP5 Улучшенное значение по умолчанию</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2975"/>
         <source>Highlight also messages with 73 or RR73</source>
-        <translation type="vanished">Выделите также сообщения с номером 73 или RR73.</translation>
+        <translation>Выделите также сообщения с номером 73 или RR73.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2992"/>
+        <location filename="../Configuration.ui" line="3012"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Highlight callsigns or grids with orange background color. Callsigns and/or grids must be separated by a comma, and there must be a comma after each callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выделяйте позывные или сетки оранжевым цветом фона. Позывные и/или сетки должны быть разделены запятой, а после каждого позывного должна стоять запятая. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выделяйте позывные или сетки оранжевым цветом фона. Позывные и/или сетки должны быть разделены запятой, а после каждого позывного должна стоять запятая. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2995"/>
         <source>Highlight orange:</source>
-        <translation type="vanished">Выделите оранжевым цветом:</translation>
+        <translation>Выделите оранжевым цветом:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3002"/>
+        <location filename="../Configuration.ui" line="3019"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Highlight callsigns or grids with blue background color. Callsigns and/or grids must be separated by a comma, and there must be a comma after each callsign.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выделяйте позывные или сетки синим цветом фона. Позывные и/или сетки должны быть разделены запятой, а после каждого позывного должна стоять запятая. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выделяйте позывные или сетки синим цветом фона. Позывные и/или сетки должны быть разделены запятой, а после каждого позывного должна стоять запятая. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3005"/>
         <source>Highlight blue:</source>
-        <translation type="vanished">Выделите синим цветом:</translation>
+        <translation>Выделите синим цветом:</translation>
     </message>
     <message>
         <source>http://lotw.arrl.org/lotw-user-activity.csv</source>
         <translation type="vanished">http://lotw.arrl.org/lotw-user-activity.csv</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3155"/>
         <source>CTY File Download</source>
-        <translation type="vanished">Загрузка файла CTY</translation>
+        <translation>Загрузка файла CTY</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3161"/>
         <source>CTY File Version: </source>
-        <translation type="vanished">Версия файла CTY: </translation>
+        <translation>Версия файла CTY: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3168"/>
         <source>Download Latest CTY.dat</source>
-        <translation type="vanished">Скачать последнюю версию CTY.dat</translation>
+        <translation>Скачать последнюю версию CTY.dat</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3178"/>
         <source>CALL3 File Download</source>
-        <translation type="vanished">CALL3 Загрузка файла</translation>
+        <translation>CALL3 Загрузка файла</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3184"/>
         <source>CALL3 File Version:</source>
-        <translation type="vanished">Версия файла CALL3:</translation>
+        <translation>Версия файла CALL3:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3191"/>
         <source>Dowload latest CALL3.TXT file.</source>
-        <translation type="vanished">Загрузите последнюю версию файла CALL3.TXT.</translation>
+        <translation>Загрузите последнюю версию файла CALL3.TXT.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3194"/>
         <source>Download CALL3.TXT for terrestrial use</source>
-        <translation type="vanished">Загрузите CALL3.TXT для наземного использования</translation>
+        <translation>Загрузите CALL3.TXT для наземного использования</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3201"/>
         <source>Dowload latest CALL3.TXT file for EME. This version is suitable for JT65 Deep Search.</source>
-        <translation type="vanished">Загрузите последнюю версию файла CALL3.TXT для EME. Эта версия подходит для глубокого поиска JT65.</translation>
+        <translation>Загрузите последнюю версию файла CALL3.TXT для EME. Эта версия подходит для глубокого поиска JT65.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3204"/>
         <source>Download CALL3.TXT for EME</source>
-        <translation type="vanished">Загрузите CALL3.TXT для EME</translation>
+        <translation>Загрузите CALL3.TXT для EME</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3289"/>
         <source>GUI tweaks for high-resolution monitors</source>
-        <translation type="vanished">Настройка графического интерфейса для мониторов с высоким разрешением.</translation>
+        <translation>Настройка графического интерфейса для мониторов с высоким разрешением.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3295"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;HighDPI scaling enables a larger and more proportionally correct display of the controls on 4K monitors (if supported by the OS).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;HighDPI scaling enables a larger and more proportionally correct display of the controls on 4K monitors (if supported by the OS).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;HighDPI scaling enables a larger and more proportionally correct display of the controls on 4K monitors (if supported by the OS).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3298"/>
         <source>HighDPI scaling (restart required)</source>
-        <translation type="vanished">Масштабирование HighDPI (требуется перезагрузка)</translation>
+        <translation>Масштабирование HighDPI (требуется перезагрузка)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3305"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Increased height of some control elements.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличена высота некоторых элементов управления.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Увеличена высота некоторых элементов управления.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3308"/>
         <source>Increased height of the tab widget (restart required)</source>
-        <translation type="vanished">Увеличена высота виджета вкладок (требуется перезагрузка)</translation>
+        <translation>Увеличена высота виджета вкладок (требуется перезагрузка)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3318"/>
+        <location filename="../Configuration.ui" line="4070"/>
         <source>Clock compensation limits (FT2/FT4/FT8)</source>
-        <translation type="vanished">Пределы компенсации тактовой частоты (FT2/FT4/FT8)</translation>
+        <translation>Пределы компенсации тактовой частоты (FT2/FT4/FT8)</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3330"/>
+        <location filename="../Configuration.ui" line="4076"/>
         <source>Max DT correction with NTP sync:</source>
-        <translation type="vanished">Максимальная коррекция DT с синхронизацией NTP:</translation>
+        <translation>Максимальная коррекция DT с синхронизацией NTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3340"/>
+        <location filename="../Configuration.ui" line="4086"/>
         <source>Limits automatic DT correction when NTP is synced. Increase for remote stations with stable extra latency.</source>
-        <translation type="vanished">Ограничивает автоматическую коррекцию DT при синхронизации NTP. Увеличение для удаленных станций со стабильной дополнительной задержкой.</translation>
+        <translation>Ограничивает автоматическую коррекцию DT при синхронизации NTP. Увеличение для удаленных станций со стабильной дополнительной задержкой.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3343"/>
+        <location filename="../Configuration.ui" line="3375"/>
+        <location filename="../Configuration.ui" line="4089"/>
+        <location filename="../Configuration.ui" line="4121"/>
         <source> ms</source>
-        <translation type="vanished"> мс</translation>
+        <translation> мс</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3362"/>
+        <location filename="../Configuration.ui" line="4108"/>
         <source>Max DT correction without NTP sync:</source>
-        <translation type="vanished">Максимальная коррекция DT без синхронизации NTP:</translation>
+        <translation>Максимальная коррекция DT без синхронизации NTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3372"/>
+        <location filename="../Configuration.ui" line="4118"/>
         <source>Limits automatic DT correction when NTP is unavailable. Use a higher value only if needed.</source>
-        <translation type="vanished">Ограничивает автоматическую коррекцию DT, когда NTP недоступен. Используйте более высокое значение только в случае необходимости.</translation>
+        <translation>Ограничивает автоматическую коррекцию DT, когда NTP недоступен. Используйте более высокое значение только в случае необходимости.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3409"/>
         <source>Enable Cloudlog Features</source>
-        <translation type="vanished">Включить функции Cloudlog</translation>
+        <translation>Включить функции Cloudlog</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3423"/>
         <source>API URL: </source>
-        <translation type="vanished">URL-адрес API: </translation>
+        <translation>URL-адрес API: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3430"/>
         <source>API Key: </source>
-        <translation type="vanished">API-ключ:</translation>
+        <translation>API-ключ:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3437"/>
         <source>Station ID: </source>
-        <translation type="vanished">Идентификатор станции: </translation>
+        <translation>Идентификатор станции: </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3472"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Test the Cloudlog API key.&lt;/p&gt;&lt;p&gt;The button will turn green if the API key is writable. It will turn orange if the API key is read-only. If the API key is invalid it will turn red.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Проверьте ключ API Cloudlog.&lt;/p&gt;&lt;p&gt;Кнопка станет зеленой, если ключ API доступен для записи. Он станет оранжевым, если ключ API доступен только для чтения. Если ключ API недействителен, он станет красным. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;P2&lt;p&gt;Проверьте ключ API Cloudlog.&lt;/p&gt;&lt;p&gt;Кнопка станет зеленой, если ключ API доступен для записи. Он станет оранжевым, если ключ API доступен только для чтения. Если ключ API недействителен, он станет красным. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3475"/>
         <source>Test API Key</source>
-        <translation type="vanished">Тестовый ключ API</translation>
+        <translation>Тестовый ключ API</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3500"/>
         <source>Special operating activity</source>
-        <translation type="vanished">Специальная оперативная деятельность</translation>
+        <translation>Специальная оперативная деятельность</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3512"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ARRL International Digital Contest&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Международный цифровой конкурс ARRL&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Международный цифровой конкурс ARRL&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3515"/>
         <source>ARRL Digi Contest</source>
-        <translation type="vanished">Цифровой конкурс ARRL</translation>
+        <translation>Цифровой конкурс ARRL</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3547"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle the NCCC Sprint FT4 short message protocol On/Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle the NCCC Sprint FT4 short message protocol On/Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle the NCCC Sprint FT4 short message protocol On/Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3550"/>
         <source>NCCC Sprint</source>
-        <translation type="vanished">NCCC Спринт</translation>
+        <translation>NCCC Спринт</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3664"/>
+        <location filename="../Configuration.ui" line="3714"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup and similar contests. Exchange is US state, Canadian province, or &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup и подобные конкурсы. Exchange&#xa0;— штат США, провинция Канады или &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FT Roundup и подобные конкурсы. Exchange&#xa0;— штат США, провинция Канады или &amp;quot;DX&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3670"/>
         <source>FT Roundup messages</source>
-        <translation type="vanished">Сообщения FT Roundup</translation>
+        <translation>Сообщения FT Roundup</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3698"/>
         <source>FT RU Exch:</source>
-        <translation type="vanished">FT RU Обмен:</translation>
+        <translation>FT RU Обмен:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3753"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this box to transmit (Fox) or receive (Hound) the SuperFox waveform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this box to transmit (Fox) or receive (Hound) the SuperFox waveform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this box to transmit (Fox) or receive (Hound) the SuperFox waveform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3756"/>
         <source>SuperFox mode</source>
-        <translation type="vanished">Режим СуперФокс</translation>
+        <translation>Режим СуперФокс</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3765"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show OTP messages in the Band Activity window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show OTP messages in the Band Activity window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show OTP messages in the Band Activity window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3768"/>
         <source>Show OTP messages</source>
-        <translation type="vanished">Показать одноразовые сообщения</translation>
+        <translation>Показать одноразовые сообщения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3794"/>
         <source>OTP URL:</source>
-        <translation type="vanished">URL-адрес OTP:</translation>
+        <translation>URL-адрес OTP:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3823"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL used to verify OTP codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL, используемый для проверки OTP-кодов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;URL, используемый для проверки OTP-кодов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3826"/>
         <source>https://www.9dx.cc</source>
-        <translation type="vanished">https://www.9dx.cc</translation>
+        <translation>https://www.9dx.cc</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3847"/>
         <source>NA VHF</source>
-        <translation type="vanished">NA УКВ</translation>
+        <translation>NA УКВ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3881"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to enable OTP method of Fox verification. Requires internet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы включить метод OTP проверки Fox. Требуется Интернет.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Нажмите, чтобы включить метод OTP проверки Fox. Требуется Интернет.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3884"/>
         <source>OTP</source>
-        <translation type="vanished">ОТП</translation>
+        <translation>ОТП</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3910"/>
         <source>Key:</source>
-        <translation type="vanished">Ключ:</translation>
+        <translation>Ключ:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3923"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fox&apos;s key to generate OTP Codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fox&apos;s key to generate OTP Codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fox&apos;s key to generate OTP Codes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3926"/>
         <source>M2ZUU5CW6EVOY2HU</source>
-        <translation type="vanished">M2ZUU5CW6EVOY2HU</translation>
+        <translation>M2ZUU5CW6EVOY2HU</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3949"/>
         <source>Interval</source>
-        <translation type="vanished">Интервал</translation>
+        <translation>Интервал</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3956"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interval at which the OTP messages are sent. Select 1 to sign every message.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Интервал отправки OTP-сообщений. Выберите 1, чтобы подписывать каждое сообщение.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Интервал отправки OTP-сообщений. Выберите 1, чтобы подписывать каждое сообщение.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3989"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Call CQ with an individual contest name instead of TEST, RU, or WW (for example CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
 </source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Call CQ with an individual contest name instead of TEST, RU, or WW (for example CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Call CQ with an individual contest name instead of TEST, RU, or WW (for example CQ PACC).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
 </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="3993"/>
         <source>CQ with individual contest name</source>
-        <translation type="vanished">CQ с индивидуальным названием конкурса</translation>
+        <translation>CQ с индивидуальным названием конкурса</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4015"/>
         <source>Contest name:</source>
-        <translation type="vanished">Название конкурса:</translation>
+        <translation>Название конкурса:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4054"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Exchange 4-character locator instead of signal report.  Provides q3-level sensitivities for the DX operator.  Especially useful for 6m EME DXpeditions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Заменить 4-значный локатор вместо отчета о сигнале.  Обеспечивает чувствительность уровня q3 для оператора DX.  Особенно полезно для 6-метровых DX-экспедиций EME.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Заменить 4-значный локатор вместо отчета о сигнале.  Обеспечивает чувствительность уровня q3 для оператора DX.  Особенно полезно для 6-метровых DX-экспедиций EME.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4057"/>
         <source>Q65 Pileup</source>
-        <translation type="vanished">Q65 Скопление</translation>
+        <translation>Q65 Скопление</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4178"/>
         <source>Receiver bandwidth:</source>
-        <translation type="vanished">Полоса пропускания приемника</translation>
+        <translation>Полоса пропускания приемника</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4191"/>
         <source>  Hz</source>
-        <translation type="vanished">Гц</translation>
+        <translation>Гц</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4207"/>
         <source>Tx delay:</source>
-        <translation type="vanished">Задержка передачи:</translation>
+        <translation>Задержка передачи:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4217"/>
         <source>Minimum delay between assertion of PTT and start of Tx audio.</source>
-        <translation type="vanished">Минимальная задержка между включением PTT
+        <translation>Минимальная задержка между включением PTT
 и подачей звукового сигнала. Используется для
 защиты контактов выходного реле передатчика
 от &apos;горячего&apos; включения.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4220"/>
         <source>  s</source>
-        <translation type="vanished"> c</translation>
+        <translation> c</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4245"/>
+        <location filename="../Configuration.ui" line="4248"/>
         <source>Tone spacing</source>
-        <translation type="vanished">Расстояние между тонами</translation>
+        <translation>Расстояние между тонами</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4254"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate Tx audio with twice the normal tone spacing.  Intended for special LF/MF transmitters that use a divide-by-2 before generating RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Создайте звук Tx с удвоенным расстоянием между тонами. Предназначен для специальных передатчиков НЧ/СЧ, которые перед генерацией РЧ используют деление на 2.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Создайте звук Tx с удвоенным расстоянием между тонами. Предназначен для специальных передатчиков НЧ/СЧ, которые перед генерацией РЧ используют деление на 2.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4257"/>
         <source>x 2</source>
-        <translation type="vanished">х 2</translation>
+        <translation>х 2</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4267"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Generate Tx audio with four times the normal tone spacing. Intended for special LF/MF transmitters that use a divide-by-4 before generating RF.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Создайте Tx с четырехкратным интервалом между тонами. Предназначен для специальных передатчиков НЧ/СЧ, которые перед генерацией РЧ используют деление на 4.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Создайте Tx с четырехкратным интервалом между тонами. Предназначен для специальных передатчиков НЧ/СЧ, которые перед генерацией РЧ используют деление на 4.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4270"/>
         <source>x 4 </source>
-        <translation type="vanished">х 4 </translation>
+        <translation>х 4 </translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4286"/>
+        <location filename="../Configuration.ui" line="4289"/>
         <source>Waterfall spectra</source>
-        <translation type="vanished">Спектр водопада</translation>
+        <translation>Спектр водопада</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4295"/>
         <source>Low sidelobes</source>
-        <translation type="vanished">Малый уровень</translation>
+        <translation>Малый уровень</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4305"/>
         <source>Most sensitive</source>
-        <translation type="vanished">Самый чувствительный</translation>
+        <translation>Самый чувствительный</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4319"/>
         <source>Alerts</source>
-        <translation type="vanished">Оповещения</translation>
+        <translation>Оповещения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4325"/>
         <source>Alert categories above the line require to have the box &quot;Show DXCC, grid, and worked-before status&quot; on the General tab checked.</source>
-        <translation type="vanished">Для категорий оповещений над линией необходимо установить флажок «Показать DXCC, сетку и статус работы до» на вкладке «Общие».</translation>
+        <translation>Для категорий оповещений над линией необходимо установить флажок «Показать DXCC, сетку и статус работы до» на вкладке «Общие».</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4332"/>
         <source>THIS FEATURE IS FOR EXPERIENCED USERS ONLY</source>
-        <translation type="vanished">ЭТА ФУНКЦИЯ ТОЛЬКО ДЛЯ ОПЫТНЫХ ПОЛЬЗОВАТЕЛЕЙ</translation>
+        <translation>ЭТА ФУНКЦИЯ ТОЛЬКО ДЛЯ ОПЫТНЫХ ПОЛЬЗОВАТЕЛЕЙ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4339"/>
         <source>Ensure that you have made meaningful settings on the Colors tab, so that you see which message triggered the alert.</source>
-        <translation type="vanished">Убедитесь, что вы сделали значимые настройки на вкладке «Цвета», чтобы вы могли видеть, какое сообщение вызвало оповещение.</translation>
+        <translation>Убедитесь, что вы сделали значимые настройки на вкладке «Цвета», чтобы вы могли видеть, какое сообщение вызвало оповещение.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4346"/>
         <source>Ensure that your rig is NOT connected via &quot;Default Device&quot;.</source>
-        <translation type="vanished">Убедитесь, что ваша установка НЕ подключена через «Устройство по умолчанию».</translation>
+        <translation>Убедитесь, что ваша установка НЕ подключена через «Устройство по умолчанию».</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4359"/>
         <source>Audio Alerts</source>
-        <translation type="vanished">Звуковые оповещения</translation>
+        <translation>Звуковые оповещения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4380"/>
+        <location filename="../Configuration.ui" line="4383"/>
         <source>New ITU Zone on Band</source>
-        <translation type="vanished">Новая ITU зона на диапазоне</translation>
+        <translation>Новая ITU зона на диапазоне</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4390"/>
+        <location filename="../Configuration.ui" line="4393"/>
         <source>New Continent</source>
-        <translation type="vanished">Новый континент</translation>
+        <translation>Новый континент</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4400"/>
+        <location filename="../Configuration.ui" line="4403"/>
         <source>DX Call or DX Grid in message</source>
-        <translation type="vanished">DX Call или DX Grid в сообщении</translation>
+        <translation>DX Call или DX Grid в сообщении</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4410"/>
+        <location filename="../Configuration.ui" line="4413"/>
         <source>New Grid</source>
-        <translation type="vanished">Новый локатор</translation>
+        <translation>Новый локатор</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4420"/>
+        <location filename="../Configuration.ui" line="4423"/>
         <source>New Continent on Band</source>
-        <translation type="vanished">Новый Континент в группе</translation>
+        <translation>Новый Континент в группе</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4430"/>
         <source>Message received</source>
-        <translation type="vanished">Сообщение получено</translation>
+        <translation>Сообщение получено</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4437"/>
+        <location filename="../Configuration.ui" line="4440"/>
         <source>New ITU Zone</source>
-        <translation type="vanished">Новая ITU зона</translation>
+        <translation>Новая ITU зона</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4447"/>
+        <location filename="../Configuration.ui" line="4450"/>
         <source>New CQ Zone</source>
-        <translation type="vanished">Новая CQ зона</translation>
+        <translation>Новая CQ зона</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4457"/>
+        <location filename="../Configuration.ui" line="4460"/>
         <source>New DXCC on Band</source>
-        <translation type="vanished">Новый DXCC на группе</translation>
+        <translation>Новый DXCC на группе</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4467"/>
         <source>My Call in message</source>
-        <translation type="vanished">Мой позывной в сообщении</translation>
+        <translation>Мой позывной в сообщении</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4470"/>
         <source>My Call</source>
-        <translation type="vanished">Мой звонок</translation>
+        <translation>Мой звонок</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4477"/>
+        <location filename="../Configuration.ui" line="4480"/>
         <source>New CQ Zone on Band</source>
-        <translation type="vanished">Новая CQ зона на диапазоне</translation>
+        <translation>Новая CQ зона на диапазоне</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4487"/>
+        <location filename="../Configuration.ui" line="4490"/>
         <source>New DXCC</source>
-        <translation type="vanished">Новая DXCC</translation>
+        <translation>Новая DXCC</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4497"/>
+        <location filename="../Configuration.ui" line="4500"/>
         <source>New Grid on Band</source>
-        <translation type="vanished">Новая сетка на полосе</translation>
+        <translation>Новая сетка на полосе</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4514"/>
+        <location filename="../Configuration.ui" line="4517"/>
         <source>CQ in message</source>
-        <translation type="vanished">CQ в сообщении</translation>
+        <translation>CQ в сообщении</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4530"/>
         <source>Toggle Audio Alerts on/off. Alerts will be played on &quot;DefaultAudioDevice&quot;. DON&apos;T ENABLE AUDIO ALERTS WHEN YOUR RIG IS CONNECTED VIA THIS SOUNDCARD !!!</source>
-        <translation type="vanished">Включите/выключите звуковые оповещения. Оповещения будут воспроизводиться на «DefaultAudioDevice». НЕ ВКЛЮЧАЙТЕ ЗВУКОВЫЕ ОПОВЕЩЕНИЯ, КОГДА ВАША УСТАНОВКА ПОДКЛЮЧЕНА ЧЕРЕЗ ЭТУ ЗВУКОВУЮ КАРТУ!!!</translation>
+        <translation>Включите/выключите звуковые оповещения. Оповещения будут воспроизводиться на «DefaultAudioDevice». НЕ ВКЛЮЧАЙТЕ ЗВУКОВЫЕ ОПОВЕЩЕНИЯ, КОГДА ВАША УСТАНОВКА ПОДКЛЮЧЕНА ЧЕРЕЗ ЭТУ ЗВУКОВУЮ КАРТУ!!!</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4545"/>
         <source>Enable Audio Alerts</source>
-        <translation type="vanished">Включить звуковые оповещения</translation>
+        <translation>Включить звуковые оповещения</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4574"/>
         <source>This requirement is fulfilled when your rig is connected via USB audio.</source>
-        <translation type="vanished">Это требование выполняется, когда ваша установка подключена через USB-аудио.</translation>
+        <translation>Это требование выполняется, когда ваша установка подключена через USB-аудио.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4581"/>
         <source>Audio Alerts will be played on the default audio device (usually the loudspeaker of your PC).</source>
-        <translation type="vanished">Звуковые оповещения будут воспроизводиться на аудиоустройстве по умолчанию (обычно это динамик вашего ПК).</translation>
+        <translation>Звуковые оповещения будут воспроизводиться на аудиоустройстве по умолчанию (обычно это динамик вашего ПК).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4588"/>
         <source>IMPORTANT NOTES</source>
-        <translation type="vanished">ВАЖНЫЕ ПРИМЕЧАНИЯ</translation>
+        <translation>ВАЖНЫЕ ПРИМЕЧАНИЯ</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4595"/>
         <source>Use of this feature requires that your computer is equipped with two sound cards.</source>
-        <translation type="vanished">Для использования этой функции необходимо, чтобы ваш компьютер был оснащен двумя звуковыми картами.</translation>
+        <translation>Для использования этой функции необходимо, чтобы ваш компьютер был оснащен двумя звуковыми картами.</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4603"/>
         <source>Filters</source>
-        <translation type="vanished">Фильтры</translation>
+        <translation>Фильтры</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4632"/>
         <source>Territories 1-4 for the Hide checkboxes in the View menu</source>
-        <translation type="vanished">Территории 1–4 для флажков «Скрыть» в меню «Вид».</translation>
+        <translation>Территории 1–4 для флажков «Скрыть» в меню «Вид».</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4639"/>
         <source>Blacklist</source>
-        <translation type="vanished">Черный список</translation>
+        <translation>Черный список</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4658"/>
         <source>Filters for the Band Activity window</source>
-        <translation type="vanished">Фильтры для окна «Активность группы»</translation>
+        <translation>Фильтры для окна «Активность группы»</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4696"/>
         <source>Hide messages containing the following callsigns or keywords:</source>
-        <translation type="vanished">Скрыть сообщения, содержащие следующие позывные или ключевые слова:</translation>
+        <translation>Скрыть сообщения, содержащие следующие позывные или ключевые слова:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4715"/>
         <source>Show only messages containing the following callsigns or keywords:</source>
-        <translation type="vanished">Показывать только сообщения, содержащие следующие позывные или ключевые слова:</translation>
+        <translation>Показывать только сообщения, содержащие следующие позывные или ключевые слова:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4731"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4734"/>
         <source>Use filters for Wait and Pounce, CQ: First, etc. only (all messages are still displayed)</source>
-        <translation type="vanished">Используйте фильтры только для «Wait and Pounce», «CQ: First» и т. д. (все сообщения по-прежнему отображаются).</translation>
+        <translation>Используйте фильтры только для «Wait and Pounce», «CQ: First» и т. д. (все сообщения по-прежнему отображаются).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4799"/>
         <source>Always pass messages with the following keywords:</source>
-        <translation type="vanished">Всегда передавайте сообщения со следующими ключевыми словами:</translation>
+        <translation>Всегда передавайте сообщения со следующими ключевыми словами:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4824"/>
         <source>Whitelist</source>
-        <translation type="vanished">Белый список</translation>
+        <translation>Белый список</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4837"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply filters only to the callsigns of the calling stations. Usually the second word of the messages is analyzed, for directional calls the third word.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply filters only to the callsigns of the calling stations. Usually the second word of the messages is analyzed, for directional calls the third word.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Apply filters only to the callsigns of the calling stations. Usually the second word of the messages is analyzed, for directional calls the third word.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4840"/>
         <source>Apply filters only to the callsigns of the calling stations</source>
-        <translation type="vanished">Применять фильтры только к позывным вызывающих станций</translation>
+        <translation>Применять фильтры только к позывным вызывающих станций</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4859"/>
         <source>Always Pass</source>
-        <translation type="vanished">Всегда проходить</translation>
+        <translation>Всегда проходить</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4875"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use “worked today and yesterday” instead of “worked today” for the 3 related Quick Filters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use “worked today and yesterday” instead of “worked today” for the 3 related Quick Filters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use “worked today and yesterday” instead of “worked today” for the 3 related Quick Filters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4878"/>
         <source>Quick Filters: Hide/Ignore/Highlight &quot;worked today and yesterday&quot; instead of &quot;worked today&quot; (UTC)</source>
-        <translation type="vanished">Быстрые фильтры: скрыть/игнорировать/выделить «работал сегодня и вчера» вместо «работал сегодня» (UTC).</translation>
+        <translation>Быстрые фильтры: скрыть/игнорировать/выделить «работал сегодня и вчера» вместо «работал сегодня» (UTC).</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="4891"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Discard (Cancel) or apply (OK) configuration changes including&lt;/p&gt;&lt;p&gt;resetting the radio interface and applying any soundcard changes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отменить (Cancel) или применить (OK) изменения конфигурации, включая&lt;/p&gt;&lt;p&gt;сброс радиоинтерфейса и применение любых изменений звуковой карты&lt;/p&gt;&lt;/body&gt;&lt; /html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отменить (Cancel) или применить (OK) изменения конфигурации, включая&lt;/p&gt;&lt;p&gt;сброс радиоинтерфейса и применение любых изменений звуковой карты&lt;/p&gt;&lt;/body&gt;&lt; /html&gt;</translation>
     </message>
 </context>
 <context>
@@ -18251,12 +18929,14 @@ Right click for insert and delete options.</source>
 <context>
     <name>wf_palette_design_dialog</name>
     <message>
+        <location filename="../wf_palette_design_dialog.ui" line="14"/>
         <source>Palette Designer</source>
-        <translation type="vanished">Дизайнер палитры</translation>
+        <translation>Дизайнер палитры</translation>
     </message>
     <message>
+        <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Дважды щелкните цвет, чтобы отредактировать его.&lt;/p&gt;&lt;p&gt;Щелкните правой кнопкой мыши , чтобы вставлять или удалять цвета.&lt;/p&gt;&lt;p&gt;Цвета в верхней части представляют слабые сигналы. и цвета внизу сильные.&lt;/p&gt;&lt;p&gt;Вы можете использовать до 256 цветов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Дважды щелкните цвет, чтобы отредактировать его.&lt;/p&gt;&lt;p&gt;Щелкните правой кнопкой мыши , чтобы вставлять или удалять цвета.&lt;/p&gt;&lt;p&gt;Цвета в верхней части представляют слабые сигналы. и цвета внизу сильные.&lt;/p&gt;&lt;p&gt;Вы можете использовать до 256 цветов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>

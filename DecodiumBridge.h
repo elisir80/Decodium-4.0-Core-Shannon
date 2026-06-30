@@ -449,6 +449,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ftxWeakSignoffBoost READ ftxWeakSignoffBoost WRITE setFtxWeakSignoffBoost NOTIFY ftxWeakSignoffBoostChanged)
     Q_PROPERTY(int ftxWeakSnrThreshold READ ftxWeakSnrThreshold WRITE setFtxWeakSnrThreshold NOTIFY ftxWeakSnrThresholdChanged)
     Q_PROPERTY(int ftxWeakSignoffBonus READ ftxWeakSignoffBonus WRITE setFtxWeakSignoffBonus NOTIFY ftxWeakSignoffBonusChanged)
+    Q_PROPERTY(bool ft2PostLogReengageGuard READ ft2PostLogReengageGuard WRITE setFt2PostLogReengageGuard NOTIFY ft2PostLogReengageGuardChanged)
+    Q_PROPERTY(int ft2PostLogReengageMax READ ft2PostLogReengageMax WRITE setFt2PostLogReengageMax NOTIFY ft2PostLogReengageMaxChanged)
+    Q_PROPERTY(bool txWatchdogLogOnClose READ txWatchdogLogOnClose WRITE setTxWatchdogLogOnClose NOTIFY txWatchdogLogOnCloseChanged)
+    Q_PROPERTY(bool callerRetriesAlwaysHard READ callerRetriesAlwaysHard WRITE setCallerRetriesAlwaysHard NOTIFY callerRetriesAlwaysHardChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2NarrowAsyncDecode READ ft2NarrowAsyncDecode WRITE setFt2NarrowAsyncDecode NOTIFY ft2NarrowAsyncDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
@@ -1438,6 +1442,10 @@ signals:
     void ftxWeakSignoffBoostChanged();    // 1.0.437 - extra signoff retries weak partner
     void ftxWeakSnrThresholdChanged();    // 1.0.437
     void ftxWeakSignoffBonusChanged();    // 1.0.437
+    void ft2PostLogReengageGuardChanged();  // 1.0.446 - guard ri-aggancio RRR post-log
+    void ft2PostLogReengageMaxChanged();    // 1.0.446
+    void txWatchdogLogOnCloseChanged();      // 1.0.446 - watchdog logga QSO in chiusura (P0-3)
+    void callerRetriesAlwaysHardChanged();   // 1.0.446 - P1-5 cap Caller-retries duro anche con watchdog ON
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2NarrowAsyncDecodeChanged();   // Sprint2-1
     void ft2ApHashCacheChanged();         // 1.0.293
@@ -1657,6 +1665,10 @@ private slots:
     void regenerateTxMessages();  // auto-genera TX6 (CQ) e TX1-5 da callsign/grid/dxCall
     void onAlcCalibrationTick(); // 1.0.324 — ALC calibration timer slot
     void processNextInQueue();   // mainwindow processNextInQueue: auto-handoff al prossimo caller
+    // 1.0.446 - P2-8: reset stato QSO estratto dalle 2 lambda finishAutoSequenceQso duplicate
+    // (checkAndStartPeriodicTx + autoSequenceStep). preserveAutoTx=false spegne il TX. Include
+    // il reset SNR partner (P2-9). Comportamento byte-identico alle ex-lambda.
+    void resetQsoStateForNextSequence(bool preserveAutoTx);
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
 private:
@@ -2045,6 +2057,20 @@ private:
     bool m_ftxWeakSignoffBoost {false};
     int  m_ftxWeakSnrThreshold {-15};
     int  m_ftxWeakSignoffBonus {3};
+    // 1.0.446 - opt-in (default OFF): dopo aver loggato un partner ("partner left"), limita i
+    // ri-aggganci RRR allo stesso partner che insiste con R+report (caso 9H1SR). Bound: al piu'
+    // m_ft2PostLogReengageMax RRR di cortesia entro la finestra cooldown (30s), poi sopprime.
+    bool m_ft2PostLogReengageGuard {false};
+    int  m_ft2PostLogReengageMax {1};
+    QHash<QString,int> m_postLogReengageCount;  // base call -> ri-aggganci consumati (entro cooldown)
+    // 1.0.446 - P0-3 opt-in (default OFF): se il TX watchdog scatta con un QSO gia' a
+    // scambio report bidirezionale completato (m_qsoProgress>=4), logga il QSO invece di
+    // abbandonarlo (1.0.445 armava solo il late-snapshot, perso in QSO manuale).
+    bool m_txWatchdogLogOnClose {false};
+    // 1.0.446 - P1-5 opt-in (default OFF): quando ON il cap "Caller retries" su TX1/TX2 ferma
+    // la chiamata anche se il TX watchdog e' ON (default 1.0.438: watchdog prioritario, ignora
+    // il cap fino al timeout). Per chi vuole un limite duro di tentativi a prescindere.
+    bool m_callerRetriesAlwaysHard {false};
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
     // Sprint2-1: fast pass narrow-band quando attendi una reply (opt-in).
     bool m_ft2NarrowAsyncDecode {false};
@@ -3009,6 +3035,14 @@ public:
     Q_INVOKABLE void setFtxWeakSnrThreshold(int v);
     Q_INVOKABLE int  ftxWeakSignoffBonus() const { return m_ftxWeakSignoffBonus; }
     Q_INVOKABLE void setFtxWeakSignoffBonus(int v);
+    Q_INVOKABLE bool ft2PostLogReengageGuard() const { return m_ft2PostLogReengageGuard; }
+    Q_INVOKABLE void setFt2PostLogReengageGuard(bool v);
+    Q_INVOKABLE int  ft2PostLogReengageMax() const { return m_ft2PostLogReengageMax; }
+    Q_INVOKABLE void setFt2PostLogReengageMax(int v);
+    Q_INVOKABLE bool txWatchdogLogOnClose() const { return m_txWatchdogLogOnClose; }
+    Q_INVOKABLE void setTxWatchdogLogOnClose(bool v);
+    Q_INVOKABLE bool callerRetriesAlwaysHard() const { return m_callerRetriesAlwaysHard; }
+    Q_INVOKABLE void setCallerRetriesAlwaysHard(bool v);
     Q_INVOKABLE bool ft2AdaptiveDecode() const { return m_ft2AdaptiveDecode; }
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
     Q_INVOKABLE bool ft2NarrowAsyncDecode() const { return m_ft2NarrowAsyncDecode; }
