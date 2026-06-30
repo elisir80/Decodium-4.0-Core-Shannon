@@ -282,7 +282,8 @@ Frame makeBeaconFrame (LinkCapabilities const& capabilities,
   Frame frame;
   frame.type = FrameType::Beacon;
   frame.profile = Profile::Narrow;
-  frame.flags = cq ? FlagEndOfMessage : 0u;
+  frame.flags = cq ? static_cast<std::uint8_t> (FlagEndOfMessage)
+                   : static_cast<std::uint8_t> (0);
   frame.payload = makePayload (capabilities, StatusOffer, nullptr, &identity);
   return frame;
 }
