@@ -2589,7 +2589,12 @@ Rectangle {
         refreshContactTimeline()
         refreshTypingIndicators()
         applyCurrentFormTemplate()
-        Qt.callLater(loadPresenceEditor)
+        // iu8lmc fix (verso 1.0.448): Qt.callLater col riferimento NUDO perde lo scope QML
+        // del root -> le chiamate unqualified dentro loadPresenceEditor (refreshPresence,
+        // refreshQsoAutomation, awayCheck...) falliscono con 'TypeError ... is not a function'
+        // alla prima invocazione differita. Invoco il metodo QUALIFICATO su root via closure:
+        // cosi' loadPresenceEditor gira nello scope del componente e tutte le sue lookup risolvono.
+        Qt.callLater(() => root.loadPresenceEditor())
     }
 
     Timer {
