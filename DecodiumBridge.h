@@ -453,6 +453,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int ft2PostLogReengageMax READ ft2PostLogReengageMax WRITE setFt2PostLogReengageMax NOTIFY ft2PostLogReengageMaxChanged)
     Q_PROPERTY(bool txWatchdogLogOnClose READ txWatchdogLogOnClose WRITE setTxWatchdogLogOnClose NOTIFY txWatchdogLogOnCloseChanged)
     Q_PROPERTY(bool callerRetriesAlwaysHard READ callerRetriesAlwaysHard WRITE setCallerRetriesAlwaysHard NOTIFY callerRetriesAlwaysHardChanged)
+    Q_PROPERTY(bool ft2TransitionCensus READ ft2TransitionCensus WRITE setFt2TransitionCensus NOTIFY ft2TransitionCensusChanged)
+    Q_PROPERTY(bool ft2AdaptiveTxGates READ ft2AdaptiveTxGates WRITE setFt2AdaptiveTxGates NOTIFY ft2AdaptiveTxGatesChanged)
     Q_PROPERTY(bool ft2AdaptiveDecode READ ft2AdaptiveDecode WRITE setFt2AdaptiveDecode NOTIFY ft2AdaptiveDecodeChanged)
     Q_PROPERTY(bool ft2NarrowAsyncDecode READ ft2NarrowAsyncDecode WRITE setFt2NarrowAsyncDecode NOTIFY ft2NarrowAsyncDecodeChanged)
     Q_PROPERTY(bool ft2ApHashCache READ ft2ApHashCache WRITE setFt2ApHashCache NOTIFY ft2ApHashCacheChanged)
@@ -1446,6 +1448,8 @@ signals:
     void ft2PostLogReengageMaxChanged();    // 1.0.446
     void txWatchdogLogOnCloseChanged();      // 1.0.446 - watchdog logga QSO in chiusura (P0-3)
     void callerRetriesAlwaysHardChanged();   // 1.0.446 - P1-5 cap Caller-retries duro anche con watchdog ON
+    void ft2TransitionCensusChanged();        // 1.0.447 - censimento transizioni stato FT2 (fondamenta Fase 1)
+    void ft2AdaptiveTxGatesChanged();          // 1.0.447 - Leva#6-A gate smart-TX adattivi
     void ft2AdaptiveDecodeChanged();      // 1.0.292
     void ft2NarrowAsyncDecodeChanged();   // Sprint2-1
     void ft2ApHashCacheChanged();         // 1.0.293
@@ -2071,6 +2075,13 @@ private:
     // la chiamata anche se il TX watchdog e' ON (default 1.0.438: watchdog prioritario, ignora
     // il cap fino al timeout). Per chi vuole un limite duro di tentativi a prescindere.
     bool m_callerRetriesAlwaysHard {false};
+    // 1.0.447 - Fondamenta Fase 1 (opt-in, default OFF): logga ogni transizione (from,to,progress,
+    // quick) in advanceQsoState per costruire EMPIRICAMENTE la matrice reale dei salti PRIMA di
+    // qualunque enforcement canAdvance. Solo-logging, gated FT2+async, byte-identico col toggle OFF.
+    bool m_ft2TransitionCensus {false};
+    // 1.0.447 - Leva#6-A (opt-in, default OFF): gate smart-TX (RMS/decode-quiet/jitter) adattivi
+    // all'occupazione del canale. OFF -> requisiti = literal storici (3/400/50/200), byte-identico.
+    bool m_ft2AdaptiveTxGates {false};
     bool m_ft2AdaptiveDecode {false};      // 1.0.292: re-decode async rado in solo-ascolto, pieno in QSO/CQ
     // Sprint2-1: fast pass narrow-band quando attendi una reply (opt-in).
     bool m_ft2NarrowAsyncDecode {false};
@@ -2319,6 +2330,9 @@ private:
     int                   m_ft2AsyncSmartTxRetries {0};
     bool                  m_ft2ManualClickTx1BypassPeriodOnce {false};
     void scheduleSmartFt2AsyncTx(const QString& reason);
+    void ft2AsyncGateRequirements(qint64 nowMs, int& rmsRunsReq, int& decodeQuietReq,
+                                 int& jitterBase, int& jitterSpan) const; // 1.0.447 Leva#6-A
+    bool canAdvance(int fromTx, int toTx) const;  // 1.0.447 Fase 2 - matrice transizioni legittime (would-reject)
     void onAudioLevelForFt2Gate();
     bool                  m_autoSpotEnabled {false};
     bool                  m_nextLogClusterSpotOverrideValid {false};
@@ -3043,6 +3057,10 @@ public:
     Q_INVOKABLE void setTxWatchdogLogOnClose(bool v);
     Q_INVOKABLE bool callerRetriesAlwaysHard() const { return m_callerRetriesAlwaysHard; }
     Q_INVOKABLE void setCallerRetriesAlwaysHard(bool v);
+    Q_INVOKABLE bool ft2TransitionCensus() const { return m_ft2TransitionCensus; }
+    Q_INVOKABLE void setFt2TransitionCensus(bool v);
+    Q_INVOKABLE bool ft2AdaptiveTxGates() const { return m_ft2AdaptiveTxGates; }
+    Q_INVOKABLE void setFt2AdaptiveTxGates(bool v);
     Q_INVOKABLE bool ft2AdaptiveDecode() const { return m_ft2AdaptiveDecode; }
     Q_INVOKABLE void setFt2AdaptiveDecode(bool v);
     Q_INVOKABLE bool ft2NarrowAsyncDecode() const { return m_ft2NarrowAsyncDecode; }

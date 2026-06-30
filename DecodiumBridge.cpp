@@ -6231,6 +6231,28 @@ void DecodiumBridge::setCallerRetriesAlwaysHard(bool v)
     bridgeLog(QStringLiteral("[FT2WS] Caller retries always hard = %1").arg(v ? "ON" : "OFF"));
 }
 
+// 1.0.447 - Fondamenta Fase 1 opt-in: censimento transizioni stato FT2 (solo-logging).
+void DecodiumBridge::setFt2TransitionCensus(bool v)
+{
+    if (m_ft2TransitionCensus == v) return;
+    m_ft2TransitionCensus = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2TransitionCensus"), v);
+    emit ft2TransitionCensusChanged();
+    bridgeLog(QStringLiteral("[STATE] FT2 transition census %1").arg(v ? "ON" : "OFF"));
+}
+
+// 1.0.447 - Leva#6-A opt-in: gate smart-TX adattivi all'occupazione del canale.
+void DecodiumBridge::setFt2AdaptiveTxGates(bool v)
+{
+    if (m_ft2AdaptiveTxGates == v) return;
+    m_ft2AdaptiveTxGates = v;
+    QSettings settings("Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("Ft2AdaptiveTxGates"), v);
+    emit ft2AdaptiveTxGatesChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Adaptive TX gates %1").arg(v ? "ON" : "OFF"));
+}
+
 // 1.0.321 — opt-in FT2 manual one-shot disarm (Salvatore latch fix da 1.0.300).
 // Default OFF su fork = TX1 ripete fino a maxCallerRetries → no "TX1 stacca su weak signal".
 void DecodiumBridge::setFt2ManualOneShotEnabled(bool v)
@@ -26407,8 +26429,47 @@ bool DecodiumBridge::enqueueCallerInternal(const QString& call,
 // === advanceQsoState — GitHub TxController clone ===
 // Mappa TX button number → QSOProgress enum, resetta watchdog
 // 0=IDLE, 1=CALLING_CQ, 2=REPLYING, 3=REPORT, 4=ROGER_REPORT, 5=SIGNOFF, 6=IDLE_QSO
+// 1.0.447 - Fase 2: matrice "best knowledge" delle transizioni di stato FT2 legittime
+// (osservato dal census loopback+on-air U noto-dai-log/verifica avversariale). Opera sul txNum
+// EFFETTIVO (post-remap QuickQSO/Tx1-disabled): il census mostro' che il grezzo 2->1 con QuickQSO
+// e' in realta' 2->2. Include i 3 falsi-reject scoperti (6->{3,4,5} deferred-after-CQ 1.0.359,
+// 2->4 fast-signoff anche q0, 2->1 risolto dal post-remap) + coda 5->2 e recovery 4/5->2/3 (note
+// legittime dalla verifica). NON e' enforcement: oggi solo would-reject (log-only) per scoprire le
+// celle mancanti prima di promuovere a guard attivo.
+bool DecodiumBridge::canAdvance(int fromTx, int toTx) const
+{
+    if (toTx == 6) return true;                                              // ripartenza CQ sempre
+    if ((fromTx == 0 || fromTx == 6) && toTx >= 1 && toTx <= 5) return true; // reply + deferred-after-CQ (1.0.359)
+    if (toTx == 2 && (fromTx <= 2 || fromTx == 4 || fromTx == 5)) return true; // report; coda(5->2); recovery(4/5->2)
+    if (toTx == 3 && fromTx >= 1 && fromTx <= 5) return true;                 // roger-report + recovery backward(4/5->3)
+    if ((toTx == 4 || toTx == 5) && fromTx >= 2 && fromTx <= 5) return true;  // signoff incl. fast(2->4) e ritrasmissioni
+    return false;
+}
+
 bool DecodiumBridge::advanceQsoState(int txNum)
 {
+    // 1.0.447 - Fondamenta Fase 1 (CENSIMENTO, solo-logging, opt-in default OFF): registra ogni
+    // transizione richiesta (from=m_currentTx, to=txNum, progress, quick) per costruire EMPIRICAMENTE
+    // la matrice reale dei salti su TUTTI gli scenari (standard/QuickQSO/Ultra2/Fast3/coda/recovery/
+    // parity) prima di scrivere a mano canAdvance/enforcement. Gated FT2+async: 0 impatto FT8/FT4,
+    // byte-identico col toggle OFF. NESSUN rifiuto, NESSUN cambio comportamento.
+    if (m_ft2TransitionCensus && m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
+        QString const censusLine = QStringLiteral("[STATE-CENSUS] from=%1 to=%2 progress=%3 quick=%4 lastNtx=%5 retry=%6 call=%7")
+                      .arg(m_currentTx).arg(txNum).arg(m_qsoProgress)
+                      .arg(m_quickQsoEnabled ? 1 : 0).arg(m_lastNtx).arg(m_txRetryCount).arg(m_callsign.trimmed());
+        bridgeLog(censusLine);   // visibilita' live monitor (log diagnostico, puo' ruotare a 5MB)
+        // 1.0.447 - file dedicato NO-ROTATE: sotto loopback 2-istanze il diagnostico si tronca e perde
+        // le righe census. Append durevole in %LOCALAPPDATA%\decodium_census.log (call= distingue ALPHA/BRAVO).
+        QString const censusDir = qEnvironmentVariable("LOCALAPPDATA");
+        if (!censusDir.isEmpty()) {
+            QFile cf(censusDir + QStringLiteral("/decodium_census.log"));
+            if (cf.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream ts(&cf);
+                ts << QDateTime::currentDateTimeUtc().toString(Qt::ISODate) << ' ' << censusLine << '\n';
+                cf.close();
+            }
+        }
+    }
     // Quick QSO (Ultra2): salta TX1 → vai diretto a TX2 (come FT2QsoFlowPolicy Ultra2)
     if (txNum == 1 && m_quickQsoEnabled) {
         bridgeLog("advanceQsoState: QuickQSO attivo → salta TX1, va a TX2 (Ultra2)");
@@ -26435,6 +26496,25 @@ bool DecodiumBridge::advanceQsoState(int txNum)
         return true;
     }
 
+    // 1.0.447 - Fase 2 (WOULD-REJECT, LOG-ONLY, NON blocca nulla): qui txNum e' gia' EFFETTIVO
+    // (post-remap QuickQSO/Tx1-disabled). Se non e' nella matrice canAdvance "best knowledge",
+    // logga l'eccezione nel census durevole per raffinare la matrice. Censimento con predicato:
+    // quando resta silenzioso su molti QSO -> matrice completa -> si potra' promuovere a guard.
+    if (m_ft2TransitionCensus && m_mode == QStringLiteral("FT2") && m_asyncTxEnabled
+        && !canAdvance(m_currentTx, txNum)) {
+        QString const wrLine = QStringLiteral("[STATE] WOULD-REJECT from=%1 to=%2 progress=%3 quick=%4 lastNtx=%5 (matrice non copre - LOG ONLY)")
+                      .arg(m_currentTx).arg(txNum).arg(m_qsoProgress).arg(m_quickQsoEnabled ? 1 : 0).arg(m_lastNtx);
+        bridgeLog(wrLine);
+        QString const wrDir = qEnvironmentVariable("LOCALAPPDATA");
+        if (!wrDir.isEmpty()) {
+            QFile wf(wrDir + QStringLiteral("/decodium_census.log"));
+            if (wf.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream wts(&wf);
+                wts << QDateTime::currentDateTimeUtc().toString(Qt::ISODate) << ' ' << wrLine << '\n';
+                wf.close();
+            }
+        }
+    }
     int progress = 0;
     switch (txNum) {
         case 1: progress = 2; break; // TX1 (risposta CQ)  → REPLYING (in attesa risposta)
@@ -26613,6 +26693,25 @@ void DecodiumBridge::onAudioLevelForFt2Gate()
     }
 }
 
+// 1.0.447 - Leva#6-A: requisiti dei gate smart-TX (S2 RMS / S3 decode-quiet / S4 jitter) adattivi
+// all'occupazione del canale FT2. Toggle OFF (default) o non-FT2/non-async -> ritorna i literal
+// storici (3/400/50/200): path byte-identico, lo score NON viene nemmeno consultato. Canale CHIARO
+// (audio silenzioso da un po' + nessun decode recente) -> piu' reattivo; AFFOLLATO (audio raramente
+// silenzioso o decode molto recenti) -> piu' conservativo. NORMAL = identico alla baseline.
+void DecodiumBridge::ft2AsyncGateRequirements(qint64 nowMs, int& rmsRunsReq, int& decodeQuietReq,
+                                              int& jitterBase, int& jitterSpan) const
+{
+    rmsRunsReq = 3; decodeQuietReq = 400; jitterBase = 50; jitterSpan = 200;
+    if (!m_ft2AdaptiveTxGates || m_mode != QStringLiteral("FT2") || !m_asyncTxEnabled) return;
+    qint64 const decodeGapMs = m_ft2AsyncLastDecodeMs > 0 ? (nowMs - m_ft2AsyncLastDecodeMs) : 999999;
+    int const quiet = m_ft2AsyncAudioQuietRuns;
+    if (quiet >= 6 && decodeGapMs > 1500) {        // canale CHIARO -> anticipa entro la finestra safe
+        rmsRunsReq = 2; decodeQuietReq = 250; jitterBase = 20; jitterSpan = 80;
+    } else if (quiet <= 1 || decodeGapMs < 400) {  // canale AFFOLLATO -> piu' margine anti-collisione
+        rmsRunsReq = 5; decodeQuietReq = 600; jitterBase = 80; jitterSpan = 300;
+    }
+}
+
 void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
 {
     static constexpr qint64 kSmartFt2AsyncTxMaxWaitMs = 2500;
@@ -26711,13 +26810,16 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         slotDelay = estimatedPartnerEndMs - refNowMs + 200;
     }
 
+    // 1.0.447 Leva#6-A: requisiti gate adattivi (opt-in). OFF -> 3/400/50/200, byte-identico.
+    int rmsRunsReq = 3, decodeQuietReq = 400, jitterBase = 50, jitterSpan = 200;
+    ft2AsyncGateRequirements(nowMs, rmsRunsReq, decodeQuietReq, jitterBase, jitterSpan);
     // S2: RMS gate
-    bool const rmsQuiet = (m_ft2AsyncAudioQuietRuns >= 3);
+    bool const rmsQuiet = (m_ft2AsyncAudioQuietRuns >= rmsRunsReq);
 
     // S3: Decode-quiet
     qint64 const decodeQuietMs = m_ft2AsyncLastDecodeMs > 0
         ? (nowMs - m_ft2AsyncLastDecodeMs) : 999999;
-    bool const decodeQuiet = (decodeQuietMs > 400);
+    bool const decodeQuiet = (decodeQuietMs > decodeQuietReq);
 
     // Decision tree:
     //  - se slotDelay molto grande (>500ms) usa quello (canale chiaramente occupato)
@@ -26736,7 +26838,7 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         QString const myCall = m_callsign.trimmed();
         int hashAcc = 0;
         for (auto c : myCall) hashAcc = (hashAcc * 31 + c.unicode()) & 0xff;
-        int const jitterMs = 50 + (hashAcc % 200);
+        int const jitterMs = jitterBase + (hashAcc % jitterSpan);
         finalDelay = jitterMs;
         strategy = QStringLiteral("S4-jitter");
     }
@@ -26785,7 +26887,10 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
         qint64 const nowMs2 = QDateTime::currentMSecsSinceEpoch();
         qint64 const decodeQuietMs2 = m_ft2AsyncLastDecodeMs > 0
             ? (nowMs2 - m_ft2AsyncLastDecodeMs) : 999999;
-        bool const allClear = (m_ft2AsyncAudioQuietRuns >= 3) && (decodeQuietMs2 > 400);
+        int rmsRunsReq2 = 3, decodeQuietReq2 = 400, jitterBase2 = 50, jitterSpan2 = 200;
+        ft2AsyncGateRequirements(nowMs2, rmsRunsReq2, decodeQuietReq2, jitterBase2, jitterSpan2);
+        Q_UNUSED(jitterBase2); Q_UNUSED(jitterSpan2);
+        bool const allClear = (m_ft2AsyncAudioQuietRuns >= rmsRunsReq2) && (decodeQuietMs2 > decodeQuietReq2);
         if (allClear) {
             bridgeLog(QStringLiteral("smartFt2Tx: gates clear after wait, TX now (decodeQuiet=%1ms quietRuns=%2)")
                       .arg(decodeQuietMs2).arg(m_ft2AsyncAudioQuietRuns));
@@ -28959,6 +29064,10 @@ void DecodiumBridge::loadSettings()
     m_txWatchdogLogOnClose = s.value(QStringLiteral("TxWatchdogLogOnClose"), false).toBool();
     // 1.0.446 - P1-5 opt-in: cap Caller-retries duro anche con watchdog ON. Default OFF.
     m_callerRetriesAlwaysHard = s.value(QStringLiteral("CallerRetriesAlwaysHard"), false).toBool();
+    // 1.0.447 - Fondamenta Fase 1 opt-in: censimento transizioni stato FT2. Default OFF.
+    m_ft2TransitionCensus = s.value(QStringLiteral("Ft2TransitionCensus"), false).toBool();
+    // 1.0.447 - Leva#6-A opt-in: gate smart-TX adattivi. Default OFF.
+    m_ft2AdaptiveTxGates = s.value(QStringLiteral("Ft2AdaptiveTxGates"), false).toBool();
     // 1.0.321 — opt-in FT2 manual one-shot disarm. Default OFF su fork (weak-signal friendly).
     m_ft2ManualOneShotEnabled = s.value(QStringLiteral("Ft2ManualOneShotEnabled"), false).toBool();
     m_ft2NarrowAsyncDecode = s.value(QStringLiteral("Ft2NarrowAsyncDecode"), false).toBool();

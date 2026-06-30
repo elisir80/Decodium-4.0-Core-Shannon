@@ -3628,6 +3628,60 @@ Dialog {
                                     ToolTip.text: qsTr("When ON, the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.\n\nDefault OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.\n\nEnable for a hard limit on TX repeats regardless of the watchdog.")
                                 }
 
+                                // 1.0.447 - Fondamenta Fase 1: censimento transizioni di stato FT2 (diagnostico, solo-log)
+                                Text {
+                                    text: qsTr("FT2 state transition census (log only):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2TransitionCensusCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2TransitionCensus : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft2TransitionCensus !== checked)
+                                            bridge.setFt2TransitionCensus(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Diagnostic only (off by default): logs every FT2 QSO state transition (from/to/progress) to the diagnostic log, to empirically map the real sequencer state machine. No behaviour change at all - it only writes log lines. Used to design future deterministic-transition guards safely.")
+                                }
+
+                                // 1.0.447 - Leva#6-A: gate smart-TX adattivi all'occupazione canale (sperimentale)
+                                Text {
+                                    text: qsTr("Adaptive async TX timing (experimental):")
+                                    color: textSecondary
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                    verticalAlignment: Text.AlignVCenter
+                                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                                    Layout.preferredHeight: controlHeight
+                                }
+                                CheckBox {
+                                    id: ft2AdaptiveTxGatesCheck
+                                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                                    Layout.preferredHeight: controlHeight
+                                    checked: bridge ? bridge.ft2AdaptiveTxGates : false
+                                    onCheckedChanged: {
+                                        if (bridge && bridge.ft2AdaptiveTxGates !== checked)
+                                            bridge.setFt2AdaptiveTxGates(checked)
+                                    }
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                    hoverEnabled: true
+                                    ToolTip.visible: hovered
+                                    ToolTip.delay: 400
+                                    ToolTip.text: qsTr("Experimental, off by default. Makes the FT2 async-TX timing gates (RMS-quiet, decode-quiet, anti-collision jitter) adapt to channel occupancy: a bit more reactive when the channel is clear, more conservative when it is crowded. With this OFF the timing is byte-identical to the standard behaviour. It never transmits before hearing the partner.")
+                                }
+
                                 // Conservative FT2 (weak-signal mode) — opt-in tuning
                                 // anti-QSB: ghost filter rilassato, retry cap esteso SNR-
                                 // adattivo, same-step wait piu' permissivo per partner
