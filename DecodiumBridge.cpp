@@ -37692,6 +37692,10 @@ void DecodiumBridge::startAudioCapture()
         }, Qt::QueuedConnection);
         connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
                 this, [this](QVector<short> samples) {
+            // IU8LMC fix 1.0.449: gate FT2-Link audio tap — skip DSP entirely
+            // when not in FT2-LINK mode (avoids 50x/sec main-thread DSP in FT8/FT2/FT4).
+            if (!isFt2LinkApplicationMode(m_mode))
+                return;
             if (!samples.isEmpty()
                 && m_monitoring
                 && !m_transmitting
