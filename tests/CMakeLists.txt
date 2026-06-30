@@ -31,7 +31,7 @@ target_link_libraries (ft4_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 
 add_executable (ft8_stage_compare ft8_stage_compare.cpp)
 target_link_libraries (ft8_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
-if (MINGW OR WIN32)
+if (MINGW)
   target_link_options (ft8_stage_compare PRIVATE -Wl,--stack,67108864)
 endif ()
 
@@ -91,6 +91,17 @@ find_package (Qt6 COMPONENTS Concurrent REQUIRED)
 add_executable (test_streaming_list_model test_streaming_list_model.cpp)
 target_link_libraries (test_streaming_list_model Qt6::Test Qt6::Concurrent)
 add_test (NAME test_streaming_list_model COMMAND $<TARGET_FILE:test_streaming_list_model>)
+
+add_executable (test_ft2link test_ft2link.cpp)
+target_link_libraries (test_ft2link ft2link_core Qt6::Test)
+add_test (NAME test_ft2link COMMAND $<TARGET_FILE:test_ft2link>)
+
+add_executable (test_ft2link_qml_adapter
+  test_ft2link_qml_adapter.cpp
+  ../controllers/FT2LinkQmlAdapter.cpp
+  ../controllers/FT2LinkQmlAdapter.hpp)
+target_link_libraries (test_ft2link_qml_adapter ft2link_core Qt6::Test Qt6::Core)
+add_test (NAME test_ft2link_qml_adapter COMMAND $<TARGET_FILE:test_ft2link_qml_adapter>)
 
 if (WSJT_BUILD_UTILS)
   # CLI smoke tests for utility binaries that are built in the main project.

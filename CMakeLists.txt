@@ -138,9 +138,13 @@ endif ()
 
 # Ottimizzazione dimensione: strip + gc-sections
 if (NOT is_debug_build)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdata-sections -ffunction-sections")
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdata-sections -ffunction-sections")
-  if (NOT APPLE)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdata-sections -ffunction-sections")
+  endif ()
+  if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdata-sections -ffunction-sections")
+  endif ()
+  if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections -Wl,-s -Wl,--strip-all")
   endif ()
 endif ()
@@ -416,6 +420,8 @@ set (wsjtx_CXXSRCS
   lib/persistence/DecodeHistoryWorker.h
   DecodeListModel.cpp
   DecodeListModel.h
+  controllers/FT2LinkQmlAdapter.cpp
+  controllers/FT2LinkQmlAdapter.hpp
   DecodiumDiagnostics.cpp
   DecodiumDiagnostics.h
   DecodiumLegacyBackend.cpp
@@ -498,6 +504,18 @@ set (wsjt_CXXSRCS
   Detector/FtxVarSyncTemplates.cpp
   ${wsjt_fox_CXXSRCS}
   )
+
+set (FT2LINK_CORE_CXXSRCS
+  lib/ft2link/FT2LinkAppModel.cpp
+  lib/ft2link/FT2LinkAudio.cpp
+  lib/ft2link/FT2LinkFrame.cpp
+  lib/ft2link/FT2LinkHandshake.cpp
+  lib/ft2link/FT2LinkOffline.cpp
+  lib/ft2link/FT2LinkPhysical.cpp
+  lib/ft2link/FT2LinkSession.cpp
+  lib/ft2link/FT2LinkWaveform.cpp
+  )
+
 # deal with a GCC v6 UB error message
 set_source_files_properties (
   lib/crc10.cpp
@@ -951,17 +969,27 @@ set (CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 #
 # C & C++ setup
 #
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+endif ()
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -fexceptions -frtti")
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -fexceptions -frtti")
+elseif (MSVC)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /permissive-")
+endif ()
 
-if (NOT APPLE)
+if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pragmas")
+endif ()
+if (NOT APPLE AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fdata-sections -ffunction-sections")
   set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -fdata-sections -ffunction-sections")
+endif ()
+if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fdata-sections -ffunction-sections")
   set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -fdata-sections -ffunction-sections")
-endif (NOT APPLE)
+endif ()
 
 if (OPENMP_FOUND)
   if (OpenMP_C_FLAGS)
@@ -980,19 +1008,22 @@ endif (WIN32)
 
 if (APPLE AND ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
-else ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=gnu++17 -pthread")
+else ()
+  set (CMAKE_CXX_STANDARD 17)
+  set (CMAKE_CXX_STANDARD_REQUIRED ON)
 endif ()
 
 
 #
 # Linker setup
 #
-if (NOT APPLE)
+if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections -Wl,-s")
   set (CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL} -Wl,--gc-sections")
-endif (NOT APPLE)
+endif ()
 
 
 #
@@ -1067,6 +1098,17 @@ endif ()
 if (WSJT_GENERATE_DOCS)
   add_subdirectory (doc)
 endif (WSJT_GENERATE_DOCS)
+
+add_library (ft2link_core STATIC ${FT2LINK_CORE_CXXSRCS})
+target_include_directories (ft2link_core PUBLIC ${CMAKE_SOURCE_DIR})
+set_target_properties (ft2link_core PROPERTIES
+  AUTOMOC OFF
+  AUTORCC OFF
+  AUTOUIC OFF
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  )
+
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
   add_subdirectory (tests)
 endif ()
@@ -1074,7 +1116,7 @@ endif ()
 # build a library of package functionality (without and optionally with OpenMP support)
 add_library (wsjt_cxx STATIC ${wsjt_CSRCS} ${wsjt_CXXSRCS})
 target_include_directories (wsjt_cxx PRIVATE ${FFTW3_INCLUDE_DIRS})
-target_link_libraries (wsjt_cxx ${LIBM_LIBRARIES} Boost::log_setup ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+target_link_libraries (wsjt_cxx ft2link_core ${LIBM_LIBRARIES} Boost::log_setup ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
 
 # wsjt_fort is now a pure interface library: all maintained application-path
 # Fortran has already been migrated in Decodium 3 and is reused here.
@@ -1210,7 +1252,7 @@ link_wsjtx_cycle_group (ft4sim_mult wsjt_qt wsjt_cxx wsjt_fort)
 
 add_executable (fst4sim utils/fst4sim.cpp)
 link_wsjtx_cycle_group (fst4sim wsjt_qt wsjt_cxx wsjt_fort)
-if (WIN32)
+if (MINGW)
   set_target_properties (fst4sim PROPERTIES
     LINK_FLAGS -Wl,--stack,0x4000000,--heap,0x6000000
     )
@@ -1495,7 +1537,7 @@ if (OPENMP_FOUND)
       LINK_FLAGS "${OpenMP_CXX_FLAGS}"
       )
   endif ()
-  if (WIN32)
+  if (MINGW)
     set_target_properties (wsjtx PROPERTIES
       LINK_FLAGS -Wl,--stack,0x1000000,--heap,0x20000000
       )
@@ -1590,6 +1632,8 @@ add_executable (decodium_qml
   helper_functions.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
+  controllers/FT2LinkQmlAdapter.cpp
+  controllers/FT2LinkQmlAdapter.hpp
   DecodiumThemeManager.cpp
   DecodiumThemeManager.h
   DecodiumSubManagers.cpp
@@ -1666,6 +1710,10 @@ if (WSJT_CREATE_WINMAIN)
   set_target_properties (decodium_qml PROPERTIES WIN32_EXECUTABLE ON)
 endif ()
 set_target_properties (decodium_qml PROPERTIES OUTPUT_NAME decodium)
+set (DECODIUM_FT2LINK_ACCESS_SALT_B64 "$ENV{DECODIUM_FT2LINK_ACCESS_SALT_B64}" CACHE STRING "Base64 salt for sealed FT2-Link access gate")
+set (DECODIUM_FT2LINK_ACCESS_HASH_B64 "$ENV{DECODIUM_FT2LINK_ACCESS_HASH_B64}" CACHE STRING "Base64 PBKDF2-HMAC-SHA256 hash for sealed FT2-Link access gate")
+set (DECODIUM_FT2LINK_ACCESS_ITERATIONS "160000" CACHE STRING "PBKDF2 iterations for sealed FT2-Link access gate")
+mark_as_advanced (DECODIUM_FT2LINK_ACCESS_SALT_B64 DECODIUM_FT2LINK_ACCESS_HASH_B64 DECODIUM_FT2LINK_ACCESS_ITERATIONS)
 # Sopprime i warnings-as-error su LegacyDspIoHelpers (vector bounds in GCC15)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES
@@ -1673,6 +1721,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
 target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
+target_compile_definitions (decodium_qml PRIVATE
+  DECODIUM_FT2LINK_ACCESS_SALT_B64="${DECODIUM_FT2LINK_ACCESS_SALT_B64}"
+  DECODIUM_FT2LINK_ACCESS_HASH_B64="${DECODIUM_FT2LINK_ACCESS_HASH_B64}"
+  DECODIUM_FT2LINK_ACCESS_ITERATIONS=${DECODIUM_FT2LINK_ACCESS_ITERATIONS}
+)
 target_compile_options (decodium_qml PRIVATE -Wno-deprecated-declarations)
 target_include_directories (decodium_qml PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}

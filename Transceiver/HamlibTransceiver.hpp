@@ -7,6 +7,8 @@
 #include "PollingTransceiver.hpp"
 #include "pimpl_h.hpp"
 
+class QTimer;
+
 // hamlib transceiver and PTT mostly delegated directly to hamlib Rig class
 class HamlibTransceiver final
   : public PollingTransceiver
@@ -37,6 +39,8 @@ private:
 
   void do_poll () override;
   void poll_transmit_telemetry (bool force_signal = false);
+  void start_cat_keep_alive_timer ();
+  void stop_cat_keep_alive_timer ();
   void poll_cat_keep_alive ();
   void schedule_transmit_telemetry_burst ();
 
@@ -44,8 +48,8 @@ private:
   bool poll_passive_state_ = true;
   bool poll_ptt_state_ = true;
   bool cat_keep_alive_ = false;
-  int cat_keep_alive_tick_ = 0;
   int cat_keep_alive_failures_ = 0;
+  QTimer * cat_keep_alive_timer_ {nullptr};
   bool do_pwr_ = false;
   bool do_pwr2_ = false;
   bool do_swr_ = false;
@@ -58,7 +62,7 @@ private:
   // concurrently. Skip telemetry on N-1 ticks of every N (default 4) when
   // any telemetry channel is enabled.
   static constexpr int kTelemetrySkipRatio_ = 4;
-  static constexpr int kCatKeepAliveSkipRatio_ = 3;
+  static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
   int telemetry_tick_ = 0;
 

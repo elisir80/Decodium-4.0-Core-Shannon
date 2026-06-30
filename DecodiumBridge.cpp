@@ -56,6 +56,7 @@
 #include <QClipboard>
 #include <QCoreApplication>
 #include <QByteArray>
+#include <QCryptographicHash>
 #include <QGuiApplication>
 #include <QScreen>
 #include <QApplication>
@@ -75,10 +76,12 @@
 #include <QHash>
 #include <QSet>
 #include <QSettings>
+#include <QMessageAuthenticationCode>
 #include <QNetworkInterface>
 #include <QHostInfo>
 #include <QUdpSocket>
 #include <QTcpSocket>
+#include <QSslSocket>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -126,6 +129,8 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QScopedValueRollback>
+#include <functional>
+#include <memory>
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
@@ -171,6 +176,86 @@ static QString extractRightCallsign(const QString& msg);
 static constexpr int kDefaultTxWatchdogMinutes = 6;
 static constexpr int kDefaultTxWatchdogCount = 3;
 static constexpr int kLegacyBridgeAudioAfterAsyncPttDelayMs = 125;
+static constexpr int kFt2LinkAccessSaltBytes = 16;
+static constexpr int kFt2LinkAccessHashBytes = 32;
+
+#ifndef DECODIUM_FT2LINK_ACCESS_SALT_B64
+#define DECODIUM_FT2LINK_ACCESS_SALT_B64 ""
+#endif
+
+#ifndef DECODIUM_FT2LINK_ACCESS_HASH_B64
+#define DECODIUM_FT2LINK_ACCESS_HASH_B64 ""
+#endif
+
+#ifndef DECODIUM_FT2LINK_ACCESS_ITERATIONS
+#define DECODIUM_FT2LINK_ACCESS_ITERATIONS 160000
+#endif
+
+static QByteArray ft2LinkConfiguredSalt()
+{
+    return QByteArray::fromBase64(QByteArray(DECODIUM_FT2LINK_ACCESS_SALT_B64));
+}
+
+static QByteArray ft2LinkConfiguredHash()
+{
+    return QByteArray::fromBase64(QByteArray(DECODIUM_FT2LINK_ACCESS_HASH_B64));
+}
+
+static int ft2LinkConfiguredIterations()
+{
+    return DECODIUM_FT2LINK_ACCESS_ITERATIONS;
+}
+
+static QByteArray ft2LinkHmacSha256(QByteArray const& key,
+                                    QByteArray const& message)
+{
+    return QMessageAuthenticationCode::hash(
+        message, key, QCryptographicHash::Sha256);
+}
+
+static QByteArray ft2LinkPbkdf2Sha256(QString const& password,
+                                      QByteArray const& salt,
+                                      int iterations,
+                                      int outputBytes)
+{
+    QByteArray const key = password.toUtf8();
+    QByteArray output;
+    quint32 blockIndex = 1;
+    while (output.size() < outputBytes) {
+        QByteArray blockInput = salt;
+        blockInput.append(static_cast<char>((blockIndex >> 24) & 0xffu));
+        blockInput.append(static_cast<char>((blockIndex >> 16) & 0xffu));
+        blockInput.append(static_cast<char>((blockIndex >> 8) & 0xffu));
+        blockInput.append(static_cast<char>(blockIndex & 0xffu));
+
+        QByteArray u = ft2LinkHmacSha256(key, blockInput);
+        QByteArray t = u;
+        for (int round = 1; round < iterations; ++round) {
+            u = ft2LinkHmacSha256(key, u);
+            for (int i = 0; i < t.size() && i < u.size(); ++i) {
+                t[i] = static_cast<char>(
+                    static_cast<unsigned char>(t[i])
+                    ^ static_cast<unsigned char>(u[i]));
+            }
+        }
+        output.append(t);
+        ++blockIndex;
+    }
+    return output.left(outputBytes);
+}
+
+static bool constantTimeEquals(QByteArray const& lhs, QByteArray const& rhs)
+{
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    unsigned char diff = 0;
+    for (int i = 0; i < lhs.size(); ++i) {
+        diff |= static_cast<unsigned char>(lhs[i])
+              ^ static_cast<unsigned char>(rhs[i]);
+    }
+    return diff == 0;
+}
 
 static qint64 bridgeMonotonicMs()
 {
@@ -1835,6 +1920,60 @@ static QString resolveSecureSettingFromProfiles(QString const& settingKey,
     }
 
     return plain;
+}
+
+static QString ft2LinkCleanEmailAddress(QString raw)
+{
+    raw = raw.trimmed();
+    static QRegularExpression const emailRe(
+        QStringLiteral(R"(([A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}))"),
+        QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch const match = emailRe.match(raw);
+    return match.hasMatch() ? match.captured(1).toLower() : QString();
+}
+
+static QString ft2LinkSmtpConfigString(QVariantMap const& config,
+                                       QString const& key,
+                                       QString const& fallback = QString())
+{
+    return config.value(key, fallback).toString().trimmed();
+}
+
+static QString ft2LinkSmtpSecretKey(QVariantMap const& config)
+{
+    QString host = ft2LinkSmtpConfigString(config, QStringLiteral("host")).toLower();
+    QString user = ft2LinkSmtpConfigString(config, QStringLiteral("username")).toLower();
+    if (host.isEmpty()) {
+        host = QStringLiteral("default-host");
+    }
+    if (user.isEmpty()) {
+        user = QStringLiteral("default-user");
+    }
+    host.replace(QRegularExpression(QStringLiteral(R"([^a-z0-9._-])")), QStringLiteral("_"));
+    user.replace(QRegularExpression(QStringLiteral(R"([^a-z0-9._@+-])")), QStringLiteral("_"));
+    return QStringLiteral("ft2LinkSmtpPassword/%1/%2").arg(host, user);
+}
+
+static QByteArray ft2LinkSmtpLine(QString const& text)
+{
+    return text.toUtf8() + "\r\n";
+}
+
+static QByteArray ft2LinkSmtpData(QString eml)
+{
+    eml.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    eml.replace(QLatin1Char('\r'), QLatin1Char('\n'));
+    QStringList lines = eml.split(QLatin1Char('\n'));
+    QByteArray data;
+    for (QString line : lines) {
+        if (line.startsWith(QLatin1Char('.'))) {
+            line.prepend(QLatin1Char('.'));
+        }
+        data += line.toUtf8();
+        data += "\r\n";
+    }
+    data += ".\r\n";
+    return data;
 }
 
 static QString normalizeUtcDisplayToken(QString raw)
@@ -3605,6 +3744,12 @@ static bool shouldCoalesceVisualTxRows(QString const& mode)
 static QString canonicalApplicationDecodeMode(QString mode)
 {
     QString const upperMode = mode.trimmed().toUpper();
+    if (upperMode == QStringLiteral("FT2-LINK")
+        || upperMode == QStringLiteral("FT2LINK")
+        || upperMode == QStringLiteral("D4LINK")
+        || upperMode == QStringLiteral("D4 LINK")) {
+        return QStringLiteral("FT2-Link");
+    }
     if (upperMode == QStringLiteral("FT8")
         || upperMode == QStringLiteral("FT2")
         || upperMode == QStringLiteral("FT4")
@@ -3624,6 +3769,15 @@ static QString canonicalApplicationDecodeMode(QString mode)
         return QStringLiteral("Echo");
     }
     return {};
+}
+
+static bool isFt2LinkApplicationMode(QString mode)
+{
+    QString const upperMode = mode.trimmed().toUpper();
+    return upperMode == QStringLiteral("FT2-LINK")
+        || upperMode == QStringLiteral("FT2LINK")
+        || upperMode == QStringLiteral("D4LINK")
+        || upperMode == QStringLiteral("D4 LINK");
 }
 
 static bool isRadioOnlyModeLabel(QString mode)
@@ -4454,6 +4608,9 @@ static qreal txGainFromSlider(double outputLevel)
 static int txSyncLeadInMsForMode(const QString& mode)
 {
     QString const normalized = mode.trimmed().toUpper();
+    if (normalized == QStringLiteral("FT2LINK")) {
+        return 300;
+    }
     if (normalized == QStringLiteral("FT8") || normalized == QStringLiteral("FT4")) {
         return 500;
     }
@@ -8207,6 +8364,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, [this](const QString& c) { emit statusMessage("Cloudlog: QSO loggato " + c); });
     connect(m_cloudlog, &DecodiumCloudlogLite::errorOccurred,
             this, [this](const QString& msg) { emit errorMessage("Cloudlog: " + msg); });
+    connect(m_cloudlog, &DecodiumCloudlogLite::adifUploadFinished,
+            this, [this](quint32 requestId, const QString& dxCall, bool ok, const QString& detail) {
+                noteExternalAdifUploadBackend(requestId, QStringLiteral("Cloudlog"), dxCall, ok, detail);
+            }, Qt::QueuedConnection);
     connect(m_cloudlog, &DecodiumCloudlogLite::apiKeyOk,
             this, [this]() { emit statusMessage(QStringLiteral("Cloudlog: API key OK, scrittura disponibile")); });
     connect(m_cloudlog, &DecodiumCloudlogLite::apiKeyInvalid,
@@ -8220,6 +8381,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, [this](const QString& c) { emit statusMessage(QStringLiteral("QRZ Logbook: QSO loggato ") + c); });
     connect(m_qrzLogbook, &DecodiumQrzLogbookLite::errorOccurred,
             this, [this](const QString& msg) { emit errorMessage(QStringLiteral("QRZ Logbook: ") + msg); });
+    connect(m_qrzLogbook, &DecodiumQrzLogbookLite::adifUploadFinished,
+            this, [this](quint32 requestId, const QString& dxCall, bool ok, const QString& detail) {
+                noteExternalAdifUploadBackend(requestId, QStringLiteral("QRZ Logbook"), dxCall, ok, detail);
+            }, Qt::QueuedConnection);
 
     // WSPR uploader
     m_wsprUploader = new DecodiumWsprUploader(this);
@@ -9133,6 +9298,9 @@ QObject * DecodiumBridge::propagationManager() const
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
 {
+    if (isFt2LinkApplicationMode(m_mode)) {
+        return false;
+    }
     return legacyTxBackendRequested() && legacyBackendAvailable();
 }
 
@@ -13209,6 +13377,56 @@ void DecodiumBridge::finalizeTimeSyncDecodeCycle(quint64 serial, const QString& 
 
 QString DecodiumBridge::mode() const { return m_mode; }
 
+bool DecodiumBridge::ft2LinkAccessUnlocked() const
+{
+    return m_ft2LinkAccessUnlocked;
+}
+
+bool DecodiumBridge::ft2LinkAccessPasswordConfigured() const
+{
+    QByteArray const salt = ft2LinkConfiguredSalt();
+    QByteArray const hash = ft2LinkConfiguredHash();
+    int const iterations = ft2LinkConfiguredIterations();
+    return salt.size() >= kFt2LinkAccessSaltBytes
+        && hash.size() == kFt2LinkAccessHashBytes
+        && iterations >= 10000;
+}
+
+bool DecodiumBridge::verifyFt2LinkAccessPassword(const QString& password)
+{
+    QByteArray const salt = ft2LinkConfiguredSalt();
+    QByteArray const expected = ft2LinkConfiguredHash();
+    int const iterations = ft2LinkConfiguredIterations();
+
+    if (salt.size() < kFt2LinkAccessSaltBytes
+        || expected.size() != kFt2LinkAccessHashBytes
+        || iterations < 10000) {
+        bridgeLog(QStringLiteral("FT2-Link access denied: password not configured"));
+        return false;
+    }
+
+    QByteArray const actual = ft2LinkPbkdf2Sha256(
+        password, salt, iterations, expected.size());
+    bool const ok = constantTimeEquals(actual, expected);
+    if (ok && !m_ft2LinkAccessUnlocked) {
+        m_ft2LinkAccessUnlocked = true;
+        emit ft2LinkAccessChanged();
+    }
+    bridgeLog(ok
+              ? QStringLiteral("FT2-Link access unlocked")
+              : QStringLiteral("FT2-Link access denied: bad password"));
+    return ok;
+}
+
+void DecodiumBridge::lockFt2LinkAccess()
+{
+    if (!m_ft2LinkAccessUnlocked) {
+        return;
+    }
+    m_ft2LinkAccessUnlocked = false;
+    emit ft2LinkAccessChanged();
+}
+
 void DecodiumBridge::setMode(const QString& v) {
     QString const requestedMode = v.trimmed();
     QString const normalizedMode = canonicalApplicationDecodeMode(requestedMode);
@@ -13274,11 +13492,14 @@ void DecodiumBridge::setMode(const QString& v) {
             // Uscendo da FT2, forza async decode OFF (mainwindow: cbAsyncDecode->setChecked(false))
             if (m_asyncDecodeEnabled)  { m_asyncDecodeEnabled = false; emit asyncDecodeEnabledChanged(); }
         }
-        m_bandManager->setCurrentMode(normalizedMode);
+        QString const bandMode = isFt2LinkApplicationMode(normalizedMode)
+            ? QStringLiteral("FT2")
+            : normalizedMode;
+        m_bandManager->setCurrentMode(bandMode);
         if (m_preserveFrequencyOnModeChange) {
             m_bandManager->updateFromFrequency(m_frequency);
         } else {
-            m_bandManager->updateForMode(normalizedMode);
+            m_bandManager->updateForMode(bandMode);
             double const targetFrequency = m_bandManager->dialFrequency();
             if (targetFrequency > 0.0
                 && (!qFuzzyCompare(m_frequency + 1.0, targetFrequency + 1.0)
@@ -13312,7 +13533,7 @@ void DecodiumBridge::setMode(const QString& v) {
         resetFtxDecodeWorkersForModeChange(previousMode, m_mode);
 
         emit modeChanged();
-        if (legacyBackendAvailable()) {
+        if (legacyBackendAvailable() && !isFt2LinkApplicationMode(normalizedMode)) {
             m_legacyBackend->setMode(normalizedMode);
             m_legacyStartupModeGuard = normalizedMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
@@ -13327,6 +13548,7 @@ void DecodiumBridge::setMode(const QString& v) {
         } else if (m_catBackend == QStringLiteral("tci")
             && m_hamlibCat
             && m_hamlibCat->connected()
+            && !isFt2LinkApplicationMode(normalizedMode)
             && !canonicalApplicationDecodeMode(normalizedMode).isEmpty()) {
             m_hamlibCat->setRigMode(normalizedMode);
         }
@@ -16203,6 +16425,37 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 
     bool const wasTransmitting = m_transmitting || wasBridgeLegacyTx;
     int const finishedTx = m_activeTxNumber;
+    if (m_ft2LinkTxActive) {
+        m_ft2LinkTxActive = false;
+        m_pendingFt2LinkText.clear();
+        m_pendingFt2LinkWave.clear();
+        m_pendingFt2LinkPlan.clear();
+
+        if (m_tuning) {
+            m_tuning = false;
+            emit tuningChanged();
+        } else if (wasTransmitting) {
+            m_transmitting = false;
+            emit transmittingChanged();
+            emit statusMessage(QStringLiteral("FT2-Link TX completato"));
+        }
+
+        cleanupMs = phaseTimer.elapsed();
+        phaseTimer.start();
+        restoreTxAudioSchedulingBoost(reason);
+        resumeRxAudioAfterTx(reason);
+        resumeNonAudioTxWork(reason);
+        resumeMs = phaseTimer.elapsed();
+        txTimelineLog(QStringLiteral("[TX-TL] tx_finish_ft2link reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 was_transmitting=%7")
+                      .arg(reason)
+                      .arg(totalTimer.elapsed())
+                      .arg(pttOffMs)
+                      .arg(soundFinishMs)
+                      .arg(cleanupMs)
+                      .arg(resumeMs)
+                      .arg(wasTransmitting ? 1 : 0));
+        return;
+    }
     noteTxPlaybackFinished(reason, false);
 
     if (m_tuning) {
@@ -17015,7 +17268,9 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
 {
     QElapsedTimer totalTimer;
     totalTimer.start();
-    QString const mode = m_cwTxActive ? QStringLiteral("CW") : m_mode.trimmed().toUpper();
+    QString const mode = m_ft2LinkTxActive
+        ? QStringLiteral("FT2LINK")
+        : (m_cwTxActive ? QStringLiteral("CW") : m_mode.trimmed().toUpper());
     QString const message = msg.trimmed();
     bool const tciAudio = usingTciAudioInput();
     auto logResult = [&](bool cacheHit,
@@ -17052,7 +17307,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
 
     // 1.0.364+ — MAM multi-stream: bypassa la cache (force rebuild) cosi' il
     // multi-stream non serve mai PCM/wave mono stantio. Mono path invariato.
-    if (!m_cwTxActive && !multiStreamActive()
+    if (!m_cwTxActive && !m_ft2LinkTxActive && !multiStreamActive()
         && cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
@@ -17115,7 +17370,12 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     QElapsedTimer phaseTimer;
     phaseTimer.start();
     QVector<float> wave;
-    if (m_cwTxActive) {
+    if (m_ft2LinkTxActive) {
+        wave = m_pendingFt2LinkWave;
+        if (wave.isEmpty()) {
+            buildError = QStringLiteral("Piano TX FT2-Link vuoto");
+        }
+    } else if (m_cwTxActive) {
         // CW-audio: tono sidetone (= txAudioFrequency) manipolato in Morse a WPM fisso.
         wave = decodium::txwave::generateCwWaveWpm(message, txAudioFrequency, m_cwWpm);
         if (wave.isEmpty()) {
@@ -17358,6 +17618,7 @@ bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
     // CW-audio: durata variabile, nessun allineamento agli slot FT (evita anche
     // scheduleSyncTxBoundaryStop e i guard "late slot", che chiamano questa).
     if (m_cwTxActive) return false;
+    if (m_ft2LinkTxActive) return false;
     QString const normalized = m_mode.trimmed().toUpper();
     bool const ft2AutoCqCalling =
         normalized == QStringLiteral("FT2")
@@ -17997,6 +18258,21 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         stopTciTxAudioStream(true);
     }
 
+    if (m_ft2LinkTxActive) {
+        m_ft2LinkTxActive = false;
+        m_pendingFt2LinkText.clear();
+        m_pendingFt2LinkWave.clear();
+        m_pendingFt2LinkPlan.clear();
+        restoreTxAudioSchedulingBoost(reason);
+        resumeRxAudioAfterTx(reason);
+        resumeNonAudioTxWork(reason);
+        if (error) emit errorMessage(QStringLiteral("FT2-Link: playback TX terminato con errore"));
+        else       emit statusMessage(QStringLiteral("FT2-Link TX completato"));
+        bridgeLog(QStringLiteral("completeTxPlayback: FT2-Link done reason=%1 err=%2")
+                      .arg(reason).arg(error ? 1 : 0));
+        return;
+    }
+
     // CW-audio: PTT gia' abbassata sopra; ripristina RX e termina senza la
     // logica QSO/auto-sequence FT (signoff, re-arm, freq hop).
     if (m_cwTxActive) {
@@ -18164,6 +18440,67 @@ void DecodiumBridge::sendCwAudio(const QString& text, qint64 dialFrequencyHz, in
     }
 }
 
+bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
+                                          const QVector<float>& wave,
+                                          const QVariantMap& plan)
+{
+    if (QThread::currentThread() != thread()) {
+        QString const queuedText = text;
+        QVector<float> const queuedWave = wave;
+        QVariantMap const queuedPlan = plan;
+        QMetaObject::invokeMethod(this, [this, queuedText, queuedWave, queuedPlan]() {
+            transmitFt2LinkAudio(queuedText, queuedWave, queuedPlan);
+        }, Qt::QueuedConnection);
+        return true;
+    }
+
+    QString const msg = text.trimmed().isEmpty()
+        ? QStringLiteral("FT2-Link DATA")
+        : text.trimmed();
+    if (wave.isEmpty()) {
+        emit errorMessage(QStringLiteral("FT2-Link: piano TX radio vuoto"));
+        return false;
+    }
+    if (m_transmitting || m_tuning) {
+        emit statusMessage(QStringLiteral("FT2-Link: TX o Tune gia' attivo"));
+        return false;
+    }
+
+    double peak = 0.0;
+    for (float sample : wave) {
+        peak = std::max(peak, std::abs(static_cast<double>(sample)));
+    }
+    if (peak <= 1.0e-7) {
+        emit errorMessage(QStringLiteral("FT2-Link: piano TX radio silenzioso"));
+        return false;
+    }
+
+    m_pendingFt2LinkText = msg;
+    m_pendingFt2LinkWave = wave;
+    m_pendingFt2LinkPlan = plan;
+    m_ft2LinkTxActive = true;
+
+    bridgeLog(QStringLiteral("FT2-Link radio TX requested: msg=[%1] samples=%2 peak=%3 profile=%4 bursts=%5")
+                  .arg(msg)
+                  .arg(wave.size())
+                  .arg(peak, 0, 'f', 6)
+                  .arg(plan.value(QStringLiteral("profileName")).toString())
+                  .arg(plan.value(QStringLiteral("burstCount")).toString()));
+
+    startTx();
+
+    if (!m_transmitting) {
+        m_ft2LinkTxActive = false;
+        m_pendingFt2LinkText.clear();
+        m_pendingFt2LinkWave.clear();
+        m_pendingFt2LinkPlan.clear();
+        emit errorMessage(QStringLiteral("FT2-Link: avvio TX radio non riuscito"));
+        return false;
+    }
+
+    return true;
+}
+
 void DecodiumBridge::startTx()
 {
     auto const selectedSlotMessage = [this]() -> QString {
@@ -18189,9 +18526,11 @@ void DecodiumBridge::startTx()
         stopTune();
     }
     if (m_transmitting || m_tuning) { bridgeLog("startTx: already TX/tuning, abort"); return; }
-    // CW-audio: salta le guardie FT (validazione payload, fallback CQ, Fox/Hound):
-    // il CW ha il suo testo arbitrario e nessuna sequenza FT.
-    if (!m_cwTxActive) {
+    bool const customAudioTxActive = m_cwTxActive || m_ft2LinkTxActive;
+    QString const txMode = m_ft2LinkTxActive ? QStringLiteral("FT2LINK") : m_mode;
+    // Audio custom: salta le guardie FT (validazione payload, fallback CQ,
+    // Fox/Hound). CW e FT2-Link hanno testo/waveform arbitrari.
+    if (!customAudioTxActive) {
         if (!ensureCurrentTxCanTransmit(QStringLiteral("startTx"))) return;
         if (!checkSwrAllowsTransmission(QStringLiteral("startTx"))) return;
         if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
@@ -18216,8 +18555,10 @@ void DecodiumBridge::startTx()
         }
     }
 
-    QString msg = m_cwTxActive ? m_pendingCwText : currentBridgeTxRepresentativeMessage();
-    if (!m_cwTxActive) {
+    QString msg = m_ft2LinkTxActive
+        ? m_pendingFt2LinkText
+        : (m_cwTxActive ? m_pendingCwText : currentBridgeTxRepresentativeMessage());
+    if (!customAudioTxActive) {
         forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     }
     bridgeLog("startTx: msg=[" + msg + "]");
@@ -18226,11 +18567,11 @@ void DecodiumBridge::startTx()
         bridgeLog("startTx: empty msg abort");
         return;
     }
-    if (!m_cwTxActive && !repairOrRejectStalePartnerTxMessage(msg, QStringLiteral("startTx"))) {
+    if (!customAudioTxActive && !repairOrRejectStalePartnerTxMessage(msg, QStringLiteral("startTx"))) {
         emit statusMessage(QStringLiteral("TX bloccato: messaggio non coerente con il QSO attivo"));
         return;
     }
-    if (!m_cwTxActive && m_monitoring) {
+    if (!customAudioTxActive && m_monitoring) {
         int elapsedMs = -1;
         int latestStartMs = 0;
         int ft2AsyncDelayMs = 0;
@@ -18273,7 +18614,7 @@ void DecodiumBridge::startTx()
     // Ora settato solo dopo ensureTxAudioPrepared OK.
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
 
-    if (!m_cwTxActive && usingLegacyBackendForTx()) {
+    if (!customAudioTxActive && usingLegacyBackendForTx()) {
         bridgeLog("startTx: delegating to legacy backend");
         if (m_recordTxEnabled) {
             QString recordingError;
@@ -18301,7 +18642,9 @@ void DecodiumBridge::startTx()
     QAudioDevice preparedDev;
     bool const tciAudioTx = usingTciAudioInput();
     // CW-audio: il tono audio e' il sidetone (la portante CW reale = dial + sidetone).
-    const int txAudioFrequency = m_cwTxActive ? m_cwSidetoneHz : effectiveTxAudioFrequencyHz();
+    const int txAudioFrequency = m_cwTxActive
+        ? m_cwSidetoneHz
+        : (m_ft2LinkTxActive ? 1500 : effectiveTxAudioFrequencyHz());
     const int xitHz = catSplitXitHzForTxFrequency(m_txFrequency);
     if (xitHz != 0 || catSplitTxDialFrequencyHz() > 0.0) {
         bridgeLog(QStringLiteral("startTx split audio: ui_tx=%1 audio_tx=%2 xit=%3 tx_dial=%4")
@@ -18366,17 +18709,17 @@ void DecodiumBridge::startTx()
             return;
         }
 
-        int const macPeriodMs = periodMsForMode(m_mode);
+        int const macPeriodMs = periodMsForMode(txMode);
         int const macSlotElapsedMs = macPeriodMs > 0
             ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(macPeriodMs))
             : -1;
         bool const macFt2Async =
-            m_mode == QStringLiteral("FT2") && m_asyncTxEnabled;
+            txMode == QStringLiteral("FT2") && m_asyncTxEnabled;
         bool const macAlignToSyncSlot = shouldAlignTxAudioToCurrentSyncSlot();
         int const macNominalLeadInMs =
-            (m_mode == QStringLiteral("FT2"))
+            (txMode == QStringLiteral("FT2"))
                 ? ((macFt2Async && !macAlignToSyncSlot) ? 0 : 450)
-                : txSyncLeadInMsForMode(m_mode);
+                : txSyncLeadInMsForMode(txMode);
         int macInitialSilenceMs = macNominalLeadInMs;
         if (macAlignToSyncSlot && macSlotElapsedMs >= 0) {
             macInitialSilenceMs = macSlotElapsedMs < macNominalLeadInMs
@@ -18399,30 +18742,32 @@ void DecodiumBridge::startTx()
             m_modulator->stop(true);
 
         // === GitHub TxController: aggiorna contatori retry ===
-        if (m_currentTx == m_lastNtx) {
-            ++m_txRetryCount;
-        } else {
-            m_txRetryCount = 1;
-            m_lastNtx = m_currentTx;
-        }
+        if (!customAudioTxActive) {
+            if (m_currentTx == m_lastNtx) {
+                ++m_txRetryCount;
+            } else {
+                m_txRetryCount = 1;
+                m_lastNtx = m_currentTx;
+            }
 
-        bool const txCarries73Payload =
-            (m_currentTx == 5) || messageCarries73Payload(msg);
-        bool const ft2DeferredSignoff =
-            txCarries73Payload
-            && (m_qsoProgress > 1)
-            && (m_mode == QStringLiteral("FT2"))
-            && (!m_quickQsoEnabled || !m_quickPeerSignaled)
-            && !m_logAfterOwn73;
-        bool const autoCqDeferredSignoff =
-            m_autoCqRepeat
-            && txCarries73Payload
-            && (m_qsoProgress > 1)
-            && (m_mode == QStringLiteral("FT4") || m_mode == QStringLiteral("FT8"))
-            && !m_logAfterOwn73;
-        if (ft2DeferredSignoff || autoCqDeferredSignoff) {
-            m_ft2DeferredLogPending = true;
-            capturePendingAutoLogSnapshot();
+            bool const txCarries73Payload =
+                (m_currentTx == 5) || messageCarries73Payload(msg);
+            bool const ft2DeferredSignoff =
+                txCarries73Payload
+                && (m_qsoProgress > 1)
+                && (m_mode == QStringLiteral("FT2"))
+                && (!m_quickQsoEnabled || !m_quickPeerSignaled)
+                && !m_logAfterOwn73;
+            bool const autoCqDeferredSignoff =
+                m_autoCqRepeat
+                && txCarries73Payload
+                && (m_qsoProgress > 1)
+                && (m_mode == QStringLiteral("FT4") || m_mode == QStringLiteral("FT8"))
+                && !m_logAfterOwn73;
+            if (ft2DeferredSignoff || autoCqDeferredSignoff) {
+                m_ft2DeferredLogPending = true;
+                capturePendingAutoLogSnapshot();
+            }
         }
 
         m_activeTxNumber = m_currentTx;
@@ -18448,16 +18793,18 @@ void DecodiumBridge::startTx()
         // Anti-collisione: ferma l'ingresso audio durante TX per evitare
         // che il decoder processi il nostro stesso tono come segnale ricevuto.
         // Eccezione: FT2 async è full-duplex, RX deve continuare durante TX.
-        if (m_soundInput && !(m_mode == "FT2" && m_asyncTxEnabled)) {
+        if (m_soundInput && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
             m_soundInput->suspend();
             m_rxAudioSuspendedForTx = true;
             bridgeLog("SoundInput suspended during TX (sync mode)");
         }
 
-        appendTxDecodeEntry(msg);
+        if (!m_ft2LinkTxActive) {
+            appendTxDecodeEntry(msg);
+        }
 
         if (m_recordTxEnabled) {
-            QString const txRecordPath = buildTxRecordingPath(m_mode, false);
+            QString const txRecordPath = buildTxRecordingPath(txMode, false);
             saveTxRecordingAsync(txRecordPath, wave, 48000, QStringLiteral("TX"));
         }
 
@@ -18483,7 +18830,7 @@ void DecodiumBridge::startTx()
                       .arg(txPlaybackMs + 300)
                       .arg(wave.size()));
         bridgeLog(QStringLiteral("TX mac PCM payload mode=%1 msg=[%2] waveSamples=%3 peak=%4 payloadMs=%5 ft2Async=%6 alignSlot=%7 nominalLeadMs=%8 initialSilenceMs=%9 slotElapsedMs=%10 pcmBytes=%11 bufferSize=%12")
-                      .arg(m_mode,
+                      .arg(txMode,
                            msg.trimmed())
                       .arg(wave.size())
                       .arg(QString::number(txWavePeak(wave), 'f', 6))
@@ -18507,7 +18854,7 @@ void DecodiumBridge::startTx()
             finishModulatorIdlePlayback(QStringLiteral("mac-pcm"));
         });
 
-        bridgeLog("startTx(mac-pcm): mode=" + m_mode +
+        bridgeLog("startTx(mac-pcm): mode=" + txMode +
                   " msg=" + msg.trimmed() +
                   " dev=" + outDev.description() +
                   " fmt=" + audioFormatToString(outFmt) +
@@ -18558,7 +18905,7 @@ void DecodiumBridge::startTx()
         bridgeLog(QStringLiteral("startTx: TCI audio path selected, skipping local TX audio device"));
     }
     if (m_recordTxEnabled) {
-        QString const txRecordPath = buildTxRecordingPath(m_mode, false);
+        QString const txRecordPath = buildTxRecordingPath(txMode, false);
         saveTxRecordingAsync(txRecordPath, wave, 48000, QStringLiteral("TX"));
     }
 
@@ -18567,30 +18914,32 @@ void DecodiumBridge::startTx()
     // NOTE: spostato dopo il check su buildTxPcmBuffer/PCM vuoto (sopra) e
     // prima del PTT SU (sotto). Se la generazione del PCM fallisce, NON
     // vogliamo gonfiare m_txRetryCount e anticipare il retry-limit.
-    if (m_currentTx == m_lastNtx) {
-        ++m_txRetryCount;
-    } else {
-        m_txRetryCount = 1;
-        m_lastNtx = m_currentTx;
-    }
+    if (!customAudioTxActive) {
+        if (m_currentTx == m_lastNtx) {
+            ++m_txRetryCount;
+        } else {
+            m_txRetryCount = 1;
+            m_lastNtx = m_currentTx;
+        }
 
-    bool const txCarries73Payload =
-        (m_currentTx == 5) || messageCarries73Payload(msg);
-    bool const ft2DeferredSignoff =
-        txCarries73Payload
-        && (m_qsoProgress > 1)
-        && (m_mode == QStringLiteral("FT2"))
-        && (!m_quickQsoEnabled || !m_quickPeerSignaled)
-        && !m_logAfterOwn73;
-    bool const autoCqDeferredSignoff =
-        m_autoCqRepeat
-        && txCarries73Payload
-        && (m_qsoProgress > 1)
-        && (m_mode == QStringLiteral("FT4") || m_mode == QStringLiteral("FT8"))
-        && !m_logAfterOwn73;
-    if (ft2DeferredSignoff || autoCqDeferredSignoff) {
-        m_ft2DeferredLogPending = true;
-        capturePendingAutoLogSnapshot();
+        bool const txCarries73Payload =
+            (m_currentTx == 5) || messageCarries73Payload(msg);
+        bool const ft2DeferredSignoff =
+            txCarries73Payload
+            && (m_qsoProgress > 1)
+            && (m_mode == QStringLiteral("FT2"))
+            && (!m_quickQsoEnabled || !m_quickPeerSignaled)
+            && !m_logAfterOwn73;
+        bool const autoCqDeferredSignoff =
+            m_autoCqRepeat
+            && txCarries73Payload
+            && (m_qsoProgress > 1)
+            && (m_mode == QStringLiteral("FT4") || m_mode == QStringLiteral("FT8"))
+            && !m_logAfterOwn73;
+        if (ft2DeferredSignoff || autoCqDeferredSignoff) {
+            m_ft2DeferredLogPending = true;
+            capturePendingAutoLogSnapshot();
+        }
     }
 
     // PTT SU — prima di avviare l'audio (come GitHub pttAssert()).
@@ -18664,19 +19013,28 @@ void DecodiumBridge::startTx()
 
     // Anti-collisione: durante TX sync non dobbiamo ricatturare il nostro
     // stesso audio sul device RX. FT2 async resta full-duplex.
-    if (m_monitoring && m_soundInput && !(m_mode == "FT2" && m_asyncTxEnabled)) {
+    if (m_monitoring && m_soundInput
+        && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
         m_soundInput->suspend();
         m_rxAudioSuspendedForTx = true;
         bridgeLog("SoundInput suspended during TX (sync mode)");
     }
 
-    appendTxDecodeEntry(msg);
+    if (!m_ft2LinkTxActive) {
+        appendTxDecodeEntry(msg);
+    }
 
     if (tciAudioTx) {
         unsigned symbolsLength = 79;
         double framesPerSymbol = 1920.0;
         double toneSpacing = -3.0;
-        if (m_mode == QStringLiteral("FT2")) {
+        bool const ft2LinkTci = txMode == QStringLiteral("FT2LINK");
+        if (ft2LinkTci) {
+            symbolsLength = static_cast<unsigned> (
+                qMax<qint64> (1, qCeil (static_cast<double> (wave.size ()) / 4.0)));
+            framesPerSymbol = 1.0;
+            toneSpacing = -6.0;
+        } else if (m_mode == QStringLiteral("FT2")) {
             symbolsLength = 103;
             framesPerSymbol = 288.0;
             toneSpacing = -2.0;
@@ -18690,9 +19048,11 @@ void DecodiumBridge::startTx()
             toneSpacing = -2.0;
         }
 
-        double const periodSeconds = qMax(0.1, periodMsForMode(m_mode) / 1000.0);
+        double const periodSeconds = ft2LinkTci
+            ? qMax(0.1, static_cast<double> (wave.size ()) / 48000.0 + 0.3)
+            : qMax(0.1, periodMsForMode(m_mode) / 1000.0);
         if (!startTciTxAudioStream(wave,
-                                   m_mode,
+                                   txMode,
                                    symbolsLength,
                                    framesPerSymbol,
                                    static_cast<double>(txAudioFrequency),
@@ -18714,7 +19074,7 @@ void DecodiumBridge::startTx()
                 "backend=%1 catConnected=%2 modo=%3 freqAudio=%4 Hz msg=\"%5\"")
                 .arg(m_catBackend,
                      m_catConnected ? QStringLiteral("true") : QStringLiteral("false"),
-                     m_mode,
+                     txMode,
                      QString::number(txAudioFrequency),
                      msg.trimmed()));
             return;
@@ -18741,13 +19101,13 @@ void DecodiumBridge::startTx()
                                if (m_transmitting && usingTciAudioInput())
                                    completeTxPlayback(QStringLiteral("tci-watchdog"));
                            });
-        int const tciPeriodMs = periodMsForMode(m_mode);
+        int const tciPeriodMs = periodMsForMode(txMode);
         int const tciSlotElapsedMs = tciPeriodMs > 0
             ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(tciPeriodMs))
             : -1;
-        int const tciLeadInMs = txSyncLeadInMsForMode(m_mode);
+        int const tciLeadInMs = txSyncLeadInMsForMode(txMode);
         bridgeLog(QStringLiteral("startTx TCI audio: mode=%1 msg=%2 samples=%3 hold=%4ms slot_elapsed=%5ms lead_in=%6ms peak=%7 gain=%8")
-                      .arg(m_mode, msg.trimmed())
+                      .arg(txMode, msg.trimmed())
                       .arg(wave.size())
                       .arg(txPlaybackMs + 300)
                       .arg(tciSlotElapsedMs)
@@ -18777,14 +19137,14 @@ void DecodiumBridge::startTx()
 #if defined(Q_OS_MAC)
     ptt1DelayMs = 300;
 #elif defined(Q_OS_LINUX)
-    ptt1DelayMs = (m_mode == "FT2") ? 40 : 80;
+    ptt1DelayMs = (txMode == "FT2" || txMode == "FT2LINK") ? 40 : 80;
 #else
-    ptt1DelayMs = (m_mode == "FT2") ? 20 : 0;
+    ptt1DelayMs = (txMode == "FT2" || txMode == "FT2LINK") ? 20 : 0;
 #endif
     ptt1DelayMs += asyncPttAudioDelayMs;
 
     // Lambda che avvia effettivamente QAudioSink dopo il delay ptt1
-    auto launchAudio = [this, outDev, outFmt, msg, wave, txSerial]() {
+    auto launchAudio = [this, outDev, outFmt, msg, wave, txSerial, txMode]() {
         if (!m_transmitting) {
             bridgeLog("startTx launchAudio skipped: TX no longer active");
             return;
@@ -18806,7 +19166,7 @@ void DecodiumBridge::startTx()
         int syncElapsedMs = -1;
         qint64 const syncOffsetBytes =
             syncTxPcmStartOffsetBytes(outFmt, m_txPcmBuffer->size(), &syncElapsedMs);
-        int const leadInMs = txSyncLeadInMsForMode(m_mode);
+        int const leadInMs = txSyncLeadInMsForMode(txMode);
         int const payloadDelayMs =
             (shouldAlignTxAudioToCurrentSyncSlot()
              && syncElapsedMs >= 0
@@ -18817,7 +19177,7 @@ void DecodiumBridge::startTx()
         if (syncOffsetBytes > 0) {
             m_txPcmBuffer->seek(syncOffsetBytes);
             bridgeLog(QStringLiteral("startTx SoundOutput sync PCM offset: mode=%1 elapsed=%2ms lead_in=%3ms offset=%4/%5 bytes")
-                          .arg(m_mode)
+	                          .arg(txMode)
                           .arg(syncElapsedMs)
                           .arg(leadInMs)
                           .arg(syncOffsetBytes)
@@ -18837,14 +19197,14 @@ void DecodiumBridge::startTx()
         qreal const effectiveGain = txGainFromSlider(m_txOutputLevel);
         double const wavePeak = txWavePeak(wave);
         qsizetype const txBufferBytes =
-            txAudioBufferBytesForMode(outFmt, m_mode, false,
+            txAudioBufferBytesForMode(outFmt, txMode, false,
                                       m_lowCpuModeEnabled || cpuPressureActive());
         qint64 const pcmBytes = m_txPcmData.size();
 
         auto startSoundOutput = [this, txSerial, expectedUs, txPlaybackMs, syncElapsedMs,
                                  leadInMs, payloadDelayMs, pcmBytes, txBufferBytes,
                                  wavePeak, effectiveGain, attenuationDb, outDev, outFmt,
-                                 msg, wave, bufferGuard, soundOutputGuard]() {
+                                 msg, wave, txMode, bufferGuard, soundOutputGuard]() {
             if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer || !soundOutputGuard) {
                 bridgeLog(QStringLiteral("startTx SoundOutput start skipped: active=%1 tune=%2 buffer_ok=%3 sound_ok=%4")
                               .arg(m_transmitting ? 1 : 0)
@@ -18872,7 +19232,7 @@ void DecodiumBridge::startTx()
             scheduleSyncTxBoundaryStop(QStringLiteral("sound-output"), txSerial);
 
             txTimelineLog(QStringLiteral("[TX-TL] sound_output_launch mode=%1 msg=[%2] samples=%3 pcm_bytes=%4 pos=%5/%6 dev=%7 fmt=%8 configured_buf=%9 channel=%10 tx_level=%11 gain=%12 peak=%13")
-                              .arg(m_mode,
+	                              .arg(txMode,
                                    msg.trimmed())
                               .arg(wave.size())
                               .arg(m_txPcmData.size())
@@ -18914,7 +19274,7 @@ void DecodiumBridge::startTx()
         int syncElapsedMs = -1;
         qint64 const syncOffsetBytes =
             syncTxPcmStartOffsetBytes(outFmt, m_txPcmBuffer->size(), &syncElapsedMs);
-        int const leadInMs = txSyncLeadInMsForMode(m_mode);
+        int const leadInMs = txSyncLeadInMsForMode(txMode);
         int const payloadDelayMs =
             (shouldAlignTxAudioToCurrentSyncSlot()
              && syncElapsedMs >= 0
@@ -18925,7 +19285,7 @@ void DecodiumBridge::startTx()
         if (syncOffsetBytes > 0) {
             m_txPcmBuffer->seek(syncOffsetBytes);
             bridgeLog(QStringLiteral("startTx sync PCM offset: mode=%1 elapsed=%2ms lead_in=%3ms offset=%4/%5 bytes")
-                          .arg(m_mode)
+	                          .arg(txMode)
                           .arg(syncElapsedMs)
                           .arg(leadInMs)
                           .arg(syncOffsetBytes)
@@ -18949,7 +19309,7 @@ void DecodiumBridge::startTx()
         qint64 const pcmBytes = m_txPcmData.size();
         m_txAudioSink->setVolume(static_cast<float>(effectiveGain));
         qsizetype const txBufferBytes =
-            txAudioBufferBytesForMode(outFmt, m_mode, false,
+            txAudioBufferBytesForMode(outFmt, txMode, false,
                                       m_lowCpuModeEnabled || cpuPressureActive());
         if (txBufferBytes > 0) {
             m_txAudioSink->setBufferSize(txBufferBytes);
@@ -19043,7 +19403,7 @@ void DecodiumBridge::startTx()
 
         auto startSink = [this, txSerial, expectedUs, txPlaybackMs, syncElapsedMs,
                           leadInMs, payloadDelayMs, pcmBytes, txBufferBytes,
-                          wavePeak, effectiveGain, outDev, outFmt, msg, wave]() {
+                          wavePeak, effectiveGain, outDev, outFmt, msg, wave, txMode]() {
             if (!m_transmitting || m_tuning || !m_txAudioSink || !m_txPcmBuffer) {
                 bridgeLog(QStringLiteral("startTx audio sink start skipped: TX inactive or sink missing"));
                 return;
@@ -19116,7 +19476,7 @@ void DecodiumBridge::startTx()
                 completeTxPlayback(QStringLiteral("watchdog"));
             });
 
-            bridgeLog("startTx launchAudio: mode=" + m_mode + " msg=" + msg.trimmed() +
+            bridgeLog("startTx launchAudio: mode=" + txMode + " msg=" + msg.trimmed() +
                       " samples=" + QString::number(wave.size()) +
                       " pcm_bytes=" + QString::number(m_txPcmData.size()) +
                       " pcm_pos=" + QString::number(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1) +
@@ -19140,7 +19500,7 @@ void DecodiumBridge::startTx()
 
         if (payloadDelayMs > 0) {
             bridgeLog(QStringLiteral("startTx payload lead-in delay: mode=%1 elapsed=%2ms lead_in=%3ms delay=%4ms")
-                          .arg(m_mode)
+                          .arg(txMode)
                           .arg(syncElapsedMs)
                           .arg(leadInMs)
                           .arg(payloadDelayMs));
@@ -19184,7 +19544,7 @@ void DecodiumBridge::sendTx(int n)
         emit statusMessage(QStringLiteral("TX bloccato: messaggio non coerente con il QSO attivo"));
         return;
     }
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForTx() && !m_ft2LinkTxActive) {
         bridgeLog(QStringLiteral("sendTx: delegating TX%1 to legacy backend").arg(n));
         syncLegacyBackendState();
         syncLegacyBackendTxState();
@@ -19299,6 +19659,10 @@ void DecodiumBridge::stopTx()
     // CW-audio interrotto manualmente: disarma lo stato CW.
     m_cwTxActive = false;
     m_pendingCwText.clear();
+    m_ft2LinkTxActive = false;
+    m_pendingFt2LinkText.clear();
+    m_pendingFt2LinkWave.clear();
+    m_pendingFt2LinkPlan.clear();
 
 #if defined(Q_OS_MAC)
     if (m_txAudioSink || m_txPcmBuffer) {
@@ -20190,7 +20554,7 @@ void DecodiumBridge::clearDecodeList()
 {
     resetWorldMapDisplayFromCurrentDecodes();
 
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForTx() && !m_ft2LinkTxActive) {
         bridgeLog("clearDecodeList: delegating band activity clear to legacy backend");
         m_legacyBackend->clearBandActivity();
         m_legacyBandActivityRevision = -1;
@@ -21226,6 +21590,470 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         emit statusMessage(QStringLiteral("PWR/SWR: riconnessione CAT per applicare il polling"));
         QTimer::singleShot(0, this, [this]() { retryRigConnection(); });
     }
+}
+
+QVariantMap DecodiumBridge::ft2LinkEmailGatewayPasswordStatus(const QVariantMap& config) const
+{
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("backendAvailable"), secure_settings::default_backend().available());
+    QString const account = ft2LinkSmtpSecretKey(config);
+    result.insert(QStringLiteral("account"), account);
+    auto const lookup = secure_settings::default_backend().lookup(
+        secure_settings::service(m_callsign.trimmed().toUpper()), account);
+    result.insert(QStringLiteral("found"), lookup.found);
+    result.insert(QStringLiteral("error"), lookup.error);
+    return result;
+}
+
+QVariantMap DecodiumBridge::setFt2LinkEmailGatewayPassword(const QVariantMap& config,
+                                                           const QString& password)
+{
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), false);
+    QString const account = ft2LinkSmtpSecretKey(config);
+    result.insert(QStringLiteral("account"), account);
+    if (password.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing SMTP password"));
+        return result;
+    }
+    auto const& backend = secure_settings::default_backend();
+    result.insert(QStringLiteral("backendAvailable"), backend.available());
+    if (!backend.available()) {
+        result.insert(QStringLiteral("error"),
+                      QStringLiteral("Secure password backend unavailable"));
+        return result;
+    }
+    QString error;
+    bool const ok = backend.store(secure_settings::service(m_callsign.trimmed().toUpper()),
+                                  account,
+                                  password,
+                                  &error);
+    result.insert(QStringLiteral("ok"), ok);
+    result.insert(QStringLiteral("error"), error);
+    if (ok) {
+        emit statusMessage(QStringLiteral("FT2-Link SMTP password saved securely"));
+    } else if (!error.isEmpty()) {
+        emit errorMessage(QStringLiteral("FT2-Link SMTP password save failed: %1").arg(error));
+    }
+    return result;
+}
+
+QVariantMap DecodiumBridge::clearFt2LinkEmailGatewayPassword(const QVariantMap& config)
+{
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), false);
+    QString const account = ft2LinkSmtpSecretKey(config);
+    result.insert(QStringLiteral("account"), account);
+    auto const& backend = secure_settings::default_backend();
+    result.insert(QStringLiteral("backendAvailable"), backend.available());
+    if (!backend.available()) {
+        result.insert(QStringLiteral("error"),
+                      QStringLiteral("Secure password backend unavailable"));
+        return result;
+    }
+    QString error;
+    bool const ok = backend.remove(secure_settings::service(m_callsign.trimmed().toUpper()),
+                                   account,
+                                   &error);
+    result.insert(QStringLiteral("ok"), ok);
+    result.insert(QStringLiteral("error"), error);
+    if (ok) {
+        emit statusMessage(QStringLiteral("FT2-Link SMTP password cleared"));
+    } else if (!error.isEmpty()) {
+        emit errorMessage(QStringLiteral("FT2-Link SMTP password clear failed: %1").arg(error));
+    }
+    return result;
+}
+
+QVariantMap DecodiumBridge::testFt2LinkEmailGateway(const QVariantMap& config)
+{
+    QVariantMap testConfig = config;
+    testConfig.insert(QStringLiteral("testOnly"), true);
+    if (!testConfig.contains(QStringLiteral("toEmail"))) {
+        testConfig.insert(QStringLiteral("toEmail"),
+                          ft2LinkSmtpConfigString(config, QStringLiteral("fromEmail"),
+                                                  ft2LinkSmtpConfigString(config, QStringLiteral("username"))));
+    }
+    return sendFt2LinkGatewayEmail(0u, testConfig, QStringLiteral("FT2-Link SMTP test"));
+}
+
+QVariantMap DecodiumBridge::sendFt2LinkGatewayEmail(quint32 mailboxId,
+                                                    const QVariantMap& config,
+                                                    const QString& eml)
+{
+    static quint32 nextRequestId = 1;
+    quint32 const requestId = nextRequestId++;
+
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("requestId"), requestId);
+    result.insert(QStringLiteral("mailboxId"), mailboxId);
+
+    QString const host = ft2LinkSmtpConfigString(config, QStringLiteral("host"));
+    int const port = qBound(1, config.value(QStringLiteral("port"), 587).toInt(), 65535);
+    QString security = ft2LinkSmtpConfigString(config, QStringLiteral("security"),
+                                               QStringLiteral("STARTTLS")).toUpper();
+    if (security != QStringLiteral("TLS")
+        && security != QStringLiteral("SSL")
+        && security != QStringLiteral("STARTTLS")
+        && security != QStringLiteral("NONE")) {
+        security = QStringLiteral("STARTTLS");
+    }
+    QString const username = ft2LinkSmtpConfigString(config, QStringLiteral("username"));
+    QString const fromEmail = ft2LinkCleanEmailAddress(
+        ft2LinkSmtpConfigString(config, QStringLiteral("fromEmail"), username));
+    QString const toEmail = ft2LinkCleanEmailAddress(
+        ft2LinkSmtpConfigString(config, QStringLiteral("toEmail")));
+    bool const auth = config.value(QStringLiteral("auth"), !username.isEmpty()).toBool();
+    bool const testOnly = config.value(QStringLiteral("testOnly"), false).toBool();
+
+    if (host.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing SMTP host"));
+        return result;
+    }
+    if (fromEmail.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing SMTP From email"));
+        return result;
+    }
+    if (!testOnly && toEmail.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing SMTP recipient email"));
+        return result;
+    }
+    if (!testOnly && eml.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing EML payload"));
+        return result;
+    }
+    if (auth && username.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("SMTP auth requires username"));
+        return result;
+    }
+
+    QString password;
+    if (auth) {
+        QString const account = ft2LinkSmtpSecretKey(config);
+        auto const& backend = secure_settings::default_backend();
+        if (!backend.available()) {
+            result.insert(QStringLiteral("error"),
+                          QStringLiteral("Secure password backend unavailable"));
+            return result;
+        }
+        auto const lookup = backend.lookup(secure_settings::service(m_callsign.trimmed().toUpper()),
+                                           account);
+        if (!lookup.found) {
+            result.insert(QStringLiteral("error"),
+                          lookup.error.isEmpty()
+                              ? QStringLiteral("SMTP password not saved")
+                              : lookup.error);
+            return result;
+        }
+        password = lookup.value;
+    }
+
+    struct SmtpState
+    {
+        enum Stage {
+            Greeting,
+            EhloBeforeTls,
+            StartTls,
+            TlsHandshake,
+            EhloAfterTls,
+            AuthLogin,
+            AuthUser,
+            AuthPassword,
+            MailFrom,
+            RcptTo,
+            DataCommand,
+            DataBody,
+            Quit
+        };
+
+        QPointer<QSslSocket> socket;
+        QPointer<QTimer> timer;
+        QByteArray buffer;
+        Stage stage {Greeting};
+        QString host;
+        int port {587};
+        QString security;
+        QString username;
+        QString password;
+        QString fromEmail;
+        QString toEmail;
+        QByteArray emlData;
+        bool auth {false};
+        bool testOnly {false};
+        bool failed {false};
+        quint32 requestId {0};
+        quint32 mailboxId {0};
+        QStringList transcript;
+        std::function<void(QString const&, QString const&)> status;
+        std::function<void(QString const&)> fail;
+        std::function<void()> sendEhlo;
+        std::function<void()> beginAuthOrMail;
+        std::function<void(QByteArray const&)> writeRaw;
+        std::function<void(int, QString const&)> handleReply;
+    };
+
+    auto state = std::make_shared<SmtpState>();
+    state->socket = new QSslSocket(this);
+    state->timer = new QTimer(state->socket);
+    state->timer->setSingleShot(true);
+    state->timer->setInterval(30000);
+    state->host = host;
+    state->port = port;
+    state->security = security;
+    state->username = username;
+    state->password = password;
+    state->fromEmail = fromEmail;
+    state->toEmail = toEmail;
+    state->auth = auth;
+    state->testOnly = testOnly;
+    state->requestId = requestId;
+    state->mailboxId = mailboxId;
+    state->emlData = ft2LinkSmtpData(eml);
+
+    SmtpState* smtp = state.get();
+    state->status = [this, smtp](QString const& smtpState, QString const& detail) {
+        emit ft2LinkEmailGatewayStatus(smtp->requestId, smtp->mailboxId, smtpState, detail);
+    };
+    state->fail = [this, smtp](QString const& detail) {
+        if (smtp->failed) {
+            return;
+        }
+        smtp->failed = true;
+        smtp->status(QStringLiteral("Failed"), detail);
+        emit errorMessage(QStringLiteral("FT2-Link SMTP gateway failed: %1").arg(detail));
+        if (smtp->timer) {
+            smtp->timer->stop();
+        }
+        if (smtp->socket) {
+            smtp->socket->disconnectFromHost();
+            smtp->socket->deleteLater();
+        }
+    };
+    state->writeRaw = [smtp](QByteArray const& bytes) {
+        if (smtp->socket && !smtp->failed) {
+            smtp->socket->write(bytes);
+        }
+    };
+    state->sendEhlo = [smtp]() {
+        smtp->status(QStringLiteral("SMTP"),
+                      QStringLiteral("EHLO %1").arg(QSysInfo::machineHostName()));
+        smtp->writeRaw(ft2LinkSmtpLine(
+            QStringLiteral("EHLO %1").arg(QSysInfo::machineHostName().isEmpty()
+                                          ? QStringLiteral("decodium")
+                                          : QSysInfo::machineHostName())));
+    };
+    state->beginAuthOrMail = [smtp]() {
+        if (smtp->testOnly && !smtp->auth) {
+            smtp->stage = SmtpState::Quit;
+            smtp->status(QStringLiteral("Ready"),
+                         QStringLiteral("SMTP test OK for %1:%2")
+                             .arg(smtp->host)
+                             .arg(smtp->port));
+            smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("QUIT")));
+        } else if (smtp->auth) {
+            smtp->stage = SmtpState::AuthLogin;
+            smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("AUTH LOGIN")));
+        } else {
+            smtp->stage = SmtpState::MailFrom;
+            smtp->writeRaw(ft2LinkSmtpLine(
+                QStringLiteral("MAIL FROM:<%1>").arg(smtp->fromEmail)));
+        }
+    };
+    state->handleReply = [smtp](int code, QString const& line) {
+        if (smtp->failed) {
+            return;
+        }
+        smtp->transcript << line.left(180);
+        auto expect = [smtp, code, &line](std::initializer_list<int> codes,
+                                           QString const& action) {
+            for (int allowed : codes) {
+                if (code == allowed) {
+                    return true;
+                }
+            }
+            smtp->fail(QStringLiteral("%1 rejected: %2").arg(action, line));
+            return false;
+        };
+
+        switch (smtp->stage) {
+        case SmtpState::Greeting:
+            if (!expect({220}, QStringLiteral("Greeting"))) return;
+            smtp->stage = SmtpState::EhloBeforeTls;
+            smtp->sendEhlo();
+            break;
+        case SmtpState::EhloBeforeTls:
+            if (!expect({250}, QStringLiteral("EHLO"))) return;
+            if (smtp->security == QStringLiteral("STARTTLS")) {
+                smtp->stage = SmtpState::StartTls;
+                smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("STARTTLS")));
+            } else {
+                smtp->beginAuthOrMail();
+            }
+            break;
+        case SmtpState::StartTls:
+            if (!expect({220}, QStringLiteral("STARTTLS"))) return;
+            smtp->stage = SmtpState::TlsHandshake;
+            smtp->status(QStringLiteral("TLS"), QStringLiteral("Starting TLS"));
+            smtp->socket->startClientEncryption();
+            break;
+        case SmtpState::EhloAfterTls:
+            if (!expect({250}, QStringLiteral("EHLO after TLS"))) return;
+            smtp->beginAuthOrMail();
+            break;
+        case SmtpState::AuthLogin:
+            if (!expect({334}, QStringLiteral("AUTH LOGIN"))) return;
+            smtp->stage = SmtpState::AuthUser;
+            smtp->writeRaw(smtp->username.toUtf8().toBase64() + "\r\n");
+            break;
+        case SmtpState::AuthUser:
+            if (!expect({334}, QStringLiteral("SMTP username"))) return;
+            smtp->stage = SmtpState::AuthPassword;
+            smtp->writeRaw(smtp->password.toUtf8().toBase64() + "\r\n");
+            break;
+        case SmtpState::AuthPassword:
+            if (!expect({235}, QStringLiteral("SMTP password"))) return;
+            if (smtp->testOnly) {
+                smtp->stage = SmtpState::Quit;
+                smtp->status(QStringLiteral("Ready"),
+                             QStringLiteral("SMTP auth test OK for %1:%2")
+                                 .arg(smtp->host)
+                                 .arg(smtp->port));
+                smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("QUIT")));
+            } else {
+                smtp->stage = SmtpState::MailFrom;
+                smtp->writeRaw(ft2LinkSmtpLine(
+                    QStringLiteral("MAIL FROM:<%1>").arg(smtp->fromEmail)));
+            }
+            break;
+        case SmtpState::MailFrom:
+            if (!expect({250}, QStringLiteral("MAIL FROM"))) return;
+            smtp->stage = SmtpState::RcptTo;
+            smtp->writeRaw(ft2LinkSmtpLine(
+                QStringLiteral("RCPT TO:<%1>").arg(smtp->toEmail)));
+            break;
+        case SmtpState::RcptTo:
+            if (!expect({250, 251}, QStringLiteral("RCPT TO"))) return;
+            smtp->stage = SmtpState::DataCommand;
+            smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("DATA")));
+            break;
+        case SmtpState::DataCommand:
+            if (!expect({354}, QStringLiteral("DATA"))) return;
+            smtp->stage = SmtpState::DataBody;
+            smtp->status(QStringLiteral("Sending"),
+                          QStringLiteral("Sending VMail email to %1").arg(smtp->toEmail));
+            smtp->writeRaw(smtp->emlData);
+            break;
+        case SmtpState::DataBody:
+            if (!expect({250}, QStringLiteral("Message body"))) return;
+            smtp->stage = SmtpState::Quit;
+            smtp->status(QStringLiteral("Sent"),
+                          QStringLiteral("SMTP accepted VMail email for %1").arg(smtp->toEmail));
+            smtp->writeRaw(ft2LinkSmtpLine(QStringLiteral("QUIT")));
+            if (smtp->timer) {
+                smtp->timer->stop();
+            }
+            break;
+        case SmtpState::Quit:
+            if (code == 221 || code == 250 || code == 0) {
+                if (smtp->timer) {
+                    smtp->timer->stop();
+                }
+                if (smtp->socket) {
+                    smtp->socket->disconnectFromHost();
+                }
+            }
+            break;
+        case SmtpState::TlsHandshake:
+            break;
+        }
+    };
+
+    QObject::connect(state->timer, &QTimer::timeout, this, [state]() {
+        state->fail(QStringLiteral("SMTP timeout"));
+    });
+    QObject::connect(state->socket, &QSslSocket::connected, this, [state]() {
+        state->status(QStringLiteral("Connected"),
+                      QStringLiteral("Connected to %1:%2").arg(state->host).arg(state->port));
+    });
+    QObject::connect(state->socket, &QSslSocket::encrypted, this, [state]() {
+        if (state->stage == SmtpState::TlsHandshake) {
+            state->stage = SmtpState::EhloAfterTls;
+            state->sendEhlo();
+        } else {
+            state->status(QStringLiteral("TLS"), QStringLiteral("TLS established"));
+        }
+    });
+    QObject::connect(state->socket, &QSslSocket::readyRead, this, [state]() {
+        state->buffer += state->socket->readAll();
+        for (;;) {
+            int const lf = state->buffer.indexOf('\n');
+            if (lf < 0) {
+                break;
+            }
+            QByteArray lineBytes = state->buffer.left(lf + 1);
+            state->buffer.remove(0, lf + 1);
+            while (lineBytes.endsWith('\n') || lineBytes.endsWith('\r')) {
+                lineBytes.chop(1);
+            }
+            QString const line = QString::fromUtf8(lineBytes);
+            if (line.size() < 3) {
+                continue;
+            }
+            bool ok = false;
+            int const code = line.left(3).toInt(&ok);
+            if (!ok) {
+                continue;
+            }
+            bool const finalLine = line.size() < 4 || line.at(3) == QLatin1Char(' ');
+            if (finalLine) {
+                state->handleReply(code, line);
+            }
+        }
+    });
+    QObject::connect(state->socket,
+                     qOverload<QAbstractSocket::SocketError>(&QSslSocket::errorOccurred),
+                     this,
+                     [state](QAbstractSocket::SocketError) {
+        if (!state->failed && state->socket) {
+            state->fail(state->socket->errorString());
+        }
+    });
+    QObject::connect(state->socket,
+                     qOverload<const QList<QSslError>&>(&QSslSocket::sslErrors),
+                     this,
+                     [state](QList<QSslError> const& errors) {
+        if (!errors.isEmpty()) {
+            state->fail(QStringLiteral("TLS error: %1")
+                        .arg(errors.first().errorString()));
+        }
+    });
+    QObject::connect(state->socket, &QSslSocket::disconnected, state->socket,
+                     &QObject::deleteLater);
+
+    state->timer->start();
+    state->status(QStringLiteral("Queued"),
+                  testOnly
+                      ? QStringLiteral("SMTP gateway test queued for %1:%2")
+                            .arg(host)
+                            .arg(port)
+                      : QStringLiteral("SMTP gateway queued for %1").arg(toEmail));
+    if (security == QStringLiteral("TLS") || security == QStringLiteral("SSL")) {
+        state->socket->connectToHostEncrypted(host, port);
+    } else {
+        state->socket->connectToHost(host, port);
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("state"), QStringLiteral("Queued"));
+    result.insert(QStringLiteral("detail"),
+                  testOnly
+                      ? QStringLiteral("SMTP gateway test queued for %1:%2")
+                            .arg(host)
+                            .arg(port)
+                      : QStringLiteral("SMTP gateway queued for %1").arg(toEmail));
+    return result;
 }
 
 namespace
@@ -23429,6 +24257,320 @@ void DecodiumBridge::tcpSendLoggedAdifQso(const QString& dxCall, const QByteArra
 
     timeout->start(3000);
     socket->connectToHost(serverName, port);
+}
+
+QVariantMap DecodiumBridge::uploadExternalAdif(const QString& dxCall,
+                                               const QString& adifRecord,
+                                               const QString& target)
+{
+    return uploadExternalAdifInternal(0, dxCall, adifRecord, target);
+}
+
+QVariantMap DecodiumBridge::uploadExternalAdifForOutbox(quint32 uploadId,
+                                                        const QString& dxCall,
+                                                        const QString& adifRecord,
+                                                        const QString& target)
+{
+    return uploadExternalAdifInternal(uploadId, dxCall, adifRecord, target);
+}
+
+QVariantMap DecodiumBridge::uploadExternalAdifInternal(quint32 uploadId,
+                                                       const QString& dxCall,
+                                                       const QString& adifRecord,
+                                                       const QString& target)
+{
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), false);
+    if (uploadId != 0) {
+        result.insert(QStringLiteral("uploadId"), uploadId);
+    }
+
+    QString const cleanCall = dxCall.trimmed().toUpper();
+    QByteArray const adifBytes = adifRecord.trimmed().toUtf8();
+    QString cleanTarget = target.trimmed().toUpper();
+    if (cleanTarget != QStringLiteral("UDP")
+        && cleanTarget != QStringLiteral("TCP")
+        && cleanTarget != QStringLiteral("N1MM")
+        && cleanTarget != QStringLiteral("QRZ")
+        && cleanTarget != QStringLiteral("CLOUDLOG")
+        && cleanTarget != QStringLiteral("ALL")) {
+        cleanTarget = QStringLiteral("ALL");
+    }
+
+    result.insert(QStringLiteral("target"), cleanTarget);
+    result.insert(QStringLiteral("dxCall"), cleanCall);
+    result.insert(QStringLiteral("bytes"), adifBytes.size());
+
+    if (cleanCall.isEmpty() || adifBytes.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing call or ADIF payload"));
+        return result;
+    }
+
+    QStringList attempted;
+    QStringList skipped;
+    QStringList pendingAsync;
+    auto wants = [&cleanTarget](QString const& name) {
+        return cleanTarget == QStringLiteral("ALL") || cleanTarget == name;
+    };
+
+    if (wants(QStringLiteral("UDP"))) {
+        int udpAttempts = 0;
+        int udpDelivered = 0;
+        QString const primaryServer =
+            getSetting(QStringLiteral("UDPServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
+        quint16 const primaryPort = udpPortFromSettingValue(
+            getSetting(QStringLiteral("UDPServerPort"), 2237), 2237);
+        if (getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool()) {
+            ++udpAttempts;
+            if (udpSendRawAdifDatagram(QStringLiteral("FT2-Link UDP primary raw ADIF"),
+                                       primaryServer, primaryPort, cleanCall, adifBytes)) {
+                ++udpDelivered;
+                attempted << QStringLiteral("UDP primary %1:%2").arg(primaryServer).arg(primaryPort);
+            }
+        } else {
+            skipped << QStringLiteral("UDP primary disabled");
+        }
+
+        bool const secondaryEnabled =
+            getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool();
+        bool const secondaryAdifEnabled =
+            getSetting(QStringLiteral("UDPSecondaryLoggedAdifEnabled"), true).toBool();
+        if (secondaryEnabled && secondaryAdifEnabled) {
+            QString const secondaryServer =
+                getSetting(QStringLiteral("UDPSecondaryServer"), primaryServer).toString().trimmed();
+            quint16 const secondaryPort = udpPortFromSettingValue(
+                getSetting(QStringLiteral("UDPSecondaryServerPort"), 2239), 2239);
+            ++udpAttempts;
+            if (udpSendRawAdifDatagram(QStringLiteral("FT2-Link UDP secondary raw ADIF"),
+                                       secondaryServer, secondaryPort, cleanCall, adifBytes)) {
+                ++udpDelivered;
+                attempted << QStringLiteral("UDP secondary %1:%2").arg(secondaryServer).arg(secondaryPort);
+            }
+        } else {
+            skipped << QStringLiteral("UDP secondary disabled");
+        }
+
+        bool const tertiaryEnabled =
+            getSetting(QStringLiteral("UDPTertiaryEnabled"), false).toBool();
+        bool const tertiaryAdifEnabled =
+            getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
+        if (tertiaryEnabled && tertiaryAdifEnabled) {
+            QString const tertiaryServer =
+                getSetting(QStringLiteral("UDPTertiaryServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
+            quint16 const tertiaryPort = udpPortFromSettingValue(
+                getSetting(QStringLiteral("UDPTertiaryServerPort"), 2237), 2237);
+            ++udpAttempts;
+            if (udpSendRawAdifDatagram(QStringLiteral("FT2-Link UDP tertiary raw ADIF"),
+                                       tertiaryServer, tertiaryPort, cleanCall, adifBytes)) {
+                ++udpDelivered;
+                attempted << QStringLiteral("UDP tertiary %1:%2").arg(tertiaryServer).arg(tertiaryPort);
+            }
+        } else {
+            skipped << QStringLiteral("UDP tertiary disabled");
+        }
+
+        if (udpAttempts > 0 && udpDelivered == 0) {
+            skipped << QStringLiteral("UDP raw ADIF targets failed");
+        }
+    }
+
+    if (wants(QStringLiteral("N1MM"))) {
+        if (getSetting(QStringLiteral("BroadcastToN1MM"), false).toBool()) {
+            udpSendN1mmLoggedQso(cleanCall, adifBytes);
+            attempted << QStringLiteral("N1MM");
+        } else {
+            skipped << QStringLiteral("N1MM disabled");
+        }
+    }
+
+    if (wants(QStringLiteral("TCP"))) {
+        if (getSetting(QStringLiteral("ADIFTcpEnabled"), false).toBool()) {
+            tcpSendLoggedAdifQso(cleanCall, adifBytes);
+            attempted << QStringLiteral("ADIF TCP");
+        } else {
+            skipped << QStringLiteral("ADIF TCP disabled");
+        }
+    }
+
+    if (wants(QStringLiteral("QRZ"))) {
+        if (m_qrzLogbookEnabled && m_qrzLogbook) {
+            m_qrzLogbook->setEnabled(m_qrzLogbookEnabled);
+            m_qrzLogbook->setApiKey(m_qrzLogbookApiKey);
+            m_qrzLogbook->setReplaceDuplicates(m_qrzLogbookReplaceDuplicates);
+            m_qrzLogbook->uploadAdif(cleanCall, adifBytes, uploadId);
+            attempted << QStringLiteral("QRZ Logbook");
+            if (uploadId != 0) {
+                pendingAsync << QStringLiteral("QRZ Logbook");
+            }
+        } else {
+            skipped << QStringLiteral("QRZ Logbook disabled");
+        }
+    }
+
+    if (wants(QStringLiteral("CLOUDLOG"))) {
+        if (m_cloudlogEnabled && m_cloudlog) {
+            m_cloudlog->setEnabled(m_cloudlogEnabled);
+            m_cloudlog->setApiUrl(m_cloudlogUrl);
+            m_cloudlog->setApiKey(m_cloudlogApiKey);
+            m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudlogStationID"), 1).toInt(), 999));
+            m_cloudlog->uploadAdif(cleanCall, adifBytes, uploadId);
+            attempted << QStringLiteral("Cloudlog");
+            if (uploadId != 0) {
+                pendingAsync << QStringLiteral("Cloudlog");
+            }
+        } else {
+            skipped << QStringLiteral("Cloudlog disabled");
+        }
+    }
+
+    QStringList immediateTargets = attempted;
+    for (QString const& backend : pendingAsync) {
+        immediateTargets.removeAll(backend);
+    }
+
+    bool const ok = !attempted.isEmpty();
+    QString const initialDetail =
+        ok ? attempted.join(QStringLiteral(", "))
+           : (skipped.isEmpty()
+              ? QStringLiteral("No configured external logbook target")
+              : skipped.join(QStringLiteral(", ")));
+
+    if (uploadId != 0 && ok) {
+        ExternalAdifUploadPending pending;
+        pending.dxCall = cleanCall;
+        pending.target = cleanTarget;
+        pending.pendingBackends = pendingAsync;
+        pending.skippedTargets = skipped;
+        pending.immediateTargets = immediateTargets;
+        if (!pending.pendingBackends.isEmpty()) {
+            m_externalAdifUploads.insert(uploadId, pending);
+        }
+    }
+
+    result.insert(QStringLiteral("ok"), ok);
+    result.insert(QStringLiteral("attempted"), attempted);
+    result.insert(QStringLiteral("skipped"), skipped);
+    result.insert(QStringLiteral("pending"), pendingAsync);
+    result.insert(QStringLiteral("immediate"), immediateTargets);
+    result.insert(QStringLiteral("state"),
+                  ok ? QStringLiteral("Submitted") : QStringLiteral("Failed"));
+    result.insert(QStringLiteral("detail"), initialDetail);
+    if (!ok) {
+        result.insert(QStringLiteral("error"), result.value(QStringLiteral("detail")).toString());
+    } else if (uploadId != 0 && pendingAsync.isEmpty()) {
+        QTimer::singleShot(0, this, [this, uploadId, initialDetail]() {
+            emit externalAdifUploadStatus(uploadId, QStringLiteral("Sent"), initialDetail);
+        });
+    }
+
+    bridgeLog(QStringLiteral("FT2-Link external ADIF upload: call=%1 target=%2 ok=%3 attempted=%4 skipped=%5 bytes=%6")
+                  .arg(cleanCall, cleanTarget, ok ? QStringLiteral("true") : QStringLiteral("false"),
+                       attempted.join(QStringLiteral("|")),
+                       skipped.join(QStringLiteral("|")))
+                  .arg(adifBytes.size()));
+    if (ok) {
+        emit statusMessage(QStringLiteral("FT2-Link QSO %1 -> %2")
+                           .arg(cleanCall, attempted.join(QStringLiteral(", "))));
+    }
+    return result;
+}
+
+void DecodiumBridge::noteExternalAdifUploadBackend(quint32 uploadId,
+                                                   const QString& backend,
+                                                   const QString& dxCall,
+                                                   bool ok,
+                                                   const QString& detail)
+{
+    if (uploadId == 0) {
+        return;
+    }
+
+    auto it = m_externalAdifUploads.find(uploadId);
+    if (it == m_externalAdifUploads.end()) {
+        bridgeLog(QStringLiteral("FT2-Link external ADIF late status ignored: id=%1 backend=%2 call=%3 ok=%4 detail=%5")
+                      .arg(uploadId)
+                      .arg(backend)
+                      .arg(dxCall)
+                      .arg(ok ? QStringLiteral("true") : QStringLiteral("false"))
+                      .arg(detail.simplified()));
+        return;
+    }
+
+    ExternalAdifUploadPending& pending = it.value();
+    pending.pendingBackends.removeAll(backend);
+    QString const backendDetail = detail.simplified();
+    QString const item = backendDetail.isEmpty()
+        ? backend
+        : QStringLiteral("%1: %2").arg(backend, backendDetail);
+    if (ok) {
+        pending.sentBackends << item;
+    } else {
+        pending.failedBackends << item;
+    }
+
+    bridgeLog(QStringLiteral("FT2-Link external ADIF backend status: id=%1 backend=%2 call=%3 ok=%4 pending=%5")
+                  .arg(uploadId)
+                  .arg(backend)
+                  .arg(dxCall)
+                  .arg(ok ? QStringLiteral("true") : QStringLiteral("false"))
+                  .arg(pending.pendingBackends.join(QStringLiteral("|"))));
+    finishExternalAdifUploadIfReady(uploadId);
+}
+
+void DecodiumBridge::finishExternalAdifUploadIfReady(quint32 uploadId)
+{
+    auto it = m_externalAdifUploads.find(uploadId);
+    if (it == m_externalAdifUploads.end()) {
+        return;
+    }
+    if (!it.value().pendingBackends.isEmpty()) {
+        return;
+    }
+
+    ExternalAdifUploadPending const pending = it.value();
+    m_externalAdifUploads.erase(it);
+
+    QStringList detailParts;
+    if (!pending.immediateTargets.isEmpty()) {
+        detailParts << QStringLiteral("submitted: %1")
+                           .arg(pending.immediateTargets.join(QStringLiteral(", ")));
+    }
+    if (!pending.sentBackends.isEmpty()) {
+        detailParts << QStringLiteral("confirmed: %1")
+                           .arg(pending.sentBackends.join(QStringLiteral("; ")));
+    }
+    if (!pending.failedBackends.isEmpty()) {
+        detailParts << QStringLiteral("failed: %1")
+                           .arg(pending.failedBackends.join(QStringLiteral("; ")));
+    }
+    if (!pending.skippedTargets.isEmpty()) {
+        detailParts << QStringLiteral("skipped: %1")
+                           .arg(pending.skippedTargets.join(QStringLiteral(", ")));
+    }
+
+    QString const state = pending.failedBackends.isEmpty()
+        ? QStringLiteral("Sent")
+        : QStringLiteral("Failed");
+    QString detail = detailParts.join(QStringLiteral(" | ")).simplified();
+    if (detail.isEmpty()) {
+        detail = state == QStringLiteral("Sent")
+            ? QStringLiteral("External logbook upload confirmed")
+            : QStringLiteral("External logbook upload failed");
+    }
+
+    bridgeLog(QStringLiteral("FT2-Link external ADIF final status: id=%1 call=%2 target=%3 state=%4 detail=%5")
+                  .arg(uploadId)
+                  .arg(pending.dxCall)
+                  .arg(pending.target)
+                  .arg(state)
+                  .arg(detail));
+    emit externalAdifUploadStatus(uploadId, state, detail);
+    if (state == QStringLiteral("Sent")) {
+        emit statusMessage(QStringLiteral("FT2-Link QSO %1 upload confermato").arg(pending.dxCall));
+    } else {
+        emit errorMessage(QStringLiteral("FT2-Link QSO %1 upload fallito: %2")
+                          .arg(pending.dxCall, detail));
+    }
 }
 
 int DecodiumBridge::remoteWebSocketPort() const
@@ -36316,6 +37458,8 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
     m_audioLevel = rms;
     emit audioLevelChanged();
     handleAudioHealth(rms, peak, dynamicRange, clippedSamples, samples.size());
+    emit ft2LinkRxSamplesReady(samples,
+                               static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (nowMs - m_lastTciAudioLogMs > 5000) {
@@ -36436,6 +37580,16 @@ void DecodiumBridge::startAudioCapture()
         connect(m_audioSink, &DecodiumAudioSink::audioHealthChanged,
                 this, [this](double rms, double peak, int dynamicRange, int clippedSamples, int samples) {
             handleAudioHealth(rms, peak, dynamicRange, clippedSamples, samples);
+        }, Qt::QueuedConnection);
+        connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
+                this, [this](QVector<short> samples) {
+            if (!samples.isEmpty()
+                && m_monitoring
+                && !m_transmitting
+                && !m_tuning) {
+                emit ft2LinkRxSamplesReady(std::move(samples),
+                                           static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+            }
         }, Qt::QueuedConnection);
         bridgeLog("audioSink created and connected");
     }
@@ -38142,20 +39296,23 @@ void DecodiumBridge::updatePeriodTicksMax()
 {
     // Timer ticks at TIMER_MS (250ms). Ticks per period:
     // FT8=15s→60, FT4=7.5s→30, FT2=3.75s→15, Q65=60s→240, MSK144=15s→60, WSPR=120s→480
-    if      (m_mode == "FT4")     m_periodTicksMax = 30;
-    else if (m_mode == "FT2")     m_periodTicksMax = 15;
-    else if (m_mode == "Q65")     m_periodTicksMax = 240;  // 60s
-    else if (m_mode == "MSK144")  m_periodTicksMax = 60;   // 15s
-    else if (m_mode == "WSPR")    m_periodTicksMax = 480;  // 120s
-    else if (m_mode == "JT65")    m_periodTicksMax = 240;   // 60s
-    else if (m_mode == "JT9")     m_periodTicksMax = 240;   // 60s
-    else if (m_mode == "JT4")     m_periodTicksMax = 240;   // 60s
-    else if (m_mode == "FST4")    m_periodTicksMax = 240;   // 60s
-    else if (m_mode == "FST4W")   m_periodTicksMax = 480;   // 120s default
-    else if (m_mode.startsWith("FST4")) {
+    QString const normalizedMode = m_mode.trimmed().toUpper();
+    if      (normalizedMode == "FT4")     m_periodTicksMax = 30;
+    else if (normalizedMode == "FT2"
+             || normalizedMode == "FT2-LINK"
+             || normalizedMode == "FT2LINK") m_periodTicksMax = 15;
+    else if (normalizedMode == "Q65")     m_periodTicksMax = 240;  // 60s
+    else if (normalizedMode == "MSK144")  m_periodTicksMax = 60;   // 15s
+    else if (normalizedMode == "WSPR")    m_periodTicksMax = 480;  // 120s
+    else if (normalizedMode == "JT65")    m_periodTicksMax = 240;   // 60s
+    else if (normalizedMode == "JT9")     m_periodTicksMax = 240;   // 60s
+    else if (normalizedMode == "JT4")     m_periodTicksMax = 240;   // 60s
+    else if (normalizedMode == "FST4")    m_periodTicksMax = 240;   // 60s
+    else if (normalizedMode == "FST4W")   m_periodTicksMax = 480;   // 120s default
+    else if (normalizedMode.startsWith("FST4")) {
         // FST4-15→60, FST4-30→120, FST4-60→240, FST4-120→480, FST4-300→1200, FST4-900→3600
-        int dashPos = m_mode.indexOf('-');
-        int trPeriod = (dashPos >= 0) ? m_mode.mid(dashPos + 1).toInt() : 15;
+        int dashPos = normalizedMode.indexOf('-');
+        int trPeriod = (dashPos >= 0) ? normalizedMode.mid(dashPos + 1).toInt() : 15;
         m_periodTicksMax = trPeriod * 1000 / TIMER_MS;
     }
     else                          m_periodTicksMax = 60;   // FT8 default
@@ -38163,7 +39320,7 @@ void DecodiumBridge::updatePeriodTicksMax()
 
 QStringList DecodiumBridge::availableModes() const
 {
-    return {"FT8", "FT2", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"};
+    return {"FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"};
 }
 
 // Simple radix-2 in-place FFT (Cooley-Tukey)
@@ -39676,6 +40833,88 @@ QString DecodiumBridge::openDirectoryDialog(const QString& title,
     return QFileDialog::getExistingDirectory(QApplication::activeWindow(),
                                              title,
                                              localDialogPath(initialPath));
+}
+
+QVariantMap DecodiumBridge::writeTextFile(const QString& path,
+                                          const QString& text) const
+{
+    QVariantMap result;
+    QString resolved = path.trimmed();
+    if (resolved.startsWith(QLatin1String("file:"))) {
+        resolved = QUrl(resolved).toLocalFile();
+    }
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("path"), resolved);
+    QByteArray const bytes = text.toUtf8();
+    result.insert(QStringLiteral("bytes"), bytes.size());
+
+    if (resolved.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing file path"));
+        return result;
+    }
+
+    QFileInfo const info(resolved);
+    QDir const dir = info.absoluteDir();
+    if (!dir.exists() && !QDir().mkpath(dir.absolutePath())) {
+        result.insert(QStringLiteral("error"),
+                      QStringLiteral("Cannot create directory %1")
+                          .arg(dir.absolutePath()));
+        return result;
+    }
+
+    QSaveFile file(resolved);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+    if (file.write(bytes) != bytes.size()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+    if (!file.commit()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("error"), QString());
+    return result;
+}
+
+bool DecodiumBridge::openExternalUrl(const QString& url)
+{
+    QString const clean = url.trimmed();
+    if (clean.isEmpty()) {
+        emit errorMessage(QStringLiteral("URL vuoto"));
+        return false;
+    }
+
+    QUrl target;
+    if (clean.startsWith(QLatin1String("file:"))) {
+        target = QUrl(clean);
+    } else if (clean.contains(QStringLiteral("://"))
+               || clean.startsWith(QLatin1String("mailto:"), Qt::CaseInsensitive)) {
+        target = QUrl(clean);
+    } else {
+        target = QUrl::fromLocalFile(clean);
+    }
+
+    QString const scheme = target.scheme().toLower();
+    if (!target.isValid()
+        || !(scheme == QStringLiteral("mailto")
+             || scheme == QStringLiteral("file")
+             || scheme == QStringLiteral("http")
+             || scheme == QStringLiteral("https"))) {
+        emit errorMessage(QStringLiteral("URL non valido o schema non permesso: %1")
+                          .arg(clean));
+        return false;
+    }
+
+    bool const ok = QDesktopServices::openUrl(target);
+    if (!ok) {
+        emit errorMessage(QStringLiteral("Impossibile aprire URL: %1").arg(clean));
+    }
+    return ok;
 }
 
 void DecodiumBridge::openWavForDecode(const QString& path)

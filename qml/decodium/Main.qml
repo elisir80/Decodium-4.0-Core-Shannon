@@ -976,10 +976,24 @@ ApplicationWindow {
         })
     }
     onLiveMapMinimizedChanged: scheduleWindowStateSave()
+    onFt2LinkModeActiveChanged: {
+        if (ft2LinkModeActive) {
+            if (bridge && !bridge.ft2LinkAccessUnlocked) {
+                Qt.callLater(requestFt2LinkAccess)
+                return
+            }
+            applyFt2LinkModeLayout()
+        } else {
+            restoreFt2LinkModeLayout()
+        }
+    }
 
     // === GAP 3 — Nuovi pannelli (A3, B9, A4, C14) ===
     property bool timeSyncPanelVisible:       settingBool("uiTimeSyncPanelVisible", false)
     property bool activeStationsPanelVisible: settingBool("uiActiveStationsPanelVisible", false)
+    readonly property bool ft2LinkModeActive: bridge && String(bridge.mode || "").toUpperCase() === "FT2-LINK"
+    property bool ft2LinkAccessPromptActive: false
+    property string ft2LinkAccessError: ""
     property bool callerQueuePanelVisible:    settingBool("uiCallerQueuePanelVisible", false)
     property bool astroPanelVisible:          settingBool("uiAstroPanelVisible", false)
     property bool dxClusterPanelVisible:      settingBool("uiDxClusterPanelVisible", false)
@@ -1005,6 +1019,68 @@ ApplicationWindow {
 
     // Tutti gli id validi (pulsanti + separatori). Usato per validare/normalizzare.
     readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","layout","history","cat","sep1","sep2"]
+
+    function applyFt2LinkModeLayout() {
+        if (typeof period1FloatingWindow !== "undefined" && period1FloatingWindow)
+            period1FloatingWindow.hide()
+        if (typeof rxFreqFloatingWindow !== "undefined" && rxFreqFloatingWindow)
+            rxFreqFloatingWindow.hide()
+        Qt.callLater(restoreDecodePanelWidths)
+    }
+
+    function restoreFt2LinkModeLayout() {
+        if (period1Detached && !period1Minimized
+                && typeof period1FloatingWindow !== "undefined" && period1FloatingWindow)
+            period1FloatingWindow.show()
+        if (rxFreqDetached && !rxFreqMinimized
+                && typeof rxFreqFloatingWindow !== "undefined" && rxFreqFloatingWindow)
+            rxFreqFloatingWindow.show()
+        Qt.callLater(restoreDecodePanelWidths)
+    }
+
+    function requestFt2LinkAccess() {
+        if (!bridge)
+            return
+        if (bridge.ft2LinkAccessUnlocked) {
+            applyFt2LinkModeLayout()
+            return
+        }
+        if (!bridge.ft2LinkAccessPasswordConfigured()) {
+            showStatusToast("FT2-Link locked: access hash not provisioned.", accentOrange)
+            rejectFt2LinkAccess()
+            return
+        }
+        ft2LinkAccessError = ""
+        ft2LinkAccessPromptActive = true
+        ft2LinkAccessDialog.open()
+    }
+
+    function rejectFt2LinkAccess() {
+        ft2LinkAccessPromptActive = false
+        ft2LinkAccessError = ""
+        if (ft2LinkPasswordField)
+            ft2LinkPasswordField.text = ""
+        if (ft2LinkAccessDialog && ft2LinkAccessDialog.opened)
+            ft2LinkAccessDialog.close()
+        if (bridge)
+            bridge.mode = "FT2"
+    }
+
+    function acceptFt2LinkAccess() {
+        if (!bridge)
+            return
+        var password = ft2LinkPasswordField.text
+        var ok = bridge.verifyFt2LinkAccessPassword(password)
+        if (!ok) {
+            rejectFt2LinkAccess()
+            return
+        }
+        ft2LinkAccessPromptActive = false
+        ft2LinkAccessError = ""
+        ft2LinkPasswordField.text = ""
+        ft2LinkAccessDialog.close()
+        applyFt2LinkModeLayout()
+    }
 
     // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
     function parseToolbarOrder(csv) {
@@ -1394,6 +1470,8 @@ ApplicationWindow {
     // un riempitore visibile e lo spazio liberato da un pannello staccato viene assorbito).
     // Preferisce Full Spectrum; ripiega su qualunque slot non-livemap/non-dxcluster.
     function classicDecodeFillSlot() {
+        if (ft2LinkModeActive)
+            return -1
         var i
         for (i = 0; i < 4; ++i)
             if (classicIdInSlot(i) === "fullspectrum") return i
@@ -1428,6 +1506,9 @@ ApplicationWindow {
     // liveMapPanelHost.visible quando era figlio diretto dello SplitView.
     function classicSlotCollapsed(idx) {
         var id = classicIdInSlot(idx)
+        if (mainWindow.ft2LinkModeActive
+                && (id === "fullspectrum" || id === "signalrx"))
+            return true
         if (id === "livemap")
             return !(mainWindow.liveMapPanelVisible && !mainWindow.liveMapDetached)
         // 1.0.385/386 — la 4ª colonna del DX Cluster esiste SOLO quando è dockato.
@@ -1618,10 +1699,12 @@ ApplicationWindow {
 	    function detachFullSpectrumPanel() {
 	        mainWindow.period1Detached = true
 	        mainWindow.period1Minimized = false
-	        period1FloatingWindow.show()
-	        period1FloatingWindow.visibility = Window.Windowed
-	        period1FloatingWindow.raise()
-	        period1FloatingWindow.requestActivate()
+	        if (!mainWindow.ft2LinkModeActive) {
+	            period1FloatingWindow.show()
+	            period1FloatingWindow.visibility = Window.Windowed
+	            period1FloatingWindow.raise()
+	            period1FloatingWindow.requestActivate()
+	        }
 	        Qt.callLater(mainWindow.restoreDecodePanelWidths)
 	    }
 	    function dockFullSpectrumPanel() {
@@ -1634,10 +1717,12 @@ ApplicationWindow {
 	    function detachSignalRxPanel() {
 	        mainWindow.rxFreqDetached = true
 	        mainWindow.rxFreqMinimized = false
-	        rxFreqFloatingWindow.show()
-	        rxFreqFloatingWindow.visibility = Window.Windowed
-	        rxFreqFloatingWindow.raise()
-	        rxFreqFloatingWindow.requestActivate()
+	        if (!mainWindow.ft2LinkModeActive) {
+	            rxFreqFloatingWindow.show()
+	            rxFreqFloatingWindow.visibility = Window.Windowed
+	            rxFreqFloatingWindow.raise()
+	            rxFreqFloatingWindow.requestActivate()
+	        }
 	        Qt.callLater(mainWindow.restoreDecodePanelWidths)
 	    }
 	    function dockSignalRxPanel() {
@@ -2645,6 +2730,95 @@ ApplicationWindow {
     Material.foreground: bridge.themeManager.textPrimary
     Material.background: bridge.themeManager.bgDeep
     color: bridge.themeManager.bgDeep
+
+    Dialog {
+        id: ft2LinkAccessDialog
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+        width: Math.min(430, Math.max(300, mainWindow.width - 48))
+        x: Math.round((mainWindow.width - width) / 2)
+        y: Math.round((mainWindow.height - height) / 2)
+        padding: 0
+
+        onOpened: {
+            ft2LinkPasswordField.text = ""
+            Qt.callLater(function() { ft2LinkPasswordField.forceActiveFocus() })
+        }
+
+        background: Rectangle {
+            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            border.color: secondaryCyan
+            border.width: 1
+            radius: 8
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 12
+            anchors.margins: 16
+
+            Text {
+                Layout.fillWidth: true
+                text: "FT2-Link access"
+                color: secondaryCyan
+                font.pixelSize: 18
+                font.bold: true
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: "Enter password to unlock this mode."
+                color: textSecondary
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+            }
+
+            TextField {
+                id: ft2LinkPasswordField
+                Layout.fillWidth: true
+                placeholderText: "Password"
+                echoMode: TextInput.Password
+                selectByMouse: true
+                color: textPrimary
+                placeholderTextColor: textSecondary
+                background: Rectangle {
+                    color: bgMedium
+                    border.color: ft2LinkPasswordField.activeFocus
+                                  ? secondaryCyan
+                                  : glassBorder
+                    radius: 5
+                }
+                Keys.onEscapePressed: mainWindow.rejectFt2LinkAccess()
+                onAccepted: mainWindow.acceptFt2LinkAccess()
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: mainWindow.ft2LinkAccessError.length > 0
+                text: mainWindow.ft2LinkAccessError
+                color: bridge.themeManager.warningColor
+                font.pixelSize: 12
+                wrapMode: Text.WordWrap
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                Item { Layout.fillWidth: true }
+
+                Button {
+                    text: "Cancel"
+                    onClicked: mainWindow.rejectFt2LinkAccess()
+                }
+
+                Button {
+                    text: "Unlock"
+                    highlighted: true
+                    onClicked: mainWindow.acceptFt2LinkAccess()
+                }
+            }
+        }
+    }
 
     // Font scale from settings (0.7 - 1.5)
     property double fs: bridge.fontScale || 1.0
@@ -6398,7 +6572,9 @@ ApplicationWindow {
                     // Current active period tracking
                     property bool isCurrentPeriodEven: true
                     property int currentSecond: 0
-                    property real periodLength: bridge.mode === "FT2" ? 3.75 : (bridge.mode === "FT4" ? 7.5 : (bridge.mode === "WSPR" ? 120 : 15))
+                    property string normalizedMode: bridge ? String(bridge.mode || "").toUpperCase() : ""
+                    property bool ft2CadenceMode: normalizedMode === "FT2" || normalizedMode === "FT2-LINK" || normalizedMode === "FT2LINK"
+                    property real periodLength: ft2CadenceMode ? 3.75 : (bridge.mode === "FT4" ? 7.5 : (bridge.mode === "WSPR" ? 120 : 15))
 
                     // IU8LMC: Reactive property for all decodes (Band Activity)
                     property bool showTxMessagesInRx: mainWindow.showTxMessagesInRx
@@ -6919,7 +7095,7 @@ ApplicationWindow {
                         border.width: 1
 
                         property real periodLen: decodePanel.periodLength
-                        property real txDuration: bridge.mode === "FT2" ? 2.87 : (bridge.mode === "FT4" ? 5.04 : (bridge.mode === "WSPR" ? 110.6 : 12.64))
+                        property real txDuration: decodePanel.ft2CadenceMode ? 2.87 : (bridge.mode === "FT4" ? 5.04 : (bridge.mode === "WSPR" ? 110.6 : 12.64))
                         property real progress: 0.0
                         property real secInPeriod: 0.0
                         property bool isTxPhase: !!(bridge && bridge.transmitting)
@@ -7070,23 +7246,52 @@ ApplicationWindow {
                         }
 
                         // ════════ SLOT-HOST FISSI (Stadio 1 pannelli interscambiabili) ════════
-                        // I 3 figli diretti dello SplitView sono ESATTAMENTE questi Item a ordine
-                        // FISSO (colSlot0=sx, colSlot1=centro, colSlot2=dx): portano loro le
+                        // ft2LinkModeSlot è il pannello applicativo inline, visibile solo nel
+                        // modo FT2-Link. Gli slot classici restano a ordine fisso
+                        // (colSlot0=sx, colSlot1=centro, colSlot2=dx, colSlot3=extra): portano loro le
                         // attached property SplitView.* + la larghezza-valore (per-slot). Ogni
                         // colSlot DICHIARA al suo interno il proprio pannello di DEFAULT come
                         // figlio naturale (anchors.fill: parent): colSlot0->period1Panel,
                         // colSlot1->rxFreqPanel, colSlot2->liveMapPanelHost. Lo SWAP re-parenta
                         // imperativamente i pannelli tra i colSlot (applyClassicColumnOrder /
-                        // swapClassicColumns), ma i figli DIRETTI dello SplitView restano sempre
-                        // i 3 colSlot -> 2 soli separatori, niente handle duplicati.
+                        // swapClassicColumns), mentre ft2LinkModeSlot resta un host separato
+                        // che prende larghezza solo quando il modo FT2-Link è attivo.
                         //
                         // Larghezza-valore: per-SLOT (posizione). Larghezza-MINIMA: segue il
                         // pannello che occupa lo slot (classicMinWidthForSlot). Lo slot che
                         // ospita la Live Map collassa a 0 quando la mappa è nascosta/staccata
                         // (classicSlotCollapsed), com'era con liveMapPanelHost.visible.
 
-                        // ========== SLOT 0 (default: LEFT Band Activity / Full Spectrum) ==========
                         Item {
+                            id: ft2LinkModeSlot
+                            visible: mainWindow.ft2LinkModeActive
+                            SplitView.fillWidth: mainWindow.ft2LinkModeActive
+                            SplitView.preferredWidth: mainWindow.ft2LinkModeActive ? 820 : 0
+                            SplitView.minimumWidth: mainWindow.ft2LinkModeActive ? 560 : 0
+
+                            Loader {
+                                id: ft2LinkInlineLoader
+                                anchors.fill: parent
+                                active: mainWindow.ft2LinkModeActive
+                                source: "../panels/FT2LinkPanel.qml"
+                                onLoaded: {
+                                    if (item)
+                                        item.dragTarget = null
+                                }
+                            }
+
+                            Connections {
+                                target: ft2LinkInlineLoader.item
+                                ignoreUnknownSignals: true
+                                function onCloseRequested() {
+                                    if (bridge)
+                                        bridge.mode = "FT2"
+                                }
+                            }
+                        }
+
+	                        // ========== SLOT 0 (default: LEFT Band Activity / Full Spectrum) ==========
+	                        Item {
                             id: colSlot0
                             property int targetPanelWidth: mainWindow.savedPeriod1PanelWidth
                             // Centro-split affidabile 50/50 (ex-period1Panel): ricalcola la metà
@@ -12052,6 +12257,10 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
             repeat: false
             onTriggered: {
                 var restoredState = mainWindow.restoreFloatingWindowState(period1FloatingWindow, "period1FloatingWindow", "period1Detached", "period1Minimized")
+                if (mainWindow.ft2LinkModeActive) {
+                    period1FloatingWindow.hide()
+                    return
+                }
                 // 1.0.186 — Auto-detach Full Spectrum di default. Pasquale-pattern:
                 // pop-out in Window separata -> render thread isolato -> niente stall
                 // main-thread durante drain ListView / texture upload waterfall.
@@ -12800,7 +13009,11 @@ NumberAnimation {
 
 	        x: mainWindow.x + 300
         y: mainWindow.y + 250
-        Component.onCompleted: mainWindow.restoreFloatingWindowState(rxFreqFloatingWindow, "rxFreqFloatingWindow", "rxFreqDetached", "rxFreqMinimized")
+        Component.onCompleted: {
+            mainWindow.restoreFloatingWindowState(rxFreqFloatingWindow, "rxFreqFloatingWindow", "rxFreqDetached", "rxFreqMinimized")
+            if (mainWindow.ft2LinkModeActive)
+                rxFreqFloatingWindow.hide()
+        }
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()
@@ -14014,8 +14227,8 @@ NumberAnimation {
                             height: 20
                             radius: 3
                             anchors.verticalCenter: parent.verticalCenter
-                            color: dxcBtnMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.30)
-                                                          : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.14)
+                            color: dxcDockBtnMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.30)
+                                                              : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.14)
                             border.color: secondaryCyan
                             border.width: 1
                             Text {
@@ -14027,7 +14240,7 @@ NumberAnimation {
                                 font.bold: true
                             }
                             MouseArea {
-                                id: dxcBtnMA
+                                id: dxcDockBtnMA
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor

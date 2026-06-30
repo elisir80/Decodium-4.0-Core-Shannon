@@ -61,6 +61,7 @@
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
 #include "DecodiumLogging.hpp"
+#include "controllers/FT2LinkQmlAdapter.hpp"
 #include "L10nLoader.hpp"
 #include "MetaDataRegistry.hpp"
 #include "Radio.hpp"
@@ -722,6 +723,8 @@ static void registerLegacySettingsStreamTypes()
     qRegisterMetaType<IARURegions::Region>("IARURegions::Region");
     qRegisterMetaType<DecodeHighlightingModel::HighlightInfo>("HighlightInfo");
     qRegisterMetaType<DecodeHighlightingModel::HighlightItems>("HighlightItems");
+    qRegisterMetaType<QVector<short>>("QVector<short>");
+    qRegisterMetaType<QVector<float>>("QVector<float>");
 }
 
 static bool ensureLegacySqliteDatabase()
@@ -1298,6 +1301,24 @@ int main(int argc, char* argv[])
 
     L("bridge constructing");
     DecodiumBridge bridge;
+    FT2LinkQmlAdapter ft2Link;
+    QObject::connect(&app, &QCoreApplication::aboutToQuit,
+                     &ft2Link,
+                     [&ft2Link]() {
+                         ft2Link.saveLocalStore();
+                     });
+    QObject::connect(&ft2Link, &FT2LinkQmlAdapter::radioTxAudioRequested,
+                     &bridge,
+                     [&bridge](QString const& displayMessage,
+                               QVector<float> const& samples,
+                               QVariantMap const& plan) {
+                         bridge.transmitFt2LinkAudio(displayMessage, samples, plan);
+                     });
+    QObject::connect(&bridge, &DecodiumBridge::ft2LinkRxSamplesReady,
+                     &ft2Link,
+                     [&ft2Link](QVector<short> const& samples, quint64 nowMs) {
+                         ft2Link.ingestRxSamples(samples, QString {}, nowMs);
+                     });
     app.setProperty("decodiumBridge", QVariant::fromValue<QObject*>(&bridge));
 #ifdef Q_OS_WIN
     QObject::connect(&bridge, &DecodiumBridge::mainQmlReadyForNativeWindowing, &app,
@@ -1411,6 +1432,7 @@ int main(int argc, char* argv[])
 
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("appEngine", &bridge);
+    engine.rootContext()->setContextProperty("ft2Link", &ft2Link);
     engine.rootContext()->setContextProperty(
         "decodiumMonoFontFamily",
         fixedFontFamily.isEmpty() ? QStringLiteral("monospace") : fixedFontFamily);

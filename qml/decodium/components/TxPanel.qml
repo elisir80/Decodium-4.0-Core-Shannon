@@ -314,7 +314,7 @@ Item {
     property color textPrimary: bridge.themeManager.textPrimary
     property color textSecondary: bridge.themeManager.textSecondary
     property color bgDeep: bridge.themeManager.bgDeep
-    readonly property var supportedModes: engine ? engine.availableModes() : ["FT8", "FT2", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"]
+    readonly property var supportedModes: engine ? engine.availableModes() : ["FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"]
     readonly property real toolbarScale: Math.max(0.9, Math.min(1.12, bridge ? bridge.fontScale : 1.0))
     readonly property int toolbarSpacing: showBandBar ? 3 : 2
     readonly property int toolbarButtonHeight: 32
@@ -325,7 +325,7 @@ Item {
     readonly property int toolbarHoldButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
     readonly property int toolbarWideButtonWidth: toolbarActionWidth("CLEAR", "")
     readonly property int toolbarLongButtonWidth: toolbarActionWidth("ALT 1/2", "\u21C4")
-    readonly property int toolbarModeWidth: toolbarActionWidth("MSK144", "\u25BE")
+    readonly property int toolbarModeWidth: toolbarActionWidth("FT2-Link", "\u25BE")
     readonly property int toolbarLabelSize: Math.max(9, Math.round(9 * toolbarScale))
     readonly property int toolbarGlyphSize: Math.max(12, Math.round(13 * toolbarScale))
     readonly property int qsoInfoControlHeight: 30

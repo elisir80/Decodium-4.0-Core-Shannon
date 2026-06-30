@@ -1023,6 +1023,7 @@ int HamlibTransceiver::do_start ()
 #endif
 
   do_poll ();
+  start_cat_keep_alive_timer ();
 
   CAT_TRACE ("finished start " << state () << " reversed=" << m_->reversed_ << " resolution=" << resolution);
   return resolution;
@@ -1030,6 +1031,7 @@ int HamlibTransceiver::do_start ()
 
 void HamlibTransceiver::do_stop ()
 {
+  stop_cat_keep_alive_timer ();
   stop_polling ();
 
   if (m_->is_dummy_ && !m_->ptt_only_)
@@ -1424,8 +1426,6 @@ void HamlibTransceiver::do_poll ()
       update_PTT (ptt_on_);
     }
 
-  poll_cat_keep_alive ();
-
   // 1.0.204 — throttle PWR/SWR polling: each rig_get_level RIG_LEVEL_SWR /
   // RFPOWER_METER_WATTS takes ~150ms on Yaesu FT-991 at 38400 baud. Running
   // both every tick made do_poll() ~470ms, which surfaced as main-thread
@@ -1452,6 +1452,39 @@ void HamlibTransceiver::do_poll ()
   poll_transmit_telemetry (false);
 }
 
+void HamlibTransceiver::start_cat_keep_alive_timer ()
+{
+  if (!cat_keep_alive_
+      || poll_passive_state_
+      || !m_->rig_
+      || m_->is_dummy_
+      || !m_->freq_query_works_)
+    {
+      return;
+    }
+
+  if (!cat_keep_alive_timer_)
+    {
+      cat_keep_alive_timer_ = new QTimer {this};
+      cat_keep_alive_timer_->setTimerType (Qt::CoarseTimer);
+      connect (cat_keep_alive_timer_, &QTimer::timeout,
+               this, &HamlibTransceiver::poll_cat_keep_alive);
+    }
+
+  cat_keep_alive_timer_->start (kCatKeepAliveIntervalMs_);
+  qInfo ().noquote ()
+    << "[CATDBG] Hamlib CAT keep-alive timer active"
+    << "interval_ms=" << kCatKeepAliveIntervalMs_;
+}
+
+void HamlibTransceiver::stop_cat_keep_alive_timer ()
+{
+  if (cat_keep_alive_timer_)
+    {
+      cat_keep_alive_timer_->stop ();
+    }
+}
+
 void HamlibTransceiver::poll_cat_keep_alive ()
 {
   if (!cat_keep_alive_
@@ -1462,12 +1495,6 @@ void HamlibTransceiver::poll_cat_keep_alive ()
     {
       return;
     }
-
-  if (++cat_keep_alive_tick_ < kCatKeepAliveSkipRatio_)
-    {
-      return;
-    }
-  cat_keep_alive_tick_ = 0;
 
   freq_t f {0};
   int const rc = rig_get_freq (m_->rig_.data (), RIG_VFO_CURR, &f);
@@ -1481,6 +1508,7 @@ void HamlibTransceiver::poll_cat_keep_alive ()
   if (-RIG_ENAVAIL == rc || -RIG_ENIMPL == rc)
     {
       cat_keep_alive_ = false;
+      stop_cat_keep_alive_timer ();
       qInfo ().noquote ()
         << "[CATDBG] Hamlib CAT keep-alive disabled: rig_get_freq unavailable rc=" << rc;
       return;
@@ -1494,6 +1522,7 @@ void HamlibTransceiver::poll_cat_keep_alive ()
   if (cat_keep_alive_failures_ >= kCatKeepAliveMaxFailures_)
     {
       cat_keep_alive_ = false;
+      stop_cat_keep_alive_timer ();
       qWarning ().noquote ()
         << "[CATDBG] Hamlib CAT keep-alive disabled for this connection after repeated failures";
     }

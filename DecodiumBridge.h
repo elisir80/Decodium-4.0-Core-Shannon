@@ -87,6 +87,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double frequency READ frequency WRITE setFrequency NOTIFY frequencyChanged)
     Q_PROPERTY(double displayFrequency READ displayFrequency NOTIFY displayFrequencyChanged)
     Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(bool ft2LinkAccessUnlocked READ ft2LinkAccessUnlocked NOTIFY ft2LinkAccessChanged)
 
     // === RX/TX STATE ===
     Q_PROPERTY(bool monitoring READ monitoring WRITE setMonitoring NOTIFY monitoringChanged)
@@ -520,6 +521,7 @@ public:
     void setFrequency(double);
     QString mode() const;
     void setMode(const QString&);
+    bool ft2LinkAccessUnlocked() const;
 
     // RX/TX State
     bool monitoring() const;
@@ -973,6 +975,9 @@ public:
 
     // Modes
     Q_INVOKABLE QStringList availableModes() const;
+    Q_INVOKABLE bool ft2LinkAccessPasswordConfigured() const;
+    Q_INVOKABLE bool verifyFt2LinkAccessPassword(const QString& password);
+    Q_INVOKABLE void lockFt2LinkAccess();
 
 public slots:
     // Notify hooks chiamabili dai DecodeWorker (thread-safe via QueuedConnection)
@@ -994,6 +999,9 @@ public slots:
     // dal keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991/991A) non
     // funziona in modalita' dati. dialFrequencyHz=0 lascia il VFO dov'e'.
     Q_INVOKABLE void sendCwAudio(const QString& text, qint64 dialFrequencyHz, int wpm);
+    Q_INVOKABLE bool transmitFt2LinkAudio(const QString& text,
+                                          const QVector<float>& wave,
+                                          const QVariantMap& plan);
     // Click su uno spot DX cluster nel waterfall: setta dxCall, txFrequency
     // sull'audio offset dello spot, abilita TX e avvia la sequenza QSO.
     Q_INVOKABLE void engageDxClusterSpot(const QString& call, int audioFreqHz);
@@ -1011,6 +1019,13 @@ public slots:
     Q_INVOKABLE void halt();           // ferma TX e Tune immediatamente
     Q_INVOKABLE void haltWithReason(const QString& reason);
     Q_INVOKABLE void logQso();
+    Q_INVOKABLE QVariantMap uploadExternalAdif(const QString& dxCall,
+                                               const QString& adifRecord,
+                                               const QString& target);
+    Q_INVOKABLE QVariantMap uploadExternalAdifForOutbox(quint32 uploadId,
+                                                        const QString& dxCall,
+                                                        const QString& adifRecord,
+                                                        const QString& target);
     Q_INVOKABLE void confirmLogQso();
     Q_INVOKABLE void rejectPromptedLogQso();
     Q_INVOKABLE void promptLogQso();
@@ -1019,7 +1034,27 @@ public slots:
     Q_INVOKABLE bool advanceQsoState(int txNum); // GitHub TxController clone
 
 private:
+    struct ExternalAdifUploadPending {
+        QString dxCall;
+        QString target;
+        QStringList pendingBackends;
+        QStringList sentBackends;
+        QStringList failedBackends;
+        QStringList skippedTargets;
+        QStringList immediateTargets;
+    };
+
     QString decodeColorValue(const QString& prop) const;
+    QVariantMap uploadExternalAdifInternal(quint32 uploadId,
+                                           const QString& dxCall,
+                                           const QString& adifRecord,
+                                           const QString& target);
+    void noteExternalAdifUploadBackend(quint32 uploadId,
+                                       const QString& backend,
+                                       const QString& dxCall,
+                                       bool ok,
+                                       const QString& detail);
+    void finishExternalAdifUploadIfReady(quint32 uploadId);
 
     // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory helpers (gate stretto + log immediato)
     void rememberPartnerStateV2(QString const& tag);
@@ -1070,6 +1105,9 @@ public:
                                        const QStringList& nameFilters = QStringList()) const;
     Q_INVOKABLE QString openDirectoryDialog(const QString& title,
                                             const QString& initialPath) const;
+    Q_INVOKABLE QVariantMap writeTextFile(const QString& path,
+                                          const QString& text) const;
+    Q_INVOKABLE bool openExternalUrl(const QString& url);
     Q_INVOKABLE void openWavForDecode(const QString& path);
     Q_INVOKABLE void openWavFolderDecode(const QString& folderPath);
 
@@ -1144,6 +1182,14 @@ public:
     Q_INVOKABLE void loadSettings();
     Q_INVOKABLE QVariant getSetting(const QString& key, const QVariant& defaultValue = {}) const;
     Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
+    Q_INVOKABLE QVariantMap ft2LinkEmailGatewayPasswordStatus(const QVariantMap& config) const;
+    Q_INVOKABLE QVariantMap setFt2LinkEmailGatewayPassword(const QVariantMap& config,
+                                                           const QString& password);
+    Q_INVOKABLE QVariantMap clearFt2LinkEmailGatewayPassword(const QVariantMap& config);
+    Q_INVOKABLE QVariantMap testFt2LinkEmailGateway(const QVariantMap& config);
+    Q_INVOKABLE QVariantMap sendFt2LinkGatewayEmail(quint32 mailboxId,
+                                                    const QVariantMap& config,
+                                                    const QString& eml);
     Q_INVOKABLE QVariantList workingFrequencyRows() const;
     Q_INVOKABLE QVariantList stationFrequencyRows() const;
     Q_INVOKABLE QStringList frequencyRegionOptions() const;
@@ -1346,6 +1392,7 @@ signals:
                                  float freqMinHz,
                                  float freqMaxHz,
                                  quint64 serial);
+    void ft2LinkRxSamplesReady(QVector<short> samples, quint64 nowMs);
     // TX — collegano bridge → Modulator (via QueuedConnection)
     void transmitFrequency(double freq);
     void sendMessage(QString mode, unsigned symbolsLength, double framesPerSymbol,
@@ -1359,6 +1406,7 @@ signals:
     void frequencyChanged();
     void displayFrequencyChanged();
     void modeChanged();
+    void ft2LinkAccessChanged();
     void monitoringChanged();
     void transmittingChanged();
     void tuningChanged();
@@ -1625,6 +1673,13 @@ signals:
     void qrzLogbookEnabledChanged();
     void qrzLogbookApiKeyChanged();
     void qrzLogbookReplaceDuplicatesChanged();
+    void externalAdifUploadStatus(quint32 uploadId,
+                                  const QString& state,
+                                  const QString& detail);
+    void ft2LinkEmailGatewayStatus(quint32 requestId,
+                                   quint32 mailboxId,
+                                   const QString& state,
+                                   const QString& detail);
     void wsprUploadEnabledChanged();
     void catManagerChanged();
     void catBackendChanged();
@@ -1904,6 +1959,7 @@ private:
     QString m_grid {"JN70"};
     double m_frequency {14074000.0};
     QString m_mode {"FT2"};
+    bool m_ft2LinkAccessUnlocked {false};
     bool m_startupModeAutoPending {true};
     qint64 m_startupModeAutoUntilMs {0};
     bool m_startupModeAutoAuthoritativeApplied {false};
@@ -2326,6 +2382,7 @@ private:
     DecodiumPskReporterLite* m_pskReporter {nullptr};
     DecodiumCloudlogLite*    m_cloudlog    {nullptr};
     DecodiumQrzLogbookLite*  m_qrzLogbook  {nullptr};
+    QHash<quint32, ExternalAdifUploadPending> m_externalAdifUploads;
     DecodiumWsprUploader*    m_wsprUploader{nullptr};
     bool                  m_wsprUploadEnabled {false};
 
@@ -2594,6 +2651,10 @@ private:
     QString m_pendingCwText;
     int     m_cwWpm {20};
     int     m_cwSidetoneHz {700};
+    bool    m_ft2LinkTxActive {false};
+    QString m_pendingFt2LinkText;
+    QVector<float> m_pendingFt2LinkWave;
+    QVariantMap m_pendingFt2LinkPlan;
     QDateTime m_lastTxActivityUtc;
     QDateTime m_qsoStartedOn;
     bool    m_logAfterOwn73 {false};
@@ -3402,7 +3463,8 @@ private:
                                                   quint64 sessionId);
     void autoSequenceStep(const QStringList& parsedFields);
     static int periodMsForMode(const QString& mode) {
-        if (mode=="FT2")      return 3750;
+        QString const normalizedMode = mode.trimmed().toUpper();
+        if (normalizedMode=="FT2" || normalizedMode=="FT2-LINK" || normalizedMode=="FT2LINK") return 3750;
         if (mode=="FT4")      return 7500;
         if (mode=="Q65")      return 60000;
         if (mode=="MSK144")   return 15000;
