@@ -211,6 +211,8 @@ Item {
 
     function txSignalBandwidthHz(modeName) {
         var mode = String(modeName || bridge.mode || "").trim().toUpperCase()
+        if (mode === "FT2-LINK" || mode === "FT2LINK")
+            return 2300
         if (mode === "FT4")
             return 90
         if (mode === "FT8" || mode === "FT2")

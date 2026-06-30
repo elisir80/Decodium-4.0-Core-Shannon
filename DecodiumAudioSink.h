@@ -77,6 +77,7 @@ public:
         double peak = 0.0;
         int dynamicRange = 0;
         int clippedSamples = 0;
+        QVector<short> emittedSamples;
         {
             QMutexLocker locker(m_bufferMutex);
             prevSize = m_buffer.size();
@@ -115,12 +116,17 @@ public:
                 peak = static_cast<double>(peakAbs) / 32768.0;
                 dynamicRange = maxSample - minSample;
                 m_lastRms = rms;
+                emittedSamples.reserve(newSamples);
+                for (int i = 0; i < newSamples; ++i) {
+                    emittedSamples.append(s[i]);
+                }
             }
         }
 
         if (newSamples > 0) {
             emit audioLevelChanged(m_lastRms);
             emit audioHealthChanged(rms, peak, dynamicRange, clippedSamples, newSamples);
+            emit audioSamplesReady(emittedSamples);
         }
 
         return maxSize;
@@ -129,6 +135,7 @@ public:
 signals:
     void audioLevelChanged(double level);
     void audioHealthChanged(double rms, double peak, int dynamicRange, int clippedSamples, int samples);
+    void audioSamplesReady(QVector<short> samples);
 
 private:
     static constexpr int kFil4Taps {49};

@@ -384,7 +384,8 @@ public:
         double const configured = configuredFreqForMode(b, normalized);
         if (configured > 0.0) return configured;
         if (normalized == "FT8" && b.ft8Freq > 0.0) return b.ft8Freq;
-        if (normalized == "FT2" && b.ft2Freq > 0.0) return b.ft2Freq;
+        if ((normalized == "FT2" || normalized == "FT2-LINK" || normalized == "FT2LINK")
+            && b.ft2Freq > 0.0) return b.ft2Freq;
         if (normalized == "FT4" && b.ft4Freq > 0.0) return b.ft4Freq;
         if ((normalized == "WSPR" || normalized == "FST4W") && b.wsprFreq > 0.0) return b.wsprFreq;
         if (normalized == "JT65" && b.jt65Freq > 0.0) return b.jt65Freq;

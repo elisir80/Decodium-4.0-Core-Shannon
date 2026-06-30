@@ -443,6 +443,113 @@ void DecodiumCloudlogLite::logQso(const QString& dxCall,
             });
 }
 
+void DecodiumCloudlogLite::uploadAdif(const QString& dxCall,
+                                      const QByteArray& adifRecord,
+                                      quint32 requestId)
+{
+    if (!m_enabled) {
+        qDebug() << "[CloudlogLite] uploadAdif called but disabled - skipping.";
+        if (requestId != 0) {
+            emit adifUploadFinished(requestId, dxCall, false, tr("Cloudlog disabled"));
+        }
+        return;
+    }
+
+    if (m_apiUrl.isEmpty() || m_apiKey.isEmpty()) {
+        const QString detail = tr("Cloudlog API URL or API key not configured.");
+        emit errorOccurred(detail);
+        if (requestId != 0) {
+            emit adifUploadFinished(requestId, dxCall, false, detail);
+        }
+        return;
+    }
+
+    QString adif = QString::fromUtf8(adifRecord).trimmed();
+    if (adif.isEmpty()) {
+        const QString detail = tr("Cloudlog ADIF record is empty.");
+        emit errorOccurred(detail);
+        if (requestId != 0) {
+            emit adifUploadFinished(requestId, dxCall, false, detail);
+        }
+        return;
+    }
+    if (!adif.contains(QStringLiteral("<EOR>"), Qt::CaseInsensitive)) {
+        adif += QStringLiteral(" <EOR>");
+    }
+
+    QJsonObject body;
+    body[QStringLiteral("key")] = m_apiKey;
+    body[QStringLiteral("station_profile_id")] = QString::number(m_stationId);
+    body[QStringLiteral("type")] = QStringLiteral("adif");
+    body[QStringLiteral("string")] = adif;
+
+    QString urlError;
+    const QUrl endpoint = cloudlogEndpoint(m_apiUrl, QStringLiteral("qso"), &urlError);
+    if (!endpoint.isValid()) {
+        emit errorOccurred(urlError);
+        if (requestId != 0) {
+            emit adifUploadFinished(requestId, dxCall, false, urlError);
+        }
+        return;
+    }
+
+    QNetworkRequest request = makeCloudlogRequest(endpoint);
+    qDebug().noquote() << "[CloudlogLite] raw ADIF POST"
+                       << endpoint.toString(QUrl::RemoveUserInfo)
+                       << "station_profile_id=" << m_stationId;
+
+    QNetworkReply* reply = m_nam->post(
+        request, QJsonDocument(body).toJson(QJsonDocument::Compact));
+
+    connect(reply, &QNetworkReply::finished, this,
+            [this, reply, dxCall, requestId]() {
+                const QNetworkReply::NetworkError networkError = reply->error();
+                const QString networkErrorText = reply->errorString();
+                const int httpStatus =
+                    reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                const QString body = readLimitedReply(reply);
+
+                reply->deleteLater();
+
+                if (networkError != QNetworkReply::NoError) {
+                    const QString detail = cloudlogHttpErrorMessage(
+                        tr("Cloudlog raw ADIF upload"),
+                        networkError,
+                        networkErrorText,
+                        httpStatus,
+                        body);
+                    emit errorOccurred(detail);
+                    if (requestId != 0) {
+                        emit adifUploadFinished(requestId, dxCall, false, detail);
+                    }
+                    return;
+                }
+
+                if (httpStatus >= 200 && httpStatus < 300
+                    && !cloudlogReplyLooksRejected(body)) {
+                    qDebug() << "[CloudlogLite] raw ADIF logged for" << dxCall;
+                    emit qsoLogged(dxCall);
+                    if (requestId != 0) {
+                        emit adifUploadFinished(requestId,
+                                                dxCall,
+                                                true,
+                                                tr("Cloudlog accepted raw ADIF"));
+                    }
+                } else {
+                    const QString detail = cloudlogHttpErrorMessage(
+                        tr("Cloudlog raw ADIF upload"),
+                        QNetworkReply::NoError,
+                        QString(),
+                        httpStatus,
+                        body);
+                    emit errorOccurred(detail);
+                    if (requestId != 0) {
+                        emit adifUploadFinished(requestId, dxCall, false, detail);
+                    }
+                }
+            });
+}
+
 // ---------------------------------------------------------------------------
 // testApi
 // ---------------------------------------------------------------------------
