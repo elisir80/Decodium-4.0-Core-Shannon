@@ -61,13 +61,8 @@ bool shouldAutoLoadLocalStore ()
       && !appName.contains (QStringLiteral ("test_ft2link"));
 }
 
-QVariant numericVariant (std::size_t value)
-{
-  return QVariant::fromValue<qulonglong> (
-      static_cast<qulonglong> (value));
-}
-
-QVariant numericVariant (std::uint64_t value)
+template<typename T>
+QVariant numericVariant (T value)
 {
   return QVariant::fromValue<qulonglong> (
       static_cast<qulonglong> (value));
@@ -7521,7 +7516,7 @@ quint64 FT2LinkQmlAdapter::sessionLastRealActivityMs (
           && isAutomaticCallIdText (text);
       if (!automaticCallId)
         {
-          last = std::max (last, message.atMs);
+          last = std::max (last, static_cast<quint64> (message.atMs));
         }
     }
   return last;
@@ -10109,10 +10104,12 @@ QVariantMap FT2LinkQmlAdapter::statistics () const
   std::vector<AppSession> const sessions = m_model.sessions ();
   for (AppSession const& session : sessions)
     {
-      lastActivityMs = std::max (lastActivityMs, session.openedAtMs);
+      lastActivityMs = std::max (
+          lastActivityMs, static_cast<quint64> (session.openedAtMs));
       for (ChatMessage const& message : session.messages)
         {
-          lastActivityMs = std::max (lastActivityMs, message.atMs);
+          lastActivityMs = std::max (
+              lastActivityMs, static_cast<quint64> (message.atMs));
           switch (message.direction)
             {
             case ChatMessageDirection::Outgoing: ++liveChatSent; break;
