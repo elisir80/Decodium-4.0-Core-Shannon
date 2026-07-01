@@ -2,6 +2,20 @@ name: Test Runner
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lib/ft2link/**'
+      - 'controllers/FT2Link*'
+      - 'tests/test_ft2link*'
+      - 'CMakeLists.txt'
+      - '.github/workflows/test-runner.yml'
+  push:
+    paths:
+      - 'lib/ft2link/**'
+      - 'controllers/FT2Link*'
+      - 'tests/test_ft2link*'
+      - 'CMakeLists.txt'
+      - '.github/workflows/test-runner.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,7 +65,7 @@ jobs:
             --output-on-failure
 
   ft2link-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout repository
@@ -79,6 +93,8 @@ jobs:
             qt6-5compat-dev \
             qt6-base-dev \
             qt6-base-dev-tools \
+            qt6-base-private-dev \
+            libxkbcommon-dev \
             qt6-declarative-dev \
             qt6-declarative-dev-tools \
             qt6-multimedia-dev \
@@ -138,7 +154,6 @@ jobs:
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-fftw
             mingw-w64-x86_64-gcc-fortran
-            mingw-w64-x86_64-hamlib
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-pkgconf
@@ -153,6 +168,16 @@ jobs:
             mingw-w64-x86_64-qt6-tools
             mingw-w64-x86_64-qt6-translations
             mingw-w64-x86_64-qt6-websockets
+
+      - name: Build and install Hamlib
+        run: |
+          set -euo pipefail
+          curl -fsSL -o hamlib-4.7.0.tar.gz https://github.com/Hamlib/Hamlib/releases/download/4.7.0/hamlib-4.7.0.tar.gz
+          tar -xzf hamlib-4.7.0.tar.gz
+          cd hamlib-4.7.0
+          ./configure --prefix=/mingw64 --disable-static --enable-shared --without-readline
+          make -j"$(nproc)"
+          make install
 
       - name: Configure
         run: |
