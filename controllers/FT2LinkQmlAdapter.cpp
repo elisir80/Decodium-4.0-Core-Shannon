@@ -5011,7 +5011,22 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
   bool decodedAny = false;
   m_liveNarrowRxSamples.insert (
       m_liveNarrowRxSamples.end (), chunk.begin (), chunk.end ());
-  for (int attempt = 0; attempt < 2; ++attempt)
+  // 1.0.450 iu8lmc fix (freeze FT2-LINK): decodeNarrowFrameWaveformWithMetrics e' DSP
+  // pesante sul MAIN THREAD ~50x/sec, col costo che cresce col buffer (fino a 5s) ->
+  // stall main-thread fino a 14s (freeze in modo FT2-LINK). Su canale MUTO non c'e'
+  // alcun frame da decodificare: salta il DSP e tieni una finestra scorrevole del buffer.
+  // Decodifica solo quando l'energia RX segnala canale attivo (isLiveChannelBusy, hold
+  // 750ms). FT2-Link e' point-to-point tra peer connessi (segnale presente quando TX).
+  bool const channelBusy = isLiveChannelBusy (nowMs);
+  if (!channelBusy && m_liveNarrowRxSamples.size () > 72000u)
+    {
+      m_liveNarrowRxSamples.erase (
+          m_liveNarrowRxSamples.begin (),
+          m_liveNarrowRxSamples.begin ()
+              + static_cast<std::vector<float>::difference_type> (
+                  m_liveNarrowRxSamples.size () - 72000u));
+    }
+  for (int attempt = 0; channelBusy && attempt < 2; ++attempt)
     {
       Frame decoded;
       decodium::ft2link::NarrowDecodeMetrics metrics;
