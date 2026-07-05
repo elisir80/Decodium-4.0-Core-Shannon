@@ -1904,6 +1904,59 @@ private Q_SLOTS:
     QVERIFY (decoded.payload == plan.frames.front ().payload);
   }
 
+  void wideTxAudioPlanCanBuildBroadcastFrames ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::FrameType;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W500WaveformConfig;
+    using decodium::ft2link::WideAudioBurstTrace;
+    using decodium::ft2link::WideTxAudioPlan;
+    using decodium::ft2link::WideTxAudioPlanOptions;
+
+    std::vector<std::uint8_t> const payload = bytesFromString (
+        "W500 broadcast payload over narrow");
+
+    WideTxAudioPlanOptions options;
+    options.profile = Profile::Wide500;
+    options.frameType = FrameType::Broadcast;
+    options.sampleRate = 48000.0;
+    options.guardBeforeSamples = 240;
+    options.guardAfterSamples = 240;
+    options.interBurstGapSamples = 480;
+
+    WideTxAudioPlan const plan = decodium::ft2link::buildWideTxAudioPlan (
+        payload, 0u, options);
+    QVERIFY2 (plan.ok, plan.error.c_str ());
+    QCOMPARE (plan.frames.size (), static_cast<std::size_t> (1));
+    QCOMPARE (static_cast<int> (plan.frames.front ().type),
+              static_cast<int> (FrameType::Broadcast));
+    QCOMPARE (plan.frames.front ().sessionId, static_cast<std::uint16_t> (0u));
+
+    WideAudioBurstTrace const& burst = plan.bursts.front ();
+    std::vector<float> wave (
+        plan.samples.begin ()
+            + static_cast<std::vector<float>::difference_type> (
+                burst.startSample),
+        plan.samples.begin ()
+            + static_cast<std::vector<float>::difference_type> (
+                burst.startSample + burst.sampleCount));
+
+    W500WaveformConfig decodeConfig;
+    decodeConfig.sampleRate = 48000.0;
+
+    Frame decoded;
+    std::string error;
+    QVERIFY2 (decodium::ft2link::decodeW500FrameWaveform (
+                  wave, &decoded, decodeConfig, &error),
+              error.c_str ());
+    QCOMPARE (static_cast<int> (decoded.type),
+              static_cast<int> (FrameType::Broadcast));
+    QCOMPARE (static_cast<int> (decoded.profile),
+              static_cast<int> (Profile::Wide500));
+    QVERIFY (decoded.payload == payload);
+  }
+
   void w2300AudioPipelineDefersWhenChannelIsBusy ()
   {
     using decodium::ft2link::W2300AudioPipelineOptions;

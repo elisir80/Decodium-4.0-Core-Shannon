@@ -58,6 +58,10 @@ public:
   // Returns the full path to the diagnostic log file
   static QString diagnosticLogPath ();
 
+  // Close the current diagnostic file so the next write follows the current
+  // QCoreApplication identity and QStandardPaths scope.
+  static void reopenDiagnosticLog ();
+
   // Read the last N lines from the diagnostic log
   static QStringList readLastLines (int n = 200);
 

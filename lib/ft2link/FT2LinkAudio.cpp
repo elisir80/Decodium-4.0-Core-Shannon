@@ -597,7 +597,8 @@ AudioThroughputMetrics makeThroughputMetrics (
   return metrics;
 }
 
-std::vector<Frame> makeDataFrames (Profile profile,
+std::vector<Frame> makeWideFrames (Profile profile,
+                                   FrameType frameType,
                                    std::uint16_t sessionId,
                                    std::vector<std::uint8_t> const& message)
 {
@@ -614,7 +615,7 @@ std::vector<Frame> makeDataFrames (Profile profile,
       std::size_t const end = std::min (message.size (), begin + capacity);
 
       Frame frame;
-      frame.type = FrameType::Data;
+      frame.type = frameType;
       frame.profile = profile;
       frame.sessionId = sessionId;
       frame.sequence = static_cast<std::uint16_t> (index);
@@ -1565,7 +1566,8 @@ WideTxAudioPlan buildWideTxAudioPlan (
       return plan;
     }
 
-  plan.frames = makeDataFrames (options.profile, sessionId, message);
+  plan.frames = makeWideFrames (
+      options.profile, options.frameType, sessionId, message);
   std::vector<AudioAckTrace> noAckBursts;
 
   if (options.profile == Profile::Wide2300)

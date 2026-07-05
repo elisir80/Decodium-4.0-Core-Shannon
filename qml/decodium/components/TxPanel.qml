@@ -10,6 +10,7 @@ Item {
 
     // 1.0.262 — CALL feature: signal emesso quando l'utente clicca il pulsante CALL
     signal callRequested()
+    signal ft2LinkAccessRequested()
 
     // Required property - reference to the app engine
     required property var engine
@@ -595,7 +596,21 @@ Item {
                                     var idx = model.indexOf(mode)
                                     return idx >= 0 ? idx : 0
                                 }
-                                onCurrentTextChanged: if (engine && currentText) engine.mode = currentText
+                                onActivated: function(index) {
+                                    if (!engine || index < 0 || index >= model.length)
+                                        return
+                                    var selectedMode = String(model[index] || "")
+                                    if (selectedMode.toUpperCase() === "FT2-LINK"
+                                            && !engine.ft2LinkAccessUnlocked) {
+                                        txPanel.ft2LinkAccessRequested()
+                                        var currentMode = engine ? String(engine.mode || "FT2") : "FT2"
+                                        var currentModeIndex = model.indexOf(currentMode)
+                                        modeSelector.currentIndex = currentModeIndex >= 0 ? currentModeIndex : model.indexOf("FT2")
+                                        return
+                                    }
+                                    if (selectedMode.length > 0)
+                                        engine.mode = selectedMode
+                                }
                                 font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 itemHeight: 34

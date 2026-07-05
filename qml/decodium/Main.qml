@@ -994,6 +994,7 @@ ApplicationWindow {
     readonly property bool ft2LinkModeActive: bridge && String(bridge.mode || "").toUpperCase() === "FT2-LINK"
     property bool ft2LinkAccessPromptActive: false
     property string ft2LinkAccessError: ""
+    property bool ft2LinkAccessPendingMode: false
     property bool callerQueuePanelVisible:    settingBool("uiCallerQueuePanelVisible", false)
     property bool astroPanelVisible:          settingBool("uiAstroPanelVisible", false)
     property bool dxClusterPanelVisible:      settingBool("uiDxClusterPanelVisible", false)
@@ -1042,6 +1043,7 @@ ApplicationWindow {
         if (!bridge)
             return
         if (bridge.ft2LinkAccessUnlocked) {
+            bridge.mode = "FT2-Link"
             applyFt2LinkModeLayout()
             return
         }
@@ -1051,12 +1053,14 @@ ApplicationWindow {
             return
         }
         ft2LinkAccessError = ""
+        ft2LinkAccessPendingMode = true
         ft2LinkAccessPromptActive = true
         ft2LinkAccessDialog.open()
     }
 
     function rejectFt2LinkAccess() {
         ft2LinkAccessPromptActive = false
+        ft2LinkAccessPendingMode = false
         ft2LinkAccessError = ""
         if (ft2LinkPasswordField)
             ft2LinkPasswordField.text = ""
@@ -1076,9 +1080,11 @@ ApplicationWindow {
             return
         }
         ft2LinkAccessPromptActive = false
+        ft2LinkAccessPendingMode = false
         ft2LinkAccessError = ""
         ft2LinkPasswordField.text = ""
         ft2LinkAccessDialog.close()
+        bridge.mode = "FT2-Link"
         applyFt2LinkModeLayout()
     }
 
@@ -9239,6 +9245,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                             visible: !txPanelDetached
                             onMamWindowRequested: mamWindow.open()
                             onCallRequested: callDialogInstance.show()
+                            onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
 
                             // Maniglia di drag colonna (Stadio 2) — overlay sull'angolo
                             // alto-SINISTRO dell'header TX (il pulsante Pop è in alto a
@@ -13780,6 +13787,7 @@ NumberAnimation {
                     handleLogPrompt: false
                     onMamWindowRequested: mamWindow.open()
                     onCallRequested: callDialogInstance.show()
+                    onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
                 }
             }
         }

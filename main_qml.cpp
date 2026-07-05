@@ -40,6 +40,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <functional>
 #include <cstdio>
 #include <clocale>
 #include <cstring>
@@ -1073,7 +1074,6 @@ int main(int argc, char* argv[])
         return dir + QStringLiteral("/qsg_pipeline_cache.bin");
     }();
     L(("Pipeline cache path: " + pipelineCacheFile.toLocal8Bit()).constData());
-    ensureLegacySqliteDatabase();
     L((QByteArray("Qt version: ") + qVersion()).constData());
     L((QByteArray("OS: ") + QSysInfo::prettyProductName().toLocal8Bit()
        + " ABI=" + QSysInfo::buildAbi().toLocal8Bit()
@@ -1217,12 +1217,284 @@ int main(int argc, char* argv[])
     QCommandLineOption const resetSafeGraphicsOption(
         QStringList {} << "reset-safe-graphics",
         QStringLiteral("Clear automatic Windows safe graphics and persistent D3D11 fallback markers."));
+    QCommandLineOption const labCallsignOption(
+        QStringList {} << "lab-callsign",
+        QStringLiteral("Runtime lab override for the local callsign."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labGridOption(
+        QStringList {} << "lab-grid",
+        QStringLiteral("Runtime lab override for the local grid locator."),
+        QStringLiteral("grid"));
+    QCommandLineOption const labAudioDeviceOption(
+        QStringList {} << "lab-audio-device",
+        QStringLiteral("Runtime lab override for both audio input and output devices."),
+        QStringLiteral("device"));
+    QCommandLineOption const labAudioInputOption(
+        QStringList {} << "lab-audio-input",
+        QStringLiteral("Runtime lab override for the audio input device."),
+        QStringLiteral("device"));
+    QCommandLineOption const labAudioOutputOption(
+        QStringList {} << "lab-audio-output",
+        QStringLiteral("Runtime lab override for the audio output device."),
+        QStringLiteral("device"));
+    QCommandLineOption const labModeOption(
+        QStringList {} << "lab-mode",
+        QStringLiteral("Runtime lab override for the application mode."),
+        QStringLiteral("mode"));
+    QCommandLineOption const labNoCatOption(
+        QStringList {} << "lab-no-cat",
+        QStringLiteral("Disable CAT auto-connect for an isolated runtime lab session."));
+    QCommandLineOption const labReapplyMsOption(
+        QStringList {} << "lab-reapply-ms",
+        QStringLiteral("Delay before reapplying runtime lab overrides after QML/settings startup."),
+        QStringLiteral("ms"),
+        QStringLiteral("6500"));
+    QCommandLineOption const labMonitorMsOption(
+        QStringList {} << "lab-monitor-ms",
+        QStringLiteral("Delay before starting RX monitor in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBcastMsOption(
+        QStringList {} << "lab-bcast-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link broadcast in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBcastTextOption(
+        QStringList {} << "lab-bcast-text",
+        QStringLiteral("Broadcast text used by --lab-bcast-ms."),
+        QStringLiteral("text"),
+        QStringLiteral("D4 LAB BCAST"));
+    QCommandLineOption const labBeaconMsOption(
+        QStringList {} << "lab-beacon-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link beacon/CQ in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBeaconCqOption(
+        QStringList {} << "lab-beacon-cq",
+        QStringLiteral("Send CQ instead of plain beacon with --lab-beacon-ms."));
+    QCommandLineOption const labCqSlotMsOption(
+        QStringList {} << "lab-cq-slot-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link CQ slot beacon."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labCqSlotIdOption(
+        QStringList {} << "lab-cq-slot-id",
+        QStringLiteral("Slot id used by --lab-cq-slot-ms."),
+        QStringLiteral("id"),
+        QStringLiteral("1"));
+    QCommandLineOption const labCqSlotSizeOption(
+        QStringList {} << "lab-cq-slot-size",
+        QStringLiteral("Slot size Hz used by --lab-cq-slot-ms."),
+        QStringLiteral("hz"),
+        QStringLiteral("500"));
+    QCommandLineOption const labAutoCqMsOption(
+        QStringList {} << "lab-auto-cq-ms",
+        QStringLiteral("Delay before enabling FT2-Link auto CQ in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labAutoCqIntervalOption(
+        QStringList {} << "lab-auto-cq-interval",
+        QStringLiteral("Auto CQ interval seconds used by --lab-auto-cq-ms."),
+        QStringLiteral("seconds"),
+        QStringLiteral("60"));
+    QCommandLineOption const labHeardCallOption(
+        QStringList {} << "lab-heard-call",
+        QStringLiteral("Seed a recent heard/contact callsign for path/relay lab scenarios."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labHeardGridOption(
+        QStringList {} << "lab-heard-grid",
+        QStringLiteral("Grid locator used by --lab-heard-call."),
+        QStringLiteral("grid"));
+    QCommandLineOption const labHeardNameOption(
+        QStringList {} << "lab-heard-name",
+        QStringLiteral("Name used by --lab-heard-call."),
+        QStringLiteral("name"),
+        QStringLiteral("LAB"));
+    QCommandLineOption const labPingMsOption(
+        QStringList {} << "lab-ping-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link ping in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labPingCallOption(
+        QStringList {} << "lab-ping-call",
+        QStringLiteral("Remote callsign used by --lab-ping-ms."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labPathMsOption(
+        QStringList {} << "lab-path-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link path finder request."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labPathTargetOption(
+        QStringList {} << "lab-path-target",
+        QStringLiteral("Target callsign used by --lab-path-ms/--lab-path-response-ms."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labPathResponseMsOption(
+        QStringList {} << "lab-path-response-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link path finder response."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labProfileOption(
+        QStringList {} << "lab-profile",
+        QStringLiteral("Preferred FT2-Link lab profile: W500 or W2300."),
+        QStringLiteral("profile"),
+        QStringLiteral("W2300"));
+    QCommandLineOption const labConnectMsOption(
+        QStringList {} << "lab-connect-ms",
+        QStringLiteral("Delay before starting an FT2-Link lab session handshake."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labConnectCallOption(
+        QStringList {} << "lab-connect-call",
+        QStringLiteral("Remote callsign for --lab-connect-ms."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labConnectGridOption(
+        QStringList {} << "lab-connect-grid",
+        QStringLiteral("Remote grid locator advertised before --lab-connect-ms."),
+        QStringLiteral("grid"));
+    QCommandLineOption const labTextMsOption(
+        QStringList {} << "lab-text-ms",
+        QStringLiteral("Delay before sending a session text message in the FT2-Link lab."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labTextOption(
+        QStringList {} << "lab-text",
+        QStringLiteral("Session text used by --lab-text-ms."),
+        QStringLiteral("text"),
+        QStringLiteral("D4 LAB TEXT"));
+    QCommandLineOption const labMailMsOption(
+        QStringList {} << "lab-mail-ms",
+        QStringLiteral("Delay before sending FT2-Link lab mailbox traffic."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labMailSubjectOption(
+        QStringList {} << "lab-mail-subject",
+        QStringLiteral("Mailbox subject used by --lab-mail-ms."),
+        QStringLiteral("subject"),
+        QStringLiteral("D4 LAB MAIL"));
+    QCommandLineOption const labMailBodyOption(
+        QStringList {} << "lab-mail-body",
+        QStringLiteral("Mailbox body used by --lab-mail-ms."),
+        QStringLiteral("body"),
+        QStringLiteral("D4 LAB MAIL BODY"));
+    QCommandLineOption const labFormMsOption(
+        QStringList {} << "lab-form-ms",
+        QStringLiteral("Delay before sending FT2-Link lab form traffic."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labFormTypeOption(
+        QStringList {} << "lab-form-type",
+        QStringLiteral("Form type used by --lab-form-ms."),
+        QStringLiteral("type"),
+        QStringLiteral("ICS213"));
+    QCommandLineOption const labFormMessageOption(
+        QStringList {} << "lab-form-message",
+        QStringLiteral("Form message field used by --lab-form-ms."),
+        QStringLiteral("message"),
+        QStringLiteral("D4 LAB FORM BODY"));
+    QCommandLineOption const labFileMsOption(
+        QStringList {} << "lab-file-ms",
+        QStringLiteral("Delay before sending FT2-Link lab file traffic."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labFileNameOption(
+        QStringList {} << "lab-file-name",
+        QStringLiteral("File name used by --lab-file-ms."),
+        QStringLiteral("name"),
+        QStringLiteral("d4-lab.txt"));
+    QCommandLineOption const labFileTextOption(
+        QStringList {} << "lab-file-text",
+        QStringLiteral("File text used by --lab-file-ms."),
+        QStringLiteral("text"),
+        QStringLiteral("D4 LAB FILE BODY"));
+    QCommandLineOption const labBulletinMsOption(
+        QStringList {} << "lab-bulletin-ms",
+        QStringLiteral("Delay before sending FT2-Link lab BBS bulletin traffic."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBulletinGroupOption(
+        QStringList {} << "lab-bulletin-group",
+        QStringLiteral("Bulletin group used by --lab-bulletin-ms."),
+        QStringLiteral("group"),
+        QStringLiteral("NET"));
+    QCommandLineOption const labBulletinTitleOption(
+        QStringList {} << "lab-bulletin-title",
+        QStringLiteral("Bulletin title used by --lab-bulletin-ms."),
+        QStringLiteral("title"),
+        QStringLiteral("D4 LAB BBS"));
+    QCommandLineOption const labBulletinBodyOption(
+        QStringList {} << "lab-bulletin-body",
+        QStringLiteral("Bulletin body used by --lab-bulletin-ms."),
+        QStringLiteral("body"),
+        QStringLiteral("D4 LAB BBS BODY"));
+    QCommandLineOption const labParkRelayMsOption(
+        QStringList {} << "lab-park-relay-ms",
+        QStringLiteral("Delay before parking an FT2-Link relay mailbox item."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labRelayTargetOption(
+        QStringList {} << "lab-relay-target",
+        QStringLiteral("Final destination callsign for --lab-park-relay-ms."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labRelaySubjectOption(
+        QStringList {} << "lab-relay-subject",
+        QStringLiteral("Relay mailbox subject used by --lab-park-relay-ms."),
+        QStringLiteral("subject"),
+        QStringLiteral("D4 LAB RELAY"));
+    QCommandLineOption const labRelayBodyOption(
+        QStringList {} << "lab-relay-body",
+        QStringLiteral("Relay mailbox body used by --lab-park-relay-ms."),
+        QStringLiteral("body"),
+        QStringLiteral("D4 LAB RELAY BODY"));
+    QCommandLineOption const labRelayTxMsOption(
+        QStringList {} << "lab-relay-tx-ms",
+        QStringLiteral("Delay before transmitting a parked relay mailbox item over a connected session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labQuitMsOption(
+        QStringList {} << "lab-quit-ms",
+        QStringLiteral("Delay before quitting the runtime lab session."),
+        QStringLiteral("ms"));
     parser.addOption(rigOption);
     parser.addOption(configOption);
     parser.addOption(languageOption);
     parser.addOption(testOption);
     parser.addOption(safeGraphicsOption);
     parser.addOption(resetSafeGraphicsOption);
+    parser.addOption(labCallsignOption);
+    parser.addOption(labGridOption);
+    parser.addOption(labAudioDeviceOption);
+    parser.addOption(labAudioInputOption);
+    parser.addOption(labAudioOutputOption);
+    parser.addOption(labModeOption);
+    parser.addOption(labNoCatOption);
+    parser.addOption(labReapplyMsOption);
+    parser.addOption(labMonitorMsOption);
+    parser.addOption(labBcastMsOption);
+    parser.addOption(labBcastTextOption);
+    parser.addOption(labBeaconMsOption);
+    parser.addOption(labBeaconCqOption);
+    parser.addOption(labCqSlotMsOption);
+    parser.addOption(labCqSlotIdOption);
+    parser.addOption(labCqSlotSizeOption);
+    parser.addOption(labAutoCqMsOption);
+    parser.addOption(labAutoCqIntervalOption);
+    parser.addOption(labHeardCallOption);
+    parser.addOption(labHeardGridOption);
+    parser.addOption(labHeardNameOption);
+    parser.addOption(labPingMsOption);
+    parser.addOption(labPingCallOption);
+    parser.addOption(labPathMsOption);
+    parser.addOption(labPathTargetOption);
+    parser.addOption(labPathResponseMsOption);
+    parser.addOption(labProfileOption);
+    parser.addOption(labConnectMsOption);
+    parser.addOption(labConnectCallOption);
+    parser.addOption(labConnectGridOption);
+    parser.addOption(labTextMsOption);
+    parser.addOption(labTextOption);
+    parser.addOption(labMailMsOption);
+    parser.addOption(labMailSubjectOption);
+    parser.addOption(labMailBodyOption);
+    parser.addOption(labFormMsOption);
+    parser.addOption(labFormTypeOption);
+    parser.addOption(labFormMessageOption);
+    parser.addOption(labFileMsOption);
+    parser.addOption(labFileNameOption);
+    parser.addOption(labFileTextOption);
+    parser.addOption(labBulletinMsOption);
+    parser.addOption(labBulletinGroupOption);
+    parser.addOption(labBulletinTitleOption);
+    parser.addOption(labBulletinBodyOption);
+    parser.addOption(labParkRelayMsOption);
+    parser.addOption(labRelayTargetOption);
+    parser.addOption(labRelaySubjectOption);
+    parser.addOption(labRelayBodyOption);
+    parser.addOption(labRelayTxMsOption);
+    parser.addOption(labQuitMsOption);
 
     if (!parser.parse(app.arguments())) {
         L(("Command line error: " + parser.errorText()).toLocal8Bit().constData());
@@ -1248,6 +1520,9 @@ int main(int argc, char* argv[])
     if (parser.isSet(testOption)) {
         app.setApplicationName(app.applicationName() + QStringLiteral(" - test"));
     }
+    DecodiumLogging::reopenDiagnosticLog();
+    L(("Application identity: " + app.applicationName().toLocal8Bit()).constData());
+    ensureLegacySqliteDatabase();
 
     QString configName = parser.value(configOption).trimmed();
     QSettings rootSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
@@ -1266,6 +1541,131 @@ int main(int argc, char* argv[])
     configureWindowsQmlDiskCache(configName);
 #endif
     QString languageOverride = parser.value(languageOption).trimmed();
+
+    QString const labCallsign = parser.value(labCallsignOption).trimmed().toUpper();
+    QString const labGrid = parser.value(labGridOption).trimmed().toUpper();
+    QString const labAudioDevice = parser.value(labAudioDeviceOption).trimmed();
+    QString const labAudioInput = parser.value(labAudioInputOption).trimmed();
+    QString const labAudioOutput = parser.value(labAudioOutputOption).trimmed();
+    QString const labMode = parser.value(labModeOption).trimmed();
+    QString const effectiveLabInput = labAudioInput.isEmpty() ? labAudioDevice : labAudioInput;
+    QString const effectiveLabOutput = labAudioOutput.isEmpty() ? labAudioDevice : labAudioOutput;
+    bool const labNoCat = parser.isSet(labNoCatOption);
+    if (labNoCat) {
+        qputenv("DECODIUM_DISABLE_CAT", QByteArrayLiteral("1"));
+        qInfo() << "[LAB] CAT auto-connect disabled by --lab-no-cat";
+    }
+    auto const parseLabDelayMs = [&parser](QCommandLineOption const& option, int fallbackMs) {
+        bool ok = false;
+        int const value = parser.value(option).trimmed().toInt(&ok);
+        if (!ok) {
+            return fallbackMs;
+        }
+        return qMax(0, value);
+    };
+    int const labReapplyMs = parseLabDelayMs(labReapplyMsOption, 6500);
+    int const labMonitorMs = parseLabDelayMs(labMonitorMsOption, 8000);
+    int const labBcastMs = parseLabDelayMs(labBcastMsOption, 14000);
+    int const labQuitMs = parseLabDelayMs(labQuitMsOption, 0);
+    QString labBcastText = parser.value(labBcastTextOption).trimmed();
+    if (labBcastText.isEmpty()) {
+        labBcastText = QStringLiteral("D4 LAB BCAST");
+    }
+    int const labBeaconMs = parseLabDelayMs(labBeaconMsOption, 0);
+    bool const labBeaconCq = parser.isSet(labBeaconCqOption);
+    int const labCqSlotMs = parseLabDelayMs(labCqSlotMsOption, 0);
+    int const labCqSlotId = qBound(-10,
+                                   parser.value(labCqSlotIdOption).trimmed().toInt(),
+                                   10);
+    int const labCqSlotSize = qBound(100,
+                                     parser.value(labCqSlotSizeOption).trimmed().toInt(),
+                                     5000);
+    int const labAutoCqMs = parseLabDelayMs(labAutoCqMsOption, 0);
+    int const labAutoCqInterval = qMax(
+        60,
+        parser.value(labAutoCqIntervalOption).trimmed().toInt());
+    QString const labHeardCall = parser.value(labHeardCallOption).trimmed().toUpper();
+    QString const labHeardGrid = parser.value(labHeardGridOption).trimmed().toUpper();
+    QString labHeardName = parser.value(labHeardNameOption).trimmed();
+    if (labHeardName.isEmpty()) {
+        labHeardName = QStringLiteral("LAB");
+    }
+    int const labPingMs = parseLabDelayMs(labPingMsOption, 0);
+    QString const labPingCall = parser.value(labPingCallOption).trimmed().toUpper();
+    int const labPathMs = parseLabDelayMs(labPathMsOption, 0);
+    QString const labPathTarget = parser.value(labPathTargetOption).trimmed().toUpper();
+    int const labPathResponseMs = parseLabDelayMs(labPathResponseMsOption, 0);
+    auto const parseLabProfile = [](QString value) {
+        QString const normalized = value.trimmed().toUpper();
+        if (normalized == QStringLiteral("1")
+            || normalized == QStringLiteral("500")
+            || normalized == QStringLiteral("W500")) {
+            return 1;
+        }
+        return 2;
+    };
+    int const labPreferredProfile = parseLabProfile(parser.value(labProfileOption));
+    bool const labSupportsW2300 = labPreferredProfile == 2;
+    QString const labProfileName = labSupportsW2300 ? QStringLiteral("W2300") : QStringLiteral("W500");
+    int const labConnectMs = parseLabDelayMs(labConnectMsOption, 0);
+    QString const labConnectCall = parser.value(labConnectCallOption).trimmed().toUpper();
+    QString const labConnectGrid = parser.value(labConnectGridOption).trimmed().toUpper();
+    int const labTextMs = parseLabDelayMs(labTextMsOption, 0);
+    QString labText = parser.value(labTextOption).trimmed();
+    if (labText.isEmpty()) {
+        labText = QStringLiteral("D4 LAB TEXT");
+    }
+    int const labMailMs = parseLabDelayMs(labMailMsOption, 0);
+    QString labMailSubject = parser.value(labMailSubjectOption).trimmed();
+    if (labMailSubject.isEmpty()) {
+        labMailSubject = QStringLiteral("D4 LAB MAIL");
+    }
+    QString labMailBody = parser.value(labMailBodyOption).trimmed();
+    if (labMailBody.isEmpty()) {
+        labMailBody = QStringLiteral("D4 LAB MAIL BODY");
+    }
+    int const labFormMs = parseLabDelayMs(labFormMsOption, 0);
+    QString labFormType = parser.value(labFormTypeOption).trimmed().toUpper();
+    if (labFormType.isEmpty()) {
+        labFormType = QStringLiteral("ICS213");
+    }
+    QString labFormMessage = parser.value(labFormMessageOption).trimmed();
+    if (labFormMessage.isEmpty()) {
+        labFormMessage = QStringLiteral("D4 LAB FORM BODY");
+    }
+    int const labFileMs = parseLabDelayMs(labFileMsOption, 0);
+    QString labFileName = parser.value(labFileNameOption).trimmed();
+    if (labFileName.isEmpty()) {
+        labFileName = QStringLiteral("d4-lab.txt");
+    }
+    QString labFileText = parser.value(labFileTextOption).trimmed();
+    if (labFileText.isEmpty()) {
+        labFileText = QStringLiteral("D4 LAB FILE BODY");
+    }
+    int const labBulletinMs = parseLabDelayMs(labBulletinMsOption, 0);
+    QString labBulletinGroup = parser.value(labBulletinGroupOption).trimmed().toUpper();
+    if (labBulletinGroup.isEmpty()) {
+        labBulletinGroup = QStringLiteral("NET");
+    }
+    QString labBulletinTitle = parser.value(labBulletinTitleOption).trimmed();
+    if (labBulletinTitle.isEmpty()) {
+        labBulletinTitle = QStringLiteral("D4 LAB BBS");
+    }
+    QString labBulletinBody = parser.value(labBulletinBodyOption).trimmed();
+    if (labBulletinBody.isEmpty()) {
+        labBulletinBody = QStringLiteral("D4 LAB BBS BODY");
+    }
+    int const labParkRelayMs = parseLabDelayMs(labParkRelayMsOption, 0);
+    QString const labRelayTarget = parser.value(labRelayTargetOption).trimmed().toUpper();
+    QString labRelaySubject = parser.value(labRelaySubjectOption).trimmed();
+    if (labRelaySubject.isEmpty()) {
+        labRelaySubject = QStringLiteral("D4 LAB RELAY");
+    }
+    QString labRelayBody = parser.value(labRelayBodyOption).trimmed();
+    if (labRelayBody.isEmpty()) {
+        labRelayBody = QStringLiteral("D4 LAB RELAY BODY");
+    }
+    int const labRelayTxMs = parseLabDelayMs(labRelayTxMsOption, 0);
     if (languageOverride.isEmpty()) {
         languageOverride = rootSettings.value(QStringLiteral("UILanguage")).toString().trimmed();
     }
@@ -1302,6 +1702,79 @@ int main(int argc, char* argv[])
     L("bridge constructing");
     DecodiumBridge bridge;
     FT2LinkQmlAdapter ft2Link;
+    auto applyLabRuntimeOverrides =
+        [&bridge,
+         &ft2Link,
+         labCallsign,
+         labGrid,
+         effectiveLabInput,
+         effectiveLabOutput,
+         labMode,
+         labPreferredProfile,
+         labSupportsW2300,
+         labProfileName](QString const& reason) {
+            bool active = false;
+            if (!labCallsign.isEmpty()) {
+                bridge.setCallsign(labCallsign);
+                active = true;
+            }
+            if (!labGrid.isEmpty()) {
+                bridge.setGrid(labGrid);
+                active = true;
+            }
+            if (!effectiveLabInput.isEmpty()) {
+                bridge.setAudioInputDevice(effectiveLabInput);
+                active = true;
+            }
+            if (!effectiveLabOutput.isEmpty()) {
+                bridge.setAudioOutputDevice(effectiveLabOutput);
+                active = true;
+            }
+            if (!labMode.isEmpty()) {
+                if (labMode.compare(QStringLiteral("FT2-Link"), Qt::CaseInsensitive) == 0
+                    && !bridge.ft2LinkAccessUnlocked()) {
+                    QString const labPassword = qEnvironmentVariable("DECODIUM_FT2LINK_LAB_PASSWORD");
+                    if (!labPassword.isEmpty()) {
+                        bool const unlocked = bridge.verifyFt2LinkAccessPassword(labPassword);
+                        qInfo() << "[LAB] FT2-Link unlock via environment ok=" << unlocked;
+                    } else {
+                        qInfo() << "[LAB] FT2-Link lab mode requested without DECODIUM_FT2LINK_LAB_PASSWORD";
+                    }
+                }
+                bridge.setMode(labMode);
+                active = true;
+            }
+            if (!labCallsign.isEmpty() || !labGrid.isEmpty()) {
+                QString const adapterCall = labCallsign.isEmpty() ? bridge.callsign().trimmed().toUpper() : labCallsign;
+                QString const adapterGrid = labGrid.isEmpty() ? bridge.grid().trimmed().toUpper() : labGrid;
+                ft2Link.setLocalStation(adapterCall, adapterGrid, QStringLiteral("LAB"));
+                ft2Link.setLocalCapabilities(true,
+                                             labSupportsW2300,
+                                             labSupportsW2300,
+                                             labSupportsW2300,
+                                             labPreferredProfile,
+                                             0);
+                active = true;
+            }
+            if (active) {
+                qInfo().noquote()
+                    << "[LAB] runtime overrides"
+                    << reason
+                    << "callsign=" << (labCallsign.isEmpty() ? QStringLiteral("<settings>") : labCallsign)
+                    << "grid=" << (labGrid.isEmpty() ? QStringLiteral("<settings>") : labGrid)
+                    << "audioIn=" << (effectiveLabInput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabInput)
+                    << "audioOut=" << (effectiveLabOutput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabOutput)
+                    << "mode=" << (labMode.isEmpty() ? QStringLiteral("<settings>") : labMode)
+                    << "profile=" << labProfileName;
+            }
+            return active;
+        };
+    bool const labOverrideActive = applyLabRuntimeOverrides(QStringLiteral("initial"));
+    QObject::connect(&app, &QCoreApplication::aboutToQuit,
+                     &ft2Link,
+                     [&ft2Link]() {
+                         ft2Link.stopDecodeWorker();
+                     });
     QObject::connect(&app, &QCoreApplication::aboutToQuit,
                      &ft2Link,
                      [&ft2Link]() {
@@ -1312,6 +1785,16 @@ int main(int argc, char* argv[])
                      [&bridge](QString const& displayMessage,
                                QVector<float> const& samples,
                                QVariantMap const& plan) {
+                         qInfo().noquote()
+                             << "[Ft2Link][TXSIGNAL]"
+                             << "display=" << displayMessage
+                             << "profile=" << plan.value(QStringLiteral("profileName")).toString()
+                             << "kind=" << plan.value(QStringLiteral("kind")).toString()
+                             << "centerHz=" << plan.value(QStringLiteral("audioCenterHz")).toDouble()
+                             << "tones=" << plan.value(QStringLiteral("audioToneHz")).toString()
+                             << "carriers=" << plan.value(QStringLiteral("audioCarrierHz")).toString()
+                             << "samples=" << samples.size()
+                             << "plan=" << plan.value(QStringLiteral("audioPlan")).toString();
                          bridge.transmitFt2LinkAudio(displayMessage, samples, plan);
                      });
     QObject::connect(&bridge, &DecodiumBridge::ft2LinkRxSamplesReady,
@@ -1326,6 +1809,433 @@ int main(int argc, char* argv[])
     // REALE di fine trasmissione, non solo sulla stima di durata.
     QObject::connect(&bridge, &DecodiumBridge::ft2LinkTxFinished,
                      &ft2Link, &FT2LinkQmlAdapter::notifyRadioTxFinished);
+    if (labOverrideActive) {
+        QTimer::singleShot(labReapplyMs, &bridge, [applyLabRuntimeOverrides]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("delayed"));
+        });
+    }
+    if (parser.isSet(labMonitorMsOption)) {
+        QTimer::singleShot(labMonitorMs, &bridge, [&bridge, applyLabRuntimeOverrides]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("pre-monitor"));
+            if (!bridge.monitoring()) {
+                bridge.startMonitor();
+            }
+            qInfo() << "[LAB] monitor requested active=" << bridge.monitoring();
+        });
+    }
+    if (!labHeardCall.isEmpty()) {
+        QTimer::singleShot(1000,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labHeardCall,
+                            labHeardGrid,
+                            labHeardName,
+                            labPreferredProfile,
+                            labSupportsW2300]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-heard"));
+                               quint64 const nowMs = static_cast<quint64>(
+                                   QDateTime::currentMSecsSinceEpoch());
+                               bool const ok = ft2Link.observeStation(labHeardCall,
+                                                                      labHeardGrid,
+                                                                      labHeardName,
+                                                                      true,
+                                                                      true,
+                                                                      labSupportsW2300,
+                                                                      labSupportsW2300,
+                                                                      labSupportsW2300,
+                                                                      labPreferredProfile,
+                                                                      0,
+                                                                      nowMs);
+                               qInfo().noquote()
+                                   << "[LAB] seeded HEARD"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "call=" << labHeardCall
+                                   << "grid=" << labHeardGrid
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labBeaconMsOption)) {
+        QTimer::singleShot(labBeaconMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labBeaconCq]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-beacon"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = ft2Link.transmitBeaconRadio(
+                                   labBeaconCq,
+                                   static_cast<quint64>(
+                                       QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto BEACON requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "cq=" << (labBeaconCq ? 1 : 0)
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labCqSlotMsOption)) {
+        QTimer::singleShot(labCqSlotMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labCqSlotId,
+                            labCqSlotSize]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-cq-slot"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = ft2Link.transmitCqSlotRadio(
+                                   labCqSlotId,
+                                   labCqSlotSize,
+                                   static_cast<quint64>(
+                                       QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto CQ_SLOT requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "slot=" << labCqSlotId
+                                   << "sizeHz=" << labCqSlotSize
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labAutoCqMsOption)) {
+        QTimer::singleShot(labAutoCqMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labAutoCqInterval]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-auto-cq"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = ft2Link.configureAutoBeacon(
+                                   true,
+                                   labAutoCqInterval,
+                                   true,
+                                   static_cast<quint64>(
+                                       QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto AUTO_CQ requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "interval=" << labAutoCqInterval
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labPingMsOption)) {
+        QTimer::singleShot(labPingMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labPingCall]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-ping"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = !labPingCall.isEmpty()
+                                   && ft2Link.transmitPingRadio(
+                                       labPingCall,
+                                       static_cast<quint64>(
+                                           QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto PING requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "call=" << labPingCall
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labPathMsOption)) {
+        QTimer::singleShot(labPathMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labPathTarget]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-path"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = !labPathTarget.isEmpty()
+                                   && ft2Link.transmitPathFinderRadio(
+                                       labPathTarget,
+                                       static_cast<quint64>(
+                                           QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto PATH requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "target=" << labPathTarget
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labPathResponseMsOption)) {
+        QTimer::singleShot(labPathResponseMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labPathTarget]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-path-response"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = !labPathTarget.isEmpty()
+                                   && ft2Link.transmitPathFinderResponseRadio(
+                                       labPathTarget,
+                                       static_cast<quint64>(
+                                           QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto PATH_RESPONSE requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "target=" << labPathTarget
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labBcastMsOption)) {
+        QTimer::singleShot(labBcastMs, &ft2Link, [&ft2Link, applyLabRuntimeOverrides, labBcastText]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("pre-bcast"));
+            ft2Link.setRadioTxArmed(true);
+            bool const ok = ft2Link.transmitBroadcastRadio(
+                labBcastText,
+                static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+            qInfo().noquote()
+                << "[LAB] auto BCAST requested"
+                << "ok=" << (ok ? 1 : 0)
+                << "text=" << labBcastText
+                << "lastError=" << ft2Link.lastError();
+        });
+    }
+    if (parser.isSet(labConnectMsOption)) {
+        QTimer::singleShot(labConnectMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labConnectCall,
+                            labConnectGrid,
+                            labPreferredProfile,
+                            labSupportsW2300]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-connect"));
+                               quint64 const nowMs = static_cast<quint64>(QDateTime::currentMSecsSinceEpoch());
+                               bool observed = false;
+                               if (!labConnectCall.isEmpty()) {
+                                   observed = ft2Link.observeStation(labConnectCall,
+                                                                     labConnectGrid,
+                                                                     QStringLiteral("LAB"),
+                                                                     true,
+                                                                     true,
+                                                                     labSupportsW2300,
+                                                                     labSupportsW2300,
+                                                                     labSupportsW2300,
+                                                                     labPreferredProfile,
+                                                                     0,
+                                                                     nowMs);
+                               }
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = !labConnectCall.isEmpty()
+                                   && ft2Link.startSessionRadioHandshake(labConnectCall, nowMs);
+                               qInfo().noquote()
+                                   << "[LAB] auto CONNECT requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "observed=" << (observed ? 1 : 0)
+                                   << "call=" << labConnectCall
+                                   << "session=" << ft2Link.activeSessionId()
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    auto scheduleLabConnectedSessionTx =
+        [&ft2Link, applyLabRuntimeOverrides](
+            int delayMs,
+            QString label,
+            std::function<bool(quint16, quint64)> transmit) mutable {
+            auto attempt = std::make_shared<std::function<void(int)>>();
+            *attempt =
+                [&ft2Link,
+                 applyLabRuntimeOverrides,
+                 label,
+                 transmit,
+                 attempt](int attemptNumber) mutable {
+                    applyLabRuntimeOverrides(QStringLiteral("pre-") + label.toLower());
+                    quint16 const sessionId = ft2Link.activeSessionId();
+                    QVariantMap const session = sessionId == 0u
+                        ? QVariantMap {}
+                        : ft2Link.sessionInfo(sessionId);
+                    QString const state = session.value(QStringLiteral("stateName")).toString();
+                    if (sessionId == 0u || state != QStringLiteral("Connected")) {
+                        qInfo().noquote()
+                            << "[LAB] auto" << label << "waiting"
+                            << "attempt=" << attemptNumber
+                            << "session=" << sessionId
+                            << "state=" << (state.isEmpty()
+                                            ? QStringLiteral("<none>")
+                                            : state);
+                        if (attemptNumber < 20) {
+                            QTimer::singleShot(1500, &ft2Link, [attempt, attemptNumber] {
+                                (*attempt)(attemptNumber + 1);
+                            });
+                        }
+                        return;
+                    }
+                    ft2Link.setRadioTxArmed(true);
+                    quint64 const nowMs = static_cast<quint64>(
+                        QDateTime::currentMSecsSinceEpoch());
+                    bool const ok = transmit(sessionId, nowMs);
+                    QVariantMap const after = ft2Link.sessionInfo(sessionId);
+                    qInfo().noquote()
+                        << "[LAB] auto" << label << "requested"
+                        << "ok=" << (ok ? 1 : 0)
+                        << "session=" << sessionId
+                        << "state=" << after.value(QStringLiteral("stateName")).toString()
+                        << "profile=" << after.value(QStringLiteral("profileName")).toString()
+                        << "lastError=" << ft2Link.lastError();
+                };
+            QTimer::singleShot(delayMs, &ft2Link, [attempt] {
+                (*attempt)(0);
+            });
+        };
+    if (parser.isSet(labParkRelayMsOption)) {
+        QTimer::singleShot(labParkRelayMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labRelayTarget,
+                            labRelaySubject,
+                            labRelayBody]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-park-relay"));
+                               bool const ok = !labRelayTarget.isEmpty()
+                                   && ft2Link.parkMailboxTyped(
+                                       labRelayTarget,
+                                       labRelaySubject,
+                                       labRelayBody,
+                                       false,
+                                       false,
+                                       static_cast<quint64>(
+                                           QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto PARK_RELAY requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "target=" << labRelayTarget
+                                   << "subject=" << labRelaySubject
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labRelayTxMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labRelayTxMs,
+            QStringLiteral("RELAY"),
+            [&ft2Link,
+             labRelayTarget,
+             labRelaySubject,
+             labRelayBody](quint16 sessionId, quint64 nowMs) {
+                quint32 mailboxId = 0u;
+                for (QVariant const& value : ft2Link.mailbox()) {
+                    QVariantMap const item = value.toMap();
+                    if (item.value(QStringLiteral("toCall")).toString() == labRelayTarget
+                        && item.value(QStringLiteral("subject")).toString() == labRelaySubject
+                        && item.value(QStringLiteral("body")).toString() == labRelayBody) {
+                        mailboxId = item.value(QStringLiteral("id")).toUInt();
+                        break;
+                    }
+                }
+                return mailboxId != 0u
+                    && ft2Link.transmitRelayMailboxRadio(
+                        sessionId,
+                        mailboxId,
+                        nowMs);
+            });
+    }
+    if (parser.isSet(labTextMsOption)) {
+        auto textAttempt = std::make_shared<std::function<void(int)>>();
+        *textAttempt =
+            [&ft2Link, applyLabRuntimeOverrides, labText, textAttempt](int attempt) mutable {
+                applyLabRuntimeOverrides(QStringLiteral("pre-text"));
+                quint16 const sessionId = ft2Link.activeSessionId();
+                QVariantMap const session = sessionId == 0u
+                    ? QVariantMap {}
+                    : ft2Link.sessionInfo(sessionId);
+                QString const state = session.value(QStringLiteral("stateName")).toString();
+                if (sessionId == 0u || state != QStringLiteral("Connected")) {
+                    qInfo().noquote()
+                        << "[LAB] auto TEXT waiting"
+                        << "attempt=" << attempt
+                        << "session=" << sessionId
+                        << "state=" << (state.isEmpty() ? QStringLiteral("<none>") : state);
+                    if (attempt < 12) {
+                        QTimer::singleShot(1500, &ft2Link, [textAttempt, attempt] {
+                            (*textAttempt)(attempt + 1);
+                        });
+                    }
+                    return;
+                }
+                ft2Link.setRadioTxArmed(true);
+                bool const ok = ft2Link.transmitPreparedRadioTxAudio(
+                    sessionId,
+                    labText,
+                    static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+                QVariantMap const after = ft2Link.sessionInfo(sessionId);
+                qInfo().noquote()
+                    << "[LAB] auto TEXT requested"
+                    << "ok=" << (ok ? 1 : 0)
+                    << "session=" << sessionId
+                    << "state=" << after.value(QStringLiteral("stateName")).toString()
+                    << "profile=" << after.value(QStringLiteral("profileName")).toString()
+                    << "text=" << labText
+                    << "lastError=" << ft2Link.lastError();
+            };
+        QTimer::singleShot(labTextMs, &ft2Link, [textAttempt] {
+            (*textAttempt)(0);
+        });
+    }
+    if (parser.isSet(labMailMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labMailMs,
+            QStringLiteral("MAIL"),
+            [&ft2Link, labMailSubject, labMailBody](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.transmitMailboxRadioTyped(
+                    sessionId,
+                    QString {},
+                    labMailSubject,
+                    labMailBody,
+                    false,
+                    false,
+                    nowMs);
+            });
+    }
+    if (parser.isSet(labFormMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labFormMs,
+            QStringLiteral("FORM"),
+            [&ft2Link, labFormType, labFormMessage](quint16 sessionId, quint64 nowMs) {
+                QVariantMap fields;
+                fields.insert(QStringLiteral("message"), labFormMessage);
+                return ft2Link.transmitFormRadio(
+                    sessionId,
+                    QString {},
+                    labFormType,
+                    fields,
+                    nowMs);
+            });
+    }
+    if (parser.isSet(labFileMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labFileMs,
+            QStringLiteral("FILE"),
+            [&ft2Link, labFileName, labFileText](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.transmitFileRadio(
+                    sessionId,
+                    QString {},
+                    labFileName,
+                    labFileText,
+                    nowMs);
+            });
+    }
+    if (parser.isSet(labBulletinMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labBulletinMs,
+            QStringLiteral("BBS"),
+            [&ft2Link,
+             labBulletinGroup,
+             labBulletinTitle,
+             labBulletinBody](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.transmitBulletinRadio(
+                    sessionId,
+                    labBulletinGroup,
+                    labBulletinTitle,
+                    labBulletinBody,
+                    nowMs);
+            });
+    }
+    if (parser.isSet(labQuitMsOption)) {
+        QTimer::singleShot(labQuitMs, &app, [&app] {
+            qInfo() << "[LAB] quit requested";
+            app.quit();
+        });
+    }
     app.setProperty("decodiumBridge", QVariant::fromValue<QObject*>(&bridge));
 #ifdef Q_OS_WIN
     QObject::connect(&bridge, &DecodiumBridge::mainQmlReadyForNativeWindowing, &app,

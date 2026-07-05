@@ -101,6 +101,8 @@ add_executable (test_ft2link_qml_adapter
   ../controllers/FT2LinkQmlAdapter.cpp
   ../controllers/FT2LinkQmlAdapter.hpp)
 target_link_libraries (test_ft2link_qml_adapter ft2link_core Qt6::Test Qt6::Core)
+target_compile_definitions (test_ft2link_qml_adapter
+  PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 add_test (NAME test_ft2link_qml_adapter COMMAND $<TARGET_FILE:test_ft2link_qml_adapter>)
 
 if (WSJT_BUILD_UTILS)

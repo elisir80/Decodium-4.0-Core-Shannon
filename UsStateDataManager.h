@@ -6,12 +6,14 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class UsStateDataManager : public QObject
 {
     Q_OBJECT
 public:
     explicit UsStateDataManager(QObject* parent = nullptr);
+    ~UsStateDataManager() override;
 
     bool ready() const { return m_ready; }
     bool updating() const { return m_updating; }
@@ -60,6 +62,7 @@ private:
     bool m_parseInProgress {false};
     bool m_downloadFailed {false};
     bool m_redownloadAfterParseFailureAttempted {false};
+    QThread* m_parseWorker {nullptr};
     QHash<QString, QString> m_callToGrid;
     QHash<QString, QString> m_grid6ToState;
     QHash<QString, QString> m_grid4ToState;

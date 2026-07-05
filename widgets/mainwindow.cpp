@@ -1094,6 +1094,16 @@ static QDateTime decode_line_timestamp_for_log (QDateTime fallbackUtc, QString c
   return candidate;
 }
 
+static int utc_hhmmss_token_from_datetime (QDateTime utcDateTime)
+{
+  if (!utcDateTime.isValid ()) {
+    utcDateTime = QDateTime::currentDateTimeUtc ();
+  }
+  utcDateTime = utcDateTime.toUTC ();
+  auto const time = utcDateTime.time ();
+  return time.hour () * 10000 + time.minute () * 100 + time.second ();
+}
+
 void MainWindow::pruneNearDuplicateDecodeCache (qint64 nowMs)
 {
   if (m_decodeDedupeLastPruneMs > 0 && (nowMs - m_decodeDedupeLastPruneMs) < 5000) {
@@ -1326,7 +1336,7 @@ struct {
   int kHzRequested;      //Integer kHz dial frequency requested from QMAP
   char result[50][72];   //Decodes as character*72 arrays
 } qmapcom;
-int* ipc_qmap;
+int* ipc_qmap {nullptr};
 
 namespace
 {
@@ -1366,6 +1376,72 @@ namespace
   constexpr int kDecDataSampleCount {static_cast<int> (sizeof (dec_data.d2) / sizeof (dec_data.d2[0]))};
   constexpr int kMaxCwSymbols {static_cast<int> (sizeof (icw) / sizeof (icw[0]))};
   constexpr int kFoxWaveSampleCount {FOXCOM_WAVE_SIZE};
+  constexpr int kQmapSharedMemoryBytes {4096};
+
+  bool qmap_shared_memory_ready ()
+  {
+    return ipc_qmap != nullptr && mem_qmap.isAttached ();
+  }
+
+  bool lock_qmap_shared_memory (char const* context)
+  {
+    if (!qmap_shared_memory_ready ())
+      {
+        return false;
+      }
+    if (!mem_qmap.lock ())
+      {
+        qWarning ().noquote ()
+            << QStringLiteral ("[QMAP] shared memory lock failed")
+            << QString::fromLatin1 (context ? context : "unknown")
+            << mem_qmap.errorString ();
+        return false;
+      }
+    return true;
+  }
+
+  void reset_qmap_shared_memory (char const* context)
+  {
+    if (!lock_qmap_shared_memory (context))
+      {
+        return;
+      }
+    std::memset (ipc_qmap, 0, kQmapSharedMemoryBytes);
+    mem_qmap.unlock ();
+  }
+
+  void initialize_qmap_shared_memory ()
+  {
+    bool attached = mem_qmap.isAttached ();
+    if (!attached)
+      {
+        attached = mem_qmap.attach ();
+      }
+    if (!attached)
+      {
+        attached = mem_qmap.create (kQmapSharedMemoryBytes);
+      }
+
+    if (!attached)
+      {
+        ipc_qmap = nullptr;
+        qWarning ().noquote ()
+            << QStringLiteral ("[QMAP] shared memory unavailable; continuing without QMAP")
+            << mem_qmap.errorString ();
+        return;
+      }
+
+    ipc_qmap = static_cast<int*> (mem_qmap.data ());
+    if (!ipc_qmap)
+      {
+        qWarning ().noquote ()
+            << QStringLiteral ("[QMAP] shared memory returned null data pointer; continuing without QMAP")
+            << mem_qmap.errorString ();
+        return;
+      }
+
+    reset_qmap_shared_memory ("startup");
+  }
 
   int embedded_decode_thread_count ()
   {
@@ -2818,13 +2894,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   m_optimizingProgress.setAutoReset (false);
   m_optimizingProgress.setMinimumDuration (15000); // only show after 15s delay
 
-  //Attach or create a memory segment to be shared with QMAP.
-  int memSize=4096;
-  if(!mem_qmap.attach()) mem_qmap.create(memSize);
-  ipc_qmap = (int*)mem_qmap.data();
-  mem_qmap.lock();
-  memset(ipc_qmap,0,memSize);         //Zero all of QMAP shared memory
-  mem_qmap.unlock();
+  // Attach or create the optional memory segment shared with QMAP.
+  initialize_qmap_shared_memory ();
 
   // Closedown.
   connect (ui->actionExit, &QAction::triggered, this, [this] {
@@ -4081,6 +4152,15 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     }
 
     // Set up decode parameters
+    int const ft2WindowMs = qMax (1, qRound (m_TRperiod * 1000.0));
+    QDateTime rxWindowUtc = now.addMSecs (-ft2WindowMs);
+    if (m_asyncRxStartMs > 0) {
+      QDateTime const rxStartUtc = QDateTime::fromMSecsSinceEpoch (m_asyncRxStartMs, Qt::UTC);
+      if (rxStartUtc.isValid () && rxWindowUtc < rxStartUtc) {
+        rxWindowUtc = rxStartUtc;
+      }
+    }
+    request.nutc = utc_hhmmss_token_from_datetime (rxWindowUtc);
     request.nqsoprogress = qBound (0, int(m_QSOProgress), 6);
     request.nfqso = qBound (0, m_wideGraph->rxFreq(), 5000);
     request.nfa = qBound (0, m_wideGraph->nStartFreq(), 5000);
@@ -4486,7 +4566,7 @@ MainWindow::~MainWindow()
   m_audioThread.quit ();
   wait_for_thread_with_event_pump (m_audioThread, -1);
   remove_child_from_event_filter (this);
-  memset(ipc_qmap,0,4096);         //Zero all of QMAP shared memory
+  reset_qmap_shared_memory ("shutdown");
 }
 
 MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
@@ -17187,8 +17267,7 @@ void MainWindow::guiUpdate()
   }
   if(m_mode=="Echo" and !m_monitoring and !m_auto and !m_diskData) m_echoRunning=false;
 
-  if(m_mode=="Q65") {
-    mem_qmap.lock();
+  if(m_mode=="Q65" && lock_qmap_shared_memory ("q65-poll")) {
     int n=0;
     if(m_decoderBusy) n=1;
     ipc_qmap[3]=n;
@@ -27485,7 +27564,7 @@ void MainWindow::readWidebandDecodes()
     m_ActiveStationsWidget->displayRecentStations(m_mode,t);
     m_ActiveStationsWidget->setClickOK(true);
   }
-  if(ipc_qmap[2]!=0) {
+  if(qmap_shared_memory_ready () && ipc_qmap[2]!=0) {
     m_fetched=0;
     ipc_qmap[0]=0;
     ipc_qmap[2]=0;
@@ -28916,8 +28995,10 @@ void MainWindow::write_all(QString txRx, QString message)
     t = t.asprintf("%5d",ui->TxFreqSpinBox->value());
     if (txRx=="Tx") msg="   0  0.0" + t + " " + message;
     auto time = QDateTime::currentDateTimeUtc ();
-    if ((txRx=="Rx" || txRx=="Ck") && !m_bFastMode) {
-      time = decode_line_timestamp_for_log (m_dateTimeSeqStart.isValid () ? m_dateTimeSeqStart : time, message);
+    if (txRx=="Rx" || txRx=="Ck") {
+      QDateTime const fallbackTime =
+          (!m_bFastMode && m_dateTimeSeqStart.isValid ()) ? m_dateTimeSeqStart : time;
+      time = decode_line_timestamp_for_log (fallbackTime, message);
     }
 
   if (txRx=="Rx") {
@@ -29489,7 +29570,18 @@ void MainWindow::processFt2AsyncDecodedRows (QStringList const& rows)
       return;
     }
     auto now = QDateTime::currentDateTimeUtc();
-    auto hhmmss = now.toString("hhmmss");
+    QDateTime fallbackDecodeUtc = now;
+    if (m_mode == "FT2") {
+      int const ft2WindowMs = qMax (1, qRound (m_TRperiod * 1000.0));
+      fallbackDecodeUtc = now.addMSecs (-ft2WindowMs);
+      if (m_asyncRxStartMs > 0) {
+        QDateTime const rxStartUtc = QDateTime::fromMSecsSinceEpoch (m_asyncRxStartMs, Qt::UTC);
+        if (rxStartUtc.isValid () && fallbackDecodeUtc < rxStartUtc) {
+          fallbackDecodeUtc = rxStartUtc;
+        }
+      }
+    }
+    auto hhmmss = fallbackDecodeUtc.toUTC().toString("hhmmss");
     struct DeferredDecode
     {
       DecodedText decodedText;

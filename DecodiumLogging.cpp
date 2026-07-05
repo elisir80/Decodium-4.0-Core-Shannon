@@ -334,6 +334,16 @@ static QString diagAudioFormatSummary(QAudioFormat const& format)
 DecodiumLogging* DecodiumLogging::instance() { return s_instance; }
 QString DecodiumLogging::diagnosticLogPath() { return diagPath(); }
 
+void DecodiumLogging::reopenDiagnosticLog() {
+    QMutexLocker lock(&g_diagMutex);
+    if (g_diagFile) {
+        g_diagFile->flush();
+        g_diagFile->close();
+        delete g_diagFile;
+        g_diagFile = nullptr;
+    }
+}
+
 QString DecodiumLogging::categoryToString(DiagCategory cat) {
     switch(cat) {
     case DiagCategory::INFO: return "INFO"; case DiagCategory::WARNING: return "WARN";

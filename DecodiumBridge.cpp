@@ -13467,6 +13467,14 @@ void DecodiumBridge::setMode(const QString& v) {
         return;
     }
 
+    if (isFt2LinkApplicationMode(normalizedMode) && !m_ft2LinkAccessUnlocked) {
+        bridgeLog(QStringLiteral("FT2-Link access denied: mode change blocked until password is verified"));
+        if (m_mode != QStringLiteral("FT2")) {
+            setMode(QStringLiteral("FT2"));
+        }
+        return;
+    }
+
     if (m_mode != normalizedMode) {
         // 1.0.179 — Smooth Decode Flow: cambio mode invalida la coda
         // residua (per evitare merge cross-mode); reset + stop timer.
@@ -16297,12 +16305,30 @@ void DecodiumBridge::updateSoundOutputDevice()
 void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
 {
     const bool wasSuspended = m_rxAudioSuspendedForTx;
+    int bufferedBeforeResume = 0;
+    {
+        QMutexLocker locker(&m_audioBufferMutex);
+        bufferedBeforeResume = m_audioBuffer.size();
+    }
     m_rxAudioSuspendedForTx = false;
     // 1.0.166 — marca timestamp fine TX per hold-off NTP rearm
     m_lastTxEndMs = QDateTime::currentMSecsSinceEpoch();
+    const bool legacyPcmTapSingleCapture =
+        usingLegacyBackendForTx()
+        && useModernSpectrumFeedWithLegacy()
+        && !useDedicatedModernAudioCaptureWithLegacy();
+    bridgeLog(QStringLiteral("RX resume after TX: reason=%1 wasSuspended=%2 monitor=%3 monitorRequested=%4 soundInput=%5 tci=%6 bufferedBefore=%7 legacyTap=%8")
+                  .arg(reason)
+                  .arg(wasSuspended ? 1 : 0)
+                  .arg(m_monitoring ? 1 : 0)
+                  .arg(m_monitorRequested ? 1 : 0)
+                  .arg(m_soundInput ? QStringLiteral("alive") : QStringLiteral("null"))
+                  .arg(m_tciAudioCaptureActive ? 1 : 0)
+                  .arg(bufferedBeforeResume)
+                  .arg(legacyPcmTapSingleCapture ? 1 : 0));
 
     if (!m_monitoring
-        && !(m_monitorRequested && usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy())) {
+        && !(m_monitorRequested && usingLegacyBackendForTx())) {
         if (wasSuspended) {
             bridgeLog(QStringLiteral("SoundInput resume skipped after TX %1: monitor off").arg(reason));
         }
@@ -16313,6 +16339,10 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
         rearmLegacyPcmSpectrumFeed(QStringLiteral("post-TX %1").arg(reason));
         scheduleLegacyPcmSpectrumRearm(QStringLiteral("post-TX %1").arg(reason));
         return;
+    }
+
+    if (legacyPcmTapSingleCapture) {
+        rearmLegacyPcmSpectrumFeed(QStringLiteral("post-TX direct visual %1").arg(reason));
     }
 
     if (wasSuspended) {
@@ -16356,10 +16386,26 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
     auto scheduleResumeProbe = [this, reason, resumeSerial, resumeStartMs](int delayMs) {
         QTimer::singleShot(delayMs, this, [this, reason, resumeSerial, resumeStartMs, delayMs]() {
             if (resumeSerial != m_postTxRxResumeSerial
-                || !m_monitoring
+                || (!m_monitoring && !m_monitorRequested)
                 || m_transmitting
                 || m_tuning
                 || m_rxAudioSuspendedForTx) {
+                return;
+            }
+
+            const bool legacyPcmTapSingleCapture =
+                usingLegacyBackendForTx()
+                && useModernSpectrumFeedWithLegacy()
+                && !useDedicatedModernAudioCaptureWithLegacy();
+            if (legacyPcmTapSingleCapture) {
+                if (m_lastLegacyPcmSampleMs >= resumeStartMs) {
+                    return;
+                }
+
+                bridgeLog(QStringLiteral("post-TX RX legacy PCM watchdog: no samples after %1 delay=%2ms, rearming tap")
+                              .arg(reason)
+                              .arg(delayMs));
+                rearmLegacyPcmSpectrumFeed(QStringLiteral("post-TX legacy PCM did not resume (%1)").arg(reason));
                 return;
             }
 
@@ -16387,7 +16433,12 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
     scheduleResumeProbe(450);
     scheduleResumeProbe(1200);
 #else
-    scheduleResumeProbe(1800);
+    if (legacyPcmTapSingleCapture) {
+        scheduleResumeProbe(350);
+        scheduleResumeProbe(1200);
+    } else {
+        scheduleResumeProbe(1800);
+    }
 #endif
 }
 
@@ -18504,12 +18555,45 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
     m_pendingFt2LinkPlan = plan;
     m_ft2LinkTxActive = true;
 
-    bridgeLog(QStringLiteral("FT2-Link radio TX requested: msg=[%1] samples=%2 peak=%3 profile=%4 bursts=%5")
-                  .arg(msg)
-                  .arg(wave.size())
-                  .arg(peak, 0, 'f', 6)
-                  .arg(plan.value(QStringLiteral("profileName")).toString())
-                  .arg(plan.value(QStringLiteral("burstCount")).toString()));
+    int rxBufferedBeforeTx = 0;
+    {
+        QMutexLocker locker(&m_audioBufferMutex);
+        rxBufferedBeforeTx = m_audioBuffer.size();
+    }
+    QString txPlanLog = QStringLiteral(
+        "FT2-Link radio TX requested: msg=[%1] samples=%2 peak=%3")
+        .arg(msg)
+        .arg(wave.size())
+        .arg(peak, 0, 'f', 6);
+    txPlanLog += QStringLiteral(
+        " kind=%1 profile=%2 rate=%3 bursts=%4 frames=%5 duration=%6s")
+        .arg(plan.value(QStringLiteral("kind")).toString(),
+             plan.value(QStringLiteral("profileName")).toString(),
+             plan.value(QStringLiteral("w2300RateModeName")).toString(),
+             plan.value(QStringLiteral("burstCount")).toString(),
+             plan.value(QStringLiteral("frameCount")).toString(),
+             QString::number(plan.value(QStringLiteral("audioSeconds")).toDouble(), 'f', 3));
+    txPlanLog += QStringLiteral(
+        " centerHz=%1 lowHz=%2 highHz=%3 tones=[%4] carriers=[%5] nominalWidthHz=%6")
+        .arg(QString::number(plan.value(QStringLiteral("audioCenterHz")).toDouble(), 'f', 1),
+             QString::number(plan.value(QStringLiteral("audioLowHz")).toDouble(), 'f', 1),
+             QString::number(plan.value(QStringLiteral("audioHighHz")).toDouble(), 'f', 1),
+             plan.value(QStringLiteral("audioToneHz")).toString(),
+             plan.value(QStringLiteral("audioCarrierHz")).toString(),
+             QString::number(plan.value(QStringLiteral("audioNominalWidthHz")).toDouble(), 'f', 1));
+    txPlanLog += QStringLiteral(
+        " queued=%1 lbt=%2 plan=[%3] mode=%4 monitor=%5 soundInput=%6 rxSuspended=%7 rxBuffered=%8 tx=%9 tune=%10")
+        .arg(plan.value(QStringLiteral("queued")).toBool() ? 1 : 0)
+        .arg(plan.value(QStringLiteral("lbtDeferred")).toBool() ? 1 : 0)
+        .arg(plan.value(QStringLiteral("audioPlan")).toString())
+        .arg(m_mode)
+        .arg(m_monitoring ? QStringLiteral("on") : QStringLiteral("off"))
+        .arg(m_soundInput ? QStringLiteral("alive") : QStringLiteral("null"))
+        .arg(m_rxAudioSuspendedForTx ? QStringLiteral("yes") : QStringLiteral("no"))
+        .arg(rxBufferedBeforeTx)
+        .arg(m_transmitting ? 1 : 0)
+        .arg(m_tuning ? 1 : 0);
+    bridgeLog(txPlanLog);
 
     startTx();
 
@@ -18823,13 +18907,32 @@ void DecodiumBridge::startTx()
         applyTxAudioSchedulingBoost(QStringLiteral("tx-mac"));
         suspendNonAudioTxWork(QStringLiteral("tx-mac"));
 
+        if (m_ft2LinkTxActive) {
+            int rxBufferedAtTxStart = 0;
+            {
+                QMutexLocker locker(&m_audioBufferMutex);
+                rxBufferedAtTxStart = m_audioBuffer.size();
+            }
+            bridgeLog(QStringLiteral("FT2-Link TX start(mac): payloadMs=%1 initialSilenceMs=%2 pcmBytes=%3 monitor=%4 soundInput=%5 rxSuspendedBefore=%6 rxBuffered=%7 periodTimer=%8")
+                          .arg(txPayloadMs)
+                          .arg(macInitialSilenceMs)
+                          .arg(macPcm.size())
+                          .arg(m_monitoring ? QStringLiteral("on") : QStringLiteral("off"))
+                          .arg(m_soundInput ? QStringLiteral("alive") : QStringLiteral("null"))
+                          .arg(m_rxAudioSuspendedForTx ? QStringLiteral("yes") : QStringLiteral("no"))
+                          .arg(rxBufferedAtTxStart)
+                          .arg(m_periodTimer && m_periodTimer->isActive() ? QStringLiteral("active") : QStringLiteral("stopped")));
+        }
+
         // Anti-collisione: ferma l'ingresso audio durante TX per evitare
         // che il decoder processi il nostro stesso tono come segnale ricevuto.
         // Eccezione: FT2 async è full-duplex, RX deve continuare durante TX.
         if (m_soundInput && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
             m_soundInput->suspend();
             m_rxAudioSuspendedForTx = true;
-            bridgeLog("SoundInput suspended during TX (sync mode)");
+            bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
+                          .arg(m_ft2LinkTxActive ? 1 : 0)
+                          .arg(m_mode));
         }
 
         if (!m_ft2LinkTxActive) {
@@ -19044,13 +19147,32 @@ void DecodiumBridge::startTx()
     applyTxAudioSchedulingBoost(QStringLiteral("tx"));
     suspendNonAudioTxWork(QStringLiteral("tx"));
 
+    if (m_ft2LinkTxActive) {
+        int rxBufferedAtTxStart = 0;
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            rxBufferedAtTxStart = m_audioBuffer.size();
+        }
+        bridgeLog(QStringLiteral("FT2-Link TX start: mode=%1 samples=%2 monitor=%3 soundInput=%4 tci=%5 rxSuspendedBefore=%6 rxBuffered=%7 periodTimer=%8")
+                      .arg(txMode)
+                      .arg(wave.size())
+                      .arg(m_monitoring ? QStringLiteral("on") : QStringLiteral("off"))
+                      .arg(m_soundInput ? QStringLiteral("alive") : QStringLiteral("null"))
+                      .arg(tciAudioTx ? 1 : 0)
+                      .arg(m_rxAudioSuspendedForTx ? QStringLiteral("yes") : QStringLiteral("no"))
+                      .arg(rxBufferedAtTxStart)
+                      .arg(m_periodTimer && m_periodTimer->isActive() ? QStringLiteral("active") : QStringLiteral("stopped")));
+    }
+
     // Anti-collisione: durante TX sync non dobbiamo ricatturare il nostro
     // stesso audio sul device RX. FT2 async resta full-duplex.
     if (m_monitoring && m_soundInput
         && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
         m_soundInput->suspend();
         m_rxAudioSuspendedForTx = true;
-        bridgeLog("SoundInput suspended during TX (sync mode)");
+        bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
+                      .arg(m_ft2LinkTxActive ? 1 : 0)
+                      .arg(m_mode));
     }
 
     if (!m_ft2LinkTxActive) {
@@ -38322,6 +38444,33 @@ void DecodiumBridge::dispatchTimeSyncDecodeWhenReady(qint64 completedUtcSlot,
         return;
     }
 
+    if (m_rxAudioSuspendedForTx || m_transmitting || m_tuning) {
+        int bufferedSamples = 0;
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            bufferedSamples = m_audioBuffer.size();
+        }
+        m_pendingTimeSyncDecodeAudio.clear();
+        m_pendingTimeSyncDecodeSlot = -1;
+        m_pendingTimeSyncDecodeMode.clear();
+        m_pendingTimeSyncDecodeActive = false;
+
+        static qint64 s_lastSuspendedDecodeSkipLogMs = 0;
+        qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (logNowMs - s_lastSuspendedDecodeSkipLogMs >= 750) {
+            s_lastSuspendedDecodeSkipLogMs = logNowMs;
+            bridgeLog(QStringLiteral("time-sync decode skipped: mode=%1 slot=%2 tx=%3 tune=%4 rxSuspended=%5 buffered=%6 session=%7")
+                          .arg(modeSnapshot)
+                          .arg(completedUtcSlot)
+                          .arg(m_transmitting ? 1 : 0)
+                          .arg(m_tuning ? 1 : 0)
+                          .arg(m_rxAudioSuspendedForTx ? 1 : 0)
+                          .arg(bufferedSamples)
+                          .arg(sessionId));
+        }
+        return;
+    }
+
     int const targetSamples = targetDecodeSamplesForMode(modeSnapshot);
     if (!m_pendingTimeSyncDecodeActive
         || m_pendingTimeSyncDecodeSlot != completedUtcSlot
@@ -38922,12 +39071,29 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     }
 
     if (!emptyAudioReason.isEmpty()) {
-        bridgeLog("feedAudioToDecoder: " + emptyAudioReason);
-        emit statusMessage(emptyAudioReason);
+        bool const expectedTxGap =
+            m_rxAudioSuspendedForTx || m_transmitting || m_tuning;
+        if (expectedTxGap) {
+            static qint64 s_lastExpectedEmptyDuringTxLogMs = 0;
+            qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+            if (logNowMs - s_lastExpectedEmptyDuringTxLogMs >= 750) {
+                s_lastExpectedEmptyDuringTxLogMs = logNowMs;
+                bridgeLog(QStringLiteral("feedAudioToDecoder: expected empty RX audio during TX/suspend: %1 slot=%2 forced=%3 tx=%4 tune=%5")
+                              .arg(emptyAudioReason)
+                              .arg(completedUtcSlot)
+                              .arg(usedForcedAudioSnapshot ? 1 : 0)
+                              .arg(m_transmitting ? 1 : 0)
+                              .arg(m_tuning ? 1 : 0));
+            }
+        } else {
+            bridgeLog("feedAudioToDecoder: " + emptyAudioReason);
+            emit statusMessage(emptyAudioReason);
+        }
         if (modeSnapshot == QStringLiteral("FT8")) {
             resetEarlyDecodeSchedule();
         }
-        if (m_monitoring
+        if (!expectedTxGap
+            && m_monitoring
             && (m_soundInput || m_tciAudioCaptureActive || usingTciAudioInput())
             && !m_transmitting
             && !m_tuning
@@ -40943,14 +41109,39 @@ static QString dialogFilterString(const QStringList& nameFilters)
     return nameFilters.isEmpty() ? QString() : nameFilters.join(QStringLiteral(";;"));
 }
 
+static QWidget* dialogParentWidget()
+{
+    if (auto* modal = QApplication::activeModalWidget()) {
+        return modal;
+    }
+    if (auto* active = QApplication::activeWindow()) {
+        return active;
+    }
+    for (auto* widget : QApplication::topLevelWidgets()) {
+        if (widget && widget->isVisible()) {
+            return widget;
+        }
+    }
+    return nullptr;
+}
+
 QString DecodiumBridge::openFileDialog(const QString& title,
                                        const QString& initialPath,
                                        const QStringList& nameFilters) const
 {
-    return QFileDialog::getOpenFileName(QApplication::activeWindow(),
-                                        title,
-                                        localDialogPath(initialPath),
-                                        dialogFilterString(nameFilters));
+    QFileDialog dialog(dialogParentWidget(),
+                       title,
+                       localDialogPath(initialPath),
+                       dialogFilterString(nameFilters));
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setWindowModality(Qt::ApplicationModal);
+    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    if (dialog.exec() != QDialog::Accepted) {
+        return QString();
+    }
+    QStringList const files = dialog.selectedFiles();
+    return files.isEmpty() ? QString() : files.first();
 }
 
 QString DecodiumBridge::saveFileDialog(const QString& title,
@@ -40969,6 +41160,48 @@ QString DecodiumBridge::openDirectoryDialog(const QString& title,
     return QFileDialog::getExistingDirectory(QApplication::activeWindow(),
                                              title,
                                              localDialogPath(initialPath));
+}
+
+QVariantMap DecodiumBridge::readTextFile(const QString& path,
+                                         int maxBytes) const
+{
+    QVariantMap result;
+    QString resolved = path.trimmed();
+    if (resolved.startsWith(QLatin1String("file:"))) {
+        resolved = QUrl(resolved).toLocalFile();
+    }
+    int const limit = qBound(1, maxBytes, 65536);
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("path"), resolved);
+    result.insert(QStringLiteral("text"), QString());
+    result.insert(QStringLiteral("bytes"), 0);
+    result.insert(QStringLiteral("fileSize"), 0);
+    result.insert(QStringLiteral("truncated"), false);
+
+    if (resolved.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing file path"));
+        return result;
+    }
+
+    QFile file(resolved);
+    if (!file.open(QIODevice::ReadOnly)) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+
+    result.insert(QStringLiteral("fileSize"), QFileInfo(file).size());
+    QByteArray bytes = file.read(limit + 1);
+    bool const truncated = bytes.size() > limit || !file.atEnd();
+    if (bytes.size() > limit) {
+        bytes.truncate(limit);
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("text"), QString::fromUtf8(bytes));
+    result.insert(QStringLiteral("bytes"), bytes.size());
+    result.insert(QStringLiteral("truncated"), truncated);
+    result.insert(QStringLiteral("error"), QString());
+    return result;
 }
 
 QVariantMap DecodiumBridge::writeTextFile(const QString& path,

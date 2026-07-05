@@ -312,6 +312,7 @@ WideAudioPipelineResult runWideAudioPipeline (
 struct WideTxAudioPlanOptions
 {
   Profile profile {Profile::Wide2300};
+  FrameType frameType {FrameType::Data};
   W2300RateMode w2300RateMode {W2300RateMode::Fast};
   double sampleRate {48000.0};
   W500WaveformConfig w500TxConfig;

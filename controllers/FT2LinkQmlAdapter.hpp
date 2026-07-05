@@ -66,6 +66,7 @@ signals:
   void resyncNeeded ();
 
 private:
+  bool stopRequested () const;
   bool busyNow (quint64 nowMs) const;
   void observeEnergy (std::vector<float> const& chunk, quint64 nowMs);
 
@@ -323,6 +324,7 @@ public:
   // Idempotente. L'app lo chiama all'avvio (main_qml); i test NON lo chiamano
   // e restano sul path sincrono storico (worker sul main, segnali direct).
   Q_INVOKABLE void startDecodeWorker ();
+  void stopDecodeWorker ();
   // P0b TX closed-loop: fine REALE della TX radio (da DecodiumBridge::
   // ft2LinkTxFinished). Rilascia il busy della coda TX e logga il drift
   // stima-vs-reale; la stima audioSeconds+250ms resta come fallback.
@@ -504,6 +506,9 @@ public:
   Q_INVOKABLE bool markMailboxRead (quint32 messageId,
                                     bool read,
                                     quint64 nowMs);
+  Q_INVOKABLE bool markReceivedFileRead (quint32 transferId,
+                                         bool read,
+                                         quint64 nowMs);
   Q_INVOKABLE bool deleteMailboxMessage (quint32 messageId);
   Q_INVOKABLE void clearMailbox ();
   Q_INVOKABLE void clearForms ();
@@ -523,6 +528,7 @@ public:
   Q_INVOKABLE QVariantMap sessionInfo (quint16 sessionId) const;
   Q_INVOKABLE QVariantList sessions () const;
   Q_INVOKABLE QVariantList messages (quint16 sessionId) const;
+  Q_INVOKABLE QVariantList chatLog (quint16 sessionId) const;
   Q_INVOKABLE QVariantList typingIndicators (quint64 nowMs);
   Q_INVOKABLE QString typingSummary (quint64 nowMs);
 
@@ -680,6 +686,7 @@ private:
   // thread-boundary sopra la classe worker.
   FT2LinkDecodeWorker* m_decodeWorker {nullptr};
   QThread m_decodeThread;
+  bool m_decodeStopping {false};
   // P0b watchdog: rileva coda TX radio bloccata (item in testa piu' vecchio di
   // kRadioQueueStuckMs) e la sblocca forzando il drain. Rete di sicurezza
   // contro bug futuri di scheduling (LBT/busy), non un percorso normale.
@@ -841,6 +848,15 @@ private:
   void recordQsoSession (quint16 sessionId,
                          quint64 nowMs,
                          QString const& event);
+  void appendChatLogEntry (quint16 sessionId,
+                           QString const& directionName,
+                           QString const& deliveryName,
+                           QString const& text,
+                           quint64 nowMs);
+  void updateLastOutgoingChatLogEntry (quint16 sessionId,
+                                       QString const& deliveryName,
+                                       quint64 nowMs);
+  void clearChatLogForSession (quint16 sessionId);
   void pruneLogbookOutbox ();
 
   struct RadioTxQueueItem
@@ -929,6 +945,7 @@ private:
     QString content;
     QString sha256;
     QString state;
+    bool read {false};
     quint64 atMs {0};
     quint64 updatedAtMs {0};
   };
@@ -979,6 +996,16 @@ private:
     quint64 updatedAtMs {0};
     quint64 closedAtMs {0};
     int messageCount {0};
+  };
+
+  struct ChatLogEntry
+  {
+    quint16 sessionId {0};
+    QString remoteCall;
+    QString directionName;
+    QString deliveryName;
+    QString text;
+    quint64 atMs {0};
   };
 
   struct LogbookUpload
@@ -1108,6 +1135,7 @@ private:
   std::map<std::uint16_t, std::unique_ptr<decodium::ft2link::InboundTransfer> > m_liveInbound;
   std::map<std::uint16_t, bool> m_liveInboundDelivered;
   std::map<std::uint16_t, std::uint64_t> m_liveInboundDeliveredAtMs;
+  std::map<std::uint16_t, QString> m_liveInboundDeliveredHash;
   std::map<std::uint16_t, LiveOutboundRetry> m_liveOutboundRetries;
   std::map<std::uint16_t, decodium::ft2link::W2300RateController> m_liveW2300RateControllers;
   std::map<std::uint16_t, decodium::ft2link::W2300DecodeMetrics> m_lastLiveW2300Metrics;
@@ -1119,6 +1147,7 @@ private:
   std::vector<Bulletin> m_bulletins;
   std::map<QString, ContactHistory> m_contactHistory;
   std::map<quint16, QsoLogEntry> m_qsoLog;
+  std::vector<ChatLogEntry> m_chatLog;
   std::vector<LogbookUpload> m_logbookOutbox;
   std::vector<PingRecord> m_pingLog;
   std::vector<PathReport> m_pathReports;

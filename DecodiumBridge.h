@@ -1107,6 +1107,8 @@ public:
                                        const QStringList& nameFilters = QStringList()) const;
     Q_INVOKABLE QString openDirectoryDialog(const QString& title,
                                             const QString& initialPath) const;
+    Q_INVOKABLE QVariantMap readTextFile(const QString& path,
+                                         int maxBytes = 4096) const;
     Q_INVOKABLE QVariantMap writeTextFile(const QString& path,
                                           const QString& text) const;
     Q_INVOKABLE bool openExternalUrl(const QString& url);

@@ -136,6 +136,13 @@ UsStateDataManager::UsStateDataManager(QObject* parent)
             this, &UsStateDataManager::handleDownloadFinished);
 }
 
+UsStateDataManager::~UsStateDataManager()
+{
+    if (m_parseWorker && m_parseWorker->isRunning()) {
+        m_parseWorker->wait();
+    }
+}
+
 void UsStateDataManager::ensureLoadedAsync()
 {
     QDir().mkpath(m_cacheDir);
@@ -261,6 +268,12 @@ void UsStateDataManager::parseAsync()
             }
         }, Qt::QueuedConnection);
     });
+    m_parseWorker = worker;
+    connect(worker, &QThread::finished, this, [this, worker]() {
+        if (m_parseWorker == worker) {
+            m_parseWorker = nullptr;
+        }
+    });
     connect(worker, &QThread::finished, worker, &QObject::deleteLater);
     worker->start();
 }
@@ -354,9 +367,14 @@ QString UsStateDataManager::normalizeCall(const QString& call)
 
 QString UsStateDataManager::normalizeGrid(const QString& grid)
 {
-    static const QRegularExpression nonGridChars(QStringLiteral("[^A-Z0-9]"));
-    QString text = grid.trimmed().toUpper();
-    text.remove(nonGridChars);
+    QString text;
+    text.reserve(grid.size());
+    for (QChar ch : grid.trimmed().toUpper()) {
+        if ((ch >= QLatin1Char('A') && ch <= QLatin1Char('Z'))
+            || (ch >= QLatin1Char('0') && ch <= QLatin1Char('9'))) {
+            text.append(ch);
+        }
+    }
     if (text.size() < 4) {
         return {};
     }

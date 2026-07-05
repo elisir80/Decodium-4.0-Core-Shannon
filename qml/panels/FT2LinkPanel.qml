@@ -22,6 +22,7 @@ Rectangle {
     property var forms: []
     property var fileTransfers: []
     property var receivedFiles: []
+    property int receivedFileUnreadCount: 0
     property var bulletins: []
     property var qsoLog: []
     property var logbookOutbox: []
@@ -48,6 +49,7 @@ Rectangle {
     property int selectedSessionId: ft2Link ? ft2Link.activeSessionId : 0
     property string selectedRemoteCall: ""
     property string selectedSessionStateName: ""
+    property string pendingConnectCall: ""
     property var lastHelloBytes: null
     property bool cqOnly: false
     property int formTemplateIndex: 0
@@ -69,6 +71,13 @@ Rectangle {
     property string logExportText: ""
     property string databaseActionText: ""
     property string typingSummaryText: ""
+    property string fileTransferStatus: ""
+    property string receivedFileStatus: ""
+    property string selectedFilePath: ""
+    property string selectedFileName: ""
+    property string selectedFileContent: ""
+    property int selectedFileBytes: 0
+    readonly property int filePayloadLimitBytes: 16384
     property bool chatScrollPinned: true
     property bool chatUnreadBelow: false
     property bool chatUnreadPulse: false
@@ -255,10 +264,15 @@ Rectangle {
         if (!ft2Link) {
             sessions = []
             selectedMessages = []
+            pendingConnectCall = ""
             return
         }
         sessions = ft2Link.sessions()
-        if (selectedSessionId === 0 && sessions.length > 0)
+        updatePendingConnectCall()
+        var backendActiveSessionId = Number(ft2Link.activeSessionId || 0)
+        if (backendActiveSessionId > 0 && selectedSessionId !== backendActiveSessionId)
+            selectSession(backendActiveSessionId)
+        else if (selectedSessionId === 0 && sessions.length > 0)
             selectSession(Number(sessions[sessions.length - 1].sessionId))
         else {
             updateSelectedSessionFromSessions()
@@ -269,7 +283,13 @@ Rectangle {
     function refreshMessages() {
         var previousCount = selectedMessages.length
         var wasAtEnd = messageListAtEnd()
-        selectedMessages = ft2Link && selectedSessionId > 0 ? ft2Link.messages(selectedSessionId) : []
+        if (ft2Link && selectedSessionId > 0) {
+            selectedMessages = typeof ft2Link.chatLog === "function"
+                               ? ft2Link.chatLog(selectedSessionId)
+                               : ft2Link.messages(selectedSessionId)
+        } else {
+            selectedMessages = []
+        }
         refreshQsyPlan()
         if (selectedMessages.length === 0) {
             chatUnreadBelow = false
@@ -321,8 +341,19 @@ Rectangle {
         fileTransfers = ft2Link ? ft2Link.fileTransfers() : []
     }
 
+    function countUnreadReceivedFiles(items) {
+        var count = 0
+        var list = items || []
+        for (var i = 0; i < list.length; ++i) {
+            if (list[i] && list[i].unread)
+                ++count
+        }
+        return count
+    }
+
     function refreshReceivedFiles() {
         receivedFiles = ft2Link ? ft2Link.receivedFiles() : []
+        receivedFileUnreadCount = countUnreadReceivedFiles(receivedFiles)
     }
 
     function refreshBulletins() {
@@ -462,7 +493,9 @@ Rectangle {
         if (ft2Link.relayQueueCount > 0)
             parts.push("RLY " + ft2Link.relayQueueCount)
         if (ft2Link.mailboxUnreadCount > 0)
-            parts.push("UNREAD " + ft2Link.mailboxUnreadCount)
+            parts.push("MAIL UNREAD " + ft2Link.mailboxUnreadCount)
+        if (receivedFileUnreadCount > 0)
+            parts.push("RXF " + receivedFileUnreadCount)
         if (queued > 0 || submitted > 0 || failed > 0)
             parts.push("LBQ " + queued + "/" + submitted + "/" + failed)
         if (ft2Link.alertCount > 0)
@@ -477,6 +510,7 @@ Rectangle {
             return root.red
         if (ft2Link && (ft2Link.relayQueueCount > 0
                         || ft2Link.mailboxUnreadCount > 0
+                        || receivedFileUnreadCount > 0
                         || logbookStateCount("Submitted") > 0
                         || logbookStateCount("Queued") > 0))
             return root.amber
@@ -487,9 +521,52 @@ Rectangle {
         return !!ft2Link && (ft2Link.alertCount > 0
                              || ft2Link.relayQueueCount > 0
                              || ft2Link.mailboxUnreadCount > 0
+                             || receivedFileUnreadCount > 0
                              || logbookStateCount("Submitted") > 0
                              || logbookStateCount("Queued") > 0
                              || logbookStateCount("Failed") > 0)
+    }
+
+    function openMailboxQueue() {
+        refreshMailbox()
+        toolPageIndex = 5
+        Qt.callLater(function() {
+            if (typeof mailboxList === "undefined" || !mailboxList)
+                return
+            var unreadIndex = -1
+            for (var i = 0; i < mailbox.length; ++i) {
+                if (mailbox[i] && mailbox[i].unread) {
+                    unreadIndex = i
+                    break
+                }
+            }
+            if (unreadIndex >= 0) {
+                mailboxList.currentIndex = unreadIndex
+                mailboxList.positionViewAtIndex(unreadIndex, ListView.Beginning)
+            }
+        })
+    }
+
+    function openReceivedFilesQueue() {
+        refreshFileTransfers()
+        refreshReceivedFiles()
+        toolPageIndex = 11
+        Qt.callLater(function() {
+            if (typeof receivedFileListPanel !== "undefined"
+                    && receivedFileListPanel) {
+                if (receivedFiles.length > 0) {
+                    receivedFileListPanel.currentIndex = 0
+                    receivedFileListPanel.positionViewAtIndex(0, ListView.Beginning)
+                }
+                return
+            }
+            if (typeof receivedFileList === "undefined" || !receivedFileList)
+                return
+            if (receivedFiles.length > 0) {
+                receivedFileList.currentIndex = 0
+                receivedFileList.positionViewAtIndex(0, ListView.Beginning)
+            }
+        })
     }
 
     function rfStatusLine() {
@@ -512,6 +589,46 @@ Rectangle {
         if (!ft2Link || String(ft2Link.lastError || "").length === 0)
             return ""
         return "ERR " + String(ft2Link.lastError)
+    }
+
+    function toolStackPreferredHeight() {
+        switch (toolPageIndex) {
+        case 0:
+            return selectedSessionId > 0 ? 112 : 44
+        case 1:
+            return 32
+        case 2:
+            return 56
+        case 3:
+            return 32
+        case 4:
+            return 92
+        default:
+            return Math.max(132, Math.min(190, root.height * 0.36))
+        }
+    }
+
+    function toolStackIndexForPage(page) {
+        switch (Number(page)) {
+        case 0: return 0   // CHAT
+        case 1: return 1   // FORM
+        case 2: return 2   // FILE
+        case 3: return 3   // BBS
+        case 4: return 4   // BCAST
+        case 5: return 5   // MAIL
+        case 6: return 6   // INFO
+        case 7: return 7   // CALL
+        case 8: return 8   // CLST
+        case 9: return 9   // PATH
+        case 10: return 12 // STAT
+        case 11: return 13 // RXF
+        case 12: return 10 // LOG
+        case 13: return 11 // DB
+        case 14: return 14 // PRE
+        case 15: return 15 // FREQ
+        case 16: return 16 // BLK
+        default: return 0
+        }
     }
 
     function loadPresenceEditor() {
@@ -809,6 +926,85 @@ Rectangle {
 
     function receivedFileDate(item) {
         return String(item.receivedUtc || "--")
+    }
+
+    function markReceivedFileRead(item, read, showStatus) {
+        if (!ft2Link || !item)
+            return false
+        var id = Number(item.id || 0)
+        if (id <= 0)
+            return false
+        if (!ft2Link.markReceivedFileRead(id, read, nowMs()))
+            return false
+        refreshFileTransfers()
+        refreshReceivedFiles()
+        if (showStatus !== false) {
+            var fileName = String(item.fileName || "received file")
+            receivedFileStatus = read ? ("Marked read " + fileName)
+                                      : ("Marked unread " + fileName)
+        }
+        return true
+    }
+
+    function markAllReceivedFilesRead() {
+        if (!ft2Link)
+            return
+        var changed = 0
+        for (var i = 0; i < receivedFiles.length; ++i) {
+            var item = receivedFiles[i]
+            if (item && item.unread
+                    && ft2Link.markReceivedFileRead(Number(item.id || 0),
+                                                    true,
+                                                    nowMs()))
+                ++changed
+        }
+        refreshFileTransfers()
+        refreshReceivedFiles()
+        receivedFileStatus = changed > 0
+                             ? ("Marked read " + changed + " received file"
+                                + (changed === 1 ? "" : "s"))
+                             : "No unread received files"
+    }
+
+    function saveReceivedFile(item) {
+        if (!item)
+            return
+        var content = String(item.content || "")
+        if (content.length === 0) {
+            receivedFileStatus = "Received file has no content"
+            return
+        }
+        var fileName = String(item.fileName || "ft2link_received.txt").trim()
+        if (fileName.length === 0)
+            fileName = "ft2link_received.txt"
+        fileName = fileName.replace(/[\\/:*?"<>|]/g, "_")
+
+        var path = ""
+        if (bridge && typeof bridge.saveFileDialog === "function")
+            path = bridge.saveFileDialog("Save FT2-Link received file",
+                                         fileName,
+                                         ["Text files (*.txt *.md *.log *.csv *.json)",
+                                          "All files (*)"])
+        if (path.length === 0) {
+            copyPlainText(content)
+            markReceivedFileRead(item, true, false)
+            receivedFileStatus = "Copied " + fileName
+            return
+        }
+        if (!bridge || typeof bridge.writeTextFile !== "function") {
+            copyPlainText(content)
+            markReceivedFileRead(item, true, false)
+            receivedFileStatus = "Save unavailable, copied " + fileName
+            return
+        }
+        var result = bridge.writeTextFile(path, content)
+        if (result && result.ok) {
+            markReceivedFileRead(item, true, false)
+            receivedFileStatus = "Saved " + fileName
+        } else {
+            receivedFileStatus = "Save failed: "
+                                 + String(result && result.error ? result.error : "unknown")
+        }
     }
 
     function prettyJson(value) {
@@ -1261,6 +1457,70 @@ Rectangle {
         }
     }
 
+    function normalizeStationCall(call) {
+        return String(call || "").trim().toUpperCase()
+    }
+
+    function stationSessionForCall(call) {
+        var wanted = normalizeStationCall(call)
+        if (wanted.length === 0)
+            return null
+        for (var i = 0; i < sessions.length; ++i) {
+            var session = sessions[i]
+            if (normalizeStationCall(session.remoteCall) === wanted)
+                return session
+        }
+        return null
+    }
+
+    function isStationConnecting(call) {
+        var wanted = normalizeStationCall(call)
+        var session = stationSessionForCall(wanted)
+        if (!session)
+            return wanted.length > 0 && pendingConnectCall === wanted
+        var state = String(session.stateName || "")
+        return state.length > 0 && state !== "Connected"
+               && state !== "Closed" && state !== "Rejected"
+    }
+
+    function stationConnectText(call) {
+        var wanted = normalizeStationCall(call)
+        var session = stationSessionForCall(wanted)
+        if (!session)
+            return wanted.length > 0 && pendingConnectCall === wanted ? "Connecting..." : "Connect"
+        var state = String(session.stateName || "")
+        if (state === "Connected")
+            return "Connected"
+        if (state === "Closed" || state === "Rejected" || state.length === 0)
+            return "Connect"
+        return "Connecting..."
+    }
+
+    function stationConnectEnabled(call) {
+        var label = stationConnectText(call)
+        return !!ft2Link && label === "Connect"
+    }
+
+    function stationConnectTip(call) {
+        var label = stationConnectText(call)
+        if (label === "Connected")
+            return "Station already connected"
+        if (label === "Connecting...")
+            return "Connection handshake in progress"
+        return "Send HELLO and connect this station"
+    }
+
+    function updatePendingConnectCall() {
+        if (pendingConnectCall.length === 0)
+            return
+        var session = stationSessionForCall(pendingConnectCall)
+        if (!session)
+            return
+        var state = String(session.stateName || "")
+        if (state === "Connected" || state === "Closed" || state === "Rejected")
+            pendingConnectCall = ""
+    }
+
     function selectSession(sessionId) {
         selectedSessionId = Number(sessionId)
         updateSelectedSessionFromSessions()
@@ -1306,6 +1566,7 @@ Rectangle {
         applyCapabilities()
         lastHelloBytes = ft2Link.startSessionHelloBytes(String(call), nowMs())
         selectedRemoteCall = String(call)
+        pendingConnectCall = normalizeStationCall(call)
         selectedSessionId = ft2Link.activeSessionId
         refreshSessions()
     }
@@ -1316,10 +1577,13 @@ Rectangle {
         syncLocalStation()
         applyCapabilities()
         lastHelloBytes = null
+        pendingConnectCall = normalizeStationCall(call)
         if (ft2Link.startSessionRadioHandshake(String(call), nowMs())) {
             selectedRemoteCall = String(call)
             selectedSessionId = ft2Link.activeSessionId
             refreshSessions()
+        } else {
+            pendingConnectCall = ""
         }
     }
 
@@ -1568,10 +1832,12 @@ Rectangle {
         var text = composeText.text.trim()
         if (text.length === 0)
             return false
-        if (ft2Link.transmitTextLocalAudio(selectedSessionId, text, nowMs(),
-                                           ackAudioCheck.checked,
-                                           dropDataCheck.checked,
-                                           dropAckCheck.checked)) {
+        if (!guardWideTx("CHAT TX"))
+            return false
+        if (!ft2Link.radioTxArmed) {
+            ft2Link.setRadioTxArmed(true)
+        }
+        if (ft2Link.transmitPreparedRadioTxAudio(selectedSessionId, text, nowMs())) {
             composeText.text = ""
             refreshSessions()
             return true
@@ -2117,21 +2383,94 @@ Rectangle {
             return
         if (!guardWideTx("FILE"))
             return
-        var content = fileContentText.text.trim()
+        var content = String(selectedFileContent || "")
         if (content.length === 0)
+        {
+            fileTransferStatus = "Select a file first"
             return
-        var toCall = fileToText.text.trim().toUpperCase()
-        if (toCall.length === 0)
-            toCall = selectedRemoteCall
+        }
+        var bytes = selectedFileBytes > 0 ? selectedFileBytes : utf8ByteCount(content)
+        if (bytes > filePayloadLimitBytes) {
+            fileTransferStatus = "File too large: " + bytes + " B / max "
+                                 + filePayloadLimitBytes + " B"
+            return
+        }
+        var toCall = String(selectedRemoteCall || "").trim().toUpperCase()
+        if (toCall.length === 0) {
+            fileTransferStatus = "No active QSO target"
+            return
+        }
+        var fileName = selectedFileName.length > 0 ? selectedFileName : baseFileName(selectedFilePath)
+        if (fileName.length === 0)
+            fileName = "file.txt"
         if (ft2Link.transmitFileRadio(selectedSessionId,
                                       toCall,
-                                      fileNameText.text.trim(),
+                                      fileName,
                                       content,
                                       nowMs())) {
-            fileContentText.text = ""
+            fileTransferStatus = "FILE queued " + fileName + " " + bytes + " B"
             refreshFileTransfers()
             refreshSessions()
         }
+    }
+
+    function utf8ByteCount(text) {
+        try {
+            return unescape(encodeURIComponent(String(text || ""))).length
+        } catch (e) {
+            return String(text || "").length
+        }
+    }
+
+    function baseFileName(path) {
+        var clean = String(path || "").replace(/\\/g, "/")
+        var index = clean.lastIndexOf("/")
+        return index >= 0 ? clean.substring(index + 1) : clean
+    }
+
+    function loadFileText() {
+        if (!bridge || typeof bridge.openFileDialog !== "function"
+                || typeof bridge.readTextFile !== "function") {
+            fileTransferStatus = "File picker unavailable"
+            return
+        }
+        fileTransferStatus = "Opening file selector..."
+        var path = bridge.openFileDialog("Load FT2-Link text file",
+                                         "",
+                                         ["Text files (*.txt *.log *.csv *.json *.md)",
+                                          "All files (*)"])
+        if (!path || path.length === 0) {
+            fileTransferStatus = "File selection cancelled"
+            return
+        }
+        var result = bridge.readTextFile(path, filePayloadLimitBytes)
+        if (!result || !result.ok) {
+            fileTransferStatus = String(result && result.error
+                                        ? result.error
+                                        : "Cannot load file")
+            return
+        }
+        var bytes = Number(result.bytes || 0)
+        var fullSize = Number(result.fileSize || bytes)
+        if (result.truncated || fullSize > filePayloadLimitBytes) {
+            clearSelectedFile()
+            fileTransferStatus = "File too large: " + fullSize + " B / max "
+                                 + filePayloadLimitBytes + " B"
+            return
+        }
+        selectedFilePath = String(result.path || path)
+        selectedFileName = baseFileName(selectedFilePath)
+        selectedFileContent = String(result.text || "")
+        selectedFileBytes = bytes
+        fileTransferStatus = "Ready " + selectedFileName + " " + bytes + " B"
+    }
+
+    function clearSelectedFile() {
+        selectedFilePath = ""
+        selectedFileName = ""
+        selectedFileContent = ""
+        selectedFileBytes = 0
+        fileTransferStatus = ""
     }
 
     function sendBulletinText() {
@@ -2711,7 +3050,12 @@ Rectangle {
         }
         function onSessionsChanged() { root.refreshSessions(); root.refreshStatistics() }
         function onMessagesChanged(sessionId) {
-            if (Number(sessionId) === root.selectedSessionId)
+            var changedSessionId = Number(sessionId)
+            if (ft2Link && changedSessionId > 0
+                    && Number(ft2Link.activeSessionId || 0) === changedSessionId
+                    && root.selectedSessionId !== changedSessionId)
+                root.selectedSessionId = changedSessionId
+            if (changedSessionId === root.selectedSessionId)
                 root.refreshMessages()
             root.refreshContactTimeline()
             root.refreshStatistics()
@@ -2849,6 +3193,72 @@ Rectangle {
             onReleased: smallButton.pressed = false
             onCanceled: smallButton.pressed = false
             onClicked: function(mouse) { smallButton.clicked(mouse) }
+        }
+
+        ToolTip.visible: hovered && tip.length > 0
+        ToolTip.text: tip
+        ToolTip.delay: 450
+    }
+
+    component CompactCheck: Item {
+        id: compactCheck
+        signal toggled(bool checked)
+
+        property bool checked: false
+        property string text: ""
+        property string tip: ""
+        property color accent: root.green
+        property bool hovered: false
+        implicitHeight: 24
+        implicitWidth: checkBox.width + label.implicitWidth + 8
+
+        Rectangle {
+            id: checkBox
+            width: 16
+            height: 16
+            radius: 2
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            color: compactCheck.checked ? compactCheck.accent
+                                        : Qt.rgba(1, 1, 1, 0.03)
+            border.width: 1
+            border.color: compactCheck.checked
+                          ? compactCheck.accent
+                          : Qt.rgba(root.textSecondary.r,
+                                    root.textSecondary.g,
+                                    root.textSecondary.b,
+                                    0.70)
+
+            Text {
+                anchors.centerIn: parent
+                visible: compactCheck.checked
+                text: "✓"
+                color: root.panelBg
+                font.family: root.mono
+                font.pixelSize: 13
+                font.bold: true
+            }
+        }
+
+        Text {
+            id: label
+            anchors.left: checkBox.right
+            anchors.leftMargin: 6
+            anchors.verticalCenter: parent.verticalCenter
+            text: compactCheck.text
+            color: compactCheck.checked ? root.textPrimary : root.textSecondary
+            font.family: root.mono
+            font.pixelSize: 10
+            elide: Text.ElideRight
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: compactCheck.hovered = true
+            onExited: compactCheck.hovered = false
+            onClicked: compactCheck.toggled(!compactCheck.checked)
         }
 
         ToolTip.visible: hovered && tip.length > 0
@@ -3115,6 +3525,7 @@ Rectangle {
                 }
 
                 Text {
+                    id: queueStatusText
                     Layout.preferredWidth: 230
                     text: root.queueStatusLine()
                     elide: Text.ElideRight
@@ -3122,6 +3533,30 @@ Rectangle {
                     font.pixelSize: 10
                     font.bold: root.queueStatusActive()
                     color: root.queueStatusColor()
+
+                    MouseArea {
+                        id: queueStatusMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: (ft2Link && ft2Link.mailboxUnreadCount > 0)
+                                     || root.receivedFileUnreadCount > 0
+                                     ? Qt.PointingHandCursor
+                                     : Qt.ArrowCursor
+                        onClicked: {
+                            if (ft2Link && ft2Link.mailboxUnreadCount > 0)
+                                root.openMailboxQueue()
+                            else if (root.receivedFileUnreadCount > 0)
+                                root.openReceivedFilesQueue()
+                        }
+                    }
+
+                    ToolTip.visible: queueStatusMouse.containsMouse
+                                     && ((ft2Link && ft2Link.mailboxUnreadCount > 0)
+                                         || root.receivedFileUnreadCount > 0)
+                    ToolTip.text: ft2Link && ft2Link.mailboxUnreadCount > 0
+                                  ? "Open unread mail"
+                                  : "Open received files"
+                    ToolTip.delay: 450
                 }
 
                 Text {
@@ -3170,15 +3605,15 @@ Rectangle {
                             tip: "Toggle CQ/beacon history"
                             onClicked: root.stationHistoryMode = !root.stationHistoryMode
                         }
-                        CheckBox {
+                        CompactCheck {
                             id: cqOnlyCheck
                             visible: !root.stationHistoryMode
                             text: "CQ only"
                             checked: root.cqOnly
-                            font.family: root.mono
-                            font.pixelSize: 10
-                            onToggled: {
-                                root.cqOnly = checked
+                            accent: root.green
+                            tip: "Show CQ-capable stations only"
+                            onToggled: function(nextChecked) {
+                                root.cqOnly = nextChecked
                                 root.refreshStations()
                             }
                         }
@@ -3186,17 +3621,18 @@ Rectangle {
 
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 26
                         spacing: 6
 
-                        CheckBox {
+                        CompactCheck {
                             id: cqArmCheck
                             text: "ARM"
                             checked: ft2Link ? ft2Link.radioTxArmed : false
-                            font.family: root.mono
-                            font.pixelSize: 10
-                            onToggled: {
+                            accent: root.green
+                            tip: "Arm FT2-Link RF transmit"
+                            onToggled: function(nextChecked) {
                                 if (ft2Link)
-                                    ft2Link.setRadioTxArmed(checked)
+                                    ft2Link.setRadioTxArmed(nextChecked)
                             }
                         }
 
@@ -3209,13 +3645,15 @@ Rectangle {
                             onClicked: root.transmitBeacon(true)
                         }
 
-                        CheckBox {
+                        CompactCheck {
                             id: autoBeaconCheck
                             text: "AUTO CQ"
                             checked: ft2Link ? ft2Link.autoBeaconEnabled : false
-                            font.family: root.mono
-                            font.pixelSize: 10
-                            onToggled: root.toggleAutoBeacon(checked)
+                            accent: root.green
+                            tip: "Enable periodic CQ"
+                            onToggled: function(nextChecked) {
+                                root.toggleAutoBeacon(nextChecked)
+                            }
                         }
 
                         SmallButton {
@@ -3229,7 +3667,7 @@ Rectangle {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 22
+                        Layout.preferredHeight: 26
                         spacing: 4
 
                         SmallButton {
@@ -3240,25 +3678,11 @@ Rectangle {
                             onClicked: root.cycleCqType()
                         }
 
-                        TextField {
-                            id: cqLocatorText
-                            Layout.preferredWidth: 64
-                            placeholderText: "LOC"
-                            text: root.cqLocator
-                            font.family: root.mono
-                            font.pixelSize: 10
-                            maximumLength: 8
-                            selectByMouse: true
-                            inputMethodHints: Qt.ImhUppercaseOnly
-                            onTextEdited: root.cqLocator = text.trim().toUpperCase()
-                            onEditingFinished: root.cqLocator = text.trim().toUpperCase()
-                        }
-
                         Text {
                             Layout.fillWidth: true
                             text: root.currentCqLocator().length > 0
-                                  ? root.currentCqLocator()
-                                  : "--"
+                                  ? "LOC " + root.currentCqLocator()
+                                  : "LOC --"
                             elide: Text.ElideRight
                             font.family: root.mono
                             font.pixelSize: 10
@@ -3268,15 +3692,17 @@ Rectangle {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 22
+                        Layout.preferredHeight: 26
                         spacing: 4
 
-                        CheckBox {
+                        CompactCheck {
                             text: "SLOT"
                             checked: !root.skipCqSlot
-                            font.family: root.mono
-                            font.pixelSize: 10
-                            onToggled: root.skipCqSlot = !checked
+                            accent: root.green
+                            tip: "Advertise CQ slot offset"
+                            onToggled: function(nextChecked) {
+                                root.skipCqSlot = !nextChecked
+                            }
                         }
 
                         SmallButton {
@@ -3314,6 +3740,7 @@ Rectangle {
                     id: stationList
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.topMargin: 6
                     // 1.0.462 iu8lmc: floor esplicito (~4 righe da 50px) cosi la
                     // lista resta visibile e cliccabile anche su finestre basse
                     // (monitor ~775px): la ColumnLayout le riserva questo spazio
@@ -3409,14 +3836,15 @@ Rectangle {
                             }
 
                             SmallButton {
-                                text: "CONNETTI"
-                                implicitWidth: 100
+                                text: root.stationConnectText(modelData.call)
+                                implicitWidth: 112
                                 implicitHeight: 36
                                 labelSize: 12
-                                accent: root.green
+                                accent: root.isStationConnecting(modelData.call) ? root.amber : root.green
                                 visible: !root.stationHistoryMode
                                 enabled: visible
-                                tip: "Invia HELLO e connetti questa stazione"
+                                interactive: root.stationConnectEnabled(modelData.call)
+                                tip: root.stationConnectTip(modelData.call)
                                 onClicked: root.connectStationRadio(modelData.call)
                             }
                         }
@@ -3426,8 +3854,12 @@ Rectangle {
                             anchors.fill: parent
                             z: -1
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.connectStationRadio(modelData.call)
+                            cursorShape: root.stationConnectEnabled(modelData.call)
+                                         ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: {
+                                if (root.stationConnectEnabled(modelData.call))
+                                    root.connectStationRadio(modelData.call)
+                            }
                         }
                     }
 
@@ -3442,61 +3874,84 @@ Rectangle {
                     }
                 }
 
-                GridLayout {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: 4
-                    rowSpacing: 4
+                    Layout.preferredHeight: 58
+                    Layout.minimumHeight: 58
+                    Layout.maximumHeight: 58
+                    spacing: 4
 
-                    TextField {
-                        id: manualCall
+                    RowLayout {
                         Layout.fillWidth: true
-                        placeholderText: "CALL"
-                        font.family: root.mono
-                        font.pixelSize: 10
-                        selectByMouse: true
-                        onAccepted: root.addManualStation()
-                    }
-                    TextField {
-                        id: manualGrid
-                        Layout.preferredWidth: 58
-                        placeholderText: "GRID"
-                        font.family: root.mono
-                        font.pixelSize: 10
-                        selectByMouse: true
-                        onAccepted: root.addManualStation()
-                    }
-	                    TextField {
-	                        id: manualName
-	                        Layout.fillWidth: true
-	                        placeholderText: "NAME"
-                        font.family: root.mono
-                        font.pixelSize: 10
-	                        selectByMouse: true
-	                        onAccepted: root.addManualStation()
-	                    }
-	                    RowLayout {
-	                        spacing: 4
-	                        TextField {
-	                            id: manualTag
-	                            Layout.preferredWidth: 54
-	                            placeholderText: "TAG"
-	                            font.family: root.mono
-	                            font.pixelSize: 10
-	                            maximumLength: 16
-	                            selectByMouse: true
-	                            onAccepted: root.addManualStation()
-	                        }
-	                        CheckBox {
-	                            id: manualCq
-                            checked: true
-                            text: "CQ"
+                        Layout.preferredHeight: 26
+                        spacing: 4
+
+                        TextField {
+                            id: manualCall
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            placeholderText: "CALL"
                             font.family: root.mono
                             font.pixelSize: 10
+                            selectByMouse: true
+                            onAccepted: root.addManualStation()
                         }
+
+                        TextField {
+                            id: manualGrid
+                            Layout.preferredWidth: 58
+                            Layout.preferredHeight: 24
+                            placeholderText: "GRID"
+                            font.family: root.mono
+                            font.pixelSize: 10
+                            selectByMouse: true
+                            onAccepted: root.addManualStation()
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 26
+                        spacing: 4
+
+                        TextField {
+                            id: manualName
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 24
+                            placeholderText: "NAME"
+                            font.family: root.mono
+                            font.pixelSize: 10
+                            selectByMouse: true
+                            onAccepted: root.addManualStation()
+                        }
+
+                        TextField {
+                            id: manualTag
+                            Layout.preferredWidth: 54
+                            Layout.preferredHeight: 24
+                            placeholderText: "TAG"
+                            font.family: root.mono
+                            font.pixelSize: 10
+                            maximumLength: 16
+                            selectByMouse: true
+                            onAccepted: root.addManualStation()
+                        }
+
+                        CompactCheck {
+                            id: manualCq
+                            checked: true
+                            text: "CQ"
+                            accent: root.green
+                            tip: "Mark manual station as CQ-capable"
+                            onToggled: function(nextChecked) {
+                                manualCq.checked = nextChecked
+                            }
+                        }
+
                         SmallButton {
                             text: "ADD"
                             implicitWidth: 46
+                            implicitHeight: 24
                             accent: root.green
                             tip: "Add manual station"
                             onClicked: root.addManualStation()
@@ -3684,26 +4139,32 @@ Rectangle {
                         color: root.textSecondary
                     }
 
-                    CheckBox {
+                    CompactCheck {
                         id: ackAudioCheck
                         checked: true
                         text: "ACK"
-                        font.family: root.mono
-                        font.pixelSize: 9
+                        accent: root.green
+                        onToggled: function(nextChecked) {
+                            ackAudioCheck.checked = nextChecked
+                        }
                     }
 
-                    CheckBox {
+                    CompactCheck {
                         id: dropDataCheck
                         text: "DROP DATA"
-                        font.family: root.mono
-                        font.pixelSize: 9
+                        accent: root.red
+                        onToggled: function(nextChecked) {
+                            dropDataCheck.checked = nextChecked
+                        }
                     }
 
-                    CheckBox {
+                    CompactCheck {
                         id: dropAckCheck
                         text: "DROP ACK"
-                        font.family: root.mono
-                        font.pixelSize: 9
+                        accent: root.red
+                        onToggled: function(nextChecked) {
+                            dropAckCheck.checked = nextChecked
+                        }
                     }
                 }
 
@@ -3721,15 +4182,14 @@ Rectangle {
                         color: ft2Link && ft2Link.radioTxArmed ? root.amber : root.textSecondary
                     }
 
-                    CheckBox {
+                    CompactCheck {
                         id: radioArmCheck
                         checked: ft2Link ? ft2Link.radioTxArmed : false
                         text: "ARM"
-                        font.family: root.mono
-                        font.pixelSize: 9
-                        onToggled: {
+                        accent: root.green
+                        onToggled: function(nextChecked) {
                             if (ft2Link)
-                                ft2Link.setRadioTxArmed(checked)
+                                ft2Link.setRadioTxArmed(nextChecked)
                         }
                     }
 
@@ -3773,7 +4233,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.broadcasts.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.broadcasts.length > 0
                     text: root.latestBroadcastLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3784,7 +4245,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.mailbox.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.mailbox.length > 0
                     text: root.latestMailboxLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3794,7 +4256,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.forms.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.forms.length > 0
                     text: root.latestFormLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3804,7 +4267,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.fileTransfers.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.fileTransfers.length > 0
                     text: root.latestFileLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3814,7 +4278,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.bulletins.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.bulletins.length > 0
                     text: root.latestBulletinLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3824,7 +4289,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.qsoLog.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.qsoLog.length > 0
                     text: root.latestQsoLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3834,7 +4300,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.contactHistory.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.contactHistory.length > 0
                     text: root.latestContactLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3844,7 +4311,8 @@ Rectangle {
 
                 Text {
                     Layout.fillWidth: true
-                    visible: root.pingLog.length > 0
+                    visible: root.selectedMessages.length === 0
+                             && root.pingLog.length > 0
                     text: root.latestPingLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -3855,6 +4323,8 @@ Rectangle {
                 Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.minimumHeight: 110
+                    Layout.preferredHeight: 180
 
                     ListView {
                         id: messageList
@@ -3886,6 +4356,15 @@ Rectangle {
                         }
 
                         delegate: Rectangle {
+                            required property var modelData
+                            readonly property string directionLabel:
+                                modelData.directionName === "Outgoing" ? "TX"
+                                : (modelData.directionName === "Incoming" ? "RX" : "SYS")
+                            readonly property string peerLabel:
+                                String(modelData.remoteCall || "").length > 0
+                                ? (" " + String(modelData.remoteCall || ""))
+                                : ""
+
                             width: messageList.width
                             implicitHeight: messageText.implicitHeight + 16
                             radius: 4
@@ -3900,7 +4379,9 @@ Rectangle {
                                 id: messageText
                                 anchors.fill: parent
                                 anchors.margins: 8
-                                text: "[" + String(modelData.deliveryName || "") + "] " + String(modelData.text || "")
+                                text: parent.directionLabel + parent.peerLabel
+                                      + " [" + String(modelData.deliveryName || "") + "] "
+                                      + String(modelData.text || "")
                                 wrapMode: Text.Wrap
                                 font.family: root.mono
                                 font.pixelSize: 11
@@ -4009,11 +4490,14 @@ Rectangle {
                         onClicked: root.toolPageIndex = 10
                     }
                     SmallButton {
-                        text: "RXF"
-                        implicitWidth: 48
+                        text: root.receivedFileUnreadCount > 0 ? "RXF*" : "RXF"
+                        implicitWidth: 54
                         checked: root.toolPageIndex === 11
-                        accent: root.cyan
-                        onClicked: root.toolPageIndex = 11
+                        accent: root.receivedFileUnreadCount > 0 ? root.amber : root.cyan
+                        tip: root.receivedFileUnreadCount > 0
+                             ? "Unread received files"
+                             : "Received files"
+                        onClicked: root.openReceivedFilesQueue()
                     }
                     SmallButton {
                         text: "PATH"
@@ -4091,11 +4575,229 @@ Rectangle {
                     Item { Layout.fillWidth: true }
                 }
 
+                Item {
+                    id: receivedFilesPanel
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible ? root.toolStackPreferredHeight() : 0
+                    Layout.minimumHeight: visible ? root.toolStackPreferredHeight() : 0
+                    Layout.maximumHeight: visible ? root.toolStackPreferredHeight() : 0
+                    visible: root.toolPageIndex === 11
+                    clip: true
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 4
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 22
+                            spacing: 6
+
+                            Text {
+                                text: "RECEIVED FILES"
+                                font.family: root.mono
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: root.cyan
+                            }
+
+                            Text {
+                                text: String(root.receivedFiles.length) + " item"
+                                      + (root.receivedFiles.length === 1 ? "" : "s")
+                                      + (root.receivedFileUnreadCount > 0
+                                         ? (" / " + root.receivedFileUnreadCount + " unread")
+                                         : "")
+                                font.family: root.mono
+                                font.pixelSize: 10
+                                color: root.receivedFileUnreadCount > 0
+                                       ? root.amber : root.textSecondary
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.receivedFiles.length > 0
+                                      ? "Use SAVE to write a received file to disk"
+                                      : "No received files"
+                                elide: Text.ElideRight
+                                font.family: root.mono
+                                font.pixelSize: 10
+                                color: root.textSecondary
+                            }
+
+                            SmallButton {
+                                text: "MARK ALL READ"
+                                implicitWidth: 104
+                                accent: root.amber
+                                enabled: root.receivedFileUnreadCount > 0
+                                tip: "Clear unread marker for all received files"
+                                onClicked: root.markAllReceivedFilesRead()
+                            }
+                        }
+
+                        ListView {
+                            id: receivedFileListPanel
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            spacing: 3
+                            boundsBehavior: Flickable.StopAtBounds
+                            model: root.receivedFiles
+                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                            delegate: Rectangle {
+                                id: rxFilePanelDelegate
+                                required property var modelData
+                                width: receivedFileListPanel.width
+                                height: 28
+                                radius: 4
+                                color: rxFilePanelMouse.containsMouse ? root.rowHover : "transparent"
+
+                                MouseArea {
+                                    id: rxFilePanelMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    acceptedButtons: Qt.NoButton
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 6
+                                    anchors.rightMargin: 6
+                                    spacing: 6
+
+                                    Text {
+                                        Layout.preferredWidth: 42
+                                        text: rxFilePanelDelegate.modelData.unread
+                                              ? "NEW"
+                                              : (rxFilePanelDelegate.modelData.imageLike ? "IMG" : "FILE")
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        color: rxFilePanelDelegate.modelData.unread
+                                               ? root.amber
+                                               : (rxFilePanelDelegate.modelData.imageLike ? root.amber : root.cyan)
+                                    }
+
+                                    Text {
+                                        Layout.preferredWidth: 76
+                                        text: String(rxFilePanelDelegate.modelData.senderCall || "--")
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        color: root.textPrimary
+                                    }
+
+                                    Text {
+                                        Layout.preferredWidth: 150
+                                        text: String(rxFilePanelDelegate.modelData.fileName || "")
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.green
+                                    }
+
+                                    Text {
+                                        Layout.preferredWidth: 104
+                                        text: root.receivedFileDate(rxFilePanelDelegate.modelData)
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.textSecondary
+                                    }
+
+                                    Text {
+                                        Layout.preferredWidth: 66
+                                        text: String(rxFilePanelDelegate.modelData.sizeBytes || 0) + " B"
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.textSecondary
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: String(rxFilePanelDelegate.modelData.preview || "")
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.textPrimary
+                                    }
+
+                                    SmallButton {
+                                        text: "SAVE"
+                                        implicitWidth: 48
+                                        accent: root.green
+                                        enabled: String(rxFilePanelDelegate.modelData.content || "").length > 0
+                                        tip: "Save received file to disk"
+                                        onClicked: root.saveReceivedFile(rxFilePanelDelegate.modelData)
+                                    }
+
+                                    SmallButton {
+                                        text: rxFilePanelDelegate.modelData.unread ? "READ" : "UNREAD"
+                                        implicitWidth: 58
+                                        accent: rxFilePanelDelegate.modelData.unread ? root.amber : root.textSecondary
+                                        enabled: !!ft2Link
+                                        tip: rxFilePanelDelegate.modelData.unread
+                                             ? "Mark received file as read"
+                                             : "Mark received file as unread"
+                                        onClicked: root.markReceivedFileRead(rxFilePanelDelegate.modelData,
+                                                                              !!rxFilePanelDelegate.modelData.unread,
+                                                                              true)
+                                    }
+
+                                    SmallButton {
+                                        text: "COPY"
+                                        implicitWidth: 52
+                                        accent: root.cyan
+                                        enabled: String(rxFilePanelDelegate.modelData.content || "").length > 0
+                                        tip: "Copy received file content"
+                                        onClicked: {
+                                            var text = String(rxFilePanelDelegate.modelData.content || "")
+                                            root.copyPlainText(text)
+                                            root.markReceivedFileRead(rxFilePanelDelegate.modelData, true, false)
+                                            root.receivedFileStatus = "Copied "
+                                                                      + String(rxFilePanelDelegate.modelData.fileName || "received file")
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                visible: receivedFileListPanel.count === 0
+                                text: "No received files"
+                                font.family: root.mono
+                                font.pixelSize: 10
+                                color: root.textSecondary
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 16
+                            text: root.receivedFileStatus.length > 0
+                                  ? root.receivedFileStatus
+                                  : (root.receivedFiles.length > 0
+                                     ? "Select SAVE to write a received file"
+                                     : "No received files")
+                            elide: Text.ElideMiddle
+                            font.family: root.mono
+                            font.pixelSize: 10
+                            color: root.textSecondary
+                        }
+                    }
+                }
+
                 StackLayout {
                     id: toolStack
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(132, Math.min(190, root.height * 0.36))
-                    currentIndex: root.toolPageIndex
+                    Layout.preferredHeight: visible ? root.toolStackPreferredHeight() : 0
+                    Layout.minimumHeight: visible ? root.toolStackPreferredHeight() : 0
+                    Layout.maximumHeight: visible ? root.toolStackPreferredHeight() : 0
+                    visible: root.toolPageIndex !== 11
+                    currentIndex: root.toolStackIndexForPage(root.toolPageIndex)
                     clip: true
 
                     Item {
@@ -4143,7 +4845,7 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 28
                                 visible: root.selectedSessionId > 0
                                 spacing: 6
 
@@ -4204,7 +4906,7 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 36
                                 spacing: 6
 
                                 SmallButton {
@@ -4228,6 +4930,7 @@ Rectangle {
                                 TextField {
                                     id: composeText
                                     Layout.fillWidth: true
+                                    Layout.preferredHeight: 34
                                     placeholderText: "Message"
                                     enabled: true
                                     font.family: root.mono
@@ -4238,11 +4941,11 @@ Rectangle {
 
                                 SmallButton {
                                     text: "TX"
-                                    implicitWidth: 46
+                                    implicitWidth: 52
                                     accent: root.green
                                     enabled: root.selectedSessionConnected && composeText.text.trim().length > 0
                                              && (!ft2Link || !ft2Link.transportBusy)
-                                    tip: "Send local audio test"
+                                    tip: "Transmit chat over RF audio"
                                     onClicked: root.sendChatText()
                                 }
 		                            }
@@ -4299,52 +5002,138 @@ Rectangle {
                     }
 
                     Item {
-                        RowLayout {
+                        ColumnLayout {
                             anchors.fill: parent
                             spacing: 6
 
-                            TextField {
-                                id: fileToText
-                                Layout.preferredWidth: 86
-                                placeholderText: root.selectedRemoteCall.length > 0 ? root.selectedRemoteCall : "TO"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 16
-                                selectByMouse: true
-                            }
-
-                            TextField {
-                                id: fileNameText
-                                Layout.preferredWidth: 132
-                                placeholderText: "file.txt"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 64
-                                selectByMouse: true
-                            }
-
-                            TextField {
-                                id: fileContentText
+                            RowLayout {
                                 Layout.fillWidth: true
-                                placeholderText: "Small file text"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 4096
-                                selectByMouse: true
-                                onAccepted: root.armOrTransmitFile()
+                                Layout.preferredHeight: 32
+                                spacing: 6
+
+                                Text {
+                                    text: "TO"
+                                    color: root.textSecondary
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: 110
+                                    Layout.preferredHeight: 28
+                                    radius: 4
+                                    color: Qt.rgba(1, 1, 1, 0.025)
+                                    border.width: 1
+                                    border.color: root.selectedSessionConnected
+                                                  ? Qt.rgba(root.green.r, root.green.g, root.green.b, 0.55)
+                                                  : Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.35)
+
+                                    Text {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+                                        verticalAlignment: Text.AlignVCenter
+                                        text: root.selectedRemoteCall.length > 0 ? root.selectedRemoteCall : "--"
+                                        elide: Text.ElideRight
+                                        color: root.selectedSessionConnected ? root.textPrimary : root.textSecondary
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        font.bold: root.selectedSessionConnected
+                                    }
+                                }
+
+                                Text {
+                                    text: "FILE"
+                                    color: root.textSecondary
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 28
+                                    radius: 4
+                                    color: Qt.rgba(1, 1, 1, 0.025)
+                                    border.width: 1
+                                    border.color: root.selectedFileName.length > 0
+                                                  ? Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.60)
+                                                  : Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.35)
+
+                                    Text {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+                                        verticalAlignment: Text.AlignVCenter
+                                        text: root.selectedFileName.length > 0
+                                              ? root.selectedFileName
+                                              : "No file selected"
+                                        elide: Text.ElideMiddle
+                                        color: root.selectedFileName.length > 0 ? root.textPrimary : root.textSecondary
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                    }
+                                }
+
+                                Text {
+                                    Layout.preferredWidth: 96
+                                    horizontalAlignment: Text.AlignRight
+                                    text: String(root.selectedFileBytes) + " / "
+                                          + String(root.filePayloadLimitBytes) + " B"
+                                    elide: Text.ElideRight
+                                    color: root.selectedFileBytes > root.filePayloadLimitBytes
+                                           ? root.red
+                                           : root.textSecondary
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                }
+
+                                SmallButton {
+                                    text: "LOAD TXT"
+                                    implicitWidth: 78
+                                    accent: root.cyan
+                                    enabled: !!bridge && typeof bridge.openFileDialog === "function"
+                                             && typeof bridge.readTextFile === "function"
+                                    tip: "Load a local text file, max 16 KiB"
+                                    onClicked: root.loadFileText()
+                                }
+
+                                SmallButton {
+                                    text: "CLEAR"
+                                    implicitWidth: 54
+                                    accent: root.red
+                                    enabled: root.selectedFileName.length > 0
+                                    tip: "Clear selected file"
+                                    onClicked: root.clearSelectedFile()
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "SEND FILE" : "ARM FILE"
+                                    implicitWidth: 88
+                                    accent: root.cyan
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                             && root.selectedFileContent.length > 0
+                                             && root.selectedFileBytes <= root.filePayloadLimitBytes
+                                    tip: ft2Link && ft2Link.radioTxArmed
+                                         ? "Transmit text file over FT2-Link"
+                                         : "Arm file transmit"
+                                    onClicked: root.armOrTransmitFile()
+                                }
                             }
 
-                            SmallButton {
-                                text: ft2Link && ft2Link.radioTxArmed ? "FILE TX" : "ARM X"
-                                implicitWidth: 72
-                                accent: root.cyan
-                                enabled: !!ft2Link && root.selectedSessionConnected
-                                         && fileContentText.text.trim().length > 0
-                                tip: ft2Link && ft2Link.radioTxArmed ? "Transmit small file" : "Arm file transmit"
-                                onClicked: root.armOrTransmitFile()
+                            Text {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 18
+                                text: root.fileTransferStatus.length > 0
+                                      ? root.fileTransferStatus
+                                      : (root.selectedFileName.length > 0 ? root.selectedFilePath : "No file selected")
+                                elide: Text.ElideMiddle
+                                color: root.fileTransferStatus.indexOf("too large") >= 0
+                                       || root.fileTransferStatus.indexOf("unavailable") >= 0
+                                       || root.fileTransferStatus.indexOf("Cannot") >= 0
+                                       ? root.red
+                                       : root.textSecondary
+                                font.family: root.mono
+                                font.pixelSize: 10
                             }
                         }
                     }
@@ -6737,113 +7526,205 @@ Rectangle {
                     }
 
                     Item {
-                        ListView {
-                            id: receivedFileList
+                        ColumnLayout {
                             anchors.fill: parent
-                            clip: true
-                            spacing: 3
-                            boundsBehavior: Flickable.StopAtBounds
-                            model: root.receivedFiles
-                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                            spacing: 4
 
-                            delegate: Rectangle {
-                                id: rxFileDelegate
-                                required property var modelData
-                                width: receivedFileList.width
-                                height: 28
-                                radius: 4
-                                color: rxFileMouse.containsMouse ? root.rowHover : "transparent"
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 22
+                                spacing: 6
 
-                                MouseArea {
-                                    id: rxFileMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
+                                Text {
+                                    text: "RECEIVED FILES"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: root.cyan
                                 }
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 6
-                                    anchors.rightMargin: 6
-                                    spacing: 6
+                                Text {
+                                    text: String(root.receivedFiles.length) + " item"
+                                          + (root.receivedFiles.length === 1 ? "" : "s")
+                                          + (root.receivedFileUnreadCount > 0
+                                             ? (" / " + root.receivedFileUnreadCount + " unread")
+                                             : "")
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.receivedFileUnreadCount > 0
+                                           ? root.amber : root.textSecondary
+                                }
 
-                                    Text {
-                                        Layout.preferredWidth: 42
-                                        text: rxFileDelegate.modelData.imageLike ? "IMG" : "FILE"
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        color: rxFileDelegate.modelData.imageLike ? root.amber : root.cyan
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.receivedFiles.length > 0
+                                          ? "Use SAVE to write a received file to disk"
+                                          : "No received files"
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
+                                }
+
+                                SmallButton {
+                                    text: "MARK ALL READ"
+                                    implicitWidth: 104
+                                    accent: root.amber
+                                    enabled: root.receivedFileUnreadCount > 0
+                                    tip: "Clear unread marker for all received files"
+                                    onClicked: root.markAllReceivedFilesRead()
+                                }
+                            }
+
+                            ListView {
+                                id: receivedFileList
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                spacing: 3
+                                boundsBehavior: Flickable.StopAtBounds
+                                model: root.receivedFiles
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                delegate: Rectangle {
+                                    id: rxFileDelegate
+                                    required property var modelData
+                                    width: receivedFileList.width
+                                    height: 28
+                                    radius: 4
+                                    color: rxFileMouse.containsMouse ? root.rowHover : "transparent"
+
+                                    MouseArea {
+                                        id: rxFileMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        acceptedButtons: Qt.NoButton
                                     }
 
-                                    Text {
-                                        Layout.preferredWidth: 76
-                                        text: String(rxFileDelegate.modelData.senderCall || "--")
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        color: root.textPrimary
-                                    }
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 6
+                                        anchors.rightMargin: 6
+                                        spacing: 6
 
-                                    Text {
-                                        Layout.preferredWidth: 150
-                                        text: String(rxFileDelegate.modelData.fileName || "")
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        color: root.green
-                                    }
+                                        Text {
+                                            Layout.preferredWidth: 42
+                                            text: rxFileDelegate.modelData.unread
+                                                  ? "NEW"
+                                                  : (rxFileDelegate.modelData.imageLike ? "IMG" : "FILE")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: rxFileDelegate.modelData.unread
+                                                   ? root.amber
+                                                   : (rxFileDelegate.modelData.imageLike ? root.amber : root.cyan)
+                                        }
 
-                                    Text {
-                                        Layout.preferredWidth: 104
-                                        text: root.receivedFileDate(rxFileDelegate.modelData)
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        color: root.textSecondary
-                                    }
+                                        Text {
+                                            Layout.preferredWidth: 76
+                                            text: String(rxFileDelegate.modelData.senderCall || "--")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: root.textPrimary
+                                        }
 
-                                    Text {
-                                        Layout.preferredWidth: 66
-                                        text: String(rxFileDelegate.modelData.sizeBytes || 0) + " B"
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        color: root.textSecondary
-                                    }
+                                        Text {
+                                            Layout.preferredWidth: 150
+                                            text: String(rxFileDelegate.modelData.fileName || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.green
+                                        }
 
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: String(rxFileDelegate.modelData.preview || "")
-                                        elide: Text.ElideRight
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        color: root.textPrimary
-                                    }
+                                        Text {
+                                            Layout.preferredWidth: 104
+                                            text: root.receivedFileDate(rxFileDelegate.modelData)
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textSecondary
+                                        }
 
-                                    SmallButton {
-                                        text: "COPY"
-                                        implicitWidth: 52
-                                        accent: root.cyan
-                                        enabled: String(rxFileDelegate.modelData.content || "").length > 0
-                                        tip: "Copy received file content"
-                                        onClicked: {
-                                            var text = String(rxFileDelegate.modelData.content || "")
-                                            if (bridge && typeof bridge.copyToClipboard === "function")
-                                                bridge.copyToClipboard(text)
-                                            else
-                                                composeText.text = text
+                                        Text {
+                                            Layout.preferredWidth: 66
+                                            text: String(rxFileDelegate.modelData.sizeBytes || 0) + " B"
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textSecondary
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: String(rxFileDelegate.modelData.preview || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textPrimary
+                                        }
+
+                                        SmallButton {
+                                            text: "SAVE"
+                                            implicitWidth: 48
+                                            accent: root.green
+                                            enabled: String(rxFileDelegate.modelData.content || "").length > 0
+                                            tip: "Save received file to disk"
+                                            onClicked: root.saveReceivedFile(rxFileDelegate.modelData)
+                                        }
+
+                                        SmallButton {
+                                            text: rxFileDelegate.modelData.unread ? "READ" : "UNREAD"
+                                            implicitWidth: 58
+                                            accent: rxFileDelegate.modelData.unread ? root.amber : root.textSecondary
+                                            enabled: !!ft2Link
+                                            tip: rxFileDelegate.modelData.unread
+                                                 ? "Mark received file as read"
+                                                 : "Mark received file as unread"
+                                            onClicked: root.markReceivedFileRead(rxFileDelegate.modelData,
+                                                                                  !!rxFileDelegate.modelData.unread,
+                                                                                  true)
+                                        }
+
+                                        SmallButton {
+                                            text: "COPY"
+                                            implicitWidth: 52
+                                            accent: root.cyan
+                                            enabled: String(rxFileDelegate.modelData.content || "").length > 0
+                                            tip: "Copy received file content"
+                                            onClicked: {
+                                                var text = String(rxFileDelegate.modelData.content || "")
+                                                root.copyPlainText(text)
+                                                root.markReceivedFileRead(rxFileDelegate.modelData, true, false)
+                                                root.receivedFileStatus = "Copied "
+                                                                          + String(rxFileDelegate.modelData.fileName || "received file")
+                                            }
                                         }
                                     }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: receivedFileList.count === 0
+                                    text: "No received files"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
                                 }
                             }
 
                             Text {
-                                anchors.centerIn: parent
-                                visible: receivedFileList.count === 0
-                                text: "No received files"
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 16
+                                text: root.receivedFileStatus.length > 0
+                                      ? root.receivedFileStatus
+                                      : (root.receivedFiles.length > 0
+                                         ? "Select SAVE to write a received file"
+                                         : "No received files")
+                                elide: Text.ElideMiddle
                                 font.family: root.mono
                                 font.pixelSize: 10
                                 color: root.textSecondary
