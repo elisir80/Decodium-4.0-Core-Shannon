@@ -1694,7 +1694,7 @@ bool decodeW500WaveformWithMetrics (std::vector<float> const& wave,
   searchWithConfig (config);
   if (!best.ok)
     {
-      for (double offset : {4.0, -4.0, 8.0, -8.0, 12.0, -12.0})
+      for (double offset : {4.0, -4.0, 8.0, -8.0, 12.0, -12.0, 16.0, -16.0, 20.0, -20.0, 24.0, -24.0})
         {
           W500WaveformConfig searchConfig = config;
           searchConfig.centerFrequencyHz += offset;
@@ -1891,7 +1891,7 @@ bool decodeNarrowFrameWaveformWithMetrics (
   searchWithConfig (config);
   if (!best.ok)
     {
-      for (double offset : {10.0, -10.0, 20.0, -20.0})
+      for (double offset : {10.0, -10.0, 20.0, -20.0, 30.0, -30.0, 40.0, -40.0, 50.0, -50.0})
         {
           NarrowWaveformConfig searchConfig = config;
           searchConfig.centerFrequencyHz += offset;
