@@ -1323,6 +1323,18 @@ Rectangle {
         }
     }
 
+    // 1.0.462 iu8lmc: CONNETTI a prova di errore. Connettersi a una stazione
+    // manda un HELLO via radio; se ARM non e' attivo lo attiva, poi fa
+    // l'handshake radio (prima, senza ARM, il click finiva sul percorso locale
+    // e non trasmetteva nulla, confondendo l'utente).
+    function connectStationRadio(call) {
+        if (!ft2Link || !call)
+            return
+        if (!ft2Link.radioTxArmed)
+            ft2Link.setRadioTxArmed(true)
+        startRadioSession(call)
+    }
+
     function transmitBeacon(cq) {
         if (!ft2Link)
             return
@@ -2926,9 +2938,36 @@ Rectangle {
         ToolTip.delay: 450
     }
 
-    ColumnLayout {
+    // 1.0.457 iu8lmc fix ("finestra troppo alta, comandi in basso tagliati"):
+    // il root ha clip:true, quindi su layout bassi il contenuto oltre l'altezza
+    // disponibile veniva TAGLIATO (composer/strumenti irraggiungibili). Wrapper
+    // Flickable verticale: se lo spazio basta (>= minContentHeight) il layout
+    // riempie come prima e il flick e' disattivato (zero cambi); se manca, il
+    // contenuto tiene l'altezza minima usabile e il pannello SCORRE.
+    Flickable {
+        id: rootFlick
+        // 1.0.462 iu8lmc: tenuto a 414 (il pannello RIEMPIE la finestra senza
+        // scorrere sui monitor normali). Per evitare che la lista stazioni si
+        // schiacci a 1-2 righe su finestre basse NON si allunga il contenuto
+        // (spingerebbe la lista sotto il bordo), ma si da' alla ListView una
+        // Layout.minimumHeight esplicita: cosi resta sempre visibile e cliccabile.
+        readonly property int minContentHeight: 414
         anchors.fill: parent
         anchors.margins: 8
+        contentWidth: width
+        contentHeight: Math.max(height, minContentHeight)
+        interactive: contentHeight > height
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.VerticalFlick
+        ScrollBar.vertical: ScrollBar {
+            policy: rootFlick.contentHeight > rootFlick.height
+                    ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+        }
+
+    ColumnLayout {
+        width: rootFlick.contentWidth
+        height: rootFlick.contentHeight
         spacing: 8
 
         RowLayout {
@@ -3275,6 +3314,11 @@ Rectangle {
                     id: stationList
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    // 1.0.462 iu8lmc: floor esplicito (~4 righe da 50px) cosi la
+                    // lista resta visibile e cliccabile anche su finestre basse
+                    // (monitor ~775px): la ColumnLayout le riserva questo spazio
+                    // togliendolo alle altre sezioni fillHeight (sessioni/chat).
+                    Layout.minimumHeight: 200
                     clip: true
                     model: root.stationHistoryMode ? root.beaconHistory : root.stations
                     boundsBehavior: Flickable.StopAtBounds
@@ -3283,115 +3327,107 @@ Rectangle {
                     }
 
                     delegate: Rectangle {
+                        id: stationCard
+                        // 1.0.462 iu8lmc: modelData come REQUIRED PROPERTY.
+                        // Per un modello ad array JS il 'modelData' nudo e' un
+                        // context property: funziona nelle binding ma NON nei
+                        // signal handler (onClicked) -> il click su una stazione
+                        // non connetteva. Dichiararlo required lo rende una
+                        // property vera del delegato, in scope ovunque.
+                        required property var modelData
                         width: stationList.width
-                        height: 50
+                        height: 62
                         clip: true
-                        color: stationMouse.containsMouse ? root.rowHover : "transparent"
-                        border.color: Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.10)
+                        color: stationMouse.containsMouse
+                               ? root.rowHover
+                               : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.06)
+                        border.color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.40)
                         border.width: 1
-                        radius: 3
+                        radius: 4
 
-                        Column {
+                        RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 6
-                            spacing: 2
-                            z: 2
+                            anchors.margins: 8
+                            spacing: 8
 
-	                            Row {
-	                                width: parent.width
-	                                spacing: 6
-		                                Text {
-		                                    text: String(modelData.call || "")
-		                                    width: 58
-		                                    elide: Text.ElideRight
-		                                    font.family: root.mono
-		                                    font.pixelSize: 12
-	                                    font.bold: true
-	                                    color: root.cyan
-	                                }
-		                                Text {
-		                                    text: root.stationHistoryMode ? String(modelData.direction || "")
-                                                                          : String(modelData.tag || "")
-		                                    width: 34
-		                                    visible: text.length > 0
-		                                    elide: Text.ElideRight
-	                                    font.family: root.mono
-	                                    font.pixelSize: 10
-	                                    font.bold: true
-	                                    color: root.stationHistoryMode
-                                               ? (String(modelData.direction || "") === "TX" ? root.cyan : root.green)
-                                               : root.amber
-	                                }
-		                                Text {
-		                                    text: modelData.cq ? String(modelData.cqType || "CQ") : "BCN"
-		                                    width: 48
-		                                    elide: Text.ElideRight
-                                    font.family: root.mono
-                                    font.pixelSize: 10
-		                                    color: modelData.cq ? root.green : root.textSecondary
-		                                }
-		                                Text {
-		                                    text: String(modelData.cqSlotLabel || "")
-		                                    width: 34
-		                                    visible: text.length > 0
-		                                    elide: Text.ElideRight
-		                                    font.family: root.mono
-		                                    font.pixelSize: 10
-		                                    font.bold: true
-		                                    color: root.amber
-		                                }
-		                                Text {
-		                                    text: root.stationHistoryMode
-                                              ? String(modelData.source || "")
-                                              : (modelData.capabilities ? String(modelData.capabilities.preferredProfileName || "") : "")
-		                                    width: 48
-		                                    elide: Text.ElideRight
-                                    font.family: root.mono
-                                    font.pixelSize: 10
-                                    color: root.amber
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+                                    Text {
+                                        text: String(modelData.call || "")
+                                        font.family: root.mono
+                                        font.pixelSize: 20
+                                        font.bold: true
+                                        color: root.cyan
+                                    }
+                                    Text {
+                                        text: modelData.cq ? String(modelData.cqType || "CQ") : "BCN"
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        font.bold: true
+                                        color: modelData.cq ? root.green : root.textSecondary
+                                    }
+                                    Text {
+                                        text: modelData.capabilities
+                                              ? String(modelData.capabilities.preferredProfileName || "")
+                                              : ""
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.amber
+                                        Layout.fillWidth: true
+                                        elide: Text.ElideRight
+                                    }
                                 }
-                            }
-
-                            Row {
-                                width: parent.width
-                                height: 20
-                                spacing: 4
 
                                 Text {
+                                    Layout.fillWidth: true
                                     text: root.stationSubtitle(modelData)
-                                    width: parent.width
-                                           - (stationRelayButton.visible ? stationRelayButton.width + parent.spacing : 0)
                                     elide: Text.ElideRight
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.stationSubtitleColor(modelData)
                                 }
+                            }
 
-                                SmallButton {
-                                    id: stationRelayButton
-                                    readonly property var workflow: root.stationRelayWorkflow(modelData)
-                                    text: "FWD"
-                                    width: 38
-                                    implicitHeight: 18
-                                    labelSize: 8
-                                    accent: !workflow ? root.amber
-                                            : (String(workflow.priority || "") === "EMCOMM" ? root.red : root.amber)
-                                    visible: !root.stationHistoryMode
-                                             && workflow !== null
-                                    enabled: visible
-                                    tip: "Call relay and prepare parked mail forwarding"
-                                    onClicked: root.useStationRelayWorkflow(modelData)
-                                }
+                            SmallButton {
+                                id: stationRelayButton
+                                readonly property var workflow: root.stationRelayWorkflow(modelData)
+                                text: "FWD"
+                                implicitWidth: 42
+                                implicitHeight: 26
+                                labelSize: 9
+                                accent: !workflow ? root.amber
+                                        : (String(workflow.priority || "") === "EMCOMM" ? root.red : root.amber)
+                                visible: !root.stationHistoryMode && workflow !== null
+                                enabled: visible
+                                tip: "Call relay and prepare parked mail forwarding"
+                                onClicked: root.useStationRelayWorkflow(modelData)
+                            }
+
+                            SmallButton {
+                                text: "CONNETTI"
+                                implicitWidth: 100
+                                implicitHeight: 36
+                                labelSize: 12
+                                accent: root.green
+                                visible: !root.stationHistoryMode
+                                enabled: visible
+                                tip: "Invia HELLO e connetti questa stazione"
+                                onClicked: root.connectStationRadio(modelData.call)
                             }
                         }
 
                         MouseArea {
                             id: stationMouse
                             anchors.fill: parent
-                            z: 1
+                            z: -1
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: root.startSession(modelData.call)
+                            onClicked: root.connectStationRadio(modelData.call)
                         }
                     }
 
@@ -7466,4 +7502,5 @@ Rectangle {
 		        }
         }
     }
+    }  // rootFlick (1.0.457)
 }
