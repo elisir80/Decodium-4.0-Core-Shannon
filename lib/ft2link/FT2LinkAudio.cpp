@@ -772,6 +772,18 @@ void W500RxAudioBuffer::clear ()
   m_buffer.clear ();
 }
 
+void W500RxAudioBuffer::dropToLastSamples (std::size_t maxSamples)
+{
+  if (m_buffer.size () > maxSamples)
+    {
+      m_buffer.erase (
+          m_buffer.begin (),
+          m_buffer.begin ()
+              + static_cast<std::vector<float>::difference_type> (
+                  m_buffer.size () - maxSamples));
+    }
+}
+
 W2300TxAudioBuffer::W2300TxAudioBuffer (std::size_t guardBeforeSamples,
                                         std::size_t guardAfterSamples,
                                         std::size_t interBurstGapSamples)
@@ -908,6 +920,18 @@ std::size_t W2300RxAudioBuffer::bufferedSamples () const
 void W2300RxAudioBuffer::clear ()
 {
   m_buffer.clear ();
+}
+
+void W2300RxAudioBuffer::dropToLastSamples (std::size_t maxSamples)
+{
+  if (m_buffer.size () > maxSamples)
+    {
+      m_buffer.erase (
+          m_buffer.begin (),
+          m_buffer.begin ()
+              + static_cast<std::vector<float>::difference_type> (
+                  m_buffer.size () - maxSamples));
+    }
 }
 
 W2300AudioPipelineResult runW2300AudioPipeline (

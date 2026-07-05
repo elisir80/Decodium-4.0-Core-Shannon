@@ -16452,6 +16452,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
         m_pendingFt2LinkText.clear();
         m_pendingFt2LinkWave.clear();
         m_pendingFt2LinkPlan.clear();
+        emit ft2LinkTxFinished();
 
         if (m_tuning) {
             m_tuning = false;
@@ -18292,6 +18293,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         else       emit statusMessage(QStringLiteral("FT2-Link TX completato"));
         bridgeLog(QStringLiteral("completeTxPlayback: FT2-Link done reason=%1 err=%2")
                       .arg(reason).arg(error ? 1 : 0));
+        emit ft2LinkTxFinished();
         return;
     }
 
@@ -18517,6 +18519,7 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
         m_pendingFt2LinkWave.clear();
         m_pendingFt2LinkPlan.clear();
         emit errorMessage(QStringLiteral("FT2-Link: avvio TX radio non riuscito"));
+        emit ft2LinkTxFinished();
         return false;
     }
 
@@ -18525,6 +18528,14 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
 
 void DecodiumBridge::startTx()
 {
+    // FT2-Link: la TX passa SOLO dal path dedicato (transmitFt2LinkAudio ->
+    // m_ft2LinkTxActive=true). Blocca qui i TX del sequencer FTx standard
+    // (AutoCQ/auto-seq) che in FT2-Link genererebbero un CQ non codificabile.
+    if (isFt2LinkApplicationMode(m_mode) && !m_ft2LinkTxActive) {
+        bridgeLog(QStringLiteral("startTx: TX standard bloccato in FT2-Link (usa ARM + CQ TX del pannello)"));
+        return;
+    }
+
     auto const selectedSlotMessage = [this]() -> QString {
         switch (m_currentTx) {
         case 1: return m_tx1;
@@ -28096,6 +28107,8 @@ void DecodiumBridge::checkAndStartPeriodicTx()
     // far entrare 2 chiamate in startTx() prima che m_transmitting=true ->
     // doppia TX FT2 "singhiozzo".
     if (m_periodicTxInFlight) return;
+    // FT2-Link non usa il sequencer TX FTx standard (TX solo dal pannello).
+    if (isFt2LinkApplicationMode(m_mode)) return;
     m_periodicTxInFlight = true;
     auto inFlightReset = qScopeGuard([this]() { m_periodicTxInFlight = false; });
 
@@ -39363,6 +39376,16 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }, Qt::QueuedConnection);
 
     } else {
+        // 1.0.451 iu8lmc fix (freeze FT2-Link): il modo applicativo FT2-Link ha
+        // il proprio decode point-to-point (ingestRxSamples: narrow/wide). Il
+        // fallback FT8 deep+AP qui girava su audio non-FT8, impiegava 4-14s
+        // trovando 0 righe e affamava il main thread -> freeze. FT2-Link non
+        // deve usare il decoder FTx: esci senza decodificare (buffer gia' svuotato).
+        if (isFt2LinkApplicationMode(modeSnapshot)) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
         // Fallback a FT8
         decodium::ft8::DecodeRequest req;
         req.serial = serial; req.audio = audioSnapshot;

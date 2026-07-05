@@ -5,14 +5,17 @@
 #include "lib/ft2link/FT2LinkAudio.hpp"
 #include "lib/ft2link/FT2LinkSession.hpp"
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <utility>
+#include <QByteArray>
 #include <QEvent>
 #include <QObject>
 #include <QStringList>
+#include <QThread>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -20,6 +23,58 @@
 
 #include <deque>
 #include <vector>
+
+Q_DECLARE_METATYPE (decodium::ft2link::W2300DecodeMetrics)
+
+// ============================================================================
+// 1.0.458 iu8lmc — P0b worker-move (piano FT2-Link).
+// FT2LinkDecodeWorker possiede TUTTO il decode RX live (narrow + W500/W2300):
+// conversione PCM->float, misura energia, gating busy/throttle, buffer e DSP.
+// CONTRATTO thread-boundary:
+//   - worker (questo oggetto): m_narrowRx/m_w500Rx/m_w2300Rx, stato busy locale,
+//     throttle. NON tocca MAI lo stato dell'adapter (sessioni/ARQ/mailbox/LBT).
+//   - main (FT2LinkQmlAdapter): riceve via segnali SOLO byte di frame
+//     serializzati + metriche W2300 + energia (rms/peak). ingestRadioFrameBytes,
+//     observeLiveW2300Metrics e lo stato LBT restano sul main (Q_ASSERT armati).
+// SYNC vs ASYNC: alla creazione il worker vive sul MAIN (segnali direct ->
+// comportamento sincrono storico, usato dai test). startDecodeWorker() lo
+// sposta su un QThread dedicato LowPriority (mai HighPriority su Windows) e le
+// stesse connessioni Qt::AutoConnection diventano queued automaticamente.
+// ============================================================================
+class FT2LinkDecodeWorker : public QObject
+{
+  Q_OBJECT
+
+public:
+  explicit FT2LinkDecodeWorker (QObject* parent = nullptr);
+
+  // Ritorna true se almeno un frame e' stato decodificato nel chunk (valore
+  // osservabile solo in modalita' sincrona; in threaded il main riceve i frame
+  // via segnali).
+  bool processChunk (QVector<short> const& samples,
+                     QString const& remoteCall,
+                     quint64 nowMs,
+                     bool wideSessionActive);
+
+signals:
+  void energyObserved (double rms, double peak, quint64 nowMs);
+  void frameDecoded (QByteArray frameBytes, QString remoteCall, quint64 nowMs);
+  void w2300FrameDecoded (QByteArray frameBytes,
+                          decodium::ft2link::W2300DecodeMetrics metrics,
+                          QString remoteCall,
+                          quint64 nowMs);
+  void resyncNeeded ();
+
+private:
+  bool busyNow (quint64 nowMs) const;
+  void observeEnergy (std::vector<float> const& chunk, quint64 nowMs);
+
+  std::vector<float> m_narrowRx;
+  decodium::ft2link::W500RxAudioBuffer m_w500Rx;
+  decodium::ft2link::W2300RxAudioBuffer m_w2300Rx;
+  quint64 m_busyUntilMs {0};
+  quint64 m_lastDecodeMs {0};
+};
 
 class FT2LinkQmlAdapter : public QObject
 {
@@ -264,6 +319,14 @@ public:
   Q_INVOKABLE bool ingestRxSamples (QVector<short> const& samples,
                                     QString const& remoteCall,
                                     quint64 nowMs);
+  // P0b worker-move: sposta il decode live su un QThread dedicato (LowPriority).
+  // Idempotente. L'app lo chiama all'avvio (main_qml); i test NON lo chiamano
+  // e restano sul path sincrono storico (worker sul main, segnali direct).
+  Q_INVOKABLE void startDecodeWorker ();
+  // P0b TX closed-loop: fine REALE della TX radio (da DecodiumBridge::
+  // ft2LinkTxFinished). Rilascia il busy della coda TX e logga il drift
+  // stima-vs-reale; la stima audioSeconds+250ms resta come fallback.
+  Q_INVOKABLE void notifyRadioTxFinished ();
   Q_INVOKABLE bool ingestRadioFrameBytes (QByteArray const& frameBytes,
                                           QString const& remoteCall,
                                           quint64 nowMs,
@@ -594,7 +657,33 @@ private:
                                         QVariantMap const& planExtras,
                                         quint64 nowMs);
   bool isLiveChannelBusy (quint64 nowMs) const;
-  void observeRxEnergy (std::vector<float> const& samples, quint64 nowMs);
+  // P0b: il calcolo dell'energia avviene sul worker; qui si applica il
+  // risultato allo stato LBT (main). Sostituisce observeRxEnergy(samples).
+  void applyObservedRxEnergy (double rms, double peak, quint64 nowMs);
+  void onWorkerFrameDecoded (QByteArray const& frameBytes,
+                             QString const& remoteCall,
+                             quint64 nowMs);
+  void onWorkerW2300FrameDecoded (QByteArray const& frameBytes,
+                                  decodium::ft2link::W2300DecodeMetrics const& metrics,
+                                  QString const& remoteCall,
+                                  quint64 nowMs);
+
+  // Harness di misura P0a (opt-in via env DECODIUM_FT2LINK_TIMING): registra il
+  // costo main-thread di ingestRxSamples e logga p50/p99/max ogni 200 chiamate su
+  // [Ft2Link]. Baseline per giustificare/validare il worker-move (P0b).
+  void recordIngestTiming (std::chrono::steady_clock::time_point start);
+  bool m_ingestTimingEnabled {false};
+  std::vector<qint64> m_ingestDurationsUs;
+
+  // P0b worker-move: buffer RX live, throttle e stato busy di decodifica sono
+  // MIGRATI in FT2LinkDecodeWorker (unico proprietario). Vedi il contratto
+  // thread-boundary sopra la classe worker.
+  FT2LinkDecodeWorker* m_decodeWorker {nullptr};
+  QThread m_decodeThread;
+  // P0b watchdog: rileva coda TX radio bloccata (item in testa piu' vecchio di
+  // kRadioQueueStuckMs) e la sblocca forzando il drain. Rete di sicurezza
+  // contro bug futuri di scheduling (LBT/busy), non un percorso normale.
+  QTimer m_radioQueueWatchdog;
   QStringList detectAlertTags (QString const& text) const;
   void recordBroadcast (QString const& fromCall,
                         QString const& text,
@@ -762,6 +851,7 @@ private:
     quint16 sessionId {0};
     bool cancelIfNoOutbound {false};
     bool priority {false};
+    quint64 enqueuedAtMs {0};  // per hold-off LBT massimo
   };
 
   struct LiveOutboundRetry
@@ -1084,9 +1174,6 @@ private:
   QString m_lastLocalStoreError;
   bool m_localStorePersistenceEnabled {false};
   bool m_loadingLocalStore {false};
-  std::vector<float> m_liveNarrowRxSamples;
-  decodium::ft2link::W500RxAudioBuffer m_liveW500Rx;
-  decodium::ft2link::W2300RxAudioBuffer m_liveW2300Rx;
   std::deque<RadioTxQueueItem> m_radioTxQueue;
   QTimer m_radioTxQueueTimer;
   QTimer m_liveOutboundRetryTimer;

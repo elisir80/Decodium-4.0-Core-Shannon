@@ -1319,6 +1319,13 @@ int main(int argc, char* argv[])
                      [&ft2Link](QVector<short> const& samples, quint64 nowMs) {
                          ft2Link.ingestRxSamples(samples, QString {}, nowMs);
                      });
+    // P0b worker-move (1.0.458): il decode live FT2-Link gira su un QThread
+    // dedicato LowPriority; il main fa solo il dispatch dei chunk.
+    ft2Link.startDecodeWorker();
+    // P0b TX closed-loop (1.0.459): la coda TX FT2-Link avanza sull'evento
+    // REALE di fine trasmissione, non solo sulla stima di durata.
+    QObject::connect(&bridge, &DecodiumBridge::ft2LinkTxFinished,
+                     &ft2Link, &FT2LinkQmlAdapter::notifyRadioTxFinished);
     app.setProperty("decodiumBridge", QVariant::fromValue<QObject*>(&bridge));
 #ifdef Q_OS_WIN
     QObject::connect(&bridge, &DecodiumBridge::mainQmlReadyForNativeWindowing, &app,

@@ -24,6 +24,7 @@
 #include <QUrlQuery>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -2509,6 +2510,56 @@ FT2LinkQmlAdapter::FT2LinkQmlAdapter (QObject* parent)
   m_lastOperatorActivityMs =
       static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
 
+  // Harness di misura P0a (opt-in): abilita il timing di ingestRxSamples.
+  m_ingestTimingEnabled =
+      qEnvironmentVariableIsSet ("DECODIUM_FT2LINK_TIMING");
+
+  // P0b worker-move: il worker nasce SUL MAIN (comportamento sincrono storico,
+  // usato dai test). startDecodeWorker() lo sposta sul QThread dedicato e le
+  // stesse connessioni AutoConnection diventano queued automaticamente.
+  qRegisterMetaType<decodium::ft2link::W2300DecodeMetrics> ();
+  m_decodeWorker = new FT2LinkDecodeWorker;
+  connect (m_decodeWorker, &FT2LinkDecodeWorker::energyObserved,
+           this, &FT2LinkQmlAdapter::applyObservedRxEnergy);
+  connect (m_decodeWorker, &FT2LinkDecodeWorker::frameDecoded,
+           this, &FT2LinkQmlAdapter::onWorkerFrameDecoded);
+  connect (m_decodeWorker, &FT2LinkDecodeWorker::w2300FrameDecoded,
+           this, &FT2LinkQmlAdapter::onWorkerW2300FrameDecoded);
+  connect (m_decodeWorker, &FT2LinkDecodeWorker::resyncNeeded,
+           this, [this] {
+    setTransportState (QStringLiteral ("RX resync"));
+  });
+
+  // P0b watchdog coda TX radio: se l'item in testa attende oltre
+  // kRadioQueueStuckMs (ben oltre l'hold-off LBT di 4s e qualsiasi burst),
+  // qualcosa nello scheduling si e' inceppato: logga, azzera il busy e forza
+  // il drain. Self-healing, mai parte del percorso normale.
+  m_radioQueueWatchdog.setInterval (5000);
+  connect (&m_radioQueueWatchdog, &QTimer::timeout, this, [this] {
+    if (m_radioTxQueue.empty ())
+      {
+        return;
+      }
+    constexpr quint64 kRadioQueueStuckMs = 20000u;
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    quint64 const oldest = m_radioTxQueue.front ().enqueuedAtMs;
+    if (oldest == 0u || nowMs < oldest + kRadioQueueStuckMs)
+      {
+        return;
+      }
+    qWarning ("%s", qUtf8Printable (
+        QStringLiteral ("[Ft2Link] WATCHDOG: coda TX radio ferma da %1ms "
+                        "(item=%2, busyUntil=%3 now=%4) - forzo il drain")
+            .arg (nowMs - oldest)
+            .arg (m_radioTxQueue.front ().displayMessage)
+            .arg (m_radioTxBusyUntilMs)
+            .arg (nowMs)));
+    m_radioTxBusyUntilMs = 0u;
+    drainRadioTxQueue (nowMs);
+  });
+  m_radioQueueWatchdog.start ();
+
   auto persistOnChange = [this] {
     persistLocalStore ();
   };
@@ -2591,6 +2642,28 @@ FT2LinkQmlAdapter::~FT2LinkQmlAdapter ()
     {
       QCoreApplication::instance ()->removeEventFilter (this);
     }
+  // P0b: shutdown ordinato del worker di decodifica.
+  if (m_decodeThread.isRunning ())
+    {
+      m_decodeThread.quit ();
+      m_decodeThread.wait (2000);
+    }
+  delete m_decodeWorker;
+  m_decodeWorker = nullptr;
+}
+
+void FT2LinkQmlAdapter::startDecodeWorker ()
+{
+  if (!m_decodeWorker || m_decodeThread.isRunning ())
+    {
+      return;
+    }
+  m_decodeThread.setObjectName (QStringLiteral ("Ft2LinkDecode"));
+  m_decodeWorker->moveToThread (&m_decodeThread);
+  // LowPriority: il decode FT2-Link tollera latenza; non deve mai contendere
+  // con cattura audio / pool FT8-FT4. MAI HighPriority su Windows (preempt ->
+  // audio watchdog, lezione storica del progetto).
+  m_decodeThread.start (QThread::LowPriority);
 }
 
 bool FT2LinkQmlAdapter::eventFilter (QObject* watched, QEvent* event)
@@ -5000,40 +5073,159 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
       return false;
     }
 
+  auto const _ingestStart = std::chrono::steady_clock::now ();
+
+  // P0b worker-move: sul MAIN resta solo la lettura dello stato sessioni
+  // (m_model e' di proprieta' del main) e il dispatch del chunk al worker.
+  // TUTTO il costo (conversione float, energia, DSP narrow/wide) vive in
+  // FT2LinkDecodeWorker::processChunk. In modalita' sincrona (worker sul main,
+  // test) la chiamata e' diretta e la semantica storica e' preservata.
+  bool wideSessionActive = false;
+  std::vector<AppSession> const sessions = m_model.sessions ();
+  for (AppSession const& session : sessions)
+    {
+      if (session.state == AppSessionState::Connected
+          && (session.negotiated.profile == Profile::Wide500
+              || session.negotiated.profile == Profile::Wide2300))
+        {
+          wideSessionActive = true;
+          break;
+        }
+    }
+
+  bool result = true;
+  if (m_decodeThread.isRunning ())
+    {
+      FT2LinkDecodeWorker* worker = m_decodeWorker;
+      QMetaObject::invokeMethod (
+          worker,
+          [worker, samples, remoteCall, nowMs, wideSessionActive] {
+            worker->processChunk (samples, remoteCall, nowMs,
+                                  wideSessionActive);
+          },
+          Qt::QueuedConnection);
+    }
+  else
+    {
+      result = m_decodeWorker->processChunk (
+          samples, remoteCall, nowMs, wideSessionActive);
+    }
+  recordIngestTiming (_ingestStart);
+  return result;
+}
+
+void FT2LinkQmlAdapter::onWorkerFrameDecoded (QByteArray const& frameBytes,
+                                              QString const& remoteCall,
+                                              quint64 nowMs)
+{
+  // Contratto P0b: l'ingest ARQ/sessioni gira SOLO sul main.
+  Q_ASSERT (QThread::currentThread () == thread ());
+  ingestRadioFrameBytes (frameBytes, remoteCall, nowMs, true);
+}
+
+void FT2LinkQmlAdapter::onWorkerW2300FrameDecoded (
+    QByteArray const& frameBytes,
+    decodium::ft2link::W2300DecodeMetrics const& metrics,
+    QString const& remoteCall,
+    quint64 nowMs)
+{
+  Q_ASSERT (QThread::currentThread () == thread ());
+  Frame frame;
+  std::string error;
+  if (decodium::ft2link::parseFrame (toBytes (frameBytes), &frame, &error))
+    {
+      observeLiveW2300Metrics (frame, metrics, nowMs);
+    }
+  ingestRadioFrameBytes (frameBytes, remoteCall, nowMs, true);
+}
+
+FT2LinkDecodeWorker::FT2LinkDecodeWorker (QObject* parent)
+  : QObject {parent}
+{
+}
+
+bool FT2LinkDecodeWorker::busyNow (quint64 nowMs) const
+{
+  return nowMs < m_busyUntilMs;
+}
+
+void FT2LinkDecodeWorker::observeEnergy (std::vector<float> const& chunk,
+                                         quint64 nowMs)
+{
+  double sumSquares = 0.0;
+  double peak = 0.0;
+  for (float sample : chunk)
+    {
+      double const value = static_cast<double> (sample);
+      sumSquares += value * value;
+      peak = std::max (peak, std::fabs (value));
+    }
+  double const rms = std::sqrt (
+      sumSquares / static_cast<double> (chunk.size ()));
+
+  // Stesse soglie dello stato LBT sul main (applyObservedRxEnergy): il worker
+  // tiene una copia LOCALE dello stato busy per il gating del decode; il main
+  // riceve rms/peak via segnale per LBT/TX.
+  constexpr double kBusyRmsThreshold = 0.012;
+  constexpr double kBusyPeakThreshold = 0.080;
+  constexpr quint64 kBusyHoldMs = 750u;
+  if (rms >= kBusyRmsThreshold || peak >= kBusyPeakThreshold)
+    {
+      m_busyUntilMs = std::max (m_busyUntilMs, nowMs + kBusyHoldMs);
+    }
+  emit energyObserved (rms, peak, nowMs);
+}
+
+bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
+                                        QString const& remoteCall,
+                                        quint64 nowMs,
+                                        bool wideSessionActive)
+{
+  if (samples.isEmpty ())
+    {
+      return false;
+    }
+
   std::vector<float> chunk;
   chunk.reserve (static_cast<std::size_t> (samples.size ()));
   for (short sample : samples)
     {
       chunk.push_back (static_cast<float> (sample) / 32768.0f);
     }
-  observeRxEnergy (chunk, nowMs);
+  observeEnergy (chunk, nowMs);
 
   bool decodedAny = false;
-  m_liveNarrowRxSamples.insert (
-      m_liveNarrowRxSamples.end (), chunk.begin (), chunk.end ());
-  // 1.0.450 iu8lmc fix (freeze FT2-LINK): decodeNarrowFrameWaveformWithMetrics e' DSP
-  // pesante sul MAIN THREAD ~50x/sec, col costo che cresce col buffer (fino a 5s) ->
-  // stall main-thread fino a 14s (freeze in modo FT2-LINK). Su canale MUTO non c'e'
-  // alcun frame da decodificare: salta il DSP e tieni una finestra scorrevole del buffer.
-  // Decodifica solo quando l'energia RX segnala canale attivo (isLiveChannelBusy, hold
-  // 750ms). FT2-Link e' point-to-point tra peer connessi (segnale presente quando TX).
-  bool const channelBusy = isLiveChannelBusy (nowMs);
-  if (!channelBusy && m_liveNarrowRxSamples.size () > 72000u)
+  m_narrowRx.insert (m_narrowRx.end (), chunk.begin (), chunk.end ());
+  // 1.0.450 iu8lmc fix (freeze FT2-LINK): su canale MUTO non c'e' alcun frame da
+  // decodificare: salta il DSP e tieni una finestra scorrevole del buffer.
+  // 1.0.455: throttle — decodifica al piu' ogni kLiveDecodeThrottleMs (l'audio
+  // continua ad accumularsi); latenza trascurabile per un modo a frame lunghi.
+  bool const channelBusy = busyNow (nowMs);
+  constexpr quint64 kLiveDecodeThrottleMs = 200u;
+  bool const decodeDue =
+      (nowMs - m_lastDecodeMs) >= kLiveDecodeThrottleMs
+      || nowMs < m_lastDecodeMs;  // guardia wrap/reset del clock
+  bool const runDecode = channelBusy && decodeDue;
+  if (runDecode)
     {
-      m_liveNarrowRxSamples.erase (
-          m_liveNarrowRxSamples.begin (),
-          m_liveNarrowRxSamples.begin ()
-              + static_cast<std::vector<float>::difference_type> (
-                  m_liveNarrowRxSamples.size () - 72000u));
+      m_lastDecodeMs = nowMs;
     }
-  for (int attempt = 0; channelBusy && attempt < 2; ++attempt)
+  if (!channelBusy && m_narrowRx.size () > 72000u)
+    {
+      m_narrowRx.erase (
+          m_narrowRx.begin (),
+          m_narrowRx.begin ()
+              + static_cast<std::vector<float>::difference_type> (
+                  m_narrowRx.size () - 72000u));
+    }
+  for (int attempt = 0; runDecode && attempt < 2; ++attempt)
     {
       Frame decoded;
       decodium::ft2link::NarrowDecodeMetrics metrics;
       std::string decodeError;
       decodium::ft2link::NarrowWaveformConfig config;
       if (!decodium::ft2link::decodeNarrowFrameWaveformWithMetrics (
-              m_liveNarrowRxSamples, &decoded, &metrics, config, &decodeError))
+              m_narrowRx, &decoded, &metrics, config, &decodeError))
         {
           break;
         }
@@ -5042,100 +5234,111 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
       std::size_t const nsps = static_cast<std::size_t> (
           config.sampleRate / config.symbolRate + 0.5);
       std::size_t const consumed = std::min (
-          m_liveNarrowRxSamples.size (),
+          m_narrowRx.size (),
           metrics.sampleOffset + metrics.symbolCount * nsps);
-      m_liveNarrowRxSamples.erase (
-          m_liveNarrowRxSamples.begin (),
-          m_liveNarrowRxSamples.begin ()
+      m_narrowRx.erase (
+          m_narrowRx.begin (),
+          m_narrowRx.begin ()
               + static_cast<std::vector<float>::difference_type> (consumed));
 
-      if (!ingestRadioFrameBytes (
-              toByteArray (decodium::ft2link::serializeFrame (decoded)),
-              remoteCall,
-              nowMs,
-              true))
-        {
-          return false;
-        }
+      emit frameDecoded (
+          toByteArray (decodium::ft2link::serializeFrame (decoded)),
+          remoteCall,
+          nowMs);
     }
 
-  bool hasConnectedWideSession = false;
-  std::vector<AppSession> const sessions = m_model.sessions ();
-  for (AppSession const& session : sessions)
-    {
-      if (session.state == AppSessionState::Connected
-          && (session.negotiated.profile == Profile::Wide500
-              || session.negotiated.profile == Profile::Wide2300))
-        {
-          hasConnectedWideSession = true;
-          break;
-        }
-    }
-  if (!hasConnectedWideSession)
+  if (!wideSessionActive)
     {
       constexpr std::size_t kMaxBufferedNarrowRxSamples = 240000u;
-      if (m_liveNarrowRxSamples.size () > kMaxBufferedNarrowRxSamples)
+      if (m_narrowRx.size () > kMaxBufferedNarrowRxSamples)
         {
-          m_liveNarrowRxSamples.clear ();
+          m_narrowRx.clear ();
         }
       return decodedAny;
     }
 
-  m_liveW500Rx.append (chunk);
-  m_liveW2300Rx.append (chunk);
+  m_w500Rx.append (chunk);
+  m_w2300Rx.append (chunk);
 
-  for (int attempt = 0; attempt < 4; ++attempt)
+  for (int attempt = 0; runDecode && attempt < 4; ++attempt)
     {
       Frame decoded;
       decodium::ft2link::W2300DecodeMetrics metrics;
       std::string decodeError;
-      if (!m_liveW2300Rx.decodeNext (&decoded, &metrics, &decodeError))
+      if (!m_w2300Rx.decodeNext (&decoded, &metrics, &decodeError))
         {
           break;
         }
       decodedAny = true;
-      observeLiveW2300Metrics (decoded, metrics, nowMs);
-      if (!ingestRadioFrameBytes (
-              toByteArray (decodium::ft2link::serializeFrame (decoded)),
-              remoteCall,
-              nowMs,
-              true))
-        {
-          return false;
-        }
+      emit w2300FrameDecoded (
+          toByteArray (decodium::ft2link::serializeFrame (decoded)),
+          metrics,
+          remoteCall,
+          nowMs);
     }
 
-  for (int attempt = 0; attempt < 4; ++attempt)
+  for (int attempt = 0; runDecode && attempt < 4; ++attempt)
     {
       Frame decoded;
       decodium::ft2link::W500DecodeMetrics metrics;
       std::string decodeError;
-      if (!m_liveW500Rx.decodeNext (&decoded, &metrics, &decodeError))
+      if (!m_w500Rx.decodeNext (&decoded, &metrics, &decodeError))
         {
           break;
         }
       decodedAny = true;
-      if (!ingestRadioFrameBytes (
-              toByteArray (decodium::ft2link::serializeFrame (decoded)),
-              remoteCall,
-              nowMs,
-              true))
-        {
-          return false;
-        }
+      emit frameDecoded (
+          toByteArray (decodium::ft2link::serializeFrame (decoded)),
+          remoteCall,
+          nowMs);
     }
 
+  // 1.0.452 iu8lmc fix (freeze FT2-Link wide): su canale muto finestra
+  // scorrevole PRE-decode; il reset 240000 resta come rete di sicurezza per il
+  // caso canale-attivo-ma-non-decodifica (garbage/RX resync).
+  constexpr std::size_t kIdleWideWindow = 72000u;      // ~finestra corta, no scan
   constexpr std::size_t kMaxBufferedRxSamples = 240000u;
-  if (!decodedAny
-      && (m_liveW500Rx.bufferedSamples () > kMaxBufferedRxSamples
-          || m_liveW2300Rx.bufferedSamples () > kMaxBufferedRxSamples))
+  if (!channelBusy)
     {
-      m_liveW500Rx.clear ();
-      m_liveW2300Rx.clear ();
-      setTransportState (QStringLiteral ("RX resync"));
+      m_w500Rx.dropToLastSamples (kIdleWideWindow);
+      m_w2300Rx.dropToLastSamples (kIdleWideWindow);
+    }
+  else if (!decodedAny
+           && (m_w500Rx.bufferedSamples () > kMaxBufferedRxSamples
+               || m_w2300Rx.bufferedSamples () > kMaxBufferedRxSamples))
+    {
+      m_w500Rx.clear ();
+      m_w2300Rx.clear ();
+      emit resyncNeeded ();
     }
 
   return decodedAny;
+}
+
+void FT2LinkQmlAdapter::recordIngestTiming (
+    std::chrono::steady_clock::time_point start)
+{
+  if (!m_ingestTimingEnabled)
+    {
+      return;
+    }
+  qint64 const us = std::chrono::duration_cast<std::chrono::microseconds> (
+      std::chrono::steady_clock::now () - start).count ();
+  m_ingestDurationsUs.push_back (us);
+  if (m_ingestDurationsUs.size () < 200u)
+    {
+      return;
+    }
+  std::vector<qint64> sorted = m_ingestDurationsUs;
+  std::sort (sorted.begin (), sorted.end ());
+  std::size_t const n = sorted.size ();
+  qint64 const p50 = sorted[n / 2];
+  qint64 const p99 = sorted[(n * 99u) / 100u];
+  qint64 const mx = sorted.back ();
+  qInfo ("%s", qUtf8Printable (
+      QStringLiteral ("[Ft2Link] ingest timing (us): n=%1 p50=%2 p99=%3 max=%4")
+          .arg (n).arg (p50).arg (p99).arg (mx)));
+  m_ingestDurationsUs.clear ();
 }
 
 bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
@@ -5143,6 +5346,8 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
                                                quint64 nowMs,
                                                bool autoAck)
 {
+  // Contratto P0b: ARQ/sessioni/mailbox girano SOLO sul main thread.
+  Q_ASSERT (QThread::currentThread () == thread ());
   Frame frame;
   std::string error;
   if (!decodium::ft2link::parseFrame (toBytes (frameBytes), &frame, &error))
@@ -5150,6 +5355,19 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       setLastError (QString::fromStdString (error));
       return false;
     }
+
+  // Osservabilita RX: ogni frame decodificato da RF lascia una traccia
+  // greppabile ([Ft2Link] RX frame) — l'unico modo per verificare la
+  // ricezione in loopback e sul campo (i tester riportano i log).
+  qInfo ("%s", qUtf8Printable (
+      QStringLiteral (
+          "[Ft2Link] RX frame decoded: type=%1 profile=%2 from=%3 bytes=%4")
+          .arg (QString::fromStdString (
+              decodium::ft2link::frameTypeName (frame.type)))
+          .arg (QString::fromStdString (
+              decodium::ft2link::profileName (frame.profile)))
+          .arg (remoteCall.isEmpty () ? QStringLiteral ("?") : remoteCall)
+          .arg (frameBytes.size ())));
 
   if (frame.type == decodium::ft2link::FrameType::Beacon)
     {
@@ -14075,25 +14293,13 @@ bool FT2LinkQmlAdapter::isLiveChannelBusy (quint64 nowMs) const
   return m_liveChannelBusy && nowMs < m_liveChannelBusyUntilMs;
 }
 
-void FT2LinkQmlAdapter::observeRxEnergy (
-    std::vector<float> const& samples,
-    quint64 nowMs)
+void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
+                                               double peak,
+                                               quint64 nowMs)
 {
-  if (samples.empty ())
-    {
-      return;
-    }
-
-  double sumSquares = 0.0;
-  double peak = 0.0;
-  for (float sample : samples)
-    {
-      double const value = static_cast<double> (sample);
-      sumSquares += value * value;
-      peak = std::max (peak, std::fabs (value));
-    }
-  double const rms = std::sqrt (
-      sumSquares / static_cast<double> (samples.size ()));
+  // P0b: il calcolo rms/peak avviene sul worker (observeEnergy); qui (main) si
+  // applica il risultato allo stato LBT usato dai path TX. Q_ASSERT contratto.
+  Q_ASSERT (QThread::currentThread () == thread ());
 
   constexpr double kBusyRmsThreshold = 0.012;
   constexpr double kBusyPeakThreshold = 0.080;
@@ -14102,6 +14308,16 @@ void FT2LinkQmlAdapter::observeRxEnergy (
       || peak >= kBusyPeakThreshold;
   quint64 const previousBusyUntil = m_liveChannelBusyUntilMs;
   bool const previousBusy = isLiveChannelBusy (nowMs);
+  if (energyBusy && !previousBusy)
+    {
+      // Osservabilita RX: fronte di salita del canale (silenzio -> energia).
+      // Distingue "cavo/antenna muta" da "sente il burst ma non decodifica".
+      qInfo ("%s", qUtf8Printable (
+          QStringLiteral (
+              "[Ft2Link] RX channel busy: rms=%1 peak=%2")
+              .arg (rms, 0, 'g', 3)
+              .arg (peak, 0, 'g', 3)));
+    }
   if (energyBusy)
     {
       m_liveChannelBusyUntilMs = std::max (
@@ -14213,6 +14429,7 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
   quint64 const effectiveNow = nowMs == 0u
       ? static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ())
       : nowMs;
+  item.enqueuedAtMs = effectiveNow;
   bool const channelBusy = isLiveChannelBusy (effectiveNow);
   if (m_radioTxQueue.empty () && m_radioTxBusyUntilMs <= effectiveNow
       && !channelBusy)
@@ -14259,6 +14476,33 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
   scheduleRadioQueueDrain (effectiveNow);
 }
 
+void FT2LinkQmlAdapter::notifyRadioTxFinished ()
+{
+  Q_ASSERT (QThread::currentThread () == thread ());
+  quint64 const nowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  // P0b TX closed-loop: la fine REALE della TX (playback completato, abort o
+  // avvio fallito) e' l'autorita' per l'avanzamento coda. La stima
+  // audioSeconds+250ms impostata all'emissione resta come fallback se questo
+  // segnale non arriva. Il drift stima-vs-reale (task P0a) va nel diagnostic:
+  // positivo = stima lunga (tempo sprecato), negativo = stima CORTA (rischio
+  // TX sovrapposta al proprio coda-audio: da correggere se ricorrente).
+  if (m_radioTxBusyUntilMs != 0u)
+    {
+      qint64 const driftMs = static_cast<qint64> (m_radioTxBusyUntilMs)
+                             - static_cast<qint64> (nowMs);
+      qInfo ("%s", qUtf8Printable (
+          QStringLiteral (
+              "[Ft2Link] radio TX finished: est-vs-real drift=%1ms")
+              .arg (driftMs)));
+      if (m_radioTxBusyUntilMs > nowMs)
+        {
+          m_radioTxBusyUntilMs = nowMs;  // rilascio anticipato
+        }
+    }
+  drainRadioTxQueue (nowMs);
+}
+
 void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
 {
   quint64 const effectiveNow = nowMs == 0u
@@ -14269,7 +14513,22 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
       scheduleRadioQueueDrain (effectiveNow);
       return;
     }
-  if (isLiveChannelBusy (effectiveNow))
+  // Hold-off LBT massimo: la LBT non deve bloccare all'infinito una TX richiesta
+  // dall'operatore. Su un'antenna HF reale il rumore di banda tiene il canale
+  // "occupato" costantemente (kBusyRmsThreshold molto basso) -> senza questo il
+  // beacon non partirebbe MAI (bug on-air: "LBT BUSY" perenne, beacon TX non parte).
+  // Se l'item in testa attende da >= kMaxLbtHoldMs, trasmetti comunque.
+  constexpr quint64 kMaxLbtHoldMs = 4000u;
+  bool forceThroughLbt = false;
+  if (!m_radioTxQueue.empty ())
+    {
+      quint64 const oldest = m_radioTxQueue.front ().enqueuedAtMs;
+      if (oldest != 0u && effectiveNow >= oldest + kMaxLbtHoldMs)
+        {
+          forceThroughLbt = true;
+        }
+    }
+  if (!forceThroughLbt && isLiveChannelBusy (effectiveNow))
     {
       setTransportState (QStringLiteral ("LBT wait"));
       scheduleRadioQueueDrain (effectiveNow);

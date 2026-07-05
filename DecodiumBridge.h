@@ -1395,6 +1395,9 @@ signals:
                                  float freqMaxHz,
                                  quint64 serial);
     void ft2LinkRxSamplesReady(QVector<short> samples, quint64 nowMs);
+    // P0b 1.0.459: fine REALE della TX FT2-Link (playback completato,
+    // abort/stop, o avvio fallito) - chiude il loop della coda TX adapter.
+    void ft2LinkTxFinished();
     // TX — collegano bridge → Modulator (via QueuedConnection)
     void transmitFrequency(double freq);
     void sendMessage(QString mode, unsigned symbolsLength, double framesPerSymbol,

@@ -620,6 +620,60 @@ bool startsWithSymbols (std::vector<std::uint8_t> const& symbols,
   return true;
 }
 
+// P1 iu8lmc (acquisizione soft, dal banco soglia-dB): distanza di Hamming in
+// BIT tra lo stream di simboli e il pattern atteso, con early-exit oltre
+// abortAbove. L'acquisizione W2300 a match ESATTO su preamble+sync (24
+// simboli-byte = 192 bit non protetti dalla ripetizione) era il collo di
+// bottiglia misurato: 1 solo bit errato uccideva l'aggancio — per questo
+// ROBUST rendeva quasi come FAST e c'erano fallimenti anche a +18/+24 dB.
+// Il match tollerante lascia al CRC (fisico+logico) il rigetto dei falsi.
+std::size_t symbolBitErrors (std::vector<std::uint8_t> const& symbols,
+                             std::size_t offset,
+                             std::vector<std::uint8_t> const& expected,
+                             std::size_t abortAbove)
+{
+  if (symbols.size () < offset + expected.size ())
+    {
+      return abortAbove + 1u;
+    }
+  std::size_t errors = 0;
+  for (std::size_t i = 0; i < expected.size (); ++i)
+    {
+      std::uint8_t diff = static_cast<std::uint8_t> (
+          symbols[offset + i] ^ expected[i]);
+      while (diff != 0u)
+        {
+          errors += static_cast<std::size_t> (diff & 0x01u);
+          diff = static_cast<std::uint8_t> (diff >> 1);
+        }
+      if (errors > abortAbove)
+        {
+          return errors;
+        }
+    }
+  return errors;
+}
+
+// Budget errori-bit per l'header W2300 (preamble 16 + sync 8 simboli = 192
+// bit): ~10%. Un match casuale ne sbaglierebbe ~96 — margine enorme; i
+// candidati borderline vengono comunque validati dal CRC.
+constexpr std::size_t kW2300HeaderMaxBitErrors = 20u;
+
+bool w2300HeaderMatchesSoft (std::vector<std::uint8_t> const& symbols,
+                             std::size_t start)
+{
+  std::size_t const preambleErrors = symbolBitErrors (
+      symbols, start, w2300PreambleSymbols (), kW2300HeaderMaxBitErrors);
+  if (preambleErrors > kW2300HeaderMaxBitErrors)
+    {
+      return false;
+    }
+  std::size_t const syncErrors = symbolBitErrors (
+      symbols, start + w2300PreambleSymbols ().size (), w2300SyncSymbols (),
+      kW2300HeaderMaxBitErrors - preambleErrors);
+  return preambleErrors + syncErrors <= kW2300HeaderMaxBitErrors;
+}
+
 bool parseW2300BurstHeader (std::vector<std::uint8_t> const& symbols,
                             std::size_t start,
                             W2300BurstInfo* info,
@@ -637,8 +691,10 @@ bool parseW2300BurstHeader (std::vector<std::uint8_t> const& symbols,
       setError (error, "W2300 symbol stream is too short");
       return false;
     }
-  if (!startsWithSymbols (symbols, start, w2300PreambleSymbols ())
-      || !startsWithSymbols (symbols, start + w2300PreambleSymbols ().size (), w2300SyncSymbols ()))
+  // P1 iu8lmc: match tollerante (vedi w2300HeaderMatchesSoft) al posto del
+  // match esatto — l'header non e' protetto dalla ripetizione e il CRC a
+  // valle rigetta i falsi positivi.
+  if (!w2300HeaderMatchesSoft (symbols, start))
     {
       setError (error, "W2300 preamble or sync mismatch");
       return false;
@@ -995,9 +1051,10 @@ W2300DecodeCandidate extractW2300PacketFromDecisions (
 
   for (std::size_t start = 0; start + minimumHeaderSymbols <= symbols.size (); ++start)
     {
-      if (!startsWithSymbols (symbols, start, w2300PreambleSymbols ())
-          || !startsWithSymbols (symbols, start + w2300PreambleSymbols ().size (),
-                                 w2300SyncSymbols ()))
+      // P1 iu8lmc: filtro di aggancio tollerante (Hamming sui 192 bit
+      // dell'header) al posto del match esatto; early-exit interno tiene lo
+      // scan economico e il CRC a valle elimina i falsi.
+      if (!w2300HeaderMatchesSoft (symbols, start))
         {
           continue;
         }
@@ -1375,62 +1432,104 @@ NarrowDecodeCandidate extractNarrowFrameFromDecisions (
     std::string* error)
 {
   NarrowDecodeCandidate best;
-  std::vector<std::uint8_t> const bits = narrowMajorityBits (decisions, repetition);
-  std::vector<std::uint8_t> const bytes = narrowBytesFromBits (bits);
-  std::size_t const prefixBytes = narrowPreambleBytes ().size ()
-      + narrowSyncBytes ().size ();
-  std::size_t const minimumBytes = prefixBytes + 6u;
-  if (bytes.size () < minimumBytes)
+  if (repetition <= 0)
     {
       return best;
     }
+  std::size_t const prefixBytes = narrowPreambleBytes ().size ()
+      + narrowSyncBytes ().size ();
+  std::size_t const minimumBytes = prefixBytes + 6u;
 
-  for (std::size_t startByte = 0; startByte + minimumBytes <= bytes.size (); ++startByte)
+  // iu8lmc fix P1 (trovato dal banco soglia-dB): il burst puo' iniziare a
+  // QUALSIASI simbolo dello stream RX, ma la votazione a gruppi (repetition)
+  // e l'impacchettamento bit->byte partivano sempre dall'indice 0: il
+  // preambolo diventava visibile nello stream di byte SOLO se il burst era
+  // allineato a multipli di repetition*8 simboli — di fatto solo offset 0
+  // (waveform pristine dei test). On-air, con storia/rumore nel buffer prima
+  // del burst, il preambolo non veniva MAI trovato ("NARROW burst not found").
+  // Fix: prova TUTTI gli allineamenti (repetition fasi di voto x 8 fasi bit);
+  // il costo extra e' solo lo scan dei byte, il DSP dei simboli e' invariato.
+  for (int repOffset = 0; repOffset < repetition; ++repOffset)
     {
-      if (!startsWithBytes (bytes, startByte, narrowPreambleBytes ())
-          || !startsWithBytes (bytes, startByte + narrowPreambleBytes ().size (),
-                               narrowSyncBytes ()))
+      if (static_cast<std::size_t> (repOffset) >= decisions.size ())
         {
-          continue;
+          break;
         }
-
-      std::size_t const packetOffset = startByte + prefixBytes;
-      if (bytes.size () < packetOffset + 6u
-          || bytes[packetOffset] != kNarrowPacketMagic0
-          || bytes[packetOffset + 1u] != kNarrowPacketMagic1)
+      std::vector<NarrowSymbolDecision> const shiftedDecisions (
+          decisions.begin () + repOffset, decisions.end ());
+      std::vector<std::uint8_t> const allBits =
+          narrowMajorityBits (shiftedDecisions, repetition);
+      for (std::size_t bitOffset = 0;
+           bitOffset < 8u && bitOffset < allBits.size (); ++bitOffset)
         {
-          continue;
-        }
-      std::size_t const packetBytes = 4u + static_cast<std::size_t> (bytes[packetOffset + 3u]) + 2u;
-      std::size_t const requiredBytes = prefixBytes + packetBytes;
-      if (startByte + requiredBytes > bytes.size ())
-        {
-          continue;
-        }
-
-      std::vector<std::uint8_t> packet (
-          bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset),
-          bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset + packetBytes));
-      Frame frame;
-      if (narrowPacketToFrame (packet, &frame, error))
-        {
-          NarrowDecodeCandidate candidate;
-          candidate.ok = true;
-          candidate.frame = frame;
-          candidate.metrics.sampleOffset = samplePhase
-              + startByte * 8u * static_cast<std::size_t> (repetition)
-                  * static_cast<std::size_t> (nsps);
-          candidate.metrics.symbolOffset = startByte * 8u
-              * static_cast<std::size_t> (repetition);
-          candidate.metrics.symbolCount = requiredBytes * 8u
-              * static_cast<std::size_t> (repetition);
-          candidate.metrics.packetBytes = packet.size ();
-          candidate.metrics.quality = averageNarrowDecisionQuality (
-              decisions, candidate.metrics.symbolOffset, candidate.metrics.symbolCount);
-          candidate.metrics.bitRepetition = repetition;
-          if (!best.ok || candidate.metrics.quality > best.metrics.quality)
+          std::vector<std::uint8_t> const bits (
+              allBits.begin ()
+                  + static_cast<std::vector<std::uint8_t>::difference_type> (
+                      bitOffset),
+              allBits.end ());
+          std::vector<std::uint8_t> const bytes = narrowBytesFromBits (bits);
+          if (bytes.size () < minimumBytes)
             {
-              best = candidate;
+              continue;
+            }
+
+          for (std::size_t startByte = 0;
+               startByte + minimumBytes <= bytes.size (); ++startByte)
+            {
+              if (!startsWithBytes (bytes, startByte, narrowPreambleBytes ())
+                  || !startsWithBytes (bytes,
+                                       startByte + narrowPreambleBytes ().size (),
+                                       narrowSyncBytes ()))
+                {
+                  continue;
+                }
+
+              std::size_t const packetOffset = startByte + prefixBytes;
+              if (bytes.size () < packetOffset + 6u
+                  || bytes[packetOffset] != kNarrowPacketMagic0
+                  || bytes[packetOffset + 1u] != kNarrowPacketMagic1)
+                {
+                  continue;
+                }
+              std::size_t const packetBytes =
+                  4u + static_cast<std::size_t> (bytes[packetOffset + 3u]) + 2u;
+              std::size_t const requiredBytes = prefixBytes + packetBytes;
+              if (startByte + requiredBytes > bytes.size ())
+                {
+                  continue;
+                }
+
+              std::vector<std::uint8_t> packet (
+                  bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset),
+                  bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset + packetBytes));
+              Frame frame;
+              if (narrowPacketToFrame (packet, &frame, error))
+                {
+                  // Offset assoluto in simboli dello stream ORIGINALE:
+                  // fase di voto + (fase bit + byte) convertiti in simboli.
+                  std::size_t const startSymbol =
+                      static_cast<std::size_t> (repOffset)
+                      + (bitOffset + startByte * 8u)
+                            * static_cast<std::size_t> (repetition);
+                  NarrowDecodeCandidate candidate;
+                  candidate.ok = true;
+                  candidate.frame = frame;
+                  candidate.metrics.sampleOffset = samplePhase
+                      + startSymbol * static_cast<std::size_t> (nsps);
+                  candidate.metrics.symbolOffset = startSymbol;
+                  candidate.metrics.symbolCount = requiredBytes * 8u
+                      * static_cast<std::size_t> (repetition);
+                  candidate.metrics.packetBytes = packet.size ();
+                  candidate.metrics.quality = averageNarrowDecisionQuality (
+                      decisions, candidate.metrics.symbolOffset,
+                      candidate.metrics.symbolCount);
+                  candidate.metrics.bitRepetition = repetition;
+                  if (!best.ok
+                      || candidate.metrics.quality > best.metrics.quality)
+                    {
+                      best = candidate;
+                    }
+                }
             }
         }
     }

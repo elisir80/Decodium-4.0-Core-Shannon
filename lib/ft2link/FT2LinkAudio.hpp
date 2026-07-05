@@ -164,6 +164,8 @@ public:
                    std::string* error = nullptr);
   std::size_t bufferedSamples () const;
   void clear ();
+  // 1.0.452 iu8lmc: trim finestra scorrevole PRE-decode (fix freeze FT2-Link wide).
+  void dropToLastSamples (std::size_t maxSamples);
 
 private:
   W500WaveformConfig m_config;
@@ -207,6 +209,8 @@ public:
                    std::string* error = nullptr);
   std::size_t bufferedSamples () const;
   void clear ();
+  // 1.0.452 iu8lmc: trim finestra scorrevole PRE-decode (fix freeze FT2-Link wide).
+  void dropToLastSamples (std::size_t maxSamples);
 
 private:
   W2300WaveformConfig m_config;
