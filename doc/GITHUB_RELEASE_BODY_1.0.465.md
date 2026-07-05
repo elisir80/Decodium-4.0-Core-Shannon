@@ -1,6 +1,6 @@
 # Decodium 4 FT2 1.0.465
 
-Release cumulativa dalla 1.0.449 alla 1.0.465, centrata su FT2-Link, stabilita RX/TX, workflow VarAC-like, UI integrata e pipeline release multipiattaforma.
+Release cumulativa dalla 1.0.449 alla 1.0.465, centrata su FT2-Link, stabilita RX/TX, workflow di messaggistica dati, UI integrata e pipeline release multipiattaforma.
 
 ## FT2-Link mode
 
@@ -19,7 +19,7 @@ Release cumulativa dalla 1.0.449 alla 1.0.465, centrata su FT2-Link, stabilita R
 - Deduplica dei file gia ricevuti con finestra estesa, ri-ACK dei duplicati e prevenzione di record duplicati in RX.
 - Migliorata la logica dei messaggi live in entrambe le direzioni, incluso handling dei casi in cui il peer risponde con ACK mentre il lato opposto sta ancora processando.
 
-## VarAC-like features implemented for FT2-Link
+## FT2-Link data features
 
 - Broadcast e CQ broadcast.
 - Mail, relay queue e mailbox unread.
