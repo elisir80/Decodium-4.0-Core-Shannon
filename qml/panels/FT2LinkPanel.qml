@@ -3549,6 +3549,9 @@ Rectangle {
                     }
 
                     delegate: Rectangle {
+                        // 1.0.463 iu8lmc: required property -> modelData in scope anche
+                        // negli onClicked del delegato sessione (era blank/ReferenceError).
+                        required property var modelData
                         width: sessionList.width
                         height: 44
                         radius: 3
