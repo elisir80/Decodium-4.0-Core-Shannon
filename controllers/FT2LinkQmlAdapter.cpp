@@ -1631,7 +1631,7 @@ QString rfc2822DateText (quint64 atMs)
 {
   QDateTime at = atMs > 0u
       ? QDateTime::fromMSecsSinceEpoch (static_cast<qint64> (atMs),
-                                        QTimeZone::UTC).toUTC ()
+                                        QTimeZone(QByteArrayLiteral("UTC"))).toUTC ()
       : QDateTime::currentDateTimeUtc ();
   if (!at.isValid ())
     {
@@ -1939,7 +1939,7 @@ QVariantMap pathReportMap (quint32 id,
 {
   QDateTime const at =
       QDateTime::fromMSecsSinceEpoch (static_cast<qint64> (atMs),
-                                      QTimeZone::UTC).toUTC ();
+                                      QTimeZone(QByteArrayLiteral("UTC"))).toUTC ();
   QVariantMap map;
   map.insert (QStringLiteral ("id"), id);
   map.insert (QStringLiteral ("direction"), direction);
@@ -2058,7 +2058,7 @@ QString utcMinuteText (quint64 atMs)
       return QStringLiteral ("--");
     }
   return QDateTime::fromMSecsSinceEpoch (
-      static_cast<qint64> (atMs), QTimeZone::UTC)
+      static_cast<qint64> (atMs), QTimeZone(QByteArrayLiteral("UTC")))
       .toUTC ()
       .toString (QStringLiteral ("yyyy-MM-dd HH:mm'Z'"));
 }
@@ -6567,7 +6567,7 @@ QString FT2LinkQmlAdapter::checkInMessage (QString const& city,
     {
       QDateTime const timestamp =
           QDateTime::fromMSecsSinceEpoch (
-              static_cast<qint64> (nowMs), QTimeZone::UTC);
+              static_cast<qint64> (nowMs), QTimeZone(QByteArrayLiteral("UTC")));
       QString const utc = timestamp.isValid ()
           ? timestamp.toUTC ().toString (QStringLiteral ("HHmm'Z'"))
           : QDateTime::currentDateTimeUtc ().toString (
@@ -6627,7 +6627,7 @@ QString FT2LinkQmlAdapter::expandCannedMessage (
 
   QDateTime const timestamp =
       QDateTime::fromMSecsSinceEpoch (
-          static_cast<qint64> (nowMs), QTimeZone::UTC);
+          static_cast<qint64> (nowMs), QTimeZone(QByteArrayLiteral("UTC")));
   QString const utc = timestamp.isValid ()
       ? timestamp.toUTC ().toString (QStringLiteral ("HHmm'Z'"))
       : QDateTime::currentDateTimeUtc ().toString (QStringLiteral ("HHmm'Z'"));
@@ -8662,7 +8662,7 @@ QString FT2LinkQmlAdapter::qslCard (quint16 sessionId) const
 
   QDateTime const timestamp =
       QDateTime::fromMSecsSinceEpoch (
-          static_cast<qint64> (openedAtMs), QTimeZone::UTC);
+          static_cast<qint64> (openedAtMs), QTimeZone(QByteArrayLiteral("UTC")));
   QString const utc = timestamp.isValid ()
       ? timestamp.toUTC ().toString (QStringLiteral ("yyyy-MM-dd HHmm'Z'"))
       : QDateTime::currentDateTimeUtc ().toString (
@@ -8743,11 +8743,11 @@ QString FT2LinkQmlAdapter::adifRecord (quint16 sessionId) const
 
   QDateTime const opened =
       QDateTime::fromMSecsSinceEpoch (
-          static_cast<qint64> (openedAtMs), QTimeZone::UTC).toUTC ();
+          static_cast<qint64> (openedAtMs), QTimeZone(QByteArrayLiteral("UTC"))).toUTC ();
   QDateTime const ended =
       QDateTime::fromMSecsSinceEpoch (
           static_cast<qint64> (closedAtMs > 0u ? closedAtMs : updatedAtMs),
-          QTimeZone::UTC).toUTC ();
+          QTimeZone(QByteArrayLiteral("UTC"))).toUTC ();
   QDateTime const safeOpened = opened.isValid ()
       ? opened
       : QDateTime::currentDateTimeUtc ();
@@ -10159,7 +10159,7 @@ QVariantMap FT2LinkQmlAdapter::pathAnalysis (QString const& call,
           total.maxSnr = std::max (total.maxSnr, report.snrDb);
 
           QDateTime const at = QDateTime::fromMSecsSinceEpoch (
-              static_cast<qint64> (report.atMs), QTimeZone::UTC).toUTC ();
+              static_cast<qint64> (report.atMs), QTimeZone(QByteArrayLiteral("UTC"))).toUTC ();
           if (at.isValid ())
             {
               addSnr (byHour[at.time ().hour ()], report.snrDb);
@@ -12024,7 +12024,7 @@ FT2LinkQmlAdapter::activeFrequencyScheduleEntry (quint64 nowMs) const
       return nullptr;
     }
   QDateTime const at = QDateTime::fromMSecsSinceEpoch (
-      static_cast<qint64> (nowMs), QTimeZone::UTC).toUTC ();
+      static_cast<qint64> (nowMs), QTimeZone(QByteArrayLiteral("UTC"))).toUTC ();
   if (!at.isValid ())
     {
       return nullptr;
@@ -13206,7 +13206,7 @@ QString FT2LinkQmlAdapter::bbsFileListReply (quint64 nowMs) const
       seen.push_back (key);
 
       QString date = QDateTime::fromMSecsSinceEpoch (
-          static_cast<qint64> (it->atMs), QTimeZone::UTC)
+          static_cast<qint64> (it->atMs), QTimeZone(QByteArrayLiteral("UTC")))
           .date ().toString (Qt::ISODate);
       if (date.isEmpty ())
         {
