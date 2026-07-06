@@ -82,6 +82,7 @@ private:
   quint64 m_lastDecodeMs {0};
   quint64 m_lastBusyLogMs {0};
   quint64 m_lastRxFailLogMs {0};
+  quint64 m_lastNarrowTrimLogMs {0};
   double m_lastRms {0.0};
   double m_lastPeak {0.0};
 };
@@ -661,6 +662,11 @@ private:
                                   quint64 nowMs);
   void runLiveOutboundRetryCheck ();
   void scheduleLiveOutboundRetryCheck (quint64 nowMs);
+  void scheduleHelloRetry (decodium::ft2link::Frame const& hello,
+                           QString const& remoteCall,
+                           quint64 nowMs);
+  void runHelloRetryCheck ();
+  void scheduleHelloRetryCheck (quint64 nowMs);
   void runAutoBeaconTick ();
   void scheduleAutoBeacon (quint64 nowMs);
   decodium::ft2link::W2300RateMode currentLiveW2300RateMode (
@@ -893,6 +899,15 @@ private:
     decodium::ft2link::Profile profile {decodium::ft2link::Profile::Wide2300};
     std::size_t messageIndex {0};
     unsigned attempts {0};
+    quint64 nextRetryMs {0};
+  };
+
+  struct HelloRetry
+  {
+    decodium::ft2link::Frame frame;
+    QString remoteCall;
+    unsigned attemptsSent {0};
+    unsigned maxAttempts {4};
     quint64 nextRetryMs {0};
   };
 
@@ -1152,6 +1167,7 @@ private:
   std::map<std::uint16_t, std::uint64_t> m_liveInboundDeliveredAtMs;
   std::map<std::uint16_t, QString> m_liveInboundDeliveredHash;
   std::map<std::uint16_t, LiveOutboundRetry> m_liveOutboundRetries;
+  std::map<std::uint16_t, HelloRetry> m_helloRetries;
   std::map<std::uint16_t, decodium::ft2link::W2300RateController> m_liveW2300RateControllers;
   std::map<std::uint16_t, decodium::ft2link::W2300DecodeMetrics> m_lastLiveW2300Metrics;
   std::vector<BroadcastMessage> m_broadcasts;
@@ -1221,6 +1237,7 @@ private:
   std::deque<RadioTxQueueItem> m_radioTxQueue;
   QTimer m_radioTxQueueTimer;
   QTimer m_liveOutboundRetryTimer;
+  QTimer m_helloRetryTimer;
   QTimer m_autoBeaconTimer;
   QTimer m_liveChannelTimer;
   quint64 m_radioTxBusyUntilMs {0};

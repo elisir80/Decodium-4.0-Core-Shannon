@@ -266,6 +266,10 @@ static qint64 bridgeMonotonicMs()
 
 static void bridgeLog(const QString& msg) {
     DIAG_INFO(msg);
+    if (msg.contains(QStringLiteral("Ft2Link"))
+        || msg.contains(QStringLiteral("FT2-Link"))) {
+        DecodiumLogging::flushDiagnosticLog();
+    }
 }
 
 static void txTimelineLog(const QString& msg) {
@@ -37521,20 +37525,48 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
 
     bool const feedRecorder = m_wavManager && m_wavManager->recording();
     bool const feedSpectrum = m_legacyPcmSpectrumFeed;
-    if (!feedRecorder && !feedSpectrum) {
+    bool const ft2LinkMode = isFt2LinkApplicationMode(m_mode);
+    bool const feedFt2Link = ft2LinkMode
+        && m_monitoring
+        && !m_transmitting
+        && !m_tuning;
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (ft2LinkMode && nowMs - m_lastFt2LinkRxTapLogMs >= 2000) {
+        m_lastFt2LinkRxTapLogMs = nowMs;
+        qint64 const lastEmitAgeMs = m_lastFt2LinkLegacyRxEmitMs > 0
+            ? nowMs - m_lastFt2LinkLegacyRxEmitMs
+            : -1;
+        bridgeLog(QStringLiteral(
+            "[Ft2Link][RXTAP] source=legacy samples=%1 emit=%2 spectrum=%3 recorder=%4 mode=%5 monitor=%6 tx=%7 tune=%8 pending=%9 scheduled=%10 lastEmitAgeMs=%11")
+            .arg(sampleCount)
+            .arg(feedFt2Link ? 1 : 0)
+            .arg(feedSpectrum ? 1 : 0)
+            .arg(feedRecorder ? 1 : 0)
+            .arg(m_mode)
+            .arg(m_monitoring ? 1 : 0)
+            .arg(m_transmitting ? 1 : 0)
+            .arg(m_tuning ? 1 : 0)
+            .arg(m_ft2LinkLegacyRxPending.size())
+            .arg(m_ft2LinkLegacyRxDrainScheduled ? 1 : 0)
+            .arg(lastEmitAgeMs));
+    }
+    if (!feedFt2Link && !m_ft2LinkLegacyRxPending.isEmpty()) {
+        m_ft2LinkLegacyRxPending.clear();
+    }
+    if (!feedRecorder && !feedSpectrum && !feedFt2Link) {
         return;
     }
 
-    QVector<short> recorderSamples;
-    if (feedRecorder) {
-        recorderSamples.reserve(sampleCount);
+    QVector<short> linearSamples;
+    if (feedRecorder || feedFt2Link) {
+        linearSamples.reserve(sampleCount);
     }
 
     auto const* bytes = reinterpret_cast<uchar const*>(pcmSamples.constData());
     for (int i = 0; i < sampleCount; ++i) {
         qint16 const sample = qFromLittleEndian<qint16>(bytes + i * static_cast<int>(sizeof(qint16)));
-        if (feedRecorder) {
-            recorderSamples.append(sample);
+        if (feedRecorder || feedFt2Link) {
+            linearSamples.append(sample);
         }
         if (feedSpectrum) {
             m_wfRing[m_wfRingPos % WF_RING_SIZE] = sample;
@@ -37543,10 +37575,54 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
     }
 
     if (feedRecorder) {
-        m_wavManager->feedSamples(recorderSamples);
+        m_wavManager->feedSamples(linearSamples);
+    }
+    if (feedFt2Link) {
+        if (!linearSamples.isEmpty()) {
+            m_ft2LinkLegacyRxPending += linearSamples;
+        }
+        // Keep the legacy audio callback light: buffer samples here and let
+        // the Qt event loop drain toward FT2-Link at a controlled cadence.
+        static constexpr int kFt2LinkLegacyDrainMs = 200;
+        static constexpr int kFt2LinkLegacyMaxPendingSamples = 24000;
+        if (m_ft2LinkLegacyRxPending.size () > kFt2LinkLegacyMaxPendingSamples) {
+            m_ft2LinkLegacyRxPending.erase (
+                m_ft2LinkLegacyRxPending.begin (),
+                m_ft2LinkLegacyRxPending.begin ()
+                    + (m_ft2LinkLegacyRxPending.size ()
+                       - kFt2LinkLegacyMaxPendingSamples));
+        }
+        if (!m_ft2LinkLegacyRxPending.isEmpty()
+            && !m_ft2LinkLegacyRxDrainScheduled) {
+            m_ft2LinkLegacyRxDrainScheduled = true;
+            QTimer::singleShot(kFt2LinkLegacyDrainMs, this, [this]() {
+                m_ft2LinkLegacyRxDrainScheduled = false;
+
+                bool const canEmit = isFt2LinkApplicationMode(m_mode)
+                    && m_monitoring
+                    && !m_transmitting
+                    && !m_tuning;
+                if (!canEmit) {
+                    m_ft2LinkLegacyRxPending.clear();
+                    return;
+                }
+                if (m_ft2LinkLegacyRxPending.isEmpty()) {
+                    return;
+                }
+
+                qint64 const drainNowMs = QDateTime::currentMSecsSinceEpoch();
+                m_lastFt2LinkLegacyRxEmitMs = drainNowMs;
+                QVector<short> batchedSamples;
+                batchedSamples.swap(m_ft2LinkLegacyRxPending);
+                emit ft2LinkRxSamplesReady(std::move(batchedSamples),
+                                           static_cast<quint64>(drainNowMs));
+            });
+        }
+    } else if (!m_ft2LinkLegacyRxPending.isEmpty()) {
+        m_ft2LinkLegacyRxPending.clear();
     }
     if (feedSpectrum) {
-        m_lastLegacyPcmSampleMs = QDateTime::currentMSecsSinceEpoch();
+        m_lastLegacyPcmSampleMs = nowMs;
     }
 }
 
@@ -37988,14 +38064,31 @@ void DecodiumBridge::startAudioCapture()
                 this, [this](QVector<short> samples) {
             // IU8LMC fix 1.0.449: gate FT2-Link audio tap — skip DSP entirely
             // when not in FT2-LINK mode (avoids 50x/sec main-thread DSP in FT8/FT2/FT4).
-            if (!isFt2LinkApplicationMode(m_mode))
-                return;
-            if (!samples.isEmpty()
+            bool const modeOk = isFt2LinkApplicationMode(m_mode);
+            bool const shouldEmit = modeOk
+                && !samples.isEmpty()
                 && m_monitoring
                 && !m_transmitting
-                && !m_tuning) {
+                && !m_tuning;
+            qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+            if (modeOk && nowMs - m_lastFt2LinkRxTapLogMs >= 2000) {
+                m_lastFt2LinkRxTapLogMs = nowMs;
+                bridgeLog(QStringLiteral(
+                    "[Ft2Link][RXTAP] samples=%1 emit=%2 mode=%3 monitor=%4 tx=%5 tune=%6 rxSuspended=%7 sink=%8")
+                    .arg(samples.size())
+                    .arg(shouldEmit ? 1 : 0)
+                    .arg(m_mode)
+                    .arg(m_monitoring ? 1 : 0)
+                    .arg(m_transmitting ? 1 : 0)
+                    .arg(m_tuning ? 1 : 0)
+                    .arg(m_rxAudioSuspendedForTx ? 1 : 0)
+                    .arg(m_audioSink ? QStringLiteral("alive") : QStringLiteral("null")));
+            }
+            if (!modeOk)
+                return;
+            if (shouldEmit) {
                 emit ft2LinkRxSamplesReady(std::move(samples),
-                                           static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+                                           static_cast<quint64>(nowMs));
             }
         }, Qt::QueuedConnection);
         bridgeLog("audioSink created and connected");

@@ -2627,6 +2627,10 @@ private:
     QAudioDevice       m_cachedTxOutputDevice;
     bool               m_tciAudioCaptureActive {false};
     qint64             m_lastTciAudioLogMs {0};
+    qint64             m_lastFt2LinkRxTapLogMs {0};
+    qint64             m_lastFt2LinkLegacyRxEmitMs {0};
+    bool               m_ft2LinkLegacyRxDrainScheduled {false};
+    QVector<short>     m_ft2LinkLegacyRxPending;
     QTimer*            m_tuneTimer    {nullptr};
     DecodiumLegacyBackend* m_legacyBackend {nullptr};
     bool m_useLegacyTxBackend {false};

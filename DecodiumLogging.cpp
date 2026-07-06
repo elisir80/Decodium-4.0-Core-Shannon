@@ -344,6 +344,13 @@ void DecodiumLogging::reopenDiagnosticLog() {
     }
 }
 
+void DecodiumLogging::flushDiagnosticLog() {
+    QMutexLocker lock(&g_diagMutex);
+    if (g_diagFile) {
+        g_diagFile->flush();
+    }
+}
+
 QString DecodiumLogging::categoryToString(DiagCategory cat) {
     switch(cat) {
     case DiagCategory::INFO: return "INFO"; case DiagCategory::WARNING: return "WARN";

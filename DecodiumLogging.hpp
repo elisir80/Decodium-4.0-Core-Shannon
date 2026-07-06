@@ -62,6 +62,9 @@ public:
   // QCoreApplication identity and QStandardPaths scope.
   static void reopenDiagnosticLog ();
 
+  // Flush pending diagnostic writes for live troubleshooting tails.
+  static void flushDiagnosticLog ();
+
   // Read the last N lines from the diagnostic log
   static QStringList readLastLines (int n = 200);
 

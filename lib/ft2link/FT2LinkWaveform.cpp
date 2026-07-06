@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 
 namespace decodium
 {
@@ -2005,10 +2006,12 @@ bool decodeNarrowFrameWaveformWithMetrics (
             }
         }
     }
+  NarrowCenterEstimate centerEstimate;
+  bool haveCenterEstimate = false;
   if (!best.ok)
     {
-      NarrowCenterEstimate const centerEstimate =
-          estimateNarrowCenter (wave, config);
+      centerEstimate = estimateNarrowCenter (wave, config);
+      haveCenterEstimate = centerEstimate.ok;
       if (centerEstimate.ok
           && std::fabs (centerEstimate.centerFrequencyHz
                         - config.centerFrequencyHz) > 55.0
@@ -2035,7 +2038,23 @@ bool decodeNarrowFrameWaveformWithMetrics (
 
   if (!best.ok)
     {
-      setError (error, "NARROW burst not found");
+      if (haveCenterEstimate)
+        {
+          char detail[192];
+          std::snprintf (
+              detail, sizeof detail,
+              "NARROW burst not found centerEst=%.1fHz offset=%.1fHz score=%.3g second=%.3g samples=%zu",
+              centerEstimate.centerFrequencyHz,
+              centerEstimate.centerFrequencyHz - config.centerFrequencyHz,
+              centerEstimate.score,
+              centerEstimate.secondScore,
+              wave.size ());
+          setError (error, detail);
+        }
+      else
+        {
+          setError (error, "NARROW burst not found");
+        }
       return false;
     }
 
