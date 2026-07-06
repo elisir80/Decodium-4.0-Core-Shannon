@@ -87,6 +87,14 @@ struct NarrowDecodeCandidate
   NarrowDecodeMetrics metrics;
 };
 
+struct NarrowCenterEstimate
+{
+  bool ok {false};
+  double centerFrequencyHz {0.0};
+  double score {0.0};
+  double secondScore {0.0};
+};
+
 struct W2300BurstInfo
 {
   W2300RateMode mode {W2300RateMode::Fast};
@@ -152,6 +160,9 @@ void setError (std::string* error, char const* message)
       *error = message;
     }
 }
+
+double narrowToneFrequency (std::uint8_t bit,
+                            NarrowWaveformConfig const& config);
 
 int samplesPerSymbol (W500WaveformConfig const& config)
 {
@@ -282,6 +293,93 @@ bool validateConfig (NarrowWaveformConfig const& config, std::string* error)
       return false;
     }
   return true;
+}
+
+double toneEnergy (std::vector<float> const& wave,
+                   std::size_t start,
+                   std::size_t count,
+                   double sampleRate,
+                   double frequencyHz)
+{
+  if (count == 0u || sampleRate <= 0.0 || frequencyHz <= 0.0)
+    {
+      return 0.0;
+    }
+
+  double const omega = 2.0 * kPi * frequencyHz / sampleRate;
+  double const cosStep = std::cos (omega);
+  double const sinStep = std::sin (omega);
+  double cosPhase = 1.0;
+  double sinPhase = 0.0;
+  double iAcc = 0.0;
+  double qAcc = 0.0;
+  for (std::size_t i = 0; i < count; ++i)
+    {
+      double const sample = static_cast<double> (wave[start + i]);
+      iAcc += sample * cosPhase;
+      qAcc -= sample * sinPhase;
+
+      double const nextCos = cosPhase * cosStep - sinPhase * sinStep;
+      double const nextSin = sinPhase * cosStep + cosPhase * sinStep;
+      cosPhase = nextCos;
+      sinPhase = nextSin;
+    }
+
+  return (iAcc * iAcc + qAcc * qAcc) / static_cast<double> (count);
+}
+
+NarrowCenterEstimate estimateNarrowCenter (
+    std::vector<float> const& wave,
+    NarrowWaveformConfig const& config)
+{
+  NarrowCenterEstimate estimate;
+  if (wave.empty () || config.sampleRate <= 0.0 || config.toneSpacingHz <= 0.0)
+    {
+      return estimate;
+    }
+
+  // Use a bounded acquisition window so live RX does not turn a long busy
+  // channel into an unbounded coarse scan.  Eight seconds covers the current
+  // NARROW control bursts while keeping the estimator cheap enough for the
+  // worker thread.
+  std::size_t const maxSamples = std::max<std::size_t> (
+      1u, static_cast<std::size_t> (std::lround (config.sampleRate * 8.0)));
+  std::size_t const count = std::min (wave.size (), maxSamples);
+  std::size_t const start = wave.size () - count;
+
+  auto observeCenter = [&] (double centerHz) {
+    NarrowWaveformConfig candidate = config;
+    candidate.centerFrequencyHz = centerHz;
+    std::string ignored;
+    if (!validateConfig (candidate, &ignored))
+      {
+        return;
+      }
+
+    double const score =
+        toneEnergy (wave, start, count, config.sampleRate,
+                    narrowToneFrequency (0u, candidate))
+        + toneEnergy (wave, start, count, config.sampleRate,
+                      narrowToneFrequency (1u, candidate));
+    if (score > estimate.score)
+      {
+        estimate.secondScore = estimate.score;
+        estimate.score = score;
+        estimate.centerFrequencyHz = centerHz;
+        estimate.ok = true;
+      }
+    else if (score > estimate.secondScore)
+      {
+        estimate.secondScore = score;
+      }
+  };
+
+  observeCenter (config.centerFrequencyHz);
+  for (double centerHz = 400.0; centerHz <= 2600.0; centerHz += 25.0)
+    {
+      observeCenter (centerHz);
+    }
+  return estimate;
 }
 
 std::uint8_t dibitToTone (std::uint8_t dibit)
@@ -1904,6 +2002,33 @@ bool decodeNarrowFrameWaveformWithMetrics (
           if (best.ok)
             {
               break;
+            }
+        }
+    }
+  if (!best.ok)
+    {
+      NarrowCenterEstimate const centerEstimate =
+          estimateNarrowCenter (wave, config);
+      if (centerEstimate.ok
+          && std::fabs (centerEstimate.centerFrequencyHz
+                        - config.centerFrequencyHz) > 55.0
+          && centerEstimate.score > 0.0)
+        {
+          for (double offset : {0.0, 25.0, -25.0, 50.0, -50.0, 75.0, -75.0})
+            {
+              NarrowWaveformConfig searchConfig = config;
+              searchConfig.centerFrequencyHz =
+                  centerEstimate.centerFrequencyHz + offset;
+              std::string configError;
+              if (!validateConfig (searchConfig, &configError))
+                {
+                  continue;
+                }
+              searchWithConfig (searchConfig);
+              if (best.ok)
+                {
+                  break;
+                }
             }
         }
     }

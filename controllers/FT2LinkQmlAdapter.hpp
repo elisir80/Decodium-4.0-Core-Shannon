@@ -69,12 +69,21 @@ private:
   bool stopRequested () const;
   bool busyNow (quint64 nowMs) const;
   void observeEnergy (std::vector<float> const& chunk, quint64 nowMs);
+  void logDecodeFailure (quint64 nowMs,
+                         bool wideSessionActive,
+                         QString const& narrowError,
+                         QString const& w2300Error,
+                         QString const& w500Error);
 
   std::vector<float> m_narrowRx;
   decodium::ft2link::W500RxAudioBuffer m_w500Rx;
   decodium::ft2link::W2300RxAudioBuffer m_w2300Rx;
   quint64 m_busyUntilMs {0};
   quint64 m_lastDecodeMs {0};
+  quint64 m_lastBusyLogMs {0};
+  quint64 m_lastRxFailLogMs {0};
+  double m_lastRms {0.0};
+  double m_lastPeak {0.0};
 };
 
 class FT2LinkQmlAdapter : public QObject

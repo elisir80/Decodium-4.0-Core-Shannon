@@ -451,6 +451,45 @@ private Q_SLOTS:
     QVERIFY (metrics.quality > 0.45);
   }
 
+  void narrowWaveformAcquiresLargeAudioOffset ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::HandshakeIdentity;
+    using decodium::ft2link::LinkCapabilities;
+    using decodium::ft2link::NarrowDecodeMetrics;
+    using decodium::ft2link::NarrowWaveformConfig;
+    using decodium::ft2link::Profile;
+
+    LinkCapabilities capabilities;
+    capabilities.preferredProfile = Profile::Wide2300;
+    HandshakeIdentity identity {"TESTA", "JN70"};
+    Frame const hello = decodium::ft2link::makeHelloFrame (
+        0x6202u, capabilities, identity);
+
+    NarrowWaveformConfig txConfig;
+    txConfig.centerFrequencyHz = 600.0;
+    std::string error;
+    std::vector<float> const burst =
+        decodium::ft2link::generateNarrowFrameWaveform (
+            hello, txConfig, &error);
+    QVERIFY2 (!burst.empty (), error.c_str ());
+    std::vector<float> stream = paddedWave (burst, 53, 180);
+    addDeterministicNoise (stream, 0.006f);
+
+    NarrowWaveformConfig rxConfig;
+    Frame parsed;
+    NarrowDecodeMetrics metrics;
+    error.clear ();
+    QVERIFY2 (decodium::ft2link::decodeNarrowFrameWaveformWithMetrics (
+                  stream, &parsed, &metrics, rxConfig, &error), error.c_str ());
+    QCOMPARE (static_cast<int> (parsed.profile), static_cast<int> (Profile::Narrow));
+    QCOMPARE (parsed.sessionId, hello.sessionId);
+    QCOMPARE (parsed.payload, hello.payload);
+    QVERIFY (std::fabs (metrics.estimatedCenterFrequencyHz - 600.0) <= 75.0);
+    QVERIFY (std::fabs (metrics.estimatedFrequencyOffsetHz + 900.0) <= 75.0);
+    QVERIFY (metrics.quality > 0.40);
+  }
+
   void handshakeNegotiatesW2300FastBeforeData ()
   {
     using decodium::ft2link::Frame;

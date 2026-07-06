@@ -60,6 +60,7 @@ public:
     QStringList foxCallerQueueLines() const;
 
     void setMode(const QString& mode);
+    void setFt2DecodeEnabled(bool enabled);
     void setDialFrequency(double frequencyHz);
     void setMonitoring(bool enabled);
     void rearmMonitoring(const QString& reason);

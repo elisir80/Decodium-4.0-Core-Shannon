@@ -55,6 +55,7 @@ public:
 
   void decodeAsync (AsyncDecodeRequest const& request);
   void decode (DecodeRequest const& request);
+  void setDecodeEnabled (bool enabled);
   void markLatestDecodeSerial (quint64 serial);
   void cancelCurrentDecode ();
   void beginShutdown ();
@@ -65,6 +66,7 @@ Q_SIGNALS:
 
 private:
   std::atomic<quint64> m_latestDecodeSerial {0};
+  std::atomic<bool> m_decodeEnabled {true};
   std::atomic<bool> m_shuttingDown {false};
 };
 

@@ -4129,7 +4129,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   });
 
   connect(&m_asyncDecodeTimer, &QTimer::timeout, this, [this]() {
-    if (m_mode != "FT2" || !ui->cbAsyncDecode || !ui->cbAsyncDecode->isChecked()) return;
+    if (!m_ft2DecodeEnabled || m_mode != "FT2" || !ui->cbAsyncDecode || !ui->cbAsyncDecode->isChecked()) return;
     if (m_transmitting) return;
     if (m_bAsyncDecoding) return;  // previous decode still running
     if (m_decoderBusy) return;     // avoid overlap with main decoder path
@@ -4998,6 +4998,58 @@ void MainWindow::legacySetMode(QString const& mode)
       m_embeddedFt2MonitorPrepared = false;
     }
   onRemoteSetModeRequested(QString {}, mode);
+  if (m_ft2DecodeWorker) {
+    m_ft2DecodeWorker->setDecodeEnabled (m_ft2DecodeEnabled && m_mode == "FT2");
+  }
+}
+
+void MainWindow::legacySetFt2DecodeEnabled(bool enabled)
+{
+  if (m_ft2DecodeEnabled == enabled)
+    {
+      if (m_ft2DecodeWorker)
+        {
+          m_ft2DecodeWorker->setDecodeEnabled (enabled && m_mode == "FT2");
+        }
+      return;
+    }
+
+  m_ft2DecodeEnabled = enabled;
+  if (m_ft2DecodeWorker)
+    {
+      m_ft2DecodeWorker->setDecodeEnabled (enabled && m_mode == "FT2");
+      if (!enabled)
+        {
+          QCoreApplication::removePostedEvents (m_ft2DecodeWorker, QEvent::MetaCall);
+          m_ft2DecodeWorker->markLatestDecodeSerial (~quint64(0));
+          m_ft2DecodeWorker->cancelCurrentDecode ();
+        }
+    }
+
+  if (!enabled)
+    {
+      m_asyncDecodeTimer.stop ();
+      m_bAsyncDecoding = false;
+      if (m_ft2DecodePending)
+        {
+          m_ft2DecodePending = false;
+          m_ft2DecodePendingUtc = 0;
+          ++m_ft2DecodeSerial;
+          if (m_decoderBusy)
+            {
+              decodeBusy (false);
+            }
+        }
+      debugToFile (QStringLiteral ("legacy FT2 decode disabled by bridge application mode"));
+    }
+  else if (m_mode == "FT2")
+    {
+      if (ui->cbAsyncDecode && ui->cbAsyncDecode->isChecked () && !m_asyncDecodeTimer.isActive ())
+        {
+          m_asyncDecodeTimer.start (100);
+        }
+      debugToFile (QStringLiteral ("legacy FT2 decode enabled by bridge application mode"));
+    }
 }
 
 void MainWindow::legacySetDialFrequency(Frequency frequency)
@@ -13194,7 +13246,7 @@ bool MainWindow::cancelPendingInProcessDecode ()
 
 void MainWindow::requestInProcessFt2Decode ()
 {
-  if (m_mode != "FT2") {
+  if (!m_ft2DecodeEnabled || m_mode != "FT2") {
     return;
   }
 
@@ -29461,6 +29513,15 @@ void MainWindow::on_cbDualCarrier_toggled (bool checked)
 
 void MainWindow::on_cbAsyncDecode_toggled (bool checked)
 {
+  if (!m_ft2DecodeEnabled) {
+    m_asyncDecodeTimer.stop ();
+    m_bAsyncDecoding = false;
+    if (ui->labelAsyncL2Active) {
+      ui->labelAsyncL2Active->setVisible (false);
+    }
+    return;
+  }
+
   if (m_mode == "FT2" && !checked) {
     // FT2 rule: Async L2 cannot be disabled.
     bool const oldBlocked = ui->cbAsyncDecode->blockSignals (true);

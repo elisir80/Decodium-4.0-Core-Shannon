@@ -5628,6 +5628,8 @@ void FT2LinkDecodeWorker::observeEnergy (std::vector<float> const& chunk,
     }
   double const rms = std::sqrt (
       sumSquares / static_cast<double> (chunk.size ()));
+  m_lastRms = rms;
+  m_lastPeak = peak;
 
   // Stesse soglie dello stato LBT sul main (applyObservedRxEnergy): il worker
   // tiene una copia LOCALE dello stato busy per il gating del decode; il main
@@ -5635,11 +5637,49 @@ void FT2LinkDecodeWorker::observeEnergy (std::vector<float> const& chunk,
   constexpr double kBusyRmsThreshold = 0.012;
   constexpr double kBusyPeakThreshold = 0.080;
   constexpr quint64 kBusyHoldMs = 750u;
+  bool const wasBusy = busyNow (nowMs);
   if (rms >= kBusyRmsThreshold || peak >= kBusyPeakThreshold)
     {
       m_busyUntilMs = std::max (m_busyUntilMs, nowMs + kBusyHoldMs);
+      if (!wasBusy && nowMs - m_lastBusyLogMs >= 1000u)
+        {
+          m_lastBusyLogMs = nowMs;
+          qInfo ("%s", qUtf8Printable (
+              QStringLiteral (
+                  "[Ft2Link][RXBUSY] rms=%1 peak=%2 holdMs=%3")
+                  .arg (rms, 0, 'f', 4)
+                  .arg (peak, 0, 'f', 4)
+                  .arg (kBusyHoldMs)));
+        }
     }
   emit energyObserved (rms, peak, nowMs);
+}
+
+void FT2LinkDecodeWorker::logDecodeFailure (quint64 nowMs,
+                                            bool wideSessionActive,
+                                            QString const& narrowError,
+                                            QString const& w2300Error,
+                                            QString const& w500Error)
+{
+  if (nowMs >= m_lastRxFailLogMs && nowMs - m_lastRxFailLogMs < 2000u)
+    {
+      return;
+    }
+  m_lastRxFailLogMs = nowMs;
+  qInfo ("%s", qUtf8Printable (
+      QStringLiteral (
+          "[Ft2Link][RXFAIL] busy=1 rms=%1 peak=%2 narrowBuf=%3"
+          " wideActive=%4 w2300Buf=%5 w500Buf=%6 narrow=\"%7\""
+          " w2300=\"%8\" w500=\"%9\"")
+          .arg (m_lastRms, 0, 'f', 4)
+          .arg (m_lastPeak, 0, 'f', 4)
+          .arg (m_narrowRx.size ())
+          .arg (wideSessionActive ? 1 : 0)
+          .arg (m_w2300Rx.bufferedSamples ())
+          .arg (m_w500Rx.bufferedSamples ())
+          .arg (narrowError.isEmpty () ? QStringLiteral ("-") : narrowError)
+          .arg (w2300Error.isEmpty () ? QStringLiteral ("-") : w2300Error)
+          .arg (w500Error.isEmpty () ? QStringLiteral ("-") : w500Error)));
 }
 
 bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
@@ -5680,6 +5720,9 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
     {
       m_lastDecodeMs = nowMs;
     }
+  QString narrowError;
+  QString w2300Error;
+  QString w500Error;
   if (!channelBusy && m_narrowRx.size () > 72000u)
     {
       m_narrowRx.erase (
@@ -5697,10 +5740,21 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       if (!decodium::ft2link::decodeNarrowFrameWaveformWithMetrics (
               m_narrowRx, &decoded, &metrics, config, &decodeError))
         {
+          narrowError = QString::fromStdString (decodeError);
           break;
         }
 
       decodedAny = true;
+      qInfo ("%s", qUtf8Printable (
+          QStringLiteral (
+              "[Ft2Link][RXDECODE] profile=NARROW centerHz=%1 offsetHz=%2"
+              " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6")
+              .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
+              .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
+              .arg (metrics.quality, 0, 'f', 3)
+              .arg (metrics.packetBytes)
+              .arg (metrics.sampleOffset)
+              .arg (metrics.symbolCount)));
       std::size_t const nsps = static_cast<std::size_t> (
           config.sampleRate / config.symbolRate + 0.5);
       std::size_t const consumed = std::min (
@@ -5724,6 +5778,11 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
         {
           m_narrowRx.clear ();
         }
+      if (runDecode && !decodedAny && channelBusy)
+        {
+          logDecodeFailure (nowMs, wideSessionActive, narrowError,
+                            w2300Error, w500Error);
+        }
       return decodedAny;
     }
 
@@ -5737,9 +5796,22 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       std::string decodeError;
       if (!m_w2300Rx.decodeNext (&decoded, &metrics, &decodeError))
         {
+          w2300Error = QString::fromStdString (decodeError);
           break;
         }
       decodedAny = true;
+      qInfo ("%s", qUtf8Printable (
+          QStringLiteral (
+              "[Ft2Link][RXDECODE] profile=W2300 centerHz=%1 offsetHz=%2"
+              " quality=%3 rate=%4 bytes=%5 sampleOffset=%6 symbols=%7")
+              .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
+              .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
+              .arg (metrics.quality, 0, 'f', 3)
+              .arg (QString::fromLatin1 (
+                  decodium::ft2link::w2300RateModeName (metrics.rateMode)))
+              .arg (metrics.packetBytes)
+              .arg (metrics.sampleOffset)
+              .arg (metrics.symbolCount)));
       emit w2300FrameDecoded (
           toByteArray (decodium::ft2link::serializeFrame (decoded)),
           metrics,
@@ -5754,9 +5826,20 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       std::string decodeError;
       if (!m_w500Rx.decodeNext (&decoded, &metrics, &decodeError))
         {
+          w500Error = QString::fromStdString (decodeError);
           break;
         }
       decodedAny = true;
+      qInfo ("%s", qUtf8Printable (
+          QStringLiteral (
+              "[Ft2Link][RXDECODE] profile=W500 centerHz=%1 offsetHz=%2"
+              " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6")
+              .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
+              .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
+              .arg (metrics.quality, 0, 'f', 3)
+              .arg (metrics.packetBytes)
+              .arg (metrics.sampleOffset)
+              .arg (metrics.symbolCount)));
       emit frameDecoded (
           toByteArray (decodium::ft2link::serializeFrame (decoded)),
           remoteCall,
@@ -5780,6 +5863,11 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       m_w500Rx.clear ();
       m_w2300Rx.clear ();
       emit resyncNeeded ();
+    }
+  if (runDecode && !decodedAny && channelBusy)
+    {
+      logDecodeFailure (nowMs, wideSessionActive, narrowError,
+                        w2300Error, w500Error);
     }
 
   return decodedAny;

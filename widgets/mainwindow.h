@@ -197,6 +197,7 @@ public:
   int legacySpecialOperationActivity() const;
   bool legacySuperFoxEnabled() const;
   QStringList legacyFoxCallerQueueLines() const;
+  void legacySetFt2DecodeEnabled(bool enabled);
   void legacyClearBandActivity();
   void legacyClearRxFrequency();
   void legacySetMode(QString const& mode);
@@ -1279,6 +1280,7 @@ private:
   quint64 m_ft2DecodeSerial {0};
   bool m_ft2DecodePending {false};
   int m_ft2DecodePendingUtc {0};
+  bool m_ft2DecodeEnabled {true};
   QThread m_ft4DecodeThread;
   decodium::ft4::FT4DecodeWorker * m_ft4DecodeWorker {nullptr};
   quint64 m_ft4DecodeSerial {0};

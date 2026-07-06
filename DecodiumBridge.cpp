@@ -8961,6 +8961,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_workerThreadFt2 = new QThread(this);
     m_workerThreadFt2->setStackSize(8 * 1024 * 1024);
     m_ft2Worker = new decodium::ft2::FT2DecodeWorker();
+    m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
     m_ft2Worker->moveToThread(m_workerThreadFt2);
     // path sincrono (fine periodo)
     connect(m_ft2Worker, &decodium::ft2::FT2DecodeWorker::decodeReady,
@@ -9808,6 +9809,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                            m_audioOutputDevice,
                            QString::number(m_audioOutputChannel)));
 
+        m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
         syncLegacyBackendDialogState();
 
         // Decodium3 espone un sender WSJT-X UDP quando e' il backend TX attivo.
@@ -9850,8 +9852,12 @@ void DecodiumBridge::syncLegacyBackendDialogState()
     m_legacyBackend->setRxInputLevel(qRound(qBound(0.0, m_rxInputLevel, 100.0)));
     int const legacyTxAttn = legacyTxAttenuationFromLevel(m_txOutputLevel);
     m_legacyBackend->setTxOutputAttenuation(legacyTxAttn);
-    m_legacyBackend->setMode(m_mode);
-    m_legacyStartupModeGuard = m_mode.trimmed();
+    QString const legacyDialogMode = isFt2LinkApplicationMode(m_mode)
+        ? QStringLiteral("FT2")
+        : m_mode;
+    m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
+    m_legacyBackend->setMode(legacyDialogMode);
+    m_legacyStartupModeGuard = legacyDialogMode.trimmed();
     m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
     m_legacyBackend->setDialFrequency(m_frequency);
     bool const houndTxSlotLock = m_specialOperationActivity == kSpecialOpHound;
@@ -10314,7 +10320,28 @@ void DecodiumBridge::syncLegacyBackendState()
             emit catModeChanged();
         }
     }
-    if (!legacyMode.isEmpty()) {
+    if (!legacyMode.isEmpty() && isFt2LinkApplicationMode(m_mode)) {
+        // FT2-Link intentionally keeps the legacy/radio side on the FT2 base
+        // mode, but the application mode must remain FT2-Link.  The legacy
+        // state poll can otherwise overwrite m_mode back to FT2 and re-enable
+        // the legacy FT2 decoder while the FT2-Link UI/RX path is active.
+        if (m_bandManager) {
+            m_bandManager->setCurrentMode(QStringLiteral("FT2"));
+        }
+        if (m_ft2Worker) {
+            m_ft2Worker->setDecodeEnabled(false);
+        }
+        if (m_legacyBackend) {
+            m_legacyBackend->setFt2DecodeEnabled(false);
+        }
+        static qint64 s_lastFt2LinkLegacyModeIgnoreLogMs = 0;
+        qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (logNowMs - s_lastFt2LinkLegacyModeIgnoreLogMs >= 10000) {
+            s_lastFt2LinkLegacyModeIgnoreLogMs = logNowMs;
+            bridgeLog(QStringLiteral("FT2-Link: ignoring legacy backend mode %1; keeping application mode %2")
+                          .arg(legacyModeRaw, m_mode));
+        }
+    } else if (!legacyMode.isEmpty()) {
         qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
         if (m_legacyStartupModeGuardUntilMs > 0 && nowMs > m_legacyStartupModeGuardUntilMs) {
             m_legacyStartupModeGuard.clear();
@@ -10343,6 +10370,12 @@ void DecodiumBridge::syncLegacyBackendState()
         bool legacyModeChanged = false;
         if (m_mode != legacyMode) {
             m_mode = legacyMode;
+            if (m_ft2Worker) {
+                m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
+            }
+            if (m_legacyBackend) {
+                m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
+            }
             legacyModeChanged = true;
         }
         updatePeriodTicksMax();
@@ -13490,6 +13523,12 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
+        if (m_ft2Worker) {
+            m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
+        }
+        if (m_legacyBackend) {
+            m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
+        }
         // 1.0.364+ MAM multi-stream nativo: un cambio modo invalida
         // ogni QSO multi-stream in corso.
         m_mamSlots.clear();
@@ -13507,6 +13546,22 @@ void DecodiumBridge::setMode(const QString& v) {
         invalidateTxAudioCache();
         updatePeriodTicksMax();
         resetTimeSyncDecodeMetrics();
+        if (previousMode == QStringLiteral("FT2") && m_mode != QStringLiteral("FT2")) {
+            if (m_asyncDecodeTimer) {
+                m_asyncDecodeTimer->stop();
+            }
+            m_asyncDecodePending = false;
+            m_asyncAudioPos.store(0, std::memory_order_release);
+            m_ft2AsyncLastDispatchAudioPos = 0;
+            m_lastFt2AsyncDecodeDispatchMs = 0;
+            if (m_ft2Worker) {
+                QCoreApplication::removePostedEvents(m_ft2Worker, QEvent::MetaCall);
+                m_ft2Worker->markLatestDecodeSerial(std::numeric_limits<quint64>::max());
+                m_ft2Worker->cancelCurrentDecode();
+            }
+            bridgeLog(QStringLiteral("Leaving FT2 mode: legacy FT2 async/sync decode stopped (next=%1)")
+                          .arg(m_mode));
+        }
         configureNtpClientForMode(m_mode);
         if (m_ntpClient && m_ntpEnabled && isTimeSyncDecodeMode(m_mode)) {
             m_ntpClient->syncNow();
@@ -13564,8 +13619,14 @@ void DecodiumBridge::setMode(const QString& v) {
 
         emit modeChanged();
         if (legacyBackendAvailable() && !isFt2LinkApplicationMode(normalizedMode)) {
+            m_legacyBackend->setFt2DecodeEnabled(normalizedMode == QStringLiteral("FT2"));
             m_legacyBackend->setMode(normalizedMode);
             m_legacyStartupModeGuard = normalizedMode.trimmed();
+            m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
+        } else if (legacyBackendAvailable()) {
+            m_legacyBackend->setFt2DecodeEnabled(false);
+            m_legacyBackend->setMode(QStringLiteral("FT2"));
+            m_legacyStartupModeGuard = QStringLiteral("FT2");
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
         }
         if (m_mode.trimmed().compare(QStringLiteral("WSPR"), Qt::CaseInsensitive) == 0
@@ -19792,6 +19853,20 @@ void DecodiumBridge::stopTx()
         return;
     }
 
+    bool const catReportsPttActive =
+        (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
+        || (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->pttActive())
+        || (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->pttActive());
+    bool const pttReleaseNeeded =
+        m_transmitting
+        || m_bridgeAudioLegacyTxActive
+        || m_ft2LinkTxActive
+        || m_cwTxActive
+        || m_txAudioSink
+        || m_txPcmBuffer
+        || (m_modulator && m_modulator->isActive())
+        || catReportsPttActive;
+
     if (usingLegacyBackendForTx()) {
 #if defined(Q_OS_MAC)
         cancelPendingLegacyBridgeAudioStart(QStringLiteral("stopTx"));
@@ -19799,9 +19874,11 @@ void DecodiumBridge::stopTx()
             stopBridgeAudioForLegacyDigitalTx(QStringLiteral("stopTx"));
         }
 #endif
-        bridgeLog("stopTx: delegating to legacy backend");
-        m_legacyBackend->stopTransmission();
-        scheduleLegacyStateRefreshBurst();
+        if (pttReleaseNeeded || (m_legacyBackend && m_legacyBackend->transmitting())) {
+            bridgeLog("stopTx: delegating to legacy backend");
+            m_legacyBackend->stopTransmission();
+            scheduleLegacyStateRefreshBurst();
+        }
         return;
     }
 
@@ -19830,8 +19907,10 @@ void DecodiumBridge::stopTx()
     if (m_soundOutput)
         m_soundOutput->stop();
     m_txPcmData.clear();
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
+    if (pttReleaseNeeded
+        && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    }
     if (m_transmitting) {
         m_transmitting = false;
         emit transmittingChanged();
@@ -19855,7 +19934,10 @@ void DecodiumBridge::stopTx()
         m_txPcmBuffer = nullptr;
     }
     m_txPcmData.clear();
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    if (pttReleaseNeeded
+        && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    }
     if (usingTciAudioInput()) stopTciTxAudioStream(true);
     if (m_transmitting) {
         m_transmitting = false;
@@ -20200,18 +20282,36 @@ void DecodiumBridge::stopTune()
         return;
     }
 
+    bool const catReportsPttActive =
+        (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
+        || (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->pttActive())
+        || (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->pttActive());
+    bool const pttReleaseNeeded =
+        m_tuning
+        || m_bridgeAudioTuneActive
+        || m_txAudioSink
+        || m_txPcmBuffer
+        || (m_modulator && m_modulator->isActive())
+        || catReportsPttActive;
+
     if (usingLegacyBackendForTx()) {
 #if defined(Q_OS_MAC)
-        bridgeLog("stopTune(mac): stopping bridge audio path while legacy TX backend is active");
-#else
-        bridgeLog("stopTune: delegating to legacy backend");
-        m_legacyBackend->startTune(false);
-        if (m_tuning) {
-            m_tuning = false;
-            emit tuningChanged();
-            emit statusMessage("Tune terminato");
+        if (pttReleaseNeeded || (m_legacyBackend && m_legacyBackend->tuning())) {
+            bridgeLog("stopTune(mac): stopping bridge audio path while legacy TX backend is active");
+        } else {
+            return;
         }
-        scheduleLegacyStateRefreshBurst();
+#else
+        if (pttReleaseNeeded || (m_legacyBackend && m_legacyBackend->tuning())) {
+            bridgeLog("stopTune: delegating to legacy backend");
+            m_legacyBackend->startTune(false);
+            if (m_tuning) {
+                m_tuning = false;
+                emit tuningChanged();
+                emit statusMessage("Tune terminato");
+            }
+            scheduleLegacyStateRefreshBurst();
+        }
         return;
 #endif
     }
@@ -20234,8 +20334,10 @@ void DecodiumBridge::stopTune()
         m_soundOutput->stop();
     m_bridgeAudioTuneActive = false;
     m_txPcmData.clear();
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
+    if (pttReleaseNeeded
+        && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    }
     if (m_tuning) {
         m_tuning = false;
         emit tuningChanged();
@@ -20259,8 +20361,10 @@ void DecodiumBridge::stopTune()
         m_txPcmBuffer = nullptr;
     }
     m_txPcmData.clear();
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
+    if (pttReleaseNeeded
+        && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
+    }
     if (usingTciAudioInput()) stopTciTxAudioStream(true);
     m_tuning = false;
     emit tuningChanged();
@@ -35960,7 +36064,11 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     // Senza questo guard finiremmo per iniettare spot marker '~' (FT2) nella
     // decodeList e broadcastarli su WebSocket anche dopo lo switch a FT8/FT4.
     if (m_mode != QStringLiteral("FT2")) {
-        bridgeLog("onFt2AsyncDecodeReady: ignored, mode changed to " + m_mode);
+        if (m_asyncDecodeTimer) {
+            m_asyncDecodeTimer->stop();
+        }
+        bridgeLog(QStringLiteral("onFt2AsyncDecodeReady: ignored/stopped outside FT2 mode=%1")
+                      .arg(m_mode));
         return;
     }
 
@@ -36387,7 +36495,26 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
 
 void DecodiumBridge::onAsyncDecodeTimer()
 {
-    if (m_mode != "FT2" || !m_monitoring || m_asyncDecodePending) return;
+    if (m_mode != QStringLiteral("FT2")) {
+        if (m_asyncDecodeTimer && m_asyncDecodeTimer->isActive()) {
+            m_asyncDecodeTimer->stop();
+        }
+        m_asyncDecodePending = false;
+        m_asyncAudioPos.store(0, std::memory_order_release);
+        if (m_ft2Worker) {
+            m_ft2Worker->markLatestDecodeSerial(std::numeric_limits<quint64>::max());
+            m_ft2Worker->cancelCurrentDecode();
+        }
+        static qint64 s_lastFt2AsyncStopLogMs = 0;
+        qint64 const stopNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (stopNowMs - s_lastFt2AsyncStopLogMs >= 10000) {
+            s_lastFt2AsyncStopLogMs = stopNowMs;
+            bridgeLog(QStringLiteral("FT2 async decode timer stopped outside FT2 mode=%1")
+                          .arg(m_mode));
+        }
+        return;
+    }
+    if (!m_monitoring || m_asyncDecodePending) return;
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     int minAsyncDecodeIntervalMs = 0;
     if (m_lowCpuModeEnabled) {
@@ -39009,6 +39136,31 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
 {
     QString const modeSnapshot = m_mode;
     int const decodeDepth = effectiveDecodeDepth();
+
+    // FT2-Link has its own streaming RX path (ft2LinkRxSamplesReady ->
+    // FT2LinkQmlAdapter::ingestRxSamples).  Never dispatch the legacy FT2/FT8
+    // end-of-period decoder here: it only produces confusing "FT2 decode
+    // completed" diagnostics and wastes CPU while FT2-Link is active.
+    if (isFt2LinkApplicationMode(modeSnapshot)) {
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            m_audioBuffer.clear();
+            m_audioBuffer.reserve(m_periodTicksMax * TIMER_MS * SAMPLE_RATE / 1000);
+        }
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        static qint64 s_lastFt2LinkSkipLogMs = 0;
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        if (nowMs - s_lastFt2LinkSkipLogMs >= 10000) {
+            s_lastFt2LinkSkipLogMs = nowMs;
+            bridgeLog(QStringLiteral(
+                "feedAudioToDecoder: skip legacy FTx decode in FT2-Link mode slot=%1")
+                          .arg(completedUtcSlot));
+        }
+        return;
+    }
 
     // Snapshot atomico del buffer audio sotto lock: il callback del sink
     // (DecodiumAudioSink::writeData) può eseguire append() in parallelo da

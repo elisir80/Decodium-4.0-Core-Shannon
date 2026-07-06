@@ -204,6 +204,21 @@ void FT2DecodeWorker::markLatestDecodeSerial (quint64 serial)
   m_latestDecodeSerial.store (serial, std::memory_order_relaxed);
 }
 
+void FT2DecodeWorker::setDecodeEnabled (bool enabled)
+{
+  m_decodeEnabled.store (enabled, std::memory_order_relaxed);
+  if (!enabled)
+    {
+      m_latestDecodeSerial.store (~quint64(0), std::memory_order_relaxed);
+      set_ft2_stage7_cancel (true);
+    }
+  else if (m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0))
+    {
+      m_latestDecodeSerial.store (0, std::memory_order_relaxed);
+      set_ft2_stage7_cancel (false);
+    }
+}
+
 void FT2DecodeWorker::cancelCurrentDecode ()
 {
   set_ft2_stage7_cancel (true);
@@ -219,7 +234,8 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
 {
   QElapsedTimer totalTimer;
   totalTimer.start ();
-  if (m_shuttingDown.load (std::memory_order_relaxed))
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed))
     {
       return;
     }
@@ -231,6 +247,12 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
   waitTimer.start ();
   QMutexLocker runtime_lock {&decodium::fortran::runtime_mutex ()};
   qint64 const waitMs = waitTimer.elapsed ();
+
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed))
+    {
+      return;
+    }
 
   short int iwave[kFt2AsyncSampleCount] {};
   int const copyCount = std::min (static_cast<int>(request.audio.size ()), static_cast<int>(kFt2AsyncSampleCount));
@@ -271,7 +293,8 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
   qint64 const decodeMs = decodeTimer.elapsed ();
   ftx_ft2_set_ap_hash_cache_c (nullptr, 0);
 
-  if (m_shuttingDown.load (std::memory_order_relaxed))
+  if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed))
     {
       return;
     }
@@ -304,6 +327,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   QElapsedTimer totalTimer;
   totalTimer.start ();
   if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed)
       || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;
@@ -318,6 +342,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   qint64 const waitMs = waitTimer.elapsed ();
 
   if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed)
       || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;
@@ -363,6 +388,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   ftx_ft2_set_ap_hash_cache_c (nullptr, 0);
 
   if (m_shuttingDown.load (std::memory_order_relaxed)
+      || !m_decodeEnabled.load (std::memory_order_relaxed)
       || m_latestDecodeSerial.load (std::memory_order_relaxed) == ~quint64(0)) // P0 1.0.407: come FT8 1.0.404 - scarta SOLO su invalidazione esplicita (mode/band change -> sentinel UINT64_MAX) o shutdown; il normale avanzamento serial NON scarta piu' il pass sync weak-recovery (depth-20+AP) quando il worker e' in backlog su slot 3.75s. Solo lista+AP cache: sequencer/TX FT2 sono sul path async (decodeAsync) senza gate, intatti.
     {
       return;

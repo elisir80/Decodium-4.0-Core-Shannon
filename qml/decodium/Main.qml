@@ -604,6 +604,7 @@ ApplicationWindow {
         // Stop monitoring and cleanup
         bridge.stopMonitor()
         bridge.shutdown()
+        shutdownAsyncLoaders()
         // Quit application
         Qt.quit()
     }
@@ -931,6 +932,40 @@ ApplicationWindow {
     property bool dxClusterDetached: true   // default detached (era sempre floating)
     property bool dxClusterMinimized: false
     property bool applicationClosing: false
+    function shutdownLoader(loader) {
+        if (!loader)
+            return
+        try {
+            loader.active = false
+        } catch (e) {
+        }
+        try {
+            loader.sourceComponent = null
+        } catch (e) {
+        }
+        try {
+            loader.source = ""
+        } catch (e) {
+        }
+    }
+    function shutdownAsyncLoaders() {
+        if (typeof waterfallEmbeddedLoader !== "undefined")
+            shutdownLoader(waterfallEmbeddedLoader)
+        if (typeof liveMapEmbeddedLoader !== "undefined")
+            shutdownLoader(liveMapEmbeddedLoader)
+        if (typeof dxPeditionLoader !== "undefined")
+            shutdownLoader(dxPeditionLoader)
+        if (typeof macroDialogLoader !== "undefined")
+            shutdownLoader(macroDialogLoader)
+        if (typeof astroWindowLoader !== "undefined")
+            shutdownLoader(astroWindowLoader)
+        if (typeof qsyQuickPickerLoader !== "undefined")
+            shutdownLoader(qsyQuickPickerLoader)
+        if (typeof devOverlayLoader !== "undefined")
+            shutdownLoader(devOverlayLoader)
+        if (typeof bugReportDialogLoader !== "undefined")
+            shutdownLoader(bugReportDialogLoader)
+    }
     function syncSpectrumVisibility() {
         if (bridge)
             bridge.spectrumVisible = waterfallPanelVisible

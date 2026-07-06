@@ -350,6 +350,22 @@ Item {
                                  Math.round(text.length * charPx + iconPx + toolbarButtonHPad * 2)))
     }
 
+    function displayModeName(mode) {
+        var text = String(mode || "").trim()
+        var upper = text.toUpperCase()
+        if (upper === "FT2-LINK" || upper === "FT2LINK" || upper === "D4LINK" || upper === "D4 LINK")
+            return "FT2-Link"
+        return text.length > 0 ? text : "FT8"
+    }
+
+    function syncModeSelector() {
+        if (typeof modeSelector === "undefined" || !modeSelector)
+            return
+        var mode = displayModeName(engine ? engine.mode : "FT8")
+        var idx = modeSelector.model.indexOf(mode)
+        modeSelector.currentIndex = idx >= 0 ? idx : 0
+    }
+
     function qsoInfoWidth(text, placeholder, minWidth, maxWidth) {
         var value = String(text || "")
         var hint = String(placeholder || "")
@@ -591,11 +607,8 @@ Item {
                                 anchors.fill: parent
                                 anchors.margins: 1
                                 model: txPanel.supportedModes
-                                currentIndex: {
-                                    var mode = engine ? engine.mode : "FT8"
-                                    var idx = model.indexOf(mode)
-                                    return idx >= 0 ? idx : 0
-                                }
+                                currentIndex: 0
+                                Component.onCompleted: txPanel.syncModeSelector()
                                 onActivated: function(index) {
                                     if (!engine || index < 0 || index >= model.length)
                                         return
@@ -603,13 +616,20 @@ Item {
                                     if (selectedMode.toUpperCase() === "FT2-LINK"
                                             && !engine.ft2LinkAccessUnlocked) {
                                         txPanel.ft2LinkAccessRequested()
-                                        var currentMode = engine ? String(engine.mode || "FT2") : "FT2"
-                                        var currentModeIndex = model.indexOf(currentMode)
-                                        modeSelector.currentIndex = currentModeIndex >= 0 ? currentModeIndex : model.indexOf("FT2")
+                                        Qt.callLater(txPanel.syncModeSelector)
                                         return
                                     }
                                     if (selectedMode.length > 0)
                                         engine.mode = selectedMode
+                                }
+                                Connections {
+                                    target: engine
+                                    function onModeChanged() {
+                                        txPanel.syncModeSelector()
+                                    }
+                                    function onFt2LinkAccessChanged() {
+                                        txPanel.syncModeSelector()
+                                    }
                                 }
                                 font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))

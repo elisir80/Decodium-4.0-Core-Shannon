@@ -864,6 +864,13 @@ void DecodiumLegacyBackend::setMode(const QString& mode)
     }
 }
 
+void DecodiumLegacyBackend::setFt2DecodeEnabled(bool enabled)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetFt2DecodeEnabled(enabled);
+    }
+}
+
 void DecodiumLegacyBackend::setDialFrequency(double frequencyHz)
 {
     if (m_mainWindow && frequencyHz > 0.0) {
