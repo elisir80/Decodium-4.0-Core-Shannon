@@ -20,10 +20,20 @@ DEFAULT_ITERATIONS = 160000
 SALT_BYTES = 16
 HASH_BYTES = 32
 
+# On Windows with MSYS2/MinGW64 toolchain, cmake lives in the MSYS2 prefix.
+_MSYS2_CMAKE = r"C:\msys64\mingw64\bin\cmake.exe"
+
+
+def _cmake_exe():
+    """Return the cmake executable to use, preferring MSYS2 on Windows."""
+    if sys.platform.startswith("win") and os.path.isfile(_MSYS2_CMAKE):
+        return _MSYS2_CMAKE
+    return "cmake"
+
 
 def default_build_dir():
     if sys.platform.startswith("win"):
-        return "build-local-windows"
+        return "build_mingw64"
     if sys.platform == "darwin":
         return "build-local-macos"
     return "build-local-linux"
@@ -109,8 +119,9 @@ def main():
     print(f"DECODIUM_FT2LINK_ACCESS_HASH_B64={hash_b64}")
     print(f"DECODIUM_FT2LINK_ACCESS_ITERATIONS={args.iterations}")
     print()
+    cmake_exe = _cmake_exe()
     cmake_cmd = [
-        "cmake",
+        cmake_exe,
         "-S",
         args.source_dir,
         "-B",
@@ -134,7 +145,7 @@ def main():
             return 2
         jobs = str(max(1, os.cpu_count() or 1))
         build_cmd = [
-            "cmake",
+            cmake_exe,
             "--build",
             args.build_dir,
             "--target",
