@@ -5,6 +5,9 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   BUILD_TAG: ${{ github.run_number }}
   HAMLIB_TAG: "4.7.0"
