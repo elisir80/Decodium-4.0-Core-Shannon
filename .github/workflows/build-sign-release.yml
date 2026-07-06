@@ -307,9 +307,9 @@ jobs:
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
             /DAppVersion="${{ steps.version.outputs.version }}" `
-            /DBuildDir="dist-windows-x64" `
-            /DSourceRoot="." `
-            /DOutputDir="installer\output" `
+            /DBuildDir="${{ github.workspace }}\dist-windows-x64" `
+            /DSourceRoot="${{ github.workspace }}" `
+            /DOutputDir="${{ github.workspace }}\installer\output" `
             /DOutputBaseFilename="Decodium_${{ steps.version.outputs.version }}_Setup_x64" `
             "installer\decodium_setup.iss"
         shell: pwsh
