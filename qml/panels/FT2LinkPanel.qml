@@ -3356,12 +3356,15 @@ Rectangle {
     // contenuto tiene l'altezza minima usabile e il pannello SCORRE.
     Flickable {
         id: rootFlick
-        // 1.0.462 iu8lmc: tenuto a 414 (il pannello RIEMPIE la finestra senza
-        // scorrere sui monitor normali). Per evitare che la lista stazioni si
-        // schiacci a 1-2 righe su finestre basse NON si allunga il contenuto
-        // (spingerebbe la lista sotto il bordo), ma si da' alla ListView una
-        // Layout.minimumHeight esplicita: cosi resta sempre visibile e cliccabile.
-        readonly property int minContentHeight: 414
+        // 1.0.467 iu8lmc: minContentHeight = altezza REALE del contenuto
+        // (contentCol.implicitHeight) invece di un valore fisso. Cosi il
+        // Flickable scorre ESATTAMENTE quanto serve: se la finestra e' alta
+        // abbastanza il contenuto riempie senza scroll; se e' bassa/larga
+        // (area centrale schiacciata) si scorre e NIENTE viene tagliato —
+        // tutte le opzioni restano raggiungibili. Il fisso 414 forzava scroll
+        // sui monitor normali; Math.min(414,h) invece uccideva lo scroll e
+        // NASCONDEVA le opzioni in eccesso: entrambi sbagliati.
+        readonly property int minContentHeight: contentCol.implicitHeight
         anchors.fill: parent
         anchors.margins: 8
         contentWidth: width
@@ -3376,6 +3379,7 @@ Rectangle {
         }
 
     ColumnLayout {
+        id: contentCol
         width: rootFlick.contentWidth
         height: rootFlick.contentHeight
         spacing: 8
@@ -3502,7 +3506,7 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 26
+            Layout.preferredHeight: root.height < 360 ? 20 : 26
             radius: 4
             color: Qt.rgba(1, 1, 1, 0.025)
             border.color: Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.16)
@@ -3745,7 +3749,7 @@ Rectangle {
                     // lista resta visibile e cliccabile anche su finestre basse
                     // (monitor ~775px): la ColumnLayout le riserva questo spazio
                     // togliendolo alle altre sezioni fillHeight (sessioni/chat).
-                    Layout.minimumHeight: 200
+                    Layout.minimumHeight: 124
                     clip: true
                     model: root.stationHistoryMode ? root.beaconHistory : root.stations
                     boundsBehavior: Flickable.StopAtBounds
@@ -4258,6 +4262,7 @@ Rectangle {
                     Layout.fillWidth: true
                     visible: root.selectedMessages.length === 0
                              && root.forms.length > 0
+                             && root.height > 360
                     text: root.latestFormLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -4269,6 +4274,7 @@ Rectangle {
                     Layout.fillWidth: true
                     visible: root.selectedMessages.length === 0
                              && root.fileTransfers.length > 0
+                             && root.height > 360
                     text: root.latestFileLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -4313,6 +4319,7 @@ Rectangle {
                     Layout.fillWidth: true
                     visible: root.selectedMessages.length === 0
                              && root.pingLog.length > 0
+                             && root.height > 360
                     text: root.latestPingLine()
                     elide: Text.ElideRight
                     font.family: root.mono
@@ -4323,7 +4330,7 @@ Rectangle {
                 Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.minimumHeight: 110
+                    Layout.minimumHeight: 76
                     Layout.preferredHeight: 180
 
                     ListView {
