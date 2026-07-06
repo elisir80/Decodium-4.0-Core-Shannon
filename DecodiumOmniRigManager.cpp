@@ -1,4 +1,5 @@
 #include "DecodiumOmniRigManager.h"
+#include "DecodiumProfileSettings.h"
 
 #if defined(Q_OS_WIN)
 #  if defined(__has_include)
@@ -122,10 +123,10 @@ bool envFlagEnabled(const char* name)
 
 bool omniRigMockRequested()
 {
-    QSettings s("Decodium", "Decodium3");
-    s.beginGroup("CAT_OmniRig");
-    const bool settingEnabled = s.value(QStringLiteral("mockEnabled"), false).toBool();
-    s.endGroup();
+    const bool settingEnabled =
+        decodium::profiledSettingsValue(QStringLiteral("CAT_OmniRig"),
+                                        QStringLiteral("mockEnabled"),
+                                        false).toBool();
     return settingEnabled || envFlagEnabled("DECODIUM_OMNIRIG_MOCK");
 }
 
@@ -590,6 +591,7 @@ void DecodiumOmniRigManager::applyPollInterval()
 void DecodiumOmniRigManager::saveSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     m_pttMethod = normalizePttMethod(m_pttMethod);
     m_pollInterval = boundedPollInterval(m_pollInterval);
     s.beginGroup("CAT_OmniRig");
@@ -618,6 +620,7 @@ void DecodiumOmniRigManager::setSplitMode(const QString& v)
 void DecodiumOmniRigManager::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_OmniRig");
     const bool hasRigName = s.contains("rigName");
     const bool hasPttMethod = s.contains("pttMethod");
@@ -758,6 +761,7 @@ void DecodiumOmniRigManager::applyPollInterval()
 void DecodiumOmniRigManager::saveSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     m_pttMethod = normalizePttMethod(m_pttMethod);
     m_pollInterval = boundedPollInterval(m_pollInterval);
     s.beginGroup("CAT_OmniRig");
@@ -786,6 +790,7 @@ void DecodiumOmniRigManager::setSplitMode(const QString& v)
 void DecodiumOmniRigManager::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_OmniRig");
     const bool hasRigName = s.contains("rigName");
     const bool hasPttMethod = s.contains("pttMethod");

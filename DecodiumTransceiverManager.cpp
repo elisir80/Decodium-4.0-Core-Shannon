@@ -4,6 +4,7 @@
 #include "DecodiumTransceiverManager.h"
 
 #include "DecodiumLogging.hpp"
+#include "DecodiumProfileSettings.h"
 #include "Transceiver/TransceiverFactory.hpp"
 #include "Transceiver/Transceiver.hpp"
 #include "Transceiver/TransceiverBase.hpp"
@@ -1490,8 +1491,7 @@ static QString stopBitsName(TransceiverFactory::StopBits stopBits)
 
 static TransceiverFactory::TXAudioSource configuredTxAudioSource()
 {
-    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
-    QVariant const raw = s.value(QStringLiteral("TXAudioSource"), 0);
+    QVariant const raw = decodium::profiledSettingsValue(QString {}, QStringLiteral("TXAudioSource"), 0);
     QString const text = raw.toString().trimmed();
     if (text.compare(QStringLiteral("Front/Mic"), Qt::CaseInsensitive) == 0
         || text.compare(QStringLiteral("front"), Qt::CaseInsensitive) == 0
@@ -1514,9 +1514,8 @@ static TransceiverFactory::TXAudioSource configuredTxAudioSource()
 
 static bool configuredPwrAndSwrEnabled()
 {
-    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
-    return settings.value(QStringLiteral("PWRandSWR"), false).toBool()
-        || settings.value(QStringLiteral("CheckSWR"), false).toBool();
+    return decodium::profiledSettingsValue(QString {}, QStringLiteral("PWRandSWR"), false).toBool()
+        || decodium::profiledSettingsValue(QString {}, QStringLiteral("CheckSWR"), false).toBool();
 }
 
 static TransceiverFactory::Handshake parseHandshake(const QString& s)
@@ -2437,6 +2436,7 @@ void DecodiumTransceiverManager::saveSettings()
     bool const canForceRts = forceRtsAvailable();
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
     s.setValue("rigName",      m_rigName);
     s.setValue("serialPort",   serialPort);
@@ -2466,6 +2466,7 @@ void DecodiumTransceiverManager::saveSettings()
 void DecodiumTransceiverManager::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
     auto get = [&](const QString& k, const QVariant& def) { return s.value(k, def); };
     m_serialPort   = normalizeDevicePath(get("serialPort",   m_serialPort).toString());

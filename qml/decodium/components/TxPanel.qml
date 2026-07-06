@@ -358,6 +358,8 @@ Item {
         return text.length > 0 ? text : "FT8"
     }
 
+    readonly property bool isFt2LinkMode: displayModeName(engine ? engine.mode : "") === "FT2-Link"
+
     function syncModeSelector() {
         if (typeof modeSelector === "undefined" || !modeSelector)
             return
@@ -1667,7 +1669,13 @@ Item {
 
             // TX Buttons row
             RowLayout {
+                id: classicTxButtonsRow
+                visible: !txPanel.isFt2LinkMode
+                enabled: visible
                 Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                Layout.minimumHeight: visible ? implicitHeight : 0
+                Layout.maximumHeight: visible ? implicitHeight : 0
                 spacing: 6
 
                 Item {

@@ -1526,11 +1526,11 @@ int main(int argc, char* argv[])
 
     QString configName = parser.value(configOption).trimmed();
     QSettings rootSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
-    if (configName.isEmpty()) {
-        configName = rootSettings.value(QStringLiteral("CurrentMultiSettingsConfiguration")).toString().trimmed();
-    }
     if (configName.isEmpty() && !rigName.isEmpty()) {
         configName = rigName;
+    }
+    if (configName.isEmpty()) {
+        configName = rootSettings.value(QStringLiteral("CurrentMultiSettingsConfiguration")).toString().trimmed();
     }
     if (!configName.isEmpty()) {
         app.setProperty("decodiumConfigName", configName);

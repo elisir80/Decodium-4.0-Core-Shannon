@@ -6,6 +6,7 @@
 #include "DecodiumAlertManager.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumPropagationManager.h"
+#include "DecodiumProfileSettings.h"
 #include "DecodiumDxCluster.h"
 #include "Network/MessageClient.hpp"
 #include "DxccLookup.h"
@@ -1607,6 +1608,7 @@ static QString audioDeviceSelectionForLog(QString const& name, QString const& id
 static void persistSingleAudioIdentity(bool input, QString const& name, QString const& id)
 {
     QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     if (input) {
         s.setValue(QStringLiteral("audioInputDevice"), name);
         s.setValue(QStringLiteral("SoundInName"), name);
@@ -4366,18 +4368,7 @@ constexpr int kLateAutoLogGraceWindowSeconds {45};
 
 void beginConfiguredBridgeSettingsGroup(QSettings& settings)
 {
-    auto const* app = QCoreApplication::instance();
-    if (!app) {
-        return;
-    }
-
-    QString const configName = app->property("decodiumConfigName").toString().trimmed();
-    if (configName.isEmpty()) {
-        return;
-    }
-
-    settings.beginGroup(QStringLiteral("MultiSettings"));
-    settings.beginGroup(configName);
+    decodium::beginActiveSettingsProfile(settings);
 }
 
 bool isWithinRecentDuplicateWindow(QDateTime const& seenAt, QDateTime const& nowUtc)
@@ -6187,8 +6178,9 @@ void DecodiumBridge::setProcessPriority(int v)
     int const clamped = qBound(0, v, 3);
     if (m_processPriority != clamped) {
         m_processPriority = clamped;
-        QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-            .setValue(QStringLiteral("ProcessPriority"), m_processPriority);
+        QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("ProcessPriority"), m_processPriority);
         emit processPriorityChanged();
     }
     applyProcessPriority();
@@ -6232,8 +6224,9 @@ void DecodiumBridge::applyReadyProfile(const QString& id)
 
     if (m_activeReadyProfile != normId) {
         m_activeReadyProfile = normId;
-        QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-            .setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
+        QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
         emit activeReadyProfileChanged();
     }
     bridgeLog(QStringLiteral("[Profile] applicato profilo pronto '%1'").arg(normId));
@@ -6245,8 +6238,9 @@ void DecodiumBridge::clearActiveReadyProfileOnManualChange()
 {
     if (m_applyingReadyProfile || m_activeReadyProfile.isEmpty()) return;
     m_activeReadyProfile.clear();
-    QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-        .setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("ActiveReadyProfile"), m_activeReadyProfile);
     emit activeReadyProfileChanged();
 }
 
@@ -7436,6 +7430,7 @@ void DecodiumBridge::persistTxWatchdogSettings()
         : 0;
 
     QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("txWatchdogMode"), m_txWatchdogMode);
     settings.setValue(QStringLiteral("txWatchdogTime"), m_txWatchdogTime);
     settings.setValue(QStringLiteral("txWatchdogCount"), m_txWatchdogCount);
@@ -11657,6 +11652,7 @@ void DecodiumBridge::setPskReporterEnabled(bool v)
     if (m_pskReporterEnabled == v) return;
     m_pskReporterEnabled = v;
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("pskReporterEnabled"), v);
     s.setValue(QStringLiteral("PSKReporter"), v);
     s.sync();
@@ -11684,6 +11680,7 @@ void DecodiumBridge::setFtThreads(int v)
     m_ftThreadsAuto = false;
     applyLowCpuRuntimeProfile(QStringLiteral("ft-threads"));
     QSettings settings("Decodium","Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue("ftThreads", m_ftThreads);
     settings.setValue("ftThreadsAuto", false);
     emit ftThreadsChanged();
@@ -11694,7 +11691,9 @@ void DecodiumBridge::setFtThreadsAuto(bool enabled)
     if (!enabled) {
         if (!m_ftThreadsAuto) return;
         m_ftThreadsAuto = false;
-        QSettings("Decodium","Decodium3").setValue("ftThreadsAuto", false);
+        QSettings settings("Decodium","Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue("ftThreadsAuto", false);
         emit ftThreadsChanged();
         return;
     }
@@ -11707,6 +11706,7 @@ void DecodiumBridge::setFtThreadsAuto(bool enabled)
     m_ftThreads = autoThreads;
     applyLowCpuRuntimeProfile(QStringLiteral("ft-threads-auto"));
     QSettings settings("Decodium","Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue("ftThreads", m_ftThreads);
     settings.setValue("ftThreadsAuto", true);
     settings.setValue("ftThreadsAutoDetected", true);
@@ -11749,6 +11749,7 @@ void DecodiumBridge::setLowCpuModeEnabled(bool enabled)
 
     m_lowCpuModeEnabled = enabled;
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("LowCpuMode"), m_lowCpuModeEnabled);
     s.setValue(QStringLiteral("lowCpuModeEnabled"), m_lowCpuModeEnabled);
     s.sync();
@@ -12987,6 +12988,7 @@ void DecodiumBridge::syncCatSplitModeToLegacy(const QString& mode, const QString
     QVariant const legacyValue = legacySplitModeSettingValue(normalized);
 
     QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
     settings.beginGroup(QStringLiteral("Transceiver"));
     settings.setValue(QStringLiteral("splitMode"), normalized);
     settings.endGroup();
@@ -13174,6 +13176,7 @@ int DecodiumBridge::targetDecodeSamplesForMode(const QString& mode) const
 void DecodiumBridge::applyNtpSettings()
 {
     QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
 
     // 1.0.159 — DecoSyncTime fase 1: priorita' alla nuova chiave
     // DecoSyncTimeEnabled (default ON). Se l'utente NON ha mai toccato il
@@ -13303,6 +13306,7 @@ void DecodiumBridge::resetStartupTransientQsoState()
 void DecodiumBridge::purgePersistentTransientQsoState()
 {
     QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.remove(QStringLiteral("dxCall"));
     s.remove(QStringLiteral("dxGrid"));
     s.remove(QStringLiteral("tx1"));
@@ -13672,6 +13676,7 @@ void DecodiumBridge::setRxFrequency(int f)
             rebuildRxDecodeList();
         }
         QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("rxFrequency"), m_rxFrequency);
     }
 }
@@ -13689,6 +13694,7 @@ void DecodiumBridge::setTxFrequency(int f)
             m_legacyBackend->setTxFrequency(f);
         }
         QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("txFrequency"), m_txFrequency);
         s.setValue(QStringLiteral("TXFrequency"), m_txFrequency);
         syncActiveCatTxSplitFrequency(QStringLiteral("tx-audio-change"));
@@ -13972,6 +13978,7 @@ void DecodiumBridge::setAudioInputDevice(const QString& v) {
             m_legacyBackend->setAudioInputDeviceName(value);
         }
         QSettings s("Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("audioInputDevice"), m_audioInputDevice);
         s.setValue(QStringLiteral("SoundInName"), m_audioInputDevice);
         if (m_audioInputDeviceId.isEmpty()) {
@@ -14050,6 +14057,7 @@ void DecodiumBridge::setAudioOutputDevice(const QString& v) {
             m_legacyBackend->setAudioOutputDeviceName(value);
         }
         QSettings s("Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("audioOutputDevice"), m_audioOutputDevice);
         s.setValue(QStringLiteral("SoundOutName"), m_audioOutputDevice);
         if (m_audioOutputDeviceId.isEmpty()) {
@@ -16093,6 +16101,7 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
     updateSpecialOperationFromLegacy(activity);
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("SelectedActivity"), activity);
     s.setValue(QStringLiteral("SpecialOpActivity"), activity != kSpecialOpNone);
     s.sync();
@@ -16108,6 +16117,7 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
             m_forceLegacyTxForSpecialOp = wasForced;
             updateSpecialOperationFromLegacy(kSpecialOpNone);
             QSettings resetSettings("Decodium", "Decodium3");
+            decodium::beginActiveSettingsProfile(resetSettings);
             resetSettings.setValue(QStringLiteral("SelectedActivity"), kSpecialOpNone);
             resetSettings.setValue(QStringLiteral("SpecialOpActivity"), false);
             resetSettings.sync();
@@ -20383,6 +20393,7 @@ void DecodiumBridge::setAlcTarget(int v)
         return;
     m_alcTarget = clamped;
     QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("AlcTarget"), m_alcTarget);
     emit alcTargetChanged();
 }
@@ -20533,6 +20544,7 @@ void DecodiumBridge::finishAlcCalibration(bool success, const QString& reason)
                              .arg(qRound(finalAlc));
         // Persisti il livello TX nello store canonico (setTxOutputLevel non lo fa da solo)
         QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("txOutputLevel"), finalLevel);
         bridgeLog(QStringLiteral("[ALC] calibration OK level=%1 alc=%2")
                       .arg(finalLevel, 0, 'f', 1)
@@ -21169,6 +21181,7 @@ void DecodiumBridge::setCatBackend(const QString& v)
     }
     refreshPskReporterLocalStation();
     QSettings s2("Decodium","Decodium3");
+    decodium::beginActiveSettingsProfile(s2);
     s2.setValue("catBackend", m_catBackend);
 }
 
@@ -21460,6 +21473,7 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
         // This switch belongs to the D4 reporting page.  Prefer QSettings so a
         // stale decodium4.ini legacy value cannot re-enable TCP/IP at startup.
         QSettings s("Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(s);
         QVariant value = readBridgeSettingWithAlias(s, key);
         if (!value.isValid()) {
             value = readSettingFromLegacyIni(key);
@@ -21490,6 +21504,7 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
             }
 
             QSettings s("Decodium", "Decodium3");
+            decodium::beginActiveSettingsProfile(s);
             QVariant v = s.value(settingKey);
             if (!v.isValid()) {
                 QString const legacyKey = aliasedBridgeSettingKey(settingKey);
@@ -21535,6 +21550,7 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
     }
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     QVariant value = readBridgeSettingWithAlias(s, key);
     if (!value.isValid() && key == QStringLiteral("RemoteHttpPort")) {
         value = s.value(QStringLiteral("WebAppHttpPort"));
@@ -21545,6 +21561,7 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
 void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     if (key == QStringLiteral("WorldMapDisplayed")) {
         m_worldMapDisplayed = value.toBool();
     }
@@ -24839,6 +24856,7 @@ int DecodiumBridge::remoteWebSocketPort() const
     }
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     bool ok = false;
     int wsPort = s.value(QStringLiteral("RemoteWsPort"),
                          s.value(QStringLiteral("WebAppWsPort"), 0)).toInt(&ok);
@@ -24877,6 +24895,14 @@ QStringList DecodiumBridge::networkInterfaceNames() const
 
 QString DecodiumBridge::udpInterfaceName() const
 {
+    QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
+    QVariant local = s.value(QStringLiteral("UDPInterface"));
+    if (local.isValid()) {
+        QStringList interfaces = local.toStringList();
+        if (!interfaces.isEmpty()) return interfaces.constFirst();
+    }
+
     // Read from legacy INI (canonical source for Configuration/MessageClient)
     QVariant v = readSettingFromLegacyIni(QStringLiteral("UDPInterface"));
     if (v.isValid()) {
@@ -24897,6 +24923,7 @@ void DecodiumBridge::setUdpInterfaceName(const QString& name)
 
     // Also keep registry copy for backwards compatibility
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     if (name.trimmed().isEmpty()) {
         s.remove(QStringLiteral("UDPInterface"));
     } else {
@@ -24915,6 +24942,7 @@ void DecodiumBridge::saveSettings()
                                    .arg(m_transmitting ? 1 : 0),
                                25);
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.setValue("callsign", m_callsign);
     s.setValue("grid", m_grid);
     s.setValue("frequency", m_frequency);
@@ -30377,6 +30405,7 @@ void DecodiumBridge::setFontScale(double s)
 void DecodiumBridge::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
     QString const legacyCallsign = legacyIni.value(QStringLiteral("MyCall")).toString().trimmed().toUpper();
     QString const legacyGrid = legacyIni.value(QStringLiteral("MyGrid")).toString().trimmed().toUpper();
@@ -30999,6 +31028,7 @@ QVariantMap DecodiumBridge::loadWindowState(const QString& key) const
     }
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup(QStringLiteral("WindowState/%1").arg(normalizedKey));
     auto const maybeInsertInt = [&] (const char* field) {
         if (s.contains(QLatin1String(field))) {
@@ -31035,6 +31065,7 @@ void DecodiumBridge::saveWindowState(const QString& key,
     }
 
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup(QStringLiteral("WindowState/%1").arg(normalizedKey));
     s.setValue(QStringLiteral("x"), x);
     s.setValue(QStringLiteral("y"), y);
@@ -31054,6 +31085,7 @@ void DecodiumBridge::saveWindowState(const QString& key,
 void DecodiumBridge::resetWindowLayout()
 {
     QSettings s(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.remove(QStringLiteral("WindowState"));
     s.sync();
     bridgeLog(QStringLiteral("resetWindowLayout: tutte le WindowState/* cancellate, signal emesso"));

@@ -113,6 +113,7 @@ class FT2LinkQmlAdapter : public QObject
   Q_PROPERTY(int formCount READ formCount NOTIFY formsChanged)
   Q_PROPERTY(int fileTransferCount READ fileTransferCount NOTIFY fileTransfersChanged)
   Q_PROPERTY(int bulletinCount READ bulletinCount NOTIFY bulletinsChanged)
+  Q_PROPERTY(int bulletinUnreadCount READ bulletinUnreadCount NOTIFY bulletinsChanged)
   Q_PROPERTY(int qsoLogCount READ qsoLogCount NOTIFY qsoLogChanged)
   Q_PROPERTY(int logbookOutboxCount READ logbookOutboxCount NOTIFY logbookOutboxChanged)
   Q_PROPERTY(int contactCount READ contactCount NOTIFY contactHistoryChanged)
@@ -173,6 +174,7 @@ public:
   int formCount () const;
   int fileTransferCount () const;
   int bulletinCount () const;
+  int bulletinUnreadCount () const;
   int qsoLogCount () const;
   int logbookOutboxCount () const;
   int contactCount () const;
@@ -518,6 +520,9 @@ public:
   Q_INVOKABLE bool markReceivedFileRead (quint32 transferId,
                                          bool read,
                                          quint64 nowMs);
+  Q_INVOKABLE bool markBulletinRead (quint32 bulletinId,
+                                     bool read,
+                                     quint64 nowMs);
   Q_INVOKABLE bool deleteMailboxMessage (quint32 messageId);
   Q_INVOKABLE void clearMailbox ();
   Q_INVOKABLE void clearForms ();
@@ -968,6 +973,7 @@ private:
     QString title;
     QString body;
     QString state;
+    bool read {false};
     quint64 atMs {0};
     quint64 updatedAtMs {0};
   };

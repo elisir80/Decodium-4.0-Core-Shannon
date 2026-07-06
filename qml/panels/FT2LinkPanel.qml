@@ -24,6 +24,7 @@ Rectangle {
     property var receivedFiles: []
     property int receivedFileUnreadCount: 0
     property var bulletins: []
+    property int bulletinUnreadCount: 0
     property var qsoLog: []
     property var logbookOutbox: []
     property var contactHistory: []
@@ -73,6 +74,8 @@ Rectangle {
     property string typingSummaryText: ""
     property string fileTransferStatus: ""
     property string receivedFileStatus: ""
+    property string bulletinStatus: ""
+    property bool alertTagsDirty: false
     property string selectedFilePath: ""
     property string selectedFileName: ""
     property string selectedFileContent: ""
@@ -84,6 +87,11 @@ Rectangle {
     property bool stationHistoryMode: false
     property bool skipCqSlot: settingBool("uiFt2LinkSkipCqSlot", false)
     property double cqSlotWaitUntilMs: 0
+    readonly property string bbsGroupDefaultCsv: "ALL,NEWS,NET,EMCOMM,CLUB,TEST"
+    property string bbsGroupCsv: settingString("uiFt2LinkBbsGroups", bbsGroupDefaultCsv)
+    readonly property var bbsGroupList: parseBbsGroups(bbsGroupCsv)
+    property string bbsDefaultGroup: normalizeBbsGroup(settingString("uiFt2LinkBbsDefaultGroup", "ALL"))
+    property string bbsGroupFilter: normalizeBbsGroupOrEmpty(settingString("uiFt2LinkBbsGroupFilter", ""))
     property string profileName: settingString("uiFt2LinkProfileName", "")
     property string profileQth: settingString("uiFt2LinkProfileQth", "")
     property string profileEmail: settingString("uiFt2LinkProfileEmail", "")
@@ -180,6 +188,12 @@ Rectangle {
     onCheckInCityChanged: persistSetting("uiFt2LinkCheckInCity", checkInCity)
     onCheckInRegionChanged: persistSetting("uiFt2LinkCheckInRegion", checkInRegion)
     onCheckInChannelChanged: persistSetting("uiFt2LinkCheckInChannel", checkInChannel)
+    onBbsGroupCsvChanged: persistSetting("uiFt2LinkBbsGroups", bbsGroupCsv)
+    onBbsDefaultGroupChanged: persistSetting("uiFt2LinkBbsDefaultGroup", bbsDefaultGroup)
+    onBbsGroupFilterChanged: {
+        persistSetting("uiFt2LinkBbsGroupFilter", bbsGroupFilter)
+        refreshBulletins()
+    }
 
     function coerceBool(value, fallback) {
         if (value === undefined || value === null)
@@ -223,6 +237,93 @@ Rectangle {
     function persistSetting(key, value) {
         if (bridge && typeof bridge.setSetting === "function")
             bridge.setSetting(key, value)
+    }
+
+    function normalizeBbsGroup(text) {
+        var value = String(text || "").trim().toUpperCase()
+        value = value.replace(/[^A-Z0-9_-]/g, "")
+        value = value.substring(0, 12)
+        return value.length > 0 ? value : "ALL"
+    }
+
+    function normalizeBbsGroupOrEmpty(text) {
+        var value = String(text || "").trim().toUpperCase()
+        value = value.replace(/[^A-Z0-9_-]/g, "")
+        return value.substring(0, 12)
+    }
+
+    function parseBbsGroups(csv) {
+        var defaults = bbsGroupDefaultCsv.split(",")
+        var input = String(csv || "").length > 0 ? String(csv).split(",") : defaults
+        var out = []
+        var seen = ({})
+        function append(raw) {
+            var group = normalizeBbsGroup(raw)
+            if (seen[group])
+                return
+            seen[group] = true
+            out.push(group)
+        }
+        append("ALL")
+        for (var i = 0; i < input.length; ++i)
+            append(input[i])
+        for (var j = 0; j < defaults.length; ++j)
+            append(defaults[j])
+        return out
+    }
+
+    function ensureBbsGroup(rawGroup) {
+        var group = normalizeBbsGroup(rawGroup)
+        var list = parseBbsGroups(bbsGroupCsv)
+        if (list.indexOf(group) < 0) {
+            list.push(group)
+            bbsGroupCsv = list.join(",")
+        }
+        return group
+    }
+
+    function setBbsComposerGroup(group) {
+        var clean = ensureBbsGroup(group)
+        if (typeof bulletinGroupText !== "undefined" && bulletinGroupText)
+            bulletinGroupText.text = clean
+        bbsDefaultGroup = clean
+        bulletinStatus = "BBS group " + clean + " selected"
+    }
+
+    function saveBbsComposerGroup() {
+        var source = typeof bulletinGroupText !== "undefined" && bulletinGroupText
+                     ? bulletinGroupText.text
+                     : bbsDefaultGroup
+        var clean = ensureBbsGroup(source)
+        if (typeof bulletinGroupText !== "undefined" && bulletinGroupText)
+            bulletinGroupText.text = clean
+        bbsDefaultGroup = clean
+        bulletinStatus = "Saved BBS group " + clean
+    }
+
+    function cycleBbsGroupFilter() {
+        var options = [""].concat(bbsGroupList)
+        var idx = options.indexOf(bbsGroupFilter)
+        bbsGroupFilter = options[(idx + 1) % options.length]
+    }
+
+    function bbsFilterLabel() {
+        return bbsGroupFilter.length > 0 ? ("FILTER " + bbsGroupFilter) : "SHOW ALL"
+    }
+
+    function bulletinMatchesFilter(item) {
+        if (bbsGroupFilter.length === 0)
+            return true
+        return normalizeBbsGroup(item && item.group ? item.group : "ALL") === bbsGroupFilter
+    }
+
+    function filteredBulletins() {
+        var out = []
+        for (var i = 0; i < bulletins.length; ++i) {
+            if (bulletinMatchesFilter(bulletins[i]))
+                out.push(bulletins[i])
+        }
+        return out
     }
 
     function nowMs() {
@@ -314,10 +415,14 @@ Rectangle {
         alerts = ft2Link ? ft2Link.alertEvents() : []
     }
 
-    function refreshAlertTags() {
+    function refreshAlertTags(forceEditorSync) {
         alertTagList = ft2Link && typeof ft2Link.customAlertTags === "function"
                        ? ft2Link.customAlertTags()
                        : []
+        if (typeof alertTagsText !== "undefined" && alertTagsText
+                && (forceEditorSync === true
+                    || (!alertTagsText.activeFocus && !alertTagsDirty)))
+            alertTagsText.text = alertTagList.join(", ")
     }
 
     function refreshMailbox() {
@@ -356,8 +461,19 @@ Rectangle {
         receivedFileUnreadCount = countUnreadReceivedFiles(receivedFiles)
     }
 
+    function countUnreadBulletins(items) {
+        var count = 0
+        var list = items || []
+        for (var i = 0; i < list.length; ++i) {
+            if (list[i] && list[i].unread)
+                ++count
+        }
+        return count
+    }
+
     function refreshBulletins() {
         bulletins = ft2Link ? ft2Link.bulletins() : []
+        bulletinUnreadCount = countUnreadBulletins(bulletins)
     }
 
     function refreshQsoLog() {
@@ -600,9 +716,11 @@ Rectangle {
         case 2:
             return 56
         case 3:
-            return 32
+            return Math.max(188, Math.min(260, root.height * 0.38))
         case 4:
-            return 92
+            return 140
+        case 6:
+            return Math.max(260, Math.min(380, root.height * 0.52))
         default:
             return Math.max(132, Math.min(190, root.height * 0.36))
         }
@@ -1005,6 +1123,94 @@ Rectangle {
             receivedFileStatus = "Save failed: "
                                  + String(result && result.error ? result.error : "unknown")
         }
+    }
+
+    function bulletinDate(item) {
+        if (!item)
+            return "--"
+        var ms = Number(item.updatedAtMs || item.atMs || 0)
+        if (!isFinite(ms) || ms <= 0)
+            return "--"
+        var d = new Date(ms)
+        function pad(n) { return n < 10 ? "0" + n : String(n) }
+        return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1)
+               + "-" + pad(d.getUTCDate()) + " "
+               + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes())
+    }
+
+    function bulletinDirectionLabel(item) {
+        return String(item && item.direction || "") === "Incoming" ? "RX" : "TX"
+    }
+
+    function bulletinPeer(item) {
+        if (!item)
+            return "--"
+        return String(item.direction || "") === "Incoming"
+               ? String(item.fromCall || "--")
+               : String(item.group || "ALL")
+    }
+
+    function bulletinText(item) {
+        if (!item)
+            return ""
+        return "BBS " + bulletinDirectionLabel(item)
+               + " " + String(item.group || "ALL")
+               + " " + bulletinPeer(item)
+               + ": " + String(item.title || "Bulletin")
+               + "\n\n" + String(item.body || "")
+    }
+
+    function copyBulletin(item) {
+        if (!item)
+            return
+        copyPlainText(bulletinText(item))
+        if (item.unread)
+            markBulletinRead(item, true, false)
+        bulletinStatus = "Copied BBS " + String(item.title || "Bulletin")
+    }
+
+    function markBulletinRead(item, read, showStatus) {
+        if (!ft2Link || !item)
+            return false
+        var id = Number(item.id || 0)
+        if (id <= 0)
+            return false
+        if (!ft2Link.markBulletinRead(id, read, nowMs()))
+            return false
+        refreshBulletins()
+        if (showStatus !== false) {
+            var title = String(item.title || "Bulletin")
+            bulletinStatus = read ? ("Marked read " + title)
+                                  : ("Marked unread " + title)
+        }
+        return true
+    }
+
+    function markAllBulletinsRead() {
+        if (!ft2Link)
+            return
+        var changed = 0
+        for (var i = 0; i < bulletins.length; ++i) {
+            var item = bulletins[i]
+            if (item && item.unread
+                    && ft2Link.markBulletinRead(Number(item.id || 0),
+                                                true,
+                                                nowMs()))
+                ++changed
+        }
+        refreshBulletins()
+        bulletinStatus = changed > 0
+                         ? ("Marked read " + changed + " BBS bulletin"
+                            + (changed === 1 ? "" : "s"))
+                         : "No unread BBS bulletins"
+    }
+
+    function clearBulletinList() {
+        if (!ft2Link || typeof ft2Link.clearBulletins !== "function")
+            return
+        ft2Link.clearBulletins()
+        refreshBulletins()
+        bulletinStatus = "BBS list cleared"
     }
 
     function prettyJson(value) {
@@ -1864,7 +2070,8 @@ Rectangle {
             return
         var result = ft2Link.setCustomAlertTags(alertTagsText.text)
         databaseActionText = prettyJson(result)
-        refreshAlertTags()
+        alertTagsDirty = false
+        refreshAlertTags(true)
         refreshStatistics()
         refreshStoreAudit()
     }
@@ -1875,7 +2082,8 @@ Rectangle {
         var result = ft2Link.clearCustomAlertTags()
         databaseActionText = prettyJson(result)
         alertTagsText.text = ""
-        refreshAlertTags()
+        alertTagsDirty = false
+        refreshAlertTags(true)
         refreshStatistics()
         refreshStoreAudit()
     }
@@ -2478,11 +2686,16 @@ Rectangle {
             return
         if (!guardWideTx("BBS"))
             return
+        var groupText = bulletinGroupText.text.trim().length > 0
+                        ? bulletinGroupText.text
+                        : bbsDefaultGroup
+        var group = ensureBbsGroup(groupText)
+        bulletinGroupText.text = group
         var body = bulletinBodyText.text.trim()
         if (body.length === 0)
             return
         if (ft2Link.transmitBulletinRadio(selectedSessionId,
-                                          bulletinGroupText.text.trim(),
+                                          group,
                                           bulletinTitleText.text.trim(),
                                           body,
                                           nowMs())) {
@@ -4452,11 +4665,17 @@ Rectangle {
                         onClicked: root.toolPageIndex = 2
                     }
                     SmallButton {
-                        text: "BBS"
+                        text: root.bulletinUnreadCount > 0 ? "BBS*" : "BBS"
                         implicitWidth: 48
                         checked: root.toolPageIndex === 3
-                        accent: root.textPrimary
-                        onClicked: root.toolPageIndex = 3
+                        accent: root.bulletinUnreadCount > 0 ? root.amber : root.textPrimary
+                        tip: root.bulletinUnreadCount > 0
+                             ? "Unread BBS bulletins"
+                             : "BBS bulletins"
+                        onClicked: {
+                            root.refreshBulletins()
+                            root.toolPageIndex = 3
+                        }
                     }
                     SmallButton {
                         text: "BCAST"
@@ -5004,12 +5223,12 @@ Rectangle {
                                          && formFieldsText.text.trim().length > 0
                                 tip: ft2Link && ft2Link.radioTxArmed ? "Transmit form" : "Arm form transmit"
                                 onClicked: root.armOrTransmitForm()
-                            }
-                        }
-                    }
+		                            }
+		                        }
+				                    }
 
-                    Item {
-                        ColumnLayout {
+				                    Item {
+		                        ColumnLayout {
                             anchors.fill: parent
                             spacing: 6
 
@@ -5141,57 +5360,430 @@ Rectangle {
                                        : root.textSecondary
                                 font.family: root.mono
                                 font.pixelSize: 10
-                            }
-                        }
-                    }
+			            }
+			        }
+			    }
 
                     Item {
-                        RowLayout {
+                        ColumnLayout {
                             anchors.fill: parent
                             spacing: 6
 
-                            TextField {
-                                id: bulletinGroupText
-                                Layout.preferredWidth: 72
-                                placeholderText: "ALL"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 16
-                                selectByMouse: true
-                            }
-
-                            TextField {
-                                id: bulletinTitleText
-                                Layout.preferredWidth: 140
-                                placeholderText: "Bulletin"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 64
-                                selectByMouse: true
-                            }
-
-                            TextField {
-                                id: bulletinBodyText
+                            RowLayout {
                                 Layout.fillWidth: true
-                                placeholderText: "BBS message"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 1024
-                                selectByMouse: true
-                                onAccepted: root.armOrTransmitBulletin()
+                                Layout.preferredHeight: 48
+                                spacing: 6
+
+                                ColumnLayout {
+                                    Layout.preferredWidth: 72
+                                    Layout.minimumWidth: 72
+                                    Layout.maximumWidth: 72
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "GROUP"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.amber
+                                        elide: Text.ElideRight
+                                    }
+
+                                    TextField {
+                                        id: bulletinGroupText
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredHeight: 28
+                                        placeholderText: "ALL"
+                                        text: root.bbsDefaultGroup
+                                        enabled: root.selectedSessionConnected
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        maximumLength: 16
+                                        selectByMouse: true
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: "BBS group. Empty means ALL."
+                                        ToolTip.delay: 450
+                                        background: Rectangle {
+                                            radius: 4
+                                            color: bulletinGroupText.enabled
+                                                   ? Qt.rgba(1, 1, 1, 0.045)
+                                                   : Qt.rgba(1, 1, 1, 0.020)
+                                            border.width: 1
+                                            border.color: bulletinGroupText.activeFocus
+                                                          ? root.amber
+                                                          : Qt.rgba(root.amber.r, root.amber.g, root.amber.b, 0.45)
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.preferredWidth: 150
+                                    Layout.minimumWidth: 118
+                                    Layout.maximumWidth: 170
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "TITLE"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.cyan
+                                        elide: Text.ElideRight
+                                    }
+
+                                    TextField {
+                                        id: bulletinTitleText
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredHeight: 28
+                                        placeholderText: "Bulletin title"
+                                        enabled: root.selectedSessionConnected
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        maximumLength: 64
+                                        selectByMouse: true
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: "Short BBS subject/title."
+                                        ToolTip.delay: 450
+                                        background: Rectangle {
+                                            radius: 4
+                                            color: bulletinTitleText.enabled
+                                                   ? Qt.rgba(1, 1, 1, 0.045)
+                                                   : Qt.rgba(1, 1, 1, 0.020)
+                                            border.width: 1
+                                            border.color: bulletinTitleText.activeFocus
+                                                          ? root.cyan
+                                                          : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.45)
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "MESSAGE"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.green
+                                        elide: Text.ElideRight
+                                    }
+
+                                    TextField {
+                                        id: bulletinBodyText
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredHeight: 28
+                                        placeholderText: "BBS message body"
+                                        enabled: root.selectedSessionConnected
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        maximumLength: 1024
+                                        selectByMouse: true
+                                        onAccepted: root.armOrTransmitBulletin()
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: "Text to store and send as the BBS bulletin body."
+                                        ToolTip.delay: 450
+                                        background: Rectangle {
+                                            radius: 4
+                                            color: bulletinBodyText.enabled
+                                                   ? Qt.rgba(1, 1, 1, 0.045)
+                                                   : Qt.rgba(1, 1, 1, 0.020)
+                                            border.width: 1
+                                            border.color: bulletinBodyText.activeFocus
+                                                          ? root.green
+                                                          : Qt.rgba(root.green.r, root.green.g, root.green.b, 0.45)
+                                        }
+                                    }
+                                }
+
+                                SmallButton {
+                                    Layout.alignment: Qt.AlignBottom
+                                    text: ft2Link && ft2Link.radioTxArmed ? "BBS TX" : "ARM BBS"
+                                    implicitWidth: 82
+                                    implicitHeight: 28
+                                    accent: root.amber
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                             && bulletinBodyText.text.trim().length > 0
+                                    tip: ft2Link && ft2Link.radioTxArmed ? "Transmit BBS bulletin" : "Arm BBS transmit"
+                                    onClicked: root.armOrTransmitBulletin()
+                                }
                             }
 
-                            SmallButton {
-                                text: ft2Link && ft2Link.radioTxArmed ? "BBS TX" : "ARM BBS"
-                                implicitWidth: 78
-                                accent: root.textPrimary
-                                enabled: !!ft2Link && root.selectedSessionConnected
-                                         && bulletinBodyText.text.trim().length > 0
-                                tip: ft2Link && ft2Link.radioTxArmed ? "Transmit bulletin" : "Arm bulletin transmit"
-                                onClicked: root.armOrTransmitBulletin()
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 24
+                                spacing: 6
+
+                                Text {
+                                    text: "GROUPS"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: root.textSecondary
+                                }
+
+                                ListView {
+                                    id: bbsGroupListView
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    orientation: ListView.Horizontal
+                                    spacing: 5
+                                    clip: true
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    model: root.bbsGroupList
+                                    ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                    delegate: SmallButton {
+                                        required property var modelData
+                                        text: String(modelData || "ALL")
+                                        implicitWidth: Math.max(44, Math.min(82, text.length * 9 + 18))
+                                        implicitHeight: 22
+                                        labelSize: 9
+                                        checked: root.normalizeBbsGroup(bulletinGroupText.text) === text
+                                        accent: checked ? root.green : root.cyan
+                                        tip: "Use BBS group " + text
+                                        onClicked: root.setBbsComposerGroup(text)
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: "SAVE GROUP"
+                                    implicitWidth: 86
+                                    implicitHeight: 22
+                                    labelSize: 9
+                                    accent: root.green
+                                    enabled: root.normalizeBbsGroupOrEmpty(bulletinGroupText.text).length > 0
+                                    tip: "Save typed GROUP as a preset and make it default"
+                                    onClicked: root.saveBbsComposerGroup()
+                                }
+
+                                SmallButton {
+                                    text: root.bbsFilterLabel()
+                                    implicitWidth: root.bbsGroupFilter.length > 0 ? 92 : 72
+                                    implicitHeight: 22
+                                    labelSize: 9
+                                    checked: root.bbsGroupFilter.length > 0
+                                    accent: root.bbsGroupFilter.length > 0 ? root.amber : root.textSecondary
+                                    tip: "Cycle BBS list filter by group"
+                                    onClicked: root.cycleBbsGroupFilter()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 20
+                                spacing: 6
+
+                                Text {
+                                    text: "BBS BULLETINS"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: root.cyan
+                                }
+
+                                Text {
+                                    text: String(root.filteredBulletins().length)
+                                          + (root.bbsGroupFilter.length > 0
+                                             ? ("/" + String(root.bulletins.length))
+                                             : "")
+                                          + " item"
+                                          + (root.filteredBulletins().length === 1 ? "" : "s")
+                                          + (root.bulletinUnreadCount > 0
+                                             ? (" / " + root.bulletinUnreadCount + " unread")
+                                             : "")
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.bulletinUnreadCount > 0
+                                           ? root.amber : root.textSecondary
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.bbsGroupFilter.length > 0
+                                          ? ("Showing group " + root.bbsGroupFilter)
+                                          : (root.bulletins.length > 0
+                                             ? "Incoming and outgoing BBS bulletins"
+                                             : "No BBS bulletins")
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
+                                }
+
+                                SmallButton {
+                                    text: "MARK ALL READ"
+                                    implicitWidth: 104
+                                    accent: root.amber
+                                    enabled: root.bulletinUnreadCount > 0
+                                    tip: "Clear unread marker for all BBS bulletins"
+                                    onClicked: root.markAllBulletinsRead()
+                                }
+
+                                SmallButton {
+                                    text: "CLEAR"
+                                    implicitWidth: 54
+                                    accent: root.red
+                                    enabled: !!ft2Link && root.bulletins.length > 0
+                                    tip: "Clear BBS bulletin list"
+                                    onClicked: root.clearBulletinList()
+                                }
+                            }
+
+	                            ListView {
+	                                id: bulletinList
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                spacing: 3
+                                boundsBehavior: Flickable.StopAtBounds
+	                                model: root.filteredBulletins()
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                delegate: Rectangle {
+                                    id: bulletinDelegate
+                                    required property var modelData
+                                    width: bulletinList.width
+                                    height: 42
+                                    radius: 4
+                                    color: bulletinMouse.containsMouse ? root.rowHover
+                                                                       : (bulletinDelegate.modelData.unread
+                                                                          ? Qt.rgba(root.amber.r, root.amber.g, root.amber.b, 0.075)
+                                                                          : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.035))
+                                    border.width: 1
+                                    border.color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.16)
+
+                                    MouseArea {
+                                        id: bulletinMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        acceptedButtons: Qt.NoButton
+                                    }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 8
+                                        anchors.rightMargin: 8
+                                        spacing: 7
+
+                                        Text {
+                                            Layout.preferredWidth: 38
+                                            text: bulletinDelegate.modelData.unread
+                                                  ? "NEW"
+                                                  : root.bulletinDirectionLabel(bulletinDelegate.modelData)
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: bulletinDelegate.modelData.unread
+                                                   ? root.amber
+                                                   : (root.bulletinDirectionLabel(bulletinDelegate.modelData) === "RX"
+                                                      ? root.green : root.amber)
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 64
+                                            text: String(bulletinDelegate.modelData.group || "ALL")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: root.amber
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 82
+                                            text: root.bulletinPeer(bulletinDelegate.modelData)
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: root.textPrimary
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 128
+                                            text: String(bulletinDelegate.modelData.title || "Bulletin")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.cyan
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: String(bulletinDelegate.modelData.body || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textPrimary
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 104
+                                            text: root.bulletinDate(bulletinDelegate.modelData)
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textSecondary
+                                        }
+
+                                        SmallButton {
+                                            text: bulletinDelegate.modelData.unread ? "READ" : "UNREAD"
+                                            implicitWidth: 58
+                                            accent: bulletinDelegate.modelData.unread ? root.amber : root.textSecondary
+                                            visible: String(bulletinDelegate.modelData.direction || "") === "Incoming"
+                                            enabled: visible && !!ft2Link
+                                            tip: bulletinDelegate.modelData.unread
+                                                 ? "Mark BBS bulletin as read"
+                                                 : "Mark BBS bulletin as unread"
+                                            onClicked: root.markBulletinRead(bulletinDelegate.modelData,
+                                                                            !!bulletinDelegate.modelData.unread,
+                                                                            true)
+                                        }
+
+                                        SmallButton {
+                                            text: "COPY"
+                                            implicitWidth: 52
+                                            accent: root.cyan
+                                            enabled: String(bulletinDelegate.modelData.body || "").length > 0
+                                            tip: "Copy this BBS bulletin"
+                                            onClicked: root.copyBulletin(bulletinDelegate.modelData)
+                                        }
+                                    }
+                                }
+
+	                                Text {
+	                                    anchors.centerIn: parent
+	                                    visible: bulletinList.count === 0
+	                                    text: root.bbsGroupFilter.length > 0
+	                                          ? ("No BBS bulletins in " + root.bbsGroupFilter)
+	                                          : "No BBS bulletins"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 16
+                                text: root.bulletinStatus.length > 0
+                                      ? root.bulletinStatus
+                                      : "GROUP = destination group, TITLE = bulletin subject, MESSAGE = body"
+                                elide: Text.ElideRight
+                                font.family: root.mono
+                                font.pixelSize: 10
+                                color: root.textSecondary
                             }
                         }
                     }
@@ -5203,60 +5795,31 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 30
+                                Layout.preferredHeight: 34
                                 spacing: 6
 
                                 TextField {
                                     id: broadcastText
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 28
-                                    placeholderText: "Broadcast"
+                                    Layout.minimumWidth: 0
+                                    Layout.preferredHeight: 32
+                                    placeholderText: "Broadcast message"
                                     enabled: true
                                     font.family: root.mono
-                                    font.pixelSize: 11
-                                    maximumLength: 32
+                                    font.pixelSize: 12
+                                    maximumLength: 256
                                     selectByMouse: true
                                     onAccepted: root.armOrTransmitBroadcast()
                                 }
 
                                 SmallButton {
                                     text: ft2Link && ft2Link.radioTxArmed ? "BCAST TX" : "ARM B"
-                                    implicitWidth: 68
+                                    implicitWidth: 74
+                                    implicitHeight: 30
                                     accent: root.alerts.length > 0 ? root.red : root.amber
                                     enabled: !!ft2Link && broadcastText.text.trim().length > 0
                                     tip: ft2Link && ft2Link.radioTxArmed ? "Transmit broadcast" : "Arm broadcast transmit"
                                     onClicked: root.armOrTransmitBroadcast()
-                                }
-
-                                TextField {
-                                    id: pathTargetText
-                                    Layout.preferredWidth: 88
-                                    Layout.preferredHeight: 28
-                                    placeholderText: "PATH CALL"
-                                    enabled: true
-                                    font.family: root.mono
-                                    font.pixelSize: 11
-                                    maximumLength: 16
-                                    selectByMouse: true
-                                    onAccepted: root.armOrTransmitPathFinderRequest()
-                                }
-
-                                SmallButton {
-                                    text: ft2Link && ft2Link.radioTxArmed ? "PATH TX" : "PATH?"
-                                    implicitWidth: 68
-                                    accent: root.cyan
-                                    enabled: !!ft2Link && pathTargetText.text.trim().length > 0
-                                    tip: "Send path finder request"
-                                    onClicked: root.armOrTransmitPathFinderRequest()
-                                }
-
-                                SmallButton {
-                                    text: ft2Link && ft2Link.radioTxArmed ? "PATH TX" : "PATH!"
-                                    implicitWidth: 68
-                                    accent: root.amber
-                                    enabled: !!ft2Link && root.pathFinderCandidate() !== null
-                                    tip: "Reply that target was heard recently"
-                                    onClicked: root.armOrTransmitPathFinderResponse()
                                 }
                             }
 
@@ -5269,13 +5832,18 @@ Rectangle {
                                     id: alertTagsText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 28
-                                    text: root.alertTagList.join(", ")
                                     placeholderText: "Alert tags: WX, POTA, NET"
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     maximumLength: 256
                                     selectByMouse: true
+                                    Component.onCompleted: text = root.alertTagList.join(", ")
+                                    onTextEdited: root.alertTagsDirty = true
+                                    onActiveFocusChanged: {
+                                        if (!activeFocus && !root.alertTagsDirty)
+                                            text = root.alertTagList.join(", ")
+                                    }
                                     onAccepted: root.saveAlertTags()
                                 }
 
@@ -5304,6 +5872,54 @@ Rectangle {
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 28
+                                spacing: 6
+
+                                TextField {
+                                    id: pathTargetText
+                                    Layout.preferredWidth: 116
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "PATH CALL"
+                                    enabled: true
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    maximumLength: 16
+                                    selectByMouse: true
+                                    onAccepted: root.armOrTransmitPathFinderRequest()
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "PATH TX" : "PATH?"
+                                    implicitWidth: 68
+                                    implicitHeight: 24
+                                    accent: root.cyan
+                                    enabled: !!ft2Link && pathTargetText.text.trim().length > 0
+                                    tip: "Send path finder request"
+                                    onClicked: root.armOrTransmitPathFinderRequest()
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "PATH TX" : "PATH!"
+                                    implicitWidth: 68
+                                    implicitHeight: 24
+                                    accent: root.amber
+                                    enabled: !!ft2Link && root.pathFinderCandidate() !== null
+                                    tip: "Reply that target was heard recently"
+                                    onClicked: root.armOrTransmitPathFinderResponse()
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.pathRelayLine()
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.pathRelayHint() ? root.amber : root.textSecondary
                                 }
                             }
 
@@ -5430,21 +6046,21 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 28
                                 spacing: 6
 
-                                CheckBox {
+                                CompactCheck {
                                     id: mailUrgentCheck
                                     text: "URG"
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.amber
+                                    onToggled: function(nextChecked) { mailUrgentCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: mailEmcommCheck
                                     text: "EMC"
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.red
+                                    onToggled: function(nextChecked) { mailEmcommCheck.checked = nextChecked }
                                 }
 
                                 Text {
@@ -5484,12 +6100,11 @@ Rectangle {
                                 Layout.preferredHeight: 24
                                 spacing: 5
 
-                                CheckBox {
+                                CompactCheck {
                                     text: "GW"
                                     checked: root.emailGatewayEnabled
-                                    font.family: root.mono
-                                    font.pixelSize: 9
-                                    onToggled: root.emailGatewayEnabled = checked
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { root.emailGatewayEnabled = nextChecked }
                                 }
 
                                 TextField {
@@ -5765,11 +6380,12 @@ Rectangle {
                     }
 
                     Item {
+                        clip: true
                         Flickable {
                             anchors.fill: parent
                             clip: true
                             contentWidth: width
-                            contentHeight: infoColumn.implicitHeight
+                            contentHeight: Math.max(height, infoColumn.implicitHeight + 8)
                             boundsBehavior: Flickable.StopAtBounds
                             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
@@ -5780,11 +6396,12 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
                                 TextField {
                                     Layout.preferredWidth: 92
+                                    Layout.preferredHeight: 26
                                     text: root.profileName
                                     placeholderText: "NAME"
                                     font.family: root.mono
@@ -5796,6 +6413,7 @@ Rectangle {
 
                                 TextField {
                                     Layout.preferredWidth: 116
+                                    Layout.preferredHeight: 26
                                     text: root.profileQth
                                     placeholderText: "QTH"
                                     font.family: root.mono
@@ -5807,6 +6425,7 @@ Rectangle {
 
                                 TextField {
                                     Layout.fillWidth: true
+                                    Layout.preferredHeight: 26
                                     text: root.profileEmail
                                     placeholderText: "EMAIL"
                                     font.family: root.mono
@@ -5819,11 +6438,12 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
                                 TextField {
                                     Layout.preferredWidth: 132
+                                    Layout.preferredHeight: 26
                                     text: root.profileRig
                                     placeholderText: "RIG"
                                     font.family: root.mono
@@ -5835,6 +6455,7 @@ Rectangle {
 
                                 TextField {
                                     Layout.preferredWidth: 132
+                                    Layout.preferredHeight: 26
                                     text: root.profileAntenna
                                     placeholderText: "ANT"
                                     font.family: root.mono
@@ -5846,6 +6467,7 @@ Rectangle {
 
                                 TextField {
                                     Layout.preferredWidth: 70
+                                    Layout.preferredHeight: 26
                                     text: root.profilePower
                                     placeholderText: "PWR"
                                     font.family: root.mono
@@ -5857,6 +6479,7 @@ Rectangle {
 
                                 TextField {
                                     Layout.fillWidth: true
+                                    Layout.preferredHeight: 26
                                     text: root.profileIce
                                     placeholderText: "ICE"
                                     font.family: root.mono
@@ -5869,11 +6492,12 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
                                 TextField {
                                     Layout.fillWidth: true
+                                    Layout.preferredHeight: 26
                                     text: root.profileGps
                                     placeholderText: "GPS"
                                     font.family: root.mono
@@ -5886,28 +6510,29 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 24
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
-                                CheckBox {
+                                CompactCheck {
                                     id: awayCheck
                                     text: "AWAY"
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.amber
+                                    onToggled: function(nextChecked) { awayCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: awayQsyCheck
                                     text: "QSY"
                                     enabled: !!ft2Link && awayCheck.checked
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.cyan
+                                    onToggled: function(nextChecked) { awayQsyCheck.checked = nextChecked }
                                 }
 
                                 TextField {
                                     id: awayMessageText
                                     Layout.preferredWidth: 176
+                                    Layout.preferredHeight: 26
                                     placeholderText: "Away message"
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -5917,17 +6542,18 @@ Rectangle {
                                     onAccepted: root.savePresence()
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: welcomeCheck
                                     text: "WELCOME"
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { welcomeCheck.checked = nextChecked }
                                 }
 
                                 TextField {
                                     id: welcomeMessageText
                                     Layout.fillWidth: true
+                                    Layout.preferredHeight: 26
                                     placeholderText: "Welcome message"
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -5937,12 +6563,12 @@ Rectangle {
                                     onAccepted: root.savePresence()
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: autoReplyCheck
                                     text: "AUTO REPLY"
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { autoReplyCheck.checked = nextChecked }
                                 }
 
                                 SmallButton {
@@ -5957,20 +6583,21 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 24
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
-                                CheckBox {
+                                CompactCheck {
                                     id: autoAwayCheck
                                     text: "AUTO AWAY"
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.amber
+                                    onToggled: function(nextChecked) { autoAwayCheck.checked = nextChecked }
                                 }
 
                                 TextField {
                                     id: autoAwayMinutesText
                                     Layout.preferredWidth: 58
+                                    Layout.preferredHeight: 26
                                     text: "10"
                                     placeholderText: "MIN"
                                     font.family: root.mono
@@ -6000,7 +6627,7 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 24
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
                                 Text {
@@ -6014,6 +6641,7 @@ Rectangle {
                                 TextField {
                                     id: callIdIntervalText
                                     Layout.preferredWidth: 58
+                                    Layout.preferredHeight: 26
                                     text: "0"
                                     placeholderText: "MIN"
                                     font.family: root.mono
@@ -6038,6 +6666,7 @@ Rectangle {
                                 TextField {
                                     id: autoDisconnectText
                                     Layout.preferredWidth: 58
+                                    Layout.preferredHeight: 26
                                     text: "0"
                                     placeholderText: "MIN"
                                     font.family: root.mono
@@ -6051,13 +6680,13 @@ Rectangle {
                                     onAccepted: root.saveQsoAutomation()
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: incomingPingCheck
                                     text: "PING RX"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { incomingPingCheck.checked = nextChecked }
                                 }
 
                                 Text {
@@ -6072,7 +6701,7 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 24
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
                                 Text {
@@ -6126,70 +6755,70 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 24
+                                Layout.preferredHeight: 30
                                 spacing: 6
 
-                                CheckBox {
+                                CompactCheck {
                                     id: lastHeardPeekingCheck
                                     text: "LH PEEK"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { lastHeardPeekingCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: snrReportCheck
                                     text: "SNR TX"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { snrReportCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: verboseSnrAcceptCheck
                                     text: "VSNR OK"
                                     checked: false
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.cyan
+                                    onToggled: function(nextChecked) { verboseSnrAcceptCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: lastConnectionsPeekingCheck
                                     text: "LC PEEK"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { lastConnectionsPeekingCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: parkedVmailPeekingCheck
                                     text: "VM PEEK"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { parkedVmailPeekingCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: vmailParkingCheck
                                     text: "VM PARK"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { vmailParkingCheck.checked = nextChecked }
                                 }
 
-                                CheckBox {
+                                CompactCheck {
                                     id: infoInquireCheck
                                     text: "INFO REQ"
                                     checked: true
                                     enabled: !!ft2Link
-                                    font.family: root.mono
-                                    font.pixelSize: 9
+                                    accent: root.green
+                                    onToggled: function(nextChecked) { infoInquireCheck.checked = nextChecked }
                                 }
 
                                 SmallButton {
@@ -6207,6 +6836,7 @@ Rectangle {
 	                            }
 	                        }
 		                    }
+		                }
 
 		                    Item {
 	                        ColumnLayout {
@@ -6584,12 +7214,11 @@ Rectangle {
                                         verticalAlignment: Text.AlignVCenter
                                     }
 
-                                    CheckBox {
+                                    CompactCheck {
                                         text: "AUTO"
                                         checked: root.clusterAutoSync
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        onToggled: root.clusterAutoSync = checked
+                                        accent: root.green
+                                        onToggled: function(nextChecked) { root.clusterAutoSync = nextChecked }
                                     }
 
                                     SmallButton {
@@ -8388,7 +9017,6 @@ Rectangle {
                             }
                         }
                     }
-		                }
 		            }
 		        }
         }

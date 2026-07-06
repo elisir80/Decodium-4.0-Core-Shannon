@@ -1794,6 +1794,7 @@ QVariantMap bulletinMap (quint32 id,
                          QString const& title,
                          QString const& body,
                          QString const& state,
+                         bool read,
                          quint64 atMs,
                          quint64 updatedAtMs)
 {
@@ -1805,6 +1806,9 @@ QVariantMap bulletinMap (quint32 id,
   map.insert (QStringLiteral ("title"), title);
   map.insert (QStringLiteral ("body"), body);
   map.insert (QStringLiteral ("state"), state);
+  map.insert (QStringLiteral ("read"), read);
+  map.insert (QStringLiteral ("unread"),
+              direction == QStringLiteral ("Incoming") && !read);
   map.insert (QStringLiteral ("atMs"),
               QVariant::fromValue<qulonglong> (atMs));
   map.insert (QStringLiteral ("updatedAtMs"),
@@ -3170,6 +3174,19 @@ int FT2LinkQmlAdapter::fileTransferCount () const
 int FT2LinkQmlAdapter::bulletinCount () const
 {
   return static_cast<int> (m_bulletins.size ());
+}
+
+int FT2LinkQmlAdapter::bulletinUnreadCount () const
+{
+  int unread = 0;
+  for (Bulletin const& bulletin : m_bulletins)
+    {
+      if (bulletin.direction == QStringLiteral ("Incoming") && !bulletin.read)
+        {
+          ++unread;
+        }
+    }
+  return unread;
 }
 
 int FT2LinkQmlAdapter::qsoLogCount () const
@@ -8942,6 +8959,7 @@ QVariantList FT2LinkQmlAdapter::bulletins () const
           bulletin.title,
           bulletin.body,
           bulletin.state,
+          bulletin.read,
           bulletin.atMs,
           bulletin.updatedAtMs));
     }
@@ -11862,6 +11880,48 @@ bool FT2LinkQmlAdapter::markReceivedFileRead (quint32 transferId,
   return false;
 }
 
+bool FT2LinkQmlAdapter::markBulletinRead (quint32 bulletinId,
+                                          bool read,
+                                          quint64 nowMs)
+{
+  if (bulletinId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link bulletin id is invalid"));
+      return false;
+    }
+
+  for (Bulletin& bulletin : m_bulletins)
+    {
+      if (bulletin.id != bulletinId)
+        {
+          continue;
+        }
+      if (bulletin.direction != QStringLiteral ("Incoming"))
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link bulletin read state applies only to incoming BBS"));
+          return false;
+        }
+
+      QString const state = read ? QStringLiteral ("Read")
+                                 : QStringLiteral ("Received");
+      if (bulletin.read == read && bulletin.state == state)
+        {
+          clearLastError ();
+          return true;
+        }
+      bulletin.read = read;
+      bulletin.state = state;
+      bulletin.updatedAtMs = nowMs;
+      emit bulletinsChanged ();
+      clearLastError ();
+      return true;
+    }
+
+  setLastError (QStringLiteral ("FT2-Link bulletin item not found"));
+  return false;
+}
+
 bool FT2LinkQmlAdapter::deleteMailboxMessage (quint32 messageId)
 {
   if (messageId == 0u)
@@ -13331,6 +13391,8 @@ quint32 FT2LinkQmlAdapter::recordBulletin (QString const& direction,
       : title.trimmed ();
   bulletin.body = body.trimmed ();
   bulletin.state = state;
+  bulletin.read = bulletin.direction != QStringLiteral ("Incoming")
+                  || bulletin.state == QStringLiteral ("Read");
   bulletin.atMs = nowMs;
   bulletin.updatedAtMs = nowMs;
   if (bulletin.body.isEmpty ())
@@ -15896,6 +15958,7 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           bulletin.title,
           bulletin.body,
           bulletin.state,
+          bulletin.read,
           bulletin.atMs,
           bulletin.updatedAtMs)));
     }
@@ -16413,6 +16476,15 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       bulletin.title = jsonString (object, QStringLiteral ("title"));
       bulletin.body = object.value (QStringLiteral ("body")).toString ();
       bulletin.state = jsonString (object, QStringLiteral ("state"));
+      bool const defaultRead =
+          bulletin.direction != QStringLiteral ("Incoming")
+          || bulletin.state == QStringLiteral ("Read");
+      bulletin.read = object.value (QStringLiteral ("read")).toBool (defaultRead);
+      if (bulletin.direction == QStringLiteral ("Incoming"))
+        {
+          bulletin.state = bulletin.read ? QStringLiteral ("Read")
+                                         : QStringLiteral ("Received");
+        }
       bulletin.atMs = jsonU64 (object, QStringLiteral ("atMs"));
       bulletin.updatedAtMs = jsonU64 (
           object, QStringLiteral ("updatedAtMs"), bulletin.atMs);

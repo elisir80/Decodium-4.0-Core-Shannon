@@ -1,5 +1,6 @@
 #include "DecodiumCatManager.h"
 #include "DecodiumLogging.hpp"
+#include "DecodiumProfileSettings.h"
 
 #include <cmath>
 #include <QDebug>
@@ -1030,6 +1031,7 @@ void DecodiumCatManager::refreshPorts()
 void DecodiumCatManager::saveSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_Native");
     s.setValue("rigName",        m_rigName);
     s.setValue("serialPort",     m_serialPort);
@@ -1068,6 +1070,7 @@ void DecodiumCatManager::setSplitMode(const QString& v)
 void DecodiumCatManager::loadSettings()
 {
     QSettings s("Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_Native");
     m_rigName        = s.value("rigName",        "Kenwood TS-590S").toString();
     m_serialPort     = s.value("serialPort",     QString{}).toString();
