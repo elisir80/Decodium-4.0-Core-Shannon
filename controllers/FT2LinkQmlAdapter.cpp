@@ -4615,6 +4615,8 @@ bool FT2LinkQmlAdapter::transmitApplicationPayloadRadio (
   plan.insert (QStringLiteral ("sessionId"), sessionId);
   plan.insert (QStringLiteral ("text"), logTrimmed);
   plan.insert (QStringLiteral ("application"), true);
+  plan.insert (QStringLiteral ("kind"),
+               state.section (QLatin1Char (' '), 0, 0).trimmed ());
   plan.insert (QStringLiteral ("requestedAtMs"),
                QVariant::fromValue<qulonglong> (
                    static_cast<qulonglong> (nowMs)));
@@ -5539,6 +5541,7 @@ bool FT2LinkQmlAdapter::transmitPreparedRadioTxAudio (quint16 sessionId,
   plan.insert (QStringLiteral ("armed"), true);
   plan.insert (QStringLiteral ("sessionId"), sessionId);
   plan.insert (QStringLiteral ("text"), payloadText);
+  plan.insert (QStringLiteral ("kind"), QStringLiteral ("CHAT"));
   plan.insert (QStringLiteral ("requestedAtMs"),
                QVariant::fromValue<qulonglong> (
                    static_cast<qulonglong> (nowMs)));
@@ -15579,6 +15582,8 @@ void FT2LinkQmlAdapter::scheduleLiveOutboundRetry (
     std::size_t messageIndex,
     quint64 nowMs)
 {
+  Q_UNUSED (nowMs);
+
   LiveOutboundRetry retry;
   retry.displayMessage = displayMessage;
   retry.samples = samples;
@@ -15587,9 +15592,11 @@ void FT2LinkQmlAdapter::scheduleLiveOutboundRetry (
   retry.profile = profile;
   retry.messageIndex = messageIndex;
   retry.attempts = 1u;
-  retry.nextRetryMs = nowMs + liveOutboundRetryDelayMs (plan);
+  quint64 const schedulerNowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  retry.nextRetryMs = schedulerNowMs + liveOutboundRetryDelayMs (plan);
   m_liveOutboundRetries[sessionId] = retry;
-  scheduleLiveOutboundRetryCheck (nowMs);
+  scheduleLiveOutboundRetryCheck (schedulerNowMs);
 }
 
 void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
@@ -15673,6 +15680,16 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
             {
               retrySamples = toSampleVector (robustPlan.samples);
               QVariantMap rebuiltPlan = radioTxPlanMap (robustPlan, true);
+              for (QVariantMap::const_iterator planIt =
+                       it->second.plan.constBegin ();
+                   planIt != it->second.plan.constEnd ();
+                   ++planIt)
+                {
+                  if (!rebuiltPlan.contains (planIt.key ()))
+                    {
+                      rebuiltPlan.insert (planIt.key (), planIt.value ());
+                    }
+                }
               rebuiltPlan.insert (QStringLiteral ("sessionId"), it->first);
               rebuiltPlan.insert (QStringLiteral ("text"),
                                   it->second.plan.value (
@@ -15740,12 +15757,16 @@ void FT2LinkQmlAdapter::scheduleHelloRetry (Frame const& hello,
                                             QString const& remoteCall,
                                             quint64 nowMs)
 {
+  Q_UNUSED (nowMs);
+
   HelloRetry retry;
   retry.frame = hello;
   retry.remoteCall = normalizeCallsign (remoteCall);
   retry.attemptsSent = 1u;
   retry.maxAttempts = 4u;
-  retry.nextRetryMs = nowMs + helloRetryDelayMs (retry.attemptsSent);
+  quint64 const schedulerNowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  retry.nextRetryMs = schedulerNowMs + helloRetryDelayMs (retry.attemptsSent);
   m_helloRetries[hello.sessionId] = retry;
   logFt2LinkDiagnostic (
       QStringLiteral (
@@ -15753,8 +15774,8 @@ void FT2LinkQmlAdapter::scheduleHelloRetry (Frame const& hello,
           .arg (hello.sessionId)
           .arg (retry.remoteCall)
           .arg (retry.maxAttempts)
-          .arg (retry.nextRetryMs - nowMs));
-  scheduleHelloRetryCheck (nowMs);
+          .arg (retry.nextRetryMs - schedulerNowMs));
+  scheduleHelloRetryCheck (schedulerNowMs);
 }
 
 void FT2LinkQmlAdapter::runHelloRetryCheck ()
