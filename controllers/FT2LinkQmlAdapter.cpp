@@ -1,6 +1,8 @@
 #include "controllers/FT2LinkQmlAdapter.hpp"
 
+#ifndef DECODIUM_FT2LINK_QML_ADAPTER_STANDALONE
 #include "DecodiumLogging.hpp"
+#endif
 #include "lib/ft2link/FT2LinkAudio.hpp"
 #include "lib/ft2link/FT2LinkFrame.hpp"
 
@@ -60,8 +62,10 @@ constexpr int kAckRepeatCount = 3;
 void logFt2LinkDiagnostic (QString const& message)
 {
   std::fprintf (stderr, "%s\n", qUtf8Printable (message));
+#ifndef DECODIUM_FT2LINK_QML_ADAPTER_STANDALONE
   DIAG_INFO (message);
   DecodiumLogging::flushDiagnosticLog ();
+#endif
 }
 
 QString utcMinuteText (quint64 atMs);
