@@ -8958,6 +8958,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for FT2 decoder — stack 8MB (necessario per stage7 C++)
     m_workerThreadFt2 = new QThread(this);
+    m_workerThreadFt2->setObjectName(QStringLiteral("FT2DecodeWorker"));
     m_workerThreadFt2->setStackSize(8 * 1024 * 1024);
     m_ft2Worker = new decodium::ft2::FT2DecodeWorker();
     m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
@@ -8973,6 +8974,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for FT4 decoder
     m_workerThreadFt4 = new QThread(this);
+    m_workerThreadFt4->setObjectName(QStringLiteral("FT4DecodeWorker"));
 #if defined(Q_OS_LINUX)
     m_workerThreadFt4->setStackSize(16 * 1024 * 1024);
 #else
@@ -8987,6 +8989,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for Q65 decoder
     m_workerThreadQ65 = new QThread(this);
+    m_workerThreadQ65->setObjectName(QStringLiteral("Q65DecodeWorker"));
     m_q65Worker = new decodium::q65::Q65DecodeWorker();
     m_q65Worker->moveToThread(m_workerThreadQ65);
     connect(m_q65Worker, &decodium::q65::Q65DecodeWorker::decodeReady,
@@ -8996,6 +8999,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for MSK144 decoder
     m_workerThreadMsk = new QThread(this);
+    m_workerThreadMsk->setObjectName(QStringLiteral("MSK144DecodeWorker"));
     m_mskWorker = new decodium::msk144::MSK144DecodeWorker();
     m_mskWorker->moveToThread(m_workerThreadMsk);
     connect(m_mskWorker, &decodium::msk144::MSK144DecodeWorker::decodeReady,
@@ -9005,6 +9009,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for WSPR decoder
     m_workerThreadWspr = new QThread(this);
+    m_workerThreadWspr->setObjectName(QStringLiteral("WSPRDecodeWorker"));
     m_wsprWorker = new decodium::wspr::WSPRDecodeWorker();
     m_wsprWorker->moveToThread(m_workerThreadWspr);
     connect(m_wsprWorker, &decodium::wspr::WSPRDecodeWorker::decodeReady,
@@ -9014,6 +9019,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for JT65/JT9/JT4 decoder
     m_workerThreadLegacyJt = new QThread(this);
+    m_workerThreadLegacyJt->setObjectName(QStringLiteral("LegacyJtDecodeWorker"));
     m_legacyJtWorker = new decodium::legacyjt::LegacyJtDecodeWorker();
     m_legacyJtWorker->moveToThread(m_workerThreadLegacyJt);
     connect(m_legacyJtWorker, &decodium::legacyjt::LegacyJtDecodeWorker::decodeReady,
@@ -9023,6 +9029,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Worker thread for FST4/FST4W decoder
     m_workerThreadFst4 = new QThread(this);
+    m_workerThreadFst4->setObjectName(QStringLiteral("FST4DecodeWorker"));
     m_fst4Worker = new decodium::fst4::FST4DecodeWorker();
     m_fst4Worker->moveToThread(m_workerThreadFst4);
     connect(m_fst4Worker, &decodium::fst4::FST4DecodeWorker::decodeReady,
