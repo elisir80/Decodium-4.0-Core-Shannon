@@ -56,6 +56,7 @@ Rectangle {
     property int formTemplateIndex: 0
     property bool preferW2300: settingBool("uiFt2LinkPreferW2300", true)
     property bool robustMode: settingBool("uiFt2LinkRobustMode", false)
+    readonly property bool deepRateEnabled: !!(bridge && bridge.deepSearchEnabled && !bridge.lowCpuModeEnabled)
     property int beaconIntervalSeconds: settingInt("uiFt2LinkBeaconIntervalSeconds", 180, 180, 600)
     property int toolPageIndex: 0
     property int qsySlotIndex: settingInt("uiFt2LinkQsySlotIndex", 0, 0, 9)
@@ -348,6 +349,8 @@ Rectangle {
     function applyCapabilities() {
         if (!ft2Link)
             return
+        if (typeof ft2Link.setDeepRateEnabled === "function")
+            ft2Link.setDeepRateEnabled(deepRateEnabled)
         ft2Link.setLocalCapabilities(true, true, true, true,
                                      preferW2300 ? 2 : 1,
                                      robustMode ? 1 : 0)
@@ -3306,6 +3309,8 @@ Rectangle {
     Connections {
         target: bridge
         ignoreUnknownSignals: true
+        function onDeepSearchEnabledChanged() { root.applyCapabilities() }
+        function onLowCpuModeEnabledChanged() { root.applyCapabilities() }
         function onExternalAdifUploadStatus(uploadId, state, detail) {
             if (!ft2Link || typeof ft2Link.markLogbookUpload !== "function")
                 return
@@ -3695,7 +3700,9 @@ Rectangle {
                 text: root.robustMode ? "ROB" : "FAST"
                 implicitWidth: 58
                 accent: root.amber
-                tip: "Switch fast/robust rate"
+                tip: root.deepRateEnabled
+                     ? "Switch fast/robust rate. DEEP and ULTRA retries are enabled by Deep Search."
+                     : "Switch fast/robust rate. Enable Deep Search and disable Low CPU to allow DEEP/ULTRA retry."
                 onClicked: {
                     root.robustMode = !root.robustMode
                     root.applyCapabilities()

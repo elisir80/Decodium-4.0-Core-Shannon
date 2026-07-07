@@ -4337,6 +4337,135 @@ private Q_SLOTS:
     QVERIFY (!constantTimeEquals (a, QByteArrayLiteral ("abcde")));  // dimensione diversa
     QVERIFY (!constantTimeEquals (a, QByteArray ()));
   }
+
+  void rfLabGeneratesAndReplaysReferenceWavs ()
+  {
+    QTemporaryDir dir;
+    QVERIFY (dir.isValid ());
+
+    FT2LinkQmlAdapter adapter;
+    QVariantMap const report = adapter.runRfLabSelfTest (dir.path ());
+    QVERIFY2 (report.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (report).toJson (
+                  QJsonDocument::Compact)));
+    QCOMPARE (report.value ("passed").toInt (), 3);
+    QCOMPARE (report.value ("total").toInt (), 3);
+
+    QVariantList const cases = report.value ("cases").toList ();
+    QCOMPARE (cases.size (), 3);
+    for (QVariant const& value : cases)
+      {
+        QVariantMap const one = value.toMap ();
+        QVERIFY2 (one.value ("ok").toBool (),
+                  qPrintable (QJsonDocument::fromVariant (one).toJson (
+                      QJsonDocument::Compact)));
+        QString const path = one.value ("path").toString ();
+        QVERIFY2 (QFile::exists (path), qPrintable (path));
+        QVariantMap const replay = one.value ("replay").toMap ();
+        QVERIFY (replay.value ("decodedCount").toInt () >= 1);
+      }
+  }
+
+  void rfLabAppliesMildChannelImpairments ()
+  {
+    QTemporaryDir dir;
+    QVERIFY (dir.isValid ());
+
+    FT2LinkQmlAdapter adapter;
+    QVariantMap options;
+    options.insert (QStringLiteral ("frameType"), QStringLiteral ("DATA"));
+    options.insert (QStringLiteral ("sampleRate"), 48000);
+    options.insert (QStringLiteral ("snrDb"), 30.0);
+    options.insert (QStringLiteral ("frequencyOffsetHz"), 2.0);
+    options.insert (QStringLiteral ("driftHz"), 1.0);
+    options.insert (QStringLiteral ("fadeDepthDb"), 3.0);
+    options.insert (QStringLiteral ("fadeHz"), 0.20);
+    options.insert (QStringLiteral ("clipLevel"), 0.97);
+    options.insert (QStringLiteral ("filter"), QStringLiteral ("WIDE"));
+    options.insert (QStringLiteral ("burstDelayMs"), 250);
+    options.insert (QStringLiteral ("sampleRatePpm"), 20.0);
+
+    QString const path = dir.filePath (QStringLiteral ("mild-w2300.wav"));
+    QVariantMap const generated = adapter.generateRfLabWav (
+        path,
+        QStringLiteral ("W2300"),
+        QStringLiteral ("RFLAB MILD CHANNEL"),
+        options);
+    QVERIFY2 (generated.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (generated).toJson (
+                  QJsonDocument::Compact)));
+
+    QVariantMap const channel = generated.value ("channel").toMap ();
+    QCOMPARE (channel.value ("snrDb").toDouble (), 30.0);
+    QCOMPARE (channel.value ("frequencyOffsetHz").toDouble (), 2.0);
+    QCOMPARE (channel.value ("driftHz").toDouble (), 1.0);
+    QCOMPARE (channel.value ("fadeDepthDb").toDouble (), 3.0);
+    QCOMPARE (channel.value ("clipLevel").toDouble (), 0.97);
+    QCOMPARE (channel.value ("sampleRatePpm").toDouble (), 20.0);
+    QCOMPARE (channel.value ("filter").toString (), QStringLiteral ("WIDE"));
+
+    QVariantMap const replay = adapter.replayRfLabWav (path);
+    QVERIFY2 (replay.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (replay).toJson (
+                  QJsonDocument::Compact)));
+    QVERIFY2 (replay.value ("decodedCount").toInt () >= 1,
+              qPrintable (QJsonDocument::fromVariant (replay).toJson (
+                  QJsonDocument::Compact)));
+  }
+
+  void rfLabGeneratesAndReplaysWeakW2300 ()
+  {
+    QTemporaryDir dir;
+    QVERIFY (dir.isValid ());
+
+    FT2LinkQmlAdapter adapter;
+    QVariantMap options;
+    options.insert (QStringLiteral ("frameType"), QStringLiteral ("DATA"));
+    options.insert (QStringLiteral ("sampleRate"), 48000);
+    options.insert (QStringLiteral ("w2300RateMode"), 2);
+    options.insert (QStringLiteral ("snrDb"), 6.0);
+
+    QString const path = dir.filePath (QStringLiteral ("weak-w2300.wav"));
+    QVariantMap const generated = adapter.generateRfLabWav (
+        path,
+        QStringLiteral ("W2300"),
+        QStringLiteral ("RFLAB WEAK W2300"),
+        options);
+    QVERIFY2 (generated.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (generated).toJson (
+                  QJsonDocument::Compact)));
+
+    QVariantMap const replay = adapter.replayRfLabWav (path);
+    QVERIFY2 (replay.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (replay).toJson (
+                  QJsonDocument::Compact)));
+    QCOMPARE (replay.value ("decodedCount").toInt (), 1);
+    QVariantList const frames = replay.value ("frames").toList ();
+    QVERIFY (!frames.isEmpty ());
+    QVariantMap const metrics = frames.first ().toMap ().value ("metrics").toMap ();
+    QCOMPARE (metrics.value ("rateMode").toString (), QStringLiteral ("WEAK"));
+  }
+
+  void rfLabChannelSweepCanRunQuickSubset ()
+  {
+    QTemporaryDir dir;
+    QVERIFY (dir.isValid ());
+
+    FT2LinkQmlAdapter adapter;
+    QVariantMap options;
+    options.insert (QStringLiteral ("profiles"), QStringLiteral ("W2300"));
+    options.insert (QStringLiteral ("maxCases"), 3);
+
+    QVariantMap const report = adapter.runRfLabChannelSweep (dir.path (), options);
+    QVERIFY2 (report.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (report).toJson (
+                  QJsonDocument::Compact)));
+    QCOMPARE (report.value ("total").toInt (), 3);
+    QCOMPARE (report.value ("generationFailed").toInt (), 0);
+    QVERIFY2 (report.value ("allDecoded").toBool (),
+              qPrintable (QJsonDocument::fromVariant (report).toJson (
+                  QJsonDocument::Compact)));
+  }
 };
 
 QTEST_MAIN (TestFt2LinkQmlAdapter)

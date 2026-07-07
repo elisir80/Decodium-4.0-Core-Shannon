@@ -213,6 +213,11 @@ bool pttPortSharesCatPort(QString const& serialPort, QString const& pttPort)
     return comparablePortName(trimmedPttPort) == comparablePortName(serialPort);
 }
 
+bool sameCatFrequency(double lhs, double rhs, double toleranceHz = 1.0)
+{
+    return std::abs(lhs - rhs) <= toleranceHz;
+}
+
 QString defaultNetworkEndpointForRig(QString const& rigName)
 {
     if (0 == rigName.compare(QStringLiteral("Ham Radio Deluxe"), Qt::CaseInsensitive))
@@ -1959,7 +1964,18 @@ void DecodiumTransceiverManager::connectRig()
                     if (onl && m_audioAutoStart)
                         emit audioAutoStartChanged();
                 }
-                if (freq > 0 && m_frequency != freq) { m_frequency = freq; emit frequencyChanged(); }
+                if (freq > 0 && m_frequency != freq) {
+                    double const previousFrequency = m_frequency;
+                    m_frequency = freq;
+                    qInfo().noquote()
+                        << "[CATDBG] Rig frequency update"
+                        << "oldHz=" << QString::number(previousFrequency, 'f', 0)
+                        << "newHz=" << QString::number(freq, 'f', 0)
+                        << "mode=" << mode
+                        << "split=" << spl
+                        << "ptt=" << ptt;
+                    emit frequencyChanged();
+                }
                 if (txf  > 0 && m_txFrequency != txf) { m_txFrequency = txf; emit txFrequencyChanged(); }
                 if (m_mode    != mode) { m_mode    = mode; emit modeChanged(); }
                 if (m_pttActive != ptt) { m_pttActive = ptt; emit pttActiveChanged(); }
@@ -2227,8 +2243,23 @@ static void sendStateSync(DecodiumTransceiverManagerPrivate* d)
 
 void DecodiumTransceiverManager::setRigFrequency(double hz)
 {
-    m_frequency = hz;
-    emit frequencyChanged();
+    if (hz <= 0.0) {
+        return;
+    }
+
+    double const desiredHz = static_cast<double>(d->desired.frequency());
+    bool const desiredMatches = desiredHz > 0.0 && sameCatFrequency(desiredHz, hz);
+    bool const reportedMatches = m_frequency > 0.0 && sameCatFrequency(m_frequency, hz);
+    if (desiredMatches && reportedMatches) {
+        return;
+    }
+
+    if (!reportedMatches) {
+        m_frequency = hz;
+        emit frequencyChanged();
+    } else {
+        m_frequency = hz;
+    }
     d->desired.frequency(static_cast<Transceiver::Frequency>(hz));
     sendState(d.get());
 }
@@ -2239,8 +2270,22 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
     hz = sanitizedCatTxFrequencyHz(hz, rxHz, m_splitMode, QStringLiteral("setRigTxFrequency"));
-    m_txFrequency = hz;
-    emit txFrequencyChanged();
+    bool const targetSplit = hz > 0.0;
+    double const desiredTxHz = static_cast<double>(d->desired.tx_frequency());
+    bool const desiredMatches = sameCatFrequency(desiredTxHz, hz)
+        && d->desired.split() == targetSplit;
+    bool const reportedTxMatches = sameCatFrequency(m_txFrequency, hz)
+        && m_split == targetSplit;
+    if (desiredMatches && reportedTxMatches) {
+        return;
+    }
+
+    if (!sameCatFrequency(m_txFrequency, hz)) {
+        m_txFrequency = hz;
+        emit txFrequencyChanged();
+    } else {
+        m_txFrequency = hz;
+    }
     if (hz > 0.0 && d->desired.frequency() == 0 && m_frequency > 0.0) {
         d->desired.frequency(static_cast<Transceiver::Frequency>(m_frequency));
     }
@@ -2359,7 +2404,20 @@ void DecodiumTransceiverManager::setRigPtt(bool on)
 
 void DecodiumTransceiverManager::setRigMode(const QString& mode)
 {
-    d->desired.mode(parseMode(mode));
+    Transceiver::MODE const targetMode = parseMode(mode);
+    if (targetMode == Transceiver::UNK) {
+        return;
+    }
+
+    QString const targetModeText = modeStr(targetMode);
+    bool const desiredMatches = d->desired.mode() == targetMode;
+    bool const reportedMatches = !m_mode.isEmpty()
+        && m_mode.compare(targetModeText, Qt::CaseInsensitive) == 0;
+    if (desiredMatches && (reportedMatches || m_mode.isEmpty())) {
+        return;
+    }
+
+    d->desired.mode(targetMode);
     sendState(d.get());
 }
 

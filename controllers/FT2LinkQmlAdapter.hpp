@@ -147,6 +147,9 @@ class FT2LinkQmlAdapter : public QObject
   Q_PROPERTY(bool infoInquireEnabled READ infoInquireEnabled NOTIFY qsoAutomationChanged)
   Q_PROPERTY(int blockedCallCount READ blockedCallCount NOTIFY blockListChanged)
   Q_PROPERTY(int typingPeerCount READ typingPeerCount NOTIFY typingIndicatorsChanged)
+  Q_PROPERTY(bool rfLabRecording READ rfLabRecording NOTIFY rfLabChanged)
+  Q_PROPERTY(QString rfLabLastPath READ rfLabLastPath NOTIFY rfLabChanged)
+  Q_PROPERTY(QVariantMap rfLabLastReport READ rfLabLastReport NOTIFY rfLabChanged)
 
 public:
   explicit FT2LinkQmlAdapter (QObject* parent = nullptr);
@@ -208,6 +211,9 @@ public:
   bool infoInquireEnabled () const;
   int blockedCallCount () const;
   int typingPeerCount () const;
+  bool rfLabRecording () const;
+  QString rfLabLastPath () const;
+  QVariantMap rfLabLastReport () const;
 
   Q_INVOKABLE void setLocalStation (QString const& call,
                                     QString const& locator,
@@ -225,6 +231,7 @@ public:
                                          bool supportsW2300Robust,
                                          int preferredProfile,
                                          int preferredW2300RateMode);
+  Q_INVOKABLE void setDeepRateEnabled (bool enabled);
   Q_INVOKABLE bool observeStation (QString const& call,
                                    QString const& locator,
                                    QString const& name,
@@ -332,6 +339,22 @@ public:
   Q_INVOKABLE bool ingestRxSamples (QVector<short> const& samples,
                                     QString const& remoteCall,
                                     quint64 nowMs);
+  Q_INVOKABLE QVariantMap startRfLabRecording (QString const& path = QString {});
+  Q_INVOKABLE QVariantMap stopRfLabRecording ();
+  Q_INVOKABLE QVariantMap replayRfLabWav (
+      QString const& path,
+      QVariantMap const& options = QVariantMap {});
+  Q_INVOKABLE QVariantMap generateRfLabWav (
+      QString const& path,
+      QString const& profileName,
+      QString const& text,
+      QVariantMap const& options = QVariantMap {});
+  Q_INVOKABLE QVariantMap runRfLabSelfTest (
+      QString const& directory = QString {},
+      QVariantMap const& options = QVariantMap {});
+  Q_INVOKABLE QVariantMap runRfLabChannelSweep (
+      QString const& directory = QString {},
+      QVariantMap const& options = QVariantMap {});
   // P0b worker-move: sposta il decode live su un QThread dedicato (LowPriority).
   // Idempotente. L'app lo chiama all'avvio (main_qml); i test NON lo chiamano
   // e restano sul path sincrono storico (worker sul main, segnali direct).
@@ -605,6 +628,7 @@ signals:
   void qsoAutomationChanged ();
   void blockListChanged ();
   void typingIndicatorsChanged ();
+  void rfLabChanged ();
   void radioTxAudioRequested (QString displayMessage,
                               QVector<float> samples,
                               QVariantMap plan);
@@ -671,6 +695,8 @@ private:
   void scheduleAutoBeacon (quint64 nowMs);
   decodium::ft2link::W2300RateMode currentLiveW2300RateMode (
       decodium::ft2link::AppSession const& session) const;
+  decodium::ft2link::W2300RateMode effectiveW2300RateMode (
+      decodium::ft2link::W2300RateMode mode) const;
   void observeLiveW2300Metrics (
       decodium::ft2link::Frame const& frame,
       decodium::ft2link::W2300DecodeMetrics const& metrics,
@@ -693,6 +719,10 @@ private:
                                   decodium::ft2link::W2300DecodeMetrics const& metrics,
                                   QString const& remoteCall,
                                   quint64 nowMs);
+  QString defaultRfLabDirectory () const;
+  QString resolvedRfLabPath (QString const& path,
+                             QString const& defaultFileName) const;
+  void setRfLabReport (QVariantMap const& report, QString const& path = QString {});
 
   // Harness di misura P0a (opt-in via env DECODIUM_FT2LINK_TIMING): registra il
   // costo main-thread di ingestRxSamples e logga p50/p99/max ogni 200 chiamate su
@@ -1148,6 +1178,7 @@ private:
   bool m_transportBusy {false};
   QVariantMap m_lastTransportMetrics;
   bool m_radioTxArmed {false};
+  bool m_deepRateEnabled {false};
   QVariantMap m_lastRadioTxPlan;
   std::vector<float> m_preparedRadioTxSamples;
   quint16 m_preparedRadioTxSessionId {0};
@@ -1250,6 +1281,12 @@ private:
   bool m_autoBeaconEnabled {false};
   bool m_autoBeaconCq {true};
   int m_autoBeaconIntervalSeconds {180};
+  bool m_rfLabRecording {false};
+  QVector<short> m_rfLabRecordedSamples;
+  QString m_rfLabRecordingPath;
+  quint64 m_rfLabRecordingStartedMs {0};
+  QString m_rfLabLastPath;
+  QVariantMap m_rfLabLastReport;
 };
 
 #endif

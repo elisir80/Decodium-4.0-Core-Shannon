@@ -529,13 +529,14 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
       throw error {tr ("Hamlib initialisation error")};
     }
 
-  // Icom CI-V passive state reads are fragile on some serial adapters/radios:
-  // one missed response can hold the CAT worker and spam bus errors. D4 already
-  // knows the frequency/mode/split/PTT it commanded, so keep passive polling off
-  // by default for this path while preserving explicit CAT set commands.
+  // Icom CI-V passive split/mode/PTT reads are fragile on some serial
+  // adapters/radios. Keep those conservative by default, but still poll the
+  // dial frequency: without rig_get_freq(), turning the radio VFO cannot update
+  // Decodium.
   bool const icom_serial_cat = is_icom_serial_cat (m_->model_);
-  poll_passive_state_ = !icom_serial_cat
-      || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
+  bool const force_passive_state = env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
+  poll_passive_state_ = !icom_serial_cat || force_passive_state;
+  poll_frequency_state_ = !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_FREQ_POLL");
   poll_ptt_state_ = !is_icom_serial_cat_ptt (m_->model_, params)
       || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PTT");
   cat_keep_alive_ = params.cat_keep_alive && icom_serial_cat;
@@ -803,6 +804,7 @@ int HamlibTransceiver::do_start ()
         << "alcCap=" << hasAlcCap
         << "alcProbe=" << alc_probe_pending_
         << "passiveStatePoll=" << poll_passive_state_
+        << "frequencyPoll=" << poll_frequency_state_
         << "passivePttPoll=" << poll_ptt_state_
         << "catKeepAlive=" << cat_keep_alive_;
     }
@@ -1349,7 +1351,7 @@ void HamlibTransceiver::do_poll ()
         }
     }
 
-  if (poll_passive_state_ && m_->freq_query_works_)
+  if ((poll_passive_state_ || poll_frequency_state_) && m_->freq_query_works_)
     {
       // only read if possible and when receiving or simplex
       if (!state ().ptt () || !state ().split ())
@@ -1456,6 +1458,7 @@ void HamlibTransceiver::start_cat_keep_alive_timer ()
 {
   if (!cat_keep_alive_
       || poll_passive_state_
+      || poll_frequency_state_
       || !m_->rig_
       || m_->is_dummy_
       || !m_->freq_query_works_)
@@ -1489,6 +1492,7 @@ void HamlibTransceiver::poll_cat_keep_alive ()
 {
   if (!cat_keep_alive_
       || poll_passive_state_
+      || poll_frequency_state_
       || !m_->freq_query_works_
       || ptt_on_
       || state ().ptt ())

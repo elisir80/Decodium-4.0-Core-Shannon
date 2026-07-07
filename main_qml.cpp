@@ -11,6 +11,7 @@
 #include <QFontDatabase>
 #include <QIcon>
 #include <QIODevice>
+#include <QJsonDocument>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -1434,6 +1435,27 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-relay-tx-ms",
         QStringLiteral("Delay before transmitting a parked relay mailbox item over a connected session."),
         QStringLiteral("ms"));
+    QCommandLineOption const ft2LinkRfLabDirOption(
+        QStringList {} << "ft2link-rflab-dir",
+        QStringLiteral("Run the FT2-Link RF WAV self-test and write generated WAVs to this directory."),
+        QStringLiteral("directory"));
+    QCommandLineOption const ft2LinkRfLabReplayOption(
+        QStringList {} << "ft2link-rflab-replay",
+        QStringLiteral("Replay a PCM16 WAV through the FT2-Link RF lab decoder."),
+        QStringLiteral("wav"));
+    QCommandLineOption const ft2LinkRfLabSweepDirOption(
+        QStringList {} << "ft2link-rflab-sweep-dir",
+        QStringLiteral("Run the FT2-Link RF channel impairment sweep and write WAVs to this directory."),
+        QStringLiteral("directory"));
+    QCommandLineOption const ft2LinkRfLabSweepProfilesOption(
+        QStringList {} << "ft2link-rflab-sweep-profiles",
+        QStringLiteral("Comma-separated profiles for --ft2link-rflab-sweep-dir: W2300, W500, NARROW."),
+        QStringLiteral("profiles"),
+        QStringLiteral("W2300"));
+    QCommandLineOption const ft2LinkRfLabSweepMaxCasesOption(
+        QStringList {} << "ft2link-rflab-sweep-max-cases",
+        QStringLiteral("Limit channel sweep case count for quick FT2-Link RF lab runs."),
+        QStringLiteral("count"));
     QCommandLineOption const labQuitMsOption(
         QStringList {} << "lab-quit-ms",
         QStringLiteral("Delay before quitting the runtime lab session."),
@@ -1494,6 +1516,11 @@ int main(int argc, char* argv[])
     parser.addOption(labRelaySubjectOption);
     parser.addOption(labRelayBodyOption);
     parser.addOption(labRelayTxMsOption);
+    parser.addOption(ft2LinkRfLabDirOption);
+    parser.addOption(ft2LinkRfLabReplayOption);
+    parser.addOption(ft2LinkRfLabSweepDirOption);
+    parser.addOption(ft2LinkRfLabSweepProfilesOption);
+    parser.addOption(ft2LinkRfLabSweepMaxCasesOption);
     parser.addOption(labQuitMsOption);
 
     if (!parser.parse(app.arguments())) {
@@ -1666,6 +1693,16 @@ int main(int argc, char* argv[])
         labRelayBody = QStringLiteral("D4 LAB RELAY BODY");
     }
     int const labRelayTxMs = parseLabDelayMs(labRelayTxMsOption, 0);
+    QString const ft2LinkRfLabDir =
+        parser.value(ft2LinkRfLabDirOption).trimmed();
+    QString const ft2LinkRfLabReplay =
+        parser.value(ft2LinkRfLabReplayOption).trimmed();
+    QString const ft2LinkRfLabSweepDir =
+        parser.value(ft2LinkRfLabSweepDirOption).trimmed();
+    QString const ft2LinkRfLabSweepProfiles =
+        parser.value(ft2LinkRfLabSweepProfilesOption).trimmed();
+    int const ft2LinkRfLabSweepMaxCases =
+        qMax(0, parser.value(ft2LinkRfLabSweepMaxCasesOption).trimmed().toInt());
     if (languageOverride.isEmpty()) {
         languageOverride = rootSettings.value(QStringLiteral("UILanguage")).toString().trimmed();
     }
@@ -1809,6 +1846,58 @@ int main(int argc, char* argv[])
     // REALE di fine trasmissione, non solo sulla stima di durata.
     QObject::connect(&bridge, &DecodiumBridge::ft2LinkTxFinished,
                      &ft2Link, &FT2LinkQmlAdapter::notifyRadioTxFinished);
+    auto logFt2LinkRfLabReport = [](QString const& label,
+                                    QVariantMap const& report) {
+        qInfo().noquote()
+            << label
+            << QString::fromUtf8(QJsonDocument::fromVariant(report).toJson(
+                   QJsonDocument::Compact));
+    };
+    if (parser.isSet(ft2LinkRfLabDirOption)) {
+        QTimer::singleShot(250, &ft2Link, [&ft2Link,
+                                           ft2LinkRfLabDir,
+                                           logFt2LinkRfLabReport]() {
+            QVariantMap const report = ft2Link.runRfLabSelfTest(ft2LinkRfLabDir);
+            logFt2LinkRfLabReport(QStringLiteral("[LAB][RFLAB] self-test"),
+                                  report);
+        });
+    }
+    if (parser.isSet(ft2LinkRfLabReplayOption)) {
+        QTimer::singleShot(350, &ft2Link, [&ft2Link,
+                                           ft2LinkRfLabReplay,
+                                           logFt2LinkRfLabReport]() {
+            QVariantMap options;
+            options.insert(QStringLiteral("wide"), true);
+            options.insert(QStringLiteral("applyToModel"), false);
+            QVariantMap const report = ft2Link.replayRfLabWav(
+                ft2LinkRfLabReplay,
+                options);
+            logFt2LinkRfLabReport(QStringLiteral("[LAB][RFLAB] replay"),
+                                  report);
+        });
+    }
+    if (parser.isSet(ft2LinkRfLabSweepDirOption)) {
+        QTimer::singleShot(450, &ft2Link, [&ft2Link,
+                                           ft2LinkRfLabSweepDir,
+                                           ft2LinkRfLabSweepProfiles,
+                                           ft2LinkRfLabSweepMaxCases,
+                                           logFt2LinkRfLabReport]() {
+            QVariantMap options;
+            if (!ft2LinkRfLabSweepProfiles.isEmpty()) {
+                options.insert(QStringLiteral("profiles"),
+                               ft2LinkRfLabSweepProfiles);
+            }
+            if (ft2LinkRfLabSweepMaxCases > 0) {
+                options.insert(QStringLiteral("maxCases"),
+                               ft2LinkRfLabSweepMaxCases);
+            }
+            QVariantMap const report = ft2Link.runRfLabChannelSweep(
+                ft2LinkRfLabSweepDir,
+                options);
+            logFt2LinkRfLabReport(QStringLiteral("[LAB][RFLAB] channel-sweep"),
+                                  report);
+        });
+    }
     if (labOverrideActive) {
         QTimer::singleShot(labReapplyMs, &bridge, [applyLabRuntimeOverrides]() mutable {
             applyLabRuntimeOverrides(QStringLiteral("delayed"));

@@ -78,7 +78,10 @@ LinkCapabilities capabilitiesFromFlags (std::uint8_t flags,
 bool validW2300RateMode (std::uint8_t value)
 {
   return value == static_cast<std::uint8_t> (W2300RateMode::Fast)
-      || value == static_cast<std::uint8_t> (W2300RateMode::Robust);
+      || value == static_cast<std::uint8_t> (W2300RateMode::Robust)
+      || value == static_cast<std::uint8_t> (W2300RateMode::Weak)
+      || value == static_cast<std::uint8_t> (W2300RateMode::Deep)
+      || value == static_cast<std::uint8_t> (W2300RateMode::Ultra);
 }
 
 std::string normalizedIdentityToken (std::string const& value,
@@ -425,9 +428,27 @@ bool negotiateLink (LinkCapabilities const& local,
       result.profile = Profile::Wide2300;
       bool const bothFast = local.supportsW2300Fast && remote.supportsW2300Fast;
       bool const bothRobust = local.supportsW2300Robust && remote.supportsW2300Robust;
+      bool const wantsUltra = local.preferredW2300RateMode == W2300RateMode::Ultra
+          || remote.preferredW2300RateMode == W2300RateMode::Ultra;
+      bool const wantsDeep = local.preferredW2300RateMode == W2300RateMode::Deep
+          || remote.preferredW2300RateMode == W2300RateMode::Deep;
+      bool const wantsWeak = local.preferredW2300RateMode == W2300RateMode::Weak
+          || remote.preferredW2300RateMode == W2300RateMode::Weak;
       bool const wantsRobust = local.preferredW2300RateMode == W2300RateMode::Robust
           || remote.preferredW2300RateMode == W2300RateMode::Robust;
-      if (bothRobust && (wantsRobust || !bothFast))
+      if (bothRobust && wantsUltra)
+        {
+          result.w2300RateMode = W2300RateMode::Ultra;
+        }
+      else if (bothRobust && wantsDeep)
+        {
+          result.w2300RateMode = W2300RateMode::Deep;
+        }
+      else if (bothRobust && wantsWeak)
+        {
+          result.w2300RateMode = W2300RateMode::Weak;
+        }
+      else if (bothRobust && (wantsRobust || !bothFast))
         {
           result.w2300RateMode = W2300RateMode::Robust;
         }

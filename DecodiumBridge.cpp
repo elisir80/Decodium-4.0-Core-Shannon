@@ -12849,6 +12849,7 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
     }
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    m_localCatFrequencyPreviousHz = m_frequency;
     m_localCatFrequencyTargetHz = hz;
     m_localCatFrequencyGuardUntilMs = nowMs + 8000;
     m_localCatFrequencyGuardMaxMs = nowMs + 20000;  // 1.0.362 tetto re-arm guard
@@ -12966,6 +12967,12 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
     }
 
     double const txDialHz = catSplitTxDialFrequencyHz();
+    if (txDialHz <= 0.0
+        && !m_hamlibCat->split()
+        && m_hamlibCat->txFrequency() <= 1.0) {
+        return;
+    }
+
     // txDialHz <= 0 is the split-disable / no-valid-TX-dial sentinel. Preserve it:
     // calibration intercepts must never turn that sentinel into a positive TX VFO.
     double const txDialCalibrated = txDialHz > 0.0
@@ -13027,14 +13034,38 @@ bool DecodiumBridge::shouldIgnoreCatFrequencyDuringLocalQsy(double hz, const QSt
     }
 
     if (std::abs(hz - m_localCatFrequencyTargetHz) <= 1.0) {
+        m_localCatFrequencyGuardUntilMs = 0;
+        m_localCatFrequencyGuardMaxMs = 0;
+        m_localCatFrequencyTargetHz = 0.0;
+        m_localCatFrequencyPreviousHz = 0.0;
+        return false;
+    }
+
+    bool const looksLikePreviousDial =
+        m_localCatFrequencyPreviousHz > 0.0
+        && std::abs(hz - m_localCatFrequencyPreviousHz) <= 25.0;
+    bool const looksLikeManualDialChange =
+        !looksLikePreviousDial
+        && std::abs(hz - m_localCatFrequencyTargetHz) > 100.0;
+    if (looksLikeManualDialChange) {
+        bridgeLog(QStringLiteral("CAT[%1] manual rig frequency accepted during local QSY guard: rig=%2 target=%3 previous=%4")
+                      .arg(backend,
+                           QString::number(hz, 'f', 0),
+                           QString::number(m_localCatFrequencyTargetHz, 'f', 0),
+                           QString::number(m_localCatFrequencyPreviousHz, 'f', 0)));
+        m_localCatFrequencyGuardUntilMs = 0;
+        m_localCatFrequencyGuardMaxMs = 0;
+        m_localCatFrequencyTargetHz = 0.0;
+        m_localCatFrequencyPreviousHz = 0.0;
         return false;
     }
 
     if (nowMs - m_lastIgnoredCatFrequencyLogMs >= 500) {
-        bridgeLog(QStringLiteral("CAT[%1] stale frequency ignored after local QSY: rig=%2 target=%3 guard_ms=%4")
+        bridgeLog(QStringLiteral("CAT[%1] stale frequency ignored after local QSY: rig=%2 target=%3 previous=%4 guard_ms=%5")
                       .arg(backend,
                            QString::number(hz, 'f', 0),
                            QString::number(m_localCatFrequencyTargetHz, 'f', 0),
+                           QString::number(m_localCatFrequencyPreviousHz, 'f', 0),
                            QString::number(m_localCatFrequencyGuardUntilMs - nowMs)));
         m_lastIgnoredCatFrequencyLogMs = nowMs;
     }
@@ -13554,6 +13585,7 @@ void DecodiumBridge::setMode(const QString& v) {
         // poll look stale and keep the displayed frequency stuck.
         m_localCatFrequencyGuardUntilMs = 0;
         m_localCatFrequencyTargetHz = 0.0;
+        m_localCatFrequencyPreviousHz = 0.0;
         m_localRxFrequencyGuardUntilMs = 0;
         m_localRxFrequencyTargetHz = 0;
         m_localTxFrequencyGuardUntilMs = 0;
@@ -21252,6 +21284,10 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
 {
     QString const rigMode = configuredCatRigMode();
     if (rigMode.isEmpty()) {
+        return;
+    }
+    if (!m_catMode.trimmed().isEmpty()
+        && m_catMode.compare(rigMode, Qt::CaseInsensitive) == 0) {
         return;
     }
 

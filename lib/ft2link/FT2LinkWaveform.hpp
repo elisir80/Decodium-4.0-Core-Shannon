@@ -59,7 +59,10 @@ struct NarrowDecodeMetrics
 enum class W2300RateMode : std::uint8_t
 {
   Fast = 0,
-  Robust = 1
+  Robust = 1,
+  Weak = 2,
+  Deep = 3,
+  Ultra = 4
 };
 
 struct W2300WaveformConfig

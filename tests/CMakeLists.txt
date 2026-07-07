@@ -107,6 +107,16 @@ target_compile_definitions (test_ft2link_qml_adapter
     DECODIUM_FT2LINK_QML_ADAPTER_STANDALONE=1)
 add_test (NAME test_ft2link_qml_adapter COMMAND $<TARGET_FILE:test_ft2link_qml_adapter>)
 
+add_executable (ft2link_rflab_corpus
+  ft2link_rflab_corpus.cpp
+  ../controllers/FT2LinkQmlAdapter.cpp
+  ../controllers/FT2LinkQmlAdapter.hpp)
+target_link_libraries (ft2link_rflab_corpus ft2link_core Qt6::Core)
+target_compile_definitions (ft2link_rflab_corpus
+  PRIVATE
+    DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    DECODIUM_FT2LINK_QML_ADAPTER_STANDALONE=1)
+
 if (WSJT_BUILD_UTILS)
   # CLI smoke tests for utility binaries that are built in the main project.
   add_test (NAME test_q65_usage COMMAND $<TARGET_FILE:test_q65>)

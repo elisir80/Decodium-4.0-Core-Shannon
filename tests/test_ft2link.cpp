@@ -536,6 +536,78 @@ private Q_SLOTS:
               static_cast<int> (W2300RateMode::Fast));
   }
 
+  void handshakeCanNegotiateW2300WeakPreference ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::LinkCapabilities;
+    using decodium::ft2link::NegotiatedLink;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300RateMode;
+
+    LinkCapabilities initiator;
+    initiator.preferredProfile = Profile::Wide2300;
+    initiator.preferredW2300RateMode = W2300RateMode::Weak;
+
+    LinkCapabilities responder;
+    responder.preferredProfile = Profile::Wide2300;
+    responder.preferredW2300RateMode = W2300RateMode::Robust;
+
+    Frame const hello = decodium::ft2link::makeHelloFrame (0x6003u, initiator);
+    Frame helloAck;
+    NegotiatedLink responderNegotiated;
+    std::string error;
+    QVERIFY2 (decodium::ft2link::answerHelloFrame (
+                  hello, responder, &helloAck, &responderNegotiated, &error), error.c_str ());
+    QVERIFY (responderNegotiated.accepted);
+    QCOMPARE (static_cast<int> (responderNegotiated.profile), static_cast<int> (Profile::Wide2300));
+    QCOMPARE (static_cast<int> (responderNegotiated.w2300RateMode),
+              static_cast<int> (W2300RateMode::Weak));
+
+    LinkCapabilities parsedResponder;
+    NegotiatedLink initiatorNegotiated;
+    QVERIFY2 (decodium::ft2link::parseHelloAckFrame (
+                  helloAck, &parsedResponder, &initiatorNegotiated, &error), error.c_str ());
+    QVERIFY (initiatorNegotiated.accepted);
+    QCOMPARE (static_cast<int> (initiatorNegotiated.w2300RateMode),
+              static_cast<int> (W2300RateMode::Weak));
+  }
+
+  void handshakeCanNegotiateW2300UltraPreference ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::LinkCapabilities;
+    using decodium::ft2link::NegotiatedLink;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300RateMode;
+
+    LinkCapabilities initiator;
+    initiator.preferredProfile = Profile::Wide2300;
+    initiator.preferredW2300RateMode = W2300RateMode::Ultra;
+
+    LinkCapabilities responder;
+    responder.preferredProfile = Profile::Wide2300;
+    responder.preferredW2300RateMode = W2300RateMode::Robust;
+
+    Frame const hello = decodium::ft2link::makeHelloFrame (0x6004u, initiator);
+    Frame helloAck;
+    NegotiatedLink responderNegotiated;
+    std::string error;
+    QVERIFY2 (decodium::ft2link::answerHelloFrame (
+                  hello, responder, &helloAck, &responderNegotiated, &error), error.c_str ());
+    QVERIFY (responderNegotiated.accepted);
+    QCOMPARE (static_cast<int> (responderNegotiated.profile), static_cast<int> (Profile::Wide2300));
+    QCOMPARE (static_cast<int> (responderNegotiated.w2300RateMode),
+              static_cast<int> (W2300RateMode::Ultra));
+
+    LinkCapabilities parsedResponder;
+    NegotiatedLink initiatorNegotiated;
+    QVERIFY2 (decodium::ft2link::parseHelloAckFrame (
+                  helloAck, &parsedResponder, &initiatorNegotiated, &error), error.c_str ());
+    QVERIFY (initiatorNegotiated.accepted);
+    QCOMPARE (static_cast<int> (initiatorNegotiated.w2300RateMode),
+              static_cast<int> (W2300RateMode::Ultra));
+  }
+
   void handshakeFallsBackToW500WhenW2300IsNotCommon ()
   {
     using decodium::ft2link::Frame;
@@ -914,9 +986,9 @@ private Q_SLOTS:
     QVERIFY (metrics.quality > 0.55);
   }
 
-  void w2300RobustSymbolMappingCorrectsRepeatedSymbolDamage ()
+  void w2300RobustSymbolMappingInterleavesAndCorrectsBurstDamage ()
   {
-    std::vector<std::uint8_t> packet = bytesFromString ("robust repeated W2300 byte symbols");
+    std::vector<std::uint8_t> packet = bytesFromString ("robust interleaved W2300 byte symbols");
     std::string error;
     std::vector<std::uint8_t> symbols = decodium::ft2link::w2300PacketToSymbols (
         packet, decodium::ft2link::W2300RateMode::Robust, &error);
@@ -924,9 +996,94 @@ private Q_SLOTS:
     QCOMPARE (decodium::ft2link::w2300RateModeRepetitionFactor (
                   decodium::ft2link::W2300RateMode::Robust), 3);
 
-    std::size_t const robustPayloadOffset = 16u + 8u + 3u + 6u;
-    QVERIFY (symbols.size () > robustPayloadOffset + 2u);
-    symbols[robustPayloadOffset + 1u] = static_cast<std::uint8_t> (symbols[robustPayloadOffset + 1u] ^ 0xffu);
+    std::size_t const robustPayloadOffset = symbols.size () - packet.size () * 3u;
+    QVERIFY (symbols.size () >= robustPayloadOffset + packet.size () * 3u);
+    for (std::size_t i = 0; i < packet.size (); ++i)
+      {
+        symbols[robustPayloadOffset + i] =
+            static_cast<std::uint8_t> (symbols[robustPayloadOffset + i] ^ 0xffu);
+      }
+
+    std::vector<std::uint8_t> parsed;
+    QVERIFY2 (decodium::ft2link::w2300SymbolsToPacket (symbols, &parsed, &error), error.c_str ());
+    QVERIFY (parsed == packet);
+  }
+
+  void w2300WeakSymbolMappingInterleavesAndCorrectsBurstDamage ()
+  {
+    using decodium::ft2link::W2300RateMode;
+
+    std::vector<std::uint8_t> packet = bytesFromString ("weak interleaved W2300 byte symbols survive bursts");
+    std::string error;
+    std::vector<std::uint8_t> symbols = decodium::ft2link::w2300PacketToSymbols (
+        packet, W2300RateMode::Weak, &error);
+    QVERIFY2 (!symbols.empty (), error.c_str ());
+    QCOMPARE (decodium::ft2link::w2300RateModeRepetitionFactor (W2300RateMode::Weak), 5);
+
+    std::size_t const weakPayloadOffset = symbols.size () - packet.size () * 5u;
+    QVERIFY (symbols.size () >= weakPayloadOffset + packet.size () * 5u);
+    for (std::size_t pass = 0; pass < 2u; ++pass)
+      {
+        for (std::size_t i = 0; i < packet.size (); ++i)
+          {
+            std::size_t const offset = weakPayloadOffset + pass * packet.size () + i;
+            symbols[offset] = static_cast<std::uint8_t> (symbols[offset] ^ 0xffu);
+          }
+      }
+
+    std::vector<std::uint8_t> parsed;
+    QVERIFY2 (decodium::ft2link::w2300SymbolsToPacket (symbols, &parsed, &error), error.c_str ());
+    QVERIFY (parsed == packet);
+  }
+
+  void w2300DeepSymbolMappingInterleavesAndCorrectsBurstDamage ()
+  {
+    using decodium::ft2link::W2300RateMode;
+
+    std::vector<std::uint8_t> packet = bytesFromString ("deep interleaved W2300 byte symbols");
+    std::string error;
+    std::vector<std::uint8_t> symbols = decodium::ft2link::w2300PacketToSymbols (
+        packet, W2300RateMode::Deep, &error);
+    QVERIFY2 (!symbols.empty (), error.c_str ());
+    QCOMPARE (decodium::ft2link::w2300RateModeRepetitionFactor (W2300RateMode::Deep), 17);
+
+    std::size_t const deepPayloadOffset = symbols.size () - packet.size () * 17u;
+    QVERIFY (symbols.size () >= deepPayloadOffset + packet.size () * 17u);
+    for (std::size_t pass = 0; pass < 8u; ++pass)
+      {
+        for (std::size_t i = 0; i < packet.size (); ++i)
+          {
+            std::size_t const offset = deepPayloadOffset + pass * packet.size () + i;
+            symbols[offset] = static_cast<std::uint8_t> (symbols[offset] ^ 0xffu);
+          }
+      }
+
+    std::vector<std::uint8_t> parsed;
+    QVERIFY2 (decodium::ft2link::w2300SymbolsToPacket (symbols, &parsed, &error), error.c_str ());
+    QVERIFY (parsed == packet);
+  }
+
+  void w2300UltraSymbolMappingInterleavesAndCorrectsBurstDamage ()
+  {
+    using decodium::ft2link::W2300RateMode;
+
+    std::vector<std::uint8_t> packet = bytesFromString ("ultra interleaved W2300 byte symbols");
+    std::string error;
+    std::vector<std::uint8_t> symbols = decodium::ft2link::w2300PacketToSymbols (
+        packet, W2300RateMode::Ultra, &error);
+    QVERIFY2 (!symbols.empty (), error.c_str ());
+    QCOMPARE (decodium::ft2link::w2300RateModeRepetitionFactor (W2300RateMode::Ultra), 25);
+
+    std::size_t const ultraPayloadOffset = symbols.size () - packet.size () * 25u;
+    QVERIFY (symbols.size () >= ultraPayloadOffset + packet.size () * 25u);
+    for (std::size_t pass = 0; pass < 12u; ++pass)
+      {
+        for (std::size_t i = 0; i < packet.size (); ++i)
+          {
+            std::size_t const offset = ultraPayloadOffset + pass * packet.size () + i;
+            symbols[offset] = static_cast<std::uint8_t> (symbols[offset] ^ 0xffu);
+          }
+      }
 
     std::vector<std::uint8_t> parsed;
     QVERIFY2 (decodium::ft2link::w2300SymbolsToPacket (symbols, &parsed, &error), error.c_str ());
@@ -973,6 +1130,135 @@ private Q_SLOTS:
     QVERIFY (metrics.quality > 0.45);
   }
 
+  void w2300WeakWaveformRoundTripsAndReportsMode ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::FrameType;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300RateMode;
+    using decodium::ft2link::W2300WaveformConfig;
+
+    Frame frame;
+    frame.type = FrameType::Data;
+    frame.profile = Profile::Wide2300;
+    frame.flags = decodium::ft2link::FlagEndOfMessage;
+    frame.sessionId = 0x2304u;
+    frame.sequence = 25u;
+    frame.payload = bytesFromString ("WEAK W2300 trades speed for interleaved correction margin");
+
+    W2300WaveformConfig weakConfig;
+    weakConfig.rateMode = W2300RateMode::Weak;
+
+    std::string error;
+    std::vector<float> const weakWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, weakConfig, &error);
+    QVERIFY2 (!weakWave.empty (), error.c_str ());
+    W2300WaveformConfig robustConfig;
+    robustConfig.rateMode = W2300RateMode::Robust;
+    std::vector<float> const robustWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, robustConfig, &error);
+    QVERIFY (weakWave.size () > robustWave.size ());
+
+    Frame parsed;
+    decodium::ft2link::W2300DecodeMetrics metrics;
+    QVERIFY2 (decodium::ft2link::decodeW2300FrameWaveformWithMetrics (
+                  weakWave, &parsed, &metrics, {}, &error), error.c_str ());
+    QCOMPARE (parsed.sessionId, frame.sessionId);
+    QCOMPARE (parsed.sequence, frame.sequence);
+    QVERIFY (parsed.payload == frame.payload);
+    QCOMPARE (static_cast<int> (metrics.rateMode), static_cast<int> (W2300RateMode::Weak));
+    QCOMPARE (metrics.repetitionFactor, 5);
+    QCOMPARE (metrics.rawBitRate, 4800.0);
+    QCOMPARE (metrics.payloadBitRate, 960.0);
+    QVERIFY (metrics.quality > 0.45);
+  }
+
+  void w2300DeepWaveformRoundTripsAndReportsMode ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::FrameType;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300RateMode;
+    using decodium::ft2link::W2300WaveformConfig;
+
+    Frame frame;
+    frame.type = FrameType::Data;
+    frame.profile = Profile::Wide2300;
+    frame.flags = decodium::ft2link::FlagEndOfMessage;
+    frame.sessionId = 0x2305u;
+    frame.sequence = 26u;
+    frame.payload = bytesFromString ("DEEP W2300 slow fallback");
+
+    W2300WaveformConfig deepConfig;
+    deepConfig.rateMode = W2300RateMode::Deep;
+
+    std::string error;
+    std::vector<float> const deepWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, deepConfig, &error);
+    QVERIFY2 (!deepWave.empty (), error.c_str ());
+    W2300WaveformConfig weakConfig;
+    weakConfig.rateMode = W2300RateMode::Weak;
+    std::vector<float> const weakWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, weakConfig, &error);
+    QVERIFY (deepWave.size () > weakWave.size ());
+
+    Frame parsed;
+    decodium::ft2link::W2300DecodeMetrics metrics;
+    QVERIFY2 (decodium::ft2link::decodeW2300FrameWaveformWithMetrics (
+                  deepWave, &parsed, &metrics, {}, &error), error.c_str ());
+    QCOMPARE (parsed.sessionId, frame.sessionId);
+    QCOMPARE (parsed.sequence, frame.sequence);
+    QVERIFY (parsed.payload == frame.payload);
+    QCOMPARE (static_cast<int> (metrics.rateMode), static_cast<int> (W2300RateMode::Deep));
+    QCOMPARE (metrics.repetitionFactor, 17);
+    QCOMPARE (metrics.rawBitRate, 4800.0);
+    QCOMPARE (metrics.payloadBitRate, 4800.0 / 17.0);
+    QVERIFY (metrics.quality > 0.40);
+  }
+
+  void w2300UltraWaveformRoundTripsAndReportsMode ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::FrameType;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300RateMode;
+    using decodium::ft2link::W2300WaveformConfig;
+
+    Frame frame;
+    frame.type = FrameType::Data;
+    frame.profile = Profile::Wide2300;
+    frame.flags = decodium::ft2link::FlagEndOfMessage;
+    frame.sessionId = 0x2306u;
+    frame.sequence = 27u;
+    frame.payload = bytesFromString ("ULTRA W2300 weak signal fallback");
+
+    W2300WaveformConfig ultraConfig;
+    ultraConfig.rateMode = W2300RateMode::Ultra;
+
+    std::string error;
+    std::vector<float> const ultraWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, ultraConfig, &error);
+    QVERIFY2 (!ultraWave.empty (), error.c_str ());
+    W2300WaveformConfig deepConfig;
+    deepConfig.rateMode = W2300RateMode::Deep;
+    std::vector<float> const deepWave = decodium::ft2link::generateW2300FrameWaveform (
+        frame, deepConfig, &error);
+    QVERIFY (ultraWave.size () > deepWave.size ());
+
+    Frame parsed;
+    decodium::ft2link::W2300DecodeMetrics metrics;
+    QVERIFY2 (decodium::ft2link::decodeW2300FrameWaveformWithMetrics (
+                  ultraWave, &parsed, &metrics, {}, &error), error.c_str ());
+    QCOMPARE (parsed.sessionId, frame.sessionId);
+    QCOMPARE (parsed.sequence, frame.sequence);
+    QVERIFY (parsed.payload == frame.payload);
+    QCOMPARE (static_cast<int> (metrics.rateMode), static_cast<int> (W2300RateMode::Ultra));
+    QCOMPARE (metrics.repetitionFactor, 25);
+    QCOMPARE (metrics.rawBitRate, 4800.0);
+    QCOMPARE (metrics.payloadBitRate, 4800.0 / 25.0);
+    QVERIFY (metrics.quality > 0.35);
+  }
+
   void w2300WaveformToleratesNoiseAndSmallFrequencyOffset ()
   {
     using decodium::ft2link::Frame;
@@ -1010,6 +1296,48 @@ private Q_SLOTS:
     QVERIFY (metrics.quality > 0.45);
   }
 
+  void w2300WaveformCorrectsLargeFrequencyOffset ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::FrameType;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300WaveformConfig;
+
+    for (double const offsetHz : {-50.0, -25.0, 25.0, 50.0})
+      {
+        Frame frame;
+        frame.type = FrameType::Data;
+        frame.profile = Profile::Wide2300;
+        frame.flags = decodium::ft2link::FlagEndOfMessage;
+        frame.sessionId = static_cast<std::uint16_t> (0x2310u + int (offsetHz + 50.0));
+        frame.sequence = 24u;
+        frame.payload = bytesFromString ("W2300 CFO correction sweep payload");
+
+        W2300WaveformConfig txConfig;
+        txConfig.centerFrequencyHz = 1500.0 + offsetHz;
+        txConfig.gain = 0.54;
+
+        std::string error;
+        std::vector<float> burst = decodium::ft2link::generateW2300FrameWaveform (frame, txConfig, &error);
+        QVERIFY2 (!burst.empty (), error.c_str ());
+        std::vector<float> stream = paddedWave (burst, 31, 57);
+        addDeterministicNoise (stream, 0.004f);
+
+        Frame parsed;
+        decodium::ft2link::W2300DecodeMetrics metrics;
+        bool const decoded = decodium::ft2link::decodeW2300FrameWaveformWithMetrics (
+            stream, &parsed, &metrics, {}, &error);
+        std::string const failure = "offset " + std::to_string (offsetHz) + " Hz: " + error;
+        QVERIFY2 (decoded, failure.c_str ());
+        QCOMPARE (parsed.sessionId, frame.sessionId);
+        QCOMPARE (parsed.sequence, frame.sequence);
+        QVERIFY (parsed.payload == frame.payload);
+        QVERIFY (std::fabs (metrics.estimatedFrequencyOffsetHz - offsetHz) <= 7.5);
+        QVERIFY (std::fabs (metrics.estimatedCenterFrequencyHz - txConfig.centerFrequencyHz) <= 7.5);
+        QVERIFY (metrics.quality > 0.45);
+      }
+  }
+
   void w2300RateRecommendationUsesQualityOffsetAndRetries ()
   {
     using decodium::ft2link::W2300DecodeMetrics;
@@ -1036,6 +1364,20 @@ private Q_SLOTS:
     metrics.estimatedFrequencyOffsetHz = 4.0;
     QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics, 1u)),
               static_cast<int> (W2300RateMode::Robust));
+    QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics, 2u)),
+              static_cast<int> (W2300RateMode::Weak));
+    QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics, 3u)),
+              static_cast<int> (W2300RateMode::Deep));
+    QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics, 4u)),
+              static_cast<int> (W2300RateMode::Ultra));
+
+    metrics.quality = 0.20;
+    metrics.estimatedFrequencyOffsetHz = 4.0;
+    QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics)),
+              static_cast<int> (W2300RateMode::Deep));
+    metrics.quality = 0.12;
+    QCOMPARE (static_cast<int> (decodium::ft2link::recommendedW2300RateMode (metrics)),
+              static_cast<int> (W2300RateMode::Ultra));
   }
 
   void w2300RateControllerUsesRobustForArqRetries ()
@@ -1066,6 +1408,12 @@ private Q_SLOTS:
     QCOMPARE (static_cast<int> (controller.configForAttempt (
                   tx.attemptsForSequence (retry[0].sequence)).rateMode),
               static_cast<int> (W2300RateMode::Robust));
+    QCOMPARE (static_cast<int> (controller.configForAttempt (3).rateMode),
+              static_cast<int> (W2300RateMode::Weak));
+    QCOMPARE (static_cast<int> (controller.configForAttempt (4).rateMode),
+              static_cast<int> (W2300RateMode::Deep));
+    QCOMPARE (static_cast<int> (controller.configForAttempt (5).rateMode),
+              static_cast<int> (W2300RateMode::Ultra));
   }
 
   void w2300RateControllerLearnsFromDecodeMetrics ()

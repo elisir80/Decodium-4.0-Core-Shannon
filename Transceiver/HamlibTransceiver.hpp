@@ -46,6 +46,7 @@ private:
 
   bool ptt_on_ = false;
   bool poll_passive_state_ = true;
+  bool poll_frequency_state_ = true;
   bool poll_ptt_state_ = true;
   bool cat_keep_alive_ = false;
   int cat_keep_alive_failures_ = 0;

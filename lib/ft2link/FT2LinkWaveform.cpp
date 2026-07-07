@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <future>
+#include <thread>
 
 namespace decodium
 {
@@ -19,6 +21,9 @@ constexpr std::size_t kW2300ModeSymbols {3};
 constexpr std::size_t kW2300Subcarriers {4};
 constexpr std::uint8_t kW2300FastModeSymbol {0x46u};
 constexpr std::uint8_t kW2300RobustModeSymbol {0x52u};
+constexpr std::uint8_t kW2300WeakModeSymbol {0x57u};
+constexpr std::uint8_t kW2300DeepModeSymbol {0x44u};
+constexpr std::uint8_t kW2300UltraModeSymbol {0x55u};
 constexpr std::uint8_t kNarrowPacketMagic0 {'N'};
 constexpr std::uint8_t kNarrowPacketMagic1 {'2'};
 constexpr std::uint8_t kNarrowPacketVersion {1};
@@ -66,6 +71,27 @@ struct W2300DecodeCandidate
   bool ok {false};
   std::vector<std::uint8_t> packet;
   W2300DecodeMetrics metrics;
+};
+
+struct W2300DecodeSearchResult
+{
+  W2300DecodeCandidate candidate;
+  Frame frame;
+  bool hasFrame {false};
+};
+
+struct W2300PhaseSearchOutcome
+{
+  W2300DecodeCandidate candidate;
+  Frame frame;
+  bool hasFrame {false};
+  std::string lastError;
+};
+
+struct W2300CfoEstimate
+{
+  double offsetHz {0.0};
+  double quality {0.0};
 };
 
 struct NarrowToneBasis
@@ -126,7 +152,11 @@ std::vector<std::uint8_t> const& w2300PreambleSymbols ()
     0x00u, 0xffu, 0x00u, 0xffu,
     0x33u, 0xccu, 0x33u, 0xccu,
     0x55u, 0xaau, 0x55u, 0xaau,
-    0x0fu, 0xf0u, 0x0fu, 0xf0u
+    0x0fu, 0xf0u, 0x0fu, 0xf0u,
+    0x69u, 0x96u, 0x3cu, 0xc3u,
+    0x5au, 0xa5u, 0x12u, 0xedu,
+    0x87u, 0x78u, 0x24u, 0xdbu,
+    0xe1u, 0x1eu, 0x4bu, 0xb4u
   };
   return symbols;
 }
@@ -135,7 +165,9 @@ std::vector<std::uint8_t> const& w2300SyncSymbols ()
 {
   static std::vector<std::uint8_t> const symbols {
     0xd2u, 0xb4u, 0xe1u, 0x78u,
-    0x4bu, 0x96u, 0x2du, 0xc3u
+    0x4bu, 0x96u, 0x2du, 0xc3u,
+    0x7du, 0x18u, 0xb6u, 0x42u,
+    0xceu, 0x35u, 0x89u, 0xf0u
   };
   return symbols;
 }
@@ -437,6 +469,9 @@ int w2300ModeRepetitionFactor (W2300RateMode mode)
     {
     case W2300RateMode::Fast: return 1;
     case W2300RateMode::Robust: return 3;
+    case W2300RateMode::Weak: return 5;
+    case W2300RateMode::Deep: return 17;
+    case W2300RateMode::Ultra: return 25;
     default: return 0;
     }
 }
@@ -447,6 +482,9 @@ std::uint8_t w2300ModeSymbol (W2300RateMode mode)
     {
     case W2300RateMode::Fast: return kW2300FastModeSymbol;
     case W2300RateMode::Robust: return kW2300RobustModeSymbol;
+    case W2300RateMode::Weak: return kW2300WeakModeSymbol;
+    case W2300RateMode::Deep: return kW2300DeepModeSymbol;
+    case W2300RateMode::Ultra: return kW2300UltraModeSymbol;
     default: return 0;
     }
 }
@@ -469,7 +507,51 @@ bool w2300ModeFromSymbol (std::uint8_t symbol, W2300RateMode* mode)
         }
       return true;
     }
+  if (symbol == kW2300WeakModeSymbol)
+    {
+      if (mode)
+        {
+          *mode = W2300RateMode::Weak;
+        }
+      return true;
+    }
+  if (symbol == kW2300DeepModeSymbol)
+    {
+      if (mode)
+        {
+          *mode = W2300RateMode::Deep;
+        }
+      return true;
+    }
+  if (symbol == kW2300UltraModeSymbol)
+    {
+      if (mode)
+        {
+          *mode = W2300RateMode::Ultra;
+        }
+      return true;
+    }
   return false;
+}
+
+bool w2300ModeUsesPayloadInterleaving (W2300RateMode mode)
+{
+  return mode == W2300RateMode::Robust
+      || mode == W2300RateMode::Weak
+      || mode == W2300RateMode::Deep
+      || mode == W2300RateMode::Ultra;
+}
+
+std::vector<W2300RateMode> const& w2300RateModes ()
+{
+  static std::vector<W2300RateMode> const modes {
+    W2300RateMode::Fast,
+    W2300RateMode::Robust,
+    W2300RateMode::Weak,
+    W2300RateMode::Deep,
+    W2300RateMode::Ultra
+  };
+  return modes;
 }
 
 void appendRepeatedByte (std::vector<std::uint8_t>& symbols,
@@ -505,6 +587,328 @@ std::uint8_t readRepeatedByte (std::vector<std::uint8_t> const& symbols,
         }
     }
   return value;
+}
+
+void appendW2300PayloadSymbols (std::vector<std::uint8_t>* symbols,
+                                std::vector<std::uint8_t> const& packet,
+                                W2300RateMode mode,
+                                int repetitionFactor)
+{
+  if (!symbols)
+    {
+      return;
+    }
+  if (w2300ModeUsesPayloadInterleaving (mode))
+    {
+      for (int copy = 0; copy < repetitionFactor; ++copy)
+        {
+          symbols->insert (symbols->end (), packet.begin (), packet.end ());
+        }
+      return;
+    }
+
+  for (std::uint8_t byte : packet)
+    {
+      appendRepeatedByte (*symbols, byte, repetitionFactor);
+    }
+}
+
+std::uint8_t readW2300PayloadByte (std::vector<std::uint8_t> const& symbols,
+                                   W2300BurstInfo const& info,
+                                   std::size_t byteIndex)
+{
+  if (!w2300ModeUsesPayloadInterleaving (info.mode))
+    {
+      return readRepeatedByte (
+          symbols,
+          info.payloadOffset + byteIndex * static_cast<std::size_t> (info.repetitionFactor),
+          info.repetitionFactor);
+    }
+
+  std::uint8_t value = 0;
+  for (int bit = 7; bit >= 0; --bit)
+    {
+      int ones = 0;
+      for (int copy = 0; copy < info.repetitionFactor; ++copy)
+        {
+          std::size_t const offset = info.payloadOffset
+              + static_cast<std::size_t> (copy) * static_cast<std::size_t> (info.packetLength)
+              + byteIndex;
+          ones += ((symbols[offset] >> bit) & 0x01u) != 0u ? 1 : 0;
+        }
+      if (ones > info.repetitionFactor / 2)
+        {
+          value = static_cast<std::uint8_t> (value | (1u << bit));
+        }
+    }
+  return value;
+}
+
+std::uint8_t readW2300PayloadByte (
+    std::vector<W2300SymbolDecision> const& decisions,
+    W2300BurstInfo const& info,
+    std::size_t byteIndex)
+{
+  if (!w2300ModeUsesPayloadInterleaving (info.mode))
+    {
+      std::uint8_t value = 0;
+      std::size_t const base = info.payloadOffset
+          + byteIndex * static_cast<std::size_t> (info.repetitionFactor);
+      for (int bit = 7; bit >= 0; --bit)
+        {
+          double oneWeight = 0.0;
+          double zeroWeight = 0.0;
+          for (int copy = 0; copy < info.repetitionFactor; ++copy)
+            {
+              W2300SymbolDecision const& decision =
+                  decisions[base + static_cast<std::size_t> (copy)];
+              double const weight = std::max (0.05, decision.quality);
+              if (((decision.symbol >> bit) & 0x01u) != 0u)
+                {
+                  oneWeight += weight;
+                }
+              else
+                {
+                  zeroWeight += weight;
+                }
+            }
+          if (oneWeight > zeroWeight)
+            {
+              value = static_cast<std::uint8_t> (value | (1u << bit));
+            }
+        }
+      return value;
+    }
+
+  std::uint8_t value = 0;
+  for (int bit = 7; bit >= 0; --bit)
+    {
+      double oneWeight = 0.0;
+      double zeroWeight = 0.0;
+      for (int copy = 0; copy < info.repetitionFactor; ++copy)
+        {
+          std::size_t const offset = info.payloadOffset
+              + static_cast<std::size_t> (copy) * static_cast<std::size_t> (info.packetLength)
+              + byteIndex;
+          W2300SymbolDecision const& decision = decisions[offset];
+          double const weight = std::max (0.05, decision.quality);
+          if (((decision.symbol >> bit) & 0x01u) != 0u)
+            {
+              oneWeight += weight;
+            }
+          else
+            {
+              zeroWeight += weight;
+            }
+        }
+      if (oneWeight > zeroWeight)
+        {
+          value = static_cast<std::uint8_t> (value | (1u << bit));
+        }
+    }
+  return value;
+}
+
+bool packetFromW2300BurstInfo (
+    std::vector<W2300SymbolDecision> const& decisions,
+    W2300BurstInfo const& info,
+    std::vector<std::uint8_t>* packet,
+    std::vector<double>* bitConfidences = nullptr)
+{
+  if (!packet)
+    {
+      return false;
+    }
+  if (info.repetitionFactor <= 0
+      || decisions.size () < info.payloadOffset
+          + static_cast<std::size_t> (info.packetLength)
+              * static_cast<std::size_t> (info.repetitionFactor))
+    {
+      return false;
+    }
+
+  packet->clear ();
+  packet->reserve (info.packetLength);
+  if (bitConfidences)
+    {
+      bitConfidences->clear ();
+      bitConfidences->reserve (static_cast<std::size_t> (info.packetLength) * 8u);
+    }
+  for (std::size_t i = 0; i < info.packetLength; ++i)
+    {
+      packet->push_back (readW2300PayloadByte (decisions, info, i));
+      if (!bitConfidences)
+        {
+          continue;
+        }
+
+      for (int bit = 7; bit >= 0; --bit)
+        {
+          double oneWeight = 0.0;
+          double zeroWeight = 0.0;
+          double qualitySum = 0.0;
+          for (int copy = 0; copy < info.repetitionFactor; ++copy)
+            {
+              std::size_t const offset = w2300ModeUsesPayloadInterleaving (info.mode)
+                  ? info.payloadOffset
+                      + static_cast<std::size_t> (copy) * static_cast<std::size_t> (info.packetLength)
+                      + i
+                  : info.payloadOffset
+                      + i * static_cast<std::size_t> (info.repetitionFactor)
+                      + static_cast<std::size_t> (copy);
+              W2300SymbolDecision const& decision = decisions[offset];
+              double const weight = std::max (0.05, decision.quality);
+              qualitySum += decision.quality;
+              if (((decision.symbol >> bit) & 0x01u) != 0u)
+                {
+                  oneWeight += weight;
+                }
+              else
+                {
+                  zeroWeight += weight;
+                }
+            }
+
+          double const totalWeight = oneWeight + zeroWeight;
+          double confidence = totalWeight > 0.0
+              ? std::fabs (oneWeight - zeroWeight) / totalWeight
+              : 0.0;
+          double const averageQuality =
+              qualitySum / double (std::max (1, info.repetitionFactor));
+          confidence = std::min (confidence, averageQuality);
+          bitConfidences->push_back (std::max (0.0, std::min (1.0, confidence)));
+        }
+    }
+  return true;
+}
+
+void flipPacketBit (std::vector<std::uint8_t>* packet, std::size_t bitIndex)
+{
+  if (!packet || packet->empty ())
+    {
+      return;
+    }
+  std::size_t const byteIndex = bitIndex / 8u;
+  if (byteIndex >= packet->size ())
+    {
+      return;
+    }
+  std::uint8_t const mask =
+      static_cast<std::uint8_t> (1u << (7u - (bitIndex % 8u)));
+  (*packet)[byteIndex] = static_cast<std::uint8_t> ((*packet)[byteIndex] ^ mask);
+}
+
+std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
+    std::vector<std::uint8_t> const& packet,
+    std::vector<double> const& bitConfidences,
+    W2300BurstInfo const& info)
+{
+  if (packet.empty () || bitConfidences.size () != packet.size () * 8u)
+    {
+      return {};
+    }
+
+  std::vector<std::size_t> ranked;
+  ranked.reserve (bitConfidences.size ());
+  double confidenceThreshold = 0.28;
+  std::size_t maxBits = 6u;
+  std::size_t maxVariants = 32u;
+  bool includeTriples = false;
+  switch (info.mode)
+    {
+    case W2300RateMode::Fast:
+      confidenceThreshold = 0.42;
+      maxBits = 6u;
+      maxVariants = 32u;
+      break;
+    case W2300RateMode::Robust:
+      confidenceThreshold = 0.36;
+      maxBits = 8u;
+      maxVariants = 64u;
+      includeTriples = true;
+      break;
+    case W2300RateMode::Weak:
+      confidenceThreshold = 0.32;
+      maxBits = 10u;
+      maxVariants = 96u;
+      includeTriples = true;
+      break;
+    case W2300RateMode::Deep:
+      confidenceThreshold = 0.30;
+      maxBits = 10u;
+      maxVariants = 96u;
+      includeTriples = true;
+      break;
+    case W2300RateMode::Ultra:
+      confidenceThreshold = 0.28;
+      maxBits = 10u;
+      maxVariants = 96u;
+      includeTriples = true;
+      break;
+    default:
+      break;
+    }
+  for (std::size_t i = 0; i < bitConfidences.size (); ++i)
+    {
+      if (bitConfidences[i] <= confidenceThreshold)
+        {
+          ranked.push_back (i);
+        }
+    }
+  if (ranked.empty ())
+    {
+      return {};
+    }
+
+  std::sort (ranked.begin (), ranked.end (),
+             [&] (std::size_t lhs, std::size_t rhs) {
+               return bitConfidences[lhs] < bitConfidences[rhs];
+             });
+  ranked.resize (std::min<std::size_t> (maxBits, ranked.size ()));
+
+  std::vector<std::vector<std::uint8_t> > repaired;
+  repaired.reserve (maxVariants);
+
+  auto appendVariant = [&] (std::initializer_list<std::size_t> bitIndexes) {
+    if (repaired.size () >= maxVariants)
+      {
+        return;
+      }
+    std::vector<std::uint8_t> variant = packet;
+    for (std::size_t bitIndex : bitIndexes)
+      {
+        flipPacketBit (&variant, bitIndex);
+      }
+    repaired.push_back (std::move (variant));
+  };
+
+  for (std::size_t i = 0; i < ranked.size (); ++i)
+    {
+      appendVariant ({ranked[i]});
+    }
+  for (std::size_t i = 0; i < ranked.size (); ++i)
+    {
+      for (std::size_t j = i + 1u; j < ranked.size (); ++j)
+        {
+          appendVariant ({ranked[i], ranked[j]});
+        }
+    }
+  if (includeTriples)
+    {
+      std::size_t const tripleBits = std::min<std::size_t> (6u, ranked.size ());
+      for (std::size_t i = 0; i < tripleBits; ++i)
+        {
+          for (std::size_t j = i + 1u; j < tripleBits; ++j)
+            {
+              for (std::size_t k = j + 1u; k < tripleBits; ++k)
+                {
+                  appendVariant ({ranked[i], ranked[j], ranked[k]});
+                }
+            }
+        }
+    }
+
+  return repaired;
 }
 
 double toneFrequency (std::uint8_t symbol, W500WaveformConfig const& config)
@@ -719,13 +1123,10 @@ bool startsWithSymbols (std::vector<std::uint8_t> const& symbols,
   return true;
 }
 
-// P1 iu8lmc (acquisizione soft, dal banco soglia-dB): distanza di Hamming in
-// BIT tra lo stream di simboli e il pattern atteso, con early-exit oltre
-// abortAbove. L'acquisizione W2300 a match ESATTO su preamble+sync (24
-// simboli-byte = 192 bit non protetti dalla ripetizione) era il collo di
-// bottiglia misurato: 1 solo bit errato uccideva l'aggancio — per questo
-// ROBUST rendeva quasi come FAST e c'erano fallimenti anche a +18/+24 dB.
-// Il match tollerante lascia al CRC (fisico+logico) il rigetto dei falsi.
+// Soft preamble acquisition: count bit-level Hamming distance between the
+// decided symbol stream and the expected training pattern. The old exact
+// preamble+sync match made one wrong training bit kill acquisition before the
+// physical/logical CRCs could reject false positives.
 std::size_t symbolBitErrors (std::vector<std::uint8_t> const& symbols,
                              std::size_t offset,
                              std::vector<std::uint8_t> const& expected,
@@ -753,24 +1154,77 @@ std::size_t symbolBitErrors (std::vector<std::uint8_t> const& symbols,
   return errors;
 }
 
-// Budget errori-bit per l'header W2300 (preamble 16 + sync 8 simboli = 192
-// bit): ~10%. Un match casuale ne sbaglierebbe ~96 — margine enorme; i
-// candidati borderline vengono comunque validati dal CRC.
-constexpr std::size_t kW2300HeaderMaxBitErrors = 20u;
+std::size_t w2300HeaderMaxBitErrors ()
+{
+  std::size_t const trainingBits =
+      (w2300PreambleSymbols ().size () + w2300SyncSymbols ().size ()) * 8u;
+  return std::max<std::size_t> (32u, trainingBits / 5u);
+}
 
 bool w2300HeaderMatchesSoft (std::vector<std::uint8_t> const& symbols,
                              std::size_t start)
 {
+  std::size_t const maxErrors = w2300HeaderMaxBitErrors ();
   std::size_t const preambleErrors = symbolBitErrors (
-      symbols, start, w2300PreambleSymbols (), kW2300HeaderMaxBitErrors);
-  if (preambleErrors > kW2300HeaderMaxBitErrors)
+      symbols, start, w2300PreambleSymbols (), maxErrors);
+  if (preambleErrors > maxErrors)
     {
       return false;
     }
   std::size_t const syncErrors = symbolBitErrors (
       symbols, start + w2300PreambleSymbols ().size (), w2300SyncSymbols (),
-      kW2300HeaderMaxBitErrors - preambleErrors);
-  return preambleErrors + syncErrors <= kW2300HeaderMaxBitErrors;
+      maxErrors - preambleErrors);
+  return preambleErrors + syncErrors <= maxErrors;
+}
+
+bool makeW2300BurstInfoForMode (std::vector<std::uint8_t> const& symbols,
+                                std::size_t start,
+                                W2300RateMode mode,
+                                W2300BurstInfo* info)
+{
+  if (!info)
+    {
+      return false;
+    }
+  int const repetitionFactor = w2300ModeRepetitionFactor (mode);
+  if (repetitionFactor <= 0)
+    {
+      return false;
+    }
+
+  std::size_t const modeOffset = start + w2300PreambleSymbols ().size ()
+      + w2300SyncSymbols ().size ();
+  std::size_t const lengthOffset = modeOffset + kW2300ModeSymbols;
+  std::size_t const lengthSymbols =
+      kW2300LengthSymbols * static_cast<std::size_t> (repetitionFactor);
+  if (symbols.size () < lengthOffset + lengthSymbols)
+    {
+      return false;
+    }
+
+  std::uint16_t const length = static_cast<std::uint16_t> (
+      (static_cast<std::uint16_t> (readRepeatedByte (
+           symbols, lengthOffset, repetitionFactor)) << 8)
+      | static_cast<std::uint16_t> (readRepeatedByte (
+          symbols,
+          lengthOffset + static_cast<std::size_t> (repetitionFactor),
+          repetitionFactor)));
+
+  std::size_t const payloadOffset = lengthOffset + lengthSymbols;
+  std::size_t const requiredSymbols = payloadOffset - start
+      + static_cast<std::size_t> (length)
+          * static_cast<std::size_t> (repetitionFactor);
+  if (symbols.size () < start + requiredSymbols)
+    {
+      return false;
+    }
+
+  info->mode = mode;
+  info->repetitionFactor = repetitionFactor;
+  info->packetLength = length;
+  info->payloadOffset = payloadOffset;
+  info->requiredSymbols = requiredSymbols;
+  return true;
 }
 
 bool parseW2300BurstHeader (std::vector<std::uint8_t> const& symbols,
@@ -790,9 +1244,8 @@ bool parseW2300BurstHeader (std::vector<std::uint8_t> const& symbols,
       setError (error, "W2300 symbol stream is too short");
       return false;
     }
-  // P1 iu8lmc: match tollerante (vedi w2300HeaderMatchesSoft) al posto del
-  // match esatto — l'header non e' protetto dalla ripetizione e il CRC a
-  // valle rigetta i falsi positivi.
+  // The training header is not protected by repetition, so use a tolerant
+  // match here and let the downstream physical/logical CRCs reject false locks.
   if (!w2300HeaderMatchesSoft (symbols, start))
     {
       setError (error, "W2300 preamble or sync mismatch");
@@ -817,34 +1270,11 @@ bool parseW2300BurstHeader (std::vector<std::uint8_t> const& symbols,
       return false;
     }
 
-  std::size_t const lengthOffset = modeOffset + kW2300ModeSymbols;
-  std::size_t const lengthSymbols = kW2300LengthSymbols * static_cast<std::size_t> (repetitionFactor);
-  if (symbols.size () < lengthOffset + lengthSymbols)
+  if (!makeW2300BurstInfoForMode (symbols, start, mode, info))
     {
       setError (error, "W2300 symbol stream is truncated");
       return false;
     }
-  std::uint16_t const length = static_cast<std::uint16_t> (
-      (static_cast<std::uint16_t> (readRepeatedByte (symbols, lengthOffset, repetitionFactor)) << 8)
-      | static_cast<std::uint16_t> (readRepeatedByte (
-          symbols,
-          lengthOffset + static_cast<std::size_t> (repetitionFactor),
-          repetitionFactor)));
-
-  std::size_t const payloadOffset = lengthOffset + lengthSymbols;
-  std::size_t const requiredSymbols = payloadOffset - start
-      + static_cast<std::size_t> (length) * static_cast<std::size_t> (repetitionFactor);
-  if (symbols.size () < start + requiredSymbols)
-    {
-      setError (error, "W2300 symbol stream is truncated");
-      return false;
-    }
-
-  info->mode = mode;
-  info->repetitionFactor = repetitionFactor;
-  info->packetLength = length;
-  info->payloadOffset = payloadOffset;
-  info->requiredSymbols = requiredSymbols;
   return true;
 }
 
@@ -1020,6 +1450,195 @@ std::uint8_t angleToDibit (double angle, double* quality)
   return best;
 }
 
+std::vector<double> const& w2300ResidualCfoSearchHz ()
+{
+  static std::vector<double> const offsets = [] {
+    std::vector<double> values;
+    values.reserve (45);
+    values.push_back (0.0);
+    for (int hz = 1; hz <= 16; ++hz)
+      {
+        values.push_back (static_cast<double> (hz));
+        values.push_back (-static_cast<double> (hz));
+      }
+    for (double hz : {20.0, 25.0, 30.0, 40.0, 50.0, 60.0})
+      {
+        values.push_back (hz);
+        values.push_back (-hz);
+      }
+    return values;
+  } ();
+  return offsets;
+}
+
+std::vector<double> const& w2300DriftSearchHz ()
+{
+  static std::vector<double> const drifts {
+    0.0,
+    3.0, -3.0,
+    5.0, -5.0,
+    10.0, -10.0,
+    15.0, -15.0,
+    25.0, -25.0
+  };
+  return drifts;
+}
+
+unsigned w2300SearchThreadCount (std::size_t phaseCount,
+                                 std::size_t residualOffsetCount,
+                                 bool includeEstimatedOffsets,
+                                 std::size_t driftCount)
+{
+  if (phaseCount < 2u)
+    {
+      return 1u;
+    }
+
+  // Keep the easy path serial. Thread startup is only worthwhile for the
+  // expensive fallback searches where each phase tries many CFO hypotheses.
+  std::size_t const estimatedWork = phaseCount
+      * std::max<std::size_t> (1u,
+                               residualOffsetCount
+                                   + (includeEstimatedOffsets ? 6u : 0u))
+      * std::max<std::size_t> (1u, driftCount);
+  if (estimatedWork < 96u)
+    {
+      return 1u;
+    }
+
+  unsigned available = std::thread::hardware_concurrency ();
+  if (available == 0u)
+    {
+      available = 1u;
+    }
+  return static_cast<unsigned> (std::min<std::size_t> (
+      phaseCount, static_cast<std::size_t> (available)));
+}
+
+std::vector<std::uint8_t> w2300HeaderTrainingSymbols ()
+{
+  std::vector<std::uint8_t> symbols;
+  symbols.reserve (w2300PreambleSymbols ().size () + w2300SyncSymbols ().size ());
+  symbols.insert (symbols.end (), w2300PreambleSymbols ().begin (), w2300PreambleSymbols ().end ());
+  symbols.insert (symbols.end (), w2300SyncSymbols ().begin (), w2300SyncSymbols ().end ());
+  return symbols;
+}
+
+bool estimateW2300ResidualCfoFromKnownSymbols (
+    std::vector<W2300SymbolState> const& states,
+    std::size_t decisionStart,
+    std::vector<std::uint8_t> const& expectedSymbols,
+    double symbolRate,
+    W2300CfoEstimate* estimate)
+{
+  if (!estimate || expectedSymbols.empty () || symbolRate <= 0.0
+      || states.size () <= decisionStart + expectedSymbols.size ())
+    {
+      return false;
+    }
+
+  double residualSin = 0.0;
+  double residualCos = 0.0;
+  double weightSum = 0.0;
+  for (std::size_t sym = 0; sym < expectedSymbols.size (); ++sym)
+    {
+      std::uint8_t const byte = expectedSymbols[sym];
+      W2300SymbolState const& previous = states[decisionStart + sym];
+      W2300SymbolState const& current = states[decisionStart + sym + 1u];
+      for (std::size_t carrier = 0; carrier < kW2300Subcarriers; ++carrier)
+        {
+          double const iNow = current.i[carrier];
+          double const qNow = current.q[carrier];
+          double const iPrev = previous.i[carrier];
+          double const qPrev = previous.q[carrier];
+          double const dot = iNow * iPrev + qNow * qPrev;
+          double const cross = qNow * iPrev - iNow * qPrev;
+          double const magNow = std::sqrt (iNow * iNow + qNow * qNow);
+          double const magPrev = std::sqrt (iPrev * iPrev + qPrev * qPrev);
+          if (magNow <= 0.0 || magPrev <= 0.0)
+            {
+              continue;
+            }
+
+          int const shift = static_cast<int> ((kW2300Subcarriers - 1u - carrier) * 2u);
+          std::uint8_t const dibit = static_cast<std::uint8_t> ((byte >> shift) & 0x03u);
+          double const measured = std::atan2 (cross, dot);
+          double const residual = wrapPi (measured - phaseDeltaForDibit (dibit));
+          double const weight = clamp01 (std::sqrt (dot * dot + cross * cross) / (magNow * magPrev));
+          residualSin += weight * std::sin (residual);
+          residualCos += weight * std::cos (residual);
+          weightSum += weight;
+        }
+    }
+
+  if (weightSum <= 0.0)
+    {
+      return false;
+    }
+
+  double const averageResidual = std::atan2 (residualSin, residualCos);
+  double const coherence = std::sqrt (residualSin * residualSin + residualCos * residualCos)
+      / weightSum;
+  estimate->offsetHz = averageResidual * symbolRate / (2.0 * kPi);
+  estimate->quality = clamp01 (coherence);
+  return true;
+}
+
+std::vector<double> w2300EstimatedResidualCfoSearchHz (
+    std::vector<W2300SymbolState> const& states,
+    double symbolRate)
+{
+  static std::vector<std::uint8_t> const training = w2300HeaderTrainingSymbols ();
+  std::vector<W2300CfoEstimate> estimates;
+  if (states.size () <= training.size () + 1u)
+    {
+      return {};
+    }
+
+  for (std::size_t start = 0; start + training.size () < states.size (); ++start)
+    {
+      W2300CfoEstimate estimate;
+      if (!estimateW2300ResidualCfoFromKnownSymbols (
+              states, start, training, symbolRate, &estimate)
+          || estimate.quality < 0.72
+          || std::fabs (estimate.offsetHz) > 120.0)
+        {
+          continue;
+        }
+
+      bool duplicate = false;
+      for (W2300CfoEstimate const& existing : estimates)
+        {
+          if (std::fabs (existing.offsetHz - estimate.offsetHz) < 0.75)
+            {
+              duplicate = true;
+              break;
+            }
+        }
+      if (!duplicate)
+        {
+          estimates.push_back (estimate);
+        }
+    }
+
+  std::sort (estimates.begin (), estimates.end (),
+             [] (W2300CfoEstimate const& lhs, W2300CfoEstimate const& rhs) {
+               return lhs.quality > rhs.quality;
+             });
+  if (estimates.size () > 8u)
+    {
+      estimates.resize (8u);
+    }
+
+  std::vector<double> offsets;
+  offsets.reserve (estimates.size ());
+  for (W2300CfoEstimate const& estimate : estimates)
+    {
+      offsets.push_back (estimate.offsetHz);
+    }
+  return offsets;
+}
+
 W2300SymbolState detectW2300SymbolState (std::vector<float> const& wave,
                                          std::size_t start,
                                          int nsps,
@@ -1062,7 +1681,9 @@ std::vector<W2300SymbolState> detectW2300SymbolStates (std::vector<float> const&
 }
 
 std::vector<W2300SymbolDecision> differentialW2300Decisions (
-    std::vector<W2300SymbolState> const& states)
+    std::vector<W2300SymbolState> const& states,
+    double phaseCorrectionRadians,
+    double driftCorrectionRadians)
 {
   std::vector<W2300SymbolDecision> decisions;
   if (states.size () < 2u)
@@ -1071,10 +1692,23 @@ std::vector<W2300SymbolDecision> differentialW2300Decisions (
     }
   decisions.reserve (states.size () - 1u);
 
+  double trackedPhaseAdjustment = 0.0;
+  constexpr double kPhaseLoopGain = 0.08;
+  std::size_t const decisionCount = states.size () - 1u;
   for (std::size_t sym = 1; sym < states.size (); ++sym)
     {
+      double const progress = decisionCount > 1u
+          ? double (sym - 1u) / double (decisionCount - 1u)
+          : 0.0;
+      double const trackedPhaseCorrection = wrapPi (
+          phaseCorrectionRadians
+          + driftCorrectionRadians * progress
+          + trackedPhaseAdjustment);
       std::uint8_t byte = 0;
       double qualitySum = 0.0;
+      double residualSin = 0.0;
+      double residualCos = 0.0;
+      double residualWeight = 0.0;
       for (std::size_t carrier = 0; carrier < kW2300Subcarriers; ++carrier)
         {
           double const iNow = states[sym].i[carrier];
@@ -1086,20 +1720,39 @@ std::vector<W2300SymbolDecision> differentialW2300Decisions (
           double const magNow = std::sqrt (iNow * iNow + qNow * qNow);
           double const magPrev = std::sqrt (iPrev * iPrev + qPrev * qPrev);
           double angularQuality = 0.0;
-          std::uint8_t const dibit = angleToDibit (std::atan2 (cross, dot), &angularQuality);
+          double const correctedAngle =
+              wrapPi (std::atan2 (cross, dot) - trackedPhaseCorrection);
+          std::uint8_t const dibit = angleToDibit (
+              correctedAngle, &angularQuality);
           double magnitudeQuality = 0.0;
           if (magNow > 0.0 && magPrev > 0.0)
             {
               double const normalizedDot = std::sqrt (dot * dot + cross * cross) / (magNow * magPrev);
               magnitudeQuality = clamp01 (normalizedDot);
             }
+          double const qualityWeight = angularQuality * magnitudeQuality;
+          double const residual = wrapPi (
+              correctedAngle - phaseDeltaForDibit (dibit));
+          residualSin += qualityWeight * std::sin (residual);
+          residualCos += qualityWeight * std::cos (residual);
+          residualWeight += qualityWeight;
           byte = static_cast<std::uint8_t> ((byte << 2) | dibit);
-          qualitySum += angularQuality * magnitudeQuality;
+          qualitySum += qualityWeight;
         }
       W2300SymbolDecision decision;
       decision.symbol = byte;
       decision.quality = qualitySum / double (kW2300Subcarriers);
       decisions.push_back (decision);
+
+      // Decision-directed residual phase tracking. This is intentionally slow:
+      // acquisition still comes from the known preamble, while the loop follows
+      // small remaining CFO/drift without letting noisy symbols dominate.
+      if (residualWeight > 0.0 && decision.quality >= 0.45)
+        {
+          double const residual = std::atan2 (residualSin, residualCos);
+          trackedPhaseAdjustment = wrapPi (
+              trackedPhaseAdjustment + kPhaseLoopGain * residual);
+        }
     }
 
   return decisions;
@@ -1133,61 +1786,107 @@ double averageW2300DecisionQuality (std::vector<W2300SymbolDecision> const& deci
   return sum / double (count);
 }
 
-W2300DecodeCandidate extractW2300PacketFromDecisions (
+std::vector<W2300DecodeCandidate> extractW2300PacketCandidatesFromDecisions (
     std::vector<W2300SymbolDecision> const& decisions,
     std::size_t samplePhase,
     int nsps,
+    bool includePhysicalRepairCandidates,
     std::string* error)
 {
-  W2300DecodeCandidate best;
+  std::vector<W2300DecodeCandidate> candidates;
   std::vector<std::uint8_t> const symbols = w2300DecisionSymbols (decisions);
   std::size_t const minimumHeaderSymbols = w2300PreambleSymbols ().size ()
       + w2300SyncSymbols ().size () + kW2300ModeSymbols + kW2300LengthSymbols;
   if (symbols.size () < minimumHeaderSymbols)
     {
-      return best;
+      return candidates;
     }
 
   for (std::size_t start = 0; start + minimumHeaderSymbols <= symbols.size (); ++start)
     {
-      // P1 iu8lmc: filtro di aggancio tollerante (Hamming sui 192 bit
-      // dell'header) al posto del match esatto; early-exit interno tiene lo
-      // scan economico e il CRC a valle elimina i falsi.
+      // Use the tolerant training match as an acquisition filter; internal
+      // early-exit keeps the scan cheap and CRC validation removes false hits.
       if (!w2300HeaderMatchesSoft (symbols, start))
         {
           continue;
         }
 
-      W2300BurstInfo info;
-      if (!parseW2300BurstHeader (symbols, start, &info, error))
+      std::vector<W2300BurstInfo> burstInfos;
+      W2300BurstInfo parsedInfo;
+      std::string headerError;
+      if (parseW2300BurstHeader (symbols, start, &parsedInfo, &headerError))
         {
-          continue;
+          burstInfos.push_back (parsedInfo);
+        }
+      else
+        {
+          if (!headerError.empty ())
+            {
+              setError (error, headerError.c_str ());
+            }
+          for (W2300RateMode mode : w2300RateModes ())
+            {
+              W2300BurstInfo fallbackInfo;
+              if (makeW2300BurstInfoForMode (
+                      symbols, start, mode, &fallbackInfo))
+                {
+                  burstInfos.push_back (fallbackInfo);
+                }
+            }
+          if (burstInfos.empty ())
+            {
+              continue;
+            }
         }
 
-      std::vector<std::uint8_t> burstSymbols (
-          symbols.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (start),
-          symbols.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (start + info.requiredSymbols));
-      std::vector<std::uint8_t> packet;
-      if (w2300SymbolsToPacket (burstSymbols, &packet, error))
+      for (W2300BurstInfo const& info : burstInfos)
         {
-          W2300DecodeCandidate candidate;
-          candidate.ok = true;
-          candidate.packet = packet;
-          candidate.metrics.sampleOffset = samplePhase + start * static_cast<std::size_t> (nsps);
-          candidate.metrics.symbolOffset = start;
-          candidate.metrics.symbolCount = info.requiredSymbols + 1u;
-          candidate.metrics.packetBytes = packet.size ();
-          candidate.metrics.quality = averageW2300DecisionQuality (decisions, start, info.requiredSymbols);
-          candidate.metrics.rateMode = info.mode;
-          candidate.metrics.repetitionFactor = info.repetitionFactor;
-          if (!best.ok || candidate.metrics.quality > best.metrics.quality)
+          std::vector<std::uint8_t> packet;
+          std::vector<double> bitConfidences;
+          if (packetFromW2300BurstInfo (
+                  decisions, info, &packet,
+                  includePhysicalRepairCandidates ? &bitConfidences : nullptr))
             {
-              best = candidate;
+              W2300DecodeCandidate candidate;
+              candidate.ok = true;
+              candidate.packet = packet;
+              candidate.metrics.sampleOffset =
+                  samplePhase + start * static_cast<std::size_t> (nsps);
+              candidate.metrics.symbolOffset = start;
+              candidate.metrics.symbolCount = info.requiredSymbols + 1u;
+              candidate.metrics.packetBytes = packet.size ();
+              candidate.metrics.quality =
+                  averageW2300DecisionQuality (
+                      decisions, start, info.requiredSymbols);
+              candidate.metrics.rateMode = info.mode;
+              candidate.metrics.repetitionFactor = info.repetitionFactor;
+              candidates.push_back (candidate);
+
+              if (includePhysicalRepairCandidates)
+                {
+                  std::vector<std::vector<std::uint8_t> > repairedPackets =
+                      w2300PhysicalRepairPackets (packet, bitConfidences, info);
+                  double repairPenalty = 0.0001;
+                  for (std::vector<std::uint8_t>& repairedPacket : repairedPackets)
+                    {
+                      W2300DecodeCandidate repaired = candidate;
+                      repaired.packet = std::move (repairedPacket);
+                      repaired.metrics.quality =
+                          std::max (0.0, repaired.metrics.quality - repairPenalty);
+                      repairPenalty += 0.0001;
+                      candidates.push_back (std::move (repaired));
+                    }
+                }
             }
         }
     }
 
-  return best;
+  std::sort (candidates.begin (), candidates.end (),
+             [] (W2300DecodeCandidate const& lhs,
+                 W2300DecodeCandidate const& rhs) {
+               return lhs.metrics.quality > rhs.metrics.quality;
+             });
+  return candidates;
 }
 
 void estimateW2300FrequencyMetrics (std::vector<float> const& wave,
@@ -2107,10 +2806,7 @@ std::vector<std::uint8_t> w2300PacketToSymbols (std::vector<std::uint8_t> const&
   std::uint16_t const length = static_cast<std::uint16_t> (packet.size ());
   appendRepeatedByte (symbols, static_cast<std::uint8_t> ((length >> 8) & 0xffu), repetitionFactor);
   appendRepeatedByte (symbols, static_cast<std::uint8_t> (length & 0xffu), repetitionFactor);
-  for (std::uint8_t byte : packet)
-    {
-      appendRepeatedByte (symbols, byte, repetitionFactor);
-    }
+  appendW2300PayloadSymbols (&symbols, packet, mode, repetitionFactor);
   return symbols;
 }
 
@@ -2134,10 +2830,7 @@ bool w2300SymbolsToPacket (std::vector<std::uint8_t> const& symbols,
   packet->reserve (info.packetLength);
   for (std::size_t i = 0; i < info.packetLength; ++i)
     {
-      packet->push_back (readRepeatedByte (
-          symbols,
-          info.payloadOffset + i * static_cast<std::size_t> (info.repetitionFactor),
-          info.repetitionFactor));
+      packet->push_back (readW2300PayloadByte (symbols, info, i));
     }
   return true;
 }
@@ -2148,6 +2841,9 @@ char const* w2300RateModeName (W2300RateMode mode)
     {
     case W2300RateMode::Fast: return "FAST";
     case W2300RateMode::Robust: return "ROBUST";
+    case W2300RateMode::Weak: return "WEAK";
+    case W2300RateMode::Deep: return "DEEP";
+    case W2300RateMode::Ultra: return "ULTRA";
     default: return "UNKNOWN";
     }
 }
@@ -2160,9 +2856,33 @@ int w2300RateModeRepetitionFactor (W2300RateMode mode)
 W2300RateMode recommendedW2300RateMode (W2300DecodeMetrics const& metrics,
                                         unsigned retryCount)
 {
+  if (retryCount > 3u)
+    {
+      return W2300RateMode::Ultra;
+    }
+  if (retryCount > 2u)
+    {
+      return W2300RateMode::Deep;
+    }
+  if (retryCount > 1u)
+    {
+      return W2300RateMode::Weak;
+    }
   if (retryCount > 0u)
     {
       return W2300RateMode::Robust;
+    }
+  if (metrics.quality < 0.18 || std::fabs (metrics.estimatedFrequencyOffsetHz) >= 70.0)
+    {
+      return W2300RateMode::Ultra;
+    }
+  if (metrics.quality < 0.25 || std::fabs (metrics.estimatedFrequencyOffsetHz) >= 55.0)
+    {
+      return W2300RateMode::Deep;
+    }
+  if (metrics.quality < 0.35 || std::fabs (metrics.estimatedFrequencyOffsetHz) >= 40.0)
+    {
+      return W2300RateMode::Weak;
     }
   if (metrics.quality < 0.55 || std::fabs (metrics.estimatedFrequencyOffsetHz) >= 20.0)
     {
@@ -2201,7 +2921,13 @@ W2300WaveformConfig W2300RateController::configForAttempt (
     W2300WaveformConfig const& base) const
 {
   W2300WaveformConfig config = base;
-  config.rateMode = attemptCount > 1 ? W2300RateMode::Robust : m_currentMode;
+  config.rateMode = attemptCount > 4
+      ? W2300RateMode::Ultra
+      : (attemptCount > 3
+      ? W2300RateMode::Deep
+      : (attemptCount > 2
+      ? W2300RateMode::Weak
+      : (attemptCount > 1 ? W2300RateMode::Robust : m_currentMode)));
   return config;
 }
 
@@ -2267,12 +2993,19 @@ bool decodeW2300Waveform (std::vector<float> const& wave,
   return decodeW2300WaveformWithMetrics (wave, packet, nullptr, config, error);
 }
 
-bool decodeW2300WaveformWithMetrics (std::vector<float> const& wave,
-                                     std::vector<std::uint8_t>* packet,
-                                     W2300DecodeMetrics* metrics,
-                                     W2300WaveformConfig const& config,
-                                     std::string* error)
+bool findW2300DecodeCandidate (std::vector<float> const& wave,
+                               W2300WaveformConfig const& config,
+                               bool requirePhysicalFrame,
+                               W2300DecodeSearchResult* result,
+                               std::string* error)
 {
+  if (!result)
+    {
+      setError (error, "missing W2300 decode result output");
+      return false;
+    }
+  *result = W2300DecodeSearchResult {};
+
   if (!validateConfig (config, error))
     {
       return false;
@@ -2287,34 +3020,177 @@ bool decodeW2300WaveformWithMetrics (std::vector<float> const& wave,
     }
 
   W2300DecodeCandidate best;
+  Frame bestFrame;
+  bool haveBestFrame = false;
+  std::string lastCandidateError;
 
-  auto searchWithConfig = [&] (W2300WaveformConfig const& searchConfig) {
-    SubcarrierBasis const basis = makeSubcarrierBasis (nsps, searchConfig);
-    for (std::size_t phase = 0; phase < static_cast<std::size_t> (nsps); ++phase)
+  auto considerCandidate = [&] (W2300PhaseSearchOutcome* outcome,
+                                W2300DecodeCandidate candidate) {
+    if (!outcome)
       {
-        if (wave.size () - phase < (headerSymbols + 1u) * static_cast<std::size_t> (nsps))
+        return;
+      }
+    if (!candidate.ok)
+      {
+        return;
+      }
+
+    Frame decodedFrame;
+    if (requirePhysicalFrame)
+      {
+        std::string physicalError;
+        if (!decodePhysicalPacket (Profile::Wide2300, candidate.packet, &decodedFrame, &physicalError))
           {
-            break;
+            if (!physicalError.empty ())
+              {
+                outcome->lastError = physicalError;
+              }
+            return;
           }
-        std::vector<W2300SymbolState> const states = detectW2300SymbolStates (
-            wave, phase, nsps, basis);
-        std::vector<W2300SymbolDecision> const decisions = differentialW2300Decisions (states);
-        W2300DecodeCandidate candidate = extractW2300PacketFromDecisions (
-            decisions, phase, nsps, error);
-        if (candidate.ok && (!best.ok || candidate.metrics.quality > best.metrics.quality))
+      }
+
+    if (!outcome->candidate.ok
+        || candidate.metrics.quality > outcome->candidate.metrics.quality)
+      {
+        outcome->candidate = candidate;
+        if (requirePhysicalFrame)
           {
-            candidate.metrics.estimatedFrequencyOffsetHz = searchConfig.centerFrequencyHz
-                - config.centerFrequencyHz;
-            candidate.metrics.estimatedCenterFrequencyHz = searchConfig.centerFrequencyHz;
-            best = candidate;
+            outcome->frame = decodedFrame;
+            outcome->hasFrame = true;
           }
       }
   };
 
-  searchWithConfig (config);
+  auto mergeOutcome = [&] (W2300PhaseSearchOutcome const& outcome) {
+    if (!outcome.lastError.empty ())
+      {
+        lastCandidateError = outcome.lastError;
+      }
+    if (!outcome.candidate.ok)
+      {
+        return;
+      }
+    if (!best.ok || outcome.candidate.metrics.quality > best.metrics.quality)
+      {
+        best = outcome.candidate;
+        if (requirePhysicalFrame)
+          {
+            bestFrame = outcome.frame;
+            haveBestFrame = outcome.hasFrame;
+          }
+      }
+  };
+
+  auto searchWithConfig = [&] (W2300WaveformConfig const& searchConfig,
+                               std::vector<double> const& residualOffsetsHz,
+                               std::vector<double> const& driftSearchHz,
+                               bool includeEstimatedOffsets) {
+    SubcarrierBasis const basis = makeSubcarrierBasis (nsps, searchConfig);
+    std::size_t const minimumSamples =
+        (headerSymbols + 1u) * static_cast<std::size_t> (nsps);
+    std::size_t const phaseCount = std::min<std::size_t> (
+        static_cast<std::size_t> (nsps), wave.size () - minimumSamples + 1u);
+    if (phaseCount == 0u)
+      {
+        return;
+      }
+
+    auto searchPhaseRange = [&] (std::size_t beginPhase,
+                                 std::size_t endPhase) {
+      W2300PhaseSearchOutcome outcome;
+      for (std::size_t phase = beginPhase; phase < endPhase; ++phase)
+        {
+          std::vector<W2300SymbolState> const states =
+              detectW2300SymbolStates (wave, phase, nsps, basis);
+          std::vector<double> offsetCandidates = residualOffsetsHz;
+          if (includeEstimatedOffsets)
+            {
+              std::vector<double> estimatedOffsets =
+                  w2300EstimatedResidualCfoSearchHz (
+                      states, searchConfig.symbolRate);
+              offsetCandidates.insert (
+                  offsetCandidates.end (), estimatedOffsets.begin (),
+                  estimatedOffsets.end ());
+            }
+          for (double const residualOffsetHz : offsetCandidates)
+            {
+              double const phaseCorrection =
+                  2.0 * kPi * residualOffsetHz / searchConfig.symbolRate;
+              for (double const driftHz : driftSearchHz)
+                {
+                  double const driftCorrection =
+                      2.0 * kPi * driftHz / searchConfig.symbolRate;
+                  std::vector<W2300SymbolDecision> const decisions =
+                      differentialW2300Decisions (
+                          states, phaseCorrection, driftCorrection);
+                  std::string candidateError;
+                  std::vector<W2300DecodeCandidate> candidates =
+                      extractW2300PacketCandidatesFromDecisions (
+                          decisions, phase, nsps, requirePhysicalFrame,
+                          &candidateError);
+                  if (!candidateError.empty ())
+                    {
+                      outcome.lastError = candidateError;
+                    }
+                  for (W2300DecodeCandidate candidate : candidates)
+                    {
+                      double const totalOffset = searchConfig.centerFrequencyHz
+                          - config.centerFrequencyHz + residualOffsetHz;
+                      candidate.metrics.estimatedFrequencyOffsetHz = totalOffset;
+                      candidate.metrics.estimatedCenterFrequencyHz =
+                          config.centerFrequencyHz + totalOffset;
+                      considerCandidate (&outcome, candidate);
+                    }
+                }
+            }
+        }
+      return outcome;
+    };
+
+    unsigned const threadCount = w2300SearchThreadCount (
+        phaseCount, residualOffsetsHz.size (), includeEstimatedOffsets,
+        driftSearchHz.size ());
+    if (threadCount <= 1u)
+      {
+        mergeOutcome (searchPhaseRange (0u, phaseCount));
+        return;
+      }
+
+    std::vector<std::future<W2300PhaseSearchOutcome> > futures;
+    futures.reserve (threadCount);
+    std::size_t const chunk =
+        (phaseCount + static_cast<std::size_t> (threadCount) - 1u)
+        / static_cast<std::size_t> (threadCount);
+    for (std::size_t begin = 0u; begin < phaseCount; begin += chunk)
+      {
+        std::size_t const end = std::min<std::size_t> (phaseCount, begin + chunk);
+        futures.push_back (std::async (
+            std::launch::async, searchPhaseRange, begin, end));
+      }
+    for (std::future<W2300PhaseSearchOutcome>& future : futures)
+      {
+        mergeOutcome (future.get ());
+      }
+  };
+
+  static std::vector<double> const noResidualCfo {0.0};
+  static std::vector<double> const noDrift {0.0};
+  searchWithConfig (config, noResidualCfo, noDrift, false);
   if (!best.ok)
     {
-      for (double offset : {10.0, -10.0, 20.0, -20.0, 30.0, -30.0})
+      searchWithConfig (config, w2300ResidualCfoSearchHz (), noDrift, true);
+    }
+  if (!best.ok)
+    {
+      searchWithConfig (
+          config, w2300ResidualCfoSearchHz (), w2300DriftSearchHz (), true);
+    }
+  if (!best.ok)
+    {
+      for (double offset : {5.0, -5.0, 10.0, -10.0, 15.0, -15.0,
+                            20.0, -20.0, 25.0, -25.0, 30.0, -30.0,
+                            35.0, -35.0, 40.0, -40.0, 45.0, -45.0,
+                            50.0, -50.0, 55.0, -55.0, 60.0, -60.0})
         {
           W2300WaveformConfig searchConfig = config;
           searchConfig.centerFrequencyHz += offset;
@@ -2323,7 +3199,48 @@ bool decodeW2300WaveformWithMetrics (std::vector<float> const& wave,
             {
               continue;
             }
-          searchWithConfig (searchConfig);
+          searchWithConfig (searchConfig, noResidualCfo, noDrift, false);
+          if (best.ok)
+            {
+              break;
+            }
+        }
+    }
+  if (!best.ok)
+    {
+      for (double offset : {10.0, -10.0, 20.0, -20.0, 30.0, -30.0,
+                            40.0, -40.0, 50.0, -50.0, 60.0, -60.0})
+        {
+          W2300WaveformConfig searchConfig = config;
+          searchConfig.centerFrequencyHz += offset;
+          std::string configError;
+          if (!validateConfig (searchConfig, &configError))
+            {
+              continue;
+            }
+          searchWithConfig (
+              searchConfig, w2300ResidualCfoSearchHz (), noDrift, true);
+          if (best.ok)
+            {
+              break;
+            }
+        }
+    }
+  if (!best.ok)
+    {
+      for (double offset : {10.0, -10.0, 20.0, -20.0, 30.0, -30.0,
+                            40.0, -40.0, 50.0, -50.0, 60.0, -60.0})
+        {
+          W2300WaveformConfig searchConfig = config;
+          searchConfig.centerFrequencyHz += offset;
+          std::string configError;
+          if (!validateConfig (searchConfig, &configError))
+            {
+              continue;
+            }
+          searchWithConfig (
+              searchConfig, w2300ResidualCfoSearchHz (),
+              w2300DriftSearchHz (), true);
           if (best.ok)
             {
               break;
@@ -2333,23 +3250,57 @@ bool decodeW2300WaveformWithMetrics (std::vector<float> const& wave,
 
   if (best.ok)
     {
+      double const acquisitionOffsetHz = best.metrics.estimatedFrequencyOffsetHz;
+      double const acquisitionCenterHz = best.metrics.estimatedCenterFrequencyHz;
       estimateW2300FrequencyMetrics (wave, best.packet, config, nsps, &best.metrics);
+      if (std::fabs (acquisitionOffsetHz) >= 1.0)
+        {
+          best.metrics.estimatedFrequencyOffsetHz = acquisitionOffsetHz;
+          best.metrics.estimatedCenterFrequencyHz = acquisitionCenterHz;
+        }
       best.metrics.rawBitRate = config.symbolRate * 8.0;
       best.metrics.payloadBitRate = best.metrics.rawBitRate
           / double (std::max (1, best.metrics.repetitionFactor));
-      if (packet)
+      result->candidate = best;
+      if (requirePhysicalFrame)
         {
-          *packet = best.packet;
-        }
-      if (metrics)
-        {
-          *metrics = best.metrics;
+          result->frame = bestFrame;
+          result->hasFrame = haveBestFrame;
         }
       return true;
     }
 
-  setError (error, "W2300 burst not found");
+  if (lastCandidateError.empty ())
+    {
+      setError (error, "W2300 burst not found");
+    }
+  else
+    {
+      setError (error, lastCandidateError.c_str ());
+    }
   return false;
+}
+
+bool decodeW2300WaveformWithMetrics (std::vector<float> const& wave,
+                                     std::vector<std::uint8_t>* packet,
+                                     W2300DecodeMetrics* metrics,
+                                     W2300WaveformConfig const& config,
+                                     std::string* error)
+{
+  W2300DecodeSearchResult result;
+  if (!findW2300DecodeCandidate (wave, config, false, &result, error))
+    {
+      return false;
+    }
+  if (packet)
+    {
+      *packet = result.candidate.packet;
+    }
+  if (metrics)
+    {
+      *metrics = result.candidate.metrics;
+    }
+  return true;
 }
 
 std::vector<float> generateW2300FrameWaveform (Frame const& frame,
@@ -2383,12 +3334,20 @@ bool decodeW2300FrameWaveformWithMetrics (std::vector<float> const& wave,
                                           W2300WaveformConfig const& config,
                                           std::string* error)
 {
-  std::vector<std::uint8_t> packet;
-  if (!decodeW2300WaveformWithMetrics (wave, &packet, metrics, config, error))
+  W2300DecodeSearchResult result;
+  if (!findW2300DecodeCandidate (wave, config, true, &result, error))
     {
       return false;
     }
-  return decodePhysicalPacket (Profile::Wide2300, packet, frame, error);
+  if (frame)
+    {
+      *frame = result.frame;
+    }
+  if (metrics)
+    {
+      *metrics = result.candidate.metrics;
+    }
+  return result.hasFrame;
 }
 
 }
