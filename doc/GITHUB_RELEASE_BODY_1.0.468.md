@@ -29,6 +29,8 @@ Release 1.0.468 focuses on FT2-Link live radio diagnostics, macOS legacy audio c
 - Added HELLO retry scheduling for radio handshakes so a connection attempt is not limited to a single unanswered transmission.
 - Added retry timing and timeout diagnostics for pending HELLO sessions.
 - Cleared HELLO retry state when a session is acknowledged or closed.
+- Moved HELLO and live outbound retry timers onto a wall-clock scheduling base so retries are not triggered early by synthetic or externally supplied logical timestamps.
+- Preserved application TX metadata across adaptive retry replans, including chat, file, form, mail, BBS, and broadcast identifiers.
 
 ## Logging and release behavior
 

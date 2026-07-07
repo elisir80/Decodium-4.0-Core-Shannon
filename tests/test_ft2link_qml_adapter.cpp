@@ -4249,6 +4249,7 @@ private Q_SLOTS:
     QVERIFY (!bulletin.isEmpty ());
     QCOMPARE (bulletin.value ("state").toString (),
               QStringLiteral ("Delivered"));
+    radioA.clear ();
 
     stationA.setRadioTxArmed (true);
     QVERIFY (stationA.transmitBroadcastRadio (
