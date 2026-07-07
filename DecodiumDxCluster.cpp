@@ -1195,12 +1195,19 @@ void DecodiumDxCluster::onError(QAbstractSocket::SocketError socketError)
     }
     bool const willReconnect = wasConnected && !m_manualDisconnect;
     if (willReconnect) {
+        // 1.0.470 iu8lmc — niente popup modale se c'e' auto-reconnect in corso.
+        // Prima onError emetteva SEMPRE errorOccurred() (popup "DX Cluster /
+        // Errore socket: The remote host closed the connection") anche quando il
+        // server chiudeva la connessione e l'app si stava gia' riconnettendo da
+        // sola (10s) → interrompeva l'utente in mezzo a un QSO. Ora la
+        // disconnessione temporanea usa solo lo statusUpdate non-invasivo emesso
+        // da scheduleReconnect(); il popup resta SOLO per errori fatali senza
+        // reconnect (ramo else), coerente con onDisconnected().
         scheduleReconnect(msg);
-    }
-    if (!willReconnect) {
+    } else {
         setLastStatus(tr("Error: %1").arg(msg));
+        emit errorOccurred(tr("Socket error: %1").arg(msg));
     }
-    emit errorOccurred(tr("Socket error: %1").arg(msg));
 }
 
 // ---------------------------------------------------------------------------
