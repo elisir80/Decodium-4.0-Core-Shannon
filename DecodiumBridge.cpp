@@ -37937,8 +37937,18 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
     m_audioLevel = rms;
     emit audioLevelChanged();
     handleAudioHealth(rms, peak, dynamicRange, clippedSamples, samples.size());
-    emit ft2LinkRxSamplesReady(samples,
-                               static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+    // 1.0.469 iu8lmc — FIX busy-loop 91% CPU (thread Ft2LinkDecode gira in
+    // FT8/FT2). Questo emit del path TCI/WebSDR (onTciPcmSamplesReady) era
+    // l'UNICO dei tre feed RX senza gate sul mode: alimentava il worker
+    // FT2-Link in QUALSIASI mode. Dal 1.0.466 (estimateNarrowCenter: 88 iter
+    // su buffer 20s ogni 200ms) su canale WebSDR sempre rumoroso girava a
+    // piena CPU affamando il decode. Ora gated come l'audioSink (38089) e il
+    // legacy (37617): fuori da FT2-Link il worker riceve zero feed.
+    if (isFt2LinkApplicationMode(m_mode) && m_monitoring
+        && !m_transmitting && !m_tuning) {
+        emit ft2LinkRxSamplesReady(samples,
+                                   static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+    }
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (nowMs - m_lastTciAudioLogMs > 5000) {
