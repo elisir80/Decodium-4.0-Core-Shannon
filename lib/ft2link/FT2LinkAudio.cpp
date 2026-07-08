@@ -234,11 +234,6 @@ bool feedToRx (W2300RxAudioBuffer* rxAudio,
     {
       std::size_t const count = std::min (chunkSamples, samples.size () - offset);
       rxAudio->append (sliceSamples (samples, offset, count));
-      std::string ignored;
-      if (rxAudio->decodeNext (decoded, metrics, &ignored))
-        {
-          return true;
-        }
     }
 
   return rxAudio->decodeNext (decoded, metrics, error);
@@ -267,11 +262,6 @@ bool feedToRx (W500RxAudioBuffer* rxAudio,
     {
       std::size_t const count = std::min (chunkSamples, samples.size () - offset);
       rxAudio->append (sliceSamples (samples, offset, count));
-      std::string ignored;
-      if (rxAudio->decodeNext (decoded, metrics, &ignored))
-        {
-          return true;
-        }
     }
 
   return rxAudio->decodeNext (decoded, metrics, error);
