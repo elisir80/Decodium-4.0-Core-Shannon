@@ -47,6 +47,7 @@ class FT2LinkDecodeWorker : public QObject
 
 public:
   explicit FT2LinkDecodeWorker (QObject* parent = nullptr);
+  void setReplayProfileHint (decodium::ft2link::Profile profile);
 
   // Ritorna true se almeno un frame e' stato decodificato nel chunk (valore
   // osservabile solo in modalita' sincrona; in threaded il main riceve i frame
@@ -79,6 +80,9 @@ private:
   std::vector<float> m_narrowRx;
   decodium::ft2link::W500RxAudioBuffer m_w500Rx;
   decodium::ft2link::W2300RxAudioBuffer m_w2300Rx;
+  bool m_hasReplayProfileHint {false};
+  decodium::ft2link::Profile m_replayProfileHint {
+    decodium::ft2link::Profile::Narrow};
   quint64 m_busyUntilMs {0};
   quint64 m_lastDecodeMs {0};
   quint64 m_lastWideDecodeMs {0};

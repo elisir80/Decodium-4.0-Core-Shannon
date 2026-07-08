@@ -384,7 +384,6 @@ std::vector<std::uint8_t> toBytes (QByteArray const& bytes)
 
 constexpr int kRfLabSampleRate = 12000;
 constexpr int kRfLabTxSampleRate = 48000;
-constexpr int kRfLabDefaultChunkSamples = 2400;
 constexpr int kRfLabMaxRecordingSeconds = 20 * 60;
 
 QVariantMap rfLabResult (bool ok, QString const& error = QString {})
@@ -502,21 +501,22 @@ bool writePcm16Wav (QString const& path,
   return true;
 }
 
-QVector<short> resamplePcm16To12k (QVector<short> const& samples,
-                                   int inputSampleRate)
+QVector<short> resamplePcm16ToReplayRate (QVector<short> const& samples,
+                                          int inputSampleRate,
+                                          int replaySampleRate)
 {
-  if (samples.isEmpty () || inputSampleRate <= 0)
+  if (samples.isEmpty () || inputSampleRate <= 0 || replaySampleRate <= 0)
     {
       return {};
     }
-  if (inputSampleRate == kRfLabSampleRate)
+  if (inputSampleRate == replaySampleRate)
     {
       return samples;
     }
 
   qint64 const outCount = qMax<qint64> (
       1, qRound64 (static_cast<double> (samples.size ())
-                   * static_cast<double> (kRfLabSampleRate)
+                   * static_cast<double> (replaySampleRate)
                    / static_cast<double> (inputSampleRate)));
   QVector<short> out;
   out.reserve (static_cast<qsizetype> (outCount));
@@ -524,7 +524,7 @@ QVector<short> resamplePcm16To12k (QVector<short> const& samples,
     {
       double const src =
           static_cast<double> (i) * static_cast<double> (inputSampleRate)
-          / static_cast<double> (kRfLabSampleRate);
+          / static_cast<double> (replaySampleRate);
       qsizetype const lo = qBound<qsizetype> (
           0, static_cast<qsizetype> (std::floor (src)), samples.size () - 1);
       qsizetype const hi = qMin<qsizetype> (lo + 1, samples.size () - 1);
@@ -550,15 +550,24 @@ quint32 readLe32 (QByteArray const& data, qsizetype offset)
 }
 
 bool readPcm16Wav (QString const& path,
-                   QVector<short>* samples12k,
+                   QVector<short>* samples,
                    QVariantMap* info,
+                   int replaySampleRate,
                    QString* error)
 {
-  if (!samples12k)
+  if (!samples)
     {
       if (error)
         {
           *error = QStringLiteral ("missing WAV sample output");
+        }
+      return false;
+    }
+  if (replaySampleRate <= 0)
+    {
+      if (error)
+        {
+          *error = QStringLiteral ("invalid replay sample rate");
         }
       return false;
     }
@@ -654,29 +663,30 @@ bool readPcm16Wav (QString const& path,
                                   / static_cast<double> (channels)), 32767)));
     }
 
-  QVector<short> converted = resamplePcm16To12k (mono, inputSampleRate);
+  QVector<short> converted = resamplePcm16ToReplayRate (
+      mono, inputSampleRate, replaySampleRate);
   if (converted.isEmpty ())
     {
       if (error)
         {
-          *error = QStringLiteral ("WAV produced no 12 kHz samples");
+          *error = QStringLiteral ("WAV produced no replay samples");
         }
       return false;
     }
-  *samples12k = converted;
+  *samples = converted;
   if (info)
     {
       info->insert (QStringLiteral ("path"), QFileInfo {path}.absoluteFilePath ());
       info->insert (QStringLiteral ("inputSampleRate"), inputSampleRate);
       info->insert (QStringLiteral ("inputChannels"), channels);
       info->insert (QStringLiteral ("inputSamples"), mono.size ());
-      info->insert (QStringLiteral ("sampleRate"), kRfLabSampleRate);
+      info->insert (QStringLiteral ("sampleRate"), replaySampleRate);
       info->insert (QStringLiteral ("samples"), converted.size ());
       info->insert (QStringLiteral ("resampled"),
-                    inputSampleRate != kRfLabSampleRate);
+                    inputSampleRate != replaySampleRate);
       info->insert (QStringLiteral ("durationMs"),
                     qRound64 (static_cast<double> (converted.size ()) * 1000.0
-                              / static_cast<double> (kRfLabSampleRate)));
+                              / static_cast<double> (replaySampleRate)));
     }
   return true;
 }
@@ -707,6 +717,46 @@ Profile rfLabProfileFromName (QString const& profileName)
       return Profile::Wide500;
     }
   return Profile::Narrow;
+}
+
+int rfLabSampleRateForProfile (QString const& profileName)
+{
+  return rfLabProfileFromName (profileName) == Profile::Narrow
+      ? kRfLabSampleRate
+      : kRfLabTxSampleRate;
+}
+
+QString rfLabReplayProfileName (QString const& path,
+                                QVariantMap const& options)
+{
+  QString profile = options.value (QStringLiteral ("profile")).toString ()
+      .trimmed ().toUpper ();
+  if (profile.isEmpty ())
+    {
+      profile = options.value (QStringLiteral ("profileName")).toString ()
+          .trimmed ().toUpper ();
+    }
+  if (!profile.isEmpty ())
+    {
+      return profile;
+    }
+
+  QString const fileName = QFileInfo {path}.fileName ().toUpper ();
+  if (fileName.contains (QStringLiteral ("2300")))
+    {
+      return QStringLiteral ("W2300");
+    }
+  if (fileName.contains (QStringLiteral ("500")))
+    {
+      return QStringLiteral ("W500");
+    }
+  if (fileName.contains (QStringLiteral ("NARROW")))
+    {
+      return QStringLiteral ("NARROW");
+    }
+  return options.value (QStringLiteral ("wide"), true).toBool ()
+      ? QStringLiteral ("W2300")
+      : QStringLiteral ("NARROW");
 }
 
 decodium::ft2link::FrameType rfLabFrameTypeFromOptions (
@@ -1255,7 +1305,7 @@ bool buildRfLabWave (QString const& profileName,
   int const sampleRate = qBound (
       kRfLabSampleRate,
       options.value (QStringLiteral ("sampleRate"),
-                     kRfLabTxSampleRate).toInt (),
+                     rfLabSampleRateForProfile (profileName)).toInt (),
       96000);
   double const centerHz =
       options.value (QStringLiteral ("centerHz"), 1500.0).toDouble ();
@@ -7107,7 +7157,9 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
   QString error;
   QVector<short> samples;
   QVariantMap wavInfo;
-  if (!readPcm16Wav (path, &samples, &wavInfo, &error))
+  QString const replayProfileName = rfLabReplayProfileName (path, options);
+  int const replaySampleRate = rfLabSampleRateForProfile (replayProfileName);
+  if (!readPcm16Wav (path, &samples, &wavInfo, replaySampleRate, &error))
     {
       QVariantMap result = rfLabResult (false, error);
       result.insert (QStringLiteral ("path"), path);
@@ -7115,25 +7167,33 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
       return result;
     }
 
-  bool const wideActive = options.value (
-      QStringLiteral ("wide"), true).toBool ();
+  Profile const replayProfile = rfLabProfileFromName (replayProfileName);
+  bool const wideActive = options.contains (QStringLiteral ("wide"))
+      ? options.value (QStringLiteral ("wide")).toBool ()
+      : replayProfile != Profile::Narrow;
   bool const applyToModel = options.value (
       QStringLiteral ("applyToModel"), false).toBool ();
   QString const remoteCall = options.value (
       QStringLiteral ("remoteCall"), QStringLiteral ("RFLAB")).toString ();
+  int const defaultChunkSamples =
+      replayProfile != Profile::Narrow
+      ? qMax (120, static_cast<int> (samples.size ()))
+      : replaySampleRate / 5;
   int const chunkSamples = qMax (
       120, options.value (QStringLiteral ("chunkSamples"),
-                          kRfLabDefaultChunkSamples).toInt ());
+                          defaultChunkSamples).toInt ());
   int const flushMs = qMax (
       0, options.value (QStringLiteral ("flushMs"), 1400).toInt ());
+  bool const decodeAll = options.value (
+      QStringLiteral ("decodeAll"), false).toBool ();
   quint64 nowMs = options.value (QStringLiteral ("startMs"),
                                  1000).toULongLong ();
   if (nowMs == 0u)
     {
       nowMs = 1000u;
     }
-
   FT2LinkDecodeWorker worker;
+  worker.setReplayProfileHint (replayProfile);
   QVariantList decodedFrames;
   int chunkCount = 0;
   double maxRms = 0.0;
@@ -7196,13 +7256,14 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
                     &chunkCount,
                     &nowMs,
                     &remoteCall,
+                    replaySampleRate,
                     wideActive](QVector<short> const& chunk) {
     worker.processChunk (chunk, remoteCall, nowMs, wideActive, !wideActive);
     ++chunkCount;
     quint64 const advance = qMax<quint64> (
         1u, static_cast<quint64> (
             qRound64 (static_cast<double> (chunk.size ()) * 1000.0
-                      / static_cast<double> (kRfLabSampleRate))));
+                      / static_cast<double> (replaySampleRate))));
     nowMs += advance;
   };
 
@@ -7218,10 +7279,16 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
           chunk.push_back (samples[offset + i]);
         }
       feedChunk (chunk);
+      if (!decodeAll && !decodedFrames.isEmpty ())
+        {
+          break;
+        }
     }
   int const flushSamples = qRound (
-      static_cast<double> (flushMs) * kRfLabSampleRate / 1000.0);
-  for (int produced = 0; produced < flushSamples; produced += chunkSamples)
+      static_cast<double> (flushMs) * replaySampleRate / 1000.0);
+  for (int produced = 0;
+       (decodeAll || decodedFrames.isEmpty ()) && produced < flushSamples;
+       produced += chunkSamples)
     {
       QVector<short> silence (
           qMin (chunkSamples, flushSamples - produced), 0);
@@ -7235,6 +7302,7 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
                                     : QString {});
   result.insert (QStringLiteral ("action"), QStringLiteral ("replay"));
   result.insert (QStringLiteral ("path"), QFileInfo {path}.absoluteFilePath ());
+  result.insert (QStringLiteral ("profileName"), replayProfileName);
   result.insert (QStringLiteral ("wav"), wavInfo);
   result.insert (QStringLiteral ("wide"), wideActive);
   result.insert (QStringLiteral ("applyToModel"), applyToModel);
@@ -7246,9 +7314,10 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
   result.insert (QStringLiteral ("maxPeak"), maxPeak);
   setRfLabReport (result, QFileInfo {path}.absoluteFilePath ());
   logFt2LinkDiagnostic (QStringLiteral (
-      "[Ft2Link][RFLAB] replay path=%1 inRate=%2 samples12k=%3 chunks=%4 decoded=%5 maxRms=%6 maxPeak=%7")
+      "[Ft2Link][RFLAB] replay path=%1 inRate=%2 replayRate=%3 samples=%4 chunks=%5 decoded=%6 maxRms=%7 maxPeak=%8")
       .arg (QFileInfo {path}.absoluteFilePath ())
       .arg (wavInfo.value (QStringLiteral ("inputSampleRate")).toInt ())
+      .arg (replaySampleRate)
       .arg (samples.size ())
       .arg (chunkCount)
       .arg (decodedFrames.size ())
@@ -7484,7 +7553,8 @@ QVariantMap FT2LinkQmlAdapter::runRfLabChannelSweep (
                              profile == QStringLiteral ("NARROW")
                              ? QStringLiteral ("BCAST")
                              : QStringLiteral ("DATA"));
-          genOptions.insert (QStringLiteral ("sampleRate"), kRfLabTxSampleRate);
+          genOptions.insert (QStringLiteral ("sampleRate"),
+                             rfLabSampleRateForProfile (profile));
 
           QString const payload = profile == QStringLiteral ("NARROW")
               ? QStringLiteral ("RFLAB%1").arg (total, 2, 10, QLatin1Char ('0'))
@@ -7498,7 +7568,10 @@ QVariantMap FT2LinkQmlAdapter::runRfLabChannelSweep (
               wavPath, profile, payload, genOptions);
 
           QVariantMap replayOptions;
-          replayOptions.insert (QStringLiteral ("wide"), true);
+          replayOptions.insert (QStringLiteral ("profile"), profile);
+          replayOptions.insert (QStringLiteral ("wide"),
+                                rfLabProfileFromName (profile)
+                                != Profile::Narrow);
           replayOptions.insert (QStringLiteral ("applyToModel"), false);
           replayOptions.insert (QStringLiteral ("remoteCall"),
                                 QStringLiteral ("RFLAB"));
@@ -7627,13 +7700,17 @@ QVariantMap FT2LinkQmlAdapter::runRfLabSelfTest (
     {
       QVariantMap genOptions = options;
       genOptions.insert (QStringLiteral ("frameType"), item.frameType);
-      genOptions.insert (QStringLiteral ("sampleRate"), kRfLabTxSampleRate);
+      genOptions.insert (QStringLiteral ("sampleRate"),
+                         rfLabSampleRateForProfile (item.profile));
       QString const wavPath = QDir (dirPath).absoluteFilePath (
           QStringLiteral ("ft2link-rflab-%1.wav").arg (item.name));
       QVariantMap generated = generateRfLabWav (
           wavPath, item.profile, item.text, genOptions);
       QVariantMap replayOptions;
-      replayOptions.insert (QStringLiteral ("wide"), true);
+      replayOptions.insert (QStringLiteral ("profile"), item.profile);
+      replayOptions.insert (QStringLiteral ("wide"),
+                            rfLabProfileFromName (item.profile)
+                            != Profile::Narrow);
       replayOptions.insert (QStringLiteral ("applyToModel"), false);
       replayOptions.insert (QStringLiteral ("remoteCall"),
                             QStringLiteral ("RFLAB"));
@@ -7844,6 +7921,13 @@ FT2LinkDecodeWorker::FT2LinkDecodeWorker (QObject* parent)
 {
 }
 
+void FT2LinkDecodeWorker::setReplayProfileHint (
+    decodium::ft2link::Profile profile)
+{
+  m_hasReplayProfileHint = true;
+  m_replayProfileHint = profile;
+}
+
 bool FT2LinkDecodeWorker::stopRequested () const
 {
   QThread* currentThread = QThread::currentThread ();
@@ -7946,7 +8030,16 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
     }
 
   bool decodedAny = false;
-  m_narrowRx.insert (m_narrowRx.end (), chunk.begin (), chunk.end ());
+  bool const suppressNarrowDecode =
+      m_hasReplayProfileHint && m_replayProfileHint != Profile::Narrow;
+  if (suppressNarrowDecode)
+    {
+      m_narrowRx.clear ();
+    }
+  else
+    {
+      m_narrowRx.insert (m_narrowRx.end (), chunk.begin (), chunk.end ());
+    }
   // Keep only a short pre-roll while idle.  A complete NARROW HELLO/CQ is
   // captured after the busy edge; keeping old idle audio here makes the first
   // acquisition pass scan mostly silence and miss the real burst.
@@ -8046,6 +8139,8 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       finalDecodeWindow ? kMinFinalNarrowDecodeSamples
                         : kMinLiveNarrowDecodeSamples;
   bool const runNarrowDecode =
+      !suppressNarrowDecode
+      &&
       (channelBusy || finalDecodeWindow)
       && narrowDecodeDue
       && m_narrowRx.size () >= narrowDecodeMinSamples;
@@ -8207,6 +8302,10 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
           toByteArray (decodium::ft2link::serializeFrame (decoded)),
           remoteCall,
           nowMs);
+      if (m_hasReplayProfileHint)
+        {
+          break;
+        }
     }
 
   if (decodedNarrowAny)
@@ -8282,6 +8381,10 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
             metrics,
             remoteCall,
             nowMs);
+        if (m_hasReplayProfileHint)
+          {
+            break;
+          }
       }
   };
 
@@ -8311,6 +8414,10 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
             toByteArray (decodium::ft2link::serializeFrame (decoded)),
             remoteCall,
             nowMs);
+        if (m_hasReplayProfileHint)
+          {
+            break;
+          }
       }
   };
 
@@ -8324,6 +8431,14 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
         {
           decodeW2300 ();
         }
+    }
+  else if (m_hasReplayProfileHint && m_replayProfileHint == Profile::Wide500)
+    {
+      decodeW500 ();
+    }
+  else if (m_hasReplayProfileHint && m_replayProfileHint == Profile::Wide2300)
+    {
+      decodeW2300 ();
     }
   else
     {
