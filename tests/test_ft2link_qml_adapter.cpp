@@ -29,18 +29,6 @@ QByteArray frameBytes (decodium::ft2link::Frame const& frame)
       static_cast<int> (wire.size ()));
 }
 
-QVector<short> pcmFromWave (std::vector<float> const& wave)
-{
-  QVector<short> out;
-  out.reserve (static_cast<qsizetype> (wave.size ()));
-  for (float sample : wave)
-    {
-      int const value = qBound (-32768, qRound (sample * 30000.0f), 32767);
-      out.push_back (static_cast<short> (value));
-    }
-  return out;
-}
-
 QVector<short> pcmFromSamples (QVector<float> const& samples, int stride = 1)
 {
   QVector<short> out;
@@ -55,6 +43,34 @@ QVector<short> pcmFromSamples (QVector<float> const& samples, int stride = 1)
       out.push_back (static_cast<short> (value));
   }
   return out;
+}
+
+bool ingestWideSamples (FT2LinkQmlAdapter& receiver,
+                        QVector<float> const& samples,
+                        QString const& remoteCall,
+                        quint64 nowMs)
+{
+  if (receiver.ingestRxSamples (pcmFromSamples (samples), remoteCall, nowMs))
+    {
+      return true;
+    }
+  QVector<short> trailingSilence;
+  trailingSilence.fill (0, 32000);
+  return receiver.ingestRxSamples (trailingSilence, remoteCall, nowMs + 3000u);
+}
+
+bool ingestWideWave (FT2LinkQmlAdapter& receiver,
+                     std::vector<float> const& wave,
+                     QString const& remoteCall,
+                     quint64 nowMs)
+{
+  QVector<float> samples;
+  samples.reserve (static_cast<qsizetype> (wave.size ()));
+  for (float sample : wave)
+    {
+      samples.push_back (sample);
+    }
+  return ingestWideSamples (receiver, samples, remoteCall, nowMs);
 }
 
 QString hexUtf8 (QString const& text)
@@ -114,13 +130,22 @@ bool deliverRadioRequest (QSignalSpy& spy,
                           int timeoutMs = 10000)
 {
   QVector<float> samples;
-  if (!takeRadioRequest (spy, &samples, plan, nullptr, timeoutMs))
+  QVariantMap localPlan;
+  QVariantMap* effectivePlan = plan ? plan : &localPlan;
+  if (!takeRadioRequest (spy, &samples, effectivePlan, nullptr, timeoutMs))
     {
       return false;
     }
+  QString const profile = effectivePlan->value (
+      QStringLiteral ("profileName")).toString ();
+  bool const wide = profile == QStringLiteral ("W2300")
+      || profile == QStringLiteral ("W500");
+  if (wide)
+    {
+      return ingestWideSamples (receiver, samples, QString {}, nowMs);
+    }
   return receiver.ingestRxSamples (pcmFromSamples (samples, 4),
-                                   QString {},
-                                   nowMs);
+                                   QString {}, nowMs);
 }
 
 bool containsMessage (FT2LinkQmlAdapter const& adapter,
@@ -516,7 +541,7 @@ private Q_SLOTS:
               QStringLiteral ("RX radio payload"));
 
     QVERIFY (caller.ingestRadioFrameBytes (
-        frameBytes (data), "K1ABC", 201000, true));
+        frameBytes (data), "K1ABC", 202500, true));
     QCOMPARE (radioRequestSpy.size (), 1);
     messages = caller.messages (sessionId);
     QCOMPARE (messages.size (), 5);
@@ -526,14 +551,15 @@ private Q_SLOTS:
     QByteArray const audioPayload = QByteArrayLiteral ("RX audio decoded");
     audioData.payload.assign (audioPayload.begin (), audioPayload.end ());
     std::string waveformError;
+    decodium::ft2link::W2300WaveformConfig audioConfig;
+    audioConfig.sampleRate = 48000.0;
     std::vector<float> const audioWave =
         decodium::ft2link::generateW2300FrameWaveform (
             audioData,
-            decodium::ft2link::W2300WaveformConfig {},
+            audioConfig,
             &waveformError);
     QVERIFY2 (!audioWave.empty (), waveformError.c_str ());
-    QVERIFY (caller.ingestRxSamples (
-        pcmFromWave (audioWave), "K1ABC", 206000));
+    QVERIFY (ingestWideWave (caller, audioWave, "K1ABC", 206000));
     QTRY_VERIFY_WITH_TIMEOUT (radioRequestSpy.size () >= 2, 3000);
     radioRequestSpy.clear ();
     messages = caller.messages (sessionId);
@@ -3778,13 +3804,14 @@ private Q_SLOTS:
     weakData.payload.assign (weakPayload.begin (), weakPayload.end ());
 
     decodium::ft2link::W2300WaveformConfig weakConfig;
+    weakConfig.sampleRate = 48000.0;
     weakConfig.centerFrequencyHz = 1520.0;
     std::string error;
     std::vector<float> weakWave =
         decodium::ft2link::generateW2300FrameWaveform (
             weakData, weakConfig, &error);
     QVERIFY2 (!weakWave.empty (), error.c_str ());
-    QVERIFY (caller.ingestRxSamples (pcmFromWave (weakWave), "K1ABC", 2500));
+    QVERIFY (ingestWideWave (caller, weakWave, "K1ABC", 2500));
     QVERIFY (metricsSpy.size () >= 1);
     QVariantMap metrics = caller.lastTransportMetrics ();
     QVERIFY (metrics.value ("liveRx").toBool ());
@@ -3806,13 +3833,15 @@ private Q_SLOTS:
             sessionId,
             0u,
             0x0001u);
+    decodium::ft2link::W2300WaveformConfig cleanConfig;
+    cleanConfig.sampleRate = 48000.0;
     std::vector<float> cleanWave =
         decodium::ft2link::generateW2300FrameWaveform (
             cleanAck,
-            decodium::ft2link::W2300WaveformConfig {},
+            cleanConfig,
             &error);
     QVERIFY2 (!cleanWave.empty (), error.c_str ());
-    QVERIFY (caller.ingestRxSamples (pcmFromWave (cleanWave), "K1ABC", 2700));
+    QVERIFY (ingestWideWave (caller, cleanWave, "K1ABC", 2700));
     metrics = caller.lastTransportMetrics ();
     QCOMPARE (metrics.value ("nextW2300RateModeName").toString (),
               QStringLiteral ("FAST"));
@@ -4052,8 +4081,7 @@ private Q_SLOTS:
 
     QVector<float> dataSamples = dataRequest[1].value<QVector<float>> ();
     QVERIFY (!dataSamples.isEmpty ());
-    QVERIFY (stationB.ingestRxSamples (pcmFromSamples (dataSamples, 4),
-                                       QString {}, 5500));
+    QVERIFY (ingestWideSamples (stationB, dataSamples, QString {}, 5500));
     QTRY_VERIFY_WITH_TIMEOUT (radioB.size () >= 1, 10000);
 
     QVERIFY (containsChatLog (stationB,
@@ -4082,8 +4110,7 @@ private Q_SLOTS:
 
     QVector<float> ackSamples = ackRequest[1].value<QVector<float>> ();
     QVERIFY (!ackSamples.isEmpty ());
-    QVERIFY (stationA.ingestRxSamples (pcmFromSamples (ackSamples, 4),
-                                       QString {}, 6600));
+    QVERIFY (ingestWideSamples (stationA, ackSamples, QString {}, 6600));
 
     QVERIFY (containsChatLog (stationA,
                               sessionId,
@@ -4151,8 +4178,7 @@ private Q_SLOTS:
         QStringLiteral ("BCAST AFTER ACK"), 4500));
     QCOMPARE (radioA.size (), 0);
 
-    QVERIFY (stationB.ingestRxSamples (pcmFromSamples (dataSamples, 4),
-                                       QString {}, 5500));
+    QVERIFY (ingestWideSamples (stationB, dataSamples, QString {}, 5500));
     QVERIFY (deliverRadioRequest (radioB, stationA, 6600, &plan));
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("ACK"));
 
@@ -4306,8 +4332,7 @@ private Q_SLOTS:
         29000));
     QVector<float> fileSamples;
     QVERIFY (takeRadioRequest (radioA, &fileSamples, &plan, nullptr, 10000));
-    QVERIFY (stationB.ingestRxSamples (pcmFromSamples (fileSamples, 4),
-                                       QString {}, 30000));
+    QVERIFY (ingestWideSamples (stationB, fileSamples, QString {}, 30000));
     QVERIFY (plan.value ("file").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QVariantMap file = findRecord (
@@ -4328,8 +4353,7 @@ private Q_SLOTS:
     QVERIFY (!file.isEmpty ());
     QCOMPARE (file.value ("state").toString (), QStringLiteral ("Delivered"));
 
-    QVERIFY (stationB.ingestRxSamples (pcmFromSamples (fileSamples, 4),
-                                       QString {}, 90000));
+    QVERIFY (ingestWideSamples (stationB, fileSamples, QString {}, 90000));
     QTRY_VERIFY_WITH_TIMEOUT (radioB.size () >= 1, 10000);
     QVERIFY (takeRadioRequest (radioB, nullptr, &ackPlan, nullptr, 10000));
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
@@ -4345,8 +4369,8 @@ private Q_SLOTS:
         QStringLiteral ("NET"),
         QStringLiteral ("LabBBS"),
         QStringLiteral ("BBS OK"),
-        36000));
-    QVERIFY (deliverRadioRequest (radioA, stationB, 37000, &plan));
+        93000));
+    QVERIFY (deliverRadioRequest (radioA, stationB, 94000, &plan));
     QVERIFY (plan.value ("bulletin").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QVariantMap bulletin = findRecord (
@@ -4358,7 +4382,7 @@ private Q_SLOTS:
               QStringLiteral ("Incoming"));
     QCOMPARE (bulletin.value ("group").toString (), QStringLiteral ("NET"));
     QCOMPARE (bulletin.value ("body").toString (), QStringLiteral ("BBS OK"));
-    QVERIFY (deliverRadioRequest (radioB, stationA, 38000, &ackPlan));
+    QVERIFY (deliverRadioRequest (radioB, stationA, 100000, &ackPlan));
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     bulletin = findRecord (
         stationA.bulletins (),
@@ -4371,8 +4395,8 @@ private Q_SLOTS:
 
     stationA.setRadioTxArmed (true);
     QVERIFY (stationA.transmitBroadcastRadio (
-        QStringLiteral ("LAB BCAST"), 41000));
-    QVERIFY (deliverRadioRequest (radioA, stationB, 42000, &plan));
+        QStringLiteral ("LAB BCAST"), 112000));
+    QVERIFY (deliverRadioRequest (radioA, stationB, 113000, &plan));
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("BCAST"));
     QCOMPARE (plan.value ("profileName").toString (),
               QStringLiteral ("NARROW"));
@@ -4384,12 +4408,12 @@ private Q_SLOTS:
     QCOMPARE (broadcast.value ("source").toString (), QStringLiteral ("RX"));
 
     stationA.setRadioTxArmed (true);
-    QVERIFY (stationA.transmitPingRadio (QStringLiteral ("TESTB"), 43000));
-    QVERIFY (deliverRadioRequest (radioA, stationB, 44000, &plan));
+    QVERIFY (stationA.transmitPingRadio (QStringLiteral ("TESTB"), 126000));
+    QVERIFY (deliverRadioRequest (radioA, stationB, 127000, &plan));
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("PING"));
     QCOMPARE (plan.value ("profileName").toString (),
               QStringLiteral ("NARROW"));
-    QVERIFY (deliverRadioRequest (radioB, stationA, 45000, &ackPlan));
+    QVERIFY (deliverRadioRequest (radioB, stationA, 139000, &ackPlan));
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("PING_ACK"));
     QVariantMap pingReply = findRecord (
         stationA.pingLog (),

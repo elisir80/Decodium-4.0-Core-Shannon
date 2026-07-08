@@ -19,6 +19,8 @@ Release highlights (`1.0.472 -> 1.0.473`):
 - RX failure diagnostics can optionally dump mono 16-bit WAV captures for decoder analysis.
 - wide runtime samples include guard silence around W500/W2300 payloads, improving burst edge handling in real audio paths.
 - W2300 acquisition/decoder diagnostics now expose more useful RX failure and decode context for RF troubleshooting.
+- live W500/W2300 RX now uses the same 48 kHz sample-rate configuration as the application audio path, fixing wide bursts that were visible on the waterfall but not decoded.
+- guarded short W2300 bursts now trim leading runtime silence before acquisition, and W500 opportunistic RX keeps enough buffered audio for long out-of-session broadcasts.
 - FT2-Link waveform and weak-signal work:
 - W2300 decode improvements continue around acquisition, frequency offset handling, drift tolerance, threaded search and deep/ultra-rate retry paths.
 - additional regression coverage exercises W2300 frame round trips, frequency offset correction, chunked audio pipelines and QML adapter behavior.
@@ -32,7 +34,7 @@ Validation performed locally:
 
 - `cmake --build /Users/salvo/Desktop/Decodium4-build --parallel 4 --target decodium_qml test_ft2link test_ft2link_qml_adapter`
 - `test_ft2link` W2300 waveform/symbol mapping/rate-controller subset, including ROBUST, WEAK, DEEP and ULTRA round trips.
-- `test_ft2link_qml_adapter qsyPlanParsesInvitations qsyBroadcastCarriesTargetFrequency`
+- `test_ft2link_qml_adapter` targeted gates for W2300 live round-trip, W500 broadcast RX, live rate adaptation, application payloads, QSY parsing and QSY broadcast metadata.
 - `git diff --check`
 - full two-instance BlackHole 2ch FT2-Link QSY simulation using QSYA/QSYB lab profiles.
 
@@ -67,6 +69,8 @@ Punti principali (`1.0.472 -> 1.0.473`):
 - le diagnostiche RX failure possono opzionalmente salvare capture WAV mono 16-bit per analisi decoder.
 - i sample runtime wide includono silenzio di guardia attorno ai payload W500/W2300, migliorando la gestione dei bordi burst nei percorsi audio reali.
 - diagnostica acquisizione/decoder W2300 arricchita con contesto piu' utile per troubleshooting RF.
+- la RX live W500/W2300 ora usa la stessa configurazione sample-rate a 48 kHz del percorso audio applicativo, correggendo burst wide visibili sul waterfall ma non decodificati.
+- i burst W2300 brevi con guardia runtime rimuovono il silenzio iniziale prima dell'acquisizione, e la RX opportunistica W500 mantiene abbastanza audio per broadcast lunghi fuori sessione.
 - Lavoro waveform e weak-signal FT2-Link:
 - continuano i miglioramenti W2300 su acquisizione, offset frequenza, tolleranza drift, ricerca threaded e retry deep/ultra-rate.
 - nuova copertura regression per round trip frame W2300, correzione offset frequenza, pipeline audio chunked e comportamento QML adapter.
@@ -80,7 +84,7 @@ Validazione locale eseguita:
 
 - `cmake --build /Users/salvo/Desktop/Decodium4-build --parallel 4 --target decodium_qml test_ft2link test_ft2link_qml_adapter`
 - subset `test_ft2link` waveform/symbol mapping/rate-controller W2300, inclusi round trip ROBUST, WEAK, DEEP e ULTRA.
-- `test_ft2link_qml_adapter qsyPlanParsesInvitations qsyBroadcastCarriesTargetFrequency`
+- gate mirati `test_ft2link_qml_adapter` per round-trip live W2300, RX broadcast W500, rate adaptation live, payload applicativi, parsing QSY e metadati broadcast QSY.
 - `git diff --check`
 - simulazione completa FT2-Link QSY con due istanze lab QSYA/QSYB via BlackHole 2ch.
 

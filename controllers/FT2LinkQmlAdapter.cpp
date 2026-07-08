@@ -62,6 +62,22 @@ constexpr int kLocalStoreVersion = 1;
 constexpr int kMaxRelayHopCount = 9;
 constexpr int kMaxTextFilePayloadBytes = 16384;
 constexpr int kAckRepeatCount = 3;
+constexpr double kLiveWideSampleRate = 48000.0;
+
+decodium::ft2link::W500WaveformConfig liveW500RxConfig ()
+{
+  decodium::ft2link::W500WaveformConfig config;
+  config.sampleRate = kLiveWideSampleRate;
+  return config;
+}
+
+decodium::ft2link::W2300WaveformConfig liveW2300RxConfig ()
+{
+  decodium::ft2link::W2300WaveformConfig config;
+  config.sampleRate = kLiveWideSampleRate;
+  config.rateMode = W2300RateMode::Fast;
+  return config;
+}
 
 void logFt2LinkDiagnostic (QString const& message)
 {
@@ -7823,6 +7839,8 @@ void FT2LinkQmlAdapter::onWorkerW2300FrameDecoded (
 
 FT2LinkDecodeWorker::FT2LinkDecodeWorker (QObject* parent)
   : QObject {parent}
+  , m_w500Rx {liveW500RxConfig ()}
+  , m_w2300Rx {liveW2300RxConfig ()}
 {
 }
 
@@ -8216,9 +8234,9 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   m_w2300Rx.append (chunk);
 
   constexpr std::size_t kIdleWideWindow = 160000u;     // keep one recent RF burst
-  constexpr std::size_t kMaxBufferedRxSamples = 240000u;
+  constexpr std::size_t kMaxBufferedRxSamples = 480000u;
   constexpr std::size_t kOpportunisticW2300Window = 160000u;
-  constexpr std::size_t kMinLiveW2300DecodeSamples = 30000u;
+  constexpr std::size_t kMinLiveW2300DecodeSamples = 48000u;
   constexpr std::size_t kMinFinalW2300DecodeSamples = 24000u;
   m_w500Rx.dropToLastSamples (kMaxBufferedRxSamples);
   m_w2300Rx.dropToLastSamples (
@@ -8332,7 +8350,8 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       m_w2300Rx.clear ();
       emit resyncNeeded ();
     }
-  if ((runNarrowDecode || runWideDecode) && !decodedAny && channelBusy)
+  if ((runNarrowDecode || runWideDecode) && !decodedAny
+      && (channelBusy || finalDecodeWindow))
     {
       logDecodeFailure (nowMs, wideSessionActive, narrowError,
                         w2300Error, w500Error);

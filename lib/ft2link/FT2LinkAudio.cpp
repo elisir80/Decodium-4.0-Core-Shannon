@@ -886,6 +886,37 @@ bool W2300RxAudioBuffer::decodeNext (Frame* frame,
       return false;
     }
 
+  int const nsps = samplesPerSymbol (m_config);
+  if (nsps <= 0)
+    {
+      setError (error, "invalid W2300 RX sample rate");
+      return false;
+    }
+
+  // Runtime TX/RX paths include a short silent guard before wide bursts.  The
+  // W2300 acquisition is intentionally bounded for CPU reasons, so strip only
+  // clear leading silence.  Keep the resulting start aligned to the decoder's
+  // symbol phase search; cutting into the first symbol makes clean guarded
+  // bursts look like "burst not found".
+  constexpr float kLeadingSilencePeak = 0.000001f;
+  std::size_t firstEnergy = 0u;
+  while (firstEnergy < m_buffer.size ()
+         && std::fabs (m_buffer[firstEnergy]) < kLeadingSilencePeak)
+    {
+      ++firstEnergy;
+    }
+  std::size_t const nspsSize = static_cast<std::size_t> (nsps);
+  std::size_t const drop = firstEnergy > nspsSize
+      ? firstEnergy - (firstEnergy % nspsSize)
+      : 0u;
+  if (drop > 0u)
+    {
+      m_buffer.erase (
+          m_buffer.begin (),
+          m_buffer.begin ()
+              + static_cast<std::vector<float>::difference_type> (drop));
+    }
+
   W2300DecodeMetrics decodedMetrics;
   Frame decodedFrame;
   if (!decodeW2300FrameWaveformWithMetrics (
@@ -894,12 +925,6 @@ bool W2300RxAudioBuffer::decodeNext (Frame* frame,
       return false;
     }
 
-  int const nsps = samplesPerSymbol (m_config);
-  if (nsps <= 0)
-    {
-      setError (error, "invalid W2300 RX sample rate");
-      return false;
-    }
   std::size_t const consumed = std::min (
       m_buffer.size (),
       decodedMetrics.sampleOffset

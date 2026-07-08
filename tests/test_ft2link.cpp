@@ -2328,6 +2328,54 @@ private Q_SLOTS:
     QVERIFY (decoded.payload == plan.frames.front ().payload);
   }
 
+  void wideTxAudioPlanDecodesShortW2300WithRuntimeGuard ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300DecodeMetrics;
+    using decodium::ft2link::W2300RateMode;
+    using decodium::ft2link::W2300RxAudioBuffer;
+    using decodium::ft2link::W2300WaveformConfig;
+    using decodium::ft2link::WideTxAudioPlan;
+    using decodium::ft2link::WideTxAudioPlanOptions;
+
+    std::vector<std::uint8_t> const payload = bytesFromString (
+        "W2300 lab payload");
+
+    WideTxAudioPlanOptions options;
+    options.profile = Profile::Wide2300;
+    options.w2300RateMode = W2300RateMode::Fast;
+    options.sampleRate = 48000.0;
+
+    WideTxAudioPlan const plan = decodium::ft2link::buildWideTxAudioPlan (
+        payload, 0x7000u, options);
+    QVERIFY2 (plan.ok, plan.error.c_str ());
+    QCOMPARE (plan.frames.size (), static_cast<std::size_t> (1));
+
+    std::vector<float> guarded = paddedWave (
+        plan.samples, 5760u, 32000u);
+    for (float& sample : guarded)
+      {
+        int const pcm = qBound (-32768, qRound (sample * 30000.0f), 32767);
+        sample = static_cast<float> (static_cast<short> (pcm)) / 32768.0f;
+      }
+    W2300WaveformConfig config;
+    config.sampleRate = 48000.0;
+    config.rateMode = W2300RateMode::Fast;
+    W2300RxAudioBuffer rx {config};
+    rx.append (guarded);
+
+    Frame decoded;
+    W2300DecodeMetrics metrics;
+    std::string error;
+    QVERIFY2 (rx.decodeNext (&decoded, &metrics, &error), error.c_str ());
+    QCOMPARE (decoded.sessionId, static_cast<std::uint16_t> (0x7000u));
+    QCOMPARE (decoded.sequence, static_cast<std::uint16_t> (0u));
+    QCOMPARE (static_cast<int> (decoded.profile),
+              static_cast<int> (Profile::Wide2300));
+    QVERIFY (decoded.payload == plan.frames.front ().payload);
+  }
+
   void wideTxAudioPlanBuildsDecodableW500At48k ()
   {
     using decodium::ft2link::Frame;
