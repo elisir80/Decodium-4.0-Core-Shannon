@@ -3542,11 +3542,11 @@ quint64 helloRetryDelayMs (unsigned attemptsSent)
     {
     case 0u:
     case 1u:
-      return 15000u;
+      return 45000u;
     case 2u:
-      return 25000u;
+      return 60000u;
     default:
-      return 40000u;
+      return 90000u;
     }
 }
 
@@ -5342,6 +5342,8 @@ bool FT2LinkQmlAdapter::receiveHelloAckBytes (QByteArray const& helloAckBytes,
 
   m_activeSessionId = helloAck.sessionId;
   m_helloRetries.erase (helloAck.sessionId);
+  purgeQueuedHelloRetries (helloAck.sessionId);
+  scheduleHelloRetryCheck (nowMs);
   emit activeSessionChanged ();
   emit sessionsChanged ();
   recordQsoSession (helloAck.sessionId, nowMs, QStringLiteral ("Connected"));
@@ -6892,7 +6894,7 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
                     &nowMs,
                     &remoteCall,
                     wideActive](QVector<short> const& chunk) {
-    worker.processChunk (chunk, remoteCall, nowMs, wideActive);
+    worker.processChunk (chunk, remoteCall, nowMs, wideActive, !wideActive);
     ++chunkCount;
     quint64 const advance = qMax<quint64> (
         1u, static_cast<quint64> (
@@ -7420,8 +7422,7 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
   // FT2LinkDecodeWorker::processChunk. In modalita' sincrona (worker sul main,
   // test) la chiamata e' diretta e la semantica storica e' preservata.
   LinkCapabilities const localCapabilities = m_model.localCapabilities ();
-  bool wideSessionActive =
-      localCapabilities.supportsW500 || localCapabilities.supportsW2300;
+  bool wideSessionActive = false;
   std::vector<AppSession> const sessions = m_model.sessions ();
   for (AppSession const& session : sessions)
     {
@@ -7433,6 +7434,8 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
           break;
         }
     }
+  bool const opportunisticWideDecode = !wideSessionActive
+      && (localCapabilities.supportsW500 || localCapabilities.supportsW2300);
 
   bool result = true;
   if (m_decodeThread.isRunning ())
@@ -7440,16 +7443,19 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
       FT2LinkDecodeWorker* worker = m_decodeWorker;
       QMetaObject::invokeMethod (
           worker,
-          [worker, samples, remoteCall, nowMs, wideSessionActive] {
+          [worker, samples, remoteCall, nowMs, wideSessionActive,
+           opportunisticWideDecode] {
             worker->processChunk (samples, remoteCall, nowMs,
-                                  wideSessionActive);
+                                  wideSessionActive,
+                                  opportunisticWideDecode);
           },
           Qt::QueuedConnection);
     }
   else
     {
       result = m_decodeWorker->processChunk (
-          samples, remoteCall, nowMs, wideSessionActive);
+          samples, remoteCall, nowMs, wideSessionActive,
+          opportunisticWideDecode);
     }
   recordIngestTiming (_ingestStart);
   return result;
@@ -7566,7 +7572,8 @@ void FT2LinkDecodeWorker::logDecodeFailure (quint64 nowMs,
 bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
                                         QString const& remoteCall,
                                         quint64 nowMs,
-                                        bool wideSessionActive)
+                                        bool wideSessionActive,
+                                        bool opportunisticWideDecode)
 {
   if (samples.isEmpty () || stopRequested ())
     {
@@ -7614,17 +7621,39 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
     }
   // 1.0.450 iu8lmc fix (freeze FT2-LINK): su canale MUTO non c'e' alcun frame da
   // decodificare: salta il DSP e tieni una finestra scorrevole del buffer.
-  // 1.0.455: throttle — decodifica al piu' ogni kLiveDecodeThrottleMs (l'audio
+  // 1.0.455: throttle — decodifica al piu' ogni kNarrowDecodeThrottleMs (l'audio
   // continua ad accumularsi); latenza trascurabile per un modo a frame lunghi.
+  // 1.0.471 hotfix: il decode wide e' molto piu' costoso del Narrow. Tenerlo
+  // attivo a pieno rate solo perche' la stazione supporta W500/W2300 satura la
+  // CPU su rumore HF. Wide pieno solo in sessione; fuori sessione resta un
+  // ascolto opportunistico piu' lento per broadcast larghi.
   bool const channelBusy = busyNow (nowMs);
-  constexpr quint64 kLiveDecodeThrottleMs = 200u;
-  bool const decodeDue =
-      (nowMs - m_lastDecodeMs) >= kLiveDecodeThrottleMs
+  constexpr quint64 kNarrowDecodeThrottleMs = 250u;
+  constexpr quint64 kConnectedWideDecodeThrottleMs = 200u;
+  constexpr quint64 kOpportunisticWideDecodeThrottleMs = 5000u;
+  bool const narrowDecodeDue =
+      (nowMs - m_lastDecodeMs) >= kNarrowDecodeThrottleMs
       || nowMs < m_lastDecodeMs;  // guardia wrap/reset del clock
-  bool const runDecode = channelBusy && decodeDue;
-  if (runDecode)
+  bool const runNarrowDecode = channelBusy && narrowDecodeDue;
+  if (runNarrowDecode)
     {
       m_lastDecodeMs = nowMs;
+    }
+  bool const wideDecodeEnabled = wideSessionActive || opportunisticWideDecode;
+  quint64 const wideThrottleMs = wideSessionActive
+      ? kConnectedWideDecodeThrottleMs
+      : kOpportunisticWideDecodeThrottleMs;
+  bool const wideDecodeDue =
+      (nowMs - m_lastWideDecodeMs) >= wideThrottleMs
+      || nowMs < m_lastWideDecodeMs;
+  bool const wideEnergyGate = wideSessionActive
+      ? (m_lastRms >= 0.010 || m_lastPeak >= 0.060)
+      : (m_lastRms >= 0.055 || m_lastPeak >= 0.350);
+  bool const runWideDecode =
+      channelBusy && wideDecodeEnabled && wideDecodeDue && wideEnergyGate;
+  if (runWideDecode)
+    {
+      m_lastWideDecodeMs = nowMs;
     }
   QString narrowError;
   QString w2300Error;
@@ -7637,7 +7666,7 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
               + static_cast<std::vector<float>::difference_type> (
                   m_narrowRx.size () - kIdleNarrowRxSamples));
     }
-  for (int attempt = 0; runDecode && !stopRequested () && attempt < 2; ++attempt)
+  for (int attempt = 0; runNarrowDecode && !stopRequested () && attempt < 2; ++attempt)
     {
       Frame decoded;
       decodium::ft2link::NarrowDecodeMetrics metrics;
@@ -7677,9 +7706,9 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
           nowMs);
     }
 
-  if (!wideSessionActive || stopRequested ())
+  if (!wideDecodeEnabled || stopRequested ())
     {
-      if (runDecode && !decodedAny && channelBusy)
+      if (runNarrowDecode && !decodedAny && channelBusy)
         {
           logDecodeFailure (nowMs, wideSessionActive, narrowError,
                             w2300Error, w500Error);
@@ -7690,68 +7719,98 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   m_w500Rx.append (chunk);
   m_w2300Rx.append (chunk);
 
-  for (int attempt = 0; runDecode && !stopRequested () && attempt < 4; ++attempt)
-    {
-      Frame decoded;
-      decodium::ft2link::W2300DecodeMetrics metrics;
-      std::string decodeError;
-      if (!m_w2300Rx.decodeNext (&decoded, &metrics, &decodeError))
-        {
-          w2300Error = QString::fromStdString (decodeError);
-          break;
-        }
-      decodedAny = true;
-      logFt2LinkDiagnostic (
-          QStringLiteral (
-              "[Ft2Link][RXDECODE] profile=W2300 centerHz=%1 offsetHz=%2"
-              " quality=%3 rate=%4 bytes=%5 sampleOffset=%6 symbols=%7")
-              .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
-              .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
-              .arg (metrics.quality, 0, 'f', 3)
-              .arg (QString::fromLatin1 (
-                  decodium::ft2link::w2300RateModeName (metrics.rateMode)))
-              .arg (metrics.packetBytes)
-              .arg (metrics.sampleOffset)
-              .arg (metrics.symbolCount));
-      emit w2300FrameDecoded (
-          toByteArray (decodium::ft2link::serializeFrame (decoded)),
-          metrics,
-          remoteCall,
-          nowMs);
-    }
+  constexpr std::size_t kIdleWideWindow = 72000u;      // ~finestra corta, no scan
+  constexpr std::size_t kMaxBufferedRxSamples = 240000u;
+  constexpr std::size_t kOpportunisticW2300Window = 96000u;
+  m_w500Rx.dropToLastSamples (kMaxBufferedRxSamples);
+  m_w2300Rx.dropToLastSamples (
+      opportunisticWideDecode ? kOpportunisticW2300Window
+                              : kMaxBufferedRxSamples);
 
-  for (int attempt = 0; runDecode && !stopRequested () && attempt < 4; ++attempt)
+  auto decodeW2300 = [&] {
+    for (int attempt = 0; runWideDecode && !stopRequested () && attempt < 4; ++attempt)
+      {
+        Frame decoded;
+        decodium::ft2link::W2300DecodeMetrics metrics;
+        std::string decodeError;
+        if (!m_w2300Rx.decodeNext (&decoded, &metrics, &decodeError))
+          {
+            w2300Error = QString::fromStdString (decodeError);
+            break;
+          }
+        decodedAny = true;
+        logFt2LinkDiagnostic (
+            QStringLiteral (
+                "[Ft2Link][RXDECODE] profile=W2300 centerHz=%1 offsetHz=%2"
+                " quality=%3 rate=%4 bytes=%5 sampleOffset=%6 symbols=%7")
+                .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
+                .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
+                .arg (metrics.quality, 0, 'f', 3)
+                .arg (QString::fromLatin1 (
+                    decodium::ft2link::w2300RateModeName (metrics.rateMode)))
+                .arg (metrics.packetBytes)
+                .arg (metrics.sampleOffset)
+                .arg (metrics.symbolCount));
+        emit w2300FrameDecoded (
+            toByteArray (decodium::ft2link::serializeFrame (decoded)),
+            metrics,
+            remoteCall,
+            nowMs);
+      }
+  };
+
+  auto decodeW500 = [&] {
+    for (int attempt = 0; runWideDecode && !stopRequested () && attempt < 4; ++attempt)
+      {
+        Frame decoded;
+        decodium::ft2link::W500DecodeMetrics metrics;
+        std::string decodeError;
+        if (!m_w500Rx.decodeNext (&decoded, &metrics, &decodeError))
+          {
+            w500Error = QString::fromStdString (decodeError);
+            break;
+          }
+        decodedAny = true;
+        logFt2LinkDiagnostic (
+            QStringLiteral (
+                "[Ft2Link][RXDECODE] profile=W500 centerHz=%1 offsetHz=%2"
+                " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6")
+                .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
+                .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
+                .arg (metrics.quality, 0, 'f', 3)
+                .arg (metrics.packetBytes)
+                .arg (metrics.sampleOffset)
+                .arg (metrics.symbolCount));
+        emit frameDecoded (
+            toByteArray (decodium::ft2link::serializeFrame (decoded)),
+            remoteCall,
+            nowMs);
+      }
+  };
+
+  bool const likelyLongW500 =
+      opportunisticWideDecode
+      && m_w500Rx.bufferedSamples () > kOpportunisticW2300Window;
+  if (likelyLongW500)
     {
-      Frame decoded;
-      decodium::ft2link::W500DecodeMetrics metrics;
-      std::string decodeError;
-      if (!m_w500Rx.decodeNext (&decoded, &metrics, &decodeError))
+      decodeW500 ();
+      if (!decodedAny)
         {
-          w500Error = QString::fromStdString (decodeError);
-          break;
+          decodeW2300 ();
         }
-      decodedAny = true;
-      logFt2LinkDiagnostic (
-          QStringLiteral (
-              "[Ft2Link][RXDECODE] profile=W500 centerHz=%1 offsetHz=%2"
-              " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6")
-              .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
-              .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
-              .arg (metrics.quality, 0, 'f', 3)
-              .arg (metrics.packetBytes)
-              .arg (metrics.sampleOffset)
-              .arg (metrics.symbolCount));
-      emit frameDecoded (
-          toByteArray (decodium::ft2link::serializeFrame (decoded)),
-          remoteCall,
-          nowMs);
+    }
+  else
+    {
+      decodeW2300 ();
+      if (!decodedAny)
+        {
+          decodeW500 ();
+        }
     }
 
   // 1.0.452 iu8lmc fix (freeze FT2-Link wide): su canale muto finestra
   // scorrevole PRE-decode; il reset 240000 resta come rete di sicurezza per il
   // caso canale-attivo-ma-non-decodifica (garbage/RX resync).
-  constexpr std::size_t kIdleWideWindow = 72000u;      // ~finestra corta, no scan
-  constexpr std::size_t kMaxBufferedRxSamples = 240000u;
   if (!channelBusy)
     {
       m_w500Rx.dropToLastSamples (kIdleWideWindow);
@@ -7765,7 +7824,7 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       m_w2300Rx.clear ();
       emit resyncNeeded ();
     }
-  if (runDecode && !decodedAny && channelBusy)
+  if ((runNarrowDecode || runWideDecode) && !decodedAny && channelBusy)
     {
       logDecodeFailure (nowMs, wideSessionActive, narrowError,
                         w2300Error, w500Error);
@@ -8154,6 +8213,9 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           return false;
         }
       m_activeSessionId = frame.sessionId;
+      m_helloRetries.erase (frame.sessionId);
+      purgeQueuedHelloRetries (frame.sessionId);
+      scheduleHelloRetryCheck (nowMs);
       emit activeSessionChanged ();
       emit sessionsChanged ();
       recordQsoSession (frame.sessionId, nowMs, QStringLiteral ("Connected"));
@@ -17269,6 +17331,41 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
       m_radioTxQueue.push_back (item);
     }
   scheduleRadioQueueDrain (effectiveNow);
+}
+
+void FT2LinkQmlAdapter::purgeQueuedHelloRetries (quint16 sessionId)
+{
+  if (sessionId == 0u || m_radioTxQueue.empty ())
+    {
+      return;
+    }
+
+  bool changed = false;
+  for (std::deque<RadioTxQueueItem>::iterator it = m_radioTxQueue.begin ();
+       it != m_radioTxQueue.end ();)
+    {
+      QString const kind = it->plan.value (QStringLiteral ("kind")).toString ();
+      if (it->sessionId == sessionId
+          && kind.startsWith (QStringLiteral ("HELLO RETRY")))
+        {
+          it = m_radioTxQueue.erase (it);
+          changed = true;
+          continue;
+        }
+      ++it;
+    }
+
+  if (changed)
+    {
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HELLORETRY] purged queued retries for session=%1")
+              .arg (sessionId));
+      if (m_radioTxQueue.empty ())
+        {
+          m_radioTxQueueTimer.stop ();
+        }
+    }
 }
 
 void FT2LinkQmlAdapter::notifyRadioTxFinished ()

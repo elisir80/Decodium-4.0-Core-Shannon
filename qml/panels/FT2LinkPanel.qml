@@ -592,6 +592,34 @@ Rectangle {
                             : ""
     }
 
+    function refreshLivePollState() {
+        syncLocalStation()
+        refreshStations()
+        refreshSessions()
+        refreshStatistics()
+        refreshTypingIndicators()
+    }
+
+    function refreshSlowPollState() {
+        refreshBroadcasts()
+        refreshAlerts()
+        refreshAlertTags()
+        refreshMailbox()
+        refreshForms()
+        refreshFileTransfers()
+        refreshReceivedFiles()
+        refreshBulletins()
+        refreshQsoLog()
+        refreshLogbookOutbox()
+        refreshContactHistory()
+        refreshPingLog()
+        refreshPathReports()
+        refreshBeaconHistory()
+        updateClusterFromRig()
+        refreshPathAnalysis()
+        refreshContactTimeline()
+    }
+
     function logbookStateCount(stateName) {
         var wanted = String(stateName || "")
         var count = 0
@@ -3173,29 +3201,35 @@ Rectangle {
         repeat: true
         onTriggered: {
             root.uiNowMs = Date.now()
-            root.syncLocalStation()
-            root.refreshStations()
-            root.refreshSessions()
-            root.refreshBroadcasts()
-            root.refreshAlerts()
-            root.refreshAlertTags()
-            root.refreshMailbox()
-            root.refreshForms()
-            root.refreshFileTransfers()
-            root.refreshReceivedFiles()
-            root.refreshBulletins()
-            root.refreshQsoLog()
-            root.refreshLogbookOutbox()
-            root.refreshContactHistory()
-            root.refreshPingLog()
-            root.refreshPathReports()
-            root.refreshBeaconHistory()
-            root.updateClusterFromRig()
-            root.refreshPathAnalysis()
-            root.refreshStatistics()
+        }
+    }
+
+    Timer {
+        interval: 5000
+        running: root.visible
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            root.uiNowMs = Date.now()
+            root.refreshLivePollState()
+        }
+    }
+
+    Timer {
+        interval: 15000
+        running: root.visible
+        repeat: true
+        onTriggered: {
+            root.refreshSlowPollState()
+        }
+    }
+
+    Timer {
+        interval: 30000
+        running: root.visible
+        repeat: true
+        onTriggered: {
             root.refreshStoreAudit()
-            root.refreshContactTimeline()
-            root.refreshTypingIndicators()
         }
     }
 

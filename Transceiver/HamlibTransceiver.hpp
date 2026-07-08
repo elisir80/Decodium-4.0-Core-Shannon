@@ -2,6 +2,7 @@
 #define HAMLIB_TRANSCEIVER_HPP_
 
 #include <QString>
+#include <hamlib/rig.h>
 
 #include "TransceiverFactory.hpp"
 #include "PollingTransceiver.hpp"
@@ -43,11 +44,15 @@ private:
   void stop_cat_keep_alive_timer ();
   void poll_cat_keep_alive ();
   void schedule_transmit_telemetry_burst ();
+  bool poll_vfo_frequency (vfo_t, freq_t *, QString const&);
+  void note_frequency_poll_success ();
+  void note_frequency_poll_failure (int, QString const&);
 
   bool ptt_on_ = false;
   bool poll_passive_state_ = true;
   bool poll_frequency_state_ = true;
   bool poll_ptt_state_ = true;
+  bool adaptive_frequency_poll_ = false;
   bool cat_keep_alive_ = false;
   int cat_keep_alive_failures_ = 0;
   QTimer * cat_keep_alive_timer_ {nullptr};
@@ -65,7 +70,13 @@ private:
   static constexpr int kTelemetrySkipRatio_ = 4;
   static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
+  static constexpr int kFrequencyPollMaxFailures_ = 1;
+  static constexpr int kFrequencyPollInitialBackoffTicks_ = 30;
+  static constexpr int kFrequencyPollMaxBackoffTicks_ = 240;
   int telemetry_tick_ = 0;
+  int frequency_poll_failures_ = 0;
+  int frequency_poll_skip_ticks_ = 0;
+  int frequency_poll_backoff_ticks_ = kFrequencyPollInitialBackoffTicks_;
 
   class impl;
   pimpl<impl> m_;

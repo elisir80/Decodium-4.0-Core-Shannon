@@ -54,6 +54,7 @@ Rectangle {
     property bool tuning: false
     property bool decoding: false
     readonly property bool txVisualActive: transmitting || tuning
+    readonly property bool ft2LinkMode: bridge && String(bridge.mode || "").toUpperCase() === "FT2-LINK"
 
     readonly property var themeManager: bridge && bridge.themeManager ? bridge.themeManager : null
     property color accentGreen: themeManager ? themeManager.accentColor : "#00FF88"
@@ -75,7 +76,7 @@ Rectangle {
     readonly property int footerMetricValueWidth: narrowFooter ? 28 : 34
     readonly property int footerButtonHeight: compactFooter ? 26 : 30
     readonly property bool showFooterVersion: width >= 1920
-    readonly property bool showFooterFtThreads: true
+    readonly property bool showFooterFtThreads: !ft2LinkMode
     readonly property bool showFooterSignalDb: width >= 1320
     readonly property bool showFooterDxText: width >= 1550
     readonly property bool showFooterGpuMonitor: gpuMonitorVisible && width >= 1280
@@ -258,7 +259,7 @@ Rectangle {
                 // Pulsing animation when decoding
                 SequentialAnimation on opacity {
                     id: pulseAnimation
-                    running: decLed.ledOn
+                    running: decLed.ledOn && !statusBarComponent.ft2LinkMode && statusBarComponent.visible
                     loops: Animation.Infinite
                     NumberAnimation { to: 0.6; duration: 300 }
                     NumberAnimation { to: 1.0; duration: 300 }
@@ -312,6 +313,8 @@ Rectangle {
                 SequentialAnimation on opacity {
                     id: ftPulseAnimation
                     running: ftThreadsLed.isActive && statusBarComponent.decoding
+                             && !statusBarComponent.ft2LinkMode
+                             && statusBarComponent.visible
                     loops: Animation.Infinite
                     NumberAnimation { to: 0.7; duration: 400 }
                     NumberAnimation { to: 1.0; duration: 400 }

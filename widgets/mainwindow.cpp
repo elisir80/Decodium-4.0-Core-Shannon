@@ -5837,6 +5837,25 @@ void MainWindow::legacySetEmbeddedMode(bool enabled)
     }
 }
 
+void MainWindow::legacySetEmbeddedUiUpdatesEnabled(bool enabled)
+{
+  if (!m_embeddedShellMode)
+    {
+      return;
+    }
+
+  if (enabled)
+    {
+      if (!m_guiTimer.isActive ())
+        {
+          m_guiTimer.start (100);
+        }
+      return;
+    }
+
+  m_guiTimer.stop ();
+}
+
 int MainWindow::effectiveDecodeFmax() const
 {
   if (m_embeddedShellMode || !m_wideGraph)
@@ -5849,6 +5868,7 @@ int MainWindow::effectiveDecodeFmax() const
 
 void MainWindow::legacyShutdownForEmbedding()
 {
+  m_guiTimer.stop ();
   if (upLotw) {
     disconnect(upLotw, nullptr, this, nullptr);
     if (upLotw->state() != QProcess::NotRunning) {

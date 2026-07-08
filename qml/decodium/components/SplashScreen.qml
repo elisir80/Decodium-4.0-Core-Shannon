@@ -30,7 +30,7 @@ Rectangle {
     Timer {
         id: autoClose
         interval: splashDuration
-        running: true
+        running: splashRoot.visible
         repeat: false
         onTriggered: splashRoot.close()
     }
@@ -72,7 +72,7 @@ Rectangle {
                 border.width: 3
 
                 SequentialAnimation on opacity {
-                    running: true; loops: Animation.Infinite
+                    running: splashRoot.visible; loops: Animation.Infinite
                     NumberAnimation { to: 0.3; duration: 900 }
                     NumberAnimation { to: 1.0; duration: 900 }
                 }
@@ -162,7 +162,7 @@ Rectangle {
                     from: 0; to: 320
                     duration: splashRoot.splashDuration - 200
                     easing.type: Easing.InOutQuad
-                    running: true
+                    running: splashRoot.visible
                 }
 
                 // Riflesso scorrevole
@@ -179,7 +179,7 @@ Rectangle {
                         from: -60; to: 320
                         duration: splashRoot.splashDuration - 200
                         easing.type: Easing.InOutQuad
-                        running: true
+                        running: splashRoot.visible
                     }
                 }
             }
@@ -271,6 +271,6 @@ Rectangle {
         from: 0; to: 1
         duration: 350
         easing.type: Easing.OutQuad
-        running: true
+        running: splashRoot.visible
     }
 }

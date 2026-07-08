@@ -54,7 +54,8 @@ public:
   bool processChunk (QVector<short> const& samples,
                      QString const& remoteCall,
                      quint64 nowMs,
-                     bool wideSessionActive);
+                     bool wideSessionActive,
+                     bool opportunisticWideDecode = false);
 
 signals:
   void energyObserved (double rms, double peak, quint64 nowMs);
@@ -80,6 +81,7 @@ private:
   decodium::ft2link::W2300RxAudioBuffer m_w2300Rx;
   quint64 m_busyUntilMs {0};
   quint64 m_lastDecodeMs {0};
+  quint64 m_lastWideDecodeMs {0};
   quint64 m_lastBusyLogMs {0};
   quint64 m_lastRxFailLogMs {0};
   quint64 m_lastNarrowTrimLogMs {0};
@@ -674,6 +676,7 @@ private:
                        bool priority,
                        quint16 sessionId = 0,
                        bool cancelIfNoOutbound = false);
+  void purgeQueuedHelloRetries (quint16 sessionId);
   void drainRadioTxQueue (quint64 nowMs);
   void scheduleRadioQueueDrain (quint64 nowMs);
   void scheduleLiveOutboundRetry (quint16 sessionId,

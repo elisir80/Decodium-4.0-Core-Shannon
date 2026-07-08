@@ -9333,6 +9333,16 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
     return legacyTxBackendRequested() && legacyBackendAvailable();
 }
 
+bool DecodiumBridge::usingLegacyBackendForRx() const
+{
+#if defined(Q_OS_MAC)
+    if (isFt2LinkApplicationMode(m_mode)) {
+        return legacyTxBackendRequested() && legacyBackendAvailable();
+    }
+#endif
+    return usingLegacyBackendForTx();
+}
+
 void DecodiumBridge::notifyMainQmlReady()
 {
     if (m_mainQmlAsyncLoadDone) {
@@ -9488,6 +9498,11 @@ void DecodiumBridge::runPostQmlStartupServices()
 
 bool DecodiumBridge::useModernSpectrumFeedWithLegacy() const
 {
+#if defined(Q_OS_MAC)
+    if (isFt2LinkApplicationMode(m_mode)) {
+        return false;
+    }
+#endif
     // The legacy FT8/FT4 backend must own the input device while it is decoding.
     // Opening a second modern capture for the panadapter can attenuate or disturb
     // USB audio devices on different backends, which lowers decoded SNR.
@@ -9905,7 +9920,7 @@ void DecodiumBridge::syncLegacyBackendDialogState()
 
 void DecodiumBridge::syncLegacyBackendTxState()
 {
-    if (!usingLegacyBackendForTx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
+    if (!usingLegacyBackendForRx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
         return;
     }
 
@@ -9918,7 +9933,7 @@ void DecodiumBridge::scheduleLegacyStateRefreshBurst()
         return;
     }
 
-    if (!usingLegacyBackendForTx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
+    if (!usingLegacyBackendForRx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
         return;
     }
 
@@ -10116,7 +10131,11 @@ void DecodiumBridge::applyDirectVisualAudioCaptureMode(const QString& reason)
 
 void DecodiumBridge::rearmLegacyPcmSpectrumFeed(const QString& reason)
 {
-    if (!usingLegacyBackendForTx()) {
+    if (!usingLegacyBackendForRx()) {
+        return;
+    }
+    if (isFt2LinkApplicationMode(m_mode) && !useModernSpectrumFeedWithLegacy()) {
+        m_legacyPcmSpectrumFeed = false;
         return;
     }
     if (useModernSpectrumFeedWithLegacy() && useDedicatedModernAudioCaptureWithLegacy()) {
@@ -10146,7 +10165,7 @@ void DecodiumBridge::rearmLegacyPcmSpectrumFeed(const QString& reason)
 
 void DecodiumBridge::scheduleLegacyPcmSpectrumRearm(const QString& reason)
 {
-    if (!usingLegacyBackendForTx() || useModernSpectrumFeedWithLegacy()) {
+    if (!usingLegacyBackendForRx() || useModernSpectrumFeedWithLegacy()) {
         return;
     }
 
@@ -10154,7 +10173,7 @@ void DecodiumBridge::scheduleLegacyPcmSpectrumRearm(const QString& reason)
     static constexpr int kRetryDelaysMs[] = {250, 900, 1800, 3500};
     for (int const delayMs : kRetryDelaysMs) {
         QTimer::singleShot(delayMs, this, [this, reason, delayMs, baselineSampleMs]() {
-            if (!m_monitorRequested || !usingLegacyBackendForTx() || useModernSpectrumFeedWithLegacy()) {
+            if (!m_monitorRequested || !usingLegacyBackendForRx() || useModernSpectrumFeedWithLegacy()) {
                 return;
             }
             if (m_transmitting || m_tuning) {
@@ -10175,7 +10194,7 @@ void DecodiumBridge::scheduleLegacyPcmSpectrumRearm(const QString& reason)
 
 void DecodiumBridge::syncLegacyBackendState()
 {
-    if (!usingLegacyBackendForTx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
+    if (!usingLegacyBackendForRx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
         return;
     }
     if (m_syncingLegacyBackendState) {
@@ -10222,6 +10241,7 @@ void DecodiumBridge::syncLegacyBackendState()
             extraSignals();
         }
     };
+    m_legacyBackend->setEmbeddedUiUpdatesEnabled(!isFt2LinkApplicationMode(m_mode));
 #if defined(Q_OS_WIN)
     bool const allowAudioDeviceProbe =
         m_mainQmlReady || qEnvironmentVariableIsSet("DECODIUM_STARTUP_AUDIO_DIAGNOSTICS");
@@ -10246,9 +10266,14 @@ void DecodiumBridge::syncLegacyBackendState()
         || m_bridgeAudioLegacyTxActive
         || m_bridgeAudioTuneActive;
     bool const legacyMonitoringStartPending = m_legacyBackend->monitoringStartPending();
+    bool const ft2LinkLegacyRxRequested =
+        isFt2LinkApplicationMode(m_mode)
+        && m_monitorRequested
+        && usingLegacyBackendForRx();
     bool const effectiveLegacyMonitoring = m_legacyBackend->monitoring()
+        || ft2LinkLegacyRxRequested
         || (m_monitorRequested
-            && usingLegacyBackendForTx()
+            && usingLegacyBackendForRx()
             && (legacyMonitoringStartPending || legacyTxOrTune));
     updateBool(m_monitoring, effectiveLegacyMonitoring, [this]() { emit monitoringChanged(); });
     if (m_monitorRequested && monitorBeforeLegacySync && !m_monitoring) {
@@ -13562,7 +13587,7 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const previousMode = m_mode;
         bool const monitorWasActive = m_monitoring;
         bool const monitorShouldStayActive = monitorWasActive || m_monitorRequested;
-        bool const rearmModernMonitor = monitorWasActive && !usingLegacyBackendForTx();
+        bool const rearmModernMonitor = monitorWasActive && !usingLegacyBackendForRx();
         quint64 const monitorSessionId = monitorShouldStayActive ? ++m_periodTimerSessionId : m_periodTimerSessionId;
         if (rearmModernMonitor && m_periodTimer) {
             m_periodTimer->stop();
@@ -13927,7 +13952,7 @@ void DecodiumBridge::syncAudioDeviceSettingsToLegacyIni()
 
 void DecodiumBridge::applyAudioInputRuntimeChange(const QString& reason)
 {
-    if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("audio input runtime change handled by legacy backend (%1)").arg(reason));
         return;
     }
@@ -16264,7 +16289,7 @@ void DecodiumBridge::startRx()
         return;
     }
 
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForRx()) {
         bridgeLog("startRx: delegating monitoring to legacy backend");
         m_periodTimer->stop();
         m_asyncDecodeTimer->stop();
@@ -16301,11 +16326,17 @@ void DecodiumBridge::startRx()
             m_spectrumBuf.clear();
             m_wfRingPos = 0;
             m_lastPanadapterData.clear();
-            m_legacyPcmSpectrumFeed = true;
+            m_legacyPcmSpectrumFeed = !isFt2LinkApplicationMode(m_mode);
             if (m_spectrumTimer) {
-                m_spectrumTimer->start();
+                if (isFt2LinkApplicationMode(m_mode)) {
+                    m_spectrumTimer->stop();
+                } else {
+                    m_spectrumTimer->start();
+                }
             }
-            bridgeLog("startRx: legacy PCM tap feeds fast QML panadapter");
+            bridgeLog(isFt2LinkApplicationMode(m_mode)
+                          ? QStringLiteral("startRx: FT2-Link legacy RX uses backend waterfall rows for visual panadapter")
+                          : QStringLiteral("startRx: legacy PCM tap feeds fast QML panadapter"));
         }
         emit statusMessage("RX avviato via backend legacy - " + m_mode);
         return;
@@ -16367,7 +16398,7 @@ void DecodiumBridge::stopRx()
     ++m_periodTimerSessionId;
     clearDeferredManualSyncTx(QStringLiteral("stop-rx"));
 
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForRx()) {
         bridgeLog("stopRx: delegating monitoring stop to legacy backend");
         m_periodTimer->stop();
         m_spectrumTimer->stop();
@@ -16428,7 +16459,7 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
     // 1.0.166 — marca timestamp fine TX per hold-off NTP rearm
     m_lastTxEndMs = QDateTime::currentMSecsSinceEpoch();
     const bool legacyPcmTapSingleCapture =
-        usingLegacyBackendForTx()
+        usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
         && !useDedicatedModernAudioCaptureWithLegacy();
     bridgeLog(QStringLiteral("RX resume after TX: reason=%1 wasSuspended=%2 monitor=%3 monitorRequested=%4 soundInput=%5 tci=%6 bufferedBefore=%7 legacyTap=%8")
@@ -16442,14 +16473,14 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
                   .arg(legacyPcmTapSingleCapture ? 1 : 0));
 
     if (!m_monitoring
-        && !(m_monitorRequested && usingLegacyBackendForTx())) {
+        && !(m_monitorRequested && usingLegacyBackendForRx())) {
         if (wasSuspended) {
             bridgeLog(QStringLiteral("SoundInput resume skipped after TX %1: monitor off").arg(reason));
         }
         return;
     }
 
-    if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("post-TX %1").arg(reason));
         scheduleLegacyPcmSpectrumRearm(QStringLiteral("post-TX %1").arg(reason));
         return;
@@ -16508,7 +16539,7 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
             }
 
             const bool legacyPcmTapSingleCapture =
-                usingLegacyBackendForTx()
+                usingLegacyBackendForRx()
                 && useModernSpectrumFeedWithLegacy()
                 && !useDedicatedModernAudioCaptureWithLegacy();
             if (legacyPcmTapSingleCapture) {
@@ -37233,7 +37264,7 @@ void DecodiumBridge::onSpectrumTimer()
         lastThrottleMinMs = -1;
     });
 
-    if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy() && !m_legacyPcmSpectrumFeed) return;
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy() && !m_legacyPcmSpectrumFeed) return;
     if (!m_monitoring) return;
     if (m_transmitting || m_tuning) return;
     bool const remoteWaterfallNeedsCpu =
@@ -37289,7 +37320,7 @@ void DecodiumBridge::onSpectrumTimer()
         if (nowMs - m_lastPanadapterFrameMs > 6000
             && nowMs - m_lastSpectrumRecoveryMs > 12000) {
             m_lastSpectrumRecoveryMs = nowMs;
-            if (m_legacyPcmSpectrumFeed && usingLegacyBackendForTx()) {
+            if (m_legacyPcmSpectrumFeed && usingLegacyBackendForRx()) {
                 rearmLegacyPcmSpectrumFeed(QStringLiteral("waterfall stalled: no legacy PCM samples"));
             } else {
                 restartAudioCaptureFromWatchdog(QStringLiteral("waterfall stalled: no spectrum samples"));
@@ -37697,7 +37728,7 @@ void DecodiumBridge::onLegacyWaterfallRow(QByteArray const& rowLevels,
                                              mode);
         }
 
-    if (!usingLegacyBackendForTx() || rowLevels.isEmpty() || spanHz <= 0)
+    if (!usingLegacyBackendForRx() || rowLevels.isEmpty() || spanHz <= 0)
         {
           return;
         }
@@ -38011,17 +38042,17 @@ void DecodiumBridge::startAudioCapture()
     MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
                                QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
                                    .arg(m_audioInputDevice, m_mode)
-                                   .arg(usingLegacyBackendForTx() ? 1 : 0),
+                                   .arg(usingLegacyBackendForRx() ? 1 : 0),
                                25);
     bridgeLog("startAudioCapture() called");
-    if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
         if (m_monitoring) {
             rearmLegacyPcmSpectrumFeed(QStringLiteral("blocked modern capture start"));
         }
         return;
     }
-    if (usingLegacyBackendForTx()
+    if (usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
         && !useDedicatedModernAudioCaptureWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy PCM tap is the single RX source for Direct Visual"));
@@ -38471,6 +38502,19 @@ void DecodiumBridge::handleAudioHealth(double rms,
         && peak >= kOverdrivePeak
         && rms >= kOverdriveRms;
 
+    // FT2-Link uses a streaming decoder and can legitimately sit on a quiet or
+    // digitally silent input while waiting for a burst. Treating that as a dead
+    // RX path causes repeated capture restarts, especially with virtual cables
+    // during lab tests.
+    if (isFt2LinkApplicationMode(m_mode)
+        && flatBlock
+        && !clippedBlock
+        && !squareLikeBlock
+        && !overdrivenBlock) {
+        m_audioUnhealthyStartMs = 0;
+        return;
+    }
+
     if (overdrivenBlock) {
         if (m_audioOverdriveStartMs == 0) {
             m_audioOverdriveStartMs = now;
@@ -38605,7 +38649,7 @@ void DecodiumBridge::scheduleMonitorRecovery(const QString& reason,
                 return;
             }
 
-            if (usingLegacyBackendForTx()
+            if (usingLegacyBackendForRx()
                 && legacyBackendAvailable()
                 && !m_legacyBackend->monitoring()) {
                 bridgeLog(QStringLiteral("%1: legacy monitor dropped, rearming backend").arg(reason));
@@ -38631,12 +38675,12 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
-    if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("watchdog %1").arg(reason));
         return;
     }
 
-    if (usingLegacyBackendForTx()
+    if (usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
         && !useDedicatedModernAudioCaptureWithLegacy()) {
         bridgeLog(QStringLiteral("Audio watchdog: rearming legacy PCM tap for Direct Visual (%1)").arg(reason));

@@ -1291,7 +1291,7 @@ Item {
                                 readonly property real prefWidth: 90
                                 readonly property string tip: qsTr("Async FT2 mode - sine wave: green=RX, red=TX (default OFF)")
                                 function activate(mouse) {}
-                                running: engine ? (engine.asyncTxEnabled || engine.asyncDecodeEnabled) : false
+                                running: btnVisible && engine && (engine.asyncTxEnabled || engine.asyncDecodeEnabled)
                                 transmitting: engine ? engine.transmitting : false
                                 snr: engine ? engine.asyncSnrDb : -99
                             }

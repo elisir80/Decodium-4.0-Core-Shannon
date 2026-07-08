@@ -245,6 +245,7 @@ private:
                          float dataFreqMax);
     void rebuildRgbWaterfallFromIntensity();
     void logWaterfallRenderPath(bool gpu, const QString& reason);
+    bool consumeUpdateBudgetLocked();
     bool shaderWaterfallSupported();
     bool spectrumGraphSupported() const;
     void updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int h);

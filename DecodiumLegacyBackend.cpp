@@ -1246,6 +1246,13 @@ void DecodiumLegacyBackend::setSuperFoxEnabled(bool enabled)
     }
 }
 
+void DecodiumLegacyBackend::setEmbeddedUiUpdatesEnabled(bool enabled)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetEmbeddedUiUpdatesEnabled(enabled);
+    }
+}
+
 void DecodiumLegacyBackend::applyEmbeddedWidgetTheme()
 {
     if (!m_app) {

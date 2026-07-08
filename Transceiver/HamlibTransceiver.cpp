@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 #include <tuple>
 #include <QByteArray>
 #include <QString>
@@ -537,9 +538,19 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
   bool const force_passive_state = env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
   poll_passive_state_ = !icom_serial_cat || force_passive_state;
   poll_frequency_state_ = !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_FREQ_POLL");
+  adaptive_frequency_poll_ = icom_serial_cat
+      && poll_frequency_state_
+      && !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_FREQ_POLL_BACKOFF");
   poll_ptt_state_ = !is_icom_serial_cat_ptt (m_->model_, params)
       || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PTT");
   cat_keep_alive_ = params.cat_keep_alive && icom_serial_cat;
+  if (adaptive_frequency_poll_)
+    {
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib Icom serial frequency polling uses adaptive backoff"
+        << "initialSkipTicks=" << kFrequencyPollInitialBackoffTicks_
+        << "maxSkipTicks=" << kFrequencyPollMaxBackoffTicks_;
+    }
 
   // m_->rig_->state.obj = this;
 
@@ -980,7 +991,13 @@ int HamlibTransceiver::do_start ()
 #endif
 
   int resolution {0};
-  if (m_->freq_query_works_)
+  if (adaptive_frequency_poll_)
+    {
+      resolution = -1;          // best guess; avoid startup get/set/get probes on fragile CI-V links
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib frequency resolution probe skipped for adaptive Icom serial polling";
+    }
+  else if (m_->freq_query_works_)
     {
       freq_t current_frequency;
       m_->error_check (rig_get_freq (m_->rig_.data (), RIG_VFO_CURR, &current_frequency), tr ("getting current VFO frequency"));
@@ -1023,6 +1040,10 @@ int HamlibTransceiver::do_start ()
   // revert Hamlib cache timeout
   rig_set_cache_timeout_ms (m_->rig_.data (), HAMLIB_CACHE_ALL, orig_cache_timeout);
 #endif
+
+  frequency_poll_failures_ = 0;
+  frequency_poll_skip_ticks_ = 0;
+  frequency_poll_backoff_ticks_ = kFrequencyPollInitialBackoffTicks_;
 
   do_poll ();
   start_cat_keep_alive_timer ();
@@ -1298,6 +1319,66 @@ void HamlibTransceiver::do_mode (MODE mode)
   update_mode (mode);
 }
 
+bool HamlibTransceiver::poll_vfo_frequency (vfo_t vfo, freq_t * frequency, QString const& doing)
+{
+  int const rc = rig_get_freq (m_->rig_.data (), vfo, frequency);
+  if (RIG_OK == rc)
+    {
+      note_frequency_poll_success ();
+      return true;
+    }
+
+  if (-RIG_ENAVAIL == rc || -RIG_ENIMPL == rc)
+    {
+      m_->freq_query_works_ = false;
+      poll_frequency_state_ = false;
+      stop_cat_keep_alive_timer ();
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib frequency polling disabled: rig_get_freq unavailable"
+        << "rc=" << rc
+        << "op=" << doing;
+      return false;
+    }
+
+  note_frequency_poll_failure (rc, doing);
+  return false;
+}
+
+void HamlibTransceiver::note_frequency_poll_success ()
+{
+  if (frequency_poll_failures_ || frequency_poll_skip_ticks_
+      || frequency_poll_backoff_ticks_ != kFrequencyPollInitialBackoffTicks_)
+    {
+      qInfo ().noquote ()
+        << "[CATDBG] Hamlib frequency polling recovered";
+    }
+  frequency_poll_failures_ = 0;
+  frequency_poll_skip_ticks_ = 0;
+  frequency_poll_backoff_ticks_ = kFrequencyPollInitialBackoffTicks_;
+}
+
+void HamlibTransceiver::note_frequency_poll_failure (int rc, QString const& doing)
+{
+  ++frequency_poll_failures_;
+  qWarning ().noquote ()
+    << "[CATDBG] Hamlib frequency poll failed"
+    << frequency_poll_failures_ << "/" << kFrequencyPollMaxFailures_
+    << "rc=" << rc
+    << "op=" << doing;
+
+  if (adaptive_frequency_poll_ && frequency_poll_failures_ >= kFrequencyPollMaxFailures_)
+    {
+      frequency_poll_skip_ticks_ = frequency_poll_backoff_ticks_;
+      frequency_poll_backoff_ticks_ = std::min (kFrequencyPollMaxBackoffTicks_,
+                                                frequency_poll_backoff_ticks_ * 2);
+      frequency_poll_failures_ = 0;
+      qWarning ().noquote ()
+        << "[CATDBG] Hamlib frequency polling backoff after timeout"
+        << "skipTicks=" << frequency_poll_skip_ticks_
+        << "nextSkipTicks=" << frequency_poll_backoff_ticks_;
+    }
+}
+
 void HamlibTransceiver::do_poll ()
 {
   auto * rig = m_->rig_.data ();
@@ -1351,18 +1432,30 @@ void HamlibTransceiver::do_poll ()
         }
     }
 
-  if ((poll_passive_state_ || poll_frequency_state_) && m_->freq_query_works_)
+  bool frequency_poll_due = poll_passive_state_ || poll_frequency_state_;
+  if (adaptive_frequency_poll_ && frequency_poll_skip_ticks_ > 0)
     {
+      --frequency_poll_skip_ticks_;
+      frequency_poll_due = false;
+    }
+
+  if (frequency_poll_due && m_->freq_query_works_)
+    {
+      bool current_frequency_ok = true;
       // only read if possible and when receiving or simplex
       if (!state ().ptt () || !state ().split ())
         {
-          m_->error_check (rig_get_freq (m_->rig_.data (), RIG_VFO_CURR, &f), tr ("getting current VFO frequency"));
-          f = std::round (f);
-          CAT_TRACE ("rig_get_freq frequency=" << Radio::frequency (f));
-          update_rx_frequency (f);
+          current_frequency_ok = poll_vfo_frequency (RIG_VFO_CURR, &f, tr ("getting current VFO frequency"));
+          if (current_frequency_ok)
+            {
+              f = std::round (f);
+              CAT_TRACE ("rig_get_freq frequency=" << Radio::frequency (f));
+              update_rx_frequency (f);
+            }
         }
 
-      if ((WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
+      if (current_frequency_ok
+          && (WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
           && state ().split ()
           && (rig_get_caps_int (m_->model_, RIG_CAPS_TARGETABLE_VFO) & RIG_TARGETABLE_FREQ)
           && !m_->one_VFO_)
@@ -1373,14 +1466,16 @@ void HamlibTransceiver::do_poll ()
 
           // we can only probe current VFO unless rig supports reading
           // the other one directly because we can't glitch the Rx
-          m_->error_check (rig_get_freq (m_->rig_.data ()
-                                         , m_->reversed_
-                                         ? (m_->rig_->state.vfo_list & RIG_VFO_A ? RIG_VFO_A : RIG_VFO_MAIN)
-                                         : (m_->rig_->state.vfo_list & RIG_VFO_B ? RIG_VFO_B : RIG_VFO_SUB)
-                                         , &f), tr ("getting other VFO frequency"));
-          f = std::round (f);
-          CAT_TRACE ("rig_get_freq other VFO=" << f);
-          update_other_frequency (f);
+          if (poll_vfo_frequency (m_->reversed_
+                                  ? (m_->rig_->state.vfo_list & RIG_VFO_A ? RIG_VFO_A : RIG_VFO_MAIN)
+                                  : (m_->rig_->state.vfo_list & RIG_VFO_B ? RIG_VFO_B : RIG_VFO_SUB),
+                                  &f,
+                                  tr ("getting other VFO frequency")))
+            {
+              f = std::round (f);
+              CAT_TRACE ("rig_get_freq other VFO=" << f);
+              update_other_frequency (f);
+            }
         }
     }
 

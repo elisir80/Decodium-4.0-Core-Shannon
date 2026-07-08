@@ -24,6 +24,7 @@ Item {
     property bool showDecodeCallsigns: true
     property var spectrumDecodeLabels: []
     property bool dxClusterRefreshPending: false
+    readonly property bool ft2LinkMode: bridge && String(bridge.mode || "").toUpperCase() === "FT2-LINK"
 
     // Altezza minima/massima del grafico spettro (regolabile tramite drag)
     // 1.0.288 — vincoli rilassati: spettro e cascata ridimensionabili quasi liberamente
@@ -1013,10 +1014,11 @@ Item {
                                      Math.min(waterfallPanel.spectrumHeight,
                                               Math.max(waterfallPanel.spectrumMinHeight,
                                                        waterfallDisplay.height - waterfallPanel.waterfallMinHeight)))
-            // Low CPU mode riattiva un throttle leggero per contenere il render
-            // QML/RHI sui PC datati. A profilo normale resta fluido a pieno rate.
-            throttleActive: bridge.lowCpuModeEnabled
-            throttleIntervalMs: bridge.lowCpuModeEnabled ? 250 : 100
+            // In FT2-Link la demodulazione e il backend legacy non richiedono il
+            // panadapter a pieno frame rate: manteniamo la vista utile, ma evitiamo
+            // render loop continui quando non arrivano nuovi blocchi RF.
+            throttleActive: bridge.lowCpuModeEnabled || waterfallPanel.ft2LinkMode
+            throttleIntervalMs: waterfallPanel.ft2LinkMode ? 500 : (bridge.lowCpuModeEnabled ? 250 : 100)
             // Carica valori da Settings al primo avvio.
             paletteIndex:   0
             contrastLevel:  contrastSlider.value

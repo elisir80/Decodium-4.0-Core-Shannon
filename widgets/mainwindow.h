@@ -255,6 +255,7 @@ public:
   void legacySetRigControlEnabled(bool enabled);
   void legacyRaiseWarning(QString const& title, QString const& summary, QString const& details);
   void legacySetEmbeddedMode(bool enabled);
+  void legacySetEmbeddedUiUpdatesEnabled(bool enabled);
   void legacyRearmMonitoring(QString const& reason);
   void legacyShutdownForEmbedding();
 

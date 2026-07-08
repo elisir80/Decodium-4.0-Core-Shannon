@@ -3413,6 +3413,7 @@ private:
     bool legacyTxBackendRequested() const;
     bool specialOperationRequiresLegacyTx() const;
     bool usingLegacyBackendForTx() const;
+    bool usingLegacyBackendForRx() const;
     bool shouldUseBridgeAudioForLegacyDigitalTx() const;
     bool legacyBridgeAudioTxInFlight() const;
     void mirrorLegacyLoggedAdif(QByteArray const& adif);

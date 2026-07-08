@@ -1984,6 +1984,21 @@ void PanadapterItem::rebuildImages(int w, int h)
 }
 
 // ─── Add spectrum data ───────────────────────────────────────────────────────
+bool PanadapterItem::consumeUpdateBudgetLocked()
+{
+    if (!m_throttleActive) {
+        return true;
+    }
+
+    qint64 const throttleNs = qint64(m_throttleIntervalMs) * 1000 * 1000;
+    qint64 const nowNs = std::chrono::steady_clock::now().time_since_epoch().count();
+    if (nowNs - m_lastUpdateNs < throttleNs) {
+        return false;
+    }
+    m_lastUpdateNs = nowNs;
+    return true;
+}
+
 void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                                       float minDb, float maxDb,
                                       float freqMinHz, float freqMaxHz)
@@ -2089,20 +2104,9 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
     // restano in m_pendingWaterfallRows (max 8 frame) e verranno tutti
     // processati al prossimo updatePaintNode. Così riduciamo il carico
     // main-thread sul render durante slot decode pesanti.
-    bool shouldEmitUpdate = true;
-    if (m_throttleActive) {
-        // 1.0.98: intervallo letto da m_throttleIntervalMs (default 100ms = 10 fps).
-        // QML può alzarlo a 200ms (5 fps) durante FT2 sotto propagazione cattiva
-        // per recuperare il bottleneck GPU/main introdotto dal panadapter
-        // cherry-pickato dall'upstream 1.0.95.
-        const qint64 throttleNs = qint64(m_throttleIntervalMs) * 1000 * 1000;
-        const qint64 nowNs = std::chrono::steady_clock::now().time_since_epoch().count();
-        if (nowNs - m_lastUpdateNs < throttleNs) {
-            shouldEmitUpdate = false;
-        } else {
-            m_lastUpdateNs = nowNs;
-        }
-    }
+    // 1.0.98: intervallo letto da m_throttleIntervalMs (default 100ms = 10 fps).
+    // QML puo' alzarlo in FT2-Link/macOS per evitare render loop continui.
+    bool const shouldEmitUpdate = consumeUpdateBudgetLocked();
     lock.unlock();
     if (shouldEmitUpdate) update();
 }
@@ -2274,6 +2278,7 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
     int const gpuBinEnd = qBound(gpuBinStart, static_cast<int>(nfb / gpuFreqPerBin), kGpuFftN / 2);
     m_gpuFftUiBinsExpected = qMax(0, gpuBinEnd - gpuBinStart);
     m_lastGpuFftFrameMs = monotonicMs();
+    bool const shouldEmitUpdate = consumeUpdateBudgetLocked();
     lock.unlock();
 
     if (!m_loggedGpuFftAccepted) {
@@ -2284,7 +2289,9 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
             << "fallback=FFTW_CPU_on_failure";
         m_loggedGpuFftAccepted = true;
     }
-    update();
+    if (shouldEmitUpdate) {
+        update();
+    }
     return true;
 }
 
@@ -2394,6 +2401,7 @@ bool PanadapterItem::addPcmFrameI16(const short* ring,
     int const gpuBinEnd = qBound(gpuBinStart, static_cast<int>(nfb / gpuFreqPerBin), kGpuFftN / 2);
     m_gpuFftUiBinsExpected = qMax(0, gpuBinEnd - gpuBinStart);
     m_lastGpuFftFrameMs = monotonicMs();
+    bool const shouldEmitUpdate = consumeUpdateBudgetLocked();
     lock.unlock();
 
     if (!m_loggedGpuFftAccepted) {
@@ -2413,7 +2421,9 @@ bool PanadapterItem::addPcmFrameI16(const short* ring,
             << "staging=float_reused";
         m_loggedGpuFftI16Accepted = true;
     }
-    update();
+    if (shouldEmitUpdate) {
+        update();
+    }
     return true;
 }
 

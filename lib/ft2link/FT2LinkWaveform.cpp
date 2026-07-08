@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <future>
 #include <thread>
 
@@ -1494,8 +1495,10 @@ unsigned w2300SearchThreadCount (std::size_t phaseCount,
       return 1u;
     }
 
-  // Keep the easy path serial. Thread startup is only worthwhile for the
-  // expensive fallback searches where each phase tries many CFO hypotheses.
+  // Keep live RX serial by default. Parallel W2300 search is useful in corpus
+  // tests, but std::async workers make shutdown fragile if the app is closed
+  // while a deep acquisition scan is active on HF noise. Operators can opt in
+  // with DECODIUM_FT2LINK_W2300_SEARCH_THREADS=1..8.
   std::size_t const estimatedWork = phaseCount
       * std::max<std::size_t> (1u,
                                residualOffsetCount
@@ -1506,10 +1509,16 @@ unsigned w2300SearchThreadCount (std::size_t phaseCount,
       return 1u;
     }
 
-  unsigned available = std::thread::hardware_concurrency ();
-  if (available == 0u)
+  unsigned available = 1u;
+  if (char const* env = std::getenv ("DECODIUM_FT2LINK_W2300_SEARCH_THREADS"))
     {
-      available = 1u;
+      char* end = nullptr;
+      unsigned long const requested = std::strtoul (env, &end, 10);
+      if (end != env)
+        {
+          available = static_cast<unsigned> (std::max<unsigned long> (
+              1ul, std::min<unsigned long> (8ul, requested)));
+        }
     }
   return static_cast<unsigned> (std::min<std::size_t> (
       phaseCount, static_cast<std::size_t> (available)));
@@ -1645,8 +1654,21 @@ W2300SymbolState detectW2300SymbolState (std::vector<float> const& wave,
                                          SubcarrierBasis const& basis)
 {
   W2300SymbolState state;
+  if (nsps <= 0
+      || start >= wave.size ()
+      || wave.size () - start < static_cast<std::size_t> (nsps)
+      || basis.i.size () < kW2300Subcarriers
+      || basis.q.size () < kW2300Subcarriers)
+    {
+      return state;
+    }
   for (std::size_t carrier = 0; carrier < kW2300Subcarriers; ++carrier)
     {
+      if (basis.i[carrier].size () < static_cast<std::size_t> (nsps)
+          || basis.q[carrier].size () < static_cast<std::size_t> (nsps))
+        {
+          return W2300SymbolState {};
+        }
       double iAcc = 0.0;
       double qAcc = 0.0;
       for (int i = 0; i < nsps; ++i)
@@ -1666,6 +1688,10 @@ std::vector<W2300SymbolState> detectW2300SymbolStates (std::vector<float> const&
                                                        int nsps,
                                                        SubcarrierBasis const& basis)
 {
+  if (nsps <= 0 || sampleOffset >= wave.size ())
+    {
+      return {};
+    }
   std::size_t const symbolCount = (wave.size () - sampleOffset) / static_cast<std::size_t> (nsps);
   std::vector<W2300SymbolState> states;
   states.reserve (symbolCount);
@@ -3086,8 +3112,14 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
                                std::vector<double> const& driftSearchHz,
                                bool includeEstimatedOffsets) {
     SubcarrierBasis const basis = makeSubcarrierBasis (nsps, searchConfig);
+    std::vector<double> const residualOffsets = residualOffsetsHz;
+    std::vector<double> const driftSearch = driftSearchHz;
     std::size_t const minimumSamples =
         (headerSymbols + 1u) * static_cast<std::size_t> (nsps);
+    if (wave.size () < minimumSamples)
+      {
+        return;
+      }
     std::size_t const phaseCount = std::min<std::size_t> (
         static_cast<std::size_t> (nsps), wave.size () - minimumSamples + 1u);
     if (phaseCount == 0u)
@@ -3095,14 +3127,16 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
         return;
       }
 
-    auto searchPhaseRange = [&] (std::size_t beginPhase,
+    auto searchPhaseRange = [&, basis, residualOffsets, driftSearch,
+                             searchConfig, includeEstimatedOffsets] (
+                                 std::size_t beginPhase,
                                  std::size_t endPhase) {
       W2300PhaseSearchOutcome outcome;
       for (std::size_t phase = beginPhase; phase < endPhase; ++phase)
         {
           std::vector<W2300SymbolState> const states =
               detectW2300SymbolStates (wave, phase, nsps, basis);
-          std::vector<double> offsetCandidates = residualOffsetsHz;
+          std::vector<double> offsetCandidates = residualOffsets;
           if (includeEstimatedOffsets)
             {
               std::vector<double> estimatedOffsets =
@@ -3116,7 +3150,7 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
             {
               double const phaseCorrection =
                   2.0 * kPi * residualOffsetHz / searchConfig.symbolRate;
-              for (double const driftHz : driftSearchHz)
+              for (double const driftHz : driftSearch)
                 {
                   double const driftCorrection =
                       2.0 * kPi * driftHz / searchConfig.symbolRate;

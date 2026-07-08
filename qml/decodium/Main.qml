@@ -3085,7 +3085,7 @@ ApplicationWindow {
                     color: secondaryCyan
 
                     SequentialAnimation on x {
-                        running: bridge.pskSearching && bridge && bridge.uiQuality !== "Low"
+                        running: bridge.pskSearching && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         NumberAnimation { to: loadingIndicatorBg.width * 0.7; duration: 800; easing.type: Easing.InOutQuad }
                         NumberAnimation { to: 0; duration: 800; easing.type: Easing.InOutQuad }
@@ -3468,7 +3468,7 @@ ApplicationWindow {
                                 color: bridge.catConnected ? accentGreen : "#555"
 
                                 SequentialAnimation on opacity {
-                                    running: bridge.catConnected && bridge.uiQuality !== "Low"
+                                    running: bridge.catConnected && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                     loops: Animation.Infinite
                                     NumberAnimation { to: 0.4; duration: 800 }
                                     OpacityAnimator { to: 1.0; duration: 800 }
@@ -3697,7 +3697,7 @@ ApplicationWindow {
                             border.width: 1
 
                             SequentialAnimation on opacity {
-                                running: bridge.coherentAvgEnabled && bridge.ledCoherentAveraging && bridge.uiQuality !== "Low"
+                                running: bridge.coherentAvgEnabled && bridge.ledCoherentAveraging && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                 loops: Animation.Infinite
                                 OpacityAnimator { to: 0.5; duration: 400 }
                                 OpacityAnimator { to: 1.0; duration: 400 }
@@ -3732,7 +3732,7 @@ ApplicationWindow {
                             border.width: 1
 
                             SequentialAnimation on opacity {
-                                running: bridge.neuralSyncEnabled && bridge.ledNeuralSync && bridge.uiQuality !== "Low"
+                                running: bridge.neuralSyncEnabled && bridge.ledNeuralSync && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                 loops: Animation.Infinite
                                 OpacityAnimator { to: 0.5; duration: 300 }
                                 OpacityAnimator { to: 1.0; duration: 300 }
@@ -3767,7 +3767,7 @@ ApplicationWindow {
                             border.width: 1
 
                             SequentialAnimation on opacity {
-                                running: bridge.turboFeedbackEnabled && bridge.ledTurboFeedback && bridge.uiQuality !== "Low"
+                                running: bridge.turboFeedbackEnabled && bridge.ledTurboFeedback && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                 loops: Animation.Infinite
                                 OpacityAnimator { to: 0.5; duration: 350 }
                                 OpacityAnimator { to: 1.0; duration: 350 }
@@ -3998,7 +3998,7 @@ ApplicationWindow {
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         SequentialAnimation on opacity {
-                                            running: bridge.monitoring && bridge.uiQuality !== "Low"
+                                            running: bridge.monitoring && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                             loops: Animation.Infinite
                                             OpacityAnimator { to: 0.4; duration: 500 }
                                             OpacityAnimator { to: 1.0; duration: 500 }
@@ -5273,7 +5273,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: waterfallMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: waterfallMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5325,7 +5325,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: logWindowMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: logWindowMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5377,7 +5377,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: astroWindowMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: astroWindowMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5434,7 +5434,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: liveMapMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: liveMapMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5605,7 +5605,7 @@ ApplicationWindow {
                         visible: bridge.filtersBypassed
                         opacity: 1.0
                         SequentialAnimation on opacity {
-                            running: bridge.filtersBypassed && bridge.uiQuality !== "Low"
+                            running: bridge.filtersBypassed && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                             loops: Animation.Infinite
                             OpacityAnimator { to: 0.15; duration: 650 }
                             OpacityAnimator { to: 1.0; duration: 650 }
@@ -5700,7 +5700,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: macroDialogMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: macroDialogMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5752,7 +5752,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: rigControlMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: rigControlMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5805,7 +5805,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: period1Minimized && bridge && bridge.uiQuality !== "Low"
+                        running: period1Minimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5857,7 +5857,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: period2Minimized && bridge && bridge.uiQuality !== "Low"
+                        running: period2Minimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5908,7 +5908,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: rxFreqMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: rxFreqMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -5960,7 +5960,7 @@ ApplicationWindow {
                     ToolTip.delay: 500
 
                     SequentialAnimation on opacity {
-                        running: txPanelMinimized && bridge && bridge.uiQuality !== "Low"
+                        running: txPanelMinimized && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                         loops: Animation.Infinite
                         OpacityAnimator { to: 0.7; duration: 800 }
                         OpacityAnimator { to: 1.0; duration: 800 }
@@ -6452,7 +6452,7 @@ ApplicationWindow {
                             opacity: 0.8
 
                             SequentialAnimation on opacity {
-                                running: waterfallPanel.isDockHighlighted && bridge && bridge.uiQuality !== "Low"
+                                running: waterfallPanel.isDockHighlighted && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                 loops: Animation.Infinite
                                 OpacityAnimator { to: 0.4; duration: 300 }
                                 OpacityAnimator { to: 1.0; duration: 300 }
@@ -6832,7 +6832,7 @@ ApplicationWindow {
                     Timer {
                         id: periodTimer
                         interval: 200  // Update 5 times per second for smooth indicator
-                        running: true
+                        running: !mainWindow.ft2LinkModeActive
                         repeat: true
                         onTriggered: {
                             decodePanel.updatePeriodState()
@@ -6843,7 +6843,7 @@ ApplicationWindow {
                     Timer {
                         id: ledStatusTimer
                         interval: 500  // Update LED status every 500ms
-                        running: true
+                        running: !mainWindow.ft2LinkModeActive
                         repeat: true
                         property int resetCounter: 0
                         onTriggered: {
@@ -7140,7 +7140,7 @@ ApplicationWindow {
                         property real progress: 0.0
                         property real secInPeriod: 0.0
                         property bool isTxPhase: !!(bridge && bridge.transmitting)
-                        property bool timerActive: !!(bridge && (bridge.monitoring || bridge.transmitting || bridge.tuning))
+                        property bool timerActive: !!(bridge && !mainWindow.ft2LinkModeActive && (bridge.monitoring || bridge.transmitting || bridge.tuning))
                         property bool isEvenPeriod: true
                         property string periodLabel: isTxPhase ? "TX" : "RX"
                         onTimerActiveChanged: {
@@ -7479,7 +7479,7 @@ ApplicationWindow {
                                     opacity: 0.8
 
                                     SequentialAnimation on opacity {
-                                        running: period1DockHighlighted && bridge && bridge.uiQuality !== "Low"
+                                        running: period1DockHighlighted && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                         loops: Animation.Infinite
                                         OpacityAnimator { to: 0.4; duration: 300 }
                                         OpacityAnimator { to: 1.0; duration: 300 }
@@ -7525,7 +7525,7 @@ ApplicationWindow {
                                             color: bridge.themeManager.successColor
 
                                             SequentialAnimation on opacity {
-                                                running: decodePanel.isCurrentPeriodEven && bridge && bridge.uiQuality !== "Low"
+                                                running: decodePanel.isCurrentPeriodEven && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                                 loops: Animation.Infinite
                                                 OpacityAnimator { to: 0.3; duration: 500 }
                                                 OpacityAnimator { to: 1.0; duration: 500 }
@@ -7560,7 +7560,7 @@ ApplicationWindow {
                                             }
 
                                             SequentialAnimation on opacity {
-                                                running: decodePanel.isCurrentPeriodEven && bridge && bridge.uiQuality !== "Low"
+                                                running: decodePanel.isCurrentPeriodEven && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                                 loops: Animation.Infinite
                                                 OpacityAnimator { to: 0.6; duration: 600 }
                                                 OpacityAnimator { to: 1.0; duration: 600 }
@@ -8307,7 +8307,7 @@ NumberAnimation {
                                     opacity: 0.8
 
                                     SequentialAnimation on opacity {
-                                        running: rxFreqDockHighlighted && bridge && bridge.uiQuality !== "Low"
+                                        running: rxFreqDockHighlighted && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                         loops: Animation.Infinite
                                         OpacityAnimator { to: 0.4; duration: 300 }
                                         OpacityAnimator { to: 1.0; duration: 300 }
@@ -9244,7 +9244,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                         opacity: 0.8
 
                         SequentialAnimation on opacity {
-                            running: txPanelDockHighlighted && bridge && bridge.uiQuality !== "Low"
+                            running: txPanelDockHighlighted && bridge && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                             loops: Animation.Infinite
                             OpacityAnimator { to: 0.4; duration: 300 }
                             OpacityAnimator { to: 1.0; duration: 300 }
@@ -11684,7 +11684,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                             color: bridge.monitoring ? accentGreen : "#555"
 
                             SequentialAnimation on opacity {
-                                running: bridge.monitoring && bridge.uiQuality !== "Low"
+                                running: bridge.monitoring && !mainWindow.ft2LinkModeActive && bridge.uiQuality !== "Low"
                                 loops: Animation.Infinite
                                 OpacityAnimator { to: 0.4; duration: 600 }
                                 OpacityAnimator { to: 1.0; duration: 600 }

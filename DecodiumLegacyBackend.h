@@ -114,6 +114,7 @@ public:
     void setTxFirst(bool enabled);
     void setSpecialOperationActivity(int activity);
     void setSuperFoxEnabled(bool enabled);
+    void setEmbeddedUiUpdatesEnabled(bool enabled);
 
 Q_SIGNALS:
     void waterfallRowReady(QByteArray const& rowLevels,
