@@ -1014,11 +1014,13 @@ Item {
                                      Math.min(waterfallPanel.spectrumHeight,
                                               Math.max(waterfallPanel.spectrumMinHeight,
                                                        waterfallDisplay.height - waterfallPanel.waterfallMinHeight)))
-            // In FT2-Link la demodulazione e il backend legacy non richiedono il
-            // panadapter a pieno frame rate: manteniamo la vista utile, ma evitiamo
-            // render loop continui quando non arrivano nuovi blocchi RF.
+            // In FT2-Link evitiamo il render loop pieno, ma 500 ms rende il
+            // panadapter visibilmente scattoso. Manteniamo un refresh fluido in
+            // profilo normale e lasciamo il taglio piu' forte solo a Low CPU.
             throttleActive: bridge.lowCpuModeEnabled || waterfallPanel.ft2LinkMode
-            throttleIntervalMs: waterfallPanel.ft2LinkMode ? 500 : (bridge.lowCpuModeEnabled ? 250 : 100)
+            throttleIntervalMs: waterfallPanel.ft2LinkMode
+                                ? (bridge.lowCpuModeEnabled ? 200 : 80)
+                                : (bridge.lowCpuModeEnabled ? 250 : 100)
             // Carica valori da Settings al primo avvio.
             paletteIndex:   0
             contrastLevel:  contrastSlider.value

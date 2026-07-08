@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <string>
@@ -41,6 +42,48 @@ void addDeterministicNoise (std::vector<float>& wave, float amplitude)
       float const unit = float ((state >> 8) & 0xffffu) / 32767.5f - 1.0f;
       sample += amplitude * unit;
     }
+}
+
+std::vector<float> fil4Decimate48kTo12k (std::vector<float> const& wave)
+{
+  static constexpr std::array<float, 49> weights {{
+      0.000861074040f, 0.010051920210f, 0.010161983649f, 0.011363155076f,
+      0.008706594219f, 0.002613872664f, -0.005202883094f, -0.011720748164f,
+      -0.013752163325f, -0.009431602741f, 0.000539063909f, 0.012636767098f,
+      0.021494659597f, 0.021951235065f, 0.011564169382f, -0.007656470131f,
+      -0.028965787341f, -0.042637874109f, -0.039203309748f, -0.013153301537f,
+      0.034320769178f, 0.094717832646f, 0.154224604789f, 0.197758325022f,
+      0.213715139513f, 0.197758325022f, 0.154224604789f, 0.094717832646f,
+      0.034320769178f, -0.013153301537f, -0.039203309748f, -0.042637874109f,
+      -0.028965787341f, -0.007656470131f, 0.011564169382f, 0.021951235065f,
+      0.021494659597f, 0.012636767098f, 0.000539063909f, -0.009431602741f,
+      -0.013752163325f, -0.011720748164f, -0.005202883094f, 0.002613872664f,
+      0.008706594219f, 0.011363155076f, 0.010161983649f, 0.010051920210f,
+      0.000861074040f
+  }};
+
+  std::array<float, 49> delay {};
+  std::vector<float> decimated;
+  decimated.reserve (wave.size () / 4u);
+  for (std::size_t index = 0; index + 4u <= wave.size (); index += 4u)
+    {
+      for (std::size_t i = 0; i < delay.size () - 4u; ++i)
+        {
+          delay[i] = delay[i + 4u];
+        }
+      for (std::size_t i = 0; i < 4u; ++i)
+        {
+          delay[delay.size () - 4u + i] = wave[index + i];
+        }
+
+      float sum = 0.0f;
+      for (std::size_t i = 0; i < delay.size (); ++i)
+        {
+          sum += weights[i] * delay[i];
+        }
+      decimated.push_back (sum);
+    }
+  return decimated;
 }
 }
 
@@ -449,6 +492,49 @@ private Q_SLOTS:
     QVERIFY (metrics.symbolCount > 0u);
     QVERIFY (metrics.packetBytes > 0u);
     QVERIFY (metrics.quality > 0.45);
+  }
+
+  void narrowControlAudioSurvivesMacFil4Path ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::HandshakeIdentity;
+    using decodium::ft2link::LinkCapabilities;
+    using decodium::ft2link::NarrowDecodeMetrics;
+    using decodium::ft2link::NarrowWaveformConfig;
+    using decodium::ft2link::Profile;
+
+    LinkCapabilities capabilities;
+    capabilities.preferredProfile = Profile::Wide2300;
+    HandshakeIdentity identity {"TESTA", "JN70"};
+    Frame const hello = decodium::ft2link::makeHelloFrame (
+        0x6203u, capabilities, identity);
+
+    NarrowWaveformConfig txConfig;
+    txConfig.sampleRate = 48000.0;
+    std::string error;
+    std::vector<float> const burst =
+        decodium::ft2link::generateNarrowFrameWaveform (
+            hello, txConfig, &error);
+    QVERIFY2 (!burst.empty (), error.c_str ());
+
+    std::vector<float> txStream (4800u, 0.0f);
+    txStream.insert (txStream.end (), burst.begin (), burst.end ());
+    txStream.insert (txStream.end (), 4800u, 0.0f);
+
+    std::vector<float> rxStream = fil4Decimate48kTo12k (txStream);
+    addDeterministicNoise (rxStream, 0.001f);
+
+    NarrowWaveformConfig rxConfig;
+    Frame parsed;
+    NarrowDecodeMetrics metrics;
+    error.clear ();
+    QVERIFY2 (decodium::ft2link::decodeNarrowFrameWaveformWithMetrics (
+                  rxStream, &parsed, &metrics, rxConfig, &error), error.c_str ());
+    QCOMPARE (static_cast<int> (parsed.profile), static_cast<int> (Profile::Narrow));
+    QCOMPARE (parsed.sessionId, hello.sessionId);
+    QCOMPARE (parsed.payload, hello.payload);
+    QVERIFY (metrics.sampleOffset < 1600u);
+    QVERIFY (metrics.quality > 0.40);
   }
 
   void narrowWaveformAcquiresLargeAudioOffset ()

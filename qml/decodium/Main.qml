@@ -6614,8 +6614,9 @@ ApplicationWindow {
                     property bool isCurrentPeriodEven: true
                     property int currentSecond: 0
                     property string normalizedMode: bridge ? String(bridge.mode || "").toUpperCase() : ""
-                    property bool ft2CadenceMode: normalizedMode === "FT2" || normalizedMode === "FT2-LINK" || normalizedMode === "FT2LINK"
-                    property real periodLength: ft2CadenceMode ? 3.75 : (bridge.mode === "FT4" ? 7.5 : (bridge.mode === "WSPR" ? 120 : 15))
+                    property bool ft2LinkPeriodMode: normalizedMode === "FT2-LINK" || normalizedMode === "FT2LINK"
+                    property bool ft2CadenceMode: normalizedMode === "FT2"
+                    property real periodLength: ft2CadenceMode ? 3.75 : (ft2LinkPeriodMode ? 15 : (bridge.mode === "FT4" ? 7.5 : (bridge.mode === "WSPR" ? 120 : 15)))
 
                     // IU8LMC: Reactive property for all decodes (Band Activity)
                     property bool showTxMessagesInRx: mainWindow.showTxMessagesInRx
@@ -7136,11 +7137,11 @@ ApplicationWindow {
                         border.width: 1
 
                         property real periodLen: decodePanel.periodLength
-                        property real txDuration: decodePanel.ft2CadenceMode ? 2.87 : (bridge.mode === "FT4" ? 5.04 : (bridge.mode === "WSPR" ? 110.6 : 12.64))
+                        property real txDuration: decodePanel.ft2CadenceMode ? 2.87 : (decodePanel.ft2LinkPeriodMode ? 10.0 : (bridge.mode === "FT4" ? 5.04 : (bridge.mode === "WSPR" ? 110.6 : 12.64)))
                         property real progress: 0.0
                         property real secInPeriod: 0.0
                         property bool isTxPhase: !!(bridge && bridge.transmitting)
-                        property bool timerActive: !!(bridge && !mainWindow.ft2LinkModeActive && (bridge.monitoring || bridge.transmitting || bridge.tuning))
+                        property bool timerActive: !!(bridge && ((bridge.transmitting || bridge.tuning) || (!mainWindow.ft2LinkModeActive && bridge.monitoring)))
                         property bool isEvenPeriod: true
                         property string periodLabel: isTxPhase ? "TX" : "RX"
                         onTimerActiveChanged: {

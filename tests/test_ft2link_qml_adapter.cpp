@@ -2170,6 +2170,65 @@ private Q_SLOTS:
     QVERIFY (secondBroadcast.value ("alert").toBool ());
   }
 
+  void qsyBroadcastCarriesTargetFrequency ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter sender;
+    sender.setLocalStation ("IU8LMC", "JN70", "Salvo");
+    QSignalSpy radioSpy {&sender, &FT2LinkQmlAdapter::radioTxAudioRequested};
+
+    QString const text = sender.qsyBroadcastText (
+        14105750, QStringLiteral ("20m"), QStringLiteral ("data"));
+    QCOMPARE (text, QStringLiteral ("QSY 14105750 Hz 20m [DATA]"));
+
+    sender.setRadioTxArmed (true);
+    QVERIFY (sender.transmitQsyBroadcastRadio (
+        14105750, QStringLiteral ("20m"), QStringLiteral ("data"), 3000));
+    QCOMPARE (radioSpy.size (), 1);
+    QCOMPARE (sender.broadcastCount (), 1);
+    QVERIFY (!sender.radioTxArmed ());
+
+    QVariantMap const localBroadcast = sender.broadcasts ().last ().toMap ();
+    QCOMPARE (localBroadcast.value ("source").toString (), QStringLiteral ("TX"));
+    QCOMPARE (localBroadcast.value ("fromCall").toString (), QStringLiteral ("IU8LMC"));
+    QVERIFY (localBroadcast.value ("qsy").toBool ());
+    QCOMPARE (localBroadcast.value ("dialFrequencyHz").toLongLong (), 14105750LL);
+    QCOMPARE (localBroadcast.value ("qsyLabel").toString (),
+              QStringLiteral ("20m"));
+    QCOMPARE (localBroadcast.value ("qsyReason").toString (),
+              QStringLiteral ("DATA"));
+
+    QList<QVariant> const request = radioSpy.takeFirst ();
+    QVariantMap const plan = request[2].toMap ();
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("BCAST"));
+
+    FT2LinkQmlAdapter receiver;
+    decodium::ft2link::Frame incoming;
+    incoming.type = decodium::ft2link::FrameType::Broadcast;
+    incoming.profile = decodium::ft2link::Profile::Narrow;
+    incoming.flags = decodium::ft2link::FlagEndOfMessage;
+    QByteArray const payload = text.toUtf8 ();
+    incoming.payload.assign (
+        reinterpret_cast<std::uint8_t const*> (payload.constData ()),
+        reinterpret_cast<std::uint8_t const*> (payload.constData ())
+            + payload.size ());
+
+    QVERIFY (receiver.ingestRadioFrameBytes (
+        frameBytes (incoming), QStringLiteral ("K1ABC"), 4000, true));
+    QCOMPARE (receiver.broadcastCount (), 1);
+    QVariantMap const incomingBroadcast = receiver.broadcasts ().last ().toMap ();
+    QCOMPARE (incomingBroadcast.value ("source").toString (), QStringLiteral ("RX"));
+    QCOMPARE (incomingBroadcast.value ("fromCall").toString (), QStringLiteral ("K1ABC"));
+    QCOMPARE (incomingBroadcast.value ("text").toString (), text);
+    QVERIFY (incomingBroadcast.value ("qsy").toBool ());
+    QCOMPARE (incomingBroadcast.value ("dialFrequencyHz").toLongLong (), 14105750LL);
+    QCOMPARE (incomingBroadcast.value ("qsyLabel").toString (),
+              QStringLiteral ("20m"));
+    QCOMPARE (incomingBroadcast.value ("qsyReason").toString (),
+              QStringLiteral ("DATA"));
+  }
+
   void wideBroadcastUsesSelectedWideProfileWhenPayloadExceedsNarrow ()
   {
     qRegisterMetaType<QVector<float>> ("QVector<float>");
@@ -4047,6 +4106,65 @@ private Q_SLOTS:
     QVERIFY (deliveredPayload);
   }
 
+  void broadcastWaitsForPendingSessionTraffic ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter stationA;
+    FT2LinkQmlAdapter stationB;
+    stationA.setLocalStation ("TESTA", "JN70", "Lab A");
+    stationB.setLocalStation ("TESTB", "FN42", "Lab B");
+    stationA.setLocalCapabilities (true, true, true, true, 2, 0);
+    stationB.setLocalCapabilities (true, true, true, true, 2, 0);
+
+    QVERIFY (stationA.observeStation (
+        "TESTB", "FN42", "Lab B", true, true, true, true, true, 2, 0, 1000));
+
+    QSignalSpy radioA {&stationA, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    QSignalSpy radioB {&stationB, &FT2LinkQmlAdapter::radioTxAudioRequested};
+
+    QVariantMap plan;
+    stationA.setRadioTxArmed (true);
+    QVERIFY (stationA.startSessionRadioHandshake ("TESTB", 1100));
+    QVERIFY (deliverRadioRequest (radioA, stationB, 2200, &plan));
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("HELLO"));
+    QVERIFY (deliverRadioRequest (radioB, stationA, 3300, &plan));
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("HELLO_ACK"));
+
+    quint16 const sessionId = stationA.activeSessionId ();
+    QVERIFY (sessionId != 0u);
+    QCOMPARE (stationA.sessionInfo (sessionId).value ("stateName").toString (),
+              QStringLiteral ("Connected"));
+
+    stationA.setRadioTxArmed (true);
+    QVERIFY (stationA.transmitPreparedRadioTxAudio (
+        sessionId, QStringLiteral ("SESSION FIRST"), 4400));
+    QVector<float> dataSamples;
+    QVariantMap dataPlan;
+    QVERIFY (takeRadioRequest (radioA, &dataSamples, &dataPlan, nullptr, 10000));
+    QCOMPARE (dataPlan.value ("kind").toString (), QStringLiteral ("CHAT"));
+    QCOMPARE (dataPlan.value ("profileName").toString (),
+              QStringLiteral ("W2300"));
+
+    stationA.setRadioTxArmed (true);
+    QVERIFY (stationA.transmitBroadcastRadio (
+        QStringLiteral ("BCAST AFTER ACK"), 4500));
+    QCOMPARE (radioA.size (), 0);
+
+    QVERIFY (stationB.ingestRxSamples (pcmFromSamples (dataSamples, 4),
+                                       QString {}, 5500));
+    QVERIFY (deliverRadioRequest (radioB, stationA, 6600, &plan));
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("ACK"));
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioA.size () >= 1, 10000);
+    QList<QVariant> const broadcastRequest = radioA.takeFirst ();
+    QVariantMap const broadcastPlan = broadcastRequest[2].toMap ();
+    QCOMPARE (broadcastPlan.value ("kind").toString (),
+              QStringLiteral ("BCAST"));
+    QVERIFY (broadcastPlan.value ("sessionDeferred").toBool ());
+    QVERIFY (broadcastPlan.value ("queued").toBool ());
+  }
+
   void twoAdaptersRoundTripApplicationPayloadsAudio ()
   {
     qRegisterMetaType<QVector<float>> ("QVector<float>");
@@ -4444,6 +4562,43 @@ private Q_SLOTS:
     QVERIFY (!frames.isEmpty ());
     QVariantMap const metrics = frames.first ().toMap ().value ("metrics").toMap ();
     QCOMPARE (metrics.value ("rateMode").toString (), QStringLiteral ("WEAK"));
+  }
+
+  void rfLabGeneratesAndReplaysUltraMinus3DbW2300 ()
+  {
+    QTemporaryDir dir;
+    QVERIFY (dir.isValid ());
+
+    qputenv ("DECODIUM_FT2LINK_W2300_SEARCH_THREADS", "8");
+
+    FT2LinkQmlAdapter adapter;
+    QVariantMap options;
+    options.insert (QStringLiteral ("frameType"), QStringLiteral ("DATA"));
+    options.insert (QStringLiteral ("sampleRate"), 48000);
+    options.insert (QStringLiteral ("w2300RateMode"), 4);
+    options.insert (QStringLiteral ("snrDb"), -3.0);
+
+    QString const path = dir.filePath (QStringLiteral ("ultra-minus3-w2300.wav"));
+    QVariantMap const generated = adapter.generateRfLabWav (
+        path,
+        QStringLiteral ("W2300"),
+        QStringLiteral ("RFLAB ULTRA MINUS THREE DB"),
+        options);
+    QVERIFY2 (generated.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (generated).toJson (
+                  QJsonDocument::Compact)));
+
+    QVariantMap const replay = adapter.replayRfLabWav (path);
+    QVERIFY2 (replay.value ("ok").toBool (),
+              qPrintable (QJsonDocument::fromVariant (replay).toJson (
+                  QJsonDocument::Compact)));
+    QVERIFY2 (replay.value ("decodedCount").toInt () >= 1,
+              qPrintable (QJsonDocument::fromVariant (replay).toJson (
+                  QJsonDocument::Compact)));
+    QVariantList const frames = replay.value ("frames").toList ();
+    QVERIFY (!frames.isEmpty ());
+    QVariantMap const metrics = frames.first ().toMap ().value ("metrics").toMap ();
+    QCOMPARE (metrics.value ("rateMode").toString (), QStringLiteral ("ULTRA"));
   }
 
   void rfLabChannelSweepCanRunQuickSubset ()

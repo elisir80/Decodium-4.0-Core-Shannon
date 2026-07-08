@@ -85,6 +85,9 @@ private:
   quint64 m_lastBusyLogMs {0};
   quint64 m_lastRxFailLogMs {0};
   quint64 m_lastNarrowTrimLogMs {0};
+  quint64 m_lastNarrowScanLogMs {0};
+  bool m_narrowFailDumped {false};
+  bool m_wasChannelBusy {false};
   double m_lastRms {0.0};
   double m_lastPeak {0.0};
 };
@@ -393,6 +396,13 @@ public:
                                      int slotsEachSide) const;
   Q_INVOKABLE QString qsyTagForOffset (int offsetHz) const;
   Q_INVOKABLE QString qsyFrequencyTag (qint64 dialFrequencyHz) const;
+  Q_INVOKABLE QString qsyBroadcastText (qint64 dialFrequencyHz,
+                                        QString const& label,
+                                        QString const& reason) const;
+  Q_INVOKABLE bool transmitQsyBroadcastRadio (qint64 dialFrequencyHz,
+                                              QString const& label,
+                                              QString const& reason,
+                                              quint64 nowMs);
   Q_INVOKABLE QVariantMap qsyPlanForText (QString const& text,
                                           qint64 currentDialFrequencyHz) const;
   Q_INVOKABLE QVariantList frequencyPresets () const;
@@ -669,6 +679,9 @@ private:
                               QString const& kind,
                               QString const& remoteCall,
                               quint64 nowMs);
+  bool hasPendingSessionRadioTraffic () const;
+  bool shouldDeferBroadcastTx (QVariantMap const& plan,
+                               quint16 sessionId) const;
   void enqueueRadioTx (QString const& displayMessage,
                        QVector<float> const& samples,
                        QVariantMap const& plan,
@@ -909,6 +922,9 @@ private:
   void updateLastOutgoingChatLogEntry (quint16 sessionId,
                                        QString const& deliveryName,
                                        quint64 nowMs);
+  bool completePendingQsyOutbound (quint16 sessionId,
+                                   bool accepted,
+                                   quint64 nowMs);
   void clearChatLogForSession (quint16 sessionId);
   void pruneLogbookOutbox ();
 
@@ -1290,6 +1306,7 @@ private:
   quint64 m_rfLabRecordingStartedMs {0};
   QString m_rfLabLastPath;
   QVariantMap m_rfLabLastReport;
+  quint64 m_lastRxIngestLogMs {0};
 };
 
 #endif

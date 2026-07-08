@@ -41,6 +41,11 @@ Rectangle {
     property var customCannedMessages: []
     property var qsySlots: []
     property var qsyPlan: ({})
+    property var pendingOutgoingQsyPlan: ({})
+    property int pendingOutgoingQsySessionId: 0
+    property var delayedQsyPlan: ({})
+    property string delayedQsyReason: ""
+    property var appliedQsyKeys: ({})
     property var frequencyPresetList: []
     property var allowedQsyRangeList: []
     property var frequencyScheduleList: []
@@ -395,6 +400,7 @@ Rectangle {
             selectedMessages = []
         }
         refreshQsyPlan()
+        processQsyReplies()
         if (selectedMessages.length === 0) {
             chatUnreadBelow = false
             chatScrollPinned = true
@@ -743,7 +749,7 @@ Rectangle {
         case 0:
             return selectedSessionId > 0 ? 112 : 44
         case 1:
-            return 32
+            return 68
         case 2:
             return 56
         case 3:
@@ -950,7 +956,7 @@ Rectangle {
         if (broadcasts.length === 0)
             return ""
         var item = broadcasts[broadcasts.length - 1]
-        var prefix = item.alert ? "ALERT " : "BCAST "
+        var prefix = item.qsy ? "QSY " : (item.alert ? "ALERT " : "BCAST ")
         return prefix + String(item.fromCall || "--") + ": " + String(item.text || "")
     }
 
@@ -2071,6 +2077,7 @@ Rectangle {
             return false
         if (!guardWideTx("CHAT TX"))
             return false
+        rememberOutgoingQsyInvite(text)
         if (!ft2Link.radioTxArmed) {
             ft2Link.setRadioTxArmed(true)
         }
@@ -2094,6 +2101,33 @@ Rectangle {
             refreshBroadcasts()
             refreshAlerts()
         }
+    }
+
+    function prepareQsyBroadcast() {
+        if (!ft2Link || typeof ft2Link.qsyBroadcastText !== "function")
+            return
+        var hz = 0
+        var label = ""
+        var reason = "MANUAL"
+        if (typeof ft2Link.activeFrequencySchedule === "function") {
+            var active = ft2Link.activeFrequencySchedule(nowMs())
+            if (active && active.active && Number(active.dialFrequencyHz || 0) > 0) {
+                hz = Number(active.dialFrequencyHz)
+                label = String(active.label || active.cqType || active.action || "schedule")
+                reason = String(active.action || "SCHEDULE")
+            }
+        }
+        if (hz <= 0) {
+            hz = currentDialFrequencyHz()
+            label = "current"
+        }
+        var text = ft2Link.qsyBroadcastText(Math.round(hz), label, reason)
+        if (String(text || "").length === 0) {
+            databaseActionText = "QSY broadcast requires a dial frequency"
+            return
+        }
+        broadcastText.text = text
+        databaseActionText = "QSY broadcast prepared " + frequencyHzText(hz)
     }
 
     function saveAlertTags() {
@@ -2604,9 +2638,7 @@ Rectangle {
         var fields = parseFormFields(formFieldsText.text)
         if (Object.keys(fields).length === 0)
             return
-        var toCall = formToText.text.trim().toUpperCase()
-        if (toCall.length === 0)
-            toCall = selectedRemoteCall
+        var toCall = selectedRemoteCall.trim().toUpperCase()
         if (ft2Link.transmitFormRadio(selectedSessionId,
                                       toCall,
                                       currentFormType(),
@@ -2977,6 +3009,16 @@ Rectangle {
         var slot = currentQsySlot()
         if (!slot)
             return
+        var dial = currentDialFrequencyHz()
+        var offset = Number(slot.offsetHz || 0)
+        if (ft2Link && typeof ft2Link.qsyFrequencyTag === "function"
+                && dial > 0 && offset !== 0) {
+            var absoluteTag = ft2Link.qsyFrequencyTag(Math.round(dial + offset))
+            if (String(absoluteTag || "").length > 0) {
+                root.insertCannedMessage(String(absoluteTag))
+                return
+            }
+        }
         root.insertCannedMessage(String(slot.tag || ""))
     }
 
@@ -3013,6 +3055,107 @@ Rectangle {
             var plan = ft2Link.qsyPlanForText(String(message.text || ""), dial)
             if (plan && plan.valid) {
                 qsyPlan = plan
+                return
+            }
+        }
+    }
+
+    function qsyPlanCanApply(plan) {
+        return !!plan && plan.valid === true
+               && plan.hasTargetFrequency === true
+               && Number(plan.dialFrequencyHz || 0) > 0
+               && plan.allowed === true
+    }
+
+    function qsyPlanApplyKey(plan, reason) {
+        return selectedSessionId + "|"
+               + Math.round(Number(plan && plan.dialFrequencyHz || 0))
+               + "|" + String(reason || "")
+    }
+
+    function applyQsyPlan(plan, reason) {
+        if (!qsyPlanCanApply(plan)) {
+            databaseActionText = "QSY not applied: "
+                                 + String(plan && plan.rangeStatus
+                                          ? plan.rangeStatus
+                                          : "invalid target")
+            return false
+        }
+        if (!bridge || typeof bridge.qsyTo !== "function") {
+            databaseActionText = "QSY target ready "
+                                 + frequencyHzText(Number(plan.dialFrequencyHz || 0))
+                                 + " but bridge.qsyTo is unavailable"
+            return false
+        }
+        var key = qsyPlanApplyKey(plan, reason)
+        if (appliedQsyKeys[key])
+            return true
+        appliedQsyKeys[key] = true
+        var hz = Math.round(Number(plan.dialFrequencyHz || 0))
+        bridge.qsyTo(hz, "FT2-Link")
+        databaseActionText = "QSY applied "
+                             + frequencyHzText(hz)
+                             + " (" + String(reason || "session") + ")"
+        return true
+    }
+
+    function scheduleQsyPlanApply(plan, reason) {
+        if (!qsyPlanCanApply(plan))
+            return false
+        delayedQsyPlan = plan
+        delayedQsyReason = String(reason || "accepted")
+        var seconds = 0
+        if (ft2Link && ft2Link.lastRadioTxPlan)
+            seconds = Number(ft2Link.lastRadioTxPlan.audioSeconds || 0)
+        qsyApplyTimer.interval = Math.max(1200, Math.round(seconds * 1000) + 900)
+        qsyApplyTimer.restart()
+        databaseActionText = "QSY queued "
+                             + frequencyHzText(Number(plan.dialFrequencyHz || 0))
+                             + " after ACK TX"
+        return true
+    }
+
+    function rememberOutgoingQsyInvite(text) {
+        if (!ft2Link || typeof ft2Link.qsyPlanForText !== "function")
+            return
+        var plan = ft2Link.qsyPlanForText(String(text || ""),
+                                          currentDialFrequencyHz())
+        if (qsyPlanCanApply(plan)) {
+            pendingOutgoingQsyPlan = plan
+            pendingOutgoingQsySessionId = selectedSessionId
+            databaseActionText = "QSY invite pending "
+                                 + frequencyHzText(Number(plan.dialFrequencyHz || 0))
+        } else if (plan && plan.valid) {
+            pendingOutgoingQsyPlan = ({})
+            pendingOutgoingQsySessionId = 0
+            databaseActionText = "QSY invite not stored: "
+                                 + String(plan.rangeStatus || "invalid target")
+        }
+    }
+
+    function processQsyReplies() {
+        if (!selectedMessages || selectedMessages.length === 0)
+            return
+        for (var i = selectedMessages.length - 1; i >= 0; --i) {
+            var message = selectedMessages[i]
+            if (String(message.directionName || "") !== "Incoming")
+                continue
+            var text = String(message.text || "").toUpperCase()
+            if (text.indexOf("<QSYJ>") >= 0 || text.indexOf("<QJO>") >= 0) {
+                if (pendingOutgoingQsySessionId === selectedSessionId) {
+                    pendingOutgoingQsyPlan = ({})
+                    pendingOutgoingQsySessionId = 0
+                    databaseActionText = "QSY rejected"
+                }
+                return
+            }
+            if (text.indexOf("<QSYR>") >= 0) {
+                if (pendingOutgoingQsySessionId === selectedSessionId
+                        && qsyPlanCanApply(pendingOutgoingQsyPlan)) {
+                    applyQsyPlan(pendingOutgoingQsyPlan, "accepted")
+                    pendingOutgoingQsyPlan = ({})
+                    pendingOutgoingQsySessionId = 0
+                }
                 return
             }
         }
@@ -3070,9 +3213,19 @@ Rectangle {
 
     function sendQsyControlTag(tag) {
         if (!tag || !selectedSessionConnected)
-            return
+            return false
         composeText.text = String(tag)
-        sendChatText()
+        return sendChatText()
+    }
+
+    function acceptQsyInvite() {
+        if (!qsyPlanCanApply(qsyPlan)) {
+            sendQsyControlTag(String(qsyPlan.outOfRangeTag || "<QJO>"))
+            return
+        }
+        var acceptedPlan = qsyPlan
+        if (sendQsyControlTag(String(acceptedPlan.acceptTag || "<QSYR>")))
+            scheduleQsyPlanApply(acceptedPlan, "accepted-local")
     }
 
     function prepareRadioTx() {
@@ -3284,6 +3437,20 @@ Rectangle {
         onRunningChanged: {
             if (!running)
                 root.chatUnreadPulse = false
+        }
+    }
+
+    Timer {
+        id: qsyApplyTimer
+        interval: 1800
+        repeat: false
+        onTriggered: {
+            root.applyQsyPlan(root.delayedQsyPlan,
+                              root.delayedQsyReason.length > 0
+                              ? root.delayedQsyReason
+                              : "accepted-local")
+            root.delayedQsyPlan = ({})
+            root.delayedQsyReason = ""
         }
     }
 
@@ -5131,7 +5298,7 @@ Rectangle {
                                     accent: root.green
                                     enabled: root.selectedSessionConnected && root.qsyPlanValid()
                                     tip: "Send QSY accepted"
-                                    onClicked: root.sendQsyControlTag(String(root.qsyPlan.acceptTag || "<QSYR>"))
+                                    onClicked: root.acceptQsyInvite()
                                 }
 
                                 SmallButton {
@@ -5220,50 +5387,125 @@ Rectangle {
 			                    }
 
 			                    Item {
-                        RowLayout {
+                        ColumnLayout {
                             anchors.fill: parent
+                            anchors.margins: 2
                             spacing: 6
 
-                            SmallButton {
-                                text: root.currentFormLabel()
-                                implicitWidth: 72
-                                accent: root.amber
-                                enabled: root.formTemplates.length > 0
-                                tip: "Cycle form template"
-                                onClicked: root.cycleFormTemplate()
-                            }
-
-                            TextField {
-                                id: formToText
-                                Layout.preferredWidth: 86
-                                placeholderText: root.selectedRemoteCall.length > 0 ? root.selectedRemoteCall : "TO"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 16
-                                selectByMouse: true
-                            }
-
-                            TextField {
-                                id: formFieldsText
+                            RowLayout {
                                 Layout.fillWidth: true
-                                placeholderText: "key=value; key=value"
-                                enabled: root.selectedSessionConnected
-                                font.family: root.mono
-                                font.pixelSize: 11
-                                maximumLength: 512
-                                selectByMouse: true
-                                onAccepted: root.armOrTransmitForm()
-                            }
+                                Layout.preferredHeight: 48
+                                spacing: 6
 
-                            SmallButton {
-                                text: ft2Link && ft2Link.radioTxArmed ? "FORM TX" : "ARM F"
-                                implicitWidth: 74
-                                accent: root.amber
-                                enabled: !!ft2Link && root.selectedSessionConnected
-                                         && formFieldsText.text.trim().length > 0
-                                tip: ft2Link && ft2Link.radioTxArmed ? "Transmit form" : "Arm form transmit"
-                                onClicked: root.armOrTransmitForm()
+                                ColumnLayout {
+                                    Layout.preferredWidth: 82
+                                    Layout.minimumWidth: 82
+                                    Layout.maximumWidth: 82
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "TYPE"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.amber
+                                        elide: Text.ElideRight
+                                    }
+
+                                    SmallButton {
+                                        text: root.currentFormLabel()
+                                        implicitWidth: 82
+                                        accent: root.amber
+                                        enabled: root.formTemplates.length > 0
+                                        tip: "Cycle form template"
+                                        onClicked: root.cycleFormTemplate()
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.preferredWidth: 110
+                                    Layout.minimumWidth: 96
+                                    Layout.maximumWidth: 130
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "TO"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.textSecondary
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 28
+                                        radius: 4
+                                        color: Qt.rgba(1, 1, 1, 0.025)
+                                        border.width: 1
+                                        border.color: root.selectedSessionConnected
+                                                      ? Qt.rgba(root.green.r, root.green.g, root.green.b, 0.55)
+                                                      : Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.35)
+
+                                        Text {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 10
+                                            anchors.rightMargin: 10
+                                            verticalAlignment: Text.AlignVCenter
+                                            text: root.selectedRemoteCall.length > 0 ? root.selectedRemoteCall : "--"
+                                            elide: Text.ElideRight
+                                            color: root.selectedSessionConnected ? root.textPrimary : root.textSecondary
+                                            font.family: root.mono
+                                            font.pixelSize: 11
+                                            font.bold: root.selectedSessionConnected
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    spacing: 2
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: "FIELDS"
+                                        font.family: root.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: root.cyan
+                                        elide: Text.ElideRight
+                                    }
+
+                                    TextField {
+                                        id: formFieldsText
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        Layout.preferredHeight: 28
+                                        placeholderText: "key=value; key=value"
+                                        enabled: root.selectedSessionConnected
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        maximumLength: 512
+                                        selectByMouse: true
+                                        onAccepted: root.armOrTransmitForm()
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "FORM TX" : "ARM F"
+                                    implicitWidth: 78
+                                    Layout.alignment: Qt.AlignBottom
+                                    accent: root.amber
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                             && formFieldsText.text.trim().length > 0
+                                    tip: ft2Link && ft2Link.radioTxArmed ? "Transmit form" : "Arm form transmit"
+                                    onClicked: root.armOrTransmitForm()
+                                }
 		                            }
 		                        }
 				                    }
@@ -5851,6 +6093,16 @@ Rectangle {
                                     maximumLength: 256
                                     selectByMouse: true
                                     onAccepted: root.armOrTransmitBroadcast()
+                                }
+
+                                SmallButton {
+                                    text: "QSY"
+                                    implicitWidth: 48
+                                    implicitHeight: 30
+                                    accent: root.cyan
+                                    enabled: !!ft2Link && root.currentDialFrequencyHz() > 0
+                                    tip: "Prepare QSY broadcast from schedule or current dial"
+                                    onClicked: root.prepareQsyBroadcast()
                                 }
 
                                 SmallButton {

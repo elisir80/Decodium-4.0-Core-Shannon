@@ -3,6 +3,7 @@
 #include "lib/ft2link/FT2LinkPhysical.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -799,6 +800,62 @@ void flipPacketBit (std::vector<std::uint8_t>* packet, std::size_t bitIndex)
   (*packet)[byteIndex] = static_cast<std::uint8_t> ((*packet)[byteIndex] ^ mask);
 }
 
+std::uint8_t nextW2300PhysicalWhiteningByte (std::uint16_t& state)
+{
+  std::uint8_t value = 0;
+  for (int bit = 0; bit < 8; ++bit)
+    {
+      std::uint16_t const feedback =
+          static_cast<std::uint16_t> (((state >> 0) ^ (state >> 2)
+                                       ^ (state >> 3) ^ (state >> 5)) & 1u);
+      state = static_cast<std::uint16_t> ((state >> 1) | (feedback << 15));
+      value = static_cast<std::uint8_t> ((value << 1) | (state & 1u));
+    }
+  return value;
+}
+
+bool w2300HeaderRepairedPhysicalPacket (
+    std::vector<std::uint8_t> const& packet,
+    std::vector<std::uint8_t>* repaired)
+{
+  constexpr std::size_t kPhysicalHeaderBytes = 8u;
+  constexpr std::size_t kPhysicalCrcBytes = 2u;
+  if (!repaired || packet.size () < kPhysicalHeaderBytes + kPhysicalCrcBytes)
+    {
+      return false;
+    }
+
+  std::uint16_t const frameLen = static_cast<std::uint16_t> (
+      packet.size () - kPhysicalHeaderBytes - kPhysicalCrcBytes);
+  std::uint8_t expected[kPhysicalHeaderBytes] {
+    'F', '2', 'L', 'P',
+    1u,
+    static_cast<std::uint8_t> (Profile::Wide2300),
+    static_cast<std::uint8_t> ((frameLen >> 8) & 0xffu),
+    static_cast<std::uint8_t> (frameLen & 0xffu)
+  };
+
+  std::uint16_t state = static_cast<std::uint16_t> (
+      0xace1u ^ (static_cast<std::uint16_t> (Profile::Wide2300) * 0x1d0fu));
+  for (std::uint8_t& byte : expected)
+    {
+      byte = static_cast<std::uint8_t> (
+          byte ^ nextW2300PhysicalWhiteningByte (state));
+    }
+
+  bool changed = false;
+  *repaired = packet;
+  for (std::size_t i = 0; i < kPhysicalHeaderBytes; ++i)
+    {
+      if ((*repaired)[i] != expected[i])
+        {
+          (*repaired)[i] = expected[i];
+          changed = true;
+        }
+    }
+  return changed;
+}
+
 std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
     std::vector<std::uint8_t> const& packet,
     std::vector<double> const& bitConfidences,
@@ -836,14 +893,14 @@ std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
       break;
     case W2300RateMode::Deep:
       confidenceThreshold = 0.30;
-      maxBits = 10u;
-      maxVariants = 96u;
+      maxBits = 12u;
+      maxVariants = 128u;
       includeTriples = true;
       break;
     case W2300RateMode::Ultra:
-      confidenceThreshold = 0.28;
-      maxBits = 10u;
-      maxVariants = 96u;
+      confidenceThreshold = 0.32;
+      maxBits = 12u;
+      maxVariants = 160u;
       includeTriples = true;
       break;
     default:
@@ -856,11 +913,6 @@ std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
           ranked.push_back (i);
         }
     }
-  if (ranked.empty ())
-    {
-      return {};
-    }
-
   std::sort (ranked.begin (), ranked.end (),
              [&] (std::size_t lhs, std::size_t rhs) {
                return bitConfidences[lhs] < bitConfidences[rhs];
@@ -870,28 +922,49 @@ std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
   std::vector<std::vector<std::uint8_t> > repaired;
   repaired.reserve (maxVariants);
 
-  auto appendVariant = [&] (std::initializer_list<std::size_t> bitIndexes) {
+  auto appendPacket = [&] (std::vector<std::uint8_t> variant) {
     if (repaired.size () >= maxVariants)
       {
         return;
       }
-    std::vector<std::uint8_t> variant = packet;
+    repaired.push_back (std::move (variant));
+  };
+
+  auto appendVariant = [&] (std::vector<std::uint8_t> const& base,
+                            std::initializer_list<std::size_t> bitIndexes) {
+    if (repaired.size () >= maxVariants)
+      {
+        return;
+      }
+    std::vector<std::uint8_t> variant = base;
     for (std::size_t bitIndex : bitIndexes)
       {
         flipPacketBit (&variant, bitIndex);
       }
-    repaired.push_back (std::move (variant));
+    appendPacket (std::move (variant));
   };
+
+  std::vector<std::uint8_t> headerRepaired;
+  bool const hasHeaderRepair =
+      w2300HeaderRepairedPhysicalPacket (packet, &headerRepaired);
+  if (hasHeaderRepair)
+    {
+      appendPacket (headerRepaired);
+    }
+  if (ranked.empty ())
+    {
+      return repaired;
+    }
 
   for (std::size_t i = 0; i < ranked.size (); ++i)
     {
-      appendVariant ({ranked[i]});
+      appendVariant (packet, {ranked[i]});
     }
   for (std::size_t i = 0; i < ranked.size (); ++i)
     {
       for (std::size_t j = i + 1u; j < ranked.size (); ++j)
         {
-          appendVariant ({ranked[i], ranked[j]});
+          appendVariant (packet, {ranked[i], ranked[j]});
         }
     }
   if (includeTriples)
@@ -903,7 +976,51 @@ std::vector<std::vector<std::uint8_t> > w2300PhysicalRepairPackets (
             {
               for (std::size_t k = j + 1u; k < tripleBits; ++k)
                 {
-                  appendVariant ({ranked[i], ranked[j], ranked[k]});
+                  appendVariant (packet, {ranked[i], ranked[j], ranked[k]});
+                }
+            }
+        }
+    }
+
+  if (hasHeaderRepair && repaired.size () < maxVariants)
+    {
+      std::vector<std::size_t> payloadRanked;
+      payloadRanked.reserve (ranked.size ());
+      constexpr std::size_t kPhysicalHeaderBits = 8u * 8u;
+      for (std::size_t bitIndex : ranked)
+        {
+          if (bitIndex >= kPhysicalHeaderBits)
+            {
+              payloadRanked.push_back (bitIndex);
+            }
+        }
+      for (std::size_t i = 0; i < payloadRanked.size (); ++i)
+        {
+          appendVariant (headerRepaired, {payloadRanked[i]});
+        }
+      for (std::size_t i = 0; i < payloadRanked.size (); ++i)
+        {
+          for (std::size_t j = i + 1u; j < payloadRanked.size (); ++j)
+            {
+              appendVariant (headerRepaired,
+                             {payloadRanked[i], payloadRanked[j]});
+            }
+        }
+      if (includeTriples)
+        {
+          std::size_t const tripleBits =
+              std::min<std::size_t> (6u, payloadRanked.size ());
+          for (std::size_t i = 0; i < tripleBits; ++i)
+            {
+              for (std::size_t j = i + 1u; j < tripleBits; ++j)
+                {
+                  for (std::size_t k = j + 1u; k < tripleBits; ++k)
+                    {
+                      appendVariant (
+                          headerRepaired,
+                          {payloadRanked[i], payloadRanked[j],
+                           payloadRanked[k]});
+                    }
                 }
             }
         }
@@ -1159,23 +1276,30 @@ std::size_t w2300HeaderMaxBitErrors ()
 {
   std::size_t const trainingBits =
       (w2300PreambleSymbols ().size () + w2300SyncSymbols ().size ()) * 8u;
-  return std::max<std::size_t> (32u, trainingBits / 5u);
+  return std::max<std::size_t> (32u, trainingBits / 4u);
+}
+
+std::size_t w2300HeaderBitErrors (std::vector<std::uint8_t> const& symbols,
+                                  std::size_t start,
+                                  std::size_t abortAbove)
+{
+  std::size_t const preambleErrors = symbolBitErrors (
+      symbols, start, w2300PreambleSymbols (), abortAbove);
+  if (preambleErrors > abortAbove)
+    {
+      return preambleErrors;
+    }
+  std::size_t const syncErrors = symbolBitErrors (
+      symbols, start + w2300PreambleSymbols ().size (), w2300SyncSymbols (),
+      abortAbove - preambleErrors);
+  return preambleErrors + syncErrors;
 }
 
 bool w2300HeaderMatchesSoft (std::vector<std::uint8_t> const& symbols,
                              std::size_t start)
 {
   std::size_t const maxErrors = w2300HeaderMaxBitErrors ();
-  std::size_t const preambleErrors = symbolBitErrors (
-      symbols, start, w2300PreambleSymbols (), maxErrors);
-  if (preambleErrors > maxErrors)
-    {
-      return false;
-    }
-  std::size_t const syncErrors = symbolBitErrors (
-      symbols, start + w2300PreambleSymbols ().size (), w2300SyncSymbols (),
-      maxErrors - preambleErrors);
-  return preambleErrors + syncErrors <= maxErrors;
+  return w2300HeaderBitErrors (symbols, start, maxErrors) <= maxErrors;
 }
 
 bool makeW2300BurstInfoForMode (std::vector<std::uint8_t> const& symbols,
@@ -1828,15 +1952,43 @@ std::vector<W2300DecodeCandidate> extractW2300PacketCandidatesFromDecisions (
       return candidates;
     }
 
+  struct HeaderStart
+  {
+    std::size_t start {0};
+    std::size_t errors {0};
+  };
+  std::vector<HeaderStart> headerStarts;
+  std::size_t const maxHeaderErrors = w2300HeaderMaxBitErrors ();
   for (std::size_t start = 0; start + minimumHeaderSymbols <= symbols.size (); ++start)
     {
       // Use the tolerant training match as an acquisition filter; internal
       // early-exit keeps the scan cheap and CRC validation removes false hits.
-      if (!w2300HeaderMatchesSoft (symbols, start))
+      std::size_t const errors = w2300HeaderBitErrors (
+          symbols, start, maxHeaderErrors);
+      if (errors <= maxHeaderErrors)
         {
-          continue;
+          headerStarts.push_back ({start, errors});
         }
+    }
 
+  std::sort (headerStarts.begin (), headerStarts.end (),
+             [] (HeaderStart const& lhs, HeaderStart const& rhs) {
+               if (lhs.errors != rhs.errors)
+                 {
+                   return lhs.errors < rhs.errors;
+                 }
+               return lhs.start < rhs.start;
+             });
+  if (headerStarts.size () > 6u)
+    {
+      headerStarts.resize (6u);
+    }
+
+  for (std::size_t headerIndex = 0; headerIndex < headerStarts.size ();
+       ++headerIndex)
+    {
+      HeaderStart const& headerStart = headerStarts[headerIndex];
+      std::size_t const start = headerStart.start;
       std::vector<W2300BurstInfo> burstInfos;
       W2300BurstInfo parsedInfo;
       std::string headerError;
@@ -1869,9 +2021,11 @@ std::vector<W2300DecodeCandidate> extractW2300PacketCandidatesFromDecisions (
         {
           std::vector<std::uint8_t> packet;
           std::vector<double> bitConfidences;
+          bool const includeRepairsForStart =
+              includePhysicalRepairCandidates && headerIndex < 2u;
           if (packetFromW2300BurstInfo (
                   decisions, info, &packet,
-                  includePhysicalRepairCandidates ? &bitConfidences : nullptr))
+                  includeRepairsForStart ? &bitConfidences : nullptr))
             {
               W2300DecodeCandidate candidate;
               candidate.ok = true;
@@ -1888,7 +2042,7 @@ std::vector<W2300DecodeCandidate> extractW2300PacketCandidatesFromDecisions (
               candidate.metrics.repetitionFactor = info.repetitionFactor;
               candidates.push_back (candidate);
 
-              if (includePhysicalRepairCandidates)
+              if (includeRepairsForStart)
                 {
                   std::vector<std::vector<std::uint8_t> > repairedPackets =
                       w2300PhysicalRepairPackets (packet, bitConfidences, info);
@@ -3127,6 +3281,7 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
         return;
       }
 
+    std::atomic_bool foundCandidate {false};
     auto searchPhaseRange = [&, basis, residualOffsets, driftSearch,
                              searchConfig, includeEstimatedOffsets] (
                                  std::size_t beginPhase,
@@ -3134,6 +3289,10 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
       W2300PhaseSearchOutcome outcome;
       for (std::size_t phase = beginPhase; phase < endPhase; ++phase)
         {
+          if (foundCandidate.load ())
+            {
+              return outcome;
+            }
           std::vector<W2300SymbolState> const states =
               detectW2300SymbolStates (wave, phase, nsps, basis);
           std::vector<double> offsetCandidates = residualOffsets;
@@ -3174,6 +3333,11 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
                       candidate.metrics.estimatedCenterFrequencyHz =
                           config.centerFrequencyHz + totalOffset;
                       considerCandidate (&outcome, candidate);
+                      if (outcome.candidate.ok)
+                        {
+                          foundCandidate.store (true);
+                          return outcome;
+                        }
                     }
                 }
             }

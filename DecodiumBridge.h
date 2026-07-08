@@ -2628,7 +2628,11 @@ private:
     QAudioDevice       m_cachedTxOutputDevice;
     bool               m_tciAudioCaptureActive {false};
     qint64             m_lastTciAudioLogMs {0};
-    qint64             m_lastFt2LinkRxTapLogMs {0};
+    qint64             m_lastFt2LinkModernRxTapLogMs {0};
+    qint64             m_lastFt2LinkModernRxEmitMs {0};
+    bool               m_ft2LinkModernRxDrainScheduled {false};
+    QVector<short>     m_ft2LinkModernRxPending;
+    qint64             m_lastFt2LinkLegacyRxTapLogMs {0};
     qint64             m_lastFt2LinkLegacyRxEmitMs {0};
     bool               m_ft2LinkLegacyRxDrainScheduled {false};
     QVector<short>     m_ft2LinkLegacyRxPending;
@@ -3493,7 +3497,8 @@ private:
     void autoSequenceStep(const QStringList& parsedFields);
     static int periodMsForMode(const QString& mode) {
         QString const normalizedMode = mode.trimmed().toUpper();
-        if (normalizedMode=="FT2" || normalizedMode=="FT2-LINK" || normalizedMode=="FT2LINK") return 3750;
+        if (normalizedMode=="FT2-LINK" || normalizedMode=="FT2LINK") return 15000;
+        if (normalizedMode=="FT2") return 3750;
         if (mode=="FT4")      return 7500;
         if (mode=="Q65")      return 60000;
         if (mode=="MSK144")   return 15000;

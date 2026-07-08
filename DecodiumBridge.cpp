@@ -9500,7 +9500,7 @@ bool DecodiumBridge::useModernSpectrumFeedWithLegacy() const
 {
 #if defined(Q_OS_MAC)
     if (isFt2LinkApplicationMode(m_mode)) {
-        return false;
+        return true;
     }
 #endif
     // The legacy FT8/FT4 backend must own the input device while it is decoding.
@@ -9514,8 +9514,14 @@ bool DecodiumBridge::useDedicatedModernAudioCaptureWithLegacy() const
     // Direct Visual no longer opens a second QAudioSource by default when the
     // embedded legacy decoder is active. The legacy detector already exposes a
     // PCM tap; use that as the single RX source and keep the GPU-direct
-    // panadapter path downstream. The old dual-capture path remains available
-    // only for explicit diagnostics.
+    // panadapter path downstream. FT2-Link is different on macOS: the legacy
+    // tap is too sparse for the streaming modem, so use the modern capture as
+    // the single FT2-Link decoder source and ignore legacy PCM for decoding.
+#if defined(Q_OS_MAC)
+    if (isFt2LinkApplicationMode(m_mode)) {
+        return useModernSpectrumFeedWithLegacy();
+    }
+#endif
     return useModernSpectrumFeedWithLegacy()
         && qEnvironmentVariableIntValue("DECODIUM_DUAL_AUDIO_PANADAPTER", 0) != 0;
 }
@@ -10249,13 +10255,30 @@ void DecodiumBridge::syncLegacyBackendState()
     bool const allowAudioDeviceProbe = true;
 #endif
 
-    QString const legacyCallsign = m_legacyBackend->callsign();
-    if (!legacyCallsign.isEmpty()) {
-        updateString(m_callsign, legacyCallsign, [this]() { emit callsignChanged(); });
+    auto const app = QCoreApplication::instance();
+    QString const labCallsign = app
+        ? app->property("decodiumLabCallsign").toString().trimmed().toUpper()
+        : QString {};
+    QString const labGrid = app
+        ? app->property("decodiumLabGrid").toString().trimmed().toUpper()
+        : QString {};
+    bool const activeProfileRequested =
+        !decodium::activeSettingsProfileName().isEmpty();
+    if (!labCallsign.isEmpty()) {
+        updateString(m_callsign, labCallsign, [this]() { emit callsignChanged(); });
+    } else if (!activeProfileRequested) {
+        QString const legacyCallsign = m_legacyBackend->callsign();
+        if (!legacyCallsign.isEmpty()) {
+            updateString(m_callsign, legacyCallsign, [this]() { emit callsignChanged(); });
+        }
     }
-    QString const legacyGrid = m_legacyBackend->grid();
-    if (!legacyGrid.isEmpty()) {
-        updateString(m_grid, legacyGrid, [this]() { emit gridChanged(); });
+    if (!labGrid.isEmpty()) {
+        updateString(m_grid, labGrid, [this]() { emit gridChanged(); });
+    } else if (!activeProfileRequested) {
+        QString const legacyGrid = m_legacyBackend->grid();
+        if (!legacyGrid.isEmpty()) {
+            updateString(m_grid, legacyGrid, [this]() { emit gridChanged(); });
+        }
     }
 
     bool const monitorBeforeLegacySync = m_monitoring;
@@ -10282,8 +10305,12 @@ void DecodiumBridge::syncLegacyBackendState()
                                 true);
     }
     updateBool(m_decoding, m_monitoring, [this]() { emit decodingChanged(); });
+    bool const bridgeOwnedCustomTxActive =
+        m_bridgeAudioLegacyTxActive
+        || m_ft2LinkTxActive
+        || m_cwTxActive;
     bool const effectiveLegacyTransmitting =
-        legacyTransmittingNow || m_bridgeAudioLegacyTxActive;
+        legacyTransmittingNow || bridgeOwnedCustomTxActive;
     updateBool(m_transmitting, effectiveLegacyTransmitting, [this]() { emit transmittingChanged(); });
     bool const legacyTxStartedForMirror =
         usingLegacyBackendForTx()
@@ -23646,7 +23673,13 @@ QString DecodiumBridge::legacyIniPath() const
     QStringList candidates;
     QString const appName = QCoreApplication::applicationName();
     if (!appName.isEmpty()) {
-        candidates << configRoot.absoluteFilePath(appName + QStringLiteral(".ini"));
+        QString const appSpecificPath =
+            configRoot.absoluteFilePath(appName + QStringLiteral(".ini"));
+        if (QFileInfo::exists(appSpecificPath)
+            || appName.contains(QStringLiteral(" - "))) {
+            return appSpecificPath;
+        }
+        candidates << appSpecificPath;
     }
     candidates
         << configRoot.absoluteFilePath(QStringLiteral("Decodium4.ini"))
@@ -30485,13 +30518,43 @@ void DecodiumBridge::loadSettings()
     QSettings s("Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
+    auto const app = QCoreApplication::instance();
+    auto const appPropertyString = [app](char const *name) {
+        return app ? app->property(name).toString().trimmed() : QString {};
+    };
+    QString const labCallsign =
+        appPropertyString("decodiumLabCallsign").toUpper();
+    QString const labGrid =
+        appPropertyString("decodiumLabGrid").toUpper();
+    QString const activeProfileName = decodium::activeSettingsProfileName();
+    bool const activeProfileRequested = !activeProfileName.isEmpty();
     QString const legacyCallsign = legacyIni.value(QStringLiteral("MyCall")).toString().trimmed().toUpper();
     QString const legacyGrid = legacyIni.value(QStringLiteral("MyGrid")).toString().trimmed().toUpper();
     QString const bridgeCallsign = s.value("callsign", QString()).toString().trimmed().toUpper();
     QString const bridgeGrid = s.value("grid", QString()).toString().trimmed().toUpper();
-    m_callsign = !legacyCallsign.isEmpty() ? legacyCallsign : bridgeCallsign;
-    m_grid     = !legacyGrid.isEmpty() ? legacyGrid
+    if (!labCallsign.isEmpty()) {
+        m_callsign = labCallsign;
+    } else if (activeProfileRequested) {
+        m_callsign = !bridgeCallsign.isEmpty() ? bridgeCallsign : legacyCallsign;
+    } else {
+        m_callsign = !legacyCallsign.isEmpty() ? legacyCallsign : bridgeCallsign;
+    }
+    if (!labGrid.isEmpty()) {
+        m_grid = labGrid;
+    } else if (activeProfileRequested) {
+        m_grid = !bridgeGrid.isEmpty() ? bridgeGrid
+                                       : (legacyGrid.isEmpty() ? QStringLiteral("AA00") : legacyGrid);
+    } else {
+        m_grid = !legacyGrid.isEmpty() ? legacyGrid
                                        : (bridgeGrid.isEmpty() ? QStringLiteral("AA00") : bridgeGrid);
+    }
+    bridgeLog(QStringLiteral("loadSettings: profile=[%1] labCall=%2 call=%3 labGrid=%4 grid=%5 legacyIni=[%6]")
+                  .arg(activeProfileName.isEmpty() ? QStringLiteral("<root>") : activeProfileName,
+                       labCallsign.isEmpty() ? QStringLiteral("<none>") : labCallsign,
+                       m_callsign.isEmpty() ? QStringLiteral("<empty>") : m_callsign,
+                       labGrid.isEmpty() ? QStringLiteral("<none>") : labGrid,
+                       m_grid,
+                       legacyIniPath()));
     loadLogbookSettings();
     m_frequency = s.value("frequency", 14074000.0).toDouble();
     {
@@ -37600,18 +37663,23 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
     bool const feedRecorder = m_wavManager && m_wavManager->recording();
     bool const feedSpectrum = m_legacyPcmSpectrumFeed;
     bool const ft2LinkMode = isFt2LinkApplicationMode(m_mode);
+    bool const ft2LinkUsesDedicatedModernRx =
+        ft2LinkMode
+        && useModernSpectrumFeedWithLegacy()
+        && useDedicatedModernAudioCaptureWithLegacy();
     bool const feedFt2Link = ft2LinkMode
+        && !ft2LinkUsesDedicatedModernRx
         && m_monitoring
         && !m_transmitting
         && !m_tuning;
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    if (ft2LinkMode && nowMs - m_lastFt2LinkRxTapLogMs >= 2000) {
-        m_lastFt2LinkRxTapLogMs = nowMs;
+    if (ft2LinkMode && nowMs - m_lastFt2LinkLegacyRxTapLogMs >= 2000) {
+        m_lastFt2LinkLegacyRxTapLogMs = nowMs;
         qint64 const lastEmitAgeMs = m_lastFt2LinkLegacyRxEmitMs > 0
             ? nowMs - m_lastFt2LinkLegacyRxEmitMs
             : -1;
         bridgeLog(QStringLiteral(
-            "[Ft2Link][RXTAP] source=legacy samples=%1 emit=%2 spectrum=%3 recorder=%4 mode=%5 monitor=%6 tx=%7 tune=%8 pending=%9 scheduled=%10 lastEmitAgeMs=%11")
+            "[Ft2Link][RXTAP] source=legacy samples=%1 emit=%2 spectrum=%3 recorder=%4 mode=%5 monitor=%6 tx=%7 tune=%8 pending=%9 scheduled=%10 lastEmitAgeMs=%11 dedicatedModern=%12")
             .arg(sampleCount)
             .arg(feedFt2Link ? 1 : 0)
             .arg(feedSpectrum ? 1 : 0)
@@ -37622,7 +37690,8 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
             .arg(m_tuning ? 1 : 0)
             .arg(m_ft2LinkLegacyRxPending.size())
             .arg(m_ft2LinkLegacyRxDrainScheduled ? 1 : 0)
-            .arg(lastEmitAgeMs));
+            .arg(lastEmitAgeMs)
+            .arg(ft2LinkUsesDedicatedModernRx ? 1 : 0));
     }
     if (!feedFt2Link && !m_ft2LinkLegacyRxPending.isEmpty()) {
         m_ft2LinkLegacyRxPending.clear();
@@ -38155,10 +38224,24 @@ void DecodiumBridge::startAudioCapture()
                 && !m_transmitting
                 && !m_tuning;
             qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-            if (modeOk && nowMs - m_lastFt2LinkRxTapLogMs >= 2000) {
-                m_lastFt2LinkRxTapLogMs = nowMs;
+            if (modeOk && nowMs - m_lastFt2LinkModernRxTapLogMs >= 2000) {
+                m_lastFt2LinkModernRxTapLogMs = nowMs;
+                double sumSquares = 0.0;
+                int peak = 0;
+                for (short sample : samples) {
+                    int const absSample = std::abs(static_cast<int>(sample));
+                    peak = std::max(peak, absSample);
+                    double const normalized = static_cast<double>(sample) / 32768.0;
+                    sumSquares += normalized * normalized;
+                }
+                double const rms = samples.isEmpty()
+                    ? 0.0
+                    : std::sqrt(sumSquares / static_cast<double>(samples.size()));
+                qint64 const lastEmitAgeMs = m_lastFt2LinkModernRxEmitMs > 0
+                    ? nowMs - m_lastFt2LinkModernRxEmitMs
+                    : -1;
                 bridgeLog(QStringLiteral(
-                    "[Ft2Link][RXTAP] samples=%1 emit=%2 mode=%3 monitor=%4 tx=%5 tune=%6 rxSuspended=%7 sink=%8")
+                    "[Ft2Link][RXTAP] source=modern samples=%1 emit=%2 mode=%3 monitor=%4 tx=%5 tune=%6 rxSuspended=%7 sink=%8 rms=%9 peak=%10 pending=%11 scheduled=%12 lastEmitAgeMs=%13")
                     .arg(samples.size())
                     .arg(shouldEmit ? 1 : 0)
                     .arg(m_mode)
@@ -38166,13 +38249,63 @@ void DecodiumBridge::startAudioCapture()
                     .arg(m_transmitting ? 1 : 0)
                     .arg(m_tuning ? 1 : 0)
                     .arg(m_rxAudioSuspendedForTx ? 1 : 0)
-                    .arg(m_audioSink ? QStringLiteral("alive") : QStringLiteral("null")));
+                    .arg(m_audioSink ? QStringLiteral("alive") : QStringLiteral("null"))
+                    .arg(rms, 0, 'f', 4)
+                    .arg(static_cast<double>(peak) / 32768.0, 0, 'f', 4)
+                    .arg(m_ft2LinkModernRxPending.size())
+                    .arg(m_ft2LinkModernRxDrainScheduled ? 1 : 0)
+                    .arg(lastEmitAgeMs));
             }
-            if (!modeOk)
+            if (!modeOk) {
+                m_ft2LinkModernRxPending.clear();
                 return;
+            }
             if (shouldEmit) {
-                emit ft2LinkRxSamplesReady(std::move(samples),
-                                           static_cast<quint64>(nowMs));
+                if (!samples.isEmpty()) {
+                    m_ft2LinkModernRxPending += samples;
+                }
+                // QAudioSource can deliver tiny downsampled chunks (128 samples
+                // on BlackHole/CoreAudio). Batch them before handing audio to
+                // the FT2-Link worker so acquisition sees continuous windows
+                // and the worker is not flooded with thousands of queued calls.
+                static constexpr int kFt2LinkModernDrainMs = 200;
+                static constexpr int kFt2LinkModernMaxPendingSamples = 24000;
+                if (m_ft2LinkModernRxPending.size()
+                    > kFt2LinkModernMaxPendingSamples) {
+                    m_ft2LinkModernRxPending.erase(
+                        m_ft2LinkModernRxPending.begin(),
+                        m_ft2LinkModernRxPending.begin()
+                            + (m_ft2LinkModernRxPending.size()
+                               - kFt2LinkModernMaxPendingSamples));
+                }
+                if (!m_ft2LinkModernRxPending.isEmpty()
+                    && !m_ft2LinkModernRxDrainScheduled) {
+                    m_ft2LinkModernRxDrainScheduled = true;
+                    QTimer::singleShot(kFt2LinkModernDrainMs, this, [this]() {
+                        m_ft2LinkModernRxDrainScheduled = false;
+
+                        bool const canEmit = isFt2LinkApplicationMode(m_mode)
+                            && m_monitoring
+                            && !m_transmitting
+                            && !m_tuning;
+                        if (!canEmit) {
+                            m_ft2LinkModernRxPending.clear();
+                            return;
+                        }
+                        if (m_ft2LinkModernRxPending.isEmpty()) {
+                            return;
+                        }
+
+                        qint64 const drainNowMs = QDateTime::currentMSecsSinceEpoch();
+                        m_lastFt2LinkModernRxEmitMs = drainNowMs;
+                        QVector<short> batchedSamples;
+                        batchedSamples.swap(m_ft2LinkModernRxPending);
+                        emit ft2LinkRxSamplesReady(std::move(batchedSamples),
+                                                   static_cast<quint64>(drainNowMs));
+                    });
+                }
+            } else if (!m_ft2LinkModernRxPending.isEmpty()) {
+                m_ft2LinkModernRxPending.clear();
             }
         }, Qt::QueuedConnection);
         bridgeLog("audioSink created and connected");
@@ -39971,12 +40104,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
 void DecodiumBridge::updatePeriodTicksMax()
 {
     // Timer ticks at TIMER_MS (250ms). Ticks per period:
-    // FT8=15s→60, FT4=7.5s→30, FT2=3.75s→15, Q65=60s→240, MSK144=15s→60, WSPR=120s→480
+    // FT8=15s->60, FT4=7.5s->30, FT2=3.75s->15,
+    // FT2-Link=15s->60 UI/housekeeping window (not a hard TX slot),
+    // Q65=60s->240, MSK144=15s->60, WSPR=120s->480
     QString const normalizedMode = m_mode.trimmed().toUpper();
     if      (normalizedMode == "FT4")     m_periodTicksMax = 30;
-    else if (normalizedMode == "FT2"
-             || normalizedMode == "FT2-LINK"
-             || normalizedMode == "FT2LINK") m_periodTicksMax = 15;
+    else if (normalizedMode == "FT2")     m_periodTicksMax = 15;
+    else if (normalizedMode == "FT2-LINK"
+             || normalizedMode == "FT2LINK") m_periodTicksMax = 60;
     else if (normalizedMode == "Q65")     m_periodTicksMax = 240;  // 60s
     else if (normalizedMode == "MSK144")  m_periodTicksMax = 60;   // 15s
     else if (normalizedMode == "WSPR")    m_periodTicksMax = 480;  // 120s

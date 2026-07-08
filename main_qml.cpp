@@ -1242,9 +1242,16 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-mode",
         QStringLiteral("Runtime lab override for the application mode."),
         QStringLiteral("mode"));
+    QCommandLineOption const labDialHzOption(
+        QStringList {} << "lab-dial-hz",
+        QStringLiteral("Runtime lab override for the dial frequency in Hz."),
+        QStringLiteral("hz"));
     QCommandLineOption const labNoCatOption(
         QStringList {} << "lab-no-cat",
         QStringLiteral("Disable CAT auto-connect for an isolated runtime lab session."));
+    QCommandLineOption const labNoMonitorOption(
+        QStringList {} << "lab-no-monitor",
+        QStringLiteral("Force RX monitor off after lab startup/reapply for isolated TX tests."));
     QCommandLineOption const labReapplyMsOption(
         QStringList {} << "lab-reapply-ms",
         QStringLiteral("Delay before reapplying runtime lab overrides after QML/settings startup."),
@@ -1352,6 +1359,18 @@ int main(int argc, char* argv[])
         QStringLiteral("Session text used by --lab-text-ms."),
         QStringLiteral("text"),
         QStringLiteral("D4 LAB TEXT"));
+    QCommandLineOption const labQsyMsOption(
+        QStringList {} << "lab-qsy-ms",
+        QStringLiteral("Delay before sending an FT2-Link lab QSY invitation over a connected session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labQsyOffsetHzOption(
+        QStringList {} << "lab-qsy-offset-hz",
+        QStringLiteral("Frequency offset in Hz used by --lab-qsy-ms."),
+        QStringLiteral("hz"),
+        QStringLiteral("750"));
+    QCommandLineOption const labAutoAcceptQsyOption(
+        QStringList {} << "lab-auto-accept-qsy",
+        QStringLiteral("Automatically accept incoming FT2-Link QSY invitations in lab mode."));
     QCommandLineOption const labMailMsOption(
         QStringList {} << "lab-mail-ms",
         QStringLiteral("Delay before sending FT2-Link lab mailbox traffic."),
@@ -1472,7 +1491,9 @@ int main(int argc, char* argv[])
     parser.addOption(labAudioInputOption);
     parser.addOption(labAudioOutputOption);
     parser.addOption(labModeOption);
+    parser.addOption(labDialHzOption);
     parser.addOption(labNoCatOption);
+    parser.addOption(labNoMonitorOption);
     parser.addOption(labReapplyMsOption);
     parser.addOption(labMonitorMsOption);
     parser.addOption(labBcastMsOption);
@@ -1498,6 +1519,9 @@ int main(int argc, char* argv[])
     parser.addOption(labConnectGridOption);
     parser.addOption(labTextMsOption);
     parser.addOption(labTextOption);
+    parser.addOption(labQsyMsOption);
+    parser.addOption(labQsyOffsetHzOption);
+    parser.addOption(labAutoAcceptQsyOption);
     parser.addOption(labMailMsOption);
     parser.addOption(labMailSubjectOption);
     parser.addOption(labMailBodyOption);
@@ -1575,12 +1599,32 @@ int main(int argc, char* argv[])
     QString const labAudioInput = parser.value(labAudioInputOption).trimmed();
     QString const labAudioOutput = parser.value(labAudioOutputOption).trimmed();
     QString const labMode = parser.value(labModeOption).trimmed();
+    qint64 const labDialHz = parser.value(labDialHzOption).trimmed().toLongLong();
     QString const effectiveLabInput = labAudioInput.isEmpty() ? labAudioDevice : labAudioInput;
     QString const effectiveLabOutput = labAudioOutput.isEmpty() ? labAudioDevice : labAudioOutput;
+    if (!labCallsign.isEmpty()) {
+        app.setProperty("decodiumLabCallsign", labCallsign);
+    }
+    if (!labGrid.isEmpty()) {
+        app.setProperty("decodiumLabGrid", labGrid);
+    }
+    if (!labMode.isEmpty()) {
+        app.setProperty("decodiumLabMode", labMode);
+    }
+    if (!effectiveLabInput.isEmpty()) {
+        app.setProperty("decodiumLabAudioInput", effectiveLabInput);
+    }
+    if (!effectiveLabOutput.isEmpty()) {
+        app.setProperty("decodiumLabAudioOutput", effectiveLabOutput);
+    }
     bool const labNoCat = parser.isSet(labNoCatOption);
     if (labNoCat) {
         qputenv("DECODIUM_DISABLE_CAT", QByteArrayLiteral("1"));
         qInfo() << "[LAB] CAT auto-connect disabled by --lab-no-cat";
+    }
+    bool const labNoMonitor = parser.isSet(labNoMonitorOption);
+    if (labNoMonitor) {
+        qInfo() << "[LAB] RX monitor forced off by --lab-no-monitor";
     }
     auto const parseLabDelayMs = [&parser](QCommandLineOption const& option, int fallbackMs) {
         bool ok = false;
@@ -1642,6 +1686,12 @@ int main(int argc, char* argv[])
     if (labText.isEmpty()) {
         labText = QStringLiteral("D4 LAB TEXT");
     }
+    int const labQsyMs = parseLabDelayMs(labQsyMsOption, 0);
+    int const labQsyOffsetHz = qBound(
+        -5000,
+        parser.value(labQsyOffsetHzOption).trimmed().toInt(),
+        5000);
+    bool const labAutoAcceptQsy = parser.isSet(labAutoAcceptQsyOption);
     int const labMailMs = parseLabDelayMs(labMailMsOption, 0);
     QString labMailSubject = parser.value(labMailSubjectOption).trimmed();
     if (labMailSubject.isEmpty()) {
@@ -1747,6 +1797,8 @@ int main(int argc, char* argv[])
          effectiveLabInput,
          effectiveLabOutput,
          labMode,
+         labDialHz,
+         labNoMonitor,
          labPreferredProfile,
          labSupportsW2300,
          labProfileName](QString const& reason) {
@@ -1781,6 +1833,16 @@ int main(int argc, char* argv[])
                 bridge.setMode(labMode);
                 active = true;
             }
+            if (labDialHz > 0) {
+                bridge.setFrequency(static_cast<double>(labDialHz));
+                active = true;
+            }
+            if (labNoMonitor) {
+                if (bridge.monitoring()) {
+                    bridge.stopMonitor();
+                }
+                active = true;
+            }
             if (!labCallsign.isEmpty() || !labGrid.isEmpty()) {
                 QString const adapterCall = labCallsign.isEmpty() ? bridge.callsign().trimmed().toUpper() : labCallsign;
                 QString const adapterGrid = labGrid.isEmpty() ? bridge.grid().trimmed().toUpper() : labGrid;
@@ -1802,6 +1864,9 @@ int main(int argc, char* argv[])
                     << "audioIn=" << (effectiveLabInput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabInput)
                     << "audioOut=" << (effectiveLabOutput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabOutput)
                     << "mode=" << (labMode.isEmpty() ? QStringLiteral("<settings>") : labMode)
+                    << "dialHz=" << (labDialHz > 0 ? QString::number(labDialHz) : QStringLiteral("<settings>"))
+                    << "effectiveHz=" << qRound64(bridge.frequency())
+                    << "monitor=" << (labNoMonitor ? QStringLiteral("forced-off") : QStringLiteral("<settings>"))
                     << "profile=" << labProfileName;
             }
             return active;
@@ -1903,7 +1968,7 @@ int main(int argc, char* argv[])
             applyLabRuntimeOverrides(QStringLiteral("delayed"));
         });
     }
-    if (parser.isSet(labMonitorMsOption)) {
+    if (parser.isSet(labMonitorMsOption) && !labNoMonitor) {
         QTimer::singleShot(labMonitorMs, &bridge, [&bridge, applyLabRuntimeOverrides]() mutable {
             applyLabRuntimeOverrides(QStringLiteral("pre-monitor"));
             if (!bridge.monitoring()) {
@@ -1911,6 +1976,8 @@ int main(int argc, char* argv[])
             }
             qInfo() << "[LAB] monitor requested active=" << bridge.monitoring();
         });
+    } else if (parser.isSet(labMonitorMsOption) && labNoMonitor) {
+        qInfo() << "[LAB] --lab-monitor-ms ignored because --lab-no-monitor is set";
     }
     if (!labHeardCall.isEmpty()) {
         QTimer::singleShot(1000,
@@ -2167,6 +2234,141 @@ int main(int argc, char* argv[])
                 (*attempt)(0);
             });
         };
+    struct LabQsyState
+    {
+        quint16 pendingSessionId {0u};
+        qint64 pendingDialHz {0};
+        quint64 startedAtMs {0u};
+        QStringList processedMessageKeys;
+    };
+    auto labQsyState = std::make_shared<LabQsyState>();
+    labQsyState->startedAtMs = static_cast<quint64>(
+        QDateTime::currentMSecsSinceEpoch());
+    auto const labApplyQsy =
+        [&bridge](qint64 targetHz, QString const& reason) {
+            qint64 const beforeHz = qRound64(bridge.frequency());
+            bridge.qsyTo(static_cast<double>(targetHz), QStringLiteral("FT2-Link"));
+            qint64 const afterHz = qRound64(bridge.frequency());
+            qInfo().noquote()
+                << "[LAB] QSY apply"
+                << "reason=" << reason
+                << "targetHz=" << targetHz
+                << "beforeHz=" << beforeHz
+                << "afterHz=" << afterHz;
+        };
+    auto const labScheduleQsyApply =
+        [&ft2Link, &bridge, labApplyQsy](qint64 targetHz,
+                                         QString const& reason) {
+            QVariantMap const plan = ft2Link.lastRadioTxPlan();
+            int delayMs = qMax(
+                1200,
+                qRound(plan.value(QStringLiteral("audioSeconds")).toDouble()
+                       * 1000.0) + 900);
+            qInfo().noquote()
+                << "[LAB] QSY apply queued"
+                << "reason=" << reason
+                << "targetHz=" << targetHz
+                << "delayMs=" << delayMs;
+            QTimer::singleShot(delayMs, &bridge, [labApplyQsy, targetHz, reason] {
+                labApplyQsy(targetHz, reason);
+            });
+        };
+    if (labAutoAcceptQsy || parser.isSet(labQsyMsOption)) {
+        QObject::connect(&ft2Link,
+                         &FT2LinkQmlAdapter::messagesChanged,
+                         &bridge,
+                         [&ft2Link,
+                          &bridge,
+                          labQsyState,
+                          labAutoAcceptQsy,
+                          labApplyQsy,
+                          labScheduleQsyApply](quint16 sessionId) mutable {
+            QVariantList const messages = ft2Link.chatLog(sessionId);
+            for (QVariant const& value : messages) {
+                QVariantMap const message = value.toMap();
+                QString const direction =
+                    message.value(QStringLiteral("directionName")).toString();
+                if (direction != QStringLiteral("Incoming")) {
+                    continue;
+                }
+                QString const text = message.value(QStringLiteral("text")).toString();
+                quint64 const atMs = message.value(QStringLiteral("atMs")).toULongLong();
+                if (atMs > 0u && atMs < labQsyState->startedAtMs) {
+                    continue;
+                }
+                QString const upper = text.toUpper();
+                QString const key = QStringLiteral("%1|%2|%3|%4")
+                    .arg(sessionId)
+                    .arg(direction, text)
+                    .arg(static_cast<qulonglong>(atMs));
+                if (labQsyState->processedMessageKeys.contains(key)) {
+                    continue;
+                }
+
+                if ((upper.contains(QStringLiteral("<QSYJ>"))
+                     || upper.contains(QStringLiteral("<QJO>")))
+                    && labQsyState->pendingSessionId == sessionId) {
+                    labQsyState->processedMessageKeys.push_back(key);
+                    qInfo().noquote()
+                        << "[LAB] QSY rejected"
+                        << "session=" << sessionId
+                        << "text=" << text;
+                    labQsyState->pendingSessionId = 0u;
+                    labQsyState->pendingDialHz = 0;
+                    continue;
+                }
+
+                if (upper.contains(QStringLiteral("<QSYR>"))
+                    && labQsyState->pendingSessionId == sessionId
+                    && labQsyState->pendingDialHz > 0) {
+                    labQsyState->processedMessageKeys.push_back(key);
+                    qint64 const targetHz = labQsyState->pendingDialHz;
+                    labQsyState->pendingSessionId = 0u;
+                    labQsyState->pendingDialHz = 0;
+                    labApplyQsy(targetHz, QStringLiteral("remote-accepted"));
+                    continue;
+                }
+
+                if (!labAutoAcceptQsy) {
+                    continue;
+                }
+
+                QVariantMap const plan = ft2Link.qsyPlanForText(
+                    text, qRound64(bridge.frequency()));
+                if (!plan.value(QStringLiteral("valid")).toBool()) {
+                    continue;
+                }
+                labQsyState->processedMessageKeys.push_back(key);
+                qint64 const targetHz =
+                    plan.value(QStringLiteral("dialFrequencyHz")).toLongLong();
+                bool const allowed = plan.value(QStringLiteral("allowed")).toBool();
+                QString const response = allowed
+                    ? QStringLiteral("<QSYR>")
+                    : QStringLiteral("<QJO>");
+                ft2Link.setRadioTxArmed(true);
+                bool const ok = ft2Link.transmitPreparedRadioTxAudio(
+                    sessionId,
+                    response,
+                    static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+                qInfo().noquote()
+                    << "[LAB] QSY auto-accept"
+                    << "ok=" << (ok ? 1 : 0)
+                    << "session=" << sessionId
+                    << "targetHz=" << targetHz
+                    << "allowed=" << (allowed ? 1 : 0)
+                    << "response=" << response
+                    << "lastError=" << ft2Link.lastError();
+                if (ok && allowed && targetHz > 0) {
+                    labScheduleQsyApply(targetHz, QStringLiteral("local-accepted"));
+                }
+            }
+            if (labQsyState->processedMessageKeys.size() > 200) {
+                labQsyState->processedMessageKeys =
+                    labQsyState->processedMessageKeys.mid(
+                        labQsyState->processedMessageKeys.size() - 100);
+            }
+        });
+    }
     if (parser.isSet(labParkRelayMsOption)) {
         QTimer::singleShot(labParkRelayMs,
                            &ft2Link,
@@ -2259,6 +2461,63 @@ int main(int argc, char* argv[])
         QTimer::singleShot(labTextMs, &ft2Link, [textAttempt] {
             (*textAttempt)(0);
         });
+    }
+    if (parser.isSet(labQsyMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labQsyMs,
+            QStringLiteral("QSY"),
+            [&ft2Link,
+             &bridge,
+             labQsyOffsetHz,
+             labQsyState](quint16 sessionId, quint64 nowMs) {
+                if (labQsyOffsetHz == 0) {
+                    qInfo() << "[LAB] QSY invite rejected: zero offset";
+                    return false;
+                }
+                qint64 const currentHz = qRound64(bridge.frequency());
+                qint64 const proposedTargetHz = currentHz + labQsyOffsetHz;
+                QString const tag = ft2Link.qsyFrequencyTag(proposedTargetHz);
+                if (tag.isEmpty()) {
+                    qInfo() << "[LAB] QSY invite rejected: empty frequency tag";
+                    return false;
+                }
+                QVariantMap const plan = ft2Link.qsyPlanForText(tag, currentHz);
+                qint64 const targetHz =
+                    plan.value(QStringLiteral("dialFrequencyHz")).toLongLong();
+                bool const allowed =
+                    plan.value(QStringLiteral("allowed")).toBool();
+                if (!plan.value(QStringLiteral("valid")).toBool()
+                    || !allowed
+                    || targetHz <= 0) {
+                    qInfo().noquote()
+                        << "[LAB] QSY invite rejected before TX"
+                        << "session=" << sessionId
+                        << "currentHz=" << currentHz
+                        << "offsetHz=" << labQsyOffsetHz
+                        << "targetHz=" << targetHz
+                        << "allowed=" << (allowed ? 1 : 0)
+                        << "plan=" << plan;
+                    return false;
+                }
+                bool const ok = ft2Link.transmitPreparedRadioTxAudio(
+                    sessionId,
+                    tag,
+                    nowMs);
+                if (ok) {
+                    labQsyState->pendingSessionId = sessionId;
+                    labQsyState->pendingDialHz = targetHz;
+                }
+                qInfo().noquote()
+                    << "[LAB] QSY invite requested"
+                    << "ok=" << (ok ? 1 : 0)
+                    << "session=" << sessionId
+                    << "currentHz=" << currentHz
+                    << "offsetHz=" << labQsyOffsetHz
+                    << "targetHz=" << targetHz
+                    << "tag=" << tag
+                    << "lastError=" << ft2Link.lastError();
+                return ok;
+            });
     }
     if (parser.isSet(labMailMsOption)) {
         scheduleLabConnectedSessionTx(

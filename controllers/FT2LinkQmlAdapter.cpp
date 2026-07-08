@@ -10,6 +10,7 @@
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QCryptographicHash>
+#include <QDataStream>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -69,6 +70,99 @@ void logFt2LinkDiagnostic (QString const& message)
   DIAG_INFO (message);
   DecodiumLogging::flushDiagnosticLog ();
 #endif
+}
+
+QString ft2LinkRxFailDumpDir ()
+{
+  QString dir = qEnvironmentVariable ("DECODIUM_FT2LINK_DUMP_RX_FAIL_DIR")
+                    .trimmed ();
+  if (dir.isEmpty ()
+      && qEnvironmentVariableIntValue ("DECODIUM_FT2LINK_DUMP_RX_FAIL", 0)
+             != 0)
+    {
+      dir = QDir::tempPath ();
+    }
+  if (dir.isEmpty ())
+    {
+      return {};
+    }
+  QDir outDir {dir};
+  if (!outDir.exists () && !outDir.mkpath (QStringLiteral (".")))
+    {
+      return {};
+    }
+  return outDir.absolutePath ();
+}
+
+bool writeMono16DebugWav (QString const& path,
+                          std::vector<float> const& samples,
+                          int sampleRate,
+                          QString* error)
+{
+  if (path.trimmed ().isEmpty () || samples.empty () || sampleRate <= 0)
+    {
+      if (error)
+        {
+          *error = QStringLiteral ("invalid WAV dump request");
+        }
+      return false;
+    }
+
+  QSaveFile file {path};
+  if (!file.open (QIODevice::WriteOnly))
+    {
+      if (error)
+        {
+          *error = file.errorString ();
+        }
+      return false;
+    }
+
+  QByteArray pcm;
+  pcm.reserve (static_cast<int> (samples.size () * sizeof (qint16)));
+  for (float sample : samples)
+    {
+      int const value = qBound (
+          -32768,
+          static_cast<int> (std::lround (
+              std::max (-1.0f, std::min (1.0f, sample)) * 32767.0f)),
+          32767);
+      qint16 const s = static_cast<qint16> (value);
+      char bytes[2];
+      qToLittleEndian<qint16> (s, bytes);
+      pcm.append (bytes, 2);
+    }
+
+  QDataStream stream {&file};
+  stream.setByteOrder (QDataStream::LittleEndian);
+  auto writeFourCc = [&] (char const* text) {
+    stream.writeRawData (text, 4);
+  };
+  quint32 const dataBytes = static_cast<quint32> (pcm.size ());
+  writeFourCc ("RIFF");
+  stream << quint32 (36u + dataBytes);
+  writeFourCc ("WAVE");
+  writeFourCc ("fmt ");
+  stream << quint32 (16u);
+  stream << quint16 (1u);
+  stream << quint16 (1u);
+  stream << quint32 (sampleRate);
+  stream << quint32 (sampleRate * 2u);
+  stream << quint16 (2u);
+  stream << quint16 (16u);
+  writeFourCc ("data");
+  stream << dataBytes;
+  stream.writeRawData (pcm.constData (), pcm.size ());
+
+  if (!file.commit ())
+    {
+      if (error)
+        {
+          *error = file.errorString ();
+        }
+      return false;
+    }
+  return true;
 }
 
 QString utcMinuteText (quint64 atMs);
@@ -226,6 +320,39 @@ QVector<float> toSampleVector (std::vector<float> const& samples)
       out.push_back (sample);
     }
   return out;
+}
+
+std::size_t wideRuntimeGuardSamples (double sampleRate)
+{
+  if (sampleRate <= 0.0)
+    {
+      sampleRate = 48000.0;
+    }
+  constexpr double kWideRuntimeGuardMs = 120.0;
+  return static_cast<std::size_t> (
+      std::max<qint64> (0, qRound64 (sampleRate * kWideRuntimeGuardMs / 1000.0)));
+}
+
+std::vector<float> guardedWideRuntimeSamples (std::vector<float> const& samples,
+                                              double sampleRate)
+{
+  std::size_t const guard = wideRuntimeGuardSamples (sampleRate);
+  if (samples.empty () || guard == 0u)
+    {
+      return samples;
+    }
+  std::vector<float> out;
+  out.reserve (samples.size () + 2u * guard);
+  out.insert (out.end (), guard, 0.0f);
+  out.insert (out.end (), samples.begin (), samples.end ());
+  out.insert (out.end (), guard, 0.0f);
+  return out;
+}
+
+QVector<float> toGuardedWideSampleVector (std::vector<float> const& samples,
+                                          double sampleRate)
+{
+  return toSampleVector (guardedWideRuntimeSamples (samples, sampleRate));
 }
 
 std::vector<std::uint8_t> toBytes (QByteArray const& bytes)
@@ -1921,18 +2048,113 @@ QString adifField (QString const& name, QString const& value)
             clean);
 }
 
+QString cleanQsyBroadcastField (QString const& value, int maxChars)
+{
+  QString clean = value.simplified ();
+  clean.replace (QRegularExpression {QStringLiteral ("[|\\r\\n]")},
+                 QStringLiteral (" "));
+  clean = clean.simplified ().left (maxChars);
+  return clean;
+}
+
+QString makeQsyBroadcastText (qint64 dialFrequencyHz,
+                              QString const& label,
+                              QString const& reason)
+{
+  if (dialFrequencyHz <= 0)
+    {
+      return {};
+    }
+
+  QStringList parts;
+  parts.push_back (QStringLiteral ("QSY"));
+  parts.push_back (QString::number (dialFrequencyHz));
+  parts.push_back (QStringLiteral ("Hz"));
+  QString const cleanLabel = cleanQsyBroadcastField (label, 48);
+  if (!cleanLabel.isEmpty ())
+    {
+      parts.push_back (cleanLabel);
+    }
+  QString const cleanReason = cleanQsyBroadcastField (reason, 24).toUpper ();
+  if (!cleanReason.isEmpty ())
+    {
+      parts.push_back (QStringLiteral ("[%1]").arg (cleanReason));
+    }
+  return parts.join (QStringLiteral (" ")).trimmed ();
+}
+
+bool parseQsyBroadcastText (QString const& text,
+                            qint64* dialFrequencyHz,
+                            QString* label,
+                            QString* reason)
+{
+  QRegularExpression const re {
+    QStringLiteral ("^\\s*QSY\\s+([0-9]{5,})\\s*(?:HZ)?\\s*(.*)$"),
+    QRegularExpression::CaseInsensitiveOption
+  };
+  QRegularExpressionMatch const match = re.match (text);
+  if (!match.hasMatch ())
+    {
+      return false;
+    }
+
+  bool ok = false;
+  qint64 const hz = match.captured (1).toLongLong (&ok);
+  if (!ok || hz <= 0)
+    {
+      return false;
+    }
+
+  QString tail = match.captured (2).simplified ();
+  QString parsedReason;
+  QRegularExpression const reasonRe {
+    QStringLiteral ("\\s*\\[([^\\]]+)\\]\\s*$")
+  };
+  QRegularExpressionMatch const reasonMatch = reasonRe.match (tail);
+  if (reasonMatch.hasMatch ())
+    {
+      parsedReason = reasonMatch.captured (1).simplified ();
+      tail = tail.left (reasonMatch.capturedStart ()).simplified ();
+    }
+
+  if (dialFrequencyHz)
+    {
+      *dialFrequencyHz = hz;
+    }
+  if (label)
+    {
+      *label = tail;
+    }
+  if (reason)
+    {
+      *reason = parsedReason;
+    }
+  return true;
+}
+
 QVariantMap broadcastMap (QString const& fromCall,
                           QString const& text,
                           QString const& source,
                           QStringList const& alertTags,
                           quint64 atMs)
 {
+  qint64 qsyDialFrequencyHz = 0;
+  QString qsyLabel;
+  QString qsyReason;
+  bool const qsy = parseQsyBroadcastText (
+      text, &qsyDialFrequencyHz, &qsyLabel, &qsyReason);
+
   QVariantMap map;
   map.insert (QStringLiteral ("fromCall"), fromCall);
   map.insert (QStringLiteral ("text"), text);
   map.insert (QStringLiteral ("source"), source);
   map.insert (QStringLiteral ("alertTags"), alertTags);
   map.insert (QStringLiteral ("alert"), !alertTags.isEmpty ());
+  map.insert (QStringLiteral ("qsy"), qsy);
+  map.insert (QStringLiteral ("dialFrequencyHz"),
+              QVariant::fromValue<qlonglong> (qsyDialFrequencyHz));
+  map.insert (QStringLiteral ("qsyLabel"), qsyLabel);
+  map.insert (QStringLiteral ("qsyReason"), qsyReason);
   map.insert (QStringLiteral ("atMs"),
               QVariant::fromValue<qulonglong> (atMs));
   return map;
@@ -3652,7 +3874,8 @@ bool buildAckAudio (Frame const& ack,
             }
           sampleCount += trace.sampleCount;
         }
-      *samples = toSampleVector (txAudio.samples ());
+      *samples = toGuardedWideSampleVector (txAudio.samples (),
+                                            config.sampleRate);
     }
   else
     {
@@ -3672,7 +3895,8 @@ bool buildAckAudio (Frame const& ack,
             }
           sampleCount += trace.sampleCount;
         }
-      *samples = toSampleVector (txAudio.samples ());
+      *samples = toGuardedWideSampleVector (txAudio.samples (),
+                                            config.sampleRate);
     }
 
   if (samples->isEmpty ())
@@ -3762,7 +3986,17 @@ bool buildNarrowControlAudio (Frame const& frame,
       return false;
     }
 
-  *samples = toSampleVector (wave);
+  // Real audio devices can drop or ramp the very first frames when a TX stream
+  // starts. NARROW control bursts begin with the sync preamble, so add a small
+  // silent guard around the generated waveform before handing it to SoundOutput.
+  constexpr std::size_t kNarrowControlGuardSamples = 4800u; // 100 ms @ 48 kHz
+  std::vector<float> guarded;
+  guarded.reserve (wave.size () + 2u * kNarrowControlGuardSamples);
+  guarded.insert (guarded.end (), kNarrowControlGuardSamples, 0.0f);
+  guarded.insert (guarded.end (), wave.begin (), wave.end ());
+  guarded.insert (guarded.end (), kNarrowControlGuardSamples, 0.0f);
+
+  *samples = toSampleVector (guarded);
 
   QVariantMap controlPlan;
   controlPlan.insert (QStringLiteral ("ok"), true);
@@ -3806,11 +4040,19 @@ bool buildNarrowControlAudio (Frame const& frame,
   controlPlan.insert (QStringLiteral ("burstCount"), 1);
   controlPlan.insert (QStringLiteral ("sampleRate"), config.sampleRate);
   controlPlan.insert (QStringLiteral ("sampleCount"),
-                      QVariant::fromValue<qulonglong> (
-                          static_cast<qulonglong> (samples->size ())));
+                  QVariant::fromValue<qulonglong> (
+                      static_cast<qulonglong> (samples->size ())));
   controlPlan.insert (QStringLiteral ("totalSamples"),
+                  QVariant::fromValue<qulonglong> (
+                      static_cast<qulonglong> (samples->size ())));
+  controlPlan.insert (QStringLiteral ("guardBeforeSamples"),
                       QVariant::fromValue<qulonglong> (
-                          static_cast<qulonglong> (samples->size ())));
+                          static_cast<qulonglong> (
+                              kNarrowControlGuardSamples)));
+  controlPlan.insert (QStringLiteral ("guardAfterSamples"),
+                      QVariant::fromValue<qulonglong> (
+                          static_cast<qulonglong> (
+                              kNarrowControlGuardSamples)));
   controlPlan.insert (QStringLiteral ("audioSeconds"),
                       static_cast<double> (samples->size ()) / config.sampleRate);
   controlPlan.insert (QStringLiteral ("format"), QStringLiteral ("float32 mono"));
@@ -4834,7 +5076,8 @@ bool FT2LinkQmlAdapter::transmitBroadcastRadio (QString const& text, quint64 now
                        static_cast<qulonglong> (nowMs)));
 
       enqueueRadioTx (QStringLiteral ("FT2-Link BCAST"),
-                      toSampleVector (widePlan.samples),
+                      toGuardedWideSampleVector (widePlan.samples,
+                                                 widePlan.sampleRate),
                       plan,
                       nowMs,
                       false,
@@ -5282,19 +5525,48 @@ bool FT2LinkQmlAdapter::queueBeaconRadio (bool cq,
 bool FT2LinkQmlAdapter::startSessionRadioHandshake (QString const& remoteCall,
                                                     quint64 nowMs)
 {
+  QString const normalizedRemote = normalizeCallsign (remoteCall);
+  QString const localCall = normalizeCallsign (
+      QString::fromStdString (m_model.localStation ().call));
+  LinkCapabilities const localCapabilities = m_model.localCapabilities ();
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][HANDSHAKE] start HELLO remote=%1 local=%2 armed=%3"
+          " profile=%4 rate=%5 sessions=%6")
+          .arg (normalizedRemote.isEmpty () ? QStringLiteral ("?") : normalizedRemote)
+          .arg (localCall.isEmpty () ? QStringLiteral ("?") : localCall)
+          .arg (m_radioTxArmed ? 1 : 0)
+          .arg (QString::fromStdString (
+              decodium::ft2link::profileName (
+                  localCapabilities.preferredProfile)))
+          .arg (QString::fromLatin1 (
+              decodium::ft2link::w2300RateModeName (
+                  localCapabilities.preferredW2300RateMode)))
+          .arg (sessionCount ()));
   if (!m_radioTxArmed)
     {
       setLastError (QStringLiteral ("FT2-Link HELLO radio TX is not armed"));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] start HELLO blocked reason=not-armed"
+              " remote=%1")
+              .arg (normalizedRemote.isEmpty ()
+                    ? QStringLiteral ("?")
+                    : normalizedRemote));
       return false;
     }
 
   int const before = sessionCount ();
   std::string error;
-  QString const normalizedRemote = normalizeCallsign (remoteCall);
   if (isCallBlocked (normalizedRemote))
     {
       setLastError (QStringLiteral ("FT2-Link blocked callsign %1")
                     .arg (normalizedRemote));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] start HELLO blocked reason=blocked-call"
+              " remote=%1")
+              .arg (normalizedRemote));
       return false;
     }
   Frame hello = m_model.startSession (
@@ -5302,6 +5574,13 @@ bool FT2LinkQmlAdapter::startSessionRadioHandshake (QString const& remoteCall,
   if (!error.empty ())
     {
       setLastError (QString::fromStdString (error));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] start HELLO failed remote=%1 error=\"%2\"")
+              .arg (normalizedRemote.isEmpty ()
+                    ? QStringLiteral ("?")
+                    : normalizedRemote,
+                    QString::fromStdString (error)));
       return false;
     }
   clearChatLogForSession (hello.sessionId);
@@ -5317,6 +5596,13 @@ bool FT2LinkQmlAdapter::startSessionRadioHandshake (QString const& remoteCall,
 
   bool const queued = requestControlRadioTx (
       hello, QStringLiteral ("HELLO"), normalizedRemote, nowMs);
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][HANDSHAKE] HELLO request session=%1 remote=%2 queued=%3")
+          .arg (hello.sessionId)
+          .arg (normalizedRemote.isEmpty () ? QStringLiteral ("?")
+                                           : normalizedRemote)
+          .arg (queued ? 1 : 0));
   if (queued)
     {
       scheduleHelloRetry (hello, normalizedRemote, nowMs);
@@ -6494,7 +6780,8 @@ bool FT2LinkQmlAdapter::prepareRadioTxAudio (quint16 sessionId,
           QStringLiteral ("lastRxFrequencyOffsetHz"),
           metrics->second.estimatedFrequencyOffsetHz);
     }
-  m_preparedRadioTxSamples = plan.samples;
+  m_preparedRadioTxSamples = guardedWideRuntimeSamples (plan.samples,
+                                                        plan.sampleRate);
   m_preparedRadioTxSessionId = plan.ok ? sessionId : 0u;
   m_preparedRadioTxText = plan.ok ? text.trimmed () : QString {};
   m_preparedRadioTxW2300RateMode = options.w2300RateMode;
@@ -7402,6 +7689,44 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
       return false;
     }
 
+  if (nowMs < m_lastRxIngestLogMs || nowMs - m_lastRxIngestLogMs >= 2000u)
+    {
+      m_lastRxIngestLogMs = nowMs;
+      double sumSquares = 0.0;
+      int peak = 0;
+      int nonZero = 0;
+      int aboveNoise = 0;
+      for (short sample : samples)
+        {
+          int const value = static_cast<int> (sample);
+          int const absSample = std::abs (value);
+          peak = std::max (peak, absSample);
+          sumSquares += static_cast<double> (value) * value;
+          if (absSample > 0)
+            {
+              ++nonZero;
+            }
+          if (absSample >= 33)
+            {
+              ++aboveNoise;
+            }
+        }
+      double const rms = std::sqrt (
+          sumSquares / static_cast<double> (std::max<qsizetype> (1, samples.size ())))
+          / 32768.0;
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][RXINGEST] samples=%1 rms=%2 peak=%3 nonzero=%4"
+              " aboveNoise=%5 remote=\"%6\" workerThread=%7")
+              .arg (samples.size ())
+              .arg (rms, 0, 'f', 4)
+              .arg (static_cast<double> (peak) / 32768.0, 0, 'f', 4)
+              .arg (nonZero)
+              .arg (aboveNoise)
+              .arg (remoteCall)
+              .arg (m_decodeThread.isRunning () ? 1 : 0));
+    }
+
   auto const _ingestStart = std::chrono::steady_clock::now ();
   if (m_rfLabRecording)
     {
@@ -7423,6 +7748,7 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
   // test) la chiamata e' diretta e la semantica storica e' preservata.
   LinkCapabilities const localCapabilities = m_model.localCapabilities ();
   bool wideSessionActive = false;
+  bool callingSessionActive = false;
   std::vector<AppSession> const sessions = m_model.sessions ();
   for (AppSession const& session : sessions)
     {
@@ -7433,8 +7759,17 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
           wideSessionActive = true;
           break;
         }
+      if (session.state == AppSessionState::Calling)
+        {
+          callingSessionActive = true;
+        }
     }
-  bool const opportunisticWideDecode = !wideSessionActive
+  // A preferred W500/W2300 profile is only the post-handshake target.  HELLO,
+  // HELLO_ACK and CQ are NARROW control frames; running foreground wide decode
+  // while a call is pending burns CPU and can delay/kill the control path.
+  bool const foregroundWideDecode = wideSessionActive;
+  bool const opportunisticWideDecode = !foregroundWideDecode
+      && !callingSessionActive
       && (localCapabilities.supportsW500 || localCapabilities.supportsW2300);
 
   bool result = true;
@@ -7443,10 +7778,10 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
       FT2LinkDecodeWorker* worker = m_decodeWorker;
       QMetaObject::invokeMethod (
           worker,
-          [worker, samples, remoteCall, nowMs, wideSessionActive,
+          [worker, samples, remoteCall, nowMs, foregroundWideDecode,
            opportunisticWideDecode] {
             worker->processChunk (samples, remoteCall, nowMs,
-                                  wideSessionActive,
+                                  foregroundWideDecode,
                                   opportunisticWideDecode);
           },
           Qt::QueuedConnection);
@@ -7454,7 +7789,7 @@ bool FT2LinkQmlAdapter::ingestRxSamples (QVector<short> const& samples,
   else
     {
       result = m_decodeWorker->processChunk (
-          samples, remoteCall, nowMs, wideSessionActive,
+          samples, remoteCall, nowMs, foregroundWideDecode,
           opportunisticWideDecode);
     }
   recordIngestTiming (_ingestStart);
@@ -7594,8 +7929,18 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
 
   bool decodedAny = false;
   m_narrowRx.insert (m_narrowRx.end (), chunk.begin (), chunk.end ());
-  constexpr std::size_t kIdleNarrowRxSamples = 72000u;
+  // Keep only a short pre-roll while idle.  A complete NARROW HELLO/CQ is
+  // captured after the busy edge; keeping old idle audio here makes the first
+  // acquisition pass scan mostly silence and miss the real burst.
+  constexpr std::size_t kIdleNarrowRxSamples = 24000u;
   constexpr std::size_t kMaxBufferedNarrowRxSamples = 240000u;
+  constexpr std::size_t kBusyEdgeNarrowPrerollSamples = 12000u;
+  // NARROW control frames (HELLO/CQ/ACK) are long enough that a half-filled
+  // buffer cannot decode, but the acquisition scan is still expensive. Wait
+  // until a realistic control burst is present, or until the channel falls
+  // idle and we get the final acquisition pass.
+  constexpr std::size_t kMinLiveNarrowDecodeSamples = 84000u;
+  constexpr std::size_t kMinFinalNarrowDecodeSamples = 60000u;
   if (m_narrowRx.size () > kMaxBufferedNarrowRxSamples)
     {
       std::size_t const dropped =
@@ -7627,30 +7972,122 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   // attivo a pieno rate solo perche' la stazione supporta W500/W2300 satura la
   // CPU su rumore HF. Wide pieno solo in sessione; fuori sessione resta un
   // ascolto opportunistico piu' lento per broadcast larghi.
+  bool const wasChannelBusy = m_wasChannelBusy;
   bool const channelBusy = busyNow (nowMs);
-  constexpr quint64 kNarrowDecodeThrottleMs = 250u;
+  if (channelBusy && !wasChannelBusy)
+    {
+      m_narrowFailDumped = false;
+      m_lastNarrowScanLogMs = 0u;
+      std::size_t const droppedW2300 = m_w2300Rx.bufferedSamples ();
+      std::size_t const droppedW500 = m_w500Rx.bufferedSamples ();
+      if (droppedW2300 > 0u || droppedW500 > 0u)
+        {
+          m_w2300Rx.clear ();
+          m_w500Rx.clear ();
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][RXBUF] wide busy-edge clear w2300Drop=%1"
+                  " w500Drop=%2 rms=%3 peak=%4")
+                  .arg (droppedW2300)
+                  .arg (droppedW500)
+                  .arg (m_lastRms, 0, 'f', 4)
+                  .arg (m_lastPeak, 0, 'f', 4));
+        }
+      std::size_t const busyEdgeKeep = std::min (
+          m_narrowRx.size (), chunk.size () + kBusyEdgeNarrowPrerollSamples);
+      if (m_narrowRx.size () > busyEdgeKeep)
+        {
+          std::size_t const dropped =
+              m_narrowRx.size () - busyEdgeKeep;
+          m_narrowRx.erase (
+              m_narrowRx.begin (),
+              m_narrowRx.begin ()
+                  + static_cast<std::vector<float>::difference_type> (dropped));
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][RXBUF] busy-edge trim drop=%1 keep=%2"
+                  " chunk=%3 preroll=%4 rms=%5 peak=%6")
+                  .arg (dropped)
+                  .arg (m_narrowRx.size ())
+                  .arg (chunk.size ())
+                  .arg (kBusyEdgeNarrowPrerollSamples)
+                  .arg (m_lastRms, 0, 'f', 4)
+                  .arg (m_lastPeak, 0, 'f', 4));
+        }
+    }
+  bool const finalDecodeWindow = !channelBusy && wasChannelBusy;
+  m_wasChannelBusy = channelBusy;
+  constexpr quint64 kNarrowDecodeThrottleMs = 750u;
   constexpr quint64 kConnectedWideDecodeThrottleMs = 200u;
   constexpr quint64 kOpportunisticWideDecodeThrottleMs = 5000u;
   bool const narrowDecodeDue =
-      (nowMs - m_lastDecodeMs) >= kNarrowDecodeThrottleMs
+      finalDecodeWindow
+      || (nowMs - m_lastDecodeMs) >= kNarrowDecodeThrottleMs
       || nowMs < m_lastDecodeMs;  // guardia wrap/reset del clock
-  bool const runNarrowDecode = channelBusy && narrowDecodeDue;
+  std::size_t const narrowDecodeMinSamples =
+      finalDecodeWindow ? kMinFinalNarrowDecodeSamples
+                        : kMinLiveNarrowDecodeSamples;
+  bool const runNarrowDecode =
+      (channelBusy || finalDecodeWindow)
+      && narrowDecodeDue
+      && m_narrowRx.size () >= narrowDecodeMinSamples;
   if (runNarrowDecode)
     {
       m_lastDecodeMs = nowMs;
+    }
+  bool const logNarrowScan =
+      runNarrowDecode
+      && (finalDecodeWindow
+          || nowMs < m_lastNarrowScanLogMs
+          || nowMs - m_lastNarrowScanLogMs >= 2000u);
+  if (logNarrowScan)
+    {
+      m_lastNarrowScanLogMs = nowMs;
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][RXSCAN] profile=NARROW start final=%1 busy=%2"
+              " samples=%3 min=%4 rms=%5 peak=%6")
+              .arg (finalDecodeWindow ? 1 : 0)
+              .arg (channelBusy ? 1 : 0)
+              .arg (m_narrowRx.size ())
+              .arg (narrowDecodeMinSamples)
+              .arg (m_lastRms, 0, 'f', 4)
+              .arg (m_lastPeak, 0, 'f', 4));
+    }
+  else if (finalDecodeWindow && !runNarrowDecode
+           && (nowMs < m_lastNarrowScanLogMs
+               || nowMs - m_lastNarrowScanLogMs >= 2000u))
+    {
+      m_lastNarrowScanLogMs = nowMs;
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][RXSCAN] profile=NARROW skip final=1 busy=0"
+              " samples=%1 min=%2 rms=%3 peak=%4 due=%5")
+              .arg (m_narrowRx.size ())
+              .arg (narrowDecodeMinSamples)
+              .arg (m_lastRms, 0, 'f', 4)
+              .arg (m_lastPeak, 0, 'f', 4)
+              .arg (narrowDecodeDue ? 1 : 0));
     }
   bool const wideDecodeEnabled = wideSessionActive || opportunisticWideDecode;
   quint64 const wideThrottleMs = wideSessionActive
       ? kConnectedWideDecodeThrottleMs
       : kOpportunisticWideDecodeThrottleMs;
   bool const wideDecodeDue =
-      (nowMs - m_lastWideDecodeMs) >= wideThrottleMs
+      finalDecodeWindow
+      || (nowMs - m_lastWideDecodeMs) >= wideThrottleMs
       || nowMs < m_lastWideDecodeMs;
   bool const wideEnergyGate = wideSessionActive
       ? (m_lastRms >= 0.010 || m_lastPeak >= 0.060)
       : (m_lastRms >= 0.055 || m_lastPeak >= 0.350);
+  bool const wideDecodeWindow =
+      wideSessionActive ? (channelBusy || finalDecodeWindow)
+                        : finalDecodeWindow;
   bool const runWideDecode =
-      channelBusy && wideDecodeEnabled && wideDecodeDue && wideEnergyGate;
+      wideDecodeWindow
+      && wideDecodeEnabled
+      && wideDecodeDue
+      && (wideEnergyGate || finalDecodeWindow);
   if (runWideDecode)
     {
       m_lastWideDecodeMs = nowMs;
@@ -7658,7 +8095,9 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   QString narrowError;
   QString w2300Error;
   QString w500Error;
-  if (!channelBusy && m_narrowRx.size () > kIdleNarrowRxSamples)
+  bool decodedNarrowAny = false;
+  if (!channelBusy && !finalDecodeWindow
+      && m_narrowRx.size () > kIdleNarrowRxSamples)
     {
       m_narrowRx.erase (
           m_narrowRx.begin (),
@@ -7672,24 +8111,70 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
       decodium::ft2link::NarrowDecodeMetrics metrics;
       std::string decodeError;
       decodium::ft2link::NarrowWaveformConfig config;
+      auto const scanStart = std::chrono::steady_clock::now ();
       if (!decodium::ft2link::decodeNarrowFrameWaveformWithMetrics (
               m_narrowRx, &decoded, &metrics, config, &decodeError))
         {
           narrowError = QString::fromStdString (decodeError);
+          qint64 const elapsedMs = static_cast<qint64> (
+              std::chrono::duration_cast<std::chrono::milliseconds> (
+                  std::chrono::steady_clock::now () - scanStart)
+                  .count ());
+          if (logNarrowScan || elapsedMs >= 200)
+            {
+              logFt2LinkDiagnostic (
+                  QStringLiteral (
+                      "[Ft2Link][RXSCAN] profile=NARROW done ok=0"
+                      " elapsedMs=%1 error=\"%2\" samples=%3")
+                      .arg (elapsedMs)
+                      .arg (narrowError)
+                      .arg (m_narrowRx.size ()));
+            }
+          if (!m_narrowFailDumped
+              && (m_lastRms >= 0.020 || m_lastPeak >= 0.120))
+            {
+              QString const dumpDir = ft2LinkRxFailDumpDir ();
+              if (!dumpDir.isEmpty ())
+                {
+                  QString const dumpPath = QDir (dumpDir).filePath (
+                      QStringLiteral ("ft2link-narrow-rxfail-%1-%2.wav")
+                          .arg (QDateTime::currentDateTimeUtc ().toString (
+                              QStringLiteral ("yyyyMMdd-HHmmss-zzz")))
+                          .arg (QCoreApplication::applicationPid ()));
+                  QString dumpError;
+                  bool const dumpOk = writeMono16DebugWav (
+                      dumpPath, m_narrowRx, 12000, &dumpError);
+                  m_narrowFailDumped = dumpOk;
+                  logFt2LinkDiagnostic (
+                      QStringLiteral (
+                          "[Ft2Link][RXDUMP] profile=NARROW ok=%1 path=\"%2\""
+                          " samples=%3 error=\"%4\"")
+                          .arg (dumpOk ? 1 : 0)
+                          .arg (dumpPath)
+                          .arg (m_narrowRx.size ())
+                          .arg (dumpError));
+                }
+            }
           break;
         }
+      qint64 const elapsedMs = static_cast<qint64> (
+          std::chrono::duration_cast<std::chrono::milliseconds> (
+              std::chrono::steady_clock::now () - scanStart)
+              .count ());
 
       decodedAny = true;
+      decodedNarrowAny = true;
       logFt2LinkDiagnostic (
           QStringLiteral (
               "[Ft2Link][RXDECODE] profile=NARROW centerHz=%1 offsetHz=%2"
-              " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6")
+              " quality=%3 bytes=%4 sampleOffset=%5 symbols=%6 elapsedMs=%7")
               .arg (metrics.estimatedCenterFrequencyHz, 0, 'f', 1)
               .arg (metrics.estimatedFrequencyOffsetHz, 0, 'f', 1)
               .arg (metrics.quality, 0, 'f', 3)
               .arg (metrics.packetBytes)
               .arg (metrics.sampleOffset)
-              .arg (metrics.symbolCount));
+              .arg (metrics.symbolCount)
+              .arg (elapsedMs));
       std::size_t const nsps = static_cast<std::size_t> (
           config.sampleRate / config.symbolRate + 0.5);
       std::size_t const consumed = std::min (
@@ -7706,6 +8191,17 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
           nowMs);
     }
 
+  if (decodedNarrowAny)
+    {
+      // A NARROW control burst can be followed by W2300/W500 traffic, but the
+      // same audio window must not seed the wide receivers. Otherwise a clean
+      // HELLO/HELLO_ACK can leave narrow control audio at the head of the wide
+      // buffer and make the first connected-session data burst look truncated.
+      m_w500Rx.clear ();
+      m_w2300Rx.clear ();
+      return decodedAny;
+    }
+
   if (!wideDecodeEnabled || stopRequested ())
     {
       if (runNarrowDecode && !decodedAny && channelBusy)
@@ -7719,15 +8215,27 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   m_w500Rx.append (chunk);
   m_w2300Rx.append (chunk);
 
-  constexpr std::size_t kIdleWideWindow = 72000u;      // ~finestra corta, no scan
+  constexpr std::size_t kIdleWideWindow = 160000u;     // keep one recent RF burst
   constexpr std::size_t kMaxBufferedRxSamples = 240000u;
-  constexpr std::size_t kOpportunisticW2300Window = 96000u;
+  constexpr std::size_t kOpportunisticW2300Window = 160000u;
+  constexpr std::size_t kMinLiveW2300DecodeSamples = 30000u;
+  constexpr std::size_t kMinFinalW2300DecodeSamples = 24000u;
   m_w500Rx.dropToLastSamples (kMaxBufferedRxSamples);
   m_w2300Rx.dropToLastSamples (
       opportunisticWideDecode ? kOpportunisticW2300Window
                               : kMaxBufferedRxSamples);
 
+  bool w2300WaitingForCompleteBurst = false;
   auto decodeW2300 = [&] {
+    std::size_t const minDecodeSamples = finalDecodeWindow
+        ? kMinFinalW2300DecodeSamples
+        : kMinLiveW2300DecodeSamples;
+    if (m_w2300Rx.bufferedSamples () < minDecodeSamples)
+      {
+        w2300WaitingForCompleteBurst = true;
+        w2300Error = QStringLiteral ("W2300 wait for complete burst");
+        return;
+      }
     for (int attempt = 0; runWideDecode && !stopRequested () && attempt < 4; ++attempt)
       {
         Frame decoded;
@@ -7802,7 +8310,7 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   else
     {
       decodeW2300 ();
-      if (!decodedAny)
+      if (!decodedAny && !w2300WaitingForCompleteBurst)
         {
           decodeW500 ();
         }
@@ -7811,7 +8319,7 @@ bool FT2LinkDecodeWorker::processChunk (QVector<short> const& samples,
   // 1.0.452 iu8lmc fix (freeze FT2-Link wide): su canale muto finestra
   // scorrevole PRE-decode; il reset 240000 resta come rete di sicurezza per il
   // caso canale-attivo-ma-non-decodifica (garbage/RX resync).
-  if (!channelBusy)
+  if (!channelBusy && !finalDecodeWindow)
     {
       m_w500Rx.dropToLastSamples (kIdleWideWindow);
       m_w2300Rx.dropToLastSamples (kIdleWideWindow);
@@ -7893,12 +8401,26 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       decodium::ft2link::HandshakeIdentity beaconIdentity;
       bool ignoredCq = false;
       std::string beaconParseError;
-      if (decodium::ft2link::parseBeaconFrame (
-              frame,
-              &ignoredCapabilities,
-              &beaconIdentity,
-              &ignoredCq,
-              &beaconParseError)
+      bool const beaconParsed = decodium::ft2link::parseBeaconFrame (
+          frame,
+          &ignoredCapabilities,
+          &beaconIdentity,
+          &ignoredCq,
+          &beaconParseError);
+      QString const localCall = normalizeCallsign (
+          QString::fromStdString (m_model.localStation ().call));
+      QString const beaconCall = normalizeCallsign (
+          QString::fromStdString (beaconIdentity.call));
+      if (beaconParsed && !localCall.isEmpty () && beaconCall == localCall)
+        {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] ignored self BEACON call=%1")
+                  .arg (beaconCall));
+          clearLastError ();
+          return true;
+        }
+      if (beaconParsed
           && isCallBlocked (QString::fromStdString (beaconIdentity.call)))
         {
           setTransportState (ignoredCq
@@ -8127,6 +8649,43 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
 
   if (frame.type == decodium::ft2link::FrameType::Hello)
     {
+      LinkCapabilities remoteCapabilities;
+      decodium::ft2link::HandshakeIdentity remoteIdentity;
+      std::string helloParseError;
+      bool const helloParsed = decodium::ft2link::parseHelloFrame (
+          frame, &remoteCapabilities, &remoteIdentity, &helloParseError);
+      QString const helloIdentityCall = normalizeCallsign (
+          QString::fromStdString (remoteIdentity.call));
+      QString const localCall = normalizeCallsign (
+          QString::fromStdString (m_model.localStation ().call));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] rx HELLO session=%1 remoteArg=%2"
+              " identity=%3 autoAck=%4 parsed=%5 err=\"%6\"")
+              .arg (frame.sessionId)
+              .arg (remoteCall.trimmed ().isEmpty ()
+                    ? QStringLiteral ("?")
+                    : remoteCall.trimmed ().toUpper ())
+              .arg (helloIdentityCall.isEmpty ()
+                    ? QStringLiteral ("?")
+                    : helloIdentityCall)
+              .arg (autoAck ? 1 : 0)
+              .arg (helloParsed ? 1 : 0)
+              .arg (QString::fromStdString (helloParseError)));
+      if (helloParsed && !localCall.isEmpty ()
+          && helloIdentityCall == localCall)
+        {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] ignored self HELLO session=%1"
+                  " call=%2")
+                  .arg (frame.sessionId)
+                  .arg (localCall));
+          setTransportState (QStringLiteral ("SELF HELLO"));
+          clearLastError ();
+          return true;
+        }
+
       int const before = sessionCount ();
       Frame helloAck;
       QString resolvedBlockedRemote;
@@ -8143,12 +8702,22 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           recordQsoSession (
               frame.sessionId, nowMs, QStringLiteral ("HELLO blocked"));
           setTransportState (QStringLiteral ("HELLO blocked"));
-          if (autoAck
-              && !requestControlRadioTx (
-                  helloAck,
-                  QStringLiteral ("HELLO_ACK"),
-                  resolvedBlockedRemote,
-                  nowMs))
+          bool const ackQueued = autoAck
+              && requestControlRadioTx (
+                     helloAck,
+                     QStringLiteral ("HELLO_ACK"),
+                     resolvedBlockedRemote,
+                     nowMs);
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] tx HELLO_ACK blocked session=%1"
+                  " remote=%2 queued=%3")
+                  .arg (frame.sessionId)
+                  .arg (resolvedBlockedRemote.isEmpty ()
+                        ? QStringLiteral ("?")
+                        : resolvedBlockedRemote)
+                  .arg (ackQueued ? 1 : 0));
+          if (autoAck && !ackQueued)
             {
               return false;
             }
@@ -8161,6 +8730,15 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           toStdString (remoteCall), frame, nowMs, &helloAck, &error);
       if (!accepted && helloAck.type != decodium::ft2link::FrameType::HelloAck)
         {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] answer HELLO failed session=%1"
+                  " remoteArg=%2 error=\"%3\"")
+                  .arg (frame.sessionId)
+                  .arg (remoteCall.trimmed ().isEmpty ()
+                        ? QStringLiteral ("?")
+                        : remoteCall.trimmed ().toUpper ())
+                  .arg (QString::fromStdString (error)));
           setLastError (QString::fromStdString (error));
           return false;
         }
@@ -8184,9 +8762,25 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
         {
           resolvedRemote = QString::fromStdString (answeredSession->remoteCall);
         }
+      bool const ackQueued = autoAck
+          && helloAck.type == decodium::ft2link::FrameType::HelloAck
+          && requestControlRadioTx (
+                 helloAck, QStringLiteral ("HELLO_ACK"), resolvedRemote, nowMs);
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] answer HELLO session=%1 remote=%2"
+              " accepted=%3 ackType=%4 autoAck=%5 ackQueued=%6 error=\"%7\"")
+              .arg (frame.sessionId)
+              .arg (resolvedRemote.isEmpty () ? QStringLiteral ("?")
+                                              : resolvedRemote)
+              .arg (accepted ? 1 : 0)
+              .arg (QString::fromStdString (
+                  decodium::ft2link::frameTypeName (helloAck.type)))
+              .arg (autoAck ? 1 : 0)
+              .arg (ackQueued ? 1 : 0)
+              .arg (QString::fromStdString (error)));
       if (autoAck && helloAck.type == decodium::ft2link::FrameType::HelloAck
-          && !requestControlRadioTx (
-              helloAck, QStringLiteral ("HELLO_ACK"), resolvedRemote, nowMs))
+          && !ackQueued)
         {
           return false;
         }
@@ -8206,8 +8800,62 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
 
   if (frame.type == decodium::ft2link::FrameType::HelloAck)
     {
+      LinkCapabilities remoteCapabilities;
+      decodium::ft2link::NegotiatedLink negotiated;
+      decodium::ft2link::HandshakeIdentity remoteIdentity;
+      std::string ackParseError;
+      bool const ackParsed = decodium::ft2link::parseHelloAckFrame (
+          frame, &remoteCapabilities, &negotiated, &remoteIdentity,
+          &ackParseError);
+      QString const ackIdentityCall = normalizeCallsign (
+          QString::fromStdString (remoteIdentity.call));
+      QString const localCall = normalizeCallsign (
+          QString::fromStdString (m_model.localStation ().call));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] rx HELLO_ACK session=%1 remoteArg=%2"
+              " identity=%3 parsed=%4 accepted=%5 profile=%6 rate=%7"
+              " err=\"%8\"")
+              .arg (frame.sessionId)
+              .arg (remoteCall.trimmed ().isEmpty ()
+                    ? QStringLiteral ("?")
+                    : remoteCall.trimmed ().toUpper ())
+              .arg (ackIdentityCall.isEmpty () ? QStringLiteral ("?")
+                                               : ackIdentityCall)
+              .arg (ackParsed ? 1 : 0)
+              .arg (ackParsed && negotiated.accepted ? 1 : 0)
+              .arg (ackParsed
+                    ? QString::fromStdString (
+                          decodium::ft2link::profileName (
+                              negotiated.profile))
+                    : QStringLiteral ("?"))
+              .arg (ackParsed
+                    ? QString::fromLatin1 (
+                          decodium::ft2link::w2300RateModeName (
+                              negotiated.w2300RateMode))
+                    : QStringLiteral ("?"))
+              .arg (QString::fromStdString (ackParseError)));
+      if (ackParsed && !localCall.isEmpty ()
+          && ackIdentityCall == localCall)
+        {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] ignored self HELLO_ACK session=%1"
+                  " call=%2")
+                  .arg (frame.sessionId)
+                  .arg (localCall));
+          setTransportState (QStringLiteral ("SELF HELLO_ACK"));
+          clearLastError ();
+          return true;
+        }
       if (!m_model.receiveHelloAck (frame, nowMs, &error))
         {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][HANDSHAKE] receive HELLO_ACK failed"
+                  " session=%1 error=\"%2\"")
+                  .arg (frame.sessionId)
+                  .arg (QString::fromStdString (error)));
           setLastError (QString::fromStdString (error));
           emit sessionsChanged ();
           return false;
@@ -8220,6 +8868,25 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       emit sessionsChanged ();
       recordQsoSession (frame.sessionId, nowMs, QStringLiteral ("Connected"));
       setTransportState (QStringLiteral ("Connected"));
+      AppSession const* connectedSession = m_model.session (frame.sessionId);
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] connected session=%1 remote=%2"
+              " profile=%3 rate=%4")
+              .arg (frame.sessionId)
+              .arg (connectedSession && !connectedSession->remoteCall.empty ()
+                    ? QString::fromStdString (connectedSession->remoteCall)
+                    : QStringLiteral ("?"))
+              .arg (connectedSession
+                    ? QString::fromStdString (
+                          decodium::ft2link::profileName (
+                              connectedSession->negotiated.profile))
+                    : QStringLiteral ("?"))
+              .arg (connectedSession
+                    ? QString::fromLatin1 (
+                          decodium::ft2link::w2300RateModeName (
+                              connectedSession->negotiated.w2300RateMode))
+                    : QStringLiteral ("?")));
       clearLastError ();
       return true;
     }
@@ -8316,6 +8983,10 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           recordQsoSession (
               frame.sessionId, nowMs, QStringLiteral ("ACK delivered"));
           setTransportState (QStringLiteral ("Delivered"));
+          if (!m_radioTxQueue.empty ())
+            {
+              scheduleRadioQueueDrain (nowMs);
+            }
         }
       else
         {
@@ -9318,6 +9989,29 @@ QString FT2LinkQmlAdapter::qsyFrequencyTag (qint64 dialFrequencyHz) const
       return QString {};
     }
   return QStringLiteral ("<QF:%1>").arg (dialFrequencyHz);
+}
+
+QString FT2LinkQmlAdapter::qsyBroadcastText (qint64 dialFrequencyHz,
+                                             QString const& label,
+                                             QString const& reason) const
+{
+  return makeQsyBroadcastText (dialFrequencyHz, label, reason);
+}
+
+bool FT2LinkQmlAdapter::transmitQsyBroadcastRadio (
+    qint64 dialFrequencyHz,
+    QString const& label,
+    QString const& reason,
+    quint64 nowMs)
+{
+  QString const text = makeQsyBroadcastText (dialFrequencyHz, label, reason);
+  if (text.isEmpty ())
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link QSY broadcast requires a target frequency"));
+      return false;
+    }
+  return transmitBroadcastRadio (text, nowMs);
 }
 
 QVariantMap FT2LinkQmlAdapter::qsyPlanForText (
@@ -16253,16 +16947,19 @@ bool FT2LinkQmlAdapter::handleIncomingControlTags (
     }
   if (containsControlTag (trimmed, QStringLiteral ("<QSYR>")))
     {
+      completePendingQsyOutbound (sessionId, true, nowMs);
       notices.push_back (QStringLiteral (
           "TAG %1 accepted QSY invitation").arg (displayCall));
     }
   if (containsControlTag (trimmed, QStringLiteral ("<QSYJ>")))
     {
+      completePendingQsyOutbound (sessionId, false, nowMs);
       notices.push_back (QStringLiteral (
           "TAG %1 rejected QSY invitation").arg (displayCall));
     }
   if (containsControlTag (trimmed, QStringLiteral ("<QJO>")))
     {
+      completePendingQsyOutbound (sessionId, false, nowMs);
       notices.push_back (QStringLiteral (
           "TAG %1 rejected QSO or QSY due to allowed range/state").arg (displayCall));
     }
@@ -17019,6 +17716,79 @@ void FT2LinkQmlAdapter::updateLastOutgoingChatLogEntry (
     }
 }
 
+bool FT2LinkQmlAdapter::completePendingQsyOutbound (quint16 sessionId,
+                                                    bool accepted,
+                                                    quint64 nowMs)
+{
+  std::map<std::uint16_t, std::size_t>::const_iterator messageIndex =
+      m_liveOutboundMessageIndex.find (sessionId);
+  if (messageIndex == m_liveOutboundMessageIndex.end ())
+    {
+      return false;
+    }
+
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || messageIndex->second >= session->messages.size ())
+    {
+      return false;
+    }
+
+  ChatMessage const& message = session->messages[messageIndex->second];
+  QString const text = QString::fromStdString (message.text).trimmed ();
+  if (!qsyPlanForText (text, 0).value (QStringLiteral ("valid")).toBool ())
+    {
+      return false;
+    }
+
+  std::string error;
+  bool ok = accepted
+      ? m_model.markOutgoingDelivered (sessionId,
+                                       messageIndex->second,
+                                       nowMs,
+                                       &error)
+      : m_model.markOutgoingFailed (sessionId,
+                                    messageIndex->second,
+                                    nowMs,
+                                    &error);
+  if (!ok)
+    {
+      if (!error.empty ())
+        {
+          setLastError (QString::fromStdString (error));
+        }
+      return false;
+    }
+
+  QString const deliveryName = accepted
+      ? QStringLiteral ("Delivered")
+      : QStringLiteral ("Failed");
+  updateLastOutgoingChatLogEntry (sessionId, deliveryName, nowMs);
+  m_liveOutbound.erase (sessionId);
+  m_liveOutboundMessageIndex.erase (sessionId);
+  m_liveOutboundRetries.erase (sessionId);
+  m_liveOutboundMailboxId.erase (sessionId);
+  m_liveOutboundMailboxDeliveredState.erase (sessionId);
+  m_liveOutboundFormId.erase (sessionId);
+  m_liveOutboundFileTransferId.erase (sessionId);
+  m_liveOutboundBulletinId.erase (sessionId);
+  emit messagesChanged (sessionId);
+  emit sessionsChanged ();
+  recordQsoSession (
+      sessionId,
+      nowMs,
+      accepted ? QStringLiteral ("QSY accepted")
+               : QStringLiteral ("QSY rejected"));
+  setTransportState (accepted ? QStringLiteral ("QSY accepted")
+                              : QStringLiteral ("QSY rejected"));
+  clearLastError ();
+  qInfo().noquote()
+      << "[Ft2Link][QSY] outbound closed"
+      << "session=" << sessionId
+      << "accepted=" << (accepted ? 1 : 0)
+      << "text=" << text;
+  return true;
+}
+
 void FT2LinkQmlAdapter::clearChatLogForSession (quint16 sessionId)
 {
   if (sessionId == 0u || m_chatLog.empty ())
@@ -17252,6 +18022,23 @@ bool FT2LinkQmlAdapter::requestControlRadioTx (Frame const& frame,
                    static_cast<qulonglong> (nowMs)));
   plan.insert (QStringLiteral ("remoteCall"), remoteCall.trimmed ().toUpper ());
 
+  if (kind.startsWith (QStringLiteral ("HELLO")))
+    {
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][HANDSHAKE] control TX kind=%1 session=%2 remote=%3"
+              " samples=%4 busy=%5 queuedItems=%6 lbtBusy=%7")
+              .arg (kind)
+              .arg (frame.sessionId)
+              .arg (remoteCall.trimmed ().isEmpty ()
+                    ? QStringLiteral ("?")
+                    : remoteCall.trimmed ().toUpper ())
+              .arg (samples.size ())
+              .arg (m_radioTxBusyUntilMs > nowMs ? 1 : 0)
+              .arg (m_radioTxQueue.size ())
+              .arg (isLiveChannelBusy (nowMs) ? 1 : 0));
+    }
+
   enqueueRadioTx (QStringLiteral ("FT2-Link ") + kind,
                   samples,
                   plan,
@@ -17261,6 +18048,61 @@ bool FT2LinkQmlAdapter::requestControlRadioTx (Frame const& frame,
                   frame.sessionId,
                   false);
   return true;
+}
+
+bool FT2LinkQmlAdapter::hasPendingSessionRadioTraffic () const
+{
+  if (!m_liveOutbound.empty () || !m_liveOutboundRetries.empty ()
+      || !m_helloRetries.empty ())
+    {
+      return true;
+    }
+
+  for (std::map<std::uint16_t,
+                std::unique_ptr<decodium::ft2link::InboundTransfer> >::const_iterator
+           it = m_liveInbound.begin ();
+       it != m_liveInbound.end ();
+       ++it)
+    {
+      std::map<std::uint16_t, bool>::const_iterator delivered =
+          m_liveInboundDelivered.find (it->first);
+      if (delivered == m_liveInboundDelivered.end () || !delivered->second)
+        {
+          return true;
+        }
+    }
+
+  for (RadioTxQueueItem const& queued : m_radioTxQueue)
+    {
+      QString const kind = queued.plan.value (
+          QStringLiteral ("kind")).toString ().trimmed ().toUpper ();
+      bool const broadcast = queued.sessionId == 0u
+          && kind == QStringLiteral ("BCAST");
+      if (!broadcast && queued.sessionId != 0u)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+bool FT2LinkQmlAdapter::shouldDeferBroadcastTx (QVariantMap const& plan,
+                                                quint16 sessionId) const
+{
+  if (sessionId != 0u)
+    {
+      return false;
+    }
+
+  QString const kind = plan.value (
+      QStringLiteral ("kind")).toString ().trimmed ().toUpper ();
+  if (kind != QStringLiteral ("BCAST"))
+    {
+      return false;
+    }
+
+  return hasPendingSessionRadioTraffic ();
 }
 
 void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
@@ -17284,8 +18126,10 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
       : nowMs;
   item.enqueuedAtMs = effectiveNow;
   bool const channelBusy = isLiveChannelBusy (effectiveNow);
+  bool const deferBroadcast = shouldDeferBroadcastTx (
+      item.plan, item.sessionId);
   if (m_radioTxQueue.empty () && m_radioTxBusyUntilMs <= effectiveNow
-      && !channelBusy)
+      && !channelBusy && !deferBroadcast)
     {
       QVariantMap emittedPlan = item.plan;
       emittedPlan.insert (QStringLiteral ("queued"), false);
@@ -17315,6 +18159,19 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
                             static_cast<qulonglong> (
                                 m_liveChannelBusyUntilMs)));
       setTransportState (QStringLiteral ("LBT wait"));
+    }
+  if (deferBroadcast)
+    {
+      item.plan.insert (QStringLiteral ("sessionDeferred"), true);
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][TXQUEUE] BCAST deferred: session traffic pending"
+              " liveOut=%1 retries=%2 hello=%3 queued=%4")
+              .arg (m_liveOutbound.size ())
+              .arg (m_liveOutboundRetries.size ())
+              .arg (m_helloRetries.size ())
+              .arg (m_radioTxQueue.size ()));
+      setTransportState (QStringLiteral ("BCAST queued"));
     }
   if (priority)
     {
@@ -17428,6 +18285,8 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
     }
   std::size_t selectedIndex = std::numeric_limits<std::size_t>::max ();
   std::size_t fallbackIndex = std::numeric_limits<std::size_t>::max ();
+  bool const deferBroadcasts = hasPendingSessionRadioTraffic ();
+  bool skippedBroadcast = false;
   for (std::size_t index = 0u; index < m_radioTxQueue.size ();)
     {
       RadioTxQueueItem const& queued = m_radioTxQueue[index];
@@ -17438,6 +18297,16 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
               m_radioTxQueue.begin ()
               + static_cast<std::deque<RadioTxQueueItem>::difference_type> (
                   index));
+          continue;
+        }
+      QString const kind = queued.plan.value (
+          QStringLiteral ("kind")).toString ().trimmed ().toUpper ();
+      bool const broadcast = queued.sessionId == 0u
+          && kind == QStringLiteral ("BCAST");
+      if (broadcast && deferBroadcasts)
+        {
+          skippedBroadcast = true;
+          ++index;
           continue;
         }
       if (queued.priority)
@@ -17463,6 +18332,19 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
     }
   if (selectedIndex == std::numeric_limits<std::size_t>::max ())
     {
+      if (skippedBroadcast)
+        {
+          setTransportState (QStringLiteral ("BCAST queued"));
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][TXQUEUE] BCAST held: waiting for session idle"
+                  " liveOut=%1 retries=%2 hello=%3 queued=%4")
+                  .arg (m_liveOutbound.size ())
+                  .arg (m_liveOutboundRetries.size ())
+                  .arg (m_helloRetries.size ())
+                  .arg (m_radioTxQueue.size ()));
+          m_radioTxQueueTimer.start (750);
+        }
       return;
     }
 
@@ -17629,7 +18511,9 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
                   it->second.payload, it->first, retryOptions);
           if (rebuiltAudioPlan.ok)
             {
-              retrySamples = toSampleVector (rebuiltAudioPlan.samples);
+              retrySamples = toGuardedWideSampleVector (
+                  rebuiltAudioPlan.samples,
+                  rebuiltAudioPlan.sampleRate);
               QVariantMap rebuiltPlan = radioTxPlanMap (rebuiltAudioPlan, true);
               for (QVariantMap::const_iterator planIt =
                        it->second.plan.constBegin ();
@@ -17683,6 +18567,10 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
       m_liveOutboundFormId.erase (sessionId);
       m_liveOutboundFileTransferId.erase (sessionId);
       m_liveOutboundBulletinId.erase (sessionId);
+    }
+  if (!failed.empty () && !m_radioTxQueue.empty ())
+    {
+      scheduleRadioQueueDrain (nowMs);
     }
   scheduleLiveOutboundRetryCheck (nowMs);
 }
