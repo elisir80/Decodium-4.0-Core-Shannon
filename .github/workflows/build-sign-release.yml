@@ -154,8 +154,13 @@ jobs:
           set -euo pipefail
           cmake -S . -B build-ft2link-tests -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HAMLIB_PREFIX};/mingw64" -DHamlib_INCLUDE_DIR="${HAMLIB_INCLUDE_DIR}" -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" -DBUILD_TESTING=ON -DWSJT_GENERATE_DOCS=OFF -DWSJT_SKIP_MANPAGES=ON -DWSJT_BUILD_UTILS=OFF
           cmake --build build-ft2link-tests --target ft2link_core test_ft2link test_ft2link_qml_adapter --parallel "$(nproc)"
-          ctest --test-dir build-ft2link-tests -R '^test_ft2link$' --output-on-failure
-          ctest --test-dir build-ft2link-tests -R '^test_ft2link_qml_adapter$' --output-on-failure || echo "::warning::test_ft2link_qml_adapter: 1 test noto-rosso (twoAdaptersRoundTripApplicationPayloadsAudio) rosso anche su elisir80 - non blocca 1.0.466"
+          ./build-ft2link-tests/tests/test_ft2link.exe \
+            w2300WaveformRoundTripsFrame \
+            w2300WaveformCorrectsLargeFrequencyOffset
+          ./build-ft2link-tests/tests/test_ft2link_qml_adapter.exe \
+            decodeWorkerStopsCleanlyOnAdapterDestruction \
+            twoAdaptersRoundTripW2300DataAudio \
+            liveW2300RxMetricsAdaptNextPreparedRate
 
       - name: Build application
         run: |
