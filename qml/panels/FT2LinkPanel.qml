@@ -49,6 +49,8 @@ Rectangle {
     property var frequencyPresetList: []
     property var allowedQsyRangeList: []
     property var frequencyScheduleList: []
+    property bool frequencyScheduleAutoApply: settingBool("uiFt2LinkFrequencyScheduleAutoApply", false)
+    property string lastFrequencyScheduleApplyKey: ""
     property var presenceState: ({})
     property var qsoAutomationState: ({})
     property var blockedCalls: []
@@ -85,6 +87,8 @@ Rectangle {
     property string selectedFilePath: ""
     property string selectedFileName: ""
     property string selectedFileContent: ""
+    property string selectedFileBase64: ""
+    property bool selectedFileBinary: false
     property int selectedFileBytes: 0
     readonly property int filePayloadLimitBytes: 16384
     property bool chatScrollPinned: true
@@ -179,6 +183,7 @@ Rectangle {
     onProfileIceChanged: { persistSetting("uiFt2LinkProfileIce", profileIce); syncLocalStation() }
     onProfileGpsChanged: { persistSetting("uiFt2LinkProfileGps", profileGps); syncLocalStation() }
     onClusterSharePathChanged: persistSetting("uiFt2LinkClusterSharePath", clusterSharePath)
+    onFrequencyScheduleAutoApplyChanged: persistSetting("uiFt2LinkFrequencyScheduleAutoApply", frequencyScheduleAutoApply)
     onClusterAutoSyncChanged: {
         persistSetting("uiFt2LinkClusterAutoSync", clusterAutoSync)
         clusterLastAutoSyncMs = 0
@@ -649,6 +654,8 @@ Rectangle {
             parts.push("MAIL UNREAD " + ft2Link.mailboxUnreadCount)
         if (receivedFileUnreadCount > 0)
             parts.push("RXF " + receivedFileUnreadCount)
+        if (bulletinUnreadCount > 0)
+            parts.push("BBS " + bulletinUnreadCount)
         if (queued > 0 || submitted > 0 || failed > 0)
             parts.push("LBQ " + queued + "/" + submitted + "/" + failed)
         if (ft2Link.alertCount > 0)
@@ -664,6 +671,7 @@ Rectangle {
         if (ft2Link && (ft2Link.relayQueueCount > 0
                         || ft2Link.mailboxUnreadCount > 0
                         || receivedFileUnreadCount > 0
+                        || bulletinUnreadCount > 0
                         || logbookStateCount("Submitted") > 0
                         || logbookStateCount("Queued") > 0))
             return root.amber
@@ -675,9 +683,68 @@ Rectangle {
                              || ft2Link.relayQueueCount > 0
                              || ft2Link.mailboxUnreadCount > 0
                              || receivedFileUnreadCount > 0
+                             || bulletinUnreadCount > 0
                              || logbookStateCount("Submitted") > 0
                              || logbookStateCount("Queued") > 0
                              || logbookStateCount("Failed") > 0)
+    }
+
+    function queueStatusClickable() {
+        return queueStatusActive()
+    }
+
+    function queueStatusTip() {
+        if (!ft2Link)
+            return "Queue unavailable"
+        if (ft2Link.alertCount > 0)
+            return "Open alerts and broadcasts"
+        if (logbookStateCount("Failed") > 0)
+            return "Open failed logbook uploads"
+        if (ft2Link.mailboxUnreadCount > 0)
+            return "Open unread mail"
+        if (receivedFileUnreadCount > 0)
+            return "Open unread received files"
+        if (bulletinUnreadCount > 0)
+            return "Open unread BBS bulletins"
+        if (ft2Link.relayQueueCount > 0)
+            return "Open relay mailbox queue"
+        if (logbookStateCount("Queued") > 0 || logbookStateCount("Submitted") > 0)
+            return "Open logbook upload queue"
+        return "Queue is clear"
+    }
+
+    function openQueueStatus() {
+        if (!ft2Link)
+            return
+        refreshSlowPollState()
+        if (ft2Link.alertCount > 0) {
+            openAlertQueue()
+            return
+        }
+        if (logbookStateCount("Failed") > 0) {
+            openLogbookQueue()
+            return
+        }
+        if (ft2Link.mailboxUnreadCount > 0) {
+            openMailboxQueue()
+            return
+        }
+        if (receivedFileUnreadCount > 0) {
+            openReceivedFilesQueue()
+            return
+        }
+        if (bulletinUnreadCount > 0) {
+            openBulletinQueue()
+            return
+        }
+        if (ft2Link.relayQueueCount > 0) {
+            openRelayQueue()
+            return
+        }
+        if (logbookStateCount("Queued") > 0 || logbookStateCount("Submitted") > 0) {
+            openLogbookQueue()
+            return
+        }
     }
 
     function openMailboxQueue() {
@@ -698,6 +765,63 @@ Rectangle {
                 mailboxList.positionViewAtIndex(unreadIndex, ListView.Beginning)
             }
         })
+    }
+
+    function openBulletinQueue() {
+        refreshBulletins()
+        toolPageIndex = 3
+        Qt.callLater(function() {
+            if (typeof bulletinList === "undefined" || !bulletinList)
+                return
+            var unreadIndex = -1
+            for (var i = 0; i < bulletins.length; ++i) {
+                if (bulletins[i] && bulletins[i].unread) {
+                    unreadIndex = i
+                    break
+                }
+            }
+            if (unreadIndex < 0 && bulletins.length > 0)
+                unreadIndex = 0
+            if (unreadIndex >= 0) {
+                bulletinList.currentIndex = unreadIndex
+                bulletinList.positionViewAtIndex(unreadIndex, ListView.Beginning)
+            }
+        })
+    }
+
+    function openAlertQueue() {
+        refreshBroadcasts()
+        refreshAlerts()
+        toolPageIndex = 4
+    }
+
+    function openRelayQueue() {
+        refreshMailbox()
+        toolPageIndex = 5
+        Qt.callLater(function() {
+            if (typeof mailboxList === "undefined" || !mailboxList)
+                return
+            var relayIndex = -1
+            for (var i = 0; i < mailbox.length; ++i) {
+                if (mailbox[i] && (String(mailbox[i].direction || "") === "Relay"
+                        || mailbox[i].relayEnvelope
+                        || String(mailbox[i].state || "").indexOf("Parked") >= 0)) {
+                    relayIndex = i
+                    break
+                }
+            }
+            if (relayIndex >= 0) {
+                mailboxList.currentIndex = relayIndex
+                mailboxList.positionViewAtIndex(relayIndex, ListView.Beginning)
+            }
+        })
+    }
+
+    function openLogbookQueue() {
+        refreshLogbookOutbox()
+        toolPageIndex = 12
+        if (logExportText.length === 0 || logbookStateCount("Failed") > 0)
+            exportLog("OUTBOX")
     }
 
     function openReceivedFilesQueue() {
@@ -1125,7 +1249,9 @@ Rectangle {
         if (!item)
             return
         var content = String(item.content || "")
-        if (content.length === 0) {
+        var contentBase64 = String(item.contentBase64 || "")
+        var binary = !!item.binary
+        if (content.length === 0 && contentBase64.length === 0) {
             receivedFileStatus = "Received file has no content"
             return
         }
@@ -1138,12 +1264,30 @@ Rectangle {
         if (bridge && typeof bridge.saveFileDialog === "function")
             path = bridge.saveFileDialog("Save FT2-Link received file",
                                          fileName,
-                                         ["Text files (*.txt *.md *.log *.csv *.json)",
-                                          "All files (*)"])
+                                         ["All files (*)",
+                                          "Text files (*.txt *.md *.log *.csv *.json)",
+                                          "Images (*.png *.jpg *.jpeg *.gif *.bmp)"])
         if (path.length === 0) {
-            copyPlainText(content)
-            markReceivedFileRead(item, true, false)
-            receivedFileStatus = "Copied " + fileName
+            if (!binary && content.length > 0) {
+                copyPlainText(content)
+                markReceivedFileRead(item, true, false)
+                receivedFileStatus = "Copied " + fileName
+            } else {
+                receivedFileStatus = "Save cancelled"
+            }
+            return
+        }
+        if (binary && bridge && typeof bridge.writeFileBytes === "function") {
+            var byteResult = bridge.writeFileBytes(path, contentBase64)
+            if (byteResult && byteResult.ok) {
+                markReceivedFileRead(item, true, false)
+                receivedFileStatus = "Saved " + fileName + " "
+                                     + String(byteResult.bytes || item.sizeBytes || 0) + " B"
+            } else {
+                receivedFileStatus = "Save failed: "
+                                     + String(byteResult && byteResult.error
+                                              ? byteResult.error : "unknown")
+            }
             return
         }
         if (!bridge || typeof bridge.writeTextFile !== "function") {
@@ -1611,6 +1755,80 @@ Rectangle {
         refreshFrequencyPlan()
         refreshStatistics()
         refreshStoreAudit()
+    }
+
+    function activeFrequencyScheduleItem() {
+        if (!ft2Link || typeof ft2Link.activeFrequencySchedule !== "function")
+            return null
+        var item = ft2Link.activeFrequencySchedule(nowMs())
+        if (!item || !item.active || Number(item.dialFrequencyHz || 0) <= 0)
+            return null
+        return item
+    }
+
+    function activeFrequencyScheduleLine() {
+        var item = activeFrequencyScheduleItem()
+        if (!item)
+            return "No active schedule slot"
+        return String(item.label || item.action || "SCHEDULE")
+               + "  " + frequencyHzText(Number(item.dialFrequencyHz || 0))
+               + "  " + String(item.cqType || "CQ")
+    }
+
+    function frequencyScheduleApplyKey(item) {
+        if (!item)
+            return ""
+        return String(item.startMinute || 0) + "-"
+               + String(item.endMinute || 0) + "|"
+               + String(item.action || "") + "|"
+               + String(Math.round(Number(item.dialFrequencyHz || 0)))
+    }
+
+    function applyActiveFrequencySchedule(autoTriggered) {
+        var item = activeFrequencyScheduleItem()
+        if (!item) {
+            if (!autoTriggered)
+                databaseActionText = "No active frequency schedule slot"
+            return false
+        }
+        if (!bridge || typeof bridge.qsyTo !== "function") {
+            databaseActionText = "Schedule target ready "
+                                 + frequencyHzText(Number(item.dialFrequencyHz || 0))
+                                 + " but bridge.qsyTo is unavailable"
+            return false
+        }
+        var key = frequencyScheduleApplyKey(item)
+        if (autoTriggered && key.length > 0 && lastFrequencyScheduleApplyKey === key)
+            return true
+        var hz = Math.round(Number(item.dialFrequencyHz || 0))
+        if (hz <= 0)
+            return false
+        bridge.qsyTo(hz, "FT2-Link schedule")
+        lastFrequencyScheduleApplyKey = key
+        databaseActionText = (autoTriggered ? "Schedule auto-applied " : "Schedule applied ")
+                             + frequencyHzText(hz) + " "
+                             + String(item.label || item.action || "")
+        return true
+    }
+
+    function prepareActiveScheduleBroadcast() {
+        var item = activeFrequencyScheduleItem()
+        if (!item) {
+            databaseActionText = "No active frequency schedule slot"
+            return
+        }
+        if (!ft2Link || typeof ft2Link.qsyBroadcastText !== "function")
+            return
+        var hz = Math.round(Number(item.dialFrequencyHz || 0))
+        var text = ft2Link.qsyBroadcastText(hz,
+                                            String(item.label || item.cqType || "schedule"),
+                                            String(item.action || "SCHEDULE"))
+        if (String(text || "").length > 0) {
+            broadcastText.text = text
+            toolPageIndex = 4
+            databaseActionText = "Schedule QSY broadcast prepared "
+                                 + frequencyHzText(hz)
+        }
     }
 
     function auditStore() {
@@ -2153,6 +2371,83 @@ Rectangle {
         refreshStoreAudit()
     }
 
+    function visibleAlerts(showArchived) {
+        var result = []
+        for (var i = 0; i < alerts.length; ++i) {
+            var item = alerts[i]
+            if (!item)
+                continue
+            if (!!item.archived === !!showArchived)
+                result.push(item)
+        }
+        return result
+    }
+
+    function activeAlerts() {
+        return visibleAlerts(false)
+    }
+
+    function archivedAlertCount() {
+        var count = 0
+        for (var i = 0; i < alerts.length; ++i) {
+            if (alerts[i] && alerts[i].archived)
+                ++count
+        }
+        return count
+    }
+
+    function alertDate(item) {
+        if (!item)
+            return "--"
+        var ms = Number(item.updatedAtMs || item.atMs || 0)
+        if (!isFinite(ms) || ms <= 0)
+            return "--"
+        var d = new Date(ms)
+        function pad(n) { return n < 10 ? "0" + n : String(n) }
+        return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1)
+               + "-" + pad(d.getUTCDate()) + " "
+               + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes())
+    }
+
+    function markAlertItemRead(item, read) {
+        if (!ft2Link || !item || typeof ft2Link.markAlertRead !== "function")
+            return
+        if (ft2Link.markAlertRead(Number(item.id || 0), read, nowMs())) {
+            refreshAlerts()
+            refreshStatistics()
+            refreshStoreAudit()
+        }
+    }
+
+    function archiveAlertItem(item, archived) {
+        if (!ft2Link || !item || typeof ft2Link.archiveAlert !== "function")
+            return
+        if (ft2Link.archiveAlert(Number(item.id || 0), archived, nowMs())) {
+            refreshAlerts()
+            refreshStatistics()
+            refreshStoreAudit()
+        }
+    }
+
+    function clearArchivedAlerts() {
+        if (!ft2Link || typeof ft2Link.clearArchivedAlertEvents !== "function")
+            return
+        ft2Link.clearArchivedAlertEvents()
+        refreshAlerts()
+        refreshStatistics()
+        refreshStoreAudit()
+    }
+
+    function copyAlertItem(item) {
+        if (!item)
+            return
+        var text = "ALERT " + String(item.tag || "--") + " "
+                   + String(item.fromCall || "--") + ": "
+                   + String(item.text || "")
+        copyPlainText(text)
+        markAlertItemRead(item, true)
+    }
+
     function pathFinderTarget() {
         return pathTargetText.text.trim().toUpperCase()
     }
@@ -2394,6 +2689,37 @@ Rectangle {
         return item
     }
 
+    function relayGuideLine() {
+        var item = relayMailboxCandidate()
+        if (item) {
+            var toCall = String(item.toCall || "--")
+            var subject = String(item.subject || "")
+            var hop = Number(item.relayHopCount || 0)
+            return "Ready to relay -> " + toCall
+                   + " / hop " + String(hop + 1)
+                   + (subject.length > 0 ? " / " + subject : "")
+        }
+        var hint = pathRelayHint()
+        if (hint)
+            return pathRelayLine()
+        if (ft2Link && ft2Link.relayQueueCount > 0)
+            return "Relay queue has " + String(ft2Link.relayQueueCount)
+                   + " item(s); connect a matching relay station"
+        return "No relay action ready"
+    }
+
+    function relayGuideColor() {
+        var item = relayMailboxCandidate()
+        if (item) {
+            if (item.emcomm)
+                return root.red
+            if (item.urgent)
+                return root.amber
+            return root.green
+        }
+        return pathRelayHint() ? root.amber : root.textSecondary
+    }
+
     function relayMailboxButtonText() {
         var item = relayMailboxCandidate()
         if (!item)
@@ -2424,11 +2750,38 @@ Rectangle {
             refreshMailbox()
     }
 
+    function markAllMailboxRead() {
+        if (!ft2Link)
+            return
+        var changed = 0
+        for (var i = 0; i < mailbox.length; ++i) {
+            var item = mailbox[i]
+            if (item && item.unread
+                    && ft2Link.markMailboxRead(Number(item.id || 0),
+                                               true,
+                                               nowMs()))
+                ++changed
+        }
+        refreshMailbox()
+        emailGatewayStatus = changed > 0
+                             ? ("Marked read " + changed + " mail item"
+                                + (changed === 1 ? "" : "s"))
+                             : "No unread mail"
+    }
+
     function deleteMailboxItem(item) {
         if (!ft2Link || !item)
             return
         if (ft2Link.deleteMailboxMessage(Number(item.id || 0)))
             refreshMailbox()
+    }
+
+    function clearMailboxList() {
+        if (!ft2Link || typeof ft2Link.clearMailbox !== "function")
+            return
+        ft2Link.clearMailbox()
+        refreshMailbox()
+        emailGatewayStatus = "Mailbox cleared"
     }
 
     function mailboxEmailDraft(item) {
@@ -2655,8 +3008,10 @@ Rectangle {
         if (!guardWideTx("FILE"))
             return
         var content = String(selectedFileContent || "")
-        if (content.length === 0)
-        {
+        var contentBase64 = String(selectedFileBase64 || "")
+        if (selectedFileName.length === 0 || selectedFileBytes <= 0
+                || (selectedFileBinary && contentBase64.length === 0)
+                || (!selectedFileBinary && content.length === 0)) {
             fileTransferStatus = "Select a file first"
             return
         }
@@ -2674,11 +3029,19 @@ Rectangle {
         var fileName = selectedFileName.length > 0 ? selectedFileName : baseFileName(selectedFilePath)
         if (fileName.length === 0)
             fileName = "file.txt"
-        if (ft2Link.transmitFileRadio(selectedSessionId,
-                                      toCall,
-                                      fileName,
-                                      content,
-                                      nowMs())) {
+        var queued = selectedFileBinary
+                     ? (typeof ft2Link.transmitFileRadioBytes === "function"
+                        && ft2Link.transmitFileRadioBytes(selectedSessionId,
+                                                          toCall,
+                                                          fileName,
+                                                          contentBase64,
+                                                          nowMs()))
+                     : ft2Link.transmitFileRadio(selectedSessionId,
+                                                 toCall,
+                                                 fileName,
+                                                 content,
+                                                 nowMs())
+        if (queued) {
             fileTransferStatus = "FILE queued " + fileName + " " + bytes + " B"
             refreshFileTransfers()
             refreshSessions()
@@ -2732,14 +3095,58 @@ Rectangle {
         selectedFilePath = String(result.path || path)
         selectedFileName = baseFileName(selectedFilePath)
         selectedFileContent = String(result.text || "")
+        selectedFileBase64 = ""
+        selectedFileBinary = false
         selectedFileBytes = bytes
         fileTransferStatus = "Ready " + selectedFileName + " " + bytes + " B"
+    }
+
+    function loadFileBytes() {
+        if (!bridge || typeof bridge.openFileDialog !== "function"
+                || typeof bridge.readFileBytes !== "function") {
+            fileTransferStatus = "Binary file picker unavailable"
+            return
+        }
+        fileTransferStatus = "Opening file selector..."
+        var path = bridge.openFileDialog("Load FT2-Link binary file",
+                                         "",
+                                         ["All files (*)",
+                                          "Images (*.png *.jpg *.jpeg *.gif *.bmp)",
+                                          "Documents (*.txt *.md *.pdf *.json)"])
+        if (!path || path.length === 0) {
+            fileTransferStatus = "File selection cancelled"
+            return
+        }
+        var result = bridge.readFileBytes(path, filePayloadLimitBytes)
+        if (!result || !result.ok) {
+            fileTransferStatus = String(result && result.error
+                                        ? result.error
+                                        : "Cannot load file")
+            return
+        }
+        var bytes = Number(result.bytes || 0)
+        var fullSize = Number(result.fileSize || bytes)
+        if (result.truncated || fullSize > filePayloadLimitBytes) {
+            clearSelectedFile()
+            fileTransferStatus = "File too large: " + fullSize + " B / max "
+                                 + filePayloadLimitBytes + " B"
+            return
+        }
+        selectedFilePath = String(result.path || path)
+        selectedFileName = baseFileName(selectedFilePath)
+        selectedFileContent = ""
+        selectedFileBase64 = String(result.base64 || "")
+        selectedFileBinary = true
+        selectedFileBytes = bytes
+        fileTransferStatus = "Ready binary " + selectedFileName + " " + bytes + " B"
     }
 
     function clearSelectedFile() {
         selectedFilePath = ""
         selectedFileName = ""
         selectedFileContent = ""
+        selectedFileBase64 = ""
+        selectedFileBinary = false
         selectedFileBytes = 0
         fileTransferStatus = ""
     }
@@ -3416,6 +3823,20 @@ Rectangle {
     }
 
     Timer {
+        interval: 30000
+        running: root.visible && root.frequencyScheduleAutoApply
+        repeat: true
+        triggeredOnStart: false
+        onTriggered: {
+            if (!ft2Link)
+                return
+            if (String(ft2Link.transportState || "").indexOf("TX") >= 0)
+                return
+            root.applyActiveFrequencySchedule(true)
+        }
+    }
+
+    Timer {
         interval: 5000
         running: root.visible && root.clusterAutoSync
         repeat: true
@@ -3963,24 +4384,15 @@ Rectangle {
                         id: queueStatusMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        cursorShape: (ft2Link && ft2Link.mailboxUnreadCount > 0)
-                                     || root.receivedFileUnreadCount > 0
+                        cursorShape: root.queueStatusClickable()
                                      ? Qt.PointingHandCursor
                                      : Qt.ArrowCursor
-                        onClicked: {
-                            if (ft2Link && ft2Link.mailboxUnreadCount > 0)
-                                root.openMailboxQueue()
-                            else if (root.receivedFileUnreadCount > 0)
-                                root.openReceivedFilesQueue()
-                        }
+                        onClicked: root.openQueueStatus()
                     }
 
                     ToolTip.visible: queueStatusMouse.containsMouse
-                                     && ((ft2Link && ft2Link.mailboxUnreadCount > 0)
-                                         || root.receivedFileUnreadCount > 0)
-                    ToolTip.text: ft2Link && ft2Link.mailboxUnreadCount > 0
-                                  ? "Open unread mail"
-                                  : "Open received files"
+                                     && root.queueStatusClickable()
+                    ToolTip.text: root.queueStatusTip()
                     ToolTip.delay: 450
                 }
 
@@ -5164,6 +5576,7 @@ Rectangle {
                                         implicitWidth: 48
                                         accent: root.green
                                         enabled: String(rxFilePanelDelegate.modelData.content || "").length > 0
+                                                 || String(rxFilePanelDelegate.modelData.contentBase64 || "").length > 0
                                         tip: "Save received file to disk"
                                         onClicked: root.saveReceivedFile(rxFilePanelDelegate.modelData)
                                     }
@@ -5583,10 +5996,11 @@ Rectangle {
                                     }
                                 }
 
-                                Text {
-                                    Layout.preferredWidth: 96
-                                    horizontalAlignment: Text.AlignRight
-                                    text: String(root.selectedFileBytes) + " / "
+                                    Text {
+                                        Layout.preferredWidth: 96
+                                        horizontalAlignment: Text.AlignRight
+                                    text: (root.selectedFileBinary ? "BIN " : "TXT ")
+                                          + String(root.selectedFileBytes) + " / "
                                           + String(root.filePayloadLimitBytes) + " B"
                                     elide: Text.ElideRight
                                     color: root.selectedFileBytes > root.filePayloadLimitBytes
@@ -5607,6 +6021,16 @@ Rectangle {
                                 }
 
                                 SmallButton {
+                                    text: "LOAD BIN"
+                                    implicitWidth: 78
+                                    accent: root.amber
+                                    enabled: !!bridge && typeof bridge.openFileDialog === "function"
+                                             && typeof bridge.readFileBytes === "function"
+                                    tip: "Load a local binary file, max 16 KiB"
+                                    onClicked: root.loadFileBytes()
+                                }
+
+                                SmallButton {
                                     text: "CLEAR"
                                     implicitWidth: 54
                                     accent: root.red
@@ -5620,10 +6044,11 @@ Rectangle {
                                     implicitWidth: 88
                                     accent: root.cyan
                                     enabled: !!ft2Link && root.selectedSessionConnected
-                                             && root.selectedFileContent.length > 0
+                                             && root.selectedFileName.length > 0
+                                             && root.selectedFileBytes > 0
                                              && root.selectedFileBytes <= root.filePayloadLimitBytes
                                     tip: ft2Link && ft2Link.radioTxArmed
-                                         ? "Transmit text file over FT2-Link"
+                                         ? "Transmit file over FT2-Link"
                                          : "Arm file transmit"
                                     onClicked: root.armOrTransmitFile()
                                 }
@@ -6258,6 +6683,179 @@ Rectangle {
                                     onClicked: root.forwardPathRelay()
                                 }
                             }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 22
+                                spacing: 6
+
+                                Text {
+                                    text: "ALERT CENTER"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: root.red
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: String(root.activeAlerts().length) + " active / "
+                                          + String(root.archivedAlertCount()) + " archived"
+                                          + (ft2Link && ft2Link.alertCount > 0
+                                             ? (" / " + ft2Link.alertCount + " unread")
+                                             : "")
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: ft2Link && ft2Link.alertCount > 0
+                                           ? root.amber : root.textSecondary
+                                }
+
+                                CompactCheck {
+                                    id: showArchivedAlertsCheck
+                                    text: "ARCH"
+                                    accent: root.amber
+                                    onToggled: function(nextChecked) { showArchivedAlertsCheck.checked = nextChecked }
+                                }
+
+                                SmallButton {
+                                    text: "CLEAR ARCH"
+                                    implicitWidth: 86
+                                    implicitHeight: 22
+                                    labelSize: 9
+                                    accent: root.red
+                                    enabled: !!ft2Link && root.archivedAlertCount() > 0
+                                    tip: "Remove archived alert records"
+                                    onClicked: root.clearArchivedAlerts()
+                                }
+                            }
+
+                            ListView {
+                                id: alertCenterList
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                clip: true
+                                spacing: 3
+                                boundsBehavior: Flickable.StopAtBounds
+                                model: root.visibleAlerts(showArchivedAlertsCheck.checked)
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                delegate: Rectangle {
+                                    id: alertDelegate
+                                    required property var modelData
+                                    width: alertCenterList.width
+                                    height: 32
+                                    radius: 4
+                                    color: alertMouse.containsMouse ? root.rowHover
+                                           : (alertDelegate.modelData.unread
+                                              ? Qt.rgba(root.red.r, root.red.g, root.red.b, 0.085)
+                                              : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.030))
+                                    border.width: 1
+                                    border.color: Qt.rgba(root.red.r, root.red.g, root.red.b, 0.18)
+
+                                    MouseArea {
+                                        id: alertMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        acceptedButtons: Qt.NoButton
+                                    }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 7
+                                        anchors.rightMargin: 7
+                                        spacing: 6
+
+                                        Text {
+                                            Layout.preferredWidth: 42
+                                            text: alertDelegate.modelData.archived
+                                                  ? "ARCH"
+                                                  : (alertDelegate.modelData.unread ? "NEW" : "READ")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: alertDelegate.modelData.archived ? root.textSecondary
+                                                   : (alertDelegate.modelData.unread ? root.red : root.green)
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 54
+                                            text: String(alertDelegate.modelData.tag || "--")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            color: root.amber
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 68
+                                            text: String(alertDelegate.modelData.fromCall || "--")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textPrimary
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: String(alertDelegate.modelData.text || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textPrimary
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 94
+                                            text: root.alertDate(alertDelegate.modelData)
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.textSecondary
+                                        }
+
+                                        SmallButton {
+                                            text: alertDelegate.modelData.unread ? "READ" : "UNREAD"
+                                            implicitWidth: 58
+                                            accent: alertDelegate.modelData.unread ? root.green : root.textSecondary
+                                            enabled: !!ft2Link && !alertDelegate.modelData.archived
+                                            tip: alertDelegate.modelData.unread ? "Mark alert as read" : "Mark alert as unread"
+                                            onClicked: root.markAlertItemRead(alertDelegate.modelData,
+                                                                              !!alertDelegate.modelData.unread)
+                                        }
+
+                                        SmallButton {
+                                            text: alertDelegate.modelData.archived ? "RESTORE" : "ARCH"
+                                            implicitWidth: 66
+                                            accent: alertDelegate.modelData.archived ? root.green : root.amber
+                                            enabled: !!ft2Link
+                                            tip: alertDelegate.modelData.archived ? "Restore alert" : "Archive alert"
+                                            onClicked: root.archiveAlertItem(alertDelegate.modelData,
+                                                                             !alertDelegate.modelData.archived)
+                                        }
+
+                                        SmallButton {
+                                            text: "COPY"
+                                            implicitWidth: 48
+                                            accent: root.cyan
+                                            enabled: String(alertDelegate.modelData.text || "").length > 0
+                                            tip: "Copy alert text"
+                                            onClicked: root.copyAlertItem(alertDelegate.modelData)
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: alertCenterList.count === 0
+                                    text: showArchivedAlertsCheck.checked ? "No archived alerts" : "No active alerts"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
+                                }
+                            }
 		                    }
 	                    }
 
@@ -6385,6 +6983,80 @@ Rectangle {
                                     enabled: !!ft2Link && root.relayQueue.length > 0
                                     tip: "Copy relay queue export"
                                     onClicked: root.copyRelayQueueText()
+                                }
+
+                                SmallButton {
+                                    text: "READ"
+                                    implicitWidth: 48
+                                    accent: root.green
+                                    enabled: !!ft2Link && ft2Link.mailboxUnreadCount > 0
+                                    tip: "Mark all incoming mail as read"
+                                    onClicked: root.markAllMailboxRead()
+                                }
+
+                                SmallButton {
+                                    text: "CLEAR"
+                                    implicitWidth: 54
+                                    accent: root.red
+                                    enabled: !!ft2Link && root.mailbox.length > 0
+                                    tip: "Clear mailbox list"
+                                    onClicked: root.clearMailboxList()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 24
+                                spacing: 5
+
+                                Text {
+                                    text: "RELAY"
+                                    Layout.preferredWidth: 48
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: root.relayGuideColor()
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.relayGuideLine()
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.relayGuideColor()
+                                }
+
+                                SmallButton {
+                                    text: "USE PATH"
+                                    implicitWidth: 72
+                                    labelSize: 9
+                                    accent: root.cyan
+                                    enabled: root.pathRelayHint() !== null
+                                    tip: "Fill mail target from the current path relay hint"
+                                    onClicked: root.usePathRelayForMail()
+                                }
+
+                                SmallButton {
+                                    text: "CALL RLY"
+                                    implicitWidth: 72
+                                    labelSize: 9
+                                    accent: root.amber
+                                    enabled: root.pathRelayHint() !== null
+                                    tip: "Call the relay station suggested by PATH"
+                                    onClicked: root.callPathRelay()
+                                }
+
+                                SmallButton {
+                                    text: root.relayMailboxButtonText()
+                                    implicitWidth: 74
+                                    labelSize: 9
+                                    accent: root.green
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                             && root.relayMailboxCandidate() !== null
+                                    tip: "Transmit the next parked relay item through this session"
+                                    onClicked: root.armOrTransmitRelayMailbox()
                                 }
                             }
 
@@ -8989,6 +9661,56 @@ Rectangle {
                                         enabled: !!ft2Link
                                         tip: "Clear frequency schedule"
                                         onClicked: root.resetFrequencySchedule()
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 28
+                                    spacing: 5
+
+                                    Text {
+                                        Layout.preferredWidth: 64
+                                        text: "ACTIVE"
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        color: root.amber
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.activeFrequencyScheduleLine()
+                                        elide: Text.ElideRight
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.activeFrequencyScheduleItem() ? root.green : root.textSecondary
+                                    }
+
+                                    CompactCheck {
+                                        text: "AUTO"
+                                        checked: root.frequencyScheduleAutoApply
+                                        accent: root.green
+                                        onToggled: function(nextChecked) { root.frequencyScheduleAutoApply = nextChecked }
+                                    }
+
+                                    SmallButton {
+                                        text: "APPLY"
+                                        implicitWidth: 58
+                                        accent: root.green
+                                        enabled: !!bridge && root.activeFrequencyScheduleItem() !== null
+                                        tip: "Apply active UTC schedule frequency now"
+                                        onClicked: root.applyActiveFrequencySchedule(false)
+                                    }
+
+                                    SmallButton {
+                                        text: "BCAST"
+                                        implicitWidth: 58
+                                        accent: root.amber
+                                        enabled: !!ft2Link && root.activeFrequencyScheduleItem() !== null
+                                        tip: "Prepare broadcast for active schedule frequency"
+                                        onClicked: root.prepareActiveScheduleBroadcast()
                                     }
                                 }
 

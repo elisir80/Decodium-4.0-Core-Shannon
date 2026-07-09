@@ -333,6 +333,11 @@ public:
                                       QString const& fileName,
                                       QString const& content,
                                       quint64 nowMs);
+  Q_INVOKABLE bool transmitFileRadioBytes (quint16 sessionId,
+                                           QString const& toCall,
+                                           QString const& fileName,
+                                           QString const& contentBase64,
+                                           quint64 nowMs);
   Q_INVOKABLE bool transmitBulletinRadio (quint16 sessionId,
                                           QString const& group,
                                           QString const& title,
@@ -466,6 +471,7 @@ public:
   Q_INVOKABLE bool isCallBlocked (QString const& call) const;
   Q_INVOKABLE QVariantList broadcasts () const;
   Q_INVOKABLE QVariantList alertEvents () const;
+  Q_INVOKABLE QVariantList activeAlertEvents () const;
   Q_INVOKABLE QStringList alertTags () const;
   Q_INVOKABLE QStringList customAlertTags () const;
   Q_INVOKABLE QVariantMap setCustomAlertTags (QString const& tagsText);
@@ -554,6 +560,13 @@ public:
   Q_INVOKABLE QVariantMap fixLocalStore (bool makeBackup);
   Q_INVOKABLE void clearBroadcasts ();
   Q_INVOKABLE void clearAlertEvents ();
+  Q_INVOKABLE bool markAlertRead (quint32 alertId,
+                                  bool read,
+                                  quint64 nowMs);
+  Q_INVOKABLE bool archiveAlert (quint32 alertId,
+                                 bool archived,
+                                 quint64 nowMs);
+  Q_INVOKABLE void clearArchivedAlertEvents ();
   Q_INVOKABLE bool markMailboxRead (quint32 messageId,
                                     bool read,
                                     quint64 nowMs);
@@ -832,8 +845,10 @@ private:
                               QString const& toCall,
                               QString const& fileName,
                               QString const& content,
+                              QString const& contentBase64,
                               QString const& sha256,
                               QString const& state,
+                              bool binary,
                               quint64 nowMs);
   bool updateFileTransferState (quint32 transferId,
                                 QString const& state,
@@ -975,11 +990,15 @@ private:
 
   struct AlertEvent
   {
+    quint32 id {0};
     QString fromCall;
     QString text;
     QString source;
     QString tag;
+    bool read {false};
+    bool archived {false};
     quint64 atMs {0};
+    quint64 updatedAtMs {0};
   };
 
   struct MailboxMessage
@@ -1025,8 +1044,10 @@ private:
     QString toCall;
     QString fileName;
     QString content;
+    QString contentBase64;
     QString sha256;
     QString state;
+    bool binary {false};
     bool read {false};
     quint64 atMs {0};
     quint64 updatedAtMs {0};
@@ -1281,6 +1302,7 @@ private:
   quint32 m_nextFormId {1u};
   quint32 m_nextFileTransferId {1u};
   quint32 m_nextBulletinId {1u};
+  quint32 m_nextAlertId {1u};
   quint32 m_nextPathReportId {1u};
   quint32 m_nextLogbookUploadId {1u};
   QString m_localStorePath;

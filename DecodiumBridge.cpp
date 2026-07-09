@@ -179,6 +179,121 @@ static constexpr int kDefaultTxWatchdogCount = 3;
 static constexpr int kLegacyBridgeAudioAfterAsyncPttDelayMs = 125;
 static constexpr int kFt2LinkAccessSaltBytes = 16;
 static constexpr int kFt2LinkAccessHashBytes = 32;
+static QString const kCatProfileRootGroup = QStringLiteral("CAT_Profiles");
+static QString const kCatProfileActiveKey = QStringLiteral("CAT_ProfileActive");
+
+static QString normalizedCatBackendForSettings(QString value)
+{
+    value = value.trimmed().toLower();
+    if (value != QStringLiteral("native")
+        && value != QStringLiteral("hamlib")
+        && value != QStringLiteral("tci")
+        && value != QStringLiteral("omnirig")) {
+        return QStringLiteral("hamlib");
+    }
+    return value;
+}
+
+static QString normalizedCatProfileName(QString value)
+{
+    value = value.trimmed();
+    value.replace(QRegularExpression(QStringLiteral(R"(\s+)")), QStringLiteral(" "));
+    return value.left(80);
+}
+
+static QString catProfileStorageKey(QString const& name)
+{
+    QByteArray const digest =
+        QCryptographicHash::hash(name.trimmed().toUtf8().toLower(), QCryptographicHash::Sha1).toHex();
+    return QStringLiteral("p_") + QString::fromLatin1(digest.left(24));
+}
+
+static QStringList catProfileSnapshotRootKeys()
+{
+    return {
+        QStringLiteral("catBackend"),
+        QStringLiteral("CATMode"),
+        QStringLiteral("TXAudioSource"),
+        QStringLiteral("CheckSWR"),
+        QStringLiteral("PWRandSWR"),
+        QStringLiteral("SWRStopThreshold")
+    };
+}
+
+static QStringList catProfileSnapshotGroups()
+{
+    return {
+        QStringLiteral("CAT_Native"),
+        QStringLiteral("Transceiver"),
+        QStringLiteral("CAT_OmniRig")
+    };
+}
+
+static QVariantMap readSettingsGroupFlat(QSettings& settings, QString const& group)
+{
+    QVariantMap values;
+    settings.beginGroup(group);
+    for (QString const& key : settings.allKeys()) {
+        values.insert(key, settings.value(key));
+    }
+    settings.endGroup();
+    return values;
+}
+
+static void writeSettingsGroupFlat(QSettings& settings,
+                                   QString const& group,
+                                   QVariantMap const& values)
+{
+    settings.beginGroup(group);
+    settings.remove(QString());
+    for (auto it = values.constBegin(); it != values.constEnd(); ++it) {
+        settings.setValue(it.key(), it.value());
+    }
+    settings.endGroup();
+}
+
+static QString findCatProfileStorageKey(QSettings& settings, QString const& profileName)
+{
+    QString const wanted = normalizedCatProfileName(profileName);
+    if (wanted.isEmpty()) {
+        return {};
+    }
+
+    settings.beginGroup(kCatProfileRootGroup);
+    QString found;
+    for (QString const& key : settings.childGroups()) {
+        settings.beginGroup(key);
+        QString const name = normalizedCatProfileName(settings.value(QStringLiteral("name")).toString());
+        settings.endGroup();
+        if (0 == name.compare(wanted, Qt::CaseInsensitive)) {
+            found = key;
+            break;
+        }
+    }
+    settings.endGroup();
+    return found;
+}
+
+static QStringList catProfileNamesFromSettings()
+{
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    QStringList names;
+    settings.beginGroup(kCatProfileRootGroup);
+    for (QString const& key : settings.childGroups()) {
+        settings.beginGroup(key);
+        QString const name = normalizedCatProfileName(settings.value(QStringLiteral("name")).toString());
+        settings.endGroup();
+        if (!name.isEmpty() && !names.contains(name, Qt::CaseInsensitive)) {
+            names << name;
+        }
+    }
+    settings.endGroup();
+    std::sort(names.begin(), names.end(), [](QString const& a, QString const& b) {
+        return QString::localeAwareCompare(a, b) < 0;
+    });
+    return names;
+}
 
 #ifndef DECODIUM_FT2LINK_ACCESS_SALT_B64
 #define DECODIUM_FT2LINK_ACCESS_SALT_B64 ""
@@ -8153,6 +8268,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_nativeCat       = new DecodiumCatManager(this);
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
+    applyStartupCatProfileSnapshot();
+    m_nativeCat->loadSettings();
+    m_omniRigCat->loadSettings();
+    m_hamlibCat->loadSettings();
     m_dxCluster       = new DecodiumDxCluster(this);
     QGuiApplication::setFont(fontSettingFont(QStringLiteral("Font"), QString(), 0));
     m_dxClusterSpotsNotifyTimer = new QTimer(this);
@@ -9196,7 +9315,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
         bridgeLog("SoundOutput error: " + text);
         emit errorMessage(text);
-        if (m_bridgeAudioLegacyTxActive && m_transmitting) {
+        if ((m_bridgeAudioLegacyTxActive || m_ft2LinkTxActive) && m_transmitting) {
             m_txPlaybackHoldUntilMs = 0;
             m_txPlaybackHardDeadlineMs = 0;
             m_txPlaybackReleasePending = false;
@@ -9204,8 +9323,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 m_txPcmBuffer->seek(m_txPcmBuffer->size());
             }
             QTimer::singleShot(0, this, [this]() {
-                if (m_bridgeAudioLegacyTxActive && m_transmitting) {
-                    completeTxPlayback(QStringLiteral("sound-output-error"), true);
+                if ((m_bridgeAudioLegacyTxActive || m_ft2LinkTxActive) && m_transmitting) {
+                    if (m_ft2LinkTxActive && !m_bridgeAudioLegacyTxActive && m_soundOutput) {
+                        finishModulatorIdlePlayback(QStringLiteral("sound-output-error"));
+                    } else {
+                        completeTxPlayback(QStringLiteral("sound-output-error"), true);
+                    }
                 }
             });
         }
@@ -13018,6 +13141,11 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
         return;
     }
 
+    QString const splitMode = normalizedCatSplitMode(m_hamlibCat->splitMode());
+    if (splitMode == QStringLiteral("none")) {
+        return;
+    }
+
     double const txDialHz = catSplitTxDialFrequencyHz();
     if (txDialHz <= 0.0
         && !m_hamlibCat->split()
@@ -13032,7 +13160,6 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
         : 0.0;
     activeCatSetTxFreq(m_nativeCat, m_hamlibCat, m_catBackend, txDialCalibrated, m_omniRigCat);
 
-    QString const splitMode = m_hamlibCat->splitMode().trimmed().toLower();
     if (txDialHz > 0.0) {
         bridgeLog(QStringLiteral("CAT split sync (%1): mode=%2 dial=%3 tx_ui=%4 xit=%5 tx_dial=%6 tx_audio=%7 via %8")
                       .arg(reason,
@@ -16641,6 +16768,12 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
         return;
     }
 
+    if (delayTxFinishUntilPcmConsumed(QStringLiteral("finishModulatorIdlePlayback"),
+                                      reason,
+                                      false)) {
+        return;
+    }
+
     m_txPlaybackReleasePending = false;
     m_txPlaybackHoldUntilMs = 0;
     m_txPlaybackHardDeadlineMs = 0;
@@ -18381,6 +18514,50 @@ void DecodiumBridge::scheduleSyncTxBoundaryStop(const QString& reason, quint64 t
     });
 }
 
+bool DecodiumBridge::delayTxFinishUntilPcmConsumed(const QString& context,
+                                                   const QString& reason,
+                                                   bool useCompletePlayback)
+{
+    if (!m_transmitting || !m_txPcmBuffer || m_txPcmBuffer->atEnd()) {
+        return false;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const hardDeadline = m_txPlaybackHardDeadlineMs;
+    if (hardDeadline <= 0 || nowMs < hardDeadline) {
+        qint64 const delayMs = hardDeadline > 0
+            ? qBound<qint64>(qint64(50), hardDeadline - nowMs, qint64(250))
+            : qint64(250);
+        if (!m_txPlaybackReleasePending) {
+            m_txPlaybackReleasePending = true;
+            bridgeLog(QStringLiteral("%1 delayed: TX PCM not drained reason=%2 pos=%3/%4 delay_ms=%5 ft2Link=%6 bridgeLegacy=%7")
+                          .arg(context, reason)
+                          .arg(m_txPcmBuffer->pos())
+                          .arg(m_txPcmBuffer->size())
+                          .arg(delayMs)
+                          .arg(m_ft2LinkTxActive ? 1 : 0)
+                          .arg(m_bridgeAudioLegacyTxActive ? 1 : 0));
+            QTimer::singleShot(delayMs, this, [this, reason, useCompletePlayback]() {
+                m_txPlaybackReleasePending = false;
+                if (useCompletePlayback) {
+                    completeTxPlayback(reason + QStringLiteral("-buffer"));
+                } else {
+                    finishModulatorIdlePlayback(reason + QStringLiteral("-buffer"));
+                }
+            });
+        }
+        return true;
+    }
+
+    bridgeLog(QStringLiteral("%1 forcing incomplete TX PCM after hard deadline: reason=%2 pos=%3/%4 ft2Link=%5 bridgeLegacy=%6")
+                  .arg(context, reason)
+                  .arg(m_txPcmBuffer->pos())
+                  .arg(m_txPcmBuffer->size())
+                  .arg(m_ft2LinkTxActive ? 1 : 0)
+                  .arg(m_bridgeAudioLegacyTxActive ? 1 : 0));
+    return false;
+}
+
 void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
 {
     if (QThread::currentThread() != thread()) {
@@ -18433,30 +18610,10 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         }
     }
 
-    if (!error && m_transmitting && m_txPcmBuffer && !m_txPcmBuffer->atEnd()) {
-        qint64 const hardDeadline = m_txPlaybackHardDeadlineMs;
-        if (hardDeadline <= 0 || nowMs < hardDeadline) {
-            qint64 const delayMs = hardDeadline > 0
-                ? qBound<qint64>(qint64(50), hardDeadline - nowMs, qint64(250))
-                : qint64(250);
-            if (!m_txPlaybackReleasePending) {
-                m_txPlaybackReleasePending = true;
-                bridgeLog(QStringLiteral("completeTxPlayback delayed: buffer incomplete reason=%1 pos=%2/%3 delay_ms=%4")
-                              .arg(reason)
-                              .arg(m_txPcmBuffer->pos())
-                              .arg(m_txPcmBuffer->size())
-                              .arg(delayMs));
-                QTimer::singleShot(delayMs, this, [this, reason]() {
-                    m_txPlaybackReleasePending = false;
-                    completeTxPlayback(reason + QStringLiteral("-buffer"));
-                });
-            }
-            return;
-        }
-        bridgeLog(QStringLiteral("completeTxPlayback forcing incomplete TX buffer after hard deadline: reason=%1 pos=%2/%3")
-                      .arg(reason)
-                      .arg(m_txPcmBuffer->pos())
-                      .arg(m_txPcmBuffer->size()));
+    if (!error && delayTxFinishUntilPcmConsumed(QStringLiteral("completeTxPlayback"),
+                                                reason,
+                                                true)) {
+        return;
     }
 
     m_txPlaybackReleasePending = false;
@@ -19978,6 +20135,19 @@ void DecodiumBridge::stopTx()
         || (m_modulator && m_modulator->isActive())
         || catReportsPttActive;
 
+    if (m_ft2LinkTxActive) {
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        bridgeLog(QStringLiteral("stopTx: aborting active FT2-Link TX tx=%1 bridgeLegacy=%2 pcm=%3/%4 hold_ms=%5 hard_ms=%6 ptt_needed=%7 catPtt=%8")
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
+                      .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
+                      .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1)
+                      .arg(qMax<qint64>(0, m_txPlaybackHoldUntilMs - nowMs))
+                      .arg(qMax<qint64>(0, m_txPlaybackHardDeadlineMs - nowMs))
+                      .arg(pttReleaseNeeded ? 1 : 0)
+                      .arg(catReportsPttActive ? 1 : 0));
+    }
+
     if (usingLegacyBackendForTx()) {
 #if defined(Q_OS_MAC)
         cancelPendingLegacyBridgeAudioStart(QStringLiteral("stopTx"));
@@ -21243,6 +21413,275 @@ QVariantList DecodiumBridge::worldClockCityOptions(const QString& query, int lim
 }
 
 // ── catBackend switch ─────────────────────────────────────────────────────────
+QString DecodiumBridge::activeCatProfile() const
+{
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    return normalizedCatProfileName(settings.value(kCatProfileActiveKey).toString());
+}
+
+QStringList DecodiumBridge::catProfileList() const
+{
+    return catProfileNamesFromSettings();
+}
+
+QString DecodiumBridge::suggestedCatProfileName() const
+{
+    QObject const* cat = catManagerObj();
+    QString rig = cat ? cat->property("rigName").toString().trimmed() : QString {};
+    if (rig.isEmpty()) {
+        rig = m_catBackend.trimmed().toUpper();
+    }
+
+    QString backend = m_catBackend.trimmed().toUpper();
+    if (backend == QStringLiteral("HAMLIB")) backend = QStringLiteral("Hamlib");
+    else if (backend == QStringLiteral("NATIVE")) backend = QStringLiteral("Native");
+    else if (backend == QStringLiteral("TCI")) backend = QStringLiteral("TCI");
+    else if (backend == QStringLiteral("OMNIRIG")) backend = QStringLiteral("OmniRig");
+
+    QString name = QStringLiteral("%1 %2").arg(rig, backend).trimmed();
+    return normalizedCatProfileName(name.isEmpty() ? QStringLiteral("Radio Profile") : name);
+}
+
+bool DecodiumBridge::saveCatProfile(const QString& rawName)
+{
+    QString const name = normalizedCatProfileName(rawName);
+    if (name.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile: enter a profile name"));
+        return false;
+    }
+
+    if (m_nativeCat) m_nativeCat->saveSettings();
+    if (m_hamlibCat) m_hamlibCat->saveSettings();
+    if (m_omniRigCat) m_omniRigCat->saveSettings();
+
+    QSettings source(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(source);
+    source.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(m_catBackend));
+
+    QVariantMap rootValues;
+    for (QString const& key : catProfileSnapshotRootKeys()) {
+        if (key == QStringLiteral("catBackend")) {
+            rootValues.insert(key, normalizedCatBackendForSettings(m_catBackend));
+        } else if (key == QStringLiteral("CATMode")) {
+            rootValues.insert(key, source.value(key, QStringLiteral("Data/Pkt")));
+        } else if (key == QStringLiteral("TXAudioSource")) {
+            rootValues.insert(key, source.value(key, QStringLiteral("Rear/Data")));
+        } else if (key == QStringLiteral("CheckSWR") || key == QStringLiteral("PWRandSWR")) {
+            rootValues.insert(key, source.value(key, false));
+        } else if (key == QStringLiteral("SWRStopThreshold")) {
+            rootValues.insert(key, source.value(key, 2.5));
+        }
+    }
+
+    QMap<QString, QVariantMap> groupValues;
+    for (QString const& group : catProfileSnapshotGroups()) {
+        groupValues.insert(group, readSettingsGroupFlat(source, group));
+    }
+
+    QString const key = catProfileStorageKey(name);
+    QSettings dest(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(dest);
+    dest.beginGroup(kCatProfileRootGroup);
+    dest.beginGroup(key);
+    dest.remove(QString());
+    dest.setValue(QStringLiteral("name"), name);
+    dest.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(m_catBackend));
+    if (QObject const* cat = catManagerObj()) {
+        dest.setValue(QStringLiteral("rigName"), cat->property("rigName").toString());
+    }
+    dest.setValue(QStringLiteral("updatedUtc"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    writeSettingsGroupFlat(dest, QStringLiteral("Root"), rootValues);
+    dest.beginGroup(QStringLiteral("Groups"));
+    for (auto it = groupValues.constBegin(); it != groupValues.constEnd(); ++it) {
+        writeSettingsGroupFlat(dest, it.key(), it.value());
+    }
+    dest.endGroup();
+    dest.endGroup();
+    dest.endGroup();
+    dest.setValue(kCatProfileActiveKey, name);
+    dest.sync();
+
+    emit catProfilesChanged();
+    emit activeCatProfileChanged();
+    emit statusMessage(QStringLiteral("CAT profile saved: %1").arg(name));
+    return true;
+}
+
+bool DecodiumBridge::applyCatProfileSnapshotToSettings(const QString& rawName, bool setActiveProfile)
+{
+    QString const requestedName = normalizedCatProfileName(rawName);
+    if (requestedName.isEmpty()) {
+        return false;
+    }
+
+    QSettings source(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(source);
+    QString const key = findCatProfileStorageKey(source, requestedName);
+    if (key.isEmpty()) {
+        return false;
+    }
+
+    QString storedName;
+    QVariantMap rootValues;
+    QMap<QString, QVariantMap> groupValues;
+    source.beginGroup(kCatProfileRootGroup);
+    source.beginGroup(key);
+    storedName = normalizedCatProfileName(source.value(QStringLiteral("name"), requestedName).toString());
+    rootValues = readSettingsGroupFlat(source, QStringLiteral("Root"));
+    for (QString const& group : catProfileSnapshotGroups()) {
+        groupValues.insert(group, readSettingsGroupFlat(source, QStringLiteral("Groups/") + group));
+    }
+    source.endGroup();
+    source.endGroup();
+
+    if (storedName.isEmpty()) {
+        storedName = requestedName;
+    }
+
+    if (rootValues.contains(QStringLiteral("catBackend"))) {
+        rootValues.insert(QStringLiteral("catBackend"),
+                          normalizedCatBackendForSettings(rootValues.value(QStringLiteral("catBackend")).toString()));
+    }
+
+    QSettings dest(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(dest);
+    for (auto it = rootValues.constBegin(); it != rootValues.constEnd(); ++it) {
+        dest.setValue(it.key(), it.value());
+    }
+    for (auto it = groupValues.constBegin(); it != groupValues.constEnd(); ++it) {
+        writeSettingsGroupFlat(dest, it.key(), it.value());
+    }
+    if (setActiveProfile) {
+        dest.setValue(kCatProfileActiveKey, storedName);
+    }
+    dest.sync();
+    return true;
+}
+
+void DecodiumBridge::applyStartupCatProfileSnapshot()
+{
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    QString const name = normalizedCatProfileName(settings.value(kCatProfileActiveKey).toString());
+    if (name.isEmpty()) {
+        return;
+    }
+    if (applyCatProfileSnapshotToSettings(name, false)) {
+        bridgeLog(QStringLiteral("CAT profile startup snapshot applied: %1").arg(name));
+    } else {
+        bridgeLog(QStringLiteral("CAT profile startup snapshot missing: %1").arg(name));
+    }
+}
+
+bool DecodiumBridge::loadCatProfile(const QString& rawName)
+{
+    QString const name = normalizedCatProfileName(rawName);
+    if (name.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile: select a profile to load"));
+        return false;
+    }
+    if (!applyCatProfileSnapshotToSettings(name, true)) {
+        emit errorMessage(QStringLiteral("CAT profile not found: %1").arg(name));
+        return false;
+    }
+
+    halt();
+    if (m_nativeCat) m_nativeCat->disconnectRig();
+    if (m_omniRigCat) m_omniRigCat->disconnectRig();
+    if (m_hamlibCat) m_hamlibCat->disconnectRig();
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    m_catConnected = false;
+    m_catRigName.clear();
+    m_catMode.clear();
+    emit catConnectedChanged();
+    emit catRigNameChanged();
+    emit catModeChanged();
+    refreshPskReporterLocalStation();
+    updateRigTelemetry(0.0, 0.0, 0.0);
+
+    reloadBridgeSettingsFromPersistentStore();
+    emit catProfilesChanged();
+    emit activeCatProfileChanged();
+    emit statusMessage(QStringLiteral("CAT profile loaded: %1. Connect manually to the radio.").arg(activeCatProfile()));
+    return true;
+}
+
+bool DecodiumBridge::deleteCatProfile(const QString& rawName)
+{
+    QString const name = normalizedCatProfileName(rawName);
+    if (name.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile: select a profile to delete"));
+        return false;
+    }
+
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    QString const key = findCatProfileStorageKey(settings, name);
+    if (key.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile not found: %1").arg(name));
+        return false;
+    }
+
+    settings.beginGroup(kCatProfileRootGroup);
+    settings.remove(key);
+    settings.endGroup();
+    if (0 == activeCatProfile().compare(name, Qt::CaseInsensitive)) {
+        settings.remove(kCatProfileActiveKey);
+    }
+    settings.sync();
+    emit catProfilesChanged();
+    emit activeCatProfileChanged();
+    emit statusMessage(QStringLiteral("CAT profile deleted: %1").arg(name));
+    return true;
+}
+
+bool DecodiumBridge::renameCatProfile(const QString& rawOldName, const QString& rawNewName)
+{
+    QString const oldName = normalizedCatProfileName(rawOldName);
+    QString const newName = normalizedCatProfileName(rawNewName);
+    if (oldName.isEmpty() || newName.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile: enter a valid profile name"));
+        return false;
+    }
+    if (0 == oldName.compare(newName, Qt::CaseInsensitive)) {
+        return true;
+    }
+
+    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    QString const oldKey = findCatProfileStorageKey(settings, oldName);
+    if (oldKey.isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile not found: %1").arg(oldName));
+        return false;
+    }
+    if (!findCatProfileStorageKey(settings, newName).isEmpty()) {
+        emit errorMessage(QStringLiteral("CAT profile already exists: %1").arg(newName));
+        return false;
+    }
+
+    settings.beginGroup(kCatProfileRootGroup);
+    QVariantMap profileValues = readSettingsGroupFlat(settings, oldKey);
+    settings.remove(oldKey);
+    QString const newKey = catProfileStorageKey(newName);
+    writeSettingsGroupFlat(settings, newKey, profileValues);
+    settings.beginGroup(newKey);
+    settings.setValue(QStringLiteral("name"), newName);
+    settings.setValue(QStringLiteral("updatedUtc"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    settings.endGroup();
+    settings.endGroup();
+
+    if (0 == activeCatProfile().compare(oldName, Qt::CaseInsensitive)) {
+        settings.setValue(kCatProfileActiveKey, newName);
+    }
+    settings.sync();
+    emit catProfilesChanged();
+    emit activeCatProfileChanged();
+    emit statusMessage(QStringLiteral("CAT profile renamed: %1").arg(newName));
+    return true;
+}
+
 void DecodiumBridge::setCatBackend(const QString& v)
 {
     QString normalized = v.trimmed().toLower();
@@ -41728,6 +42167,100 @@ QVariantMap DecodiumBridge::writeTextFile(const QString& path,
 
     if (resolved.isEmpty()) {
         result.insert(QStringLiteral("error"), QStringLiteral("Missing file path"));
+        return result;
+    }
+
+    QFileInfo const info(resolved);
+    QDir const dir = info.absoluteDir();
+    if (!dir.exists() && !QDir().mkpath(dir.absolutePath())) {
+        result.insert(QStringLiteral("error"),
+                      QStringLiteral("Cannot create directory %1")
+                          .arg(dir.absolutePath()));
+        return result;
+    }
+
+    QSaveFile file(resolved);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+    if (file.write(bytes) != bytes.size()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+    if (!file.commit()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("error"), QString());
+    return result;
+}
+
+QVariantMap DecodiumBridge::readFileBytes(const QString& path,
+                                          int maxBytes) const
+{
+    QVariantMap result;
+    QString resolved = path.trimmed();
+    if (resolved.startsWith(QLatin1String("file:"))) {
+        resolved = QUrl(resolved).toLocalFile();
+    }
+    int const limit = qBound(1, maxBytes, 65536);
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("path"), resolved);
+    result.insert(QStringLiteral("base64"), QString());
+    result.insert(QStringLiteral("bytes"), 0);
+    result.insert(QStringLiteral("fileSize"), 0);
+    result.insert(QStringLiteral("truncated"), false);
+
+    if (resolved.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing file path"));
+        return result;
+    }
+
+    QFile file(resolved);
+    if (!file.open(QIODevice::ReadOnly)) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        return result;
+    }
+
+    result.insert(QStringLiteral("fileSize"), QFileInfo(file).size());
+    QByteArray bytes = file.read(limit + 1);
+    bool const truncated = bytes.size() > limit || !file.atEnd();
+    if (bytes.size() > limit) {
+        bytes.truncate(limit);
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("base64"), QString::fromLatin1(bytes.toBase64()));
+    result.insert(QStringLiteral("bytes"), bytes.size());
+    result.insert(QStringLiteral("truncated"), truncated);
+    result.insert(QStringLiteral("error"), QString());
+    return result;
+}
+
+QVariantMap DecodiumBridge::writeFileBytes(const QString& path,
+                                           const QString& base64) const
+{
+    QVariantMap result;
+    QString resolved = path.trimmed();
+    if (resolved.startsWith(QLatin1String("file:"))) {
+        resolved = QUrl(resolved).toLocalFile();
+    }
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("path"), resolved);
+
+    QByteArray const bytes = QByteArray::fromBase64(
+        base64.trimmed().toLatin1(), QByteArray::Base64Encoding);
+    result.insert(QStringLiteral("bytes"), bytes.size());
+
+    if (resolved.isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing file path"));
+        return result;
+    }
+    if (base64.trimmed().isEmpty()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("Missing file data"));
         return result;
     }
 

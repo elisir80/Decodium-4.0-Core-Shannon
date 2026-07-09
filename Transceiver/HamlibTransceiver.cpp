@@ -535,12 +535,15 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
   // dial frequency: without rig_get_freq(), turning the radio VFO cannot update
   // Decodium.
   bool const icom_serial_cat = is_icom_serial_cat (m_->model_);
+  rig_split_control_enabled_ = params.split_mode == TransceiverFactory::split_mode_rig;
   bool const force_passive_state = env_flag_enabled ("DECODIUM_HAMLIB_POLL_PASSIVE_STATE");
   poll_passive_state_ = !icom_serial_cat || force_passive_state;
   poll_frequency_state_ = !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_FREQ_POLL");
   adaptive_frequency_poll_ = icom_serial_cat
       && poll_frequency_state_
       && !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_FREQ_POLL_BACKOFF");
+  explicit_frequency_poll_vfo_ = adaptive_frequency_poll_
+      && !env_flag_enabled ("DECODIUM_HAMLIB_DISABLE_EXPLICIT_FREQ_VFO");
   poll_ptt_state_ = !is_icom_serial_cat_ptt (m_->model_, params)
       || env_flag_enabled ("DECODIUM_HAMLIB_POLL_PTT");
   cat_keep_alive_ = params.cat_keep_alive && icom_serial_cat;
@@ -549,7 +552,8 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
       qInfo ().noquote ()
         << "[CATDBG] Hamlib Icom serial frequency polling uses adaptive backoff"
         << "initialSkipTicks=" << kFrequencyPollInitialBackoffTicks_
-        << "maxSkipTicks=" << kFrequencyPollMaxBackoffTicks_;
+        << "maxSkipTicks=" << kFrequencyPollMaxBackoffTicks_
+        << "explicitVfo=" << explicit_frequency_poll_vfo_;
     }
 
   // m_->rig_->state.obj = this;
@@ -817,7 +821,8 @@ int HamlibTransceiver::do_start ()
         << "passiveStatePoll=" << poll_passive_state_
         << "frequencyPoll=" << poll_frequency_state_
         << "passivePttPoll=" << poll_ptt_state_
-        << "catKeepAlive=" << cat_keep_alive_;
+        << "catKeepAlive=" << cat_keep_alive_
+        << "rigSplitControl=" << rig_split_control_enabled_;
     }
 
   // the Net rigctl back end promises all functions work but we must
@@ -1078,15 +1083,26 @@ void HamlibTransceiver::do_stop ()
       && RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt
       && (ptt_on_ || state ().ptt ()))
     {
-      for (int attempt = 0; attempt < 3; ++attempt)
+      int const attempts = ptt_off_attempt_limit (true);
+      int rc = -RIG_EIO;
+      for (int attempt = 0; attempt < attempts; ++attempt)
         {
-          int const rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
+          rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
           CAT_TRACE ("do_stop PTT=false attempt=" << attempt << " rc=" << rc);
           if (RIG_OK == rc)
             {
               ptt_on_ = false;
+              ptt_off_failed_recently_ = false;
+              update_PTT (false);
               break;
             }
+        }
+      if (RIG_OK != rc)
+        {
+          qWarning ().noquote ()
+            << "[CATDBG] Hamlib shutdown PTT-off failed rc=" << rc
+            << "attempts=" << attempts
+            << "— closing without more CAT retries";
         }
     }
   if (m_->rig_)
@@ -1097,9 +1113,26 @@ void HamlibTransceiver::do_stop ()
   CAT_TRACE ("state: " << state () << " reversed=" << m_->reversed_);
 }
 
+int HamlibTransceiver::ptt_off_attempt_limit (bool shutdown) const
+{
+  // Icom CI-V bus errors/timeouts can consume seconds per rig_set_ptt(false).
+  // The adaptive Icom serial path already detected a slow/failing bus, so keep
+  // one safety attempt and avoid a shutdown retry train.
+  if (adaptive_frequency_poll_ || ptt_off_failed_recently_)
+    {
+      return 1;
+    }
+  return shutdown ? 3 : 2;
+}
+
 void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
 {
   CAT_TRACE ("f: " << f << " mode: " << m << " reversed: " << m_->reversed_);
+
+  if (suppress_cat_write_during_backoff (tr ("setting frequency")))
+    {
+      return;
+    }
 
   // only change when receiving or simplex or direct VFO addressing
   // unavailable or forced
@@ -1151,6 +1184,13 @@ void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
 void HamlibTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool no_ignore)
 {
   CAT_TRACE ("txf: " << tx << " reversed: " << m_->reversed_);
+
+  if (!rig_split_control_enabled_)
+    {
+      update_other_frequency (0);
+      update_split (false);
+      return;
+    }
 
   if (WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_) // split is meaningless if you can't see it
     {
@@ -1264,6 +1304,11 @@ void HamlibTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool no_ignore
 void HamlibTransceiver::do_mode (MODE mode)
 {
   CAT_TRACE (mode);
+
+  if (suppress_cat_write_during_backoff (tr ("setting current VFO mode")))
+    {
+      return;
+    }
 
   auto vfos = m_->get_vfos (state ().split ());
   // auto rx_vfo = std::get<0> (vfos);
@@ -1379,6 +1424,52 @@ void HamlibTransceiver::note_frequency_poll_failure (int rc, QString const& doin
     }
 }
 
+bool HamlibTransceiver::cat_write_backoff_active () const
+{
+  return adaptive_frequency_poll_
+      && (frequency_poll_failures_ > 0 || frequency_poll_skip_ticks_ > 0);
+}
+
+bool HamlibTransceiver::suppress_cat_write_during_backoff (QString const& operation) const
+{
+  if (!cat_write_backoff_active ())
+    {
+      return false;
+    }
+
+  qWarning ().noquote ()
+    << "[CATDBG] Hamlib CAT write suppressed while Icom frequency polling is unstable"
+    << "op=" << operation
+    << "failures=" << frequency_poll_failures_
+    << "skipTicks=" << frequency_poll_skip_ticks_
+    << "nextSkipTicks=" << frequency_poll_backoff_ticks_;
+  return true;
+}
+
+vfo_t HamlibTransceiver::frequency_poll_vfo () const
+{
+  if (!explicit_frequency_poll_vfo_
+      || !m_->rig_
+      || m_->one_VFO_)
+    {
+      return RIG_VFO_CURR;
+    }
+
+  auto const vfo_list = m_->rig_->state.vfo_list;
+  if (m_->reversed_)
+    {
+      if (vfo_list & RIG_VFO_B) return RIG_VFO_B;
+      if (vfo_list & RIG_VFO_SUB) return RIG_VFO_SUB;
+    }
+
+  if (vfo_list & RIG_VFO_A) return RIG_VFO_A;
+  if (vfo_list & RIG_VFO_MAIN) return RIG_VFO_MAIN;
+  // Some Hamlib Icom backends under-report vfo_list/targetable capability.
+  // For serial CI-V polling, try MAIN explicitly before falling back to CURR;
+  // this avoids the fragile "current VFO" transaction path on IC-7300 class rigs.
+  return RIG_VFO_MAIN;
+}
+
 void HamlibTransceiver::do_poll ()
 {
   auto * rig = m_->rig_.data ();
@@ -1445,7 +1536,22 @@ void HamlibTransceiver::do_poll ()
       // only read if possible and when receiving or simplex
       if (!state ().ptt () || !state ().split ())
         {
-          current_frequency_ok = poll_vfo_frequency (RIG_VFO_CURR, &f, tr ("getting current VFO frequency"));
+          vfo_t const poll_vfo = frequency_poll_vfo ();
+          if (explicit_frequency_poll_vfo_ && !frequency_poll_vfo_logged_)
+            {
+              frequency_poll_vfo_logged_ = true;
+              qInfo ().noquote ()
+                << "[CATDBG] Hamlib frequency polling VFO selected"
+                << rig_strvfo (poll_vfo)
+                << "vfoList=" << m_->rig_->state.vfo_list
+                << "targetable=" << rig_get_caps_int (m_->model_, RIG_CAPS_TARGETABLE_VFO);
+            }
+          current_frequency_ok = poll_vfo_frequency (
+              poll_vfo,
+              &f,
+              poll_vfo == RIG_VFO_CURR
+                  ? tr ("getting current VFO frequency")
+                  : tr ("getting RX VFO frequency"));
           if (current_frequency_ok)
             {
               f = std::round (f);
@@ -1817,11 +1923,12 @@ void HamlibTransceiver::do_ptt (bool on)
           // signal a UI error here: a failed PTT-off must not abort the
           // surrounding TX-teardown sequence. The PTT-on path above keeps
           // throwing, since a failed TX start SHOULD surface to the user.
-          // 1.0.367 — 2 attempts (was 3): on a healthy bus the first call
-          // always succeeds (no stall); the cap bounds the worst-case worker
-          // stall on a dead bus to ~2×timeout instead of ~3×.
+          // 1.0.474 — use a dynamic cap: the Icom serial adaptive path gets
+          // one attempt to avoid compounding long Hamlib timeouts, while other
+          // rigs keep the previous bounded retry behavior.
           int rc = -RIG_EIO;
-          for (int attempt = 0; attempt < 2; ++attempt)
+          int const attempts = ptt_off_attempt_limit (false);
+          for (int attempt = 0; attempt < attempts; ++attempt)
             {
               rc = rig_set_ptt (m_->rig_.data (), RIG_VFO_CURR, RIG_PTT_OFF);
               CAT_TRACE ("rig_set_ptt PTT=false attempt=" << attempt << " rc=" << rc);
@@ -1833,13 +1940,16 @@ void HamlibTransceiver::do_ptt (bool on)
           if (RIG_OK == rc)
             {
               ptt_on_ = false;  // set AFTER successful rig_set_ptt
+              ptt_off_failed_recently_ = false;
             }
           else
             {
               // Leave ptt_on_ true so do_stop()'s release retry (1.0.365) and
               // any later TX-off attempt know the rig may still be keyed.
+              ptt_off_failed_recently_ = true;
               qWarning ().noquote ()
                 << "[CATDBG] Hamlib PTT-off failed after retries rc=" << rc
+                << "attempts=" << attempts
                 << "— radio may still be transmitting (bus error/timeout)";
             }
         }

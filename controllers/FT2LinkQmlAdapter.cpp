@@ -2230,15 +2230,25 @@ QVariantMap alertMap (QString const& fromCall,
                       QString const& text,
                       QString const& source,
                       QString const& tag,
-                      quint64 atMs)
+                      quint64 atMs,
+                      quint64 updatedAtMs,
+                      quint32 id = 0,
+                      bool read = false,
+                      bool archived = false)
 {
   QVariantMap map;
+  map.insert (QStringLiteral ("id"), id);
   map.insert (QStringLiteral ("fromCall"), fromCall);
   map.insert (QStringLiteral ("text"), text);
   map.insert (QStringLiteral ("source"), source);
   map.insert (QStringLiteral ("tag"), tag);
+  map.insert (QStringLiteral ("read"), read);
+  map.insert (QStringLiteral ("unread"), !read && !archived);
+  map.insert (QStringLiteral ("archived"), archived);
   map.insert (QStringLiteral ("atMs"),
               QVariant::fromValue<qulonglong> (atMs));
+  map.insert (QStringLiteral ("updatedAtMs"),
+              QVariant::fromValue<qulonglong> (updatedAtMs));
   return map;
 }
 
@@ -2757,17 +2767,81 @@ QString makeFileEnvelope (QString const& toCall,
             QString::fromLatin1 (contentBytes.toBase64 ()));
 }
 
+QString makeFileEnvelopeBytes (QString const& toCall,
+                               QString const& fromCall,
+                               QString const& fileName,
+                               QByteArray const& contentBytes)
+{
+  return QStringLiteral ("FT2FILE2|%1|%2|%3|B64|%4|%5|%6")
+      .arg (normalizeCallsign (toCall),
+            normalizeCallsign (fromCall),
+            mailboxEncodePart (fileName.trimmed ()),
+            QString::number (contentBytes.size ()),
+            sha256Hex (contentBytes),
+            QString::fromLatin1 (contentBytes.toBase64 ()));
+}
+
 bool parseFileEnvelope (QString const& text,
                         QString* toCall,
                         QString* fromCall,
                         QString* fileName,
                         QString* content,
-                        QString* sha256)
+                        QString* contentBase64,
+                        QString* sha256,
+                        bool* binary)
 {
   QStringList const parts = text.trimmed ().split (QLatin1Char ('|'));
   if (parts.size () != 7 || parts[0] != QStringLiteral ("FT2FILE1"))
     {
-      return false;
+      if (parts.size () != 8 || parts[0] != QStringLiteral ("FT2FILE2")
+          || parts[4] != QStringLiteral ("B64"))
+        {
+          return false;
+        }
+      if (!isHexText (parts[3]))
+        {
+          return false;
+        }
+
+      bool sizeOk = false;
+      int const declaredSize = parts[5].toInt (&sizeOk);
+      QByteArray const contentBytes = QByteArray::fromBase64 (parts[7].toLatin1 ());
+      QString const computedSha = sha256Hex (contentBytes);
+      if (!sizeOk || declaredSize < 0 || contentBytes.size () != declaredSize
+          || computedSha.compare (parts[6], Qt::CaseInsensitive) != 0)
+        {
+          return false;
+        }
+
+      if (toCall)
+        {
+          *toCall = normalizeCallsign (parts[1]);
+        }
+      if (fromCall)
+        {
+          *fromCall = normalizeCallsign (parts[2]);
+        }
+      if (fileName)
+        {
+          *fileName = mailboxDecodePart (parts[3]).trimmed ();
+        }
+      if (content)
+        {
+          *content = QString::fromUtf8 (contentBytes);
+        }
+      if (contentBase64)
+        {
+          *contentBase64 = QString::fromLatin1 (contentBytes.toBase64 ());
+        }
+      if (sha256)
+        {
+          *sha256 = computedSha;
+        }
+      if (binary)
+        {
+          *binary = true;
+        }
+      return true;
     }
   if (!isHexText (parts[3]))
     {
@@ -2800,9 +2874,17 @@ bool parseFileEnvelope (QString const& text,
     {
       *content = QString::fromUtf8 (contentBytes);
     }
+  if (contentBase64)
+    {
+      *contentBase64 = QString::fromLatin1 (contentBytes.toBase64 ());
+    }
   if (sha256)
     {
       *sha256 = computedSha;
+    }
+  if (binary)
+    {
+      *binary = false;
     }
   return true;
 }
@@ -3385,13 +3467,17 @@ QVariantMap fileTransferMap (quint32 id,
                              QString const& toCall,
                              QString const& fileName,
                              QString const& content,
+                             QString const& contentBase64,
                              QString const& sha256,
                              QString const& state,
+                             bool binary,
                              bool read,
                              quint64 atMs,
                              quint64 updatedAtMs)
 {
-  QByteArray const bytes = content.toUtf8 ();
+  QByteArray const bytes = binary
+      ? QByteArray::fromBase64 (contentBase64.trimmed ().toLatin1 ())
+      : content.toUtf8 ();
   QVariantMap map;
   map.insert (QStringLiteral ("id"), id);
   map.insert (QStringLiteral ("direction"), direction);
@@ -3399,9 +3485,14 @@ QVariantMap fileTransferMap (quint32 id,
   map.insert (QStringLiteral ("toCall"), toCall);
   map.insert (QStringLiteral ("fileName"), fileName);
   map.insert (QStringLiteral ("content"), content);
+  map.insert (QStringLiteral ("contentBase64"),
+              binary
+              ? contentBase64.trimmed ()
+              : QString::fromLatin1 (content.toUtf8 ().toBase64 ()));
   map.insert (QStringLiteral ("sizeBytes"), bytes.size ());
   map.insert (QStringLiteral ("sha256"), sha256);
   map.insert (QStringLiteral ("state"), state);
+  map.insert (QStringLiteral ("binary"), binary);
   map.insert (QStringLiteral ("read"), read);
   map.insert (QStringLiteral ("unread"),
               direction == QStringLiteral ("Incoming") && !read);
@@ -3410,6 +3501,18 @@ QVariantMap fileTransferMap (quint32 id,
   map.insert (QStringLiteral ("updatedAtMs"),
               QVariant::fromValue<qulonglong> (updatedAtMs));
   return map;
+}
+
+int fileTransferByteSize (QString const& content,
+                          QString const& contentBase64,
+                          bool binary)
+{
+  if (binary)
+    {
+      return QByteArray::fromBase64 (
+          contentBase64.trimmed ().toLatin1 ()).size ();
+    }
+  return content.toUtf8 ().size ();
 }
 
 QString compactTextPreview (QString const& text, int maxChars = 96)
@@ -4476,7 +4579,15 @@ int FT2LinkQmlAdapter::broadcastCount () const
 
 int FT2LinkQmlAdapter::alertCount () const
 {
-  return static_cast<int> (m_alerts.size ());
+  int count = 0;
+  for (AlertEvent const& alert : m_alerts)
+    {
+      if (!alert.archived && !alert.read)
+        {
+          ++count;
+        }
+    }
+  return count;
 }
 
 int FT2LinkQmlAdapter::mailboxCount () const
@@ -6611,7 +6722,7 @@ bool FT2LinkQmlAdapter::transmitFileRadio (quint16 sessionId,
     {
       safeName = QStringLiteral ("ft2link.txt");
     }
-  QString const contentText = content.trimmed ();
+  QString const contentText = content;
   QByteArray const contentBytes = contentText.toUtf8 ();
 
   if (from.isEmpty ())
@@ -6666,8 +6777,109 @@ bool FT2LinkQmlAdapter::transmitFileRadio (quint16 sessionId,
       resolvedTo,
       safeName,
       contentText,
+      QString::fromLatin1 (contentBytes.toBase64 ()),
       checksum,
       QStringLiteral ("Pending"),
+      false,
+      nowMs);
+  m_liveOutboundFileTransferId[sessionId] = transferId;
+  m_liveOutboundMailboxId.erase (sessionId);
+  m_liveOutboundMailboxDeliveredState.erase (sessionId);
+  m_liveOutboundFormId.erase (sessionId);
+  m_liveOutboundBulletinId.erase (sessionId);
+  return true;
+}
+
+bool FT2LinkQmlAdapter::transmitFileRadioBytes (quint16 sessionId,
+                                                QString const& toCall,
+                                                QString const& fileName,
+                                                QString const& contentBase64,
+                                                quint64 nowMs)
+{
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link binary file TX requires a connected session"));
+      return false;
+    }
+
+  QString const from = normalizeCallsign (
+      QString::fromStdString (m_model.localStation ().call));
+  QString resolvedTo = normalizeCallsign (toCall);
+  if (resolvedTo.isEmpty ())
+    {
+      resolvedTo = QString::fromStdString (session->remoteCall);
+    }
+  resolvedTo = normalizeCallsign (resolvedTo);
+  QString safeName = fileName.trimmed ();
+  safeName.replace (QLatin1Char ('/'), QLatin1Char ('_'));
+  safeName.replace (QLatin1Char ('\\'), QLatin1Char ('_'));
+  if (safeName.isEmpty ())
+    {
+      safeName = QStringLiteral ("ft2link.bin");
+    }
+
+  QByteArray const contentBytes = QByteArray::fromBase64 (
+      contentBase64.trimmed ().toLatin1 ());
+  if (from.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link binary file TX requires MYCALL"));
+      return false;
+    }
+  if (resolvedTo.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link binary file TX requires a recipient"));
+      return false;
+    }
+  if (contentBytes.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link binary file content is empty"));
+      return false;
+    }
+  if (contentBytes.size () > kMaxTextFilePayloadBytes)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link binary file content exceeds %1 bytes").arg (
+              kMaxTextFilePayloadBytes));
+      return false;
+    }
+
+  QString const checksum = sha256Hex (contentBytes);
+  QString const normalizedBase64 = QString::fromLatin1 (contentBytes.toBase64 ());
+  QString const envelope = makeFileEnvelopeBytes (
+      resolvedTo, from, safeName, contentBytes);
+  QString const displayText = QStringLiteral ("FILE %1 to %2")
+      .arg (safeName, resolvedTo);
+  QVariantMap planExtras;
+  planExtras.insert (QStringLiteral ("file"), true);
+  planExtras.insert (QStringLiteral ("fileName"), safeName);
+  planExtras.insert (QStringLiteral ("fileBytes"), contentBytes.size ());
+  planExtras.insert (QStringLiteral ("fileBinary"), true);
+  planExtras.insert (QStringLiteral ("sha256"), checksum);
+
+  if (!transmitApplicationPayloadRadio (
+          sessionId,
+          envelope,
+          displayText,
+          QStringLiteral ("FT2-Link FILE ") + safeName,
+          QStringLiteral ("FILE TX"),
+          planExtras,
+          nowMs))
+    {
+      return false;
+    }
+
+  quint32 const transferId = recordFileTransfer (
+      QStringLiteral ("Outgoing"),
+      from,
+      resolvedTo,
+      safeName,
+      QString::fromUtf8 (contentBytes),
+      normalizedBase64,
+      checksum,
+      QStringLiteral ("Pending"),
+      true,
       nowMs);
   m_liveOutboundFileTransferId[sessionId] = transferId;
   m_liveOutboundMailboxId.erase (sessionId);
@@ -9204,7 +9416,9 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       QString fileFrom;
       QString fileName;
       QString fileContent;
+      QString fileContentBase64;
       QString fileSha256;
+      bool fileBinary = false;
       QString formTo;
       QString formFrom;
       QString formType;
@@ -9227,15 +9441,24 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           displayText = QStringLiteral ("DUPLICATE RX");
         }
       else if (parseFileEnvelope (
-              text, &fileTo, &fileFrom, &fileName, &fileContent, &fileSha256))
+              text,
+              &fileTo,
+              &fileFrom,
+              &fileName,
+              &fileContent,
+              &fileContentBase64,
+              &fileSha256,
+              &fileBinary))
         {
           recordFileTransfer (QStringLiteral ("Incoming"),
                               fileFrom,
                               fileTo,
                               fileName,
                               fileContent,
+                              fileContentBase64,
                               fileSha256,
                               QStringLiteral ("Received"),
+                              fileBinary,
                               nowMs);
           displayText = QStringLiteral ("FILE from %1: %2")
               .arg (fileFrom, fileName);
@@ -9442,7 +9665,9 @@ bool FT2LinkQmlAdapter::appendIncomingText (quint16 sessionId,
   QString fileFrom;
   QString fileName;
   QString fileContent;
+  QString fileContentBase64;
   QString fileSha256;
+  bool fileBinary = false;
   QString formTo;
   QString formFrom;
   QString formType;
@@ -9461,15 +9686,24 @@ bool FT2LinkQmlAdapter::appendIncomingText (quint16 sessionId,
   bool mailEmcomm = false;
   bool mailRelayEnvelope = false;
   if (parseFileEnvelope (
-          displayText, &fileTo, &fileFrom, &fileName, &fileContent, &fileSha256))
+          displayText,
+          &fileTo,
+          &fileFrom,
+          &fileName,
+          &fileContent,
+          &fileContentBase64,
+          &fileSha256,
+          &fileBinary))
     {
       recordFileTransfer (QStringLiteral ("Incoming"),
                           fileFrom,
                           fileTo,
                           fileName,
                           fileContent,
+                          fileContentBase64,
                           fileSha256,
                           QStringLiteral ("Received"),
+                          fileBinary,
                           nowMs);
       displayText = QStringLiteral ("FILE from %1: %2")
           .arg (fileFrom, fileName);
@@ -11425,7 +11659,39 @@ QVariantList FT2LinkQmlAdapter::alertEvents () const
           alert.text,
           alert.source,
           alert.tag,
-          alert.atMs));
+          alert.atMs,
+          alert.updatedAtMs > 0u ? alert.updatedAtMs : alert.atMs,
+          alert.id,
+          alert.read,
+          alert.archived));
+    }
+  std::sort (list.begin (), list.end (), [] (QVariant const& lhs,
+                                             QVariant const& rhs) {
+    return lhs.toMap ().value (QStringLiteral ("atMs")).toULongLong ()
+        > rhs.toMap ().value (QStringLiteral ("atMs")).toULongLong ();
+  });
+  return list;
+}
+
+QVariantList FT2LinkQmlAdapter::activeAlertEvents () const
+{
+  QVariantList list;
+  for (AlertEvent const& alert : m_alerts)
+    {
+      if (alert.archived)
+        {
+          continue;
+        }
+      list.push_back (alertMap (
+          alert.fromCall,
+          alert.text,
+          alert.source,
+          alert.tag,
+          alert.atMs,
+          alert.updatedAtMs > 0u ? alert.updatedAtMs : alert.atMs,
+          alert.id,
+          alert.read,
+          alert.archived));
     }
   return list;
 }
@@ -11669,8 +11935,10 @@ QVariantList FT2LinkQmlAdapter::fileTransfers () const
           transfer.toCall,
           transfer.fileName,
           transfer.content,
+          transfer.contentBase64,
           transfer.sha256,
           transfer.state,
+          transfer.binary,
           transfer.read,
           transfer.atMs,
           transfer.updatedAtMs));
@@ -11697,8 +11965,10 @@ QVariantList FT2LinkQmlAdapter::receivedFiles () const
           transfer.toCall,
           transfer.fileName,
           transfer.content,
+          transfer.contentBase64,
           transfer.sha256,
           transfer.state,
+          transfer.binary,
           transfer.read,
           transfer.atMs,
           transfer.updatedAtMs);
@@ -11975,7 +12245,10 @@ QVariantList FT2LinkQmlAdapter::contactTimeline (QString const& call) const
           transfer.state,
           transfer.fileName,
           QStringLiteral ("%1 bytes sha %2")
-              .arg (QString::number (transfer.content.toUtf8 ().size ()),
+              .arg (QString::number (fileTransferByteSize (
+                        transfer.content,
+                        transfer.contentBase64,
+                        transfer.binary)),
                     transfer.sha256.left (12)),
           transfer.updatedAtMs > 0u ? transfer.updatedAtMs : transfer.atMs,
           transfer.id));
@@ -13855,7 +14128,10 @@ QVariantMap FT2LinkQmlAdapter::statistics () const
         {
           ++filesIncoming;
           receivedFileBytes += static_cast<quint64> (
-              transfer.content.toUtf8 ().size ());
+              fileTransferByteSize (
+                  transfer.content,
+                  transfer.contentBase64,
+                  transfer.binary));
         }
       else
         {
@@ -14572,6 +14848,89 @@ void FT2LinkQmlAdapter::clearAlertEvents ()
   emit alertsChanged ();
 }
 
+bool FT2LinkQmlAdapter::markAlertRead (quint32 alertId,
+                                       bool read,
+                                       quint64 nowMs)
+{
+  if (alertId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link alert id is invalid"));
+      return false;
+    }
+  for (AlertEvent& alert : m_alerts)
+    {
+      if (alert.id != alertId)
+        {
+          continue;
+        }
+      if (alert.read == read)
+        {
+          clearLastError ();
+          return true;
+        }
+      alert.read = read;
+      alert.updatedAtMs = nowMs;
+      emit alertsChanged ();
+      clearLastError ();
+      return true;
+    }
+  setLastError (QStringLiteral ("FT2-Link alert not found"));
+  return false;
+}
+
+bool FT2LinkQmlAdapter::archiveAlert (quint32 alertId,
+                                      bool archived,
+                                      quint64 nowMs)
+{
+  if (alertId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link alert id is invalid"));
+      return false;
+    }
+  for (AlertEvent& alert : m_alerts)
+    {
+      if (alert.id != alertId)
+        {
+          continue;
+        }
+      if (alert.archived == archived)
+        {
+          clearLastError ();
+          return true;
+        }
+      alert.archived = archived;
+      if (archived)
+        {
+          alert.read = true;
+        }
+      alert.updatedAtMs = nowMs;
+      emit alertsChanged ();
+      clearLastError ();
+      return true;
+    }
+  setLastError (QStringLiteral ("FT2-Link alert not found"));
+  return false;
+}
+
+void FT2LinkQmlAdapter::clearArchivedAlertEvents ()
+{
+  if (m_alerts.empty ())
+    {
+      return;
+    }
+  std::size_t const before = m_alerts.size ();
+  m_alerts.erase (
+      std::remove_if (
+          m_alerts.begin (),
+          m_alerts.end (),
+          [] (AlertEvent const& alert) { return alert.archived; }),
+      m_alerts.end ());
+  if (m_alerts.size () != before)
+    {
+      emit alertsChanged ();
+    }
+}
+
 bool FT2LinkQmlAdapter::markMailboxRead (quint32 messageId,
                                          bool read,
                                          quint64 nowMs)
@@ -15131,11 +15490,19 @@ void FT2LinkQmlAdapter::recordBroadcast (QString const& fromCall,
   for (QString const& tag : message.alertTags)
     {
       AlertEvent alert;
+      alert.id = m_nextAlertId++;
+      if (m_nextAlertId == 0u)
+        {
+          m_nextAlertId = 1u;
+        }
       alert.fromCall = message.fromCall;
       alert.text = message.text;
       alert.source = message.source;
       alert.tag = tag;
+      alert.read = false;
+      alert.archived = false;
       alert.atMs = nowMs;
+      alert.updatedAtMs = nowMs;
       m_alerts.push_back (alert);
     }
   if (m_alerts.size () > 100u)
@@ -15164,12 +15531,20 @@ void FT2LinkQmlAdapter::recordPathFinderAlert (QString const& fromCall,
     }
 
   AlertEvent alert;
+  alert.id = m_nextAlertId++;
+  if (m_nextAlertId == 0u)
+    {
+      m_nextAlertId = 1u;
+    }
   alert.fromCall = normalizedCall.isEmpty () ? QStringLiteral ("UNKNOWN")
                                              : normalizedCall;
   alert.text = normalizedText;
   alert.source = QStringLiteral ("Path");
   alert.tag = QStringLiteral ("PATH");
+  alert.read = false;
+  alert.archived = false;
   alert.atMs = nowMs;
+  alert.updatedAtMs = nowMs;
   m_alerts.push_back (alert);
   if (m_alerts.size () > 100u)
     {
@@ -15391,6 +15766,14 @@ void FT2LinkQmlAdapter::notifyParkedMailboxForCall (QString const& call,
       alert.source = QStringLiteral ("Relay");
       alert.tag = QStringLiteral ("MAIL");
       alert.atMs = nowMs;
+      alert.updatedAtMs = nowMs;
+      alert.read = false;
+      alert.archived = false;
+      alert.id = m_nextAlertId++;
+      if (m_nextAlertId == 0u)
+        {
+          m_nextAlertId = 1u;
+        }
       m_alerts.push_back (alert);
       if (m_alerts.size () > 100u)
         {
@@ -16080,8 +16463,10 @@ quint32 FT2LinkQmlAdapter::recordFileTransfer (QString const& direction,
                                                QString const& toCall,
                                                QString const& fileName,
                                                QString const& content,
+                                               QString const& contentBase64,
                                                QString const& sha256,
                                                QString const& state,
+                                               bool binary,
                                                quint64 nowMs)
 {
   FileTransfer transfer;
@@ -16097,8 +16482,10 @@ quint32 FT2LinkQmlAdapter::recordFileTransfer (QString const& direction,
       ? QStringLiteral ("ft2link.txt")
       : fileName.trimmed ();
   transfer.content = content;
+  transfer.contentBase64 = contentBase64.trimmed ();
   transfer.sha256 = sha256.trimmed ();
   transfer.state = state;
+  transfer.binary = binary;
   transfer.read = direction != QStringLiteral ("Incoming")
       || state == QStringLiteral ("Read");
   transfer.atMs = nowMs;
@@ -16748,7 +17135,10 @@ QString FT2LinkQmlAdapter::bbsFileListReply (quint64 nowMs) const
        it != m_fileTransfers.rend ();
        ++it)
     {
-      if (it->content.trimmed ().isEmpty ())
+      if (fileTransferByteSize (
+              it->content,
+              it->contentBase64,
+              it->binary) <= 0)
         {
           continue;
         }
@@ -16773,7 +17163,10 @@ QString FT2LinkQmlAdapter::bbsFileListReply (quint64 nowMs) const
         {
           date = QStringLiteral ("1970-01-01");
         }
-      int const size = it->content.toUtf8 ().size ();
+      int const size = fileTransferByteSize (
+          it->content,
+          it->contentBase64,
+          it->binary);
       tags.push_back (QStringLiteral ("<BL:%1|%2|%3>")
                       .arg (safeName, date, QString::number (size)));
       if (tags.size () >= 5)
@@ -16796,7 +17189,10 @@ bool FT2LinkQmlAdapter::bbsFileAvailable (QString const& fileName) const
   for (FileTransfer const& transfer : m_fileTransfers)
     {
       if (transfer.fileName.trimmed ().toLower () == wanted
-          && !transfer.content.trimmed ().isEmpty ())
+          && fileTransferByteSize (
+              transfer.content,
+              transfer.contentBase64,
+              transfer.binary) > 0)
         {
           return true;
         }
@@ -19007,6 +19403,8 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
                QString::number (m_nextFileTransferId));
   root.insert (QStringLiteral ("nextBulletinId"),
                QString::number (m_nextBulletinId));
+  root.insert (QStringLiteral ("nextAlertId"),
+               QString::number (m_nextAlertId));
   root.insert (QStringLiteral ("nextPathReportId"),
                QString::number (m_nextPathReportId));
   root.insert (QStringLiteral ("nextLogbookUploadId"),
@@ -19076,7 +19474,11 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           alert.text,
           alert.source,
           alert.tag,
-          alert.atMs)));
+          alert.atMs,
+          alert.updatedAtMs > 0u ? alert.updatedAtMs : alert.atMs,
+          alert.id,
+          alert.read,
+          alert.archived)));
     }
   root.insert (QStringLiteral ("alerts"), alerts);
 
@@ -19131,8 +19533,10 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           transfer.toCall,
           transfer.fileName,
           transfer.content,
+          transfer.contentBase64,
           transfer.sha256,
           transfer.state,
+          transfer.binary,
           transfer.read,
           transfer.atMs,
           transfer.updatedAtMs)));
@@ -19491,6 +19895,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   quint32 maxFormId = 0u;
   quint32 maxFileTransferId = 0u;
   quint32 maxBulletinId = 0u;
+  quint32 maxAlertId = 0u;
   quint32 maxPathReportId = 0u;
   quint32 maxLogbookUploadId = 0u;
 
@@ -19540,9 +19945,20 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       alert.source = jsonString (object, QStringLiteral ("source"));
       alert.tag = jsonString (object, QStringLiteral ("tag")).toUpper ();
       alert.atMs = jsonU64 (object, QStringLiteral ("atMs"));
+      alert.updatedAtMs = jsonU64 (
+          object, QStringLiteral ("updatedAtMs"), alert.atMs);
+      alert.read = object.value (QStringLiteral ("read")).toBool (false);
+      alert.archived = object.value (
+          QStringLiteral ("archived")).toBool (false);
+      alert.id = jsonU32 (object, QStringLiteral ("id"));
+      if (alert.id == 0u)
+        {
+          alert.id = maxAlertId + 1u;
+        }
       if (!alert.text.isEmpty () && !alert.tag.isEmpty ())
         {
           alerts.push_back (alert);
+          maxAlertId = std::max (maxAlertId, alert.id);
         }
     }
 
@@ -19638,6 +20054,24 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       transfer.fileName = jsonString (object, QStringLiteral ("fileName"));
       transfer.content = object.value (
           QStringLiteral ("content")).toString ();
+      transfer.contentBase64 = object.value (
+          QStringLiteral ("contentBase64")).toString ().trimmed ();
+      transfer.binary = object.value (QStringLiteral ("binary")).toBool (
+          !transfer.contentBase64.isEmpty ()
+          && transfer.content.isEmpty ());
+      if (transfer.contentBase64.isEmpty ()
+          && !transfer.content.isEmpty ())
+        {
+          transfer.contentBase64 = QString::fromLatin1 (
+              transfer.content.toUtf8 ().toBase64 ());
+        }
+      if (transfer.binary && transfer.content.isEmpty ()
+          && !transfer.contentBase64.isEmpty ())
+        {
+          transfer.content = QString::fromUtf8 (
+              QByteArray::fromBase64 (
+                  transfer.contentBase64.trimmed ().toLatin1 ()));
+        }
       transfer.sha256 = jsonString (object, QStringLiteral ("sha256"));
       transfer.state = jsonString (object, QStringLiteral ("state"));
       transfer.read = object.value (QStringLiteral ("read")).toBool (
@@ -20278,6 +20712,9 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   m_nextBulletinId = nextU32 (
       jsonU32 (root, QStringLiteral ("nextBulletinId"), 1u),
       maxBulletinId);
+  m_nextAlertId = nextU32 (
+      jsonU32 (root, QStringLiteral ("nextAlertId"), 1u),
+      maxAlertId);
   m_nextPathReportId = nextU32 (
       jsonU32 (root, QStringLiteral ("nextPathReportId"), 1u),
       maxPathReportId);

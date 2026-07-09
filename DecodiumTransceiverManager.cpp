@@ -2270,6 +2270,20 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
     hz = sanitizedCatTxFrequencyHz(hz, rxHz, m_splitMode, QStringLiteral("setRigTxFrequency"));
+    QString const splitModeText = m_splitMode.trimmed().toLower();
+    bool const splitDisabledByConfig =
+        splitModeText.isEmpty() || splitModeText == QStringLiteral("none");
+    if (splitDisabledByConfig) {
+        if (!sameCatFrequency(m_txFrequency, 0.0)) {
+            m_txFrequency = 0.0;
+            emit txFrequencyChanged();
+        } else {
+            m_txFrequency = 0.0;
+        }
+        d->desired.split(false);
+        d->desired.tx_frequency(0);
+        return;
+    }
     bool const targetSplit = hz > 0.0;
     double const desiredTxHz = static_cast<double>(d->desired.tx_frequency());
     bool const desiredMatches = sameCatFrequency(desiredTxHz, hz)
@@ -2309,6 +2323,12 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
     hz = sanitizedCatTxFrequencyHz(hz, rxHz, m_splitMode, QStringLiteral("setRigTxFrequencyAndPtt"));
+    QString const splitModeText = m_splitMode.trimmed().toLower();
+    bool const splitDisabledByConfig =
+        splitModeText.isEmpty() || splitModeText == QStringLiteral("none");
+    if (splitDisabledByConfig) {
+        hz = 0.0;
+    }
     if (hz > 0.0 && d->desired.frequency() == 0 && m_frequency > 0.0) {
         d->desired.frequency(static_cast<Transceiver::Frequency>(m_frequency));
     }
@@ -2350,6 +2370,12 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPttAsync(double hz, bool on
         ? static_cast<double>(d->desired.frequency())
         : m_frequency;
     hz = sanitizedCatTxFrequencyHz(hz, rxHz, m_splitMode, QStringLiteral("setRigTxFrequencyAndPttAsync"));
+    QString const splitModeText = m_splitMode.trimmed().toLower();
+    bool const splitDisabledByConfig =
+        splitModeText.isEmpty() || splitModeText == QStringLiteral("none");
+    if (splitDisabledByConfig) {
+        hz = 0.0;
+    }
     if (hz > 0.0 && d->desired.frequency() == 0 && m_frequency > 0.0) {
         d->desired.frequency(static_cast<Transceiver::Frequency>(m_frequency));
     }

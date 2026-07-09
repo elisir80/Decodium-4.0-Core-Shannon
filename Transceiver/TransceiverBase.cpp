@@ -14,6 +14,11 @@ namespace
 {
   auto const unexpected = TransceiverBase::tr ("Unexpected rig error");
 
+  bool frequency_matches (Transceiver::Frequency lhs, Transceiver::Frequency rhs)
+  {
+    return lhs && rhs && lhs == rhs;
+  }
+
   void sleep_non_gui_thread (unsigned long ms)
   {
     auto * app = QCoreApplication::instance ();
@@ -57,6 +62,12 @@ void TransceiverBase::set (TransceiverState const& s,
                            unsigned sequence_number) noexcept
 {
   CAT_TRACE ("#: " << s);
+  if (sequence_number < last_sequence_number_)
+    {
+      CAT_WARNING ("dropping stale transceiver state #:" << sequence_number
+                   << "last:" << last_sequence_number_);
+      return;
+    }
 
   try
     {
@@ -173,9 +184,16 @@ void TransceiverBase::set (TransceiverState const& s,
                                        // Tx to Rx
               }
 
+          bool const rx_frequency_requested =
+              s.frequency ()
+              && s.frequency () != requested_.frequency ()
+              && !frequency_matches (s.frequency (), actual_.frequency ());
+          bool const rx_mode_requested =
+              s.mode () != UNK
+              && s.mode () != requested_.mode ()
+              && s.mode () != actual_.mode ();
           if (s.frequency ()    // ignore bogus zero frequencies
-              && ((s.frequency () != requested_.frequency () // and QSY
-                   || (s.mode () != UNK && s.mode () != requested_.mode ())))) // or mode change
+              && rx_frequency_requested) // QSY, possibly with mode change
             {
                 requested_.frequency (s.frequency ());
                 requested_.mode (s.mode ());
@@ -185,6 +203,21 @@ void TransceiverBase::set (TransceiverState const& s,
               // record what actually changed
               requested_.frequency (actual_.frequency ());
               requested_.mode (actual_.mode ());
+            }
+            else if (rx_mode_requested)
+            {
+              requested_.mode (s.mode ());
+              do_mode (s.mode ());
+              do_post_mode (s.mode ());
+              requested_.mode (actual_.mode ());
+            }
+            else if (s.frequency () && frequency_matches (s.frequency (), actual_.frequency ()))
+            {
+              requested_.frequency (actual_.frequency ());
+              if (s.mode () != UNK && s.mode () == actual_.mode ())
+                {
+                  requested_.mode (actual_.mode ());
+                }
             }
             else if (!s.tx_frequency ()
               || (s.tx_frequency () > 10000 // ignore bogus startup values

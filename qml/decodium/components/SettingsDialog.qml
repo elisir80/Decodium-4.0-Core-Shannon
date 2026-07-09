@@ -573,6 +573,12 @@ Dialog {
                 dataDownloadIsError = true
             }
         }
+        function onActiveCatProfileChanged() {
+            settingsDialog.refreshCatProfileDraft()
+        }
+        function onCatProfilesChanged() {
+            settingsDialog.refreshCatProfileDraft()
+        }
     }
 
     function activeCatController() {
@@ -960,6 +966,76 @@ Dialog {
         if (controller && controller.refreshPorts) controller.refreshPorts()
     }
 
+    function selectedCatProfileName() {
+        if (catProfileCombo && catProfileCombo.currentIndex >= 0)
+            return String(catProfileCombo.currentText || "").trim()
+        return String(bridge.activeCatProfile || "").trim()
+    }
+
+    function nextCatProfileName() {
+        var base = String(bridge.suggestedCatProfileName ? bridge.suggestedCatProfileName() : "Radio Profile").trim()
+        if (base.length === 0)
+            base = "Radio Profile"
+        var profiles = bridge.catProfileList || []
+        var exists = function(name) {
+            for (var i = 0; i < profiles.length; ++i) {
+                if (String(profiles[i]).trim().toLowerCase() === String(name).trim().toLowerCase())
+                    return true
+            }
+            return false
+        }
+        if (!exists(base))
+            return base
+        for (var n = 2; n < 100; ++n) {
+            var candidate = base + " " + n
+            if (!exists(candidate))
+                return candidate
+        }
+        return base + " " + Date.now()
+    }
+
+    function refreshCatProfileDraft() {
+        if (!catProfileNameField)
+            return
+        var active = String(bridge.activeCatProfile || "").trim()
+        if (active.length > 0) {
+            catProfileNameField.text = active
+        } else if (String(catProfileNameField.text || "").trim().length === 0) {
+            catProfileNameField.text = bridge.suggestedCatProfileName ? bridge.suggestedCatProfileName() : ""
+        }
+    }
+
+    function saveCatProfileFromField() {
+        var name = String(catProfileNameField.text || "").trim()
+        if (name.length === 0)
+            name = nextCatProfileName()
+        if (bridge.saveCatProfile(name))
+            catProfileNameField.text = String(bridge.activeCatProfile || name)
+    }
+
+    function saveNewCatProfileFromCurrent() {
+        catProfileNameField.text = nextCatProfileName()
+        saveCatProfileFromField()
+    }
+
+    function loadSelectedCatProfile() {
+        var name = selectedCatProfileName()
+        if (name.length === 0)
+            return
+        if (bridge.loadCatProfile(name)) {
+            catProfileNameField.text = String(bridge.activeCatProfile || name)
+            refreshCatPorts()
+        }
+    }
+
+    function deleteSelectedCatProfile() {
+        var name = selectedCatProfileName()
+        if (name.length === 0)
+            return
+        if (bridge.deleteCatProfile(name))
+            catProfileNameField.text = bridge.suggestedCatProfileName ? bridge.suggestedCatProfileName() : ""
+    }
+
     function refreshAudioDevices() {
         if (bridge && bridge.refreshAudioDevices)
             bridge.refreshAudioDevices()
@@ -1072,8 +1148,10 @@ Dialog {
     }
 
     onOpened: {
-        if (!warmupInProgress)
+        if (!warmupInProgress) {
             closeAlreadyPersisted = false
+            refreshCatProfileDraft()
+        }
     }
 
     onClosed: {
@@ -1708,6 +1786,102 @@ Dialog {
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        Text { text: qsTr("Profile:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            spacing: 6
+
+                            DecoComboBox {
+                                id: catProfileCombo
+                                model: bridge.catProfileList || []
+                                Layout.preferredWidth: compactSettingsLayout ? 180 : 240
+                                Layout.minimumWidth: compactSettingsLayout ? 150 : 200
+                                implicitHeight: controlHeight
+                                currentIndex: {
+                                    var active = String(bridge.activeCatProfile || "")
+                                    if (active.length === 0)
+                                        return -1
+                                    return find(active)
+                                }
+                                onActivated: {
+                                    catProfileNameField.text = currentText
+                                    settingsDialog.loadSelectedCatProfile()
+                                }
+                                background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                contentItem: Text {
+                                    text: catProfileCombo.currentIndex >= 0 ? catProfileCombo.displayText : qsTr("No profile")
+                                    color: catProfileCombo.currentIndex >= 0 ? textPrimary : textSecondary
+                                    font.pixelSize: controlFontSize
+                                    leftPadding: 8
+                                    verticalAlignment: Text.AlignVCenter
+                                    elide: Text.ElideRight
+                                }
+                                delegate: ItemDelegate {
+                                    contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                                    background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium }
+                                }
+                                popup: SettingsComboPopup { combo: catProfileCombo }
+                            }
+
+                            DecoTextField {
+                                id: catProfileNameField
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: compactSettingsLayout ? 180 : 260
+                                implicitHeight: controlHeight
+                                text: bridge.activeCatProfile || (bridge.suggestedCatProfileName ? bridge.suggestedCatProfileName() : "")
+                                placeholderText: qsTr("Profile name")
+                                color: textPrimary
+                                font.pixelSize: controlFontSize
+                                leftPadding: 8
+                                onAccepted: settingsDialog.saveCatProfileFromField()
+                                background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            }
+
+                            Button {
+                                id: catProfileLoadButton
+                                text: qsTr("Load")
+                                enabled: catProfileCombo.currentIndex >= 0 && !settingsDialog.catConnectionInProgress()
+                                Layout.preferredWidth: 68
+                                implicitHeight: controlHeight
+                                onClicked: settingsDialog.loadSelectedCatProfile()
+                                background: Rectangle { color: catProfileLoadButton.enabled && catProfileLoadButton.hovered ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.22) : bgMedium; border.color: catProfileLoadButton.enabled ? primaryBlue : glassBorder; radius: 4 }
+                                contentItem: Text { text: catProfileLoadButton.text; color: catProfileLoadButton.enabled ? primaryBlue : textSecondary; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            }
+
+                            Button {
+                                id: catProfileSaveButton
+                                text: qsTr("Save")
+                                enabled: String(catProfileNameField.text || "").trim().length > 0
+                                Layout.preferredWidth: 68
+                                implicitHeight: controlHeight
+                                onClicked: settingsDialog.saveCatProfileFromField()
+                                background: Rectangle { color: catProfileSaveButton.enabled && catProfileSaveButton.hovered ? Qt.rgba(accentGreen.r,accentGreen.g,accentGreen.b,0.22) : bgMedium; border.color: catProfileSaveButton.enabled ? accentGreen : glassBorder; radius: 4 }
+                                contentItem: Text { text: catProfileSaveButton.text; color: catProfileSaveButton.enabled ? accentGreen : textSecondary; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            }
+
+                            Button {
+                                id: catProfileNewButton
+                                text: qsTr("New")
+                                Layout.preferredWidth: 62
+                                implicitHeight: controlHeight
+                                onClicked: settingsDialog.saveNewCatProfileFromCurrent()
+                                background: Rectangle { color: catProfileNewButton.hovered ? Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.18) : bgMedium; border.color: secondaryCyan; radius: 4 }
+                                contentItem: Text { text: catProfileNewButton.text; color: secondaryCyan; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            }
+
+                            Button {
+                                id: catProfileDeleteButton
+                                text: qsTr("Delete")
+                                enabled: catProfileCombo.currentIndex >= 0
+                                Layout.preferredWidth: 76
+                                implicitHeight: controlHeight
+                                onClicked: settingsDialog.deleteSelectedCatProfile()
+                                background: Rectangle { color: catProfileDeleteButton.enabled && catProfileDeleteButton.hovered ? Qt.rgba(1,0.25,0.25,0.18) : bgMedium; border.color: catProfileDeleteButton.enabled ? "#ff5b5b" : glassBorder; radius: 4 }
+                                contentItem: Text { text: catProfileDeleteButton.text; color: catProfileDeleteButton.enabled ? "#ff7777" : textSecondary; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                             }
                         }
 

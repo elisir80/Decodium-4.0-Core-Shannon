@@ -325,6 +325,8 @@ class DecodiumBridge : public QObject
     // catManager ritorna QObject* (può essere DecodiumCatManager o DecodiumTransceiverManager)
     Q_PROPERTY(QObject*                      catManager      READ catManagerObj   NOTIFY catManagerChanged)
     Q_PROPERTY(QString                       catBackend      READ catBackend      WRITE setCatBackend NOTIFY catBackendChanged)
+    Q_PROPERTY(QString                       activeCatProfile READ activeCatProfile NOTIFY activeCatProfileChanged)
+    Q_PROPERTY(QStringList                   catProfileList READ catProfileList NOTIFY catProfilesChanged)
     Q_PROPERTY(DecodiumCatManager*           nativeCat       READ nativeCat       CONSTANT)
     Q_PROPERTY(DecodiumOmniRigManager*       omniRigCat      READ omniRigCat      CONSTANT)
     Q_PROPERTY(DecodiumTransceiverManager*   hamlibCat       READ hamlibCat       CONSTANT)
@@ -783,6 +785,8 @@ public:
     }
     QString                      catBackend()    const { return m_catBackend; }
     void                         setCatBackend(const QString& v);
+    QString                      activeCatProfile() const;
+    QStringList                  catProfileList() const;
     DecodiumCatManager*          nativeCat()     const { return m_nativeCat; }
     DecodiumOmniRigManager*      omniRigCat()    const { return m_omniRigCat; }
     DecodiumTransceiverManager*  hamlibCat()     const { return m_hamlibCat; }
@@ -1111,6 +1115,10 @@ public:
                                          int maxBytes = 4096) const;
     Q_INVOKABLE QVariantMap writeTextFile(const QString& path,
                                           const QString& text) const;
+    Q_INVOKABLE QVariantMap readFileBytes(const QString& path,
+                                          int maxBytes = 16384) const;
+    Q_INVOKABLE QVariantMap writeFileBytes(const QString& path,
+                                           const QString& base64) const;
     Q_INVOKABLE bool openExternalUrl(const QString& url);
     Q_INVOKABLE void openWavForDecode(const QString& path);
     Q_INVOKABLE void openWavFolderDecode(const QString& folderPath);
@@ -1186,6 +1194,11 @@ public:
     Q_INVOKABLE void loadSettings();
     Q_INVOKABLE QVariant getSetting(const QString& key, const QVariant& defaultValue = {}) const;
     Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
+    Q_INVOKABLE QString suggestedCatProfileName() const;
+    Q_INVOKABLE bool saveCatProfile(const QString& name);
+    Q_INVOKABLE bool loadCatProfile(const QString& name);
+    Q_INVOKABLE bool deleteCatProfile(const QString& name);
+    Q_INVOKABLE bool renameCatProfile(const QString& oldName, const QString& newName);
     Q_INVOKABLE QVariantMap ft2LinkEmailGatewayPasswordStatus(const QVariantMap& config) const;
     Q_INVOKABLE QVariantMap setFt2LinkEmailGatewayPassword(const QVariantMap& config,
                                                            const QString& password);
@@ -1692,6 +1705,8 @@ signals:
     void wsprUploadEnabledChanged();
     void catManagerChanged();
     void catBackendChanged();
+    void activeCatProfileChanged();
+    void catProfilesChanged();
     void uiSpectrumHeightChanged();
     void uiPaletteIndexChanged();
     void uiZoomFactorChanged();
@@ -3036,6 +3051,8 @@ private:
     };
 
     QStringList ctyDatSearchPaths() const;
+    bool applyCatProfileSnapshotToSettings(const QString& name, bool setActiveProfile);
+    void applyStartupCatProfileSnapshot();
     bool reloadDxccLookup(QString* loadedPath = nullptr);
     QString extractDecodedCallsign(const QString& msg, bool isCQ) const;
     QString extractDecodedGrid(const QString& msg) const;
@@ -3382,6 +3399,9 @@ private:
     void resumeRxAudioAfterTx(const QString& reason);
     void noteTxPlaybackFinished(const QString& reason, bool error);
     void completeTxPlayback(const QString& reason, bool error = false);
+    bool delayTxFinishUntilPcmConsumed(const QString& context,
+                                       const QString& reason,
+                                       bool useCompletePlayback);
     void finishModulatorIdlePlayback(const QString& reason);
     bool shouldAlignTxAudioToCurrentSyncSlot() const;
     bool isSyncTxStartTooLate(int* elapsedMsOut = nullptr, int* latestStartMsOut = nullptr) const;

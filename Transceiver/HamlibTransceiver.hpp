@@ -44,11 +44,19 @@ private:
   void stop_cat_keep_alive_timer ();
   void poll_cat_keep_alive ();
   void schedule_transmit_telemetry_burst ();
+  vfo_t frequency_poll_vfo () const;
   bool poll_vfo_frequency (vfo_t, freq_t *, QString const&);
   void note_frequency_poll_success ();
   void note_frequency_poll_failure (int, QString const&);
+  bool cat_write_backoff_active () const;
+  bool suppress_cat_write_during_backoff (QString const& operation) const;
+  int ptt_off_attempt_limit (bool shutdown) const;
 
   bool ptt_on_ = false;
+  bool ptt_off_failed_recently_ = false;
+  bool rig_split_control_enabled_ = true;
+  bool explicit_frequency_poll_vfo_ = false;
+  bool frequency_poll_vfo_logged_ = false;
   bool poll_passive_state_ = true;
   bool poll_frequency_state_ = true;
   bool poll_ptt_state_ = true;
@@ -70,9 +78,9 @@ private:
   static constexpr int kTelemetrySkipRatio_ = 4;
   static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
-  static constexpr int kFrequencyPollMaxFailures_ = 1;
-  static constexpr int kFrequencyPollInitialBackoffTicks_ = 30;
-  static constexpr int kFrequencyPollMaxBackoffTicks_ = 240;
+  static constexpr int kFrequencyPollMaxFailures_ = 2;
+  static constexpr int kFrequencyPollInitialBackoffTicks_ = 2;
+  static constexpr int kFrequencyPollMaxBackoffTicks_ = 10;
   int telemetry_tick_ = 0;
   int frequency_poll_failures_ = 0;
   int frequency_poll_skip_ticks_ = 0;
