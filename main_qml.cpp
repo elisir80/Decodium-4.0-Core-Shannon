@@ -1300,6 +1300,39 @@ int main(int argc, char* argv[])
         QStringLiteral("Auto CQ interval seconds used by --lab-auto-cq-ms."),
         QStringLiteral("seconds"),
         QStringLiteral("60"));
+    QCommandLineOption const labSendTxMsOption(
+        QStringList {} << "lab-sendtx-ms",
+        QStringLiteral("Delay before sending a standard TX slot in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labSendTxSlotOption(
+        QStringList {} << "lab-sendtx-slot",
+        QStringLiteral("TX slot used by --lab-sendtx-ms."),
+        QStringLiteral("slot"),
+        QStringLiteral("6"));
+    QCommandLineOption const labSendTxPlanOption(
+        QStringList {} << "lab-sendtx-plan",
+        QStringLiteral("Comma-separated standard TX plan entries in the form ms:slot."),
+        QStringLiteral("plan"));
+    QCommandLineOption const labDxCallOption(
+        QStringList {} << "lab-dx-call",
+        QStringLiteral("Runtime lab override for the active DX callsign."),
+        QStringLiteral("callsign"));
+    QCommandLineOption const labDxGridOption(
+        QStringList {} << "lab-dx-grid",
+        QStringLiteral("Runtime lab override for the active DX grid locator."),
+        QStringLiteral("grid"));
+    QCommandLineOption const labStandardAutoCqMsOption(
+        QStringList {} << "lab-standard-autocq-ms",
+        QStringLiteral("Delay before enabling standard-mode AutoCQ in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labStandardWaitPounceMsOption(
+        QStringList {} << "lab-standard-wait-pounce-ms",
+        QStringLiteral("Delay before enabling standard-mode Wait & Pounce in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labTxPeriodOption(
+        QStringList {} << "lab-tx-period",
+        QStringLiteral("Runtime lab override for TX period: 0=even/first, 1=odd/second."),
+        QStringLiteral("period"));
     QCommandLineOption const labHeardCallOption(
         QStringList {} << "lab-heard-call",
         QStringLiteral("Seed a recent heard/contact callsign for path/relay lab scenarios."),
@@ -1505,6 +1538,14 @@ int main(int argc, char* argv[])
     parser.addOption(labCqSlotSizeOption);
     parser.addOption(labAutoCqMsOption);
     parser.addOption(labAutoCqIntervalOption);
+    parser.addOption(labSendTxMsOption);
+    parser.addOption(labSendTxSlotOption);
+    parser.addOption(labSendTxPlanOption);
+    parser.addOption(labDxCallOption);
+    parser.addOption(labDxGridOption);
+    parser.addOption(labStandardAutoCqMsOption);
+    parser.addOption(labStandardWaitPounceMsOption);
+    parser.addOption(labTxPeriodOption);
     parser.addOption(labHeardCallOption);
     parser.addOption(labHeardGridOption);
     parser.addOption(labHeardNameOption);
@@ -1622,6 +1663,13 @@ int main(int argc, char* argv[])
         qputenv("DECODIUM_DISABLE_CAT", QByteArrayLiteral("1"));
         qInfo() << "[LAB] CAT auto-connect disabled by --lab-no-cat";
     }
+    if (parser.isSet(labStandardWaitPounceMsOption)) {
+        app.setProperty("decodiumLabPassiveWaitPounce", true);
+    }
+    if (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) {
+        qputenv("DECODIUM_LAB_FORCE_TX_IMMEDIATE", QByteArrayLiteral("1"));
+        qInfo() << "[LAB] immediate TX timing bypass enabled by lab standard TX trigger";
+    }
     bool const labNoMonitor = parser.isSet(labNoMonitorOption);
     if (labNoMonitor) {
         qInfo() << "[LAB] RX monitor forced off by --lab-no-monitor";
@@ -1655,6 +1703,20 @@ int main(int argc, char* argv[])
     int const labAutoCqInterval = qMax(
         60,
         parser.value(labAutoCqIntervalOption).trimmed().toInt());
+    int const labSendTxMs = parseLabDelayMs(labSendTxMsOption, 0);
+    int const labSendTxSlot = qBound(
+        1,
+        parser.value(labSendTxSlotOption).trimmed().toInt(),
+        6);
+    QString const labSendTxPlan = parser.value(labSendTxPlanOption).trimmed();
+    QString const labDxCall = parser.value(labDxCallOption).trimmed().toUpper();
+    QString const labDxGrid = parser.value(labDxGridOption).trimmed().toUpper();
+    int const labStandardAutoCqMs = parseLabDelayMs(labStandardAutoCqMsOption, 0);
+    int const labStandardWaitPounceMs = parseLabDelayMs(labStandardWaitPounceMsOption, 0);
+    bool const labTxPeriodSpecified = parser.isSet(labTxPeriodOption);
+    int const labTxPeriod = qBound(0,
+                                   parser.value(labTxPeriodOption).trimmed().toInt(),
+                                   1);
     QString const labHeardCall = parser.value(labHeardCallOption).trimmed().toUpper();
     QString const labHeardGrid = parser.value(labHeardGridOption).trimmed().toUpper();
     QString labHeardName = parser.value(labHeardNameOption).trimmed();
@@ -1798,6 +1860,10 @@ int main(int argc, char* argv[])
          effectiveLabOutput,
          labMode,
          labDialHz,
+         labDxCall,
+         labDxGrid,
+         labTxPeriodSpecified,
+         labTxPeriod,
          labNoMonitor,
          labPreferredProfile,
          labSupportsW2300,
@@ -1837,6 +1903,18 @@ int main(int argc, char* argv[])
                 bridge.setFrequency(static_cast<double>(labDialHz));
                 active = true;
             }
+            if (!labDxCall.isEmpty()) {
+                bridge.setDxCall(labDxCall);
+                active = true;
+            }
+            if (!labDxGrid.isEmpty()) {
+                bridge.setDxGrid(labDxGrid);
+                active = true;
+            }
+            if (labTxPeriodSpecified) {
+                bridge.setTxPeriod(labTxPeriod);
+                active = true;
+            }
             if (labNoMonitor) {
                 if (bridge.monitoring()) {
                     bridge.stopMonitor();
@@ -1865,6 +1943,9 @@ int main(int argc, char* argv[])
                     << "audioOut=" << (effectiveLabOutput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabOutput)
                     << "mode=" << (labMode.isEmpty() ? QStringLiteral("<settings>") : labMode)
                     << "dialHz=" << (labDialHz > 0 ? QString::number(labDialHz) : QStringLiteral("<settings>"))
+                    << "dxCall=" << (labDxCall.isEmpty() ? QStringLiteral("<settings>") : labDxCall)
+                    << "dxGrid=" << (labDxGrid.isEmpty() ? QStringLiteral("<settings>") : labDxGrid)
+                    << "txPeriod=" << (labTxPeriodSpecified ? QString::number(labTxPeriod) : QStringLiteral("<settings>"))
                     << "effectiveHz=" << qRound64(bridge.frequency())
                     << "monitor=" << (labNoMonitor ? QStringLiteral("forced-off") : QStringLiteral("<settings>"))
                     << "profile=" << labProfileName;
@@ -1978,6 +2059,79 @@ int main(int argc, char* argv[])
         });
     } else if (parser.isSet(labMonitorMsOption) && labNoMonitor) {
         qInfo() << "[LAB] --lab-monitor-ms ignored because --lab-no-monitor is set";
+    }
+    if (parser.isSet(labSendTxMsOption)) {
+        QTimer::singleShot(labSendTxMs, &bridge, [&bridge,
+                                                  applyLabRuntimeOverrides,
+                                                  labSendTxSlot]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("pre-sendtx"));
+            bridge.sendTx(labSendTxSlot);
+            qInfo().noquote()
+                << "[LAB] auto SENDTX requested"
+                << "slot=" << labSendTxSlot
+                << "mode=" << bridge.mode()
+                << "message=" << bridge.currentTxMessage();
+        });
+    }
+    if (parser.isSet(labSendTxPlanOption)) {
+        QStringList const entries = labSendTxPlan.split(',', Qt::SkipEmptyParts);
+        for (QString const& rawEntry : entries) {
+            QStringList const parts = rawEntry.trimmed().split(':', Qt::SkipEmptyParts);
+            if (parts.size() != 2) {
+                qWarning() << "[LAB] ignoring invalid sendtx plan entry" << rawEntry;
+                continue;
+            }
+            bool okMs = false;
+            bool okSlot = false;
+            int const delayMs = parts.at(0).trimmed().toInt(&okMs);
+            int const slot = qBound(1, parts.at(1).trimmed().toInt(&okSlot), 6);
+            if (!okMs || !okSlot || delayMs < 0) {
+                qWarning() << "[LAB] ignoring invalid sendtx plan entry" << rawEntry;
+                continue;
+            }
+            QTimer::singleShot(delayMs,
+                               &bridge,
+                               [&bridge, applyLabRuntimeOverrides, delayMs, slot]() mutable {
+                applyLabRuntimeOverrides(QStringLiteral("pre-sendtx-plan"));
+                bridge.sendTx(slot);
+                qInfo().noquote()
+                    << "[LAB] TXPLAN fired"
+                    << "ms=" << delayMs
+                    << "slot=" << slot
+                    << "mode=" << bridge.mode()
+                    << "message=" << bridge.currentTxMessage();
+            });
+        }
+    }
+    if (parser.isSet(labStandardAutoCqMsOption)) {
+        QTimer::singleShot(labStandardAutoCqMs,
+                           &bridge,
+                           [&bridge, applyLabRuntimeOverrides]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("pre-standard-autocq"));
+            bridge.setAutoSeq(true);
+            bridge.setCurrentTx(6);
+            bridge.setAutoCqRepeat(true);
+            qInfo().noquote()
+                << "[LAB] standard AutoCQ enabled"
+                << "mode=" << bridge.mode()
+                << "message=" << bridge.currentTxMessage();
+        });
+    }
+    if (parser.isSet(labStandardWaitPounceMsOption)) {
+        QTimer::singleShot(labStandardWaitPounceMs,
+                           &bridge,
+                           [&bridge, applyLabRuntimeOverrides]() mutable {
+            applyLabRuntimeOverrides(QStringLiteral("pre-standard-wait-pounce"));
+            bridge.setAutoSeq(true);
+            bridge.setCurrentTx(6);
+            bridge.setWaitPounceActive(true);
+            bridge.setTxEnabled(false);
+            qInfo().noquote()
+                << "[LAB] standard passive WaitPounce armed"
+                << "mode=" << bridge.mode()
+                << "txEnabled=" << bridge.txEnabled()
+                << "message=" << bridge.currentTxMessage();
+        });
     }
     if (!labHeardCall.isEmpty()) {
         QTimer::singleShot(1000,

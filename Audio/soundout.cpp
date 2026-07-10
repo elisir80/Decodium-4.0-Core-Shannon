@@ -302,6 +302,22 @@ void SoundOutput::restart(QIODevice* source)
   m_pendingWrite.clear();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
+#if defined(Q_OS_MAC)
+  if (m_stream && m_coreAudioKeepAlive) {
+    qInfo().noquote() << "[TX-TL] sound_output_restart"
+                      << "reuse=0"
+                      << "reason=parked_keepalive_recreate"
+                      << "state=" << audioStateName(m_stream->state())
+                      << "error=" << audioErrorName(m_stream->error())
+                      << "pending_bytes=" << m_pendingWrite.size()
+                      << "dev=" << m_device.description();
+    m_streamDevice.clear();
+    m_sourceDevice.clear();
+    m_pendingWrite.clear();
+    m_coreAudioKeepAlive = false;
+    retireStream(QStringLiteral("restart-parked-keepalive"));
+  }
+#endif
   if (m_stream
       && !m_streamDevice.isNull()
       && m_openDeviceId == m_device.id()

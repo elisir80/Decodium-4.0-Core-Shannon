@@ -1864,6 +1864,7 @@ private:
     void rememberRecentAutoCqAbandoned(const QString& call, double freqHz, const QString& mode);
     void rememberRecentAutoCqWorked(const QString& call, double freqHz, const QString& mode);
     void rememberCompletedAutoCqPartner(const QString& call, bool logged, const QString& reason);
+    bool finishAutoSequenceQsoFromCompletedSignoff(const QString& reason, bool logNow);
     void removeCallerFromQueue(const QString& call);
     QString activeMamCallerBase() const;
     void removeActiveMamCallerFromQueue(const QString& reason);
@@ -3404,7 +3405,7 @@ private:
     void applyTxAudioSchedulingBoost(const QString& reason);
     void restoreTxAudioSchedulingBoost(const QString& reason);
     void resumeRxAudioAfterTx(const QString& reason);
-    void noteTxPlaybackFinished(const QString& reason, bool error);
+    bool noteTxPlaybackFinished(const QString& reason, bool error);
     void completeTxPlayback(const QString& reason, bool error = false);
     bool delayTxFinishUntilPcmConsumed(const QString& context,
                                        const QString& reason,
@@ -3482,6 +3483,8 @@ private:
                                          DecodeUserFilterConfig const& userFilterConfig) const;
     QVariantList augmentLegacyMirrorWithAllTxt(QVariantList const& mirroredEntries,
                                                bool rxPane) const;
+    QStringList localDecodeCallCandidates() const;
+    bool messageMentionsLocalCall(const QString& message, QString* matchedCall = nullptr) const;
     bool shouldMirrorToRxPane(const QVariantMap& entry) const;
     void appendTxDecodeEntry(const QString& message);
     void appendRxDecodeEntry(const QVariantMap& entry);

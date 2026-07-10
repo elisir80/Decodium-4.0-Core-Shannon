@@ -1275,7 +1275,7 @@ void MainWindow::updateAsyncL2ControlsVisibility ()
   }
 
   if (ui->txFirstCheckBox) {
-    if (isFt2 && ui->txFirstCheckBox->isChecked ()) {
+    if (m_specOp == SpecOp::HOUND && ui->txFirstCheckBox->isChecked ()) {
       ui->txFirstCheckBox->setChecked (false);
     }
     ui->txFirstCheckBox->setVisible (!isFt2);
@@ -1450,6 +1450,22 @@ namespace
       return qBound (1, QThread::idealThreadCount (), kMaxEmbeddedDecodeThreads);
     }
     return qBound (1, configured, kMaxEmbeddedDecodeThreads);
+  }
+
+  int embedded_ft2_async_live_depth (int rawDepth)
+  {
+    int baseDepth = rawDepth & 7;
+    if (baseDepth <= 0) {
+      baseDepth = rawDepth;
+    }
+    baseDepth = qBound (1, baseDepth, 3);
+
+    // The FT2 async path is a live, repeating pass. Keep it timely and leave
+    // correlation/averaging/deep retries to the full slot decode path.
+    if (qEnvironmentVariableIntValue ("DECODIUM_FT2_ASYNC_DEEP") != 0) {
+      return baseDepth;
+    }
+    return qMin (baseDepth, 2);
   }
 
   QString ft4_progressive_decode_key (QString const& row)
@@ -4168,7 +4184,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     if (request.nfb <= request.nfa) {
       request.nfb = request.nfa + 50;
     }
-    request.ndepth = qMax (1, m_ndepth);
+    request.ndepth = embedded_ft2_async_live_depth (m_ndepth);
+    request.threadCount = embedded_decode_thread_count ();
     request.ncontest = qBound (0, int(m_specOp), 16);
     request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
     request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
@@ -5740,16 +5757,14 @@ void MainWindow::legacySetTxFirst(bool enabled)
       return;
     }
 
-  if (m_mode == "FT2" || m_specOp == SpecOp::HOUND)
+  if (m_specOp == SpecOp::HOUND)
     {
       // Solo Hound deve forzare m_txFirst=false: in FT2 normale il sequencer
       // legge m_txFirst per la parity degli slot e azzerarlo qui rompe la
       // sincronia TX/RX (sintomi: chiamata duplicata, stazione DX non vista,
       // sequencer che salta a TX3/TX4). Il checkbox UI resta nascosto/unchecked
       // come in 1.0.70.
-      if (m_specOp == SpecOp::HOUND) {
-        m_txFirst = false;
-      }
+      m_txFirst = false;
       ui->txFirstCheckBox->setChecked(false);
       return;
     }
@@ -8331,12 +8346,17 @@ void MainWindow::restartConfiguredAudioStreams (bool resume_monitor, bool force_
           debugToFile (QStringLiteral ("audioRest   active check skipped cross-thread"));
         }
 
+      bool const embedded_no_cat_audio_owner =
+          m_embeddedShellMode && !m_embeddedRigControlEnabled;
       bool const force_input_reopen_allowed =
           force_input_reopen
+          && !embedded_no_cat_audio_owner
           && !(m_embeddedShellMode && !m_embeddedUiUpdatesEnabled);
       if (force_input_reopen && !force_input_reopen_allowed)
         {
-          debugToFile (QStringLiteral ("audioRest   forced input restart suppressed in embedded passive mode"));
+          debugToFile (embedded_no_cat_audio_owner
+                       ? QStringLiteral ("audioRest   forced input restart suppressed in embedded no-CAT mode")
+                       : QStringLiteral ("audioRest   forced input restart suppressed in embedded passive mode"));
         }
 
       if (force_input_reopen_allowed)
@@ -17016,12 +17036,24 @@ void MainWindow::guiUpdate()
     if(m_restart) {
       bool const restartChangesPayload =
           m_currentMessage.trimmed () != m_lastMessageSent.trimmed ();
+      bool suppressEmbeddedBridgeRestartLog = false;
+#if defined(Q_OS_MAC)
+      suppressEmbeddedBridgeRestartLog =
+          m_embeddedShellMode && !m_embeddedRigControlEnabled && !m_tci_audio && !m_tune
+          && SpecOp::FOX != m_specOp && SpecOp::HOUND != m_specOp
+          && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2");
+#endif
       if (restartChangesPayload) {
-        write_all("Tx",m_currentMessage);
-        if (m_config.TX_messages () and m_mode!="Echo") {
-          secondaryDecodeView()->displayTransmittedText(m_currentMessage.trimmed(),m_mode,
-                ui->TxFreqSpinBox->value(),m_bFastMode,m_TRperiod,m_config.superFox());
+        if (suppressEmbeddedBridgeRestartLog) {
+          debugToFile (QString {"txRestart bridge-audio payload log suppressed mode:%1 msg:%2"}
+                         .arg (m_mode, m_currentMessage.trimmed ()));
+        } else {
+          write_all("Tx",m_currentMessage);
+          if (m_config.TX_messages () and m_mode!="Echo") {
+            secondaryDecodeView()->displayTransmittedText(m_currentMessage.trimmed(),m_mode,
+                  ui->TxFreqSpinBox->value(),m_bFastMode,m_TRperiod,m_config.superFox());
           }
+        }
       } else {
         debugToFile (QString {"txRestart duplicate payload suppressed mode:%1 msg:%2"}
                        .arg (m_mode, m_currentMessage.trimmed ()));
