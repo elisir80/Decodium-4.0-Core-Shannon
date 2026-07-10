@@ -1073,6 +1073,41 @@ namespace {
 
 constexpr int kMaxFtDecodeThreads {24};
 
+struct Ft2LinkPcmStats
+{
+    double rms {0.0};
+    double peak {0.0};
+    int nonZero {0};
+    int aboveNoise {0};
+};
+
+Ft2LinkPcmStats ft2LinkPcmStats(QVector<short> const& samples)
+{
+    Ft2LinkPcmStats stats;
+    if (samples.isEmpty()) {
+        return stats;
+    }
+
+    double sumSq = 0.0;
+    int peakAbs = 0;
+    for (short sample : samples) {
+        int const value = static_cast<int>(sample);
+        int const absSample = value < 0 ? -value : value;
+        peakAbs = std::max(peakAbs, absSample);
+        sumSq += static_cast<double>(value) * static_cast<double>(value);
+        if (absSample > 0) {
+            ++stats.nonZero;
+        }
+        if (absSample >= 33) {
+            ++stats.aboveNoise;
+        }
+    }
+
+    stats.rms = std::sqrt(sumSq / static_cast<double>(samples.size())) / 32768.0;
+    stats.peak = static_cast<double>(peakAbs) / 32768.0;
+    return stats;
+}
+
 QTimeZone decodiumUtcTimeZone()
 {
     return QTimeZone(QByteArrayLiteral("UTC"));
@@ -4580,6 +4615,7 @@ static QString audioErrorToString(QAudio::Error error)
 
 static QAudioFormat makeAudioFormat(int sampleRate, int channelCount, QAudioFormat::SampleFormat sampleFormat)
 {
+    channelCount = channelCount <= 1 ? 1 : 2;
     QAudioFormat fmt;
     fmt.setSampleRate(sampleRate);
     fmt.setChannelCount(channelCount);
@@ -4599,10 +4635,16 @@ static bool sameAudioFormat(const QAudioFormat& a, const QAudioFormat& b)
         && a.sampleFormat() == b.sampleFormat();
 }
 
+static int txPcmChannelCountForDeviceFormat(const QAudioFormat& preferred)
+{
+    return preferred.channelCount() <= 1 ? 1 : 2;
+}
+
 static QAudioFormat chooseTxAudioFormat(const QAudioDevice& device)
 {
-    const QAudioFormat requested = makeAudioFormat(48000, 1, QAudioFormat::Int16);
     const QAudioFormat preferred = device.preferredFormat();
+    const int requestedChannels = txPcmChannelCountForDeviceFormat(preferred);
+    const QAudioFormat requested = makeAudioFormat(48000, requestedChannels, QAudioFormat::Int16);
 
     bridgeLog("TX audio requested: " + audioFormatToString(requested));
     bridgeLog("TX audio preferred: " + audioFormatToString(preferred) +
@@ -4611,7 +4653,7 @@ static QAudioFormat chooseTxAudioFormat(const QAudioDevice& device)
     QList<QAudioFormat> candidates;
 #if defined(Q_OS_MAC)
     QAudioFormat stereoPreferred48k = makeAudioFormat(48000,
-                                                      qMax(2, preferred.channelCount()),
+                                                      qMin(2, qMax(1, preferred.channelCount())),
                                                       QAudioFormat::Int16);
     if (preferred.channelCount() > 1)
         candidates.append(stereoPreferred48k);
@@ -4628,28 +4670,30 @@ static QAudioFormat chooseTxAudioFormat(const QAudioDevice& device)
     candidates.append(requested);
 
     if (preferred.channelCount() > 0) {
-        candidates.append(makeAudioFormat(48000, preferred.channelCount(), QAudioFormat::Int16));
+        candidates.append(makeAudioFormat(48000, txPcmChannelCountForDeviceFormat(preferred), QAudioFormat::Int16));
     }
     if (preferred.sampleFormat() != QAudioFormat::Unknown) {
         candidates.append(makeAudioFormat(48000, 1, preferred.sampleFormat()));
         if (preferred.channelCount() > 0) {
-            candidates.append(makeAudioFormat(48000, preferred.channelCount(), preferred.sampleFormat()));
+            candidates.append(makeAudioFormat(48000, txPcmChannelCountForDeviceFormat(preferred), preferred.sampleFormat()));
         }
     }
     if (preferred.sampleRate() > 0) {
         candidates.append(makeAudioFormat(preferred.sampleRate(), 1, QAudioFormat::Int16));
         if (preferred.channelCount() > 0) {
-            candidates.append(makeAudioFormat(preferred.sampleRate(), preferred.channelCount(), QAudioFormat::Int16));
+            candidates.append(makeAudioFormat(preferred.sampleRate(), txPcmChannelCountForDeviceFormat(preferred), QAudioFormat::Int16));
         }
         if (preferred.sampleFormat() != QAudioFormat::Unknown) {
             candidates.append(makeAudioFormat(preferred.sampleRate(), 1, preferred.sampleFormat()));
             if (preferred.channelCount() > 0) {
-                candidates.append(makeAudioFormat(preferred.sampleRate(), preferred.channelCount(), preferred.sampleFormat()));
+                candidates.append(makeAudioFormat(preferred.sampleRate(), txPcmChannelCountForDeviceFormat(preferred), preferred.sampleFormat()));
             }
         }
     }
     if (preferred.isValid()) {
-        candidates.append(preferred);
+        candidates.append(makeAudioFormat(preferred.sampleRate(),
+                                          txPcmChannelCountForDeviceFormat(preferred),
+                                          preferred.sampleFormat()));
     }
 
     QList<QAudioFormat> uniqueCandidates;
@@ -4676,9 +4720,9 @@ static QAudioFormat chooseTxAudioFormat(const QAudioDevice& device)
         }
     }
 
-    bridgeLog("TX audio fallback to preferred format: " + audioFormatToString(preferred) +
+    bridgeLog("TX audio fallback to requested format: " + audioFormatToString(requested) +
               " dev=" + device.description());
-    return preferred.isValid() ? preferred : requested;
+    return requested;
 }
 
 static qreal txAttenuationFromSlider(double outputLevel)
@@ -9636,12 +9680,14 @@ bool DecodiumBridge::useDedicatedModernAudioCaptureWithLegacy() const
     // Direct Visual no longer opens a second QAudioSource by default when the
     // embedded legacy decoder is active. The legacy detector already exposes a
     // PCM tap; use that as the single RX source and keep the GPU-direct
-    // panadapter path downstream. FT2-Link is different on macOS: the legacy
-    // tap is too sparse for the streaming modem, so use the modern capture as
-    // the single FT2-Link decoder source and ignore legacy PCM for decoding.
+    // panadapter path downstream. FT2-Link must follow the same rule on macOS:
+    // on real USB radios the second modern QAudioSource can produce silence
+    // while the legacy waterfall still sees RF. Keep dual capture as an
+    // explicit lab/debug opt-in only.
 #if defined(Q_OS_MAC)
     if (isFt2LinkApplicationMode(m_mode)) {
-        return useModernSpectrumFeedWithLegacy();
+        return useModernSpectrumFeedWithLegacy()
+            && qEnvironmentVariableIntValue("DECODIUM_FT2LINK_DEDICATED_MODERN_RX", 0) != 0;
     }
 #endif
     return useModernSpectrumFeedWithLegacy()
@@ -16155,7 +16201,9 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_bridgeAudioLegacyTxActive = true;
     suspendNonAudioTxWork(QStringLiteral("legacy-bridge-tx"));
 
-    if (m_soundInput && !(m_mode == QStringLiteral("FT2") && m_asyncTxEnabled)) {
+    if (m_soundInput
+        && !m_ft2LinkTxActive
+        && !(m_mode == QStringLiteral("FT2") && m_asyncTxEnabled)) {
         m_soundInput->suspend();
         m_rxAudioSuspendedForTx = true;
         bridgeLog(QStringLiteral("SoundInput suspended during legacy bridge TX"));
@@ -16863,6 +16911,8 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     bool const wasTransmitting = m_transmitting || wasBridgeLegacyTx;
     int const finishedTx = m_activeTxNumber;
     if (m_ft2LinkTxActive) {
+        qint64 const guardNowMs = QDateTime::currentMSecsSinceEpoch();
+        m_ft2LinkPostTxAckGuardUntilMs = guardNowMs + 15000;
         m_ft2LinkTxActive = false;
         m_pendingFt2LinkText.clear();
         m_pendingFt2LinkWave.clear();
@@ -18721,6 +18771,8 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     }
 
     if (m_ft2LinkTxActive) {
+        qint64 const guardNowMs = QDateTime::currentMSecsSinceEpoch();
+        m_ft2LinkPostTxAckGuardUntilMs = guardNowMs + 15000;
         m_ft2LinkTxActive = false;
         m_pendingFt2LinkText.clear();
         m_pendingFt2LinkWave.clear();
@@ -19314,8 +19366,11 @@ void DecodiumBridge::startTx()
 
         // Anti-collisione: ferma l'ingresso audio durante TX per evitare
         // che il decoder processi il nostro stesso tono come segnale ricevuto.
-        // Eccezione: FT2 async è full-duplex, RX deve continuare durante TX.
-        if (m_soundInput && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
+        // FT2-Link deve restare pronto a ricevere ACK immediati: sospendere
+        // l'input su macOS forza restart CoreAudio e puo' tagliare HELLO_ACK.
+        if (m_soundInput
+            && !m_ft2LinkTxActive
+            && !(m_mode == "FT2" && m_asyncTxEnabled)) {
             m_soundInput->suspend();
             m_rxAudioSuspendedForTx = true;
             bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
@@ -19334,7 +19389,11 @@ void DecodiumBridge::startTx()
 
         double const txPeriodSeconds = macPeriodMs / 1000.0;
         qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-        m_txPlaybackHoldUntilMs = nowMs + txPlaybackMs + 300;
+        // FT2-Link control frames are CRC-sensitive continuous bursts. On
+        // macOS/BlackHole Qt can consume the QBuffer before CoreAudio has
+        // actually emitted the tail, so keep TX open longer for this mode.
+        qint64 const macTxTailGuardMs = m_ft2LinkTxActive ? qint64(1200) : qint64(300);
+        m_txPlaybackHoldUntilMs = nowMs + txPlaybackMs + macTxTailGuardMs;
         m_txPlaybackHardDeadlineMs = nowMs + txPlaybackMs + 5000;
         m_txPlaybackReleasePending = false;
         m_txAudioRestartPending = false;
@@ -19350,9 +19409,10 @@ void DecodiumBridge::startTx()
         m_txPcmBuffer->seek(0);
         QPointer<QBuffer> const bufferGuard(m_txPcmBuffer);
 
-        bridgeLog(QStringLiteral("startTx(mac-pcm): playback hold %1 ms for %2 samples")
-                      .arg(txPlaybackMs + 300)
-                      .arg(wave.size()));
+        bridgeLog(QStringLiteral("startTx(mac-pcm): playback hold %1 ms for %2 samples tail_guard_ms=%3")
+                      .arg(txPlaybackMs + macTxTailGuardMs)
+                      .arg(wave.size())
+                      .arg(macTxTailGuardMs));
         bridgeLog(QStringLiteral("TX mac PCM payload mode=%1 msg=[%2] waveSamples=%3 peak=%4 payloadMs=%5 ft2Async=%6 alignSlot=%7 nominalLeadMs=%8 initialSilenceMs=%9 slotElapsedMs=%10 pcmBytes=%11 bufferSize=%12")
                       .arg(txMode,
                            msg.trimmed())
@@ -19367,12 +19427,14 @@ void DecodiumBridge::startTx()
                       .arg(m_txPcmData.size())
                       .arg(m_txPcmBuffer->size()));
         m_soundOutput->restart(m_txPcmBuffer);
-        QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
+        QTimer::singleShot(txPlaybackMs + macTxTailGuardMs + 50, this,
+                           [this, bufferGuard, txPlaybackMs, macTxTailGuardMs]() {
             if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer) {
                 return;
             }
-            bridgeLog(QStringLiteral("startTx(mac-pcm) completion timer: playback_ms=%1 bufPos=%2/%3")
+            bridgeLog(QStringLiteral("startTx(mac-pcm) completion timer: playback_ms=%1 tail_guard_ms=%2 bufPos=%3/%4")
                           .arg(txPlaybackMs)
+                          .arg(macTxTailGuardMs)
                           .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
                           .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1));
             finishModulatorIdlePlayback(QStringLiteral("mac-pcm"));
@@ -19555,7 +19617,8 @@ void DecodiumBridge::startTx()
     // Anti-collisione: durante TX sync non dobbiamo ricatturare il nostro
     // stesso audio sul device RX. FT2 async resta full-duplex.
     if (m_monitoring && m_soundInput
-        && (m_ft2LinkTxActive || !(m_mode == "FT2" && m_asyncTxEnabled))) {
+        && !m_ft2LinkTxActive
+        && !(m_mode == "FT2" && m_asyncTxEnabled)) {
         m_soundInput->suspend();
         m_rxAudioSuspendedForTx = true;
         bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
@@ -19758,7 +19821,12 @@ void DecodiumBridge::startTx()
             }
 
             qint64 const audioStartWallMs = QDateTime::currentMSecsSinceEpoch();
-            m_txPlaybackHoldUntilMs = audioStartWallMs + txPlaybackMs + 300;
+            // FT2-Link frames are continuous data bursts: losing even the last
+            // few symbols invalidates the frame CRC. CoreAudio/BlackHole can
+            // still have queued audio after Qt has consumed the QBuffer, so use
+            // a larger tail guard only for FT2-Link.
+            qint64 const txTailGuardMs = m_ft2LinkTxActive ? qint64(1200) : qint64(300);
+            m_txPlaybackHoldUntilMs = audioStartWallMs + txPlaybackMs + txTailGuardMs;
             m_txPlaybackHardDeadlineMs = audioStartWallMs + txPlaybackMs + 5000;
             m_txPlaybackReleasePending = false;
             m_txAudioRestartPending = true;
@@ -19789,12 +19857,14 @@ void DecodiumBridge::startTx()
                               .arg(effectiveGain, 0, 'f', 4)
                               .arg(wavePeak, 0, 'f', 6));
 
-            QTimer::singleShot(txPlaybackMs + 350, this, [this, bufferGuard, txPlaybackMs]() {
+            QTimer::singleShot(txPlaybackMs + txTailGuardMs + 50, this,
+                               [this, bufferGuard, txPlaybackMs, txTailGuardMs]() {
                 if (!m_transmitting || m_tuning || bufferGuard != m_txPcmBuffer) {
                     return;
                 }
-                bridgeLog(QStringLiteral("startTx SoundOutput completion timer: playback_ms=%1 bufPos=%2/%3")
+                bridgeLog(QStringLiteral("startTx SoundOutput completion timer: playback_ms=%1 tail_guard_ms=%2 bufPos=%3/%4")
                               .arg(txPlaybackMs)
+                              .arg(txTailGuardMs)
                               .arg(m_txPcmBuffer ? m_txPcmBuffer->pos() : -1)
                               .arg(m_txPcmBuffer ? m_txPcmBuffer->size() : -1));
                 completeTxPlayback(QStringLiteral("sound-output"));
@@ -38262,6 +38332,17 @@ void DecodiumBridge::onLegacyAudioSamples(QByteArray const& pcmSamples)
                 m_lastFt2LinkLegacyRxEmitMs = drainNowMs;
                 QVector<short> batchedSamples;
                 batchedSamples.swap(m_ft2LinkLegacyRxPending);
+                if (drainNowMs - m_lastFt2LinkLegacyRxEmitLogMs >= 2000) {
+                    m_lastFt2LinkLegacyRxEmitLogMs = drainNowMs;
+                    Ft2LinkPcmStats const stats = ft2LinkPcmStats(batchedSamples);
+                    bridgeLog(QStringLiteral(
+                        "[Ft2Link][RXEMIT] source=legacy samples=%1 rms=%2 peak=%3 nonzero=%4 aboveNoise=%5")
+                        .arg(batchedSamples.size())
+                        .arg(stats.rms, 0, 'f', 4)
+                        .arg(stats.peak, 0, 'f', 4)
+                        .arg(stats.nonZero)
+                        .arg(stats.aboveNoise));
+                }
                 emit ft2LinkRxSamplesReady(std::move(batchedSamples),
                                            static_cast<quint64>(drainNowMs));
             });
@@ -38619,6 +38700,26 @@ void DecodiumBridge::startAudioCapture()
                                    .arg(usingLegacyBackendForRx() ? 1 : 0),
                                25);
     bridgeLog("startAudioCapture() called");
+    qint64 const captureRequestMs = QDateTime::currentMSecsSinceEpoch();
+    constexpr qint64 kFt2LinkPostTxAckGuardMs = 15000;
+    if (isFt2LinkApplicationMode(m_mode)
+        && (m_transmitting
+            || m_ft2LinkTxActive
+            || (m_soundInput
+                && m_ft2LinkPostTxAckGuardUntilMs > 0
+                && captureRequestMs < m_ft2LinkPostTxAckGuardUntilMs)
+            || (m_lastTxEndMs > 0
+                && captureRequestMs - m_lastTxEndMs < kFt2LinkPostTxAckGuardMs))) {
+        bridgeLog(QStringLiteral(
+            "startAudioCapture skipped: FT2-Link post-TX ACK guard tx=%1 ft2Tx=%2 sinceTxEnd=%3ms guardLeft=%4ms")
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_ft2LinkTxActive ? 1 : 0)
+                      .arg(m_lastTxEndMs > 0 ? captureRequestMs - m_lastTxEndMs : -1)
+                      .arg(qMax<qint64>(0, m_ft2LinkPostTxAckGuardUntilMs - captureRequestMs)));
+        m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
+                                            captureRequestMs + kFt2LinkPostTxAckGuardMs);
+        return;
+    }
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
         if (m_monitoring) {
@@ -38805,6 +38906,17 @@ void DecodiumBridge::startAudioCapture()
                         m_lastFt2LinkModernRxEmitMs = drainNowMs;
                         QVector<short> batchedSamples;
                         batchedSamples.swap(m_ft2LinkModernRxPending);
+                        if (drainNowMs - m_lastFt2LinkModernRxEmitLogMs >= 2000) {
+                            m_lastFt2LinkModernRxEmitLogMs = drainNowMs;
+                            Ft2LinkPcmStats const stats = ft2LinkPcmStats(batchedSamples);
+                            bridgeLog(QStringLiteral(
+                                "[Ft2Link][RXEMIT] source=modern samples=%1 rms=%2 peak=%3 nonzero=%4 aboveNoise=%5")
+                                .arg(batchedSamples.size())
+                                .arg(stats.rms, 0, 'f', 4)
+                                .arg(stats.peak, 0, 'f', 4)
+                                .arg(stats.nonZero)
+                                .arg(stats.aboveNoise));
+                        }
                         emit ft2LinkRxSamplesReady(std::move(batchedSamples),
                                                    static_cast<quint64>(drainNowMs));
                     });
@@ -39313,6 +39425,25 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
+    qint64 const now = QDateTime::currentMSecsSinceEpoch();
+    constexpr qint64 kFt2LinkPostTxAckGuardMs = 15000;
+    if (isFt2LinkApplicationMode(m_mode)
+        && (m_ft2LinkTxActive
+            || (m_soundInput
+                && m_ft2LinkPostTxAckGuardUntilMs > 0
+                && now < m_ft2LinkPostTxAckGuardUntilMs)
+            || (m_lastTxEndMs > 0
+                && now - m_lastTxEndMs < kFt2LinkPostTxAckGuardMs))) {
+        bridgeLog(QStringLiteral(
+            "Audio watchdog restart skipped: FT2-Link post-TX ACK guard reason=%1 sinceTxEnd=%2ms guardLeft=%3ms")
+                      .arg(reason)
+                      .arg(m_lastTxEndMs > 0 ? now - m_lastTxEndMs : -1)
+                      .arg(qMax<qint64>(0, m_ft2LinkPostTxAckGuardUntilMs - now)));
+        m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
+                                            now + kFt2LinkPostTxAckGuardMs);
+        return;
+    }
+
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("watchdog %1").arg(reason));
         return;
@@ -39337,7 +39468,6 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
-    const qint64 now = QDateTime::currentMSecsSinceEpoch();
     m_lastAudioWatchdogRestartMs = now;
     m_lastAudioWatchdogLogMs = now;
     m_audioUnhealthyStartMs = 0;

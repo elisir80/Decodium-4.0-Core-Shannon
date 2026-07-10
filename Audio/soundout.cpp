@@ -54,6 +54,7 @@ QString audioErrorName(QAudio::Error error)
 
 QAudioFormat txPcmFormat(unsigned channels)
 {
+  channels = channels <= 1u ? 1u : 2u;
   QAudioFormat format;
   format.setChannelCount(static_cast<int>(channels));
   format.setChannelConfig(channels == 1
@@ -271,9 +272,16 @@ bool SoundOutput::checkStream() const
 
 void SoundOutput::setFormat(QAudioDevice const& device, unsigned channels, int frames_buffered)
 {
-  Q_ASSERT(0 < channels && channels < 3);
+  unsigned const boundedChannels = channels <= 1u ? 1u : 2u;
+  if (channels != boundedChannels) {
+    qInfo().noquote() << "TX SoundOutput channel count clamped"
+                      << "requested=" << channels
+                      << "used=" << boundedChannels
+                      << "dev=" << device.description();
+  }
+  Q_ASSERT(0 < boundedChannels && boundedChannels < 3);
   m_device = device;
-  m_channels = channels;
+  m_channels = boundedChannels;
   m_framesBuffered = frames_buffered;
 }
 
@@ -485,13 +493,25 @@ void SoundOutput::finishPlayback()
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
   if (m_stream && !m_streamDevice.isNull()) {
     m_coreAudioKeepAlive = true;
-    m_stream->setVolume(0.0f);
     pumpAudio();
     m_pumpTimer.start();
-    Q_EMIT status(QStringLiteral("TX SoundOutput sink kept warm after finish"));
+    QPointer<SoundOutput> const self(this);
+    QPointer<QAudioSink> const stream(m_stream.data());
+    // Keep CoreAudio audible long enough for the device/backend queue to drain.
+    // Qt can report the source buffer consumed before BlackHole/CoreAudio has
+    // actually played the tail; muting too early truncates FT2-Link frames.
+    QTimer::singleShot(1800, this, [self, stream]() {
+      if (!self || !stream || self->m_stream.data() != stream.data()
+          || !self->m_coreAudioKeepAlive) {
+        return;
+      }
+      stream->setVolume(0.0f);
+      self->pumpAudio();
+    });
+    Q_EMIT status(QStringLiteral("TX SoundOutput sink draining before keepalive"));
     qInfo().noquote() << "[TX-TL] sound_output_retire"
                       << "reason=finish"
-                      << "mode=keepalive"
+                      << "mode=drain_keepalive"
                       << "elapsed_ms=0";
     return;
   }

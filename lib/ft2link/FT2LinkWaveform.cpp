@@ -2384,22 +2384,78 @@ std::vector<std::uint8_t> narrowBytesFromBits (
   return bytes;
 }
 
-bool startsWithBytes (std::vector<std::uint8_t> const& bytes,
-                      std::size_t offset,
-                      std::vector<std::uint8_t> const& expected)
+std::vector<std::uint8_t> narrowBytesFromBitsAt (
+    std::vector<std::uint8_t> const& bits,
+    std::size_t bitOffset,
+    std::size_t byteCount)
+{
+  std::vector<std::uint8_t> bytes;
+  if (bits.size () < bitOffset + byteCount * 8u)
+    {
+      return bytes;
+    }
+
+  bytes.reserve (byteCount);
+  for (std::size_t byte = 0; byte < byteCount; ++byte)
+    {
+      std::uint8_t value = 0;
+      std::size_t const base = bitOffset + byte * 8u;
+      for (std::size_t bit = 0; bit < 8u; ++bit)
+        {
+          value = static_cast<std::uint8_t> (
+              (value << 1) | (bits[base + bit] & 0x01u));
+        }
+      bytes.push_back (value);
+    }
+  return bytes;
+}
+
+std::size_t byteBitErrors (std::vector<std::uint8_t> const& bytes,
+                           std::size_t offset,
+                           std::vector<std::uint8_t> const& expected,
+                           std::size_t abortAbove)
 {
   if (bytes.size () < offset + expected.size ())
     {
-      return false;
+      return abortAbove + 1u;
     }
+
+  std::size_t errors = 0;
   for (std::size_t i = 0; i < expected.size (); ++i)
     {
-      if (bytes[offset + i] != expected[i])
+      std::uint8_t diff = static_cast<std::uint8_t> (
+          bytes[offset + i] ^ expected[i]);
+      while (diff != 0u)
         {
-          return false;
+          errors += static_cast<std::size_t> (diff & 0x01u);
+          diff = static_cast<std::uint8_t> (diff >> 1);
+        }
+      if (errors > abortAbove)
+        {
+          return errors;
         }
     }
-  return true;
+  return errors;
+}
+
+bool narrowTrainingMatchesSoft (std::vector<std::uint8_t> const& bytes,
+                                std::size_t startByte)
+{
+  // Keep NARROW acquisition tolerant of small edge/ramp corruption while still
+  // relying on the packet magic and CRC below to reject false locks.
+  constexpr std::size_t kMaxTrainingBitErrors = 8u;
+  std::size_t const preambleErrors = byteBitErrors (
+      bytes, startByte, narrowPreambleBytes (), kMaxTrainingBitErrors);
+  if (preambleErrors > kMaxTrainingBitErrors)
+    {
+      return false;
+    }
+  std::size_t const syncErrors = byteBitErrors (
+      bytes,
+      startByte + narrowPreambleBytes ().size (),
+      narrowSyncBytes (),
+      kMaxTrainingBitErrors - preambleErrors);
+  return preambleErrors + syncErrors <= kMaxTrainingBitErrors;
 }
 
 NarrowDecodeCandidate extractNarrowFrameFromDecisions (
@@ -2454,58 +2510,80 @@ NarrowDecodeCandidate extractNarrowFrameFromDecisions (
           for (std::size_t startByte = 0;
                startByte + minimumBytes <= bytes.size (); ++startByte)
             {
-              if (!startsWithBytes (bytes, startByte, narrowPreambleBytes ())
-                  || !startsWithBytes (bytes,
-                                       startByte + narrowPreambleBytes ().size (),
-                                       narrowSyncBytes ()))
+              if (!narrowTrainingMatchesSoft (bytes, startByte))
                 {
                   continue;
                 }
 
               std::size_t const packetOffset = startByte + prefixBytes;
-              if (bytes.size () < packetOffset + 6u
-                  || bytes[packetOffset] != kNarrowPacketMagic0
-                  || bytes[packetOffset + 1u] != kNarrowPacketMagic1)
+              std::size_t const burstStartBit = startByte * 8u;
+              std::size_t const nominalPacketBitStart = packetOffset * 8u;
+              for (int packetBitAdjust = -4; packetBitAdjust <= 4;
+                   ++packetBitAdjust)
                 {
-                  continue;
-                }
-              std::size_t const packetBytes =
-                  4u + static_cast<std::size_t> (bytes[packetOffset + 3u]) + 2u;
-              std::size_t const requiredBytes = prefixBytes + packetBytes;
-              if (startByte + requiredBytes > bytes.size ())
-                {
-                  continue;
-                }
-
-              std::vector<std::uint8_t> packet (
-                  bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset),
-                  bytes.begin () + static_cast<std::vector<std::uint8_t>::difference_type> (packetOffset + packetBytes));
-              Frame frame;
-              if (narrowPacketToFrame (packet, &frame, error))
-                {
-                  // Offset assoluto in simboli dello stream ORIGINALE:
-                  // fase di voto + (fase bit + byte) convertiti in simboli.
-                  std::size_t const startSymbol =
-                      static_cast<std::size_t> (repOffset)
-                      + (bitOffset + startByte * 8u)
-                            * static_cast<std::size_t> (repetition);
-                  NarrowDecodeCandidate candidate;
-                  candidate.ok = true;
-                  candidate.frame = frame;
-                  candidate.metrics.sampleOffset = samplePhase
-                      + startSymbol * static_cast<std::size_t> (nsps);
-                  candidate.metrics.symbolOffset = startSymbol;
-                  candidate.metrics.symbolCount = requiredBytes * 8u
-                      * static_cast<std::size_t> (repetition);
-                  candidate.metrics.packetBytes = packet.size ();
-                  candidate.metrics.quality = averageNarrowDecisionQuality (
-                      decisions, candidate.metrics.symbolOffset,
-                      candidate.metrics.symbolCount);
-                  candidate.metrics.bitRepetition = repetition;
-                  if (!best.ok
-                      || candidate.metrics.quality > best.metrics.quality)
+                  if (packetBitAdjust < 0
+                      && nominalPacketBitStart
+                          < static_cast<std::size_t> (-packetBitAdjust))
                     {
-                      best = candidate;
+                      continue;
+                    }
+                  std::size_t const packetBitStart =
+                      packetBitAdjust < 0
+                      ? nominalPacketBitStart
+                            - static_cast<std::size_t> (-packetBitAdjust)
+                      : nominalPacketBitStart
+                            + static_cast<std::size_t> (packetBitAdjust);
+                  if (packetBitStart <= burstStartBit)
+                    {
+                      continue;
+                    }
+                  std::vector<std::uint8_t> const header =
+                      narrowBytesFromBitsAt (bits, packetBitStart, 4u);
+                  if (header.size () < 4u
+                      || header[0] != kNarrowPacketMagic0
+                      || header[1] != kNarrowPacketMagic1)
+                    {
+                      continue;
+                    }
+                  std::size_t const packetBytes =
+                      4u + static_cast<std::size_t> (header[3]) + 2u;
+                  if (packetBytes < 6u
+                      || bits.size () < packetBitStart + packetBytes * 8u)
+                    {
+                      continue;
+                    }
+
+                  std::vector<std::uint8_t> packet =
+                      narrowBytesFromBitsAt (bits, packetBitStart, packetBytes);
+                  Frame frame;
+                  if (narrowPacketToFrame (packet, &frame, error))
+                    {
+                      // Offset assoluto in simboli dello stream ORIGINALE:
+                      // fase di voto + fase bit + byte, convertiti in simboli.
+                      std::size_t const startSymbol =
+                          static_cast<std::size_t> (repOffset)
+                          + (bitOffset + burstStartBit)
+                                * static_cast<std::size_t> (repetition);
+                      std::size_t const endBit =
+                          packetBitStart + packetBytes * 8u;
+                      NarrowDecodeCandidate candidate;
+                      candidate.ok = true;
+                      candidate.frame = frame;
+                      candidate.metrics.sampleOffset = samplePhase
+                          + startSymbol * static_cast<std::size_t> (nsps);
+                      candidate.metrics.symbolOffset = startSymbol;
+                      candidate.metrics.symbolCount = (endBit - burstStartBit)
+                          * static_cast<std::size_t> (repetition);
+                      candidate.metrics.packetBytes = packet.size ();
+                      candidate.metrics.quality = averageNarrowDecisionQuality (
+                          decisions, candidate.metrics.symbolOffset,
+                          candidate.metrics.symbolCount);
+                      candidate.metrics.bitRepetition = repetition;
+                      if (!best.ok
+                          || candidate.metrics.quality > best.metrics.quality)
+                        {
+                          best = candidate;
+                        }
                     }
                 }
             }
@@ -2842,8 +2920,10 @@ bool decodeNarrowFrameWaveformWithMetrics (
   NarrowDecodeCandidate best;
   auto searchWithConfig = [&] (NarrowWaveformConfig const& searchConfig) {
     NarrowToneBasis const basis = makeNarrowToneBasis (nsps, searchConfig);
-    std::size_t const phaseStep = std::max<std::size_t> (
-        1u, static_cast<std::size_t> (nsps) / 20u);
+    // NARROW control frames must survive arbitrary audio-device and decimator
+    // phase.  A coarse 4-sample step was fast but missed clean BlackHole/USB
+    // loopback bursts whose symbol boundary fell between probed phases.
+    std::size_t const phaseStep = 1u;
     for (std::size_t phase = 0; phase < static_cast<std::size_t> (nsps);
          phase += phaseStep)
       {

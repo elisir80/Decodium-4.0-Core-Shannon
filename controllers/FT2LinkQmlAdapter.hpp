@@ -87,9 +87,11 @@ private:
   quint64 m_lastDecodeMs {0};
   quint64 m_lastWideDecodeMs {0};
   quint64 m_lastBusyLogMs {0};
+  quint64 m_lastWorkerIngestLogMs {0};
   quint64 m_lastRxFailLogMs {0};
   quint64 m_lastNarrowTrimLogMs {0};
   quint64 m_lastNarrowScanLogMs {0};
+  quint64 m_lastWideScanLogMs {0};
   bool m_narrowFailDumped {false};
   bool m_wasChannelBusy {false};
   double m_lastRms {0.0};
@@ -707,6 +709,7 @@ private:
                        quint16 sessionId = 0,
                        bool cancelIfNoOutbound = false);
   void purgeQueuedHelloRetries (quint16 sessionId);
+  void purgeQueuedLiveOutboundRetries (quint16 sessionId);
   void drainRadioTxQueue (quint64 nowMs);
   void scheduleRadioQueueDrain (quint64 nowMs);
   void scheduleLiveOutboundRetry (quint16 sessionId,

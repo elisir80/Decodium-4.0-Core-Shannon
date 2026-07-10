@@ -2649,10 +2649,12 @@ private:
     qint64             m_lastTciAudioLogMs {0};
     qint64             m_lastFt2LinkModernRxTapLogMs {0};
     qint64             m_lastFt2LinkModernRxEmitMs {0};
+    qint64             m_lastFt2LinkModernRxEmitLogMs {0};
     bool               m_ft2LinkModernRxDrainScheduled {false};
     QVector<short>     m_ft2LinkModernRxPending;
     qint64             m_lastFt2LinkLegacyRxTapLogMs {0};
     qint64             m_lastFt2LinkLegacyRxEmitMs {0};
+    qint64             m_lastFt2LinkLegacyRxEmitLogMs {0};
     bool               m_ft2LinkLegacyRxDrainScheduled {false};
     QVector<short>     m_ft2LinkLegacyRxPending;
     QTimer*            m_tuneTimer    {nullptr};
@@ -2699,6 +2701,7 @@ private:
     int     m_cwWpm {20};
     int     m_cwSidetoneHz {700};
     bool    m_ft2LinkTxActive {false};
+    qint64  m_ft2LinkPostTxAckGuardUntilMs {0};
     QString m_pendingFt2LinkText;
     QVector<float> m_pendingFt2LinkWave;
     QVariantMap m_pendingFt2LinkPlan;

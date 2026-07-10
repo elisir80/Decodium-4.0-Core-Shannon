@@ -50,7 +50,7 @@ bool ingestWideSamples (FT2LinkQmlAdapter& receiver,
                         QString const& remoteCall,
                         quint64 nowMs)
 {
-  if (receiver.ingestRxSamples (pcmFromSamples (samples), remoteCall, nowMs))
+  if (receiver.ingestRxSamples (pcmFromSamples (samples, 4), remoteCall, nowMs))
     {
       return true;
     }
@@ -4212,10 +4212,12 @@ private Q_SLOTS:
     stationA.setRadioTxArmed (true);
     QVERIFY (stationA.startSessionRadioHandshake ("TESTB", 1100));
     QVERIFY (deliverRadioRequest (radioA, stationB, 2200, &plan));
+    stationA.notifyRadioTxFinished ();
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("HELLO"));
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("NARROW"));
 
     QVERIFY (deliverRadioRequest (radioB, stationA, 3300, &plan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("HELLO_ACK"));
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("NARROW"));
 
@@ -4235,6 +4237,7 @@ private Q_SLOTS:
     QVERIFY (stationA.transmitPreparedRadioTxAudio (
         sessionId, chatText, 8000));
     QVERIFY (deliverRadioRequest (radioA, stationB, 9000, &plan));
+    stationA.notifyRadioTxFinished ();
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QCOMPARE (plan.value ("audioCarrierHz").toString (),
               QStringLiteral ("600,1200,1800,2400"));
@@ -4246,6 +4249,7 @@ private Q_SLOTS:
                               chatText,
                               QStringLiteral ("Received")));
     QVERIFY (deliverRadioRequest (radioB, stationA, 10000, &ackPlan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     QCOMPARE (ackPlan.value ("profileName").toString (),
               QStringLiteral ("W2300"));
@@ -4270,6 +4274,7 @@ private Q_SLOTS:
         true,
         15000));
     QVERIFY (deliverRadioRequest (radioA, stationB, 16000, &plan));
+    stationA.notifyRadioTxFinished ();
     QVERIFY (plan.value ("mailbox").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QVariantMap mail = findRecord (
@@ -4284,6 +4289,7 @@ private Q_SLOTS:
     QVERIFY (mail.value ("urgent").toBool ());
     QVERIFY (mail.value ("emcomm").toBool ());
     QVERIFY (deliverRadioRequest (radioB, stationA, 17000, &ackPlan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     mail = findRecord (
         stationA.mailbox (),
@@ -4303,6 +4309,7 @@ private Q_SLOTS:
         fields,
         18500));
     QVERIFY (deliverRadioRequest (radioA, stationB, 19000, &plan));
+    stationA.notifyRadioTxFinished ();
     QVERIFY (plan.value ("form").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QVariantMap form = findRecord (
@@ -4315,6 +4322,7 @@ private Q_SLOTS:
                   QStringLiteral ("message")).toString (),
               QStringLiteral ("Form OK"));
     QVERIFY (deliverRadioRequest (radioB, stationA, 20000, &ackPlan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     form = findRecord (
         stationA.forms (),
@@ -4332,6 +4340,7 @@ private Q_SLOTS:
         29000));
     QVector<float> fileSamples;
     QVERIFY (takeRadioRequest (radioA, &fileSamples, &plan, nullptr, 10000));
+    stationA.notifyRadioTxFinished ();
     QVERIFY (ingestWideSamples (stationB, fileSamples, QString {}, 30000));
     QVERIFY (plan.value ("file").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
@@ -4344,6 +4353,7 @@ private Q_SLOTS:
     QCOMPARE (file.value ("content").toString (), QStringLiteral ("file ok"));
     QVERIFY (!stationB.receivedFiles ().isEmpty ());
     QVERIFY (deliverRadioRequest (radioB, stationA, 31000, &ackPlan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     QVERIFY (ackPlan.value ("ackRepeatCount").toInt () > 1);
     file = findRecord (
@@ -4356,6 +4366,7 @@ private Q_SLOTS:
     QVERIFY (ingestWideSamples (stationB, fileSamples, QString {}, 90000));
     QTRY_VERIFY_WITH_TIMEOUT (radioB.size () >= 1, 10000);
     QVERIFY (takeRadioRequest (radioB, nullptr, &ackPlan, nullptr, 10000));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     QVERIFY (ackPlan.value ("ackRepeatCount").toInt () > 1);
     QCOMPARE (countRecords (stationB.fileTransfers (),
@@ -4371,6 +4382,7 @@ private Q_SLOTS:
         QStringLiteral ("BBS OK"),
         93000));
     QVERIFY (deliverRadioRequest (radioA, stationB, 94000, &plan));
+    stationA.notifyRadioTxFinished ();
     QVERIFY (plan.value ("bulletin").toBool ());
     QCOMPARE (plan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QVariantMap bulletin = findRecord (
@@ -4383,6 +4395,7 @@ private Q_SLOTS:
     QCOMPARE (bulletin.value ("group").toString (), QStringLiteral ("NET"));
     QCOMPARE (bulletin.value ("body").toString (), QStringLiteral ("BBS OK"));
     QVERIFY (deliverRadioRequest (radioB, stationA, 100000, &ackPlan));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     bulletin = findRecord (
         stationA.bulletins (),
@@ -4397,6 +4410,7 @@ private Q_SLOTS:
     QVERIFY (stationA.transmitBroadcastRadio (
         QStringLiteral ("LAB BCAST"), 112000));
     QVERIFY (deliverRadioRequest (radioA, stationB, 113000, &plan));
+    stationA.notifyRadioTxFinished ();
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("BCAST"));
     QCOMPARE (plan.value ("profileName").toString (),
               QStringLiteral ("NARROW"));
@@ -4409,11 +4423,13 @@ private Q_SLOTS:
 
     stationA.setRadioTxArmed (true);
     QVERIFY (stationA.transmitPingRadio (QStringLiteral ("TESTB"), 126000));
-    QVERIFY (deliverRadioRequest (radioA, stationB, 127000, &plan));
+    QVERIFY (deliverRadioRequest (radioA, stationB, 127000, &plan, 25000));
+    stationA.notifyRadioTxFinished ();
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("PING"));
     QCOMPARE (plan.value ("profileName").toString (),
               QStringLiteral ("NARROW"));
-    QVERIFY (deliverRadioRequest (radioB, stationA, 139000, &ackPlan));
+    QVERIFY (deliverRadioRequest (radioB, stationA, 139000, &ackPlan, 25000));
+    stationB.notifyRadioTxFinished ();
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("PING_ACK"));
     QVariantMap pingReply = findRecord (
         stationA.pingLog (),

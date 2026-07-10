@@ -844,6 +844,7 @@ private:
   MessageBox m_rigErrorMessageBox;
   bool m_embeddedShellMode {false};
   bool m_embeddedRigControlEnabled {true};
+  bool m_embeddedUiUpdatesEnabled {true};
   bool m_forceLegacySettingsDialog {false};
   bool m_embeddedFt2MonitorPrepared {false};
   bool m_embeddedBridgeMutesLegacyTxAudio {false};

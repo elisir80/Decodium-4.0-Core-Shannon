@@ -60,9 +60,9 @@ private:
   void emitStatusIfChanged (QString const& message, QAudio::State state);
   void retireCurrentStream ();
 #if defined(Q_OS_MACOS)
-  bool startNativeMacDefaultInput (QAudioDevice const&, QAudioFormat const&,
-                                   int framesPerBuffer, AudioDevice *,
-                                   AudioDevice::Channel);
+	  bool startNativeMacInput (QAudioDevice const&, QAudioFormat const&,
+	                            int framesPerBuffer, AudioDevice *,
+	                            AudioDevice::Channel, QString *failureReason);
   void stopNativeMacInput ();
   static void audioQueueInputCallback (void *, AudioQueueRef, AudioQueueBufferRef,
                                        AudioTimeStamp const *, UInt32,

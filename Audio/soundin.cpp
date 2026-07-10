@@ -8,7 +8,6 @@
 #include <QAudioFormat>
 #include <QAudioSource>
 #include <QElapsedTimer>
-#include <QMediaDevices>
 #include <QSysInfo>
 #include <QDebug>
 #include <QThread>
@@ -187,23 +186,6 @@ QString audioDeviceIdForKey(QAudioDevice const& device)
 }
 
 #if defined(Q_OS_MACOS)
-bool isSameAudioDevice(QAudioDevice const& lhs, QAudioDevice const& rhs)
-{
-  if (lhs.isNull() || rhs.isNull())
-    {
-      return false;
-    }
-
-  QByteArray const lhsId = lhs.id();
-  QByteArray const rhsId = rhs.id();
-  if (!lhsId.isEmpty() || !rhsId.isEmpty())
-    {
-      return lhsId == rhsId;
-    }
-
-  return lhs.description() == rhs.description();
-}
-
 QString osStatusName(OSStatus status)
 {
   char text[5] {};
@@ -308,17 +290,26 @@ void SoundInput::audioQueueInputCallback (void * userData,
     }
 }
 
-bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
-                                             QAudioFormat const& format,
-                                             int framesPerBuffer,
-                                             AudioDevice * sink,
-                                             AudioDevice::Channel channel)
+bool SoundInput::startNativeMacInput (QAudioDevice const& device,
+                                      QAudioFormat const& format,
+                                      int framesPerBuffer,
+                                      AudioDevice * sink,
+                                      AudioDevice::Channel channel,
+                                      QString *failureReason)
 {
   stopNativeMacInput ();
 
+  auto fail = [failureReason] (QString const& reason) {
+    if (failureReason)
+      {
+        *failureReason = reason;
+      }
+    return false;
+  };
+
   if (!sink)
     {
-      return false;
+      return fail (QStringLiteral ("missing sink"));
     }
   if (format.sampleFormat () != QAudioFormat::Int16
       || format.sampleRate () <= 0
@@ -326,7 +317,8 @@ bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
     {
       Q_EMIT error (tr ("Native macOS AudioQueue input requires PCM Int16 format, got %1")
                     .arg (inputFormatSummary (format)));
-      return false;
+      return fail (QStringLiteral ("unsupported native input format %1")
+                   .arg (inputFormatSummary (format)));
     }
 
   if (!sink->initialize (QIODevice::WriteOnly, channel, format.channelCount ()))
@@ -335,7 +327,7 @@ bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
                     .arg (device.description (),
                           inputFormatSummary (format),
                           inputChannelName (static_cast<int> (channel))));
-      return false;
+      return fail (QStringLiteral ("sink initialization failed"));
     }
 
   AudioStreamBasicDescription asbd {};
@@ -358,9 +350,36 @@ bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
                                         &queue);
   if (status != noErr || !queue)
     {
-      Q_EMIT error (tr ("Native macOS AudioQueue input open failed for \"%1\": %2")
-                    .arg (device.description (), osStatusName (status)));
-      return false;
+      return fail (QStringLiteral ("AudioQueueNewInput failed for \"%1\": %2")
+                   .arg (device.description (), osStatusName (status)));
+    }
+
+  QByteArray const deviceId = device.id ();
+  if (!deviceId.isEmpty ())
+    {
+      CFStringRef uid = CFStringCreateWithBytes (kCFAllocatorDefault,
+                                                 reinterpret_cast<UInt8 const *> (deviceId.constData ()),
+                                                 deviceId.size (),
+                                                 kCFStringEncodingUTF8,
+                                                 false);
+      if (!uid)
+        {
+          AudioQueueDispose (queue, true);
+          return fail (QStringLiteral ("cannot convert CoreAudio input UID for \"%1\"")
+                       .arg (device.description ()));
+        }
+
+      status = AudioQueueSetProperty (queue,
+                                      kAudioQueueProperty_CurrentDevice,
+                                      &uid,
+                                      sizeof (uid));
+      CFRelease (uid);
+      if (status != noErr)
+        {
+          AudioQueueDispose (queue, true);
+          return fail (QStringLiteral ("AudioQueue current-device select failed for \"%1\": %2")
+                       .arg (device.description (), osStatusName (status)));
+        }
     }
 
   m_audioQueue = queue;
@@ -376,20 +395,22 @@ bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
       status = AudioQueueAllocateBuffer (m_audioQueue, bufferBytes, &bufferRef);
       if (status != noErr || !bufferRef)
         {
-          Q_EMIT error (tr ("Native macOS AudioQueue buffer allocation failed for \"%1\": %2")
-                        .arg (device.description (), osStatusName (status)));
-          stopNativeMacInput ();
-          return false;
-        }
+              Q_EMIT error (tr ("Native macOS AudioQueue buffer allocation failed for \"%1\": %2")
+                            .arg (device.description (), osStatusName (status)));
+              stopNativeMacInput ();
+              return fail (QStringLiteral ("buffer allocation failed: %1")
+                           .arg (osStatusName (status)));
+            }
       m_audioQueueBuffers.append (bufferRef);
       status = AudioQueueEnqueueBuffer (m_audioQueue, bufferRef, 0, nullptr);
       if (status != noErr)
         {
-          Q_EMIT error (tr ("Native macOS AudioQueue buffer enqueue failed for \"%1\": %2")
-                        .arg (device.description (), osStatusName (status)));
-          stopNativeMacInput ();
-          return false;
-        }
+              Q_EMIT error (tr ("Native macOS AudioQueue buffer enqueue failed for \"%1\": %2")
+                            .arg (device.description (), osStatusName (status)));
+              stopNativeMacInput ();
+              return fail (QStringLiteral ("buffer enqueue failed: %1")
+                           .arg (osStatusName (status)));
+            }
     }
 
   sink->setInputGainLinear (m_inputGain);
@@ -399,11 +420,13 @@ bool SoundInput::startNativeMacDefaultInput (QAudioDevice const& device,
       Q_EMIT error (tr ("Native macOS AudioQueue input start failed for \"%1\": %2")
                     .arg (device.description (), osStatusName (status)));
       stopNativeMacInput ();
-      return false;
+      return fail (QStringLiteral ("AudioQueueStart failed: %1")
+                   .arg (osStatusName (status)));
     }
 
   qInfo () << "SoundInput: native macOS AudioQueue input active for"
            << device.description()
+           << "id=" << QString::fromUtf8 (deviceId)
            << "format=" << inputFormatSummary (format)
            << "bufferFrames=" << bufferFrames;
   cummulative_lost_usec_ = std::numeric_limits<qint64>::min ();
@@ -579,7 +602,18 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       return;
     }
 
-  if (m_stream
+  bool const sameActiveInput =
+#if defined(Q_OS_MACOS)
+      (m_audioQueue
+       && m_sink == sink
+       && m_deviceDescription == device.description()
+       && m_deviceId == deviceId
+       && m_sampleRate == format.sampleRate()
+       && m_channelCount == format.channelCount()
+       && m_channelSelector == static_cast<int>(channel))
+      ||
+#endif
+      (m_stream
       && (isReusableInputStream(m_stream.data())
           || (m_stream->error () == QAudio::NoError
               && m_currentStartKey == currentStartKey
@@ -591,7 +625,8 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       && m_deviceId == deviceId
       && m_sampleRate == format.sampleRate()
       && m_channelCount == format.channelCount()
-      && m_channelSelector == static_cast<int>(channel))
+      && m_channelSelector == static_cast<int>(channel));
+  if (sameActiveInput)
     {
       bool const keyChanged = currentStartKey != m_lastDuplicateStartKey;
       bool const shouldLogDuplicate =
@@ -656,16 +691,18 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
     }
 
 #if defined(Q_OS_MACOS)
-  QAudioDevice const defaultInput = QMediaDevices::defaultAudioInput();
-  bool const useDefaultInputConstructor = isSameAudioDevice(device, defaultInput);
-  if (useDefaultInputConstructor)
+  QString nativeFailureReason;
+  qDebug() << "SoundInput: trying native macOS AudioQueue input" << device.description();
+  if (startNativeMacInput (device, format, framesPerBuffer, sink, channel,
+                           &nativeFailureReason))
     {
-      qDebug() << "SoundInput: using native macOS AudioQueue for default input" << device.description();
-      startNativeMacDefaultInput (device, format, framesPerBuffer, sink, channel);
       m_startInProgress = false;
       return;
     }
-  else
+  qWarning() << "SoundInput: native macOS AudioQueue input unavailable for"
+             << device.description()
+             << "-" << nativeFailureReason
+             << "; falling back to QAudioSource";
 #endif
     {
       m_stream.reset (new QAudioSource {device, format});

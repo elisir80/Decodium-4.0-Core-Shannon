@@ -5844,6 +5844,7 @@ void MainWindow::legacySetEmbeddedUiUpdatesEnabled(bool enabled)
       return;
     }
 
+  m_embeddedUiUpdatesEnabled = enabled;
   if (enabled)
     {
       if (!m_guiTimer.isActive ())
@@ -8330,7 +8331,15 @@ void MainWindow::restartConfiguredAudioStreams (bool resume_monitor, bool force_
           debugToFile (QStringLiteral ("audioRest   active check skipped cross-thread"));
         }
 
-      if (force_input_reopen)
+      bool const force_input_reopen_allowed =
+          force_input_reopen
+          && !(m_embeddedShellMode && !m_embeddedUiUpdatesEnabled);
+      if (force_input_reopen && !force_input_reopen_allowed)
+        {
+          debugToFile (QStringLiteral ("audioRest   forced input restart suppressed in embedded passive mode"));
+        }
+
+      if (force_input_reopen_allowed)
         {
           debugToFile (QStringLiteral ("audioRest   forced input restart"));
           Q_EMIT restartAudioInputStream (input_device
