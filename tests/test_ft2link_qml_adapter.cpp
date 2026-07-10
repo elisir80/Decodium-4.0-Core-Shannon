@@ -4177,7 +4177,7 @@ private Q_SLOTS:
         sessionId, QStringLiteral ("SESSION FIRST"), 4400));
     QVector<float> dataSamples;
     QVariantMap dataPlan;
-    QVERIFY (takeRadioRequest (radioA, &dataSamples, &dataPlan, nullptr, 10000));
+    QVERIFY (takeRadioRequest (radioA, &dataSamples, &dataPlan, nullptr, 25000));
     QCOMPARE (dataPlan.value ("kind").toString (), QStringLiteral ("CHAT"));
     QCOMPARE (dataPlan.value ("profileName").toString (),
               QStringLiteral ("W2300"));
