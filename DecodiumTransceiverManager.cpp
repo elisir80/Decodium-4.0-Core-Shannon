@@ -55,6 +55,7 @@ QString extractPortNameFromReason(QString const& reason)
 // rileva e la sostituisce con un testo piu' comprensibile.
 QString sanitizeHamlibFailure(QString const& reason)
 {
+    QString const lower = reason.toLower();
     bool const hrdProtocolSilent =
         reason.contains(QStringLiteral("protocol silent"), Qt::CaseInsensitive);
     bool const hrdProtocolTimeout =
@@ -119,6 +120,28 @@ QString sanitizeHamlibFailure(QString const& reason)
         }
     }
 
+    bool const hamlibTimeout =
+        lower.contains(QStringLiteral("timed out"))
+        || lower.contains(QStringLiteral("timeout"))
+        || lower.contains(QStringLiteral("returning(-5)"));
+    bool const yaesuNewCatTrace =
+        lower.contains(QStringLiteral("newcat_"))
+        || lower.contains(QStringLiteral("cmd_str = fa"))
+        || lower.contains(QStringLiteral("cmd_str=fa"))
+        || lower.contains(QStringLiteral("newcat_get_freq"));
+    if (hamlibTimeout && yaesuNewCatTrace) {
+        return QObject::tr(
+            "Hamlib Yaesu/NewCAT: il rig non risponde alla query CAT. "
+            "Verifica porta COM, baud rate CAT della radio, handshake RTS/DTR, "
+            "CAT TOT e che nessun altro software stia usando la porta.");
+    }
+
+    if (hamlibTimeout) {
+        return QObject::tr(
+            "Comunicazione CAT in timeout. Verifica cavo USB, porta COM, baud rate, "
+            "handshake RTS/DTR e che il rig sia acceso e non usato da altri software.");
+    }
+
     static QStringList const debugMarkers = {
         QStringLiteral("read_string_generic"),
         QStringLiteral("write_block"),
@@ -132,7 +155,7 @@ QString sanitizeHamlibFailure(QString const& reason)
         if (reason.contains(marker, Qt::CaseInsensitive)) {
             return QObject::tr("Comunicazione CAT interrotta con il rig. "
                                "Verifica cavo USB, porta COM, baud rate e che "
-                               "il rig sia acceso. (trace hamlib: %1)").arg(reason);
+                               "il rig sia acceso. Dettagli tecnici nel diagnostic log.");
         }
     }
     return reason;
@@ -2022,6 +2045,8 @@ void DecodiumTransceiverManager::connectRig()
                     << "shown=" << shownReason;
                 if (startupAttempt && isSerialPortMissingFailure(reason)) {
                     emit statusUpdate(shownReason + QStringLiteral(" Ritento CAT a breve..."));
+                } else if (startupAttempt && isTransientCatIoFailure(reason)) {
+                    emit statusUpdate(QStringLiteral("CAT non connesso: ") + shownReason);
                 } else if ((wasConnected || recovering) && isTransientCatIoFailure(reason)) {
                     scheduleTransientReconnect(reason);
                 } else {
@@ -2224,6 +2249,26 @@ static void sendState(DecodiumTransceiverManagerPrivate* d)
     }, Qt::QueuedConnection);
 }
 
+static void sendLatestState(DecodiumTransceiverManagerPrivate* d, char const* context)
+{
+    if (!d->transceiver) return;
+    auto* xcv = d->transceiver;
+    auto st = d->desired;
+    auto* latestSeq = &d->seqNum;
+    unsigned seq = ++(d->seqNum);
+    QMetaObject::invokeMethod(xcv, [xcv, st, seq, latestSeq, context]() {
+        if (seq != latestSeq->load()) {
+            qInfo().noquote()
+                << "[CATDBG] Hamlib stale queued CAT state dropped"
+                << "context=" << context
+                << "seq=" << seq
+                << "latest=" << latestSeq->load();
+            return;
+        }
+        xcv->set(st, seq);
+    }, Qt::QueuedConnection);
+}
+
 static void sendStateSync(DecodiumTransceiverManagerPrivate* d)
 {
     if (!d->transceiver) return;
@@ -2261,7 +2306,7 @@ void DecodiumTransceiverManager::setRigFrequency(double hz)
         m_frequency = hz;
     }
     d->desired.frequency(static_cast<Transceiver::Frequency>(hz));
-    sendState(d.get());
+    sendLatestState(d.get(), "setRigFrequency");
 }
 
 void DecodiumTransceiverManager::setRigTxFrequency(double hz)

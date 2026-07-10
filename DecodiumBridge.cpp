@@ -8769,7 +8769,6 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         double const previousFrequency = m_frequency;
         setFrequency(freq);
         requestRigFrequencyFromBridge(freq, QStringLiteral("band/mode"));
-        applyConfiguredCatRigMode(QStringLiteral("band-change"));
         if (m_monitoring) {
             {
                 QMutexLocker locker(&m_audioBufferMutex);
@@ -13039,6 +13038,16 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
     // 1.0.192 — applica Frequency Calibration prima di scrivere al rig.
     // Compensa drift conoscuto: hz_corrected = hz + slope_ppm*hz*1e-6 + intercept_Hz.
     double const dialHz = applyFrequencyCalibration(hz);
+    if (isHamlibFamilyBackend(m_catBackend)) {
+        activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend, dialHz, m_omniRigCat, m_legacyBackend);
+        schedulePostQsyCatSettledSync(hz, reason);
+        bridgeLog(QStringLiteral("CAT local QSY requested by %1: %2 Hz via %3 (mode/split sync delayed)")
+                      .arg(reason,
+                           QString::number(hz, 'f', 0),
+                           m_catBackend));
+        return;
+    }
+
     QString const rigMode = configuredCatRigMode();
     if (!rigMode.isEmpty()
         && isHamlibFamilyBackend(m_catBackend)
@@ -13052,6 +13061,51 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
                   .arg(reason,
                        QString::number(hz, 'f', 0),
                        m_catBackend));
+}
+
+void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs)
+{
+    if (hz <= 0.0
+        || !isHamlibFamilyBackend(m_catBackend)
+        || !m_hamlibCat
+        || !m_hamlibCat->connected()) {
+        return;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    m_catFrequencySettleUntilMs = std::max(m_catFrequencySettleUntilMs,
+                                           nowMs + qMax(250, delayMs));
+    quint64 const serial = ++m_catQsySettleSerial;
+    QTimer::singleShot(qMax(250, delayMs), this, [this, hz, reason, serial]() {
+        if (serial != m_catQsySettleSerial) {
+            return;
+        }
+        if (!isHamlibFamilyBackend(m_catBackend)
+            || !m_hamlibCat
+            || !m_hamlibCat->connected()) {
+            return;
+        }
+        if (m_localCatFrequencyTargetHz > 0.0
+            && std::abs(m_localCatFrequencyTargetHz - hz) > 1.0) {
+            return;
+        }
+
+        m_catFrequencySettleUntilMs = 0;
+        QString const settledReason = reason + QStringLiteral("/settled");
+        bridgeLog(QStringLiteral("CAT post-QSY settled sync (%1): %2 Hz")
+                      .arg(settledReason, QString::number(hz, 'f', 0)));
+        applyConfiguredCatRigMode(settledReason);
+        syncActiveCatTxSplitFrequency(settledReason);
+    });
+}
+
+bool DecodiumBridge::hamlibCatFrequencySettleActive(const QString& reason) const
+{
+    if (!isHamlibFamilyBackend(m_catBackend)
+        || reason.contains(QStringLiteral("settled"), Qt::CaseInsensitive)) {
+        return false;
+    }
+    return m_catFrequencySettleUntilMs > QDateTime::currentMSecsSinceEpoch();
 }
 
 bool DecodiumBridge::catSplitOperationActiveForMode() const
@@ -13138,6 +13192,11 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
         || !isHamlibFamilyBackend(m_catBackend)
         || !m_hamlibCat
         || !m_hamlibCat->connected()) {
+        return;
+    }
+
+    if (hamlibCatFrequencySettleActive(reason)) {
+        bridgeLog(QStringLiteral("CAT split sync delayed during QSY settle (%1)").arg(reason));
         return;
     }
 
@@ -21783,6 +21842,13 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
     if (rigMode.isEmpty()) {
         return;
     }
+
+    if (hamlibCatFrequencySettleActive(reason)) {
+        bridgeLog(QStringLiteral("CAT rig mode sync delayed during QSY settle (%1): %2")
+                      .arg(reason, rigMode));
+        return;
+    }
+
     if (!m_catMode.trimmed().isEmpty()
         && m_catMode.compare(rigMode, Qt::CaseInsensitive) == 0) {
         return;

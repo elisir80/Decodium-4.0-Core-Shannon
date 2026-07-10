@@ -1775,6 +1775,8 @@ private:
     void armPeriodTimerForCurrentMode(quint64 sessionId, const QString& reason);
     int minimumDecodeSamplesForMode(const QString& mode) const;
     void requestRigFrequencyFromBridge(double hz, const QString& reason);
+    void schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs = 900);
+    bool hamlibCatFrequencySettleActive(const QString& reason) const;
     bool shouldIgnoreCatFrequencyDuringLocalQsy(double hz, const QString& backend);
     bool shouldIgnoreLegacyAudioFrequencyDuringLocalQsy(int hz, bool tx);
     bool catSplitOperationActiveForMode() const;
@@ -2312,6 +2314,8 @@ private:
     double m_localCatFrequencyTargetHz {0.0};
     double m_localCatFrequencyPreviousHz {0.0};
     qint64 m_localCatFrequencyGuardUntilMs {0};
+    quint64 m_catQsySettleSerial {0};
+    qint64 m_catFrequencySettleUntilMs {0};
     // 1.0.362 — tetto massimo del guard anti-poll-stale: finché il rig riporta una
     // frequenza diversa dal target (es. FT8 dopo aver chiesto FT2 su un FT-991 lento),
     // shouldIgnoreCatFrequencyDuringLocalQsy ri-arma il guard fino a questo tetto, così

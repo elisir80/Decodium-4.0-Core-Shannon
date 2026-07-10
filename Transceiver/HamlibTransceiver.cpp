@@ -580,6 +580,16 @@ HamlibTransceiver::HamlibTransceiver (logger_type * logger,
 #endif
             }
           m_->set_conf ("serial_speed", QByteArray::number (params.baud).data ());
+          if (icom_serial_cat)
+            {
+              // Icom CI-V can spend several seconds inside Hamlib's internal
+              // band-change preflight if the serial bus is briefly late. Keep
+              // failed transactions short; the adaptive poll/backoff layer will
+              // absorb the miss without tearing down CAT.
+              m_->set_conf ("timeout", "700");
+              m_->set_conf ("retry", "1");
+              m_->set_conf ("timeout_retry", "0");
+            }
           if (params.data_bits != TransceiverFactory::default_data_bits)
             {
               m_->set_conf ("data_bits", TransceiverFactory::seven_data_bits == params.data_bits ? "7" : "8");
@@ -1129,11 +1139,6 @@ void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
 {
   CAT_TRACE ("f: " << f << " mode: " << m << " reversed: " << m_->reversed_);
 
-  if (suppress_cat_write_during_backoff (tr ("setting frequency")))
-    {
-      return;
-    }
-
   // only change when receiving or simplex or direct VFO addressing
   // unavailable or forced
   if (!state ().ptt () || !state ().split () || !m_->one_VFO_ || no_ignore)
@@ -1145,8 +1150,17 @@ void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
         {
           target_vfo = RIG_VFO_MAIN; // no VFO A/B so force to Rx on MAIN
         }
-      m_->error_check (rig_set_freq (m_->rig_.data (), target_vfo, f), tr ("setting frequency"));
+      auto const write_result = set_frequency_or_tolerate (target_vfo, f, tr ("setting frequency"));
+      if (FrequencyWriteResult::Rejected == write_result
+          || FrequencyWriteResult::Deferred == write_result)
+        {
+          return;
+        }
       update_rx_frequency (f);
+      if (FrequencyWriteResult::AppliedWithTransientError == write_result)
+        {
+          return;
+        }
 
       if (m_->mode_query_works_ && UNK != m)
         {
@@ -1163,7 +1177,12 @@ void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
 
               // for the 2nd time because a mode change may have caused a
               // frequency change
-              m_->error_check (rig_set_freq (m_->rig_.data (), RIG_VFO_CURR, f), tr ("setting frequency"));
+              auto const post_mode_write = set_frequency_or_tolerate (RIG_VFO_CURR, f, tr ("setting frequency"));
+              if (FrequencyWriteResult::Rejected == post_mode_write
+                  || FrequencyWriteResult::Deferred == post_mode_write)
+                {
+                  return;
+                }
 
               // for the second time because some rigs change mode according
               // to frequency such as the TS-2000 auto mode setting
@@ -1189,6 +1208,11 @@ void HamlibTransceiver::do_tx_frequency (Frequency tx, MODE mode, bool no_ignore
     {
       update_other_frequency (0);
       update_split (false);
+      return;
+    }
+
+  if (suppress_cat_write_during_backoff (tr ("setting TX/split frequency")))
+    {
       return;
     }
 
@@ -1391,11 +1415,17 @@ bool HamlibTransceiver::poll_vfo_frequency (vfo_t vfo, freq_t * frequency, QStri
 
 void HamlibTransceiver::note_frequency_poll_success ()
 {
-  if (frequency_poll_failures_ || frequency_poll_skip_ticks_
-      || frequency_poll_backoff_ticks_ != kFrequencyPollInitialBackoffTicks_)
+  bool const was_unstable = frequency_poll_failures_ || frequency_poll_skip_ticks_
+      || frequency_poll_write_quiet_ticks_ > 0
+      || frequency_poll_backoff_ticks_ != kFrequencyPollInitialBackoffTicks_;
+
+  frequency_poll_write_quiet_ticks_ = 0;
+
+  if (was_unstable)
     {
       qInfo ().noquote ()
-        << "[CATDBG] Hamlib frequency polling recovered";
+        << "[CATDBG] Hamlib frequency polling recovered"
+        << "writeQuietTicks=" << frequency_poll_write_quiet_ticks_;
     }
   frequency_poll_failures_ = 0;
   frequency_poll_skip_ticks_ = 0;
@@ -1405,11 +1435,18 @@ void HamlibTransceiver::note_frequency_poll_success ()
 void HamlibTransceiver::note_frequency_poll_failure (int rc, QString const& doing)
 {
   ++frequency_poll_failures_;
+  if (adaptive_frequency_poll_)
+    {
+      frequency_poll_write_quiet_ticks_ = std::max (frequency_poll_write_quiet_ticks_,
+                                                    kFrequencyPollWriteQuietTicks_);
+    }
+
   qWarning ().noquote ()
     << "[CATDBG] Hamlib frequency poll failed"
     << frequency_poll_failures_ << "/" << kFrequencyPollMaxFailures_
     << "rc=" << rc
-    << "op=" << doing;
+    << "op=" << doing
+    << "writeQuietTicks=" << frequency_poll_write_quiet_ticks_;
 
   if (adaptive_frequency_poll_ && frequency_poll_failures_ >= kFrequencyPollMaxFailures_)
     {
@@ -1427,7 +1464,9 @@ void HamlibTransceiver::note_frequency_poll_failure (int rc, QString const& doin
 bool HamlibTransceiver::cat_write_backoff_active () const
 {
   return adaptive_frequency_poll_
-      && (frequency_poll_failures_ > 0 || frequency_poll_skip_ticks_ > 0);
+      && (frequency_poll_failures_ > 0
+          || frequency_poll_skip_ticks_ > 0
+          || frequency_poll_write_quiet_ticks_ > 0);
 }
 
 bool HamlibTransceiver::suppress_cat_write_during_backoff (QString const& operation) const
@@ -1442,8 +1481,80 @@ bool HamlibTransceiver::suppress_cat_write_during_backoff (QString const& operat
     << "op=" << operation
     << "failures=" << frequency_poll_failures_
     << "skipTicks=" << frequency_poll_skip_ticks_
+    << "writeQuietTicks=" << frequency_poll_write_quiet_ticks_
     << "nextSkipTicks=" << frequency_poll_backoff_ticks_;
   return true;
+}
+
+HamlibTransceiver::FrequencyWriteResult HamlibTransceiver::set_frequency_or_tolerate (vfo_t vfo,
+                                                                                      Frequency f,
+                                                                                      QString const& operation)
+{
+  int const rc = rig_set_freq (m_->rig_.data (), vfo, f);
+  if (RIG_OK == rc)
+    {
+      return FrequencyWriteResult::Applied;
+    }
+
+  QString const error_text = QString::fromLocal8Bit (rigerror (rc));
+  bool const rejected_after_timeout =
+      adaptive_frequency_poll_
+      && rc == -RIG_ERJCTED
+      && (error_text.contains (QStringLiteral ("timed out"), Qt::CaseInsensitive)
+          || error_text.contains (QStringLiteral ("timeout"), Qt::CaseInsensitive)
+          || error_text.contains (QStringLiteral ("returning(-5)"), Qt::CaseInsensitive)
+          || error_text.contains (QStringLiteral ("rig_get_freq failed"), Qt::CaseInsensitive)
+          || error_text.contains (QStringLiteral ("Communication bus error"), Qt::CaseInsensitive)
+          || error_text.contains (QStringLiteral ("returning(-13)"), Qt::CaseInsensitive));
+  if (rejected_after_timeout)
+    {
+      note_frequency_poll_failure (-RIG_ETIMEOUT, operation + tr (" (write preflight timeout)"));
+      qWarning ().noquote ()
+        << "[CATDBG] Hamlib Icom frequency write deferred after preflight timeout"
+        << "rc=" << rc
+        << "vfo=" << rig_strvfo (vfo)
+        << "freq=" << QString::number (static_cast<double> (f), 'f', 0)
+        << "op=" << operation;
+      return FrequencyWriteResult::Deferred;
+    }
+
+  bool const rejected_frequency =
+      rc == -RIG_ERJCTED
+      || rc == -RIG_EINVAL
+      || rc == -RIG_EDOM
+      || rc == -RIG_ELIMIT
+      || rc == -RIG_ENAVAIL
+      || rc == -RIG_ENTARGET
+      || rc == -RIG_EVFO;
+  if (rejected_frequency)
+    {
+      qWarning ().noquote ()
+        << "[CATDBG] Hamlib frequency write rejected by rig"
+        << "rc=" << rc
+        << "vfo=" << rig_strvfo (vfo)
+        << "freq=" << QString::number (static_cast<double> (f), 'f', 0)
+        << "op=" << operation
+        << "reason=" << error_text;
+      return FrequencyWriteResult::Rejected;
+    }
+
+  bool const transient_icom_serial_error =
+      adaptive_frequency_poll_
+      && (rc == -RIG_EIO || rc == -RIG_ETIMEOUT || rc == -RIG_BUSERROR);
+  if (transient_icom_serial_error)
+    {
+      note_frequency_poll_failure (rc, operation + tr (" (write tolerated)"));
+      qWarning ().noquote ()
+        << "[CATDBG] Hamlib Icom frequency write transient error tolerated"
+        << "rc=" << rc
+        << "vfo=" << rig_strvfo (vfo)
+        << "freq=" << QString::number (static_cast<double> (f), 'f', 0)
+        << "op=" << operation;
+      return FrequencyWriteResult::AppliedWithTransientError;
+    }
+
+  m_->error_check (rc, operation);
+  return FrequencyWriteResult::Rejected;
 }
 
 vfo_t HamlibTransceiver::frequency_poll_vfo () const
