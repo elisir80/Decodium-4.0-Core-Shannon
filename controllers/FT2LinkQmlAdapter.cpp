@@ -733,6 +733,12 @@ int rfLabSampleRateForProfile (QString const& profileName)
       : kRfLabTxSampleRate;
 }
 
+int rfLabReplaySampleRateForProfile (QString const& profileName)
+{
+  Q_UNUSED (profileName);
+  return static_cast<int> (kLiveWideSampleRate);
+}
+
 QString rfLabReplayProfileName (QString const& path,
                                 QVariantMap const& options)
 {
@@ -7382,7 +7388,8 @@ QVariantMap FT2LinkQmlAdapter::replayRfLabWav (
   QVector<short> samples;
   QVariantMap wavInfo;
   QString const replayProfileName = rfLabReplayProfileName (path, options);
-  int const replaySampleRate = rfLabSampleRateForProfile (replayProfileName);
+  int const replaySampleRate =
+      rfLabReplaySampleRateForProfile (replayProfileName);
   if (!readPcm16Wav (path, &samples, &wavInfo, replaySampleRate, &error))
     {
       QVariantMap result = rfLabResult (false, error);

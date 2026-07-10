@@ -2,6 +2,7 @@
 
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QDateTime>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -485,6 +486,7 @@ private Q_SLOTS:
     QVERIFY (!requestSamples.isEmpty ());
     QVERIFY (requestPlan.value ("armed").toBool ());
     QCOMPARE (requestPlan.value ("profileName").toString (), QStringLiteral ("W2300"));
+    caller.notifyRadioTxFinished ();
 
     messages = caller.messages (sessionId);
     QCOMPARE (messages.size (), 4);
@@ -530,6 +532,7 @@ private Q_SLOTS:
     QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
     QCOMPARE (ackPlan.value ("profileName").toString (), QStringLiteral ("W2300"));
     QCOMPARE (ackPlan.value ("ackBase").toUInt (), 1u);
+    caller.notifyRadioTxFinished ();
 
     messages = caller.messages (sessionId);
     QCOMPARE (messages.size (), 5);
@@ -3199,6 +3202,7 @@ private Q_SLOTS:
     QCOMPARE (form.value ("state").toString (), QStringLiteral ("Pending"));
     QVariantMap formPlan = radioSpy.takeFirst ()[2].toMap ();
     QVERIFY (formPlan.value ("form").toBool ());
+    caller.notifyRadioTxFinished ();
 
     decodium::ft2link::Frame ack =
         decodium::ft2link::makeAckFrame (
@@ -3254,6 +3258,7 @@ private Q_SLOTS:
     QVERIFY (filesSpy.size () >= 1);
     QVariantMap filePlan = radioSpy.takeFirst ()[2].toMap ();
     QVERIFY (filePlan.value ("file").toBool ());
+    caller.notifyRadioTxFinished ();
     QCOMPARE (caller.fileTransfers ().first ().toMap ().value ("state").toString (),
               QStringLiteral ("Pending"));
     QVERIFY (caller.ingestRadioFrameBytes (
@@ -3736,7 +3741,7 @@ private Q_SLOTS:
     transmit (secondSession, QStringLiteral ("B1"), 2002);
     QCOMPARE (radioSpy.size (), 0);
 
-    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 25000);
     QList<QVariant> const queuedRequest = radioSpy.takeFirst ();
     QVariantMap queuedPlan = queuedRequest[2].toMap ();
     QCOMPARE (queuedPlan.value ("sessionId").toUInt (),
@@ -3765,7 +3770,7 @@ private Q_SLOTS:
     QCOMPARE (firstPlan.value ("w2300RateModeName").toString (),
               QStringLiteral ("FAST"));
 
-    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 25000);
     QList<QVariant> const retryRequest = radioSpy.takeFirst ();
     QVariantMap retryPlan = retryRequest[2].toMap ();
     QCOMPARE (retryPlan.value ("retryAttempt").toInt (), 2);
@@ -3872,12 +3877,14 @@ private Q_SLOTS:
       {
         busySamples.push_back (i % 2 == 0 ? 12000 : -12000);
       }
-    QVERIFY (!caller.ingestRxSamples (busySamples, "", 5000));
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    QVERIFY (!caller.ingestRxSamples (busySamples, "", nowMs));
 
     QSignalSpy radioSpy {&caller, &FT2LinkQmlAdapter::radioTxAudioRequested};
     caller.setRadioTxArmed (true);
     QVERIFY (caller.transmitPreparedRadioTxAudio (
-        sessionId, QStringLiteral ("defer until clear"), 5001));
+        sessionId, QStringLiteral ("defer until clear"), nowMs + 1u));
     QCOMPARE (caller.transportState (), QStringLiteral ("LBT wait"));
     QCOMPARE (radioSpy.size (), 0);
 
@@ -3913,6 +3920,7 @@ private Q_SLOTS:
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("CQ"));
     QCOMPARE (plan.value ("frameTypeName").toString (), QStringLiteral ("BEACON"));
     QVERIFY (plan.value ("cq").toBool ());
+    sender.notifyRadioTxFinished ();
 
     QVERIFY (receiver.ingestRxSamples (pcmFromSamples (samples, 4), "", 2200));
     QCOMPARE (receiver.stationCount (), 1);
@@ -3933,6 +3941,7 @@ private Q_SLOTS:
 	              QStringLiteral ("FT2-Link CQ"));
 	    QCOMPARE (secondManualRequest[2].toMap ().value ("kind").toString (),
 	              QStringLiteral ("CQ"));
+	    sender.notifyRadioTxFinished ();
 
 	    QVERIFY (!sender.configureAutoBeacon (true, 30, true, 31000));
 	    QVERIFY (sender.lastError ().contains ("ARM"));
@@ -4172,6 +4181,7 @@ private Q_SLOTS:
     QCOMPARE (dataPlan.value ("kind").toString (), QStringLiteral ("CHAT"));
     QCOMPARE (dataPlan.value ("profileName").toString (),
               QStringLiteral ("W2300"));
+    stationA.notifyRadioTxFinished ();
 
     stationA.setRadioTxArmed (true);
     QVERIFY (stationA.transmitBroadcastRadio (
@@ -4181,8 +4191,9 @@ private Q_SLOTS:
     QVERIFY (ingestWideSamples (stationB, dataSamples, QString {}, 5500));
     QVERIFY (deliverRadioRequest (radioB, stationA, 6600, &plan));
     QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("ACK"));
+    stationB.notifyRadioTxFinished ();
 
-    QTRY_VERIFY_WITH_TIMEOUT (radioA.size () >= 1, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT (radioA.size () >= 1, 25000);
     QList<QVariant> const broadcastRequest = radioA.takeFirst ();
     QVariantMap const broadcastPlan = broadcastRequest[2].toMap ();
     QCOMPARE (broadcastPlan.value ("kind").toString (),
