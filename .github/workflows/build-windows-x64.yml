@@ -390,20 +390,39 @@ jobs:
     # Numeric release tags publish the unsigned Windows installer from the
     # build job. SignPath packaging is only attempted for explicit v* tags.
     if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+    outputs:
+      enabled: ${{ steps.signpath-credentials.outputs.enabled }}
+    env:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
 
     steps:
+      - name: Check SignPath credentials
+        id: signpath-credentials
+        shell: bash
+        run: |
+          if [[ -n "${SIGNPATH_API_TOKEN}" && -n "${SIGNPATH_ORGANIZATION_ID}" ]]; then
+            echo "enabled=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "enabled=false" >> "${GITHUB_OUTPUT}"
+            echo "SignPath credentials are not configured; keeping unsigned release asset."
+          fi
+
       - name: Download portable bundle
+        if: steps.signpath-credentials.outputs.enabled == 'true'
         uses: actions/download-artifact@v4
         with:
           name: decodium-windows-x64-portable
           path: unsigned
 
       - name: Repackage for SignPath
+        if: steps.signpath-credentials.outputs.enabled == 'true'
         run: |
           cd unsigned
           zip -r ../decodium-x64.zip .
 
       - name: Upload for SignPath
+        if: steps.signpath-credentials.outputs.enabled == 'true'
         id: upload-for-signing
         uses: actions/upload-artifact@v4
         with:
@@ -411,10 +430,11 @@ jobs:
           path: decodium-x64.zip
 
       - name: Submit signing request
+        if: steps.signpath-credentials.outputs.enabled == 'true'
         uses: signpath/github-action-submit-signing-request@v1
         with:
-          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
+          organization-id: '${{ env.SIGNPATH_ORGANIZATION_ID }}'
           project-slug: 'decodium'
           signing-policy-slug: >-
             ${{ startsWith(github.ref, 'refs/tags/v')
@@ -425,6 +445,7 @@ jobs:
           output-artifact-directory: 'signed'
 
       - name: Upload signed bundle
+        if: steps.signpath-credentials.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: decodium-signed-x64
@@ -435,7 +456,7 @@ jobs:
   package-signed:
     needs: sign
     runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && needs.sign.outputs.enabled == 'true'
 
     steps:
       - name: Checkout

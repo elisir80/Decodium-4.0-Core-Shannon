@@ -5084,6 +5084,7 @@ private Q_SLOTS:
     QVERIFY (dir.isValid ());
 
     qputenv ("DECODIUM_FT2LINK_W2300_SEARCH_THREADS", "8");
+    qputenv ("DECODIUM_FT2LINK_W2300_MAX_DECODE_MS", "2500");
 
     FT2LinkQmlAdapter adapter;
     QVariantMap options;

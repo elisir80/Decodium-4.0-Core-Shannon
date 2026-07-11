@@ -86,6 +86,16 @@ decodium::ft2link::W2300WaveformConfig liveW2300RxConfig ()
   config.sampleRate = kLiveWideSampleRate;
   config.rateMode = W2300RateMode::Fast;
   config.maxDecodeMillis = 900;
+  if (char const* env = std::getenv ("DECODIUM_FT2LINK_W2300_MAX_DECODE_MS"))
+    {
+      char* end = nullptr;
+      long const requested = std::strtol (env, &end, 10);
+      if (end != env)
+        {
+          config.maxDecodeMillis = static_cast<int> (
+              std::max<long> (250, std::min<long> (5000, requested)));
+        }
+    }
   return config;
 }
 
