@@ -4360,6 +4360,51 @@ RemoteCommandServer::CommandResult RemoteCommandServer::processCommandObject(QJs
       return result;
     }
 
+  if (commandType == QStringLiteral("send_tx"))
+    {
+      int slot = 6;
+      if (object.contains(QStringLiteral("slot")))
+        {
+          bool ok = false;
+          int const requestedSlot = object.value(QStringLiteral("slot")).toVariant().toInt(&ok);
+          if (!ok || requestedSlot < 1 || requestedSlot > 6)
+            {
+              result.payload = makeRejectPayload(commandId, QStringLiteral("rejected_invalid_request"), QStringLiteral("slot must be 1..6"));
+              return result;
+            }
+          slot = requestedSlot;
+        }
+      seenCommandIds_.insert(commandId, nowUtcMs);
+      Q_EMIT sendTxRequested(commandId, slot);
+      result.accepted = true;
+      result.payload = QJsonObject {
+        {"event", QStringLiteral("command_ack")},
+        {"command_id", commandId},
+        {"type", QStringLiteral("send_tx")},
+        {"status", QStringLiteral("accepted_immediate")},
+        {"slot", slot},
+        {"server_now_ms", nowUtcMs},
+      };
+      return result;
+    }
+
+  if (commandType == QStringLiteral("stop_tx")
+      || commandType == QStringLiteral("halt")
+      || commandType == QStringLiteral("abort_tx"))
+    {
+      seenCommandIds_.insert(commandId, nowUtcMs);
+      Q_EMIT stopTxRequested(commandId);
+      result.accepted = true;
+      result.payload = QJsonObject {
+        {"event", QStringLiteral("command_ack")},
+        {"command_id", commandId},
+        {"type", commandType},
+        {"status", QStringLiteral("accepted_immediate")},
+        {"server_now_ms", nowUtcMs},
+      };
+      return result;
+    }
+
   if (commandType == QStringLiteral("set_auto_cq"))
     {
       if (!object.contains(QStringLiteral("enabled")))

@@ -926,6 +926,7 @@ ApplicationWindow {
     // TxPanel detached and minimized states
     property bool txPanelDetached: false
     property bool txPanelMinimized: false
+    property bool ft2LinkPanelDetached: false
     property bool liveMapDetached: false
     property bool liveMapMinimized: false
     // 1.0.275 (fork-only) — DX Cluster floating window state
@@ -1019,6 +1020,7 @@ ApplicationWindow {
             }
             applyFt2LinkModeLayout()
         } else {
+            dockFt2LinkPanel()
             restoreFt2LinkModeLayout()
         }
     }
@@ -1072,6 +1074,27 @@ ApplicationWindow {
                 && typeof rxFreqFloatingWindow !== "undefined" && rxFreqFloatingWindow)
             rxFreqFloatingWindow.show()
         Qt.callLater(restoreDecodePanelWidths)
+    }
+
+    function popFt2LinkPanel() {
+        if (!ft2LinkModeActive)
+            return
+        ft2LinkPanelDetached = true
+        Qt.callLater(function() {
+            if (typeof ft2LinkFloatingWindow !== "undefined" && ft2LinkFloatingWindow)
+                ft2LinkFloatingWindow.requestActivate()
+        })
+    }
+
+    function dockFt2LinkPanel() {
+        ft2LinkPanelDetached = false
+    }
+
+    function toggleFt2LinkPanelDock() {
+        if (ft2LinkPanelDetached)
+            dockFt2LinkPanel()
+        else
+            popFt2LinkPanel()
     }
 
     function requestFt2LinkAccess() {
@@ -2534,6 +2557,7 @@ ApplicationWindow {
             { id: "db",   vis: true },
             { id: "dt",   vis: true },
             { id: "freq", vis: true },
+            { id: "drift", vis: true },
             { id: "msg",  vis: true },
             { id: "dist", vis: true },
             { id: "dxcc", vis: true },
@@ -2541,7 +2565,7 @@ ApplicationWindow {
         ]
     }
     function fsDefaultWidths() {
-        return { utc: 86, db: 38, dt: 48, freq: 45, msg: 140, dist: 58, dxcc: 200, az: 52 }
+        return { utc: 86, db: 38, dt: 48, freq: 45, drift: 42, msg: 140, dist: 58, dxcc: 200, az: 52 }
     }
     // Metadati statici per colonna (label, allineamento, flessibile, nascondibile, min px).
     function fsColMeta(id) {
@@ -2550,6 +2574,7 @@ ApplicationWindow {
         case "db":   return { label: "dB",      align: "right", fill: false, canHide: true,  minW: 24 }
         case "dt":   return { label: "DT",      align: "right", fill: false, canHide: true,  minW: 28 }
         case "freq": return { label: "Freq",    align: "right", fill: false, canHide: true,  minW: 30 }
+        case "drift": return { label: "Drift",  align: "right", fill: false, canHide: true,  minW: 34 }
         case "msg":  return { label: "Message", align: "left",  fill: true,  canHide: false, minW: 72 }
         case "dist": return { label: "Dist",    align: "right", fill: false, canHide: true,  minW: 36 }
         case "dxcc": return { label: "DXCC",    align: "right", fill: false, canHide: true,  minW: 90 }
@@ -2566,6 +2591,7 @@ ApplicationWindow {
         for (var i = 0; i < arr.length; ++i) {
             var c = arr[i]
             if (!c || !c.vis) continue
+            if (c.id === "drift" && (!bridge || bridge.mode !== "WSPR")) continue
             if ((c.id === "dxcc" || c.id === "az") && !mainWindow.showDxccInfo) continue
             out.push(c)
         }
@@ -2622,6 +2648,19 @@ ApplicationWindow {
                     }
                     for (var k = 0; k < def.length; ++k)
                         if (!seen[def[k].id]) merged.push(def[k])
+                    if (!seen["drift"]) {
+                        var driftAt = -1
+                        var freqAt = -1
+                        for (var mi = 0; mi < merged.length; ++mi) {
+                            if (merged[mi].id === "drift") driftAt = mi
+                            if (merged[mi].id === "freq") freqAt = mi
+                        }
+                        if (driftAt >= 0 && freqAt >= 0 && driftAt !== freqAt + 1) {
+                            var driftCol = merged.splice(driftAt, 1)[0]
+                            if (driftAt < freqAt) freqAt--
+                            merged.splice(freqAt + 1, 0, driftCol)
+                        }
+                    }
                     if (merged.length) order = merged
                 }
             }
@@ -2731,6 +2770,7 @@ ApplicationWindow {
         case "db":   return entry.db || ""
         case "dt":   return entry.dt || ""
         case "freq": return entry.freq || ""
+        case "drift": return entry.mode === "WSPR" ? (entry.drift || "0") : ""
         case "msg":  return entry.displayMessage || entry.message || ""
         case "dist": return decodePanel.distanceText(entry)
         case "dxcc": return dxccDisplayText(entry)
@@ -2743,6 +2783,7 @@ ApplicationWindow {
         switch (id) {
         case "msg":  return fullSpectrumTextColor(entry)
         case "freq": return boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan)
+        case "drift": return boostedDecodeTextColor(textSecondary)
         case "db":   return boostedDecodeTextColor(entry.snrColor || (entry.isTx ? "#f1c40f" : textSecondary))
         case "dxcc": return boostedDecodeTextColor((entry.dxCountry || entry.usState) && decodeColorCategoryEnabled("colorDXEntity") ? effectiveDecodeColor("colorDXEntity") : textSecondary)
         case "az":   return boostedDecodeTextColor(secondaryCyan)
@@ -7311,26 +7352,82 @@ ApplicationWindow {
                             SplitView.preferredWidth: mainWindow.ft2LinkModeActive ? 820 : 0
                             SplitView.minimumWidth: mainWindow.ft2LinkModeActive ? 560 : 0
 
-                            Loader {
-                                id: ft2LinkInlineLoader
-                                anchors.fill: parent
-                                active: mainWindow.ft2LinkModeActive
-                                source: "../panels/FT2LinkPanel.qml"
-                                onLoaded: {
-                                    if (item)
-                                        item.dragTarget = null
-                                }
-                            }
+	                            Loader {
+	                                id: ft2LinkInlineLoader
+	                                anchors.fill: parent
+	                                active: mainWindow.ft2LinkModeActive && !mainWindow.ft2LinkPanelDetached
+	                                source: "../panels/FT2LinkPanel.qml"
+	                                onLoaded: {
+	                                    if (item) {
+	                                        item.dragTarget = null
+	                                        item.toolTabsExternal = true
+	                                        item.poppedOut = false
+	                                    }
+	                                }
+	                            }
 
-                            Connections {
-                                target: ft2LinkInlineLoader.item
-                                ignoreUnknownSignals: true
-                                function onCloseRequested() {
-                                    if (bridge)
-                                        bridge.mode = "FT2"
+                                Rectangle {
+                                    anchors.fill: parent
+                                    visible: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
+                                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.55)
+                                    radius: 8
+                                    border.color: glassBorder
+                                    border.width: 1
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: 10
+
+                                        Text {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: "FT2-Link popped out"
+                                            font.pixelSize: 13
+                                            font.bold: true
+                                            color: textSecondary
+                                        }
+
+                                        Rectangle {
+                                            width: 54
+                                            height: 24
+                                            radius: 4
+                                            color: ft2InlineDockMA.containsMouse
+                                                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.30)
+                                                   : "transparent"
+                                            border.color: ft2InlineDockMA.containsMouse
+                                                          ? secondaryCyan
+                                                          : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.45)
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "Dock"
+                                                font.pixelSize: 10
+                                                font.bold: true
+                                                color: ft2InlineDockMA.containsMouse ? secondaryCyan : textPrimary
+                                            }
+
+                                            MouseArea {
+                                                id: ft2InlineDockMA
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: mainWindow.dockFt2LinkPanel()
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                        }
+
+	                            Connections {
+	                                target: ft2LinkInlineLoader.item
+	                                ignoreUnknownSignals: true
+	                                function onCloseRequested() {
+	                                    mainWindow.dockFt2LinkPanel()
+	                                }
+	                                function onPopDockRequested() {
+	                                    mainWindow.popFt2LinkPanel()
+	                                }
+	                            }
+	                        }
 
 	                        // ========== SLOT 0 (default: LEFT Band Activity / Full Spectrum) ==========
 	                        Item {
@@ -7834,7 +7931,7 @@ ApplicationWindow {
                                         // + 9 Text con highlight checks) si istanziavano ~115 row out-of-
                                         // viewport, ognuna ricalcolata su decodeListVersion++ -> picco
                                         // CPU che contribuiva al "effetto molla" su scrolling tail-follow.
-                                        cacheBuffer: 600
+                                        cacheBuffer: 360
                                         reuseItems: true
                                         interactive: true
                                         verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
@@ -8492,7 +8589,7 @@ NumberAnimation {
                                         anchors.margins: 2
 	                                        clip: true
 	                                        spacing: 1
-	                                        cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
+                                        cacheBuffer: 360  // 1.0.478 — meno delegate offscreen durante pile-up FT8/4/2
 	                                        reuseItems: true
 	                                        interactive: true
 	                                        property bool followTail: true
@@ -8588,11 +8685,16 @@ NumberAnimation {
 	                                            }
 	                                        }
                                         onCountChanged: {
+                                            if (!followTail) {
+                                                rxFrequencyList.pendingNewDecodes++
+                                                return
+                                            }
                                             forceTailFollow()
                                         }
 
                                         property int _ver: decodePanel.rxDecodeListVersion
                                         on_VerChanged: {
+                                            if (!followTail) return
                                             forceTailFollow()
                                         }
                                         model: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes
@@ -9171,15 +9273,16 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                         startTxHeight = txPanelContainer.height
                     }
 
-                    onPositionChanged: {
-                        if (pressed) {
-                            var dy = startMouseY - mouseY
-                            var newHeight = startTxHeight + dy
-                            if (newHeight >= 100 && newHeight <= 350) {
-                                txPanelContainer.height = newHeight
-                            }
-                        }
-                    }
+	                    onPositionChanged: {
+	                        if (pressed) {
+	                            var dy = startMouseY - mouseY
+	                            var newHeight = startTxHeight + dy
+	                            if (newHeight >= txPanelContainer.minHeight
+	                                    && newHeight <= txPanelContainer.maxHeight) {
+	                                txPanelContainer.height = newHeight
+	                            }
+	                        }
+	                    }
                 }
             }
 
@@ -9188,15 +9291,18 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 
             // TX Panel Container (resizable at bottom) - delegates to HvTxW via bridge
             Rectangle {
-                id: txPanelContainer
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: 160
-                color: "transparent"
+	                id: txPanelContainer
+	                anchors.left: parent.left
+	                anchors.right: parent.right
+	                anchors.bottom: parent.bottom
+	                height: mainWindow.ft2LinkModeActive && !txPanelDetached
+	                        ? Math.max(minHeight, Math.min(maxHeight, txPanelAutoHeight))
+	                        : 160
+	                color: "transparent"
 
-                property int minHeight: 100
-                property int maxHeight: 350
+	                readonly property int txPanelAutoHeight: Math.ceil((txPanelComponent ? txPanelComponent.implicitHeight : 92) + 2)
+	                property int minHeight: mainWindow.ft2LinkModeActive ? 72 : 100
+	                property int maxHeight: 350
 
                 // Placeholder when detached - magnetic dock zone.
                 // Stadio 2: mostrato solo quando la TX area (slot 3) ospita davvero il TX
@@ -9274,9 +9380,12 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 
                         // Actual TxPanel content
                         TxPanel {
-                            id: txPanelComponent
-                            anchors.fill: parent
-                            engine: bridge
+	                            id: txPanelComponent
+	                            anchors.fill: parent
+	                            engine: bridge
+	                            ft2LinkToolPanel: mainWindow.ft2LinkPanelDetached
+	                                              ? ft2LinkFloatingLoader.item
+	                                              : ft2LinkInlineLoader.item
                             showAsyncIcon: mainWindow.asyncIconVisible
                             visible: !txPanelDetached
                             onMamWindowRequested: mamWindow.open()
@@ -12701,7 +12810,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                         clip: true
                         spacing: 1
                         model: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : decodePanel.allDecodes
-                        cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
+                        cacheBuffer: 360  // 1.0.478 — meno delegate offscreen durante pile-up FT8/4/2
                         reuseItems: true
                         interactive: true
                         verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
@@ -12748,18 +12857,10 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         if (!period1FloatingList)
             return
         var targetY = period1FloatingList.tailContentY()
-        var distance = Math.abs(period1FloatingList.contentY - targetY)
         period1FloatingTailAnimation.stop()
         period1FloatingList.tailFollowPending = true
-        if (distance < 1 || distance > Math.max(12000, period1FloatingList.height * 18)) {
-            period1FloatingList.contentY = targetY
-            period1FloatingList.finishTailFollow()
-            return
-        }
-        period1FloatingTailAnimation.from = period1FloatingList.contentY
-        period1FloatingTailAnimation.to = targetY
-        period1FloatingTailAnimation.duration = Math.max(180, Math.min(620, 130 + distance * 0.24))
-        period1FloatingTailAnimation.start()
+        period1FloatingList.contentY = targetY
+        period1FloatingList.finishTailFollow()
     })
 }
 NumberAnimation {
@@ -13315,7 +13416,7 @@ NumberAnimation {
                         anchors.margins: 4
 	                        clip: true
 	                        spacing: 1
-	                        cacheBuffer: 600  // 1.0.228 — 3000 era eccessivo per delegate complessi
+                        cacheBuffer: 360  // 1.0.478 — meno delegate offscreen durante pile-up FT8/4/2
 	                        reuseItems: true
 	                        interactive: true
 	                        property bool followTail: true
@@ -13358,18 +13459,10 @@ NumberAnimation {
         if (!rxFrequencyFloatingList)
             return
         var targetY = rxFrequencyFloatingList.tailContentY()
-        var distance = Math.abs(rxFrequencyFloatingList.contentY - targetY)
         rxFrequencyFloatingTailAnimation.stop()
         rxFrequencyFloatingList.tailFollowPending = true
-        if (distance < 1 || distance > Math.max(12000, rxFrequencyFloatingList.height * 18)) {
-            rxFrequencyFloatingList.contentY = targetY
-            rxFrequencyFloatingList.finishTailFollow()
-            return
-        }
-        rxFrequencyFloatingTailAnimation.from = rxFrequencyFloatingList.contentY
-        rxFrequencyFloatingTailAnimation.to = targetY
-        rxFrequencyFloatingTailAnimation.duration = Math.max(180, Math.min(620, 130 + distance * 0.24))
-        rxFrequencyFloatingTailAnimation.start()
+        rxFrequencyFloatingList.contentY = targetY
+        rxFrequencyFloatingList.finishTailFollow()
     })
 }
 NumberAnimation {
@@ -13412,10 +13505,15 @@ NumberAnimation {
 	                            }
 	                        }
 	                        onCountChanged: {
-                            forceTailFollow()
+	                            if (!followTail) {
+	                                rxFrequencyFloatingList.pendingNewDecodes++
+	                                return
+	                            }
+	                            forceTailFollow()
                         }
                         property int _ver: decodePanel.rxDecodeListVersion
-	                        on_VerChanged: {
+		                        on_VerChanged: {
+	                            if (!followTail) return
                             forceTailFollow()
                         }
                         model: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes
@@ -13818,7 +13916,10 @@ NumberAnimation {
                 TxPanel {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    engine: bridge
+	                    engine: bridge
+	                    ft2LinkToolPanel: mainWindow.ft2LinkPanelDetached
+	                                      ? ft2LinkFloatingLoader.item
+	                                      : ft2LinkInlineLoader.item
                     showAsyncIcon: mainWindow.asyncIconVisible
                     handleLogPrompt: false
                     onMamWindowRequested: mamWindow.open()
@@ -13826,10 +13927,55 @@ NumberAnimation {
                     onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
                 }
             }
-        }
-    }
+	        }
+	    }
 
-    // ===== GAP 3 — Pannelli floating draggabili =====
+	    // ========== DETACHABLE FT2-LINK PANEL WINDOW ==========
+	    Window {
+	        id: ft2LinkFloatingWindow
+	        width: 1180
+	        height: 620
+	        minimumWidth: 760
+	        minimumHeight: 360
+	        visible: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
+	        title: "FT2-Link - Decodium"
+	        color: bgDeep
+
+	        x: mainWindow.x + 80
+	        y: mainWindow.y + 120
+
+	        onClosing: function(close) {
+	            mainWindow.dockFt2LinkPanel()
+	            close.accepted = true
+	        }
+
+	        Loader {
+	            id: ft2LinkFloatingLoader
+	            anchors.fill: parent
+	            active: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
+	            source: "../panels/FT2LinkPanel.qml"
+	            onLoaded: {
+	                if (item) {
+	                    item.dragTarget = null
+	                    item.toolTabsExternal = true
+	                    item.poppedOut = true
+	                }
+	            }
+	        }
+
+	        Connections {
+	            target: ft2LinkFloatingLoader.item
+	            ignoreUnknownSignals: true
+	            function onCloseRequested() {
+	                mainWindow.dockFt2LinkPanel()
+	            }
+	            function onPopDockRequested() {
+	                mainWindow.dockFt2LinkPanel()
+	            }
+	        }
+	    }
+
+	    // ===== GAP 3 — Pannelli floating draggabili =====
 
     // TimeSyncPanel — sotto il blocco Setup/REC/WAV, togglabile da menu
     Item {

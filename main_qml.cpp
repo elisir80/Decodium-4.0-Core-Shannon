@@ -1238,6 +1238,10 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-audio-output",
         QStringLiteral("Runtime lab override for the audio output device."),
         QStringLiteral("device"));
+    QCommandLineOption const labTxOutputLevelOption(
+        QStringList {} << "lab-tx-output-level" << "lab-tx-level",
+        QStringLiteral("Runtime lab override for TX output attenuation level 0..450; 0=max output, 450=45 dB attenuation."),
+        QStringLiteral("level"));
     QCommandLineOption const labModeOption(
         QStringList {} << "lab-mode",
         QStringLiteral("Runtime lab override for the application mode."),
@@ -1366,6 +1370,28 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-path-response-ms",
         QStringLiteral("Delay before sending an armed FT2-Link path finder response."),
         QStringLiteral("ms"));
+    QCommandLineOption const labDigiEnableOption(
+        QStringList {} << "lab-digi-enable",
+        QStringLiteral("Enable FT2-Link digipeater forwarding in a runtime lab session."));
+    QCommandLineOption const labDigiMsOption(
+        QStringList {} << "lab-digi-ms",
+        QStringLiteral("Delay before sending an armed FT2-Link digipeater frame."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labDigiTargetOption(
+        QStringList {} << "lab-digi-target",
+        QStringLiteral("Target callsign for --lab-digi-ms."),
+        QStringLiteral("callsign"),
+        QStringLiteral("ALL"));
+    QCommandLineOption const labDigiBodyOption(
+        QStringList {} << "lab-digi-body",
+        QStringLiteral("Payload text for --lab-digi-ms."),
+        QStringLiteral("text"),
+        QStringLiteral("D4 LAB DIGI"));
+    QCommandLineOption const labDigiHopsOption(
+        QStringList {} << "lab-digi-hops",
+        QStringLiteral("Maximum hop count for --lab-digi-ms and --lab-digi-enable."),
+        QStringLiteral("hops"),
+        QStringLiteral("2"));
     QCommandLineOption const labProfileOption(
         QStringList {} << "lab-profile",
         QStringLiteral("Preferred FT2-Link lab profile: W500 or W2300."),
@@ -1446,6 +1472,40 @@ int main(int argc, char* argv[])
         QStringLiteral("File text used by --lab-file-ms."),
         QStringLiteral("text"),
         QStringLiteral("D4 LAB FILE BODY"));
+    QCommandLineOption const labBbsServerEnableOption(
+        QStringList {} << "lab-bbs-server-enable",
+        QStringLiteral("Enable the FT2-Link BBS file server in a runtime lab session."));
+    QCommandLineOption const labBbsPublishNameOption(
+        QStringList {} << "lab-bbs-publish-name",
+        QStringLiteral("File name published by --lab-bbs-server-enable."),
+        QStringLiteral("name"),
+        QStringLiteral("bbs-lab.txt"));
+    QCommandLineOption const labBbsPublishTextOption(
+        QStringList {} << "lab-bbs-publish-text",
+        QStringLiteral("Text body published by --lab-bbs-server-enable."),
+        QStringLiteral("text"),
+        QStringLiteral("D4 LAB BBS FILE BODY"));
+    QCommandLineOption const labBbsListMsOption(
+        QStringList {} << "lab-bbs-list-ms",
+        QStringLiteral("Delay before requesting a remote FT2-Link BBS file list."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBbsGetMsOption(
+        QStringList {} << "lab-bbs-get-ms",
+        QStringLiteral("Delay before requesting a remote FT2-Link BBS file."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBbsGetNameOption(
+        QStringList {} << "lab-bbs-get-name",
+        QStringLiteral("File name requested by --lab-bbs-get-ms."),
+        QStringLiteral("name"),
+        QStringLiteral("bbs-lab.txt"));
+    QCommandLineOption const labBbsServerListMsOption(
+        QStringList {} << "lab-bbs-server-list-ms",
+        QStringLiteral("Delay before transmitting the local FT2-Link BBS file list."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labBbsServerFileMsOption(
+        QStringList {} << "lab-bbs-server-file-ms",
+        QStringLiteral("Delay before transmitting a local FT2-Link BBS server file."),
+        QStringLiteral("ms"));
     QCommandLineOption const labBulletinMsOption(
         QStringList {} << "lab-bulletin-ms",
         QStringLiteral("Delay before sending FT2-Link lab BBS bulletin traffic."),
@@ -1523,6 +1583,7 @@ int main(int argc, char* argv[])
     parser.addOption(labAudioDeviceOption);
     parser.addOption(labAudioInputOption);
     parser.addOption(labAudioOutputOption);
+    parser.addOption(labTxOutputLevelOption);
     parser.addOption(labModeOption);
     parser.addOption(labDialHzOption);
     parser.addOption(labNoCatOption);
@@ -1554,6 +1615,11 @@ int main(int argc, char* argv[])
     parser.addOption(labPathMsOption);
     parser.addOption(labPathTargetOption);
     parser.addOption(labPathResponseMsOption);
+    parser.addOption(labDigiEnableOption);
+    parser.addOption(labDigiMsOption);
+    parser.addOption(labDigiTargetOption);
+    parser.addOption(labDigiBodyOption);
+    parser.addOption(labDigiHopsOption);
     parser.addOption(labProfileOption);
     parser.addOption(labConnectMsOption);
     parser.addOption(labConnectCallOption);
@@ -1572,6 +1638,14 @@ int main(int argc, char* argv[])
     parser.addOption(labFileMsOption);
     parser.addOption(labFileNameOption);
     parser.addOption(labFileTextOption);
+    parser.addOption(labBbsServerEnableOption);
+    parser.addOption(labBbsPublishNameOption);
+    parser.addOption(labBbsPublishTextOption);
+    parser.addOption(labBbsListMsOption);
+    parser.addOption(labBbsGetMsOption);
+    parser.addOption(labBbsGetNameOption);
+    parser.addOption(labBbsServerListMsOption);
+    parser.addOption(labBbsServerFileMsOption);
     parser.addOption(labBulletinMsOption);
     parser.addOption(labBulletinGroupOption);
     parser.addOption(labBulletinTitleOption);
@@ -1639,6 +1713,11 @@ int main(int argc, char* argv[])
     QString const labAudioDevice = parser.value(labAudioDeviceOption).trimmed();
     QString const labAudioInput = parser.value(labAudioInputOption).trimmed();
     QString const labAudioOutput = parser.value(labAudioOutputOption).trimmed();
+    bool const labTxOutputLevelSpecified = parser.isSet(labTxOutputLevelOption);
+    bool labTxOutputLevelOk = false;
+    double const labTxOutputLevel = qBound(0.0,
+                                           parser.value(labTxOutputLevelOption).trimmed().toDouble(&labTxOutputLevelOk),
+                                           450.0);
     QString const labMode = parser.value(labModeOption).trimmed();
     qint64 const labDialHz = parser.value(labDialHzOption).trimmed().toLongLong();
     QString const effectiveLabInput = labAudioInput.isEmpty() ? labAudioDevice : labAudioInput;
@@ -1657,6 +1736,11 @@ int main(int argc, char* argv[])
     }
     if (!effectiveLabOutput.isEmpty()) {
         app.setProperty("decodiumLabAudioOutput", effectiveLabOutput);
+    }
+    if (labTxOutputLevelSpecified && labTxOutputLevelOk) {
+        app.setProperty("decodiumLabTxOutputLevel", labTxOutputLevel);
+    } else if (labTxOutputLevelSpecified) {
+        qWarning() << "[LAB] invalid --lab-tx-output-level ignored";
     }
     bool const labNoCat = parser.isSet(labNoCatOption);
     if (labNoCat) {
@@ -1685,11 +1769,19 @@ int main(int argc, char* argv[])
     int const labReapplyMs = parseLabDelayMs(labReapplyMsOption, 6500);
     int const labMonitorMs = parseLabDelayMs(labMonitorMsOption, 8000);
     int const labBcastMs = parseLabDelayMs(labBcastMsOption, 14000);
+    int const labDigiMs = parseLabDelayMs(labDigiMsOption, 14000);
     int const labQuitMs = parseLabDelayMs(labQuitMsOption, 0);
     QString labBcastText = parser.value(labBcastTextOption).trimmed();
     if (labBcastText.isEmpty()) {
         labBcastText = QStringLiteral("D4 LAB BCAST");
     }
+    QString const labDigiTarget = parser.value(labDigiTargetOption).trimmed().toUpper();
+    QString const labDigiBody = parser.value(labDigiBodyOption).trimmed().isEmpty()
+        ? QStringLiteral("D4 LAB DIGI")
+        : parser.value(labDigiBodyOption).trimmed();
+    bool labDigiHopsOk = false;
+    int const labDigiHops = qBound(
+        0, parser.value(labDigiHopsOption).trimmed().toInt(&labDigiHopsOk), 9);
     int const labBeaconMs = parseLabDelayMs(labBeaconMsOption, 0);
     bool const labBeaconCq = parser.isSet(labBeaconCqOption);
     int const labCqSlotMs = parseLabDelayMs(labCqSlotMsOption, 0);
@@ -1781,6 +1873,25 @@ int main(int argc, char* argv[])
     if (labFileText.isEmpty()) {
         labFileText = QStringLiteral("D4 LAB FILE BODY");
     }
+    bool const labBbsServerEnable = parser.isSet(labBbsServerEnableOption);
+    QString labBbsPublishName = parser.value(labBbsPublishNameOption).trimmed();
+    if (labBbsPublishName.isEmpty()) {
+        labBbsPublishName = QStringLiteral("bbs-lab.txt");
+    }
+    QString labBbsPublishText = parser.value(labBbsPublishTextOption);
+    if (labBbsPublishText.trimmed().isEmpty()) {
+        labBbsPublishText = QStringLiteral("D4 LAB BBS FILE BODY");
+    }
+    int const labBbsListMs = parseLabDelayMs(labBbsListMsOption, 0);
+    int const labBbsGetMs = parseLabDelayMs(labBbsGetMsOption, 0);
+    QString labBbsGetName = parser.value(labBbsGetNameOption).trimmed();
+    if (labBbsGetName.isEmpty()) {
+        labBbsGetName = labBbsPublishName;
+    }
+    int const labBbsServerListMs =
+        parseLabDelayMs(labBbsServerListMsOption, 0);
+    int const labBbsServerFileMs =
+        parseLabDelayMs(labBbsServerFileMsOption, 0);
     int const labBulletinMs = parseLabDelayMs(labBulletinMsOption, 0);
     QString labBulletinGroup = parser.value(labBulletinGroupOption).trimmed().toUpper();
     if (labBulletinGroup.isEmpty()) {
@@ -1851,6 +1962,7 @@ int main(int argc, char* argv[])
     L("bridge constructing");
     DecodiumBridge bridge;
     FT2LinkQmlAdapter ft2Link;
+    auto labDialOverrideActive = std::make_shared<bool>(labDialHz > 0);
     auto applyLabRuntimeOverrides =
         [&bridge,
          &ft2Link,
@@ -1858,8 +1970,12 @@ int main(int argc, char* argv[])
          labGrid,
          effectiveLabInput,
          effectiveLabOutput,
+         labTxOutputLevelSpecified,
+         labTxOutputLevelOk,
+         labTxOutputLevel,
          labMode,
          labDialHz,
+         labDialOverrideActive,
          labDxCall,
          labDxGrid,
          labTxPeriodSpecified,
@@ -1885,6 +2001,10 @@ int main(int argc, char* argv[])
                 bridge.setAudioOutputDevice(effectiveLabOutput);
                 active = true;
             }
+            if (labTxOutputLevelSpecified && labTxOutputLevelOk) {
+                bridge.setTxOutputLevel(labTxOutputLevel);
+                active = true;
+            }
             if (!labMode.isEmpty()) {
                 if (labMode.compare(QStringLiteral("FT2-Link"), Qt::CaseInsensitive) == 0
                     && !bridge.ft2LinkAccessUnlocked()) {
@@ -1899,7 +2019,8 @@ int main(int argc, char* argv[])
                 bridge.setMode(labMode);
                 active = true;
             }
-            if (labDialHz > 0) {
+            if (labDialHz > 0 && labDialOverrideActive
+                && *labDialOverrideActive) {
                 bridge.setFrequency(static_cast<double>(labDialHz));
                 active = true;
             }
@@ -1941,8 +2062,14 @@ int main(int argc, char* argv[])
                     << "grid=" << (labGrid.isEmpty() ? QStringLiteral("<settings>") : labGrid)
                     << "audioIn=" << (effectiveLabInput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabInput)
                     << "audioOut=" << (effectiveLabOutput.isEmpty() ? QStringLiteral("<settings>") : effectiveLabOutput)
+                    << "txOutputLevel=" << (labTxOutputLevelSpecified && labTxOutputLevelOk
+                                            ? QString::number(labTxOutputLevel, 'f', 1)
+                                            : QStringLiteral("<settings>"))
                     << "mode=" << (labMode.isEmpty() ? QStringLiteral("<settings>") : labMode)
-                    << "dialHz=" << (labDialHz > 0 ? QString::number(labDialHz) : QStringLiteral("<settings>"))
+                    << "dialHz=" << (labDialHz > 0
+                                      ? QString::number(labDialHz)
+                                      : QStringLiteral("<settings>"))
+                    << "dialReapply=" << (labDialOverrideActive && *labDialOverrideActive ? 1 : 0)
                     << "dxCall=" << (labDxCall.isEmpty() ? QStringLiteral("<settings>") : labDxCall)
                     << "dxGrid=" << (labDxGrid.isEmpty() ? QStringLiteral("<settings>") : labDxGrid)
                     << "txPeriod=" << (labTxPeriodSpecified ? QString::number(labTxPeriod) : QStringLiteral("<settings>"))
@@ -2287,6 +2414,46 @@ int main(int argc, char* argv[])
                                    << "lastError=" << ft2Link.lastError();
                            });
     }
+    if (parser.isSet(labDigiEnableOption)) {
+        QTimer::singleShot(qMax(0, labReapplyMs + 500),
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labDigiHops]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-digi-enable"));
+                               QVariantMap const result = ft2Link.configureDigipeater(
+                                   true, labDigiHops);
+                               qInfo().noquote()
+                                   << "[LAB] digipeater enabled"
+                                   << "state=" << QJsonDocument::fromVariant(result).toJson(
+                                          QJsonDocument::Compact);
+                           });
+    }
+    if (parser.isSet(labDigiMsOption)) {
+        QTimer::singleShot(labDigiMs,
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labDigiTarget,
+                            labDigiBody,
+                            labDigiHops]() mutable {
+                               applyLabRuntimeOverrides(QStringLiteral("pre-digi"));
+                               ft2Link.setRadioTxArmed(true);
+                               bool const ok = ft2Link.transmitDigipeaterRadio(
+                                   labDigiTarget,
+                                   labDigiBody,
+                                   labDigiHops,
+                                   static_cast<quint64>(
+                                       QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] auto DIGI requested"
+                                   << "ok=" << (ok ? 1 : 0)
+                                   << "target=" << labDigiTarget
+                                   << "hops=" << labDigiHops
+                                   << "body=" << labDigiBody
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
     if (parser.isSet(labBcastMsOption)) {
         QTimer::singleShot(labBcastMs, &ft2Link, [&ft2Link, applyLabRuntimeOverrides, labBcastText]() mutable {
             applyLabRuntimeOverrides(QStringLiteral("pre-bcast"));
@@ -2388,6 +2555,72 @@ int main(int argc, char* argv[])
                 (*attempt)(0);
             });
         };
+    if (labBbsServerEnable) {
+        QTimer::singleShot(qMax(0, labReapplyMs + 900),
+                           &ft2Link,
+                           [&ft2Link,
+                            applyLabRuntimeOverrides,
+                            labBbsPublishName,
+                            labBbsPublishText]() mutable {
+                               applyLabRuntimeOverrides(
+                                   QStringLiteral("pre-bbs-server"));
+                               QVariantMap const enabled =
+                                   ft2Link.configureBbsFileServer(true);
+                               QVariantMap const published =
+                                   ft2Link.publishBbsSharedFileText(
+                                       labBbsPublishName,
+                                       labBbsPublishText,
+                                       static_cast<quint64>(
+                                           QDateTime::currentMSecsSinceEpoch()));
+                               qInfo().noquote()
+                                   << "[LAB] BBS server configured"
+                                   << "enabled="
+                                   << (enabled.value(QStringLiteral("enabled")).toBool()
+                                       ? 1
+                                       : 0)
+                                   << "file=" << labBbsPublishName
+                                   << "ok="
+                                   << (published.value(QStringLiteral("ok")).toBool()
+                                       ? 1
+                                       : 0)
+                                   << "lastError=" << ft2Link.lastError();
+                           });
+    }
+    if (parser.isSet(labBbsListMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labBbsListMs,
+            QStringLiteral("BBS_LIST_REQ"),
+            [&ft2Link](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.requestBbsFileListRadio(sessionId, nowMs);
+            });
+    }
+    if (parser.isSet(labBbsGetMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labBbsGetMs,
+            QStringLiteral("BBS_FILE_REQ"),
+            [&ft2Link, labBbsGetName](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.requestBbsFileRadio(
+                    sessionId, labBbsGetName, nowMs);
+            });
+    }
+    if (parser.isSet(labBbsServerListMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labBbsServerListMs,
+            QStringLiteral("BBS_LIST_TX"),
+            [&ft2Link](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.transmitBbsSharedFileListRadio(
+                    sessionId, nowMs);
+            });
+    }
+    if (parser.isSet(labBbsServerFileMsOption)) {
+        scheduleLabConnectedSessionTx(
+            labBbsServerFileMs,
+            QStringLiteral("BBS_FILE_TX"),
+            [&ft2Link, labBbsPublishName](quint16 sessionId, quint64 nowMs) {
+                return ft2Link.transmitBbsSharedFileRadio(
+                    sessionId, labBbsPublishName, nowMs);
+            });
+    }
     struct LabQsyState
     {
         quint16 pendingSessionId {0u};
@@ -2399,8 +2632,11 @@ int main(int argc, char* argv[])
     labQsyState->startedAtMs = static_cast<quint64>(
         QDateTime::currentMSecsSinceEpoch());
     auto const labApplyQsy =
-        [&bridge](qint64 targetHz, QString const& reason) {
+        [&bridge, labDialOverrideActive](qint64 targetHz, QString const& reason) {
             qint64 const beforeHz = qRound64(bridge.frequency());
+            if (labDialOverrideActive) {
+                *labDialOverrideActive = false;
+            }
             bridge.qsyTo(static_cast<double>(targetHz), QStringLiteral("FT2-Link"));
             qint64 const afterHz = qRound64(bridge.frequency());
             qInfo().noquote()

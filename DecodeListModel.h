@@ -54,6 +54,7 @@ public:
         HighlightBgRole,
         IsHighlightedRole,  // 1.0.144: aggregato isTx||isCQ||isMyCall||...
         AptypeRole,
+        DriftRole,
         ForceRxPaneRole,
         QualityRole,
         EntryRole,  // tutta la QVariantMap originale (compat per modelData.X path)

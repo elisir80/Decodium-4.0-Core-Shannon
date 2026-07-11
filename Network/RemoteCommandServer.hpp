@@ -89,6 +89,8 @@ Q_SIGNALS:
   void setRxFrequencyRequested(QString const& commandId, int rxFrequencyHz);
   void setTxFrequencyRequested(QString const& commandId, int txFrequencyHz);
   void setTxEnabledRequested(QString const& commandId, bool enabled);
+  void sendTxRequested(QString const& commandId, int slot);
+  void stopTxRequested(QString const& commandId);
   void setAutoCqRequested(QString const& commandId, bool enabled);
   void setAutoSpotRequested(QString const& commandId, bool enabled);
   void setMonitoringRequested(QString const& commandId, bool enabled);

@@ -426,6 +426,10 @@ private Q_SLOTS:
     QCOMPARE (static_cast<int> (beacon.type), static_cast<int> (FrameType::Beacon));
     QCOMPARE (static_cast<int> (beacon.profile), static_cast<int> (Profile::Narrow));
     QVERIFY ((beacon.flags & decodium::ft2link::FlagEndOfMessage) != 0u);
+    QVERIFY ((beacon.sessionId & decodium::ft2link::BeaconWaveW2300) != 0u);
+    QVERIFY ((beacon.sessionId & decodium::ft2link::BeaconWaveW2300Deep) != 0u);
+    QVERIFY ((beacon.ackBitmap & decodium::ft2link::BeaconServiceChat) != 0u);
+    QVERIFY ((beacon.ackBitmap & decodium::ft2link::BeaconServiceQsy) != 0u);
 
     FT2LinkAppModel receiver {StationIdentity {"K1ABC", "FN42", "Ann"}};
     StationAdvertisement advertisement;
@@ -437,6 +441,10 @@ private Q_SLOTS:
     QVERIFY (advertisement.cq);
     QCOMPARE (advertisement.cqType, std::string ("CQ"));
     QCOMPARE (advertisement.cqLocator, std::string ("JN70"));
+    QVERIFY ((advertisement.waveformCapabilityFlags
+              & decodium::ft2link::BeaconWaveW2300Ultra) != 0u);
+    QVERIFY ((advertisement.serviceCapabilityFlags
+              & decodium::ft2link::BeaconServiceFile) != 0u);
 
     std::vector<StationAdvertisement> active = receiver.activeStations (
         2200, 1000, true);
@@ -445,7 +453,9 @@ private Q_SLOTS:
 
     Frame const specialBeacon =
         source.makeLocalBeaconFrame (true, 2, 750, "EMCOMM", "JN71");
-    QCOMPARE (specialBeacon.ackBitmap, static_cast<std::uint16_t> (3u));
+    QCOMPARE (static_cast<std::uint16_t> (specialBeacon.ackBitmap & 0x000fu),
+              static_cast<std::uint16_t> (3u));
+    QVERIFY ((specialBeacon.ackBitmap & 0xfff0u) != 0u);
     QVERIFY2 (receiver.observeBeacon (
                   specialBeacon, 2300, &advertisement, &error),
               error.c_str ());
@@ -455,6 +465,9 @@ private Q_SLOTS:
     QCOMPARE (advertisement.cqLocator, std::string ("JN71"));
     QCOMPARE (advertisement.cqSlotId, 2);
     QCOMPARE (advertisement.cqSlotOffsetHz, 1500);
+    QCOMPARE (advertisement.serviceCapabilityFlags,
+              static_cast<std::uint16_t> (
+                  specialBeacon.ackBitmap & 0xfff0u));
   }
 
   void narrowWaveformRoundTripsHelloFrame ()

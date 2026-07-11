@@ -14,6 +14,7 @@
 #include <QNetworkReply>
 #include <QUrl>
 #include <QDebug>
+#include <QDateTime>
 
 #include "moc_wsprnet.cpp"
 
@@ -49,6 +50,17 @@ with app.test_request_context ():
   \s+(?<dt>[-+]?\d+\.\d+)
   \s+(?<freq>\d+)
   \s+`
+  \s+<?(?<call>[A-Z0-9/]+)>?(?:\s(?<grid>[A-R]{2}[0-9]{2}(?:[A-X]{2})?))?(?:\s+(?<dBm>\d+))?
+)", QRegularExpression::ExtendedPatternSyntaxOption};
+
+  // regexp to parse direct wsprd stdout rows:
+  //   2256 -21 -0.3 14.097090 0 DU1MGA PK04 37
+  QRegularExpression wspr_stdout_re {R"(
+  (?<time>\d{4})
+  \s+(?<db>[-+]?\d+(?:\.\d+)?)
+  \s+(?<dt>[-+]?\d+\.\d+)
+  \s+(?<freq>\d+\.\d+)
+  \s+(?<drift>[-+]?\d+)
   \s+<?(?<call>[A-Z0-9/]+)>?(?:\s(?<grid>[A-R]{2}[0-9]{2}(?:[A-X]{2})?))?(?:\s+(?<dBm>\d+))?
 )", QRegularExpression::ExtendedPatternSyntaxOption};
 
@@ -142,10 +154,10 @@ void WSPRNet::post (QString const& call, QString const& grid, QString const& rfr
     }
   else
     {
-      auto const& match = fst4_re.match (decode_text);
-      if (match.hasMatch ())
-        {
-          SpotQueue::value_type query;
+	      auto const& match = fst4_re.match (decode_text);
+	      if (match.hasMatch ())
+	        {
+	          SpotQueue::value_type query;
           // Prevent reporting data ouside of the current frequency
           // band - removed by G4WJS to accommodate FST4W spots
           // outside of WSPR segments
@@ -165,11 +177,32 @@ void WSPRNet::post (QString const& call, QString const& grid, QString const& rfr
               query.addQueryItem ("drift", "0");
               query.addQueryItem ("tgrid", match.captured ("grid"));
               query.addQueryItem ("dbm", match.captured ("dBm"));
-              spot_queue_.enqueue (urlEncodeSpot (query));
-              m_uploadType = 2;
-            }
-        }
-    }
+	              spot_queue_.enqueue (urlEncodeSpot (query));
+	              m_uploadType = 2;
+	            }
+	        }
+	      else
+	        {
+	          auto const& wspr_match = wspr_stdout_re.match (decode_text);
+	          if (wspr_match.hasMatch ())
+	            {
+	              SpotQueue::value_type query;
+	              query.addQueryItem ("function", "wspr");
+	              auto const& date = QDateTime::currentDateTimeUtc ().addSecs (-TR_period * 3. / 4.).date ();
+	              query.addQueryItem ("date", date.toString ("yyMMdd"));
+	              query.addQueryItem ("time", wspr_match.captured ("time"));
+	              query.addQueryItem ("sig", QString::number (std::lround (wspr_match.captured ("db").toDouble ())));
+	              query.addQueryItem ("dt", wspr_match.captured ("dt"));
+	              query.addQueryItem ("tqrg", wspr_match.captured ("freq"));
+	              query.addQueryItem ("tcall", wspr_match.captured ("call"));
+	              query.addQueryItem ("drift", wspr_match.captured ("drift"));
+	              query.addQueryItem ("tgrid", wspr_match.captured ("grid"));
+	              query.addQueryItem ("dbm", wspr_match.captured ("dBm"));
+	              spot_queue_.enqueue (urlEncodeSpot (query));
+	              m_uploadType = 2;
+	            }
+	        }
+	    }
 }
 
 void WSPRNet::networkReply (QNetworkReply * reply)

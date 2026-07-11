@@ -5037,6 +5037,51 @@ static bool writeMono16WavFile(QString const& path, QVector<float> const& wave, 
     return true;
 }
 
+static bool writeMono16WavFile(QString const& path, QVector<short> const& samples, int sampleRate)
+{
+    if (samples.isEmpty() || sampleRate <= 0) {
+        return false;
+    }
+
+    QString error;
+    if (!ensureParentDirectoryForFile(path, &error)) {
+        qWarning() << error;
+        return false;
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::WriteOnly)) {
+        qWarning() << "Cannot open RX WAV for write:" << path;
+        return false;
+    }
+
+    QDataStream s(&f);
+    s.setByteOrder(QDataStream::LittleEndian);
+
+    quint32 const dataSize = static_cast<quint32>(samples.size() * sizeof(qint16));
+    quint32 const fileSize = 36u + dataSize;
+
+    f.write("RIFF", 4);
+    s << fileSize;
+    f.write("WAVE", 4);
+    f.write("fmt ", 4);
+    s << quint32(16);
+    s << quint16(1);
+    s << quint16(1);
+    s << quint32(sampleRate);
+    s << quint32(sampleRate * sizeof(qint16));
+    s << quint16(sizeof(qint16));
+    s << quint16(16);
+    f.write("data", 4);
+    s << dataSize;
+
+    for (short sample : samples) {
+        s << static_cast<qint16>(sample);
+    }
+
+    return true;
+}
+
 static QString buildTxRecordingPath(QString const& mode, bool tune)
 {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
@@ -5048,6 +5093,22 @@ static QString buildTxRecordingPath(QString const& mode, bool tune)
     QString const tag = tune ? QStringLiteral("tune") : QStringLiteral("tx");
     QString const safeMode = mode.trimmed().isEmpty() ? QStringLiteral("FT8") : mode.trimmed().toUpper();
     return QDir(dir).absoluteFilePath(QStringLiteral("decodium_%1_%2_%3.wav").arg(tag, safeMode, stamp));
+}
+
+static QString buildWsprDecodeWavPath(quint64 serial, QString const& utcToken)
+{
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    if (dir.isEmpty()) {
+        dir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    }
+    dir += QStringLiteral("/wspr/%1").arg(serial);
+    QDateTime slotUtc = approxUtcDateTimeForDisplayToken(utcToken);
+    if (!slotUtc.isValid()) {
+        slotUtc = QDateTime::currentDateTimeUtc();
+    }
+    QString const date = slotUtc.toString(QStringLiteral("yyMMdd"));
+    QString const time = slotUtc.toString(QStringLiteral("hhmm"));
+    return QDir(dir).absoluteFilePath(QStringLiteral("%1_%2.wav").arg(date, time));
 }
 
 static QVector<float> buildTuneWaveform(double freq, int sampleRate, int durationSeconds)
@@ -5076,13 +5137,54 @@ static bool bridgeGeneratedTxWaveMode(QString const& mode)
         || normalized == QStringLiteral("WSPR");
 }
 
-static int stationPowerWattsToWsprDbm(int watts)
+static int normalizeWsprPowerDbm(int dbm)
 {
-    if (watts <= 0) {
-        return 0;
+    static constexpr int kWsprPowerDbmValues[] = {
+        0, 3, 7, 10, 13, 17, 20, 23, 27, 30,
+        33, 37, 40, 43, 47, 50, 53, 57, 60
+    };
+
+    int best = kWsprPowerDbmValues[0];
+    int bestDelta = std::abs(dbm - best);
+    for (int value : kWsprPowerDbmValues) {
+        int const delta = std::abs(dbm - value);
+        if (delta < bestDelta) {
+            best = value;
+            bestDelta = delta;
+        }
     }
-    double const dbm = 30.0 + 10.0 * std::log10(static_cast<double>(watts));
-    return qBound(0, qRound(dbm), 60);
+    return best;
+}
+
+static QString wsprPowerDbmLabel(int dbm)
+{
+    switch (normalizeWsprPowerDbm(dbm)) {
+    case 0:  return QStringLiteral("0 dBm  1 mW");
+    case 3:  return QStringLiteral("3 dBm  2 mW");
+    case 7:  return QStringLiteral("7 dBm  5 mW");
+    case 10: return QStringLiteral("10 dBm  10 mW");
+    case 13: return QStringLiteral("13 dBm  20 mW");
+    case 17: return QStringLiteral("17 dBm  50 mW");
+    case 20: return QStringLiteral("20 dBm  100 mW");
+    case 23: return QStringLiteral("23 dBm  200 mW");
+    case 27: return QStringLiteral("27 dBm  500 mW");
+    case 30: return QStringLiteral("30 dBm  1 W");
+    case 33: return QStringLiteral("33 dBm  2 W");
+    case 37: return QStringLiteral("37 dBm  5 W");
+    case 40: return QStringLiteral("40 dBm  10 W");
+    case 43: return QStringLiteral("43 dBm  20 W");
+    case 47: return QStringLiteral("47 dBm  50 W");
+    case 50: return QStringLiteral("50 dBm  100 W");
+    case 53: return QStringLiteral("53 dBm  200 W");
+    case 57: return QStringLiteral("57 dBm  500 W");
+    case 60: return QStringLiteral("60 dBm  1 kW");
+    default: return QStringLiteral("37 dBm  5 W");
+    }
+}
+
+static double wsprPowerDbmToWatts(int dbm)
+{
+    return std::pow(10.0, (normalizeWsprPowerDbm(dbm) - 30.0) / 10.0);
 }
 
 static QString txWaveMetricsSummary(QVector<float> const& wave)
@@ -8641,7 +8743,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                         s.dialFrequencyHz = static_cast<qint64>(m_frequency);
                         s.rxFrequencyHz = m_rxFrequency;
                         s.txFrequencyHz = m_txFrequency;
-                        s.periodMs = qMax<qint64>(1, qRound64(m_txPeriod * 1000.0));
+                        s.periodMs = qMax<qint64>(1, periodMsForMode(m_mode));
                         s.txEnabled = m_txEnabled;
                         s.autoCqEnabled = m_autoCqRepeat > 0;
                         s.autoSpotEnabled = m_autoSpotEnabled;
@@ -8710,6 +8812,15 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     connect(m_remoteServer, &RemoteCommandServer::setTxEnabledRequested, this, [this](const QString& commandId, bool e) {
                         bridgeLog(QStringLiteral("Remote command %1: set_tx_enabled %2").arg(commandId, e ? QStringLiteral("1") : QStringLiteral("0")));
                         setTxEnabled(e);
+                    }, Qt::QueuedConnection);
+                    connect(m_remoteServer, &RemoteCommandServer::sendTxRequested, this, [this](const QString& commandId, int slot) {
+                        bridgeLog(QStringLiteral("Remote command %1: send_tx TX%2").arg(commandId, QString::number(slot)));
+                        sendTx(slot);
+                    }, Qt::QueuedConnection);
+                    connect(m_remoteServer, &RemoteCommandServer::stopTxRequested, this, [this](const QString& commandId) {
+                        bridgeLog(QStringLiteral("Remote command %1: stop_tx").arg(commandId));
+                        setTxEnabled(false);
+                        stopTx();
                     }, Qt::QueuedConnection);
                     connect(m_remoteServer, &RemoteCommandServer::setMonitoringRequested, this, [this](const QString& commandId, bool e) {
                         bridgeLog(QStringLiteral("Remote command %1: set_monitoring %2").arg(commandId, e ? QStringLiteral("1") : QStringLiteral("0")));
@@ -9176,6 +9287,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // Worker thread for WSPR decoder
     m_workerThreadWspr = new QThread(this);
     m_workerThreadWspr->setObjectName(QStringLiteral("WSPRDecodeWorker"));
+#if defined(Q_OS_LINUX)
+    m_workerThreadWspr->setStackSize(32 * 1024 * 1024);
+#else
+    m_workerThreadWspr->setStackSize(16 * 1024 * 1024);
+#endif
     m_wsprWorker = new decodium::wspr::WSPRDecodeWorker();
     m_wsprWorker->moveToThread(m_workerThreadWspr);
     connect(m_wsprWorker, &decodium::wspr::WSPRDecodeWorker::decodeReady,
@@ -9497,7 +9613,9 @@ QObject * DecodiumBridge::propagationManager() const
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
 {
-    if (isFt2LinkApplicationMode(m_mode)) {
+    QString const normalizedMode = m_mode.trimmed().toUpper();
+    if (isFt2LinkApplicationMode(m_mode)
+        || normalizedMode == QStringLiteral("WSPR")) {
         return false;
     }
     return legacyTxBackendRequested() && legacyBackendAvailable();
@@ -10485,8 +10603,14 @@ void DecodiumBridge::syncLegacyBackendState()
         }
     }
     if (!labCallsign.isEmpty() || !labGrid.isEmpty()) {
-        QString const expectedTx6 =
-            standardFtxCqMessage(m_callsign, m_grid.left(4).toUpper(), m_mode.trimmed().toUpper());
+        QString const normalizedMode = m_mode.trimmed().toUpper();
+        QString const grid4 = m_grid.left(4).toUpper();
+        QString const expectedTx6 = normalizedMode == QStringLiteral("WSPR")
+            ? (m_callsign.trimmed().toUpper()
+               + (grid4.isEmpty() ? QString() : QStringLiteral(" ") + grid4)
+               + QStringLiteral(" ")
+               + QString::number(normalizeWsprPowerDbm(m_wsprPowerDbm)))
+            : standardFtxCqMessage(m_callsign, grid4, normalizedMode);
         bool const staleLabTxMessages =
             !expectedTx6.isEmpty()
             && m_tx6.trimmed().compare(expectedTx6, Qt::CaseInsensitive) != 0;
@@ -10529,12 +10653,21 @@ void DecodiumBridge::syncLegacyBackendState()
                                 true);
     }
     updateBool(m_decoding, m_monitoring, [this]() { emit decodingChanged(); });
+    qint64 const txStateNowMs = QDateTime::currentMSecsSinceEpoch();
+    bool const bridgeAudioPlaybackTxActive =
+        m_transmitting
+        && (m_txPlaybackHoldUntilMs > txStateNowMs
+            || m_txPlaybackHardDeadlineMs > txStateNowMs
+            || (m_txPcmBuffer && m_txPcmBuffer->isOpen()
+                && m_txPcmBuffer->pos() < m_txPcmBuffer->size()));
     bool const bridgeOwnedCustomTxActive =
         m_bridgeAudioLegacyTxActive
         || m_ft2LinkTxActive
         || m_cwTxActive;
     bool const effectiveLegacyTransmitting =
-        legacyTransmittingNow || bridgeOwnedCustomTxActive;
+        legacyTransmittingNow
+        || bridgeOwnedCustomTxActive
+        || bridgeAudioPlaybackTxActive;
     updateBool(m_transmitting, effectiveLegacyTransmitting, [this]() { emit transmittingChanged(); });
     bool const legacyTxStartedForMirror =
         usingLegacyBackendForTx()
@@ -10579,6 +10712,62 @@ void DecodiumBridge::syncLegacyBackendState()
     }
     double const legacySignalLevel = m_legacyBackend->signalLevel();
     updateDouble(m_sMeter, legacySignalLevel, [this]() { emit sMeterChanged(); });
+    if (m_autoRxInputLevel
+        && m_monitoring
+        && usingLegacyBackendForRx()
+        && !m_soundInput
+        && !m_tciAudioCaptureActive
+        && legacySignalLevel > 0.0) {
+        qint64 const now = QDateTime::currentMSecsSinceEpoch();
+        if (now >= m_autoRxLevelManualHoldUntilMs) {
+            constexpr double kLegacyHighDb = 78.0;
+            constexpr double kLegacyTargetDb = 62.0;
+            constexpr double kLegacyLowDb = 32.0;
+            constexpr double kLegacyUsefulDb = 4.0;
+            constexpr qint64 kLegacyDownCooldownMs = 1200;
+            constexpr qint64 kLegacyUpCooldownMs = 3500;
+            constexpr qint64 kLegacyLowHoldMs = 4000;
+            constexpr double kMinGain = 0.05;
+            double const currentGain = rxInputGainFromLevel(m_rxInputLevel);
+            double const maxGain = rxInputGainFromLevel(kAutoRxInputMaxLevel);
+
+            if (legacySignalLevel >= kLegacyHighDb) {
+                m_autoRxLevelLowStartMs = 0;
+                if (now - m_autoRxLevelLastAdjustMs >= kLegacyDownCooldownMs) {
+                    double const targetGain = qBound(kMinGain,
+                                                     currentGain * (kLegacyTargetDb / qMax(legacySignalLevel, 1.0)),
+                                                     maxGain);
+                    double const newLevel = rxInputLevelFromGain(targetGain);
+                    if (newLevel < m_rxInputLevel - 0.5) {
+                        applyRxInputLevel(newLevel, true);
+                        m_autoRxLevelLastAdjustMs = now;
+                        bridgeLog(QStringLiteral("Auto RX legacy level down: level=%1 sMeter=%2")
+                                      .arg(m_rxInputLevel, 0, 'f', 1)
+                                      .arg(legacySignalLevel, 0, 'f', 1));
+                    }
+                }
+            } else if (legacySignalLevel >= kLegacyUsefulDb
+                       && legacySignalLevel <= kLegacyLowDb
+                       && m_rxInputLevel < kAutoRxInputMaxLevel - 0.5) {
+                if (m_autoRxLevelLowStartMs == 0) {
+                    m_autoRxLevelLowStartMs = now;
+                } else if (now - m_autoRxLevelLowStartMs >= kLegacyLowHoldMs
+                           && now - m_autoRxLevelLastAdjustMs >= kLegacyUpCooldownMs) {
+                    double const targetGain = qBound(kMinGain, currentGain * 1.10, maxGain);
+                    double const newLevel = qMin(kAutoRxInputMaxLevel, rxInputLevelFromGain(targetGain));
+                    if (newLevel > m_rxInputLevel + 0.5) {
+                        applyRxInputLevel(newLevel, true);
+                        m_autoRxLevelLastAdjustMs = now;
+                        bridgeLog(QStringLiteral("Auto RX legacy level up: level=%1 sMeter=%2")
+                                      .arg(m_rxInputLevel, 0, 'f', 1)
+                                      .arg(legacySignalLevel, 0, 'f', 1));
+                    }
+                }
+            } else {
+                m_autoRxLevelLowStartMs = 0;
+            }
+        }
+    }
     if (usingLegacyBackendForTx() && !m_soundInput && !m_tciAudioCaptureActive) {
         // When the embedded legacy backend owns RX audio, the modern
         // DecodiumAudioSink is intentionally not opened. Feed the QML LVL meter
@@ -12768,6 +12957,32 @@ void DecodiumBridge::setStationAntenna(const QString& v)
     refreshPskReporterLocalStation();
 }
 
+void DecodiumBridge::setWsprPowerDbm(int v)
+{
+    int const normalized = normalizeWsprPowerDbm(v);
+    if (m_wsprPowerDbm == normalized) {
+        return;
+    }
+    m_wsprPowerDbm = normalized;
+    emit wsprPowerDbmChanged();
+    if (m_mode.trimmed().compare(QStringLiteral("WSPR"), Qt::CaseInsensitive) == 0) {
+        regenerateTxMessages();
+    }
+}
+
+QVariantList DecodiumBridge::wsprPowerOptions() const
+{
+    QVariantList options;
+    static constexpr int kWsprPowerDbmValues[] = {
+        0, 3, 7, 10, 13, 17, 20, 23, 27, 30,
+        33, 37, 40, 43, 47, 50, 53, 57, 60
+    };
+    for (int value : kWsprPowerDbmValues) {
+        options.append(wsprPowerDbmLabel(value));
+    }
+    return options;
+}
+
 // Rigenera TX6 (CQ) sempre da callsign+grid; TX1-5 solo se dxCall è noto.
 // Chiamato quando cambiano callsign, grid o dxCall.
 // Non sovrascrive messaggi già personalizzati con dati correnti (formato standard).
@@ -12781,7 +12996,7 @@ void DecodiumBridge::regenerateTxMessages()
 
     if (mode == QStringLiteral("WSPR")) {
         QString const my = m_callsign.toUpper();
-        int const dbm = stationPowerWattsToWsprDbm(m_stationPowerWatts);
+        int const dbm = normalizeWsprPowerDbm(m_wsprPowerDbm);
         QString const wsprMessage = my + (grid4.isEmpty() ? QString() : " " + grid4)
             + " " + QString::number(dbm);
         setTx6(wsprMessage);
@@ -12793,7 +13008,9 @@ void DecodiumBridge::regenerateTxMessages()
         if (m_currentTx >= 1 && m_currentTx <= 5) {
             setCurrentTx(6);
         }
-        bridgeLog("regenerateTxMessages WSPR: tx6=" + m_tx6);
+        bridgeLog(QStringLiteral("regenerateTxMessages WSPR: tx6=%1 power=%2")
+                      .arg(m_tx6)
+                      .arg(wsprPowerDbmLabel(dbm)));
         return;
     }
 
@@ -12934,7 +13151,8 @@ bool DecodiumBridge::isTimeSyncDecodeMode(const QString& mode) const
     QString const normalized = mode.trimmed().toUpper();
     return normalized == QStringLiteral("FT2")
         || normalized == QStringLiteral("FT4")
-        || normalized == QStringLiteral("FT8");
+        || normalized == QStringLiteral("FT8")
+        || normalized == QStringLiteral("WSPR");
 }
 
 bool DecodiumBridge::ft8LiveDecodeBacklogActive(qint64 nowMs, int minAgeMs,
@@ -13613,6 +13831,18 @@ void DecodiumBridge::armPeriodTimerForCurrentMode(quint64 sessionId, const QStri
               " ntp=" + QString::number((m_ntpEnabled && m_ntpSynced) ? m_ntpOffsetMs : 0.0, 'f', 1) +
               " session=" + QString::number(sessionId) + ")");
 
+    if (modeSnapshot == QStringLiteral("WSPR")) {
+        resetRxPeriodAccumulation(true);
+        m_periodTicks = 0;
+        m_lastPeriodSlot = -1;
+        m_periodTimer->start();
+        bridgeLog(QStringLiteral("%1: WSPR period timer started immediately; next UTC boundary in %2ms (session=%3)")
+                      .arg(reason)
+                      .arg(msToNext)
+                      .arg(sessionId));
+        return;
+    }
+
     QTimer::singleShot(msToNext, this, [this, sessionId, modeSnapshot]() {
         if (!m_monitoring) {
             return;
@@ -13640,6 +13870,9 @@ int DecodiumBridge::minimumDecodeSamplesForMode(const QString& mode) const
     }
     if (normalized == QStringLiteral("FT4")) {
         return 60000;  // Leaves margin for FT4's shorter DSP window while dropping startup fragments.
+    }
+    if (normalized == QStringLiteral("WSPR")) {
+        return 110 * SAMPLE_RATE; // WSPR needs almost the full 120s receive window.
     }
     return 0;
 }
@@ -14215,7 +14448,12 @@ void DecodiumBridge::applyRxInputLevel(double level, bool automatic)
     }
 
     if (!automatic && m_autoRxInputLevel) {
-        m_autoRxLevelManualHoldUntilMs = QDateTime::currentMSecsSinceEpoch() + 30000;
+        m_autoRxInputLevel = false;
+        m_autoRxLevelLowStartMs = 0;
+        m_autoRxLevelLastAdjustMs = 0;
+        m_autoRxLevelManualHoldUntilMs = 0;
+        bridgeLog(QStringLiteral("Auto RX Input Level disabled by manual RX level change"));
+        emit autoRxInputLevelChanged();
     }
 
     bridgeLog(QStringLiteral("%1RxInputLevel: requested=%2 previous=%3 legacy=%4")
@@ -15673,6 +15911,7 @@ void DecodiumBridge::updateRigTelemetry(double powerWatts, double swr, double al
     m_rigAlcValid = alcValid;
     emit rigTelemetryChanged();
     enforceSwrTransmissionLimit(QStringLiteral("telemetry"));
+    enforceWsprPowerTransmissionLimit(QStringLiteral("telemetry"));
 }
 
 void DecodiumBridge::updateProcessCpuUsage()
@@ -15912,6 +16151,43 @@ void DecodiumBridge::enforceSwrTransmissionLimit(const QString& reason)
                           .arg(kSWRStopThreshold, 0, 'f', 1));
     emit statusMessage(QStringLiteral("TX interrotto: SWR %1 > %2")
                            .arg(m_rigSwr, 0, 'f', 2).arg(kSWRStopThreshold, 0, 'f', 1));
+}
+
+void DecodiumBridge::enforceWsprPowerTransmissionLimit(const QString& reason)
+{
+    if (m_mode.trimmed().compare(QStringLiteral("WSPR"), Qt::CaseInsensitive) != 0
+        || !m_transmitting
+        || !getSetting(QStringLiteral("PWRandSWR"), false).toBool()
+        || m_rigPowerWatts <= 0.05) {
+        return;
+    }
+
+    double const declaredWatts = wsprPowerDbmToWatts(m_wsprPowerDbm);
+    double const stopThresholdWatts = qMax(declaredWatts * 2.5, declaredWatts + 5.0);
+    if (m_rigPowerWatts <= stopThresholdWatts) {
+        return;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (nowMs - m_lastWsprPowerGuardMs < 1000) {
+        return;
+    }
+    m_lastWsprPowerGuardMs = nowMs;
+
+    bridgeLog(QStringLiteral("WSPR power guard stopping TX (%1): rig=%2 W declared=%3 W threshold=%4 W dbm=%5")
+                  .arg(reason)
+                  .arg(m_rigPowerWatts, 0, 'f', 1)
+                  .arg(declaredWatts, 0, 'f', 1)
+                  .arg(stopThresholdWatts, 0, 'f', 1)
+                  .arg(normalizeWsprPowerDbm(m_wsprPowerDbm)));
+
+    stopTx();
+    emit errorMessage(QStringLiteral("WSPR power mismatch: rig %1 W, message %2.\n\nTX interrotta: abbassa la potenza RF del rig o scegli il dBm corretto.")
+                          .arg(m_rigPowerWatts, 0, 'f', 1)
+                          .arg(wsprPowerDbmLabel(m_wsprPowerDbm)));
+    emit statusMessage(QStringLiteral("WSPR TX interrotta: PWR %1 W > %2 W")
+                           .arg(m_rigPowerWatts, 0, 'f', 1)
+                           .arg(stopThresholdWatts, 0, 'f', 1));
 }
 
 // === SETTINGS ===
@@ -25948,6 +26224,8 @@ void DecodiumBridge::saveSettings()
     s.setValue("StationRigInfo",  m_stationRigInfo);
     s.setValue("StationAntenna",  m_stationAntenna);
     s.setValue("StationPowerW",   m_stationPowerWatts);
+    s.setValue("WsprPowerDbm",    m_wsprPowerDbm);
+    s.setValue("dBm",             m_wsprPowerDbm);
     s.setValue("MonitorOFF",      false);
     s.setValue("autoSeq",         m_autoSeq);
     s.setValue("AutoSeq",         m_autoSeq);
@@ -31651,6 +31929,8 @@ void DecodiumBridge::loadSettings()
     m_stationRigInfo   = s.value("StationRigInfo",  QString()).toString();
     m_stationAntenna   = s.value("StationAntenna",  QString()).toString();
     m_stationPowerWatts= qBound(0, s.value("StationPowerW", 100).toInt(), 9999);
+    m_wsprPowerDbm     = normalizeWsprPowerDbm(s.value("WsprPowerDbm",
+                                                       s.value("dBm", 37)).toInt());
     bool const storedMonitorOffAtStartup = s.value("MonitorOFF", false).toBool();
     if (storedMonitorOffAtStartup) {
         s.setValue(QStringLiteral("MonitorOFF"), false);
@@ -31990,6 +32270,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit stationRigInfoChanged();
     emit stationAntennaChanged();
     emit stationPowerWattsChanged();
+    emit wsprPowerDbmChanged();
     emit autoStartMonitorOnStartupChanged();
     emit startFromTx2Changed();
     emit vhfUhfFeaturesChanged();
@@ -37743,23 +38024,198 @@ void DecodiumBridge::onMsk144DecodeReady(quint64 serial, QStringList rows)
 }
 
 void DecodiumBridge::onWsprDecodeReady(quint64 serial, QStringList rows,
-                                        QStringList /*diagnostics*/, int /*exitCode*/)
+                                        QStringList diagnostics, int exitCode)
 {
+    noteDecodeReadySlotStart();
+    auto decodeReadyPhaseGuard = qScopeGuard([] {
+        DecodiumBridge::noteDecodeReadySlotEnd();
+    });
+
+    QString const tempWav = m_wsprDecodeTempFiles.take(serial);
+    if (!tempWav.isEmpty()) {
+        QFile::remove(tempWav);
+    }
+
+    auto forgetDecodeSerial = [this, serial]() {
+        m_decodeStartMsBySerial.remove(serial);
+        m_decodeModeBySerial.remove(serial);
+        m_decodeUtcTokenBySerial.remove(serial);
+        m_decodeSessionBySerial.remove(serial);
+        m_ft8PendingDeepFollowups.remove(serial);
+    };
+    auto forgetDecodeSerialGuard = qScopeGuard([&forgetDecodeSerial] {
+        forgetDecodeSerial();
+    });
+
     if (shouldIgnoreDecodeCallbacks()) {
         bridgeLog("onWsprDecodeReady: ignored during shutdown");
         return;
     }
 
-    // WSPR upload spots
-    if (m_wsprUploadEnabled && m_wsprUploader && !m_callsign.isEmpty()) {
-        m_wsprUploader->setCallsign(m_callsign);
-        m_wsprUploader->setGrid(m_grid);
-        for (const QString& row : rows) {
-            if (!row.trimmed().isEmpty())
-                m_wsprUploader->uploadSpot(row.trimmed(), m_frequency);
+    QString const serialMode = m_decodeModeBySerial.value(serial);
+    quint64 const serialSession = m_decodeSessionBySerial.value(serial, m_decodeSessionId);
+    if (serialSession != m_decodeSessionId
+        || (!serialMode.isEmpty() && serialMode != m_mode)) {
+        bridgeLog(QStringLiteral("onWsprDecodeReady: ignored stale callback serial=%1 serialMode=%2 mode=%3 session=%4 currentSession=%5")
+                      .arg(serial)
+                      .arg(serialMode)
+                      .arg(m_mode)
+                      .arg(serialSession)
+                      .arg(m_decodeSessionId));
+        m_decoding = false;
+        emit decodingChanged();
+        return;
+    }
+
+    QStringList decodeRows;
+    decodeRows.reserve(rows.size());
+    for (QString const& row : std::as_const(rows)) {
+        QString const trimmed = row.trimmed();
+        if (!trimmed.isEmpty() && trimmed != QStringLiteral("<DecodeFinished>")) {
+            decodeRows.append(trimmed);
         }
     }
-    onFt8DecodeReady(serial, rows);   // WSPR usa stesso formato di lista decode
+
+    bridgeLog(QStringLiteral("onWsprDecodeReady: serial=%1 rows=%2 decoded=%3 exit=%4 diagnostics=%5")
+                  .arg(serial)
+                  .arg(rows.size())
+                  .arg(decodeRows.size())
+                  .arg(exitCode)
+                  .arg(diagnostics.size()));
+    for (int i = 0; i < qMin(decodeRows.size(), 3); ++i) {
+        bridgeLog(QStringLiteral("  wspr[%1]='%2'").arg(i).arg(decodeRows.at(i)));
+    }
+    for (int i = 0; i < qMin(diagnostics.size(), 3); ++i) {
+        QString const diag = diagnostics.at(i).trimmed();
+        if (!diag.isEmpty()) {
+            bridgeLog(QStringLiteral("  wsprdiag[%1]='%2'").arg(i).arg(diag));
+        }
+    }
+
+    if (m_wsprUploadEnabled && m_wsprUploader && !m_callsign.isEmpty()) {
+        m_wsprUploader->setEnabled(m_wsprUploadEnabled);
+        m_wsprUploader->setCallsign(m_callsign);
+        m_wsprUploader->setGrid(m_grid);
+        if (decodeRows.isEmpty()) {
+            m_wsprUploader->uploadSpot(QString(), m_frequency,
+                                       QStringLiteral("0"),
+                                       QString::number(m_wsprPowerDbm));
+        } else {
+            for (QString const& row : std::as_const(decodeRows)) {
+                m_wsprUploader->uploadSpot(row, m_frequency,
+                                           QStringLiteral("0"),
+                                           QString::number(m_wsprPowerDbm));
+            }
+        }
+    }
+
+    bool changed = false;
+    int accepted = 0;
+    int parseFailures = 0;
+    int filtered = 0;
+    QString const forcedUtcToken = m_decodeUtcTokenBySerial.value(serial).trimmed();
+    QVector<double> dtSamples;
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    QSet<QString> recentDecodeDedupKeys;
+    int const listSize = m_decodeList.size();
+    int const firstRecent = qMax(0, listSize - 300);
+    recentDecodeDedupKeys.reserve(listSize - firstRecent + decodeRows.size());
+    for (int di = firstRecent; di < listSize; ++di) {
+        QVariantMap const prev = m_decodeList[di].toMap();
+        if (prev.value("isTx").toBool()) {
+            continue;
+        }
+        QString const key = decodeDedupKey(prev.value("time").toString(),
+                                           prev.value("freq").toString(),
+                                           prev.value("message").toString());
+        if (!key.isEmpty()) {
+            recentDecodeDedupKeys.insert(key);
+        }
+    }
+
+    for (QString const& row : std::as_const(decodeRows)) {
+        QStringList f = parseWsprRow(row);
+        if (f.size() < 8) {
+            ++parseFailures;
+            bridgeLog(QStringLiteral("  parseWsprRow FAILED for: '%1'").arg(row));
+            continue;
+        }
+
+        QString const msg = f[4];
+        QString const entryTime = forcedUtcToken.isEmpty() ? f[0] : normalizeUtcDisplayToken(forcedUtcToken);
+        bool const isMyCall = messageMentionsLocalCall(msg);
+        QString const fromCall = extractDecodedCallsign(msg, false);
+        QString const dedupKey = decodeDedupKey(entryTime, f[7], msg);
+        if (!dedupKey.isEmpty() && recentDecodeDedupKeys.contains(dedupKey)) {
+            ++filtered;
+            continue;
+        }
+        if (!dedupKey.isEmpty()) {
+            recentDecodeDedupKeys.insert(dedupKey);
+        }
+
+        QVariantMap entry;
+        entry["time"] = entryTime;
+        entry["db"] = f[1];
+        entry["dt"] = f[2];
+        entry["freq"] = f[7];
+        entry["message"] = msg;
+        entry["aptype"] = QString();
+        entry["drift"] = f[5];
+        entry["quality"] = f[6];
+        entry["mode"] = QStringLiteral("WSPR");
+        entry["isTx"] = false;
+        entry["isCQ"] = false;
+        entry["isMyCall"] = isMyCall;
+        entry["fromCall"] = fromCall;
+        entry["decodeSessionId"] = static_cast<qulonglong>(m_decodeSessionId);
+        entry["timestamp"] = static_cast<qulonglong>(
+            decodeEntryTimestampMsecs(entryTime, QDateTime::currentMSecsSinceEpoch()));
+        enrichDecodeEntry(entry);
+
+        QString userFilterReason;
+        if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
+            ++filtered;
+            bridgeLog(QStringLiteral("user decode filter WSPR: %1 msg='%2'")
+                          .arg(userFilterReason, msg));
+            continue;
+        }
+
+        bool snrOk = false;
+        bool dtOk = false;
+        int const snrVal = f[1].toInt(&snrOk);
+        double const dtVal = f[2].toDouble(&dtOk);
+        if (snrOk && dtOk) {
+            dtSamples.append(dtVal);
+            if (m_decoSyncTime) {
+                m_decoSyncTime->reportDecodeDt(dtVal, snrVal);
+            }
+        }
+
+        maybeQueuePskReporterSpot(entry, msg, false, f[7], f[1], QStringLiteral("WSPR"));
+        appendDecodeMapToList(entry);
+        appendRxDecodeEntry(entry);
+        appendLegacyAllTxtDecodeLine(entry);
+        queueWorldMapEntryForReplay(entry, false, 250);
+        udpSendDecode(true, row, serial);
+        maybePlayDecodeAlert(false, entry.value(QStringLiteral("isMyCall")).toBool());
+        changed = true;
+        ++accepted;
+    }
+
+    if (changed) {
+        normalizeDecodeEntriesForDisplay(m_decodeList, 1500, QStringLiteral("WSPR"));
+        normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, QStringLiteral("WSPR"));
+        emitDecodeListChangedThrottled();
+    }
+    finalizeTimeSyncDecodeCycle(serial, QStringLiteral("WSPR"), dtSamples);
+    m_decoding = false;
+    emit decodingChanged();
+    bridgeLog(QStringLiteral("onWsprDecodeReady summary: serial=%1 accepted=%2 parseFail=%3 filtered=%4")
+                  .arg(serial)
+                  .arg(accepted)
+                  .arg(parseFailures)
+                  .arg(filtered));
 }
 
 void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
@@ -38804,6 +39260,88 @@ QStringList DecodiumBridge::parseFt8Row(const QString& row) const
     QString dfStr = freqOk ? QString::number(freqHz - m_nfa) : freqStr;
 
     return {timeStr, snrStr, dtStr, dfStr, message, aptype, "100", freqStr};
+}
+
+QStringList DecodiumBridge::parseWsprRow(const QString& row) const
+{
+    QString const trimmed = row.trimmed();
+    if (trimmed.isEmpty() || trimmed == QStringLiteral("<DecodeFinished>")) {
+        return {};
+    }
+
+    // wsprd stdout format:
+    //   2256 -21 -0.3 14.097090 0 DU1MGA PK04 37
+    // Returns same structure as parseFt8Row:
+    //   [time, snr, dt, df, message, aptype, quality, freq]
+    static const QRegularExpression re(
+        R"(^(\d{4})\s+([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+\.\d+)\s+(\d+\.\d+)\s+([-+]?\d+)\s+(.+?)\s*$)");
+    QRegularExpressionMatch const match = re.match(trimmed);
+    if (!match.hasMatch()) {
+        return {};
+    }
+
+    QString const message = match.captured(6).trimmed().toUpper();
+    QString const snrStr = QString::number(qRound(match.captured(2).toDouble()));
+    QString const dtStr = match.captured(3).trimmed();
+    QString const driftStr = match.captured(5).trimmed();
+
+    QStringList const messageParts = message.split(QRegularExpression(QStringLiteral("\\s+")),
+                                                   Qt::SkipEmptyParts);
+    if (messageParts.size() < 2) {
+        return {};
+    }
+    QString const callToken = messageParts.at(0);
+    bool const hasBrackets = callToken.startsWith(QLatin1Char('<')) && callToken.endsWith(QLatin1Char('>'));
+    QString const normalizedCall = hasBrackets
+        ? callToken.mid(1, callToken.size() - 2)
+        : callToken;
+    auto const looksLikeWsprCallsign = [](QString const& token) {
+        QString const t = token.trimmed().toUpper();
+        if (t.size() < 3 || t.size() > 12) {
+            return false;
+        }
+        bool hasLetter = false;
+        bool hasDigit = false;
+        for (QChar const& ch : t) {
+            bool const ok = ch.isLetterOrNumber() || ch == QLatin1Char('/');
+            if (!ok) {
+                return false;
+            }
+            hasLetter = hasLetter || ch.isLetter();
+            hasDigit = hasDigit || ch.isDigit();
+        }
+        return hasLetter && hasDigit;
+    };
+    if (!looksLikeWsprCallsign(normalizedCall)) {
+        return {};
+    }
+
+    bool dbmOk = false;
+    int const remoteDbm = messageParts.constLast().toInt(&dbmOk);
+    if (!dbmOk || remoteDbm < 0 || remoteDbm > 60) {
+        return {};
+    }
+
+    bool rfOk = false;
+    double const rfMhz = match.captured(4).toDouble(&rfOk);
+    int audioHz = 1500;
+    if (rfOk && m_frequency > 0.0) {
+        audioHz = qRound((rfMhz * 1.0e6) - m_frequency);
+    }
+    if (audioHz < 0 || audioHz > 5000) {
+        audioHz = m_rxFrequency > 0 ? m_rxFrequency : 1500;
+    }
+    QString const freqStr = QString::number(audioHz);
+    QString const dfStr = QString::number(audioHz - m_nfa);
+
+    return {normalizeUtcDisplayToken(match.captured(1)),
+            snrStr,
+            dtStr,
+            dfStr,
+            message,
+            driftStr,
+            QStringLiteral("100"),
+            freqStr};
 }
 
 QStringList DecodiumBridge::parseJt65Row(const QString& row) const
@@ -40954,14 +41492,57 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "WSPR") {
+        auto* worker = m_wsprWorker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QString const wavPath = buildWsprDecodeWavPath(serial, utcToken);
+        if (!writeMono16WavFile(wavPath, audioSnapshot, SAMPLE_RATE)) {
+            bridgeLog(QStringLiteral("[WSPRDECODE] cannot write decode WAV serial=%1 path=%2 samples=%3")
+                          .arg(serial)
+                          .arg(wavPath)
+                          .arg(audioSnapshot.size()));
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        if (dataDir.isEmpty()) {
+            dataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+        }
+        if (dataDir.isEmpty()) {
+            dataDir = QFileInfo(wavPath).absolutePath();
+        }
+        QDir().mkpath(dataDir);
+
+        QStringList depthArgs;
+        int const depthKind = decodeDepth & 7;
+        if (depthKind <= 1) {
+            depthArgs << QStringLiteral("-qB");
+        } else {
+            depthArgs << QStringLiteral("-C") << QStringLiteral("500")
+                      << QStringLiteral("-o") << QStringLiteral("4");
+            if (depthKind >= 3) {
+                depthArgs << QStringLiteral("-d");
+            }
+        }
         decodium::wspr::DecodeRequest req;
         req.serial = serial;
-        req.arguments = QStringList()
-            << "-f" << QString::number(m_frequency / 1e6, 'f', 6)
-            << "-c" << m_callsign
-            << "-g" << m_grid;
-        QMetaObject::invokeMethod(m_wsprWorker, [this, req]() {
-            m_wsprWorker->decode(req);
+        req.arguments = depthArgs
+            << QStringLiteral("-a") << QDir::toNativeSeparators(dataDir)
+            << QStringLiteral("-f") << QString::number(m_frequency / 1e6, 'f', 6)
+            << QDir::toNativeSeparators(wavPath);
+        m_wsprDecodeTempFiles.insert(serial, wavPath);
+        bridgeLog(QStringLiteral("[WSPRDECODE] serial=%1 samples=%2 utc=%3 wav=%4 args=%5")
+                      .arg(serial)
+                      .arg(audioSnapshot.size())
+                      .arg(utcToken)
+                      .arg(wavPath)
+                      .arg(req.arguments.join(QLatin1Char(' '))));
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "JT65" || modeSnapshot == "JT9" || modeSnapshot == "JT4") {

@@ -24,6 +24,8 @@ struct StationAdvertisement
 {
   StationIdentity station;
   LinkCapabilities capabilities;
+  std::uint16_t waveformCapabilityFlags {0};
+  std::uint16_t serviceCapabilityFlags {0};
   bool cq {false};
   std::string cqType;
   std::string cqLocator;
@@ -32,6 +34,41 @@ struct StationAdvertisement
   int cqSlotSizeHz {750};
   std::uint64_t heardAtMs {0};
 };
+
+enum BeaconWaveformCapabilityFlags : std::uint16_t
+{
+  BeaconWaveW500 = 0x0001,
+  BeaconWaveW2300 = 0x0002,
+  BeaconWaveW2300Fast = 0x0004,
+  BeaconWaveW2300Robust = 0x0008,
+  BeaconWaveW2300Weak = 0x0010,
+  BeaconWaveW2300Deep = 0x0020,
+  BeaconWaveW2300Ultra = 0x0040,
+  BeaconWavePreferredW500 = 0x0100,
+  BeaconWavePreferredW2300 = 0x0200
+};
+
+enum BeaconServiceCapabilityFlags : std::uint16_t
+{
+  BeaconServiceChat = 0x0010,
+  BeaconServiceMail = 0x0020,
+  BeaconServiceForm = 0x0040,
+  BeaconServiceFile = 0x0080,
+  BeaconServiceBbs = 0x0100,
+  BeaconServiceBroadcast = 0x0200,
+  BeaconServiceInfo = 0x0400,
+  BeaconServiceQsy = 0x0800,
+  BeaconServicePath = 0x1000,
+  BeaconServicePing = 0x2000,
+  BeaconServiceRelay = 0x4000,
+  BeaconServiceAlert = 0x8000
+};
+
+std::uint16_t beaconWaveformCapabilityFlags (
+    LinkCapabilities const& capabilities);
+std::uint16_t defaultBeaconServiceCapabilityFlags ();
+std::string beaconWaveformCapabilitySummary (std::uint16_t flags);
+std::string beaconServiceCapabilitySummary (std::uint16_t flags);
 
 enum class AppSessionState
 {
@@ -113,6 +150,8 @@ public:
   bool hasActiveStation (std::string const& call,
                          std::uint64_t nowMs,
                          std::uint64_t maxAgeMs) const;
+  StationAdvertisement const* stationAdvertisement (
+      std::string const& call) const;
 
   Frame startSession (std::string const& remoteCall,
                       std::uint64_t nowMs,

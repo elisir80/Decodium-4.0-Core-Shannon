@@ -5472,9 +5472,7 @@ void MainWindow::legacySetRxInputLevel(int value)
       return;
     }
 
-    // Gain changes are not latency-critical. Queue cross-thread updates so the
-    // UI cannot block while CoreAudio/QAudioSource is still opening the device.
-    QMetaObject::invokeMethod (target, updater, Qt::QueuedConnection);
+    QMetaObject::invokeMethod (target, updater, Qt::BlockingQueuedConnection);
   };
 
   if (m_detector) {

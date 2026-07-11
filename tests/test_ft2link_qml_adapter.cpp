@@ -371,6 +371,14 @@ private Q_SLOTS:
     QVariantMap calling = caller.sessionInfo (sessionId);
     QCOMPARE (calling.value ("stateName").toString (), QStringLiteral ("Calling"));
     QCOMPARE (calling.value ("remoteCall").toString (), QStringLiteral ("K1ABC"));
+    QVariantMap const callingCapabilities =
+        calling.value ("capabilities").toMap ();
+    QVERIFY (callingCapabilities.value ("beaconSummary").toString ().contains (
+        QStringLiteral ("W2300")));
+    QVERIFY (callingCapabilities.value ("beaconSummary").toString ().contains (
+        QStringLiteral ("ULTRA")));
+    QVERIFY (calling.value ("capabilitySummary").toString ().contains (
+        QStringLiteral ("W500")));
 
     QByteArray const helloAck = answerer.answerHelloBytes ("IU8LMC", hello, 1400);
     QVERIFY (!helloAck.isEmpty ());
@@ -1386,6 +1394,104 @@ private Q_SLOTS:
     QVERIFY (adapter.infoInquireEnabled ());
   }
 
+  void inquiryPrivacyPanelPreviewsAndPersists ()
+  {
+    QTemporaryDir tempDir;
+    QVERIFY (tempDir.isValid ());
+    QString const storePath = tempDir.filePath ("ft2link-inquiry.json");
+
+    FT2LinkQmlAdapter adapter;
+    adapter.setLocalStorePath (storePath);
+    adapter.setLocalStation ("IU8LMC", "JN70", "Salvo");
+    adapter.setLocalOperatorProfile (
+        QStringLiteral ("Malta"),
+        QStringLiteral ("iu8lmc@example.net"),
+        QStringLiteral ("QRV"),
+        QStringLiteral ("IC-7300"),
+        QStringLiteral ("Vertical"),
+        QStringLiteral ("20W"),
+        QStringLiteral ("35.9N 14.5E"));
+    quint16 const sessionId = connectWideSession (
+        adapter, QStringLiteral ("TESTB"), QStringLiteral ("JN71"), 1000);
+    QVERIFY (sessionId != 0u);
+    QVERIFY (adapter.observeStation (
+        "N0NET", "EM12", "Relay", true, true, true, true, true, 2, 0, 1200));
+    QVERIFY (adapter.parkMailbox (
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("Relay"),
+        QStringLiteral ("Parked traffic"),
+        1300));
+
+    QVariantMap panel = adapter.privacyPanel (2000);
+    QVERIFY (panel.value (QStringLiteral ("ok")).toBool ());
+    QVERIFY (panel.value (QStringLiteral ("inquirySummary")).toString ().contains (
+        QStringLiteral ("parked")));
+    QVERIFY (panel.value (QStringLiteral ("exposures")).toList ().size () >= 8);
+
+    QVariantMap preview = adapter.inquiryPreview (
+        QStringLiteral ("TESTB"), 2100);
+    QCOMPARE (preview.value (QStringLiteral ("remoteCall")).toString (),
+              QStringLiteral ("TESTB"));
+    QVERIFY (preview.value (QStringLiteral ("sharedCount")).toInt () >= 7);
+    QVariantList rows = preview.value (QStringLiteral ("rows")).toList ();
+    QVariantMap info = findRecord (rows, QStringLiteral ("key"),
+                                   QStringLiteral ("INFO"));
+    QVERIFY (info.value (QStringLiteral ("reply")).toString ().contains (
+        QStringLiteral ("<NAME:Salvo>")));
+    QVariantMap parked = findRecord (rows, QStringLiteral ("key"),
+                                     QStringLiteral ("VM"));
+    QVERIFY (parked.value (QStringLiteral ("reply")).toString ().contains (
+        QStringLiteral ("parked VMail waiting")));
+
+    QVariantMap saved = adapter.configureInquiryPrivacy (
+        false, false, false, false, false, false, false, false, false, false,
+        2200);
+    QVERIFY (saved.value (QStringLiteral ("changed")).toBool ());
+    QVERIFY (!adapter.incomingPingsEnabled ());
+    QVERIFY (!adapter.lastHeardPeekingEnabled ());
+    QVERIFY (!adapter.lastConnectionsPeekingEnabled ());
+    QVERIFY (!adapter.parkedVmailPeekingEnabled ());
+    QVERIFY (!adapter.vmailParkingEnabled ());
+    QVERIFY (!adapter.snrReportSendingEnabled ());
+    QVERIFY (!adapter.verboseSnrAutoAcceptEnabled ());
+    QVERIFY (!adapter.infoInquireEnabled ());
+    QVERIFY (!adapter.autoReplyEnabled ());
+    QVERIFY (!adapter.welcomeEnabled ());
+
+    preview = adapter.inquiryPreview (QStringLiteral ("TESTB"), 2300);
+    rows = preview.value (QStringLiteral ("rows")).toList ();
+    info = findRecord (rows, QStringLiteral ("key"), QStringLiteral ("INFO"));
+    QCOMPARE (info.value (QStringLiteral ("status")).toString (),
+              QStringLiteral ("HOLD"));
+    QVERIFY (!info.value (QStringLiteral ("reply")).toString ().contains (
+        QStringLiteral ("<NAME:Salvo>")));
+    parked = findRecord (rows, QStringLiteral ("key"), QStringLiteral ("VM"));
+    QCOMPARE (parked.value (QStringLiteral ("status")).toString (),
+              QStringLiteral ("HOLD"));
+    QCOMPARE (findRecord (rows, QStringLiteral ("key"),
+                          QStringLiteral ("PING")).value (
+                  QStringLiteral ("status")).toString (),
+              QStringLiteral ("HOLD"));
+
+    QVERIFY (adapter.addBlockedCall (QStringLiteral ("TESTB")).value (
+                 QStringLiteral ("ok")).toBool ());
+    preview = adapter.inquiryPreview (QStringLiteral ("TESTB"), 2400);
+    QVERIFY (preview.value (QStringLiteral ("blocked")).toBool ());
+    rows = preview.value (QStringLiteral ("rows")).toList ();
+    QCOMPARE (findRecord (rows, QStringLiteral ("key"),
+                          QStringLiteral ("VER")).value (
+                  QStringLiteral ("status")).toString (),
+              QStringLiteral ("BLOCK"));
+
+    QVERIFY (adapter.saveLocalStore ());
+    FT2LinkQmlAdapter restored;
+    restored.setLocalStorePath (storePath);
+    QVERIFY (restored.loadLocalStore ());
+    QVERIFY (!restored.incomingPingsEnabled ());
+    QVERIFY (!restored.infoInquireEnabled ());
+    QVERIFY (restored.isCallBlocked (QStringLiteral ("TESTB")));
+  }
+
   void blockedCallsignsPersistFilterAndRejectHello ()
   {
     QTemporaryDir tempDir;
@@ -1594,6 +1700,12 @@ private Q_SLOTS:
     QCOMPARE (station.value ("cqSlotOffsetHz").toInt (), -2250);
     QCOMPARE (station.value ("cqSlotSizeHz").toInt (), 750);
     QCOMPARE (station.value ("cqSlotLabel").toString (), QStringLiteral ("S-3"));
+    QVariantMap const capabilities = station.value ("capabilities").toMap ();
+    QVERIFY (capabilities.value ("supportsW2300").toBool ());
+    QVERIFY (capabilities.value ("supportsW2300Ultra").toBool ());
+    QVERIFY (capabilities.value ("supportsQsy").toBool ());
+    QVERIFY (capabilities.value ("beaconSummary").toString ().contains (
+        QStringLiteral ("CHAT")));
 
     decodium::ft2link::Frame const specialBeacon =
         sender.makeLocalBeaconFrame (true, 1, 750, "NET", "JN71");
@@ -1617,6 +1729,8 @@ private Q_SLOTS:
               QStringLiteral ("NET"));
     QCOMPARE (history.first ().toMap ().value ("cqSlotLabel").toString (),
               QStringLiteral ("S+1"));
+    QVERIFY (history.first ().toMap ().value (
+        "capabilitySummary").toString ().contains (QStringLiteral ("W2300")));
     QVERIFY (adapter.beaconHistoryText ().contains (
         QStringLiteral ("NET | IU8LMC")));
   }
@@ -1642,7 +1756,8 @@ private Q_SLOTS:
     QCOMPARE (plan.value ("cqLocator").toString (), QStringLiteral ("JN71"));
     QCOMPARE (plan.value ("sequence").toInt (), 2);
     QCOMPARE (plan.value ("ackBase").toInt (), 750);
-    QCOMPARE (plan.value ("ackBitmap").toInt (), 3);
+    QCOMPARE (plan.value ("ackBitmap").toInt () & 0x000f, 3);
+    QVERIFY ((plan.value ("ackBitmap").toInt () & 0xfff0) != 0);
     QCOMPARE (adapter.beaconHistoryCount (), 1);
     QVariantMap const history = adapter.beaconHistory ().first ().toMap ();
     QCOMPARE (history.value ("direction").toString (), QStringLiteral ("TX"));
@@ -2411,6 +2526,15 @@ private Q_SLOTS:
     QVERIFY (relay.ingestRadioFrameBytes (
         frameBytes (requestFrame), QStringLiteral ("K1ABC"), 71000, true));
     QCOMPARE (relay.transportState (), QStringLiteral ("PATH RX"));
+    QCOMPARE (relay.pathReportCount (), 1);
+    QVariantMap const requestReport = relay.pathReports ().first ().toMap ();
+    QCOMPARE (requestReport.value ("kind").toString (), QStringLiteral ("PATH?"));
+    QCOMPARE (requestReport.value ("remoteCall").toString (),
+              QStringLiteral ("K1ABC"));
+    QCOMPARE (requestReport.value ("targetCall").toString (),
+              QStringLiteral ("N0CALL"));
+    QVERIFY (requestReport.value ("detail").toString ().contains (
+        QStringLiteral ("heard 1m ago")));
     QVERIFY (relay.alertCount () >= 1);
     QVariantMap pathAlert = relay.alertEvents ().last ().toMap ();
     QCOMPARE (pathAlert.value ("source").toString (), QStringLiteral ("Path"));
@@ -2432,6 +2556,18 @@ private Q_SLOTS:
     QVERIFY (requester.ingestRadioFrameBytes (
         frameBytes (responseFrame), QStringLiteral ("IU8LMC"), 72000, true));
     QCOMPARE (requester.transportState (), QStringLiteral ("PATH RX"));
+    QCOMPARE (requester.pathReportCount (), 1);
+    QVariantMap const responseReport = requester.pathReports ().first ().toMap ();
+    QCOMPARE (responseReport.value ("kind").toString (),
+              QStringLiteral ("PATH!"));
+    QCOMPARE (responseReport.value ("remoteCall").toString (),
+              QStringLiteral ("IU8LMC"));
+    QCOMPARE (responseReport.value ("targetCall").toString (),
+              QStringLiteral ("N0CALL"));
+    QCOMPARE (responseReport.value ("relayCall").toString (),
+              QStringLiteral ("IU8LMC"));
+    QCOMPARE (responseReport.value ("locator").toString (),
+              QStringLiteral ("EM12"));
     QVariantMap foundAlert = requester.alertEvents ().last ().toMap ();
     QCOMPARE (foundAlert.value ("source").toString (), QStringLiteral ("Path"));
     QVERIFY (foundAlert.value ("text").toString ().contains (
@@ -2504,6 +2640,85 @@ private Q_SLOTS:
           }
       }
     QVERIFY (sawRelayBadge);
+  }
+
+  void digipeaterForwardsOnceAndDeliversMultiHop ()
+  {
+    FT2LinkQmlAdapter source;
+    source.setLocalStation ("TESTA", "JN70", "A");
+    QString const envelope = source.digipeaterEnvelopeText (
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("multi hop payload"),
+        2,
+        1000);
+    QVERIFY (!envelope.isEmpty ());
+    QVERIFY (envelope.startsWith (QStringLiteral ("DG1|TESTA|TESTB|")));
+
+    decodium::ft2link::Frame sourceFrame;
+    sourceFrame.type = decodium::ft2link::FrameType::Broadcast;
+    sourceFrame.profile = decodium::ft2link::Profile::Wide2300;
+    sourceFrame.flags = decodium::ft2link::FlagEndOfMessage;
+    QByteArray const sourcePayload = envelope.toUtf8 ();
+    sourceFrame.payload.assign (
+        reinterpret_cast<std::uint8_t const*> (sourcePayload.constData ()),
+        reinterpret_cast<std::uint8_t const*> (sourcePayload.constData ())
+            + sourcePayload.size ());
+
+    FT2LinkQmlAdapter relay;
+    relay.setLocalStation ("TESTR", "JN71", "Relay");
+    QVariantMap const configured = relay.configureDigipeater (true, 2);
+    QVERIFY (configured.value (QStringLiteral ("ok")).toBool ());
+    QVERIFY (relay.digipeaterEnabled ());
+
+    QSignalSpy relayRadioSpy {&relay, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    QVERIFY (relay.ingestRadioFrameBytes (
+        frameBytes (sourceFrame), QStringLiteral ("TESTA"), 2000, true));
+    QCOMPARE (relayRadioSpy.size (), 1);
+    QCOMPARE (relay.transportState (), QStringLiteral ("DIGI RX"));
+    QVariantMap const relayEvent =
+        relay.digipeaterEvents ().first ().toMap ();
+    QCOMPARE (relayEvent.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Forwarded"));
+    QCOMPARE (relayEvent.value (QStringLiteral ("path")).toString (),
+              QStringLiteral ("TESTA>TESTR"));
+
+    QString const forwardedText = relay.broadcasts ().last ().toMap ().value (
+        QStringLiteral ("text")).toString ();
+    QVERIFY (forwardedText.startsWith (QStringLiteral ("DG1|TESTA|TESTB|")));
+    QVERIFY (forwardedText.contains (QStringLiteral ("|1|TESTA,TESTR|")));
+
+    QVERIFY (relay.ingestRadioFrameBytes (
+        frameBytes (sourceFrame), QStringLiteral ("TESTA"), 2100, true));
+    QCOMPARE (relayRadioSpy.size (), 1);
+    QCOMPARE (relay.digipeaterEvents ().first ().toMap ().value (
+                  QStringLiteral ("state")).toString (),
+              QStringLiteral ("Duplicate"));
+
+    decodium::ft2link::Frame forwardedFrame;
+    forwardedFrame.type = decodium::ft2link::FrameType::Broadcast;
+    forwardedFrame.profile = decodium::ft2link::Profile::Wide2300;
+    forwardedFrame.flags = decodium::ft2link::FlagEndOfMessage;
+    QByteArray const forwardedPayload = forwardedText.toUtf8 ();
+    forwardedFrame.payload.assign (
+        reinterpret_cast<std::uint8_t const*> (forwardedPayload.constData ()),
+        reinterpret_cast<std::uint8_t const*> (forwardedPayload.constData ())
+            + forwardedPayload.size ());
+
+    FT2LinkQmlAdapter dest;
+    dest.setLocalStation ("TESTB", "JN72", "B");
+    QVERIFY (dest.ingestRadioFrameBytes (
+        frameBytes (forwardedFrame), QStringLiteral ("TESTR"), 3000, true));
+    QCOMPARE (dest.transportState (), QStringLiteral ("DIGI RX"));
+    QVariantMap const delivered =
+        dest.digipeaterEvents ().first ().toMap ();
+    QCOMPARE (delivered.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Delivered"));
+    QCOMPARE (delivered.value (QStringLiteral ("payloadText")).toString (),
+              QStringLiteral ("multi hop payload"));
+    QCOMPARE (dest.pathReportCount (), 1);
+    QCOMPARE (dest.pathReports ().first ().toMap ().value (
+                  QStringLiteral ("kind")).toString (),
+              QStringLiteral ("DIGI"));
   }
 
   void pingRadioRoundTrip ()
@@ -2966,6 +3181,100 @@ private Q_SLOTS:
     QCOMPARE (restoredMail.value ("relayNotifiedAtMs").toULongLong (), 2000ull);
   }
 
+  void mailboxCenterTracksParkingRelayActionsAndPersistence ()
+  {
+    QTemporaryDir tempDir;
+    QVERIFY (tempDir.isValid ());
+    QString const storePath = tempDir.filePath (
+        QStringLiteral ("ft2link-mailbox-center-state.json"));
+
+    FT2LinkQmlAdapter adapter;
+    adapter.setLocalStorePath (storePath);
+    adapter.setLocalStation ("IU8LMC", "JN70", "Salvo");
+
+    QVariantMap center = adapter.mailboxCenter (1000);
+    QCOMPARE (center.value (QStringLiteral ("total")).toInt (), 0);
+    QCOMPARE (center.value (QStringLiteral ("relayQueue")).toInt (), 0);
+
+    QVERIFY (adapter.parkMailboxTyped (
+        QStringLiteral ("N0CALL"),
+        QStringLiteral ("Center relay"),
+        QStringLiteral ("Parked mailbox center body"),
+        true,
+        false,
+        1000));
+
+    center = adapter.mailboxCenter (61000);
+    QCOMPARE (center.value (QStringLiteral ("total")).toInt (), 1);
+    QCOMPARE (center.value (QStringLiteral ("parked")).toInt (), 1);
+    QCOMPARE (center.value (QStringLiteral ("relayReady")).toInt (), 0);
+    QCOMPARE (center.value (QStringLiteral ("relayQueue")).toInt (), 1);
+    QCOMPARE (center.value (QStringLiteral ("urgent")).toInt (), 1);
+    QVariantList rows = center.value (QStringLiteral ("rows")).toList ();
+    QCOMPARE (rows.size (), 1);
+    QVariantMap row = rows.first ().toMap ();
+    QCOMPARE (row.value (QStringLiteral ("role")).toString (),
+              QStringLiteral ("PARKED"));
+    QCOMPARE (row.value (QStringLiteral ("centerAction")).toString (),
+              QStringLiteral ("MARK_READY"));
+    QVERIFY (row.value (QStringLiteral ("summaryLine")).toString ().contains (
+        QStringLiteral ("Center relay")));
+    QCOMPARE (row.value (QStringLiteral ("ageMinutes")).toULongLong (), 1ull);
+    quint32 const mailboxId = row.value (QStringLiteral ("id")).toUInt ();
+    QVERIFY (mailboxId != 0u);
+
+    QVERIFY (adapter.markMailboxRelayReady (mailboxId, 70000));
+    center = adapter.mailboxCenter (70000);
+    QCOMPARE (center.value (QStringLiteral ("relayReady")).toInt (), 1);
+    row = center.value (QStringLiteral ("rows")).toList ().first ().toMap ();
+    QCOMPARE (row.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Relay ready"));
+    QCOMPARE (row.value (QStringLiteral ("centerAction")).toString (),
+              QStringLiteral ("CONNECT_RELAY"));
+
+    quint16 const sessionId =
+        connectWideSession (adapter, "N0CALL", "EM12", 80000);
+    QVERIFY (sessionId != 0u);
+    center = adapter.mailboxCenter (81000);
+    QCOMPARE (center.value (QStringLiteral ("canRelayNow")).toInt (), 1);
+    row = center.value (QStringLiteral ("rows")).toList ().first ().toMap ();
+    QVERIFY (row.value (QStringLiteral ("canRelayNow")).toBool ());
+    QCOMPARE (row.value (QStringLiteral ("centerAction")).toString (),
+              QStringLiteral ("RELAY_NOW"));
+
+    QVERIFY (adapter.markMailboxPendingRelay (
+        mailboxId, QStringLiteral ("N0CALL"), 90000));
+    center = adapter.mailboxCenter (90000);
+    QCOMPARE (center.value (QStringLiteral ("pendingRelay")).toInt (), 1);
+    row = center.value (QStringLiteral ("rows")).toList ().first ().toMap ();
+    QCOMPARE (row.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Pending relay"));
+    QCOMPARE (row.value (QStringLiteral ("relayViaCall")).toString (),
+              QStringLiteral ("N0CALL"));
+    QCOMPARE (row.value (QStringLiteral ("centerAction")).toString (),
+              QStringLiteral ("WAIT_ACK"));
+
+    QVERIFY (adapter.cancelMailboxRelay (mailboxId, 100000));
+    center = adapter.mailboxCenter (100000);
+    row = center.value (QStringLiteral ("rows")).toList ().first ().toMap ();
+    QCOMPARE (row.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Parked"));
+    QCOMPARE (row.value (QStringLiteral ("relayNotifiedAtMs")).toULongLong (),
+              0ull);
+
+    QVERIFY (adapter.saveLocalStore ());
+    FT2LinkQmlAdapter restored;
+    restored.setLocalStorePath (storePath);
+    QVERIFY (restored.loadLocalStore ());
+    center = restored.mailboxCenter (101000);
+    QCOMPARE (center.value (QStringLiteral ("total")).toInt (), 1);
+    row = center.value (QStringLiteral ("rows")).toList ().first ().toMap ();
+    QCOMPARE (row.value (QStringLiteral ("state")).toString (),
+              QStringLiteral ("Parked"));
+    QCOMPARE (row.value (QStringLiteral ("role")).toString (),
+              QStringLiteral ("PARKED"));
+  }
+
   void relayMailboxForwardsParkedThirdPartyMail ()
   {
     qRegisterMetaType<QVector<float>> ("QVector<float>");
@@ -3404,6 +3713,160 @@ private Q_SLOTS:
               QStringLiteral ("Shelter"));
     QCOMPARE (caller.messages (sessionId).last ().toMap ().value ("text").toString (),
               QStringLiteral ("BBS NET from K1ABC: Shelter"));
+  }
+
+  void bbsFileServerServesSharedFilesAndManagesReceivedFiles ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter server;
+    server.setLocalStation ("IU8LMC", "JN70", "Salvo");
+    quint16 const sessionId =
+        connectWideSession (server, "K1ABC", "FN42", 1000);
+    QVERIFY (sessionId != 0u);
+
+    QSignalSpy radioSpy {&server, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    QSignalSpy fileSpy {&server, &FT2LinkQmlAdapter::fileTransfersChanged};
+    QSignalSpy bbsSpy {&server, &FT2LinkQmlAdapter::bbsFileServerChanged};
+
+    QVariantMap state = server.configureBbsFileServer (true);
+    QVERIFY (state.value (QStringLiteral ("enabled")).toBool ());
+    QVERIFY (bbsSpy.size () >= 1);
+
+    QVariantMap published = server.publishBbsSharedFileText (
+        QStringLiteral ("server.txt"),
+        QStringLiteral ("BBS server payload"),
+        2000);
+    QVERIFY2 (published.value (QStringLiteral ("ok")).toBool (),
+              qPrintable (server.lastError ()));
+    QCOMPARE (server.bbsSharedFileCount (), 1);
+    QVariantList shared = server.bbsSharedFiles ();
+    QCOMPARE (shared.size (), 1);
+    QCOMPARE (shared.first ().toMap ().value ("fileName").toString (),
+              QStringLiteral ("server.txt"));
+    QCOMPARE (shared.first ().toMap ().value ("requestCount").toInt (), 0);
+
+    QVERIFY (server.transmitBbsSharedFileListRadio (sessionId, 3000));
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap listPlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (listPlan.value (QStringLiteral ("bbsFileList")).toBool ());
+    QVERIFY (listPlan.value (QStringLiteral ("bbsFileServer")).toBool ());
+    QCOMPARE (server.transportState (), QStringLiteral ("BBS LIST TX"));
+    server.notifyRadioTxFinished ();
+
+    QVERIFY (server.transmitBbsSharedFileRadio (
+        sessionId, QStringLiteral ("server.txt"), 4000));
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap filePlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (filePlan.value (QStringLiteral ("file")).toBool ());
+    QCOMPARE (filePlan.value (QStringLiteral ("fileName")).toString (),
+              QStringLiteral ("server.txt"));
+    server.notifyRadioTxFinished ();
+    QCOMPARE (server.fileTransferCount (), 1);
+    QVERIFY (fileSpy.size () >= 1);
+    QVariantMap outgoing = server.fileTransfers ().first ().toMap ();
+    QCOMPARE (outgoing.value (QStringLiteral ("direction")).toString (),
+              QStringLiteral ("Outgoing"));
+    QCOMPARE (outgoing.value (QStringLiteral ("fileName")).toString (),
+              QStringLiteral ("server.txt"));
+    shared = server.bbsSharedFiles ();
+    QCOMPARE (shared.first ().toMap ().value ("requestCount").toInt (), 1);
+
+    radioSpy.clear ();
+    QVERIFY (server.appendIncomingText (
+        sessionId, QStringLiteral ("<BLR>"), 5000));
+    QCOMPARE (radioSpy.size (), 1);
+    listPlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (listPlan.value (QStringLiteral ("bbsFileList")).toBool ());
+    server.notifyRadioTxFinished ();
+
+    radioSpy.clear ();
+    QVERIFY (server.appendIncomingText (
+        sessionId, QStringLiteral ("<BG:server.txt>"), 6000));
+    QCOMPARE (radioSpy.size (), 1);
+    filePlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (filePlan.value (QStringLiteral ("file")).toBool ());
+    server.notifyRadioTxFinished ();
+    shared = server.bbsSharedFiles ();
+    QCOMPARE (shared.first ().toMap ().value ("requestCount").toInt (), 2);
+
+    QByteArray const firstBytes = QByteArrayLiteral ("first received body");
+    QString const firstEnvelope =
+        QStringLiteral ("FT2FILE1|IU8LMC|K1ABC|%1|%2|%3|%4")
+            .arg (hexUtf8 (QStringLiteral ("first.txt")),
+                  QString::number (firstBytes.size ()),
+                  sha256Hex (firstBytes),
+                  QString::fromLatin1 (firstBytes.toBase64 ()));
+    QVERIFY (server.appendIncomingText (sessionId, firstEnvelope, 7000));
+    QVariantList received = server.receivedFiles ();
+    QCOMPARE (received.size (), 1);
+    quint32 const firstId =
+        received.first ().toMap ().value (QStringLiteral ("id")).toUInt ();
+    QVERIFY (server.markReceivedFileRead (firstId, true, 7100));
+    QCOMPARE (server.clearReceivedFiles (true), 1);
+    QVERIFY (server.receivedFiles ().isEmpty ());
+
+    QByteArray const secondBytes = QByteArrayLiteral ("second body");
+    QString const secondEnvelope =
+        QStringLiteral ("FT2FILE1|IU8LMC|K1ABC|%1|%2|%3|%4")
+            .arg (hexUtf8 (QStringLiteral ("second.txt")),
+                  QString::number (secondBytes.size ()),
+                  sha256Hex (secondBytes),
+                  QString::fromLatin1 (secondBytes.toBase64 ()));
+    QByteArray const thirdBytes = QByteArrayLiteral ("third body");
+    QString const thirdEnvelope =
+        QStringLiteral ("FT2FILE1|IU8LMC|K1ABC|%1|%2|%3|%4")
+            .arg (hexUtf8 (QStringLiteral ("third.txt")),
+                  QString::number (thirdBytes.size ()),
+                  sha256Hex (thirdBytes),
+                  QString::fromLatin1 (thirdBytes.toBase64 ()));
+    QVERIFY (server.appendIncomingText (sessionId, secondEnvelope, 8000));
+    QVERIFY (server.appendIncomingText (sessionId, thirdEnvelope, 8100));
+    received = server.receivedFiles ();
+    QCOMPARE (received.size (), 2);
+    quint32 const newestId =
+        received.first ().toMap ().value (QStringLiteral ("id")).toUInt ();
+    quint32 const olderId =
+        received.last ().toMap ().value (QStringLiteral ("id")).toUInt ();
+    QVERIFY (server.markReceivedFileRead (newestId, true, 8200));
+    QCOMPARE (server.clearReceivedFiles (true), 1);
+    received = server.receivedFiles ();
+    QCOMPARE (received.size (), 1);
+    QCOMPARE (received.first ().toMap ().value (QStringLiteral ("id")).toUInt (),
+              olderId);
+    QVERIFY (server.deleteReceivedFile (olderId));
+    QVERIFY (server.receivedFiles ().isEmpty ());
+
+    QVERIFY (server.removeBbsSharedFile (
+        shared.first ().toMap ().value (QStringLiteral ("id")).toUInt ()));
+    QCOMPARE (server.bbsSharedFileCount (), 0);
+
+    QByteArray binaryBytes;
+    binaryBytes.append ('\0');
+    binaryBytes.append ("BBSBIN", 6);
+    binaryBytes.append (char (0x7f));
+    QVariantMap binaryPublished = server.publishBbsSharedFileBytes (
+        QStringLiteral ("image.bin"),
+        QString::fromLatin1 (binaryBytes.toBase64 ()),
+        9000);
+    QVERIFY2 (binaryPublished.value (QStringLiteral ("ok")).toBool (),
+              qPrintable (server.lastError ()));
+    QVERIFY (binaryPublished.value (QStringLiteral ("binary")).toBool ());
+    QCOMPARE (binaryPublished.value (QStringLiteral ("sizeBytes")).toInt (),
+              binaryBytes.size ());
+    QCOMPARE (server.bbsSharedFileCount (), 1);
+    radioSpy.clear ();
+    QVERIFY (server.transmitBbsSharedFileRadio (
+        sessionId, QStringLiteral ("image.bin"), 9100));
+    QCOMPARE (radioSpy.size (), 1);
+    filePlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (filePlan.value (QStringLiteral ("file")).toBool ());
+    QCOMPARE (filePlan.value (QStringLiteral ("fileName")).toString (),
+              QStringLiteral ("image.bin"));
+    server.notifyRadioTxFinished ();
+    QVERIFY (server.removeBbsSharedFile (
+        binaryPublished.value (QStringLiteral ("id")).toUInt ()));
+    QCOMPARE (server.bbsSharedFileCount (), 0);
   }
 
   void localStorePersistsOperationalLogs ()
@@ -4005,7 +4468,7 @@ private Q_SLOTS:
     QVector<float> helloSamples = helloRequest[1].value<QVector<float>> ();
     QVERIFY (!helloSamples.isEmpty ());
     QVERIFY (answerer.ingestRxSamples (pcmFromSamples (helloSamples, 4), "", 2200));
-    QTRY_VERIFY_WITH_TIMEOUT (answererRadioSpy.size () >= 1, 3000);
+    QTRY_VERIFY_WITH_TIMEOUT (answererRadioSpy.size () >= 1, 5000);
     QCOMPARE (answerer.sessionCount (), 1);
     quint16 const sessionId = caller.activeSessionId ();
     QCOMPARE (answerer.sessionInfo (sessionId).value ("stateName").toString (),
@@ -4055,7 +4518,7 @@ private Q_SLOTS:
     QVERIFY (!helloSamples.isEmpty ());
     QVERIFY (stationB.ingestRxSamples (pcmFromSamples (helloSamples, 4),
                                        QString {}, 2200));
-    QTRY_VERIFY_WITH_TIMEOUT (radioB.size () >= 1, 3000);
+    QTRY_VERIFY_WITH_TIMEOUT (radioB.size () >= 1, 5000);
     quint16 const sessionId = stationA.activeSessionId ();
     QVERIFY (sessionId != 0u);
     QCOMPARE (stationB.sessionInfo (sessionId).value ("stateName").toString (),

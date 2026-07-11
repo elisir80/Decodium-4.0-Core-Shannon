@@ -277,6 +277,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString stationRigInfo    READ stationRigInfo    WRITE setStationRigInfo    NOTIFY stationRigInfoChanged)
     Q_PROPERTY(QString stationAntenna    READ stationAntenna    WRITE setStationAntenna    NOTIFY stationAntennaChanged)
     Q_PROPERTY(int     stationPowerWatts READ stationPowerWatts WRITE setStationPowerWatts NOTIFY stationPowerWattsChanged)
+    Q_PROPERTY(int     wsprPowerDbm      READ wsprPowerDbm      WRITE setWsprPowerDbm      NOTIFY wsprPowerDbmChanged)
     Q_PROPERTY(bool    autoStartMonitorOnStartup READ autoStartMonitorOnStartup WRITE setAutoStartMonitorOnStartup NOTIFY autoStartMonitorOnStartupChanged)
     Q_PROPERTY(bool    startFromTx2      READ startFromTx2      WRITE setStartFromTx2      NOTIFY startFromTx2Changed)
     Q_PROPERTY(bool    vhfUhfFeatures    READ vhfUhfFeatures    WRITE setVhfUhfFeatures    NOTIFY vhfUhfFeaturesChanged)
@@ -831,6 +832,9 @@ public:
     void    setStationAntenna(const QString& v);
     int     stationPowerWatts() const { return m_stationPowerWatts; }
     void    setStationPowerWatts(int v){ v = qBound(0, v, 9999); if (m_stationPowerWatts!=v){m_stationPowerWatts=v;emit stationPowerWattsChanged(); if (m_mode.trimmed().compare(QStringLiteral("WSPR"), Qt::CaseInsensitive) == 0) regenerateTxMessages();} }
+    int     wsprPowerDbm() const { return m_wsprPowerDbm; }
+    void    setWsprPowerDbm(int v);
+    Q_INVOKABLE QVariantList wsprPowerOptions() const;
     bool    autoStartMonitorOnStartup() const { return m_autoStartMonitorOnStartup; }
     void    setAutoStartMonitorOnStartup(bool){ if (!m_autoStartMonitorOnStartup){m_autoStartMonitorOnStartup=true;emit autoStartMonitorOnStartupChanged();} }
     bool    startFromTx2()   const { return m_startFromTx2; }
@@ -1668,6 +1672,7 @@ signals:
     void stationRigInfoChanged();
     void stationAntennaChanged();
     void stationPowerWattsChanged();
+    void wsprPowerDbmChanged();
     void autoStartMonitorOnStartupChanged();
     void startFromTx2Changed();
     void vhfUhfFeaturesChanged();
@@ -1787,6 +1792,7 @@ private:
     void syncCatSplitModeToLegacy(const QString& mode, const QString& reason);
     bool checkSwrAllowsTransmission(const QString& reason);
     void enforceSwrTransmissionLimit(const QString& reason);
+    void enforceWsprPowerTransmissionLimit(const QString& reason);
     void applyRemoteDialFrequency(double hz, const QString& reason);
     void applyRemoteBandChange(const QString& band);
     void publishRemoteActivityEntries(QVariantList const& entries);
@@ -2285,6 +2291,7 @@ private:
     double m_rigSwr {0.0};
     double m_rigAlc {0.0};  // 1.0.323 — ALC meter 0..100
     bool m_rigAlcValid {false};
+    qint64 m_lastWsprPowerGuardMs {0};
     // 1.0.324 — ALC auto-calibration state
     int     m_alcTarget        {20};
     bool    m_alcCalibrating   {false};
@@ -2512,6 +2519,7 @@ private:
     decodium::msk144::MSK144DecodeWorker* m_mskWorker {nullptr};
     QThread* m_workerThreadWspr{nullptr};
     decodium::wspr::WSPRDecodeWorker*  m_wsprWorker   {nullptr};
+    QHash<quint64, QString> m_wsprDecodeTempFiles;
     QThread* m_workerThreadLegacyJt{nullptr};
     decodium::legacyjt::LegacyJtDecodeWorker* m_legacyJtWorker {nullptr};
     QThread* m_workerThreadFst4{nullptr};
@@ -2781,6 +2789,7 @@ private:
     QString m_stationRigInfo;
     QString m_stationAntenna;
     int     m_stationPowerWatts {100};
+    int     m_wsprPowerDbm {37};
     bool    m_autoStartMonitorOnStartup {true};
     bool    m_startFromTx2 {false};
     bool    m_vhfUhfFeatures {false};
@@ -3301,6 +3310,7 @@ private:
 
     void refreshDecodeListDxcc();
     QStringList parseFt8Row(const QString& row) const;
+    QStringList parseWsprRow(const QString& row) const;
     QStringList parseJt65Row(const QString& row) const;
     void startAudioCapture();
     void stopAudioCapture();

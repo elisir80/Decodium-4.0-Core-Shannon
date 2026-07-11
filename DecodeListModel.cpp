@@ -46,6 +46,7 @@ static RoleSpec const kRoleSpecs[] = {
     { DecodeListModel::HighlightBgRole,          "highlightBg",        "highlightBg" },
     { DecodeListModel::IsHighlightedRole,        "isHighlighted",      "isHighlighted" },
     { DecodeListModel::AptypeRole,               "aptype",             "aptype" },
+    { DecodeListModel::DriftRole,                "drift",              "drift" },
     { DecodeListModel::ForceRxPaneRole,          "forceRxPane",        "forceRxPane" },
     { DecodeListModel::QualityRole,              "quality",            "quality" },
     // Role speciale che ritorna l'intera entry (per delegate che usano
@@ -201,9 +202,10 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
     // coda (1.0.206 cap 500). Senza questo caso si cadeva in beginResetModel
     // = ridisegno totale ListView ad ogni decode → Full Spectrum scattoso.
     // Cerco lo shift N tale che oldEntries[N..oldCount-1] match newEntries[0..oldCount-N-1].
-    // Limita ricerca a shift <=64 (cap conservativo per non bruciare CPU su miss).
+    // 1.0.478: busy FT8/FT4/FT2 slots can trim more than 64 old rows at once.
+    // Raising the cap avoids beginResetModel() during high decode pile-up.
     if (oldCount > 0 && newCount > 0) {
-        int const maxShift = qMin(oldCount, 64);
+        int const maxShift = qMin(oldCount, 256);
         for (int shift = 1; shift <= maxShift; ++shift) {
             int const overlapLen = oldCount - shift;
             if (overlapLen <= 0 || overlapLen > newCount) continue;

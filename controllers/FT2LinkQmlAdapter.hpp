@@ -131,6 +131,11 @@ class FT2LinkQmlAdapter : public QObject
   Q_PROPERTY(int contactCount READ contactCount NOTIFY contactHistoryChanged)
   Q_PROPERTY(int pingCount READ pingCount NOTIFY pingLogChanged)
   Q_PROPERTY(int pathReportCount READ pathReportCount NOTIFY pathReportsChanged)
+  Q_PROPERTY(bool digipeaterEnabled READ digipeaterEnabled NOTIFY digipeaterChanged)
+  Q_PROPERTY(int digipeaterMaxHops READ digipeaterMaxHops NOTIFY digipeaterChanged)
+  Q_PROPERTY(int digipeaterEventCount READ digipeaterEventCount NOTIFY digipeaterChanged)
+  Q_PROPERTY(bool bbsFileServerEnabled READ bbsFileServerEnabled NOTIFY bbsFileServerChanged)
+  Q_PROPERTY(int bbsSharedFileCount READ bbsSharedFileCount NOTIFY bbsFileServerChanged)
   Q_PROPERTY(int beaconHistoryCount READ beaconHistoryCount NOTIFY beaconHistoryChanged)
   Q_PROPERTY(int clusterLastHeardCount READ clusterLastHeardCount NOTIFY clusterLastHeardChanged)
   Q_PROPERTY(int frequencyScheduleCount READ frequencyScheduleCount NOTIFY frequencyPlanChanged)
@@ -195,6 +200,11 @@ public:
   int contactCount () const;
   int pingCount () const;
   int pathReportCount () const;
+  bool digipeaterEnabled () const;
+  int digipeaterMaxHops () const;
+  int digipeaterEventCount () const;
+  bool bbsFileServerEnabled () const;
+  int bbsSharedFileCount () const;
   int beaconHistoryCount () const;
   int clusterLastHeardCount () const;
   int frequencyScheduleCount () const;
@@ -277,6 +287,40 @@ public:
                                                     quint64 nowMs);
   Q_INVOKABLE QVariantMap pathFinderCandidate (QString const& targetCall,
                                                quint64 nowMs) const;
+  Q_INVOKABLE QVariantMap digipeaterState (quint64 nowMs) const;
+  Q_INVOKABLE QVariantList digipeaterEvents () const;
+  Q_INVOKABLE QVariantMap configureDigipeater (bool enabled,
+                                               int maxHops);
+  Q_INVOKABLE bool clearDigipeaterEvents ();
+  Q_INVOKABLE QString digipeaterEnvelopeText (QString const& targetCall,
+                                              QString const& payloadText,
+                                              int maxHops,
+                                              quint64 nowMs) const;
+  Q_INVOKABLE bool transmitDigipeaterRadio (QString const& targetCall,
+                                            QString const& payloadText,
+                                            int maxHops,
+                                            quint64 nowMs);
+  Q_INVOKABLE QVariantMap bbsFileServerState (quint64 nowMs) const;
+  Q_INVOKABLE QVariantList bbsSharedFiles () const;
+  Q_INVOKABLE QVariantMap configureBbsFileServer (bool enabled);
+  Q_INVOKABLE QVariantMap publishBbsSharedFileText (QString const& fileName,
+                                                    QString const& content,
+                                                    quint64 nowMs);
+  Q_INVOKABLE QVariantMap publishBbsSharedFileBytes (QString const& fileName,
+                                                     QString const& contentBase64,
+                                                     quint64 nowMs);
+  Q_INVOKABLE bool removeBbsSharedFile (quint32 fileId);
+  Q_INVOKABLE bool clearBbsSharedFiles ();
+  Q_INVOKABLE bool requestBbsFileListRadio (quint16 sessionId,
+                                            quint64 nowMs);
+  Q_INVOKABLE bool requestBbsFileRadio (quint16 sessionId,
+                                        QString const& fileName,
+                                        quint64 nowMs);
+  Q_INVOKABLE bool transmitBbsSharedFileListRadio (quint16 sessionId,
+                                                   quint64 nowMs);
+  Q_INVOKABLE bool transmitBbsSharedFileRadio (quint16 sessionId,
+                                               QString const& fileName,
+                                               quint64 nowMs);
   Q_INVOKABLE bool transmitPingRadio (QString const& remoteCall, quint64 nowMs);
   Q_INVOKABLE bool configureAutoBeacon (bool enabled,
                                         int intervalSeconds,
@@ -345,6 +389,7 @@ public:
                                           QString const& title,
                                           QString const& body,
                                           quint64 nowMs);
+  Q_INVOKABLE void armStrictListenBeforeTransmit (int cancelAfterMs = 24000);
   Q_INVOKABLE void setRadioTxArmed (bool armed);
   Q_INVOKABLE bool prepareRadioTxAudio (quint16 sessionId,
                                         QString const& text,
@@ -451,7 +496,22 @@ public:
   Q_INVOKABLE QVariantMap evaluateAutoAway (quint64 nowMs);
   Q_INVOKABLE QVariantMap qsoAutomation () const;
   Q_INVOKABLE QVariantMap privacyProfile () const;
+  Q_INVOKABLE QVariantMap privacyPanel (quint64 nowMs) const;
+  Q_INVOKABLE QVariantMap inquiryPreview (QString const& remoteCall,
+                                          quint64 nowMs) const;
   Q_INVOKABLE QVariantMap applyPrivacyPreset (QString const& preset);
+  Q_INVOKABLE QVariantMap configureInquiryPrivacy (
+      bool incomingPings,
+      bool lastHeardPeeking,
+      bool lastConnectionsPeeking,
+      bool parkedVmailPeeking,
+      bool vmailParking,
+      bool snrReportSending,
+      bool verboseSnrAutoAccept,
+      bool infoInquire,
+      bool autoReply,
+      bool welcome,
+      quint64 nowMs);
   Q_INVOKABLE QVariantMap configureQsoAutomation (
       int callIdIntervalMinutes,
       int autoDisconnectMinutes);
@@ -517,6 +577,7 @@ public:
   Q_INVOKABLE QString chatHistoryLog () const;
   Q_INVOKABLE QString mailboxText () const;
   Q_INVOKABLE QString relayQueueText (quint64 nowMs) const;
+  Q_INVOKABLE QVariantMap mailboxCenter (quint64 nowMs) const;
   Q_INVOKABLE bool markMailboxEmailGateway (quint32 messageId,
                                             QString const& state,
                                             QString const& detail,
@@ -572,9 +633,18 @@ public:
   Q_INVOKABLE bool markMailboxRead (quint32 messageId,
                                     bool read,
                                     quint64 nowMs);
+  Q_INVOKABLE bool markMailboxRelayReady (quint32 messageId,
+                                          quint64 nowMs);
+  Q_INVOKABLE bool markMailboxPendingRelay (quint32 messageId,
+                                            QString const& relayCall,
+                                            quint64 nowMs);
+  Q_INVOKABLE bool cancelMailboxRelay (quint32 messageId,
+                                       quint64 nowMs);
   Q_INVOKABLE bool markReceivedFileRead (quint32 transferId,
                                          bool read,
                                          quint64 nowMs);
+  Q_INVOKABLE bool deleteReceivedFile (quint32 transferId);
+  Q_INVOKABLE int clearReceivedFiles (bool readOnly);
   Q_INVOKABLE bool markBulletinRead (quint32 bulletinId,
                                      bool read,
                                      quint64 nowMs);
@@ -649,6 +719,8 @@ signals:
   void contactHistoryChanged ();
   void pingLogChanged ();
   void pathReportsChanged ();
+  void digipeaterChanged ();
+  void bbsFileServerChanged ();
   void beaconHistoryChanged ();
   void clusterLastHeardChanged ();
   void localStoreChanged ();
@@ -788,6 +860,23 @@ private:
   bool handlePathFinderBroadcast (QString const& fromCall,
                                   QString const& text,
                                   quint64 nowMs);
+  bool handleDigipeaterBroadcast (QString const& fromCall,
+                                  QString const& text,
+                                  quint64 nowMs);
+  bool transmitDigipeaterEnvelopeRadio (QString const& envelopeText,
+                                        quint64 nowMs,
+                                        bool requireArm);
+  void recordDigipeaterEvent (QString const& direction,
+                              QString const& originCall,
+                              QString const& targetCall,
+                              QString const& viaCall,
+                              QStringList const& path,
+                              QString const& payloadText,
+                              QString const& state,
+                              int ttl,
+                              QString const& detail,
+                              quint64 nowMs);
+  void pruneDigipeaterSeen (quint64 nowMs);
   quint32 recordMailbox (QString const& direction,
                          QString const& fromCall,
                          QString const& toCall,
@@ -884,6 +973,14 @@ private:
                          QString const& rateName,
                          QString const& source,
                          quint64 nowMs);
+  void recordPathFinderReport (QString const& direction,
+                               QString const& remoteCall,
+                               QString const& targetCall,
+                               QString const& relayCall,
+                               QString const& locator,
+                               QString const& kind,
+                               QString const& detail,
+                               quint64 nowMs);
   void recordSnrReportsForText (quint16 sessionId,
                                 QString const& direction,
                                 QString const& text,
@@ -909,6 +1006,7 @@ private:
                            quint64 nowMs,
                            decodium::ft2link::Frame* helloAck,
                            QString* resolvedRemoteCall);
+  struct BbsSharedFile;
   bool recordOperatorActivity (quint64 nowMs);
   QVariantMap autoAwayResult (bool changed,
                               bool activated,
@@ -925,6 +1023,14 @@ private:
   QString lastConnectionsTagReply () const;
   QString bbsFileListReply (quint64 nowMs) const;
   bool bbsFileAvailable (QString const& fileName) const;
+  BbsSharedFile const* bbsSharedFileForName (QString const& fileName) const;
+  bool queueBbsSharedFileListReply (quint16 sessionId,
+                                    QString const& remoteCall,
+                                    quint64 nowMs);
+  bool queueBbsSharedFileDownload (quint16 sessionId,
+                                   QString const& remoteCall,
+                                   QString const& fileName,
+                                   quint64 nowMs);
   void setTypingPeer (QString const& call, bool typing, quint64 nowMs);
   bool expireTypingIndicators (quint64 nowMs);
   void touchContact (QString const& call,
@@ -957,6 +1063,8 @@ private:
     QVariantMap plan;
     quint16 sessionId {0};
     bool cancelIfNoOutbound {false};
+    bool strictLbt {false};
+    quint64 lbtCancelAtMs {0};
     bool priority {false};
     quint64 enqueuedAtMs {0};  // per hold-off LBT massimo
   };
@@ -1056,6 +1164,21 @@ private:
     quint64 updatedAtMs {0};
   };
 
+  struct BbsSharedFile
+  {
+    quint32 id {0};
+    QString fileName;
+    QString content;
+    QString contentBase64;
+    QString sha256;
+    bool binary {false};
+    bool enabled {true};
+    quint64 atMs {0};
+    quint64 updatedAtMs {0};
+    quint64 lastRequestedAtMs {0};
+    int requestCount {0};
+  };
+
   struct Bulletin
   {
     quint32 id {0};
@@ -1153,6 +1276,10 @@ private:
     QString profileName;
     QString rateName;
     QString source;
+    QString kind;
+    QString targetCall;
+    QString relayCall;
+    QString detail;
     quint64 atMs {0};
   };
 
@@ -1165,6 +1292,21 @@ private:
     quint64 atMs {0};
   };
 
+  struct DigipeaterEvent
+  {
+    quint32 id {0};
+    QString direction;
+    QString originCall;
+    QString targetCall;
+    QString viaCall;
+    QStringList path;
+    QString payloadText;
+    QString state;
+    int ttl {0};
+    QString detail;
+    quint64 atMs {0};
+  };
+
   struct BeaconHistoryEntry
   {
     QString direction;
@@ -1172,6 +1314,9 @@ private:
     QString locator;
     QString name;
     QString profileName;
+    QString capabilitySummary;
+    quint16 waveformCapabilityFlags {0};
+    quint16 serviceCapabilityFlags {0};
     bool cq {false};
     QString cqType;
     QString cqLocator;
@@ -1253,6 +1398,7 @@ private:
   std::vector<MailboxMessage> m_mailbox;
   std::vector<FormMessage> m_forms;
   std::vector<FileTransfer> m_fileTransfers;
+  std::vector<BbsSharedFile> m_bbsSharedFiles;
   std::vector<Bulletin> m_bulletins;
   std::map<QString, ContactHistory> m_contactHistory;
   std::map<quint16, QsoLogEntry> m_qsoLog;
@@ -1261,6 +1407,8 @@ private:
   std::vector<PingRecord> m_pingLog;
   std::vector<PathReport> m_pathReports;
   std::vector<PathRelayHint> m_pathRelayHints;
+  std::vector<DigipeaterEvent> m_digipeaterEvents;
+  std::map<QString, quint64> m_digipeaterSeen;
   std::vector<BeaconHistoryEntry> m_beaconHistory;
   std::map<QString, ClusterLastHeardEntry> m_clusterLastHeard;
   std::vector<CannedMessage> m_customCannedMessages;
@@ -1288,6 +1436,9 @@ private:
   bool m_snrReportSendingEnabled {true};
   bool m_verboseSnrAutoAcceptEnabled {false};
   bool m_infoInquireEnabled {true};
+  bool m_digipeaterEnabled {false};
+  int m_digipeaterMaxHops {2};
+  bool m_bbsFileServerEnabled {false};
   bool m_clusterEnabled {true};
   QString m_clusterNodeId;
   QString m_clusterBand;
@@ -1304,9 +1455,11 @@ private:
   quint32 m_nextMailboxId {1u};
   quint32 m_nextFormId {1u};
   quint32 m_nextFileTransferId {1u};
+  quint32 m_nextBbsSharedFileId {1u};
   quint32 m_nextBulletinId {1u};
   quint32 m_nextAlertId {1u};
   quint32 m_nextPathReportId {1u};
+  quint32 m_nextDigipeaterEventId {1u};
   quint32 m_nextLogbookUploadId {1u};
   QString m_localStorePath;
   bool m_localStoreLoaded {false};
@@ -1321,6 +1474,8 @@ private:
   QTimer m_liveChannelTimer;
   quint64 m_radioTxBusyUntilMs {0};
   quint16 m_lastRadioTxSessionId {0};
+  bool m_nextRadioTxStrictLbt {false};
+  int m_nextRadioTxStrictLbtCancelMs {24000};
   quint64 m_lastBeaconTxMs {0};
   quint64 m_liveChannelBusyUntilMs {0};
   bool m_liveChannelBusy {false};

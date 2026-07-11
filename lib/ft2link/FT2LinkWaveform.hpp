@@ -73,6 +73,9 @@ struct W2300WaveformConfig
   double subcarrierSpacingHz {600.0};
   double gain {0.55};
   W2300RateMode rateMode {W2300RateMode::Fast};
+  // 0 means unlimited. Live RX sets a small budget so a false W2300
+  // acquisition cannot hold the decode worker during shutdown.
+  int maxDecodeMillis {0};
 };
 
 struct W2300DecodeMetrics

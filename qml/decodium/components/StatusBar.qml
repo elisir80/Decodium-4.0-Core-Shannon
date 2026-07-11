@@ -44,11 +44,13 @@ Rectangle {
     // 1.0.323 — ALC: verde se 0 < ALC ≤ 60, rosso se > 60 (over-ALC)
     readonly property color alcStatusColor: rigAlc > 60 ? colorRed : accentGreen
 
-    // Scala logaritmica: -60 dBFS → 0.0, 0 dBFS → 1.0
-    // Mappa valori RMS tipici (0.001..0.3) su tutto il range S-meter
-    readonly property double scaledLevel: audioLevel > 0.0
-        ? Math.max(0.0, Math.min(1.0, (20.0 * Math.log(audioLevel) / Math.LN10 + 60.0) / 60.0))
-        : Math.max(0.0, Math.min(1.0, signalLevel / 90.0))
+    readonly property bool hasLegacySignalLevel: signalLevel > 0.0
+    // Prefer the legacy-calibrated S-meter when available; raw RMS is only a fallback.
+    readonly property double scaledLevel: hasLegacySignalLevel
+        ? Math.max(0.0, Math.min(1.0, signalLevel / 90.0))
+        : (audioLevel > 0.0
+            ? Math.max(0.0, Math.min(1.0, (20.0 * Math.log(audioLevel) / Math.LN10 + 60.0) / 60.0))
+            : 0.0)
     property bool monitoring: false
     property bool transmitting: false
     property bool tuning: false
@@ -186,12 +188,12 @@ Rectangle {
             Text {
                 visible: showFooterSignalDb
                 text: {
+                    if (hasLegacySignalLevel)
+                        return signalLevel.toFixed(0) + "dB"
                     if (audioLevel > 0) {
                         var db = 20.0 * Math.log(audioLevel) / Math.LN10
                         return db.toFixed(0) + "dB"
                     }
-                    if (signalLevel > 0)
-                        return signalLevel.toFixed(0) + "dB"
                     return "-∞"
                 }
                 font.family: decodiumMonoFontFamily

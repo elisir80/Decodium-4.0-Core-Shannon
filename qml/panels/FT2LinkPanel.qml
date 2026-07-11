@@ -8,8 +8,12 @@ Rectangle {
     id: root
 
     signal closeRequested()
+    signal popDockRequested()
 
     property var dragTarget: null
+    property bool toolTabsExternal: false
+    property bool poppedOut: false
+    readonly property var ft2LinkAdapter: ft2Link
     property var stations: []
     property var sessions: []
     property var selectedMessages: []
@@ -17,6 +21,7 @@ Rectangle {
     property var alerts: []
     property var alertTagList: []
     property var mailbox: []
+    property var mailboxCenterState: ({})
     property var relayQueue: []
     property var formTemplates: []
     property var forms: []
@@ -31,6 +36,10 @@ Rectangle {
     property var selectedContactTimeline: []
     property var pingLog: []
     property var pathReports: []
+    property var digipeaterState: ({})
+    property var digipeaterEvents: []
+    property var bbsFileServerState: ({})
+    property var bbsSharedFiles: []
     property var beaconHistory: []
     property var clusterLastHeard: []
     property var pathAnalysis: ({})
@@ -53,6 +62,9 @@ Rectangle {
     property string lastFrequencyScheduleApplyKey: ""
     property var presenceState: ({})
     property var qsoAutomationState: ({})
+    property var privacyPanelState: ({})
+    property var inquiryPreviewState: ({})
+    property string inquiryPreviewCall: ""
     property var blockedCalls: []
     property int selectedSessionId: ft2Link ? ft2Link.activeSessionId : 0
     property string selectedRemoteCall: ""
@@ -69,6 +81,14 @@ Rectangle {
     property int qsySlotIndex: settingInt("uiFt2LinkQsySlotIndex", 0, 0, 9)
     property int cqSlotIndex: settingInt("uiFt2LinkCqSlotIndex", 0, 0, 9)
     property int cqSlotWaitSeconds: settingInt("uiFt2LinkCqSlotWaitSeconds", 120, 60, 3600)
+    property int slotSnifferSeconds: settingInt("uiFt2LinkSlotSnifferSeconds", 8, 3, 30)
+    property double slotSnifferUntilMs: 0
+    property double slotSnifferDeadlineMs: 0
+    property string slotSnifferAction: ""
+    property string slotSnifferLabel: ""
+    property bool slotSnifferRequireSlotClear: false
+    property string slotSnifferStatus: ""
+    property var slotSnifferPayload: ({})
     property int cqTypeIndex: settingInt("uiFt2LinkCqTypeIndex", 0, 0, 5)
     property string cqLocator: settingString("uiFt2LinkCqLocator", "")
     property int qsyCallingFrequencyHz: settingInt("uiFt2LinkCallingFrequencyHz", 0, 0, 999999999)
@@ -77,6 +97,13 @@ Rectangle {
     property string selectedContactCall: ""
     property string pathFilterCall: ""
     property string pathFilterGrid: ""
+    property bool digipeaterEnabledSetting: settingBool("uiFt2LinkDigipeaterEnabled", false)
+    property int digipeaterMaxHopsSetting: settingInt("uiFt2LinkDigipeaterMaxHops", 2, 0, 9)
+    property bool bbsFileServerEnabledSetting: settingBool("uiFt2LinkBbsFileServerEnabled", false)
+    property string bbsServerStatus: ""
+    property string bbsServerContentBase64: ""
+    property bool bbsServerBinary: false
+    property int bbsServerBytes: 0
     property string logExportText: ""
     property string databaseActionText: ""
     property string typingSummaryText: ""
@@ -169,10 +196,14 @@ Rectangle {
     onQsyCallingFrequencyHzChanged: persistSetting("uiFt2LinkCallingFrequencyHz", qsyCallingFrequencyHz)
     onCqSlotIndexChanged: persistSetting("uiFt2LinkCqSlotIndex", cqSlotIndex)
     onCqSlotWaitSecondsChanged: persistSetting("uiFt2LinkCqSlotWaitSeconds", cqSlotWaitSeconds)
+    onSlotSnifferSecondsChanged: persistSetting("uiFt2LinkSlotSnifferSeconds", slotSnifferSeconds)
     onCqTypeIndexChanged: persistSetting("uiFt2LinkCqTypeIndex", cqTypeIndex)
     onCqLocatorChanged: persistSetting("uiFt2LinkCqLocator", cqLocator)
     onStationPaneWidthChanged: persistSetting("uiFt2LinkStationPaneWidth", stationPaneWidth)
     onSessionPaneWidthChanged: persistSetting("uiFt2LinkSessionPaneWidth", sessionPaneWidth)
+    onDigipeaterEnabledSettingChanged: persistSetting("uiFt2LinkDigipeaterEnabled", digipeaterEnabledSetting)
+    onDigipeaterMaxHopsSettingChanged: persistSetting("uiFt2LinkDigipeaterMaxHops", digipeaterMaxHopsSetting)
+    onBbsFileServerEnabledSettingChanged: persistSetting("uiFt2LinkBbsFileServerEnabled", bbsFileServerEnabledSetting)
     onSkipCqSlotChanged: persistSetting("uiFt2LinkSkipCqSlot", skipCqSlot)
     onProfileNameChanged: { persistSetting("uiFt2LinkProfileName", profileName); syncLocalStation() }
     onProfileQthChanged: { persistSetting("uiFt2LinkProfileQth", profileQth); syncLocalStation() }
@@ -444,6 +475,9 @@ Rectangle {
         relayQueue = ft2Link && typeof ft2Link.relayQueue === "function"
                      ? ft2Link.relayQueue(nowMs())
                      : []
+        mailboxCenterState = ft2Link && typeof ft2Link.mailboxCenter === "function"
+                             ? ft2Link.mailboxCenter(nowMs())
+                             : ({ rows: mailbox })
     }
 
     function refreshFormTemplates() {
@@ -473,6 +507,15 @@ Rectangle {
     function refreshReceivedFiles() {
         receivedFiles = ft2Link ? ft2Link.receivedFiles() : []
         receivedFileUnreadCount = countUnreadReceivedFiles(receivedFiles)
+    }
+
+    function refreshBbsFileServer() {
+        bbsFileServerState = ft2Link && typeof ft2Link.bbsFileServerState === "function"
+                             ? ft2Link.bbsFileServerState(nowMs())
+                             : ({})
+        bbsSharedFiles = ft2Link && typeof ft2Link.bbsSharedFiles === "function"
+                         ? ft2Link.bbsSharedFiles()
+                         : []
     }
 
     function countUnreadBulletins(items) {
@@ -516,6 +559,15 @@ Rectangle {
 
     function refreshPathReports() {
         pathReports = ft2Link ? ft2Link.pathReports() : []
+    }
+
+    function refreshDigipeater() {
+        digipeaterState = ft2Link && typeof ft2Link.digipeaterState === "function"
+                           ? ft2Link.digipeaterState(nowMs())
+                           : ({})
+        digipeaterEvents = ft2Link && typeof ft2Link.digipeaterEvents === "function"
+                           ? ft2Link.digipeaterEvents()
+                           : []
     }
 
     function refreshBeaconHistory() {
@@ -591,6 +643,21 @@ Rectangle {
                              : ({})
     }
 
+    function refreshPrivacyPanel() {
+        privacyPanelState = ft2Link && typeof ft2Link.privacyPanel === "function"
+                            ? ft2Link.privacyPanel(nowMs())
+                            : ({})
+    }
+
+    function refreshInquiryPreview() {
+        var call = inquiryPreviewCall.trim()
+        if (call.length === 0)
+            call = selectedRemoteCall
+        inquiryPreviewState = ft2Link && typeof ft2Link.inquiryPreview === "function"
+                              ? ft2Link.inquiryPreview(call, nowMs())
+                              : ({})
+    }
+
     function refreshBlockedCalls() {
         blockedCalls = ft2Link && typeof ft2Link.blockedCalls === "function"
                        ? ft2Link.blockedCalls()
@@ -619,16 +686,20 @@ Rectangle {
         refreshForms()
         refreshFileTransfers()
         refreshReceivedFiles()
+        refreshBbsFileServer()
         refreshBulletins()
         refreshQsoLog()
         refreshLogbookOutbox()
         refreshContactHistory()
         refreshPingLog()
         refreshPathReports()
+        refreshDigipeater()
         refreshBeaconHistory()
         updateClusterFromRig()
         refreshPathAnalysis()
         refreshContactTimeline()
+        refreshPrivacyPanel()
+        refreshInquiryPreview()
     }
 
     function logbookStateCount(stateName) {
@@ -644,6 +715,10 @@ Rectangle {
     function queueStatusLine() {
         if (!ft2Link)
             return "QUEUE --"
+        if (slotSnifferActive())
+            return "QUEUE " + slotSnifferLine()
+        if (slotSnifferStatus.length > 0)
+            return "QUEUE " + slotSnifferStatus
         var parts = []
         var queued = logbookStateCount("Queued")
         var submitted = logbookStateCount("Submitted")
@@ -666,6 +741,11 @@ Rectangle {
     }
 
     function queueStatusColor() {
+        if (slotSnifferActive())
+            return root.amber
+        if (slotSnifferStatus.indexOf("abort") >= 0
+                || slotSnifferStatus.indexOf("BUSY") >= 0)
+            return root.red
         if (ft2Link && (ft2Link.alertCount > 0 || logbookStateCount("Failed") > 0))
             return root.red
         if (ft2Link && (ft2Link.relayQueueCount > 0
@@ -679,14 +759,16 @@ Rectangle {
     }
 
     function queueStatusActive() {
-        return !!ft2Link && (ft2Link.alertCount > 0
+        return slotSnifferActive()
+               || slotSnifferStatus.length > 0
+               || (!!ft2Link && (ft2Link.alertCount > 0
                              || ft2Link.relayQueueCount > 0
                              || ft2Link.mailboxUnreadCount > 0
                              || receivedFileUnreadCount > 0
                              || bulletinUnreadCount > 0
                              || logbookStateCount("Submitted") > 0
                              || logbookStateCount("Queued") > 0
-                             || logbookStateCount("Failed") > 0)
+                             || logbookStateCount("Failed") > 0))
     }
 
     function queueStatusClickable() {
@@ -849,6 +931,8 @@ Rectangle {
     function rfStatusLine() {
         if (!ft2Link)
             return "RF --"
+        if (slotSnifferActive())
+            return "RF " + slotSnifferLine()
         var plan = ft2Link.lastRadioTxPlan || ({})
         var kind = String(plan.kind || plan.frameKind || "")
         var profile = String(plan.profileName || plan.profile || "")
@@ -879,9 +963,15 @@ Rectangle {
         case 3:
             return Math.max(188, Math.min(260, root.height * 0.38))
         case 4:
-            return 140
-        case 6:
-            return Math.max(260, Math.min(380, root.height * 0.52))
+            return Math.max(216, Math.min(286, root.height * 0.40))
+        case 6: {
+            var infoContentHeight = (typeof infoColumn !== "undefined"
+                                     && infoColumn.implicitHeight > 0)
+                                    ? Math.ceil(infoColumn.implicitHeight + 8)
+                                    : 260
+            return Math.max(260, Math.min(Math.max(300, root.height * 0.52),
+                                          Math.max(300, infoContentHeight)))
+        }
         default:
             return Math.max(132, Math.min(190, root.height * 0.36))
         }
@@ -897,16 +987,65 @@ Rectangle {
         case 5: return 5   // MAIL
         case 6: return 6   // INFO
         case 7: return 7   // CALL
-        case 8: return 8   // CLST
-        case 9: return 9   // PATH
-        case 10: return 12 // STAT
-        case 11: return 13 // RXF
-        case 12: return 10 // LOG
-        case 13: return 11 // DB
-        case 14: return 14 // PRE
-        case 15: return 15 // FREQ
-        case 16: return 16 // BLK
+        case 8: return 7   // CLST shares the CALL/contact stack slot
+        case 9: return 8   // PATH
+        case 10: return 11 // STAT
+        case 11: return 12 // RXF fallback; normal RXF uses receivedFilesPanel
+        case 12: return 9  // LOG
+        case 13: return 10 // DB
+        case 14: return 13 // PRE
+        case 15: return 14 // FREQ
+        case 16: return 15 // BLK
         default: return 0
+        }
+    }
+
+    function openToolPage(page) {
+        var target = Number(page)
+        switch (target) {
+        case 3:
+            refreshBulletins()
+            toolPageIndex = 3
+            break
+        case 6:
+            toolPageIndex = 6
+            loadPresenceEditor()
+            break
+        case 8:
+            toolPageIndex = 8
+            updateClusterFromRig()
+            break
+        case 11:
+            openReceivedFilesQueue()
+            break
+        case 12:
+            toolPageIndex = 12
+            if (logExportText.length === 0)
+                exportLog("OPS")
+            break
+        case 13:
+            toolPageIndex = 13
+            auditStore()
+            break
+        case 15:
+            toolPageIndex = 15
+            if (ft2Link) {
+                frequencyPresetText.text = ft2Link.frequencyPresetsText()
+                allowedQsyRangeText.text = ft2Link.allowedQsyRangesText()
+                frequencyScheduleText.text = typeof ft2Link.frequencyScheduleText === "function"
+                                             ? ft2Link.frequencyScheduleText()
+                                             : ""
+            }
+            break
+        case 16:
+            toolPageIndex = 16
+            refreshBlockedCalls()
+            if (ft2Link && typeof ft2Link.blockedCallsText === "function")
+                blockedCallsText.text = ft2Link.blockedCallsText()
+            break
+        default:
+            toolPageIndex = target
+            break
         }
     }
 
@@ -921,6 +1060,10 @@ Rectangle {
         autoAwayCheck.checked = !!presenceState.autoAwayEnabled
         autoAwayMinutesText.text = String(presenceState.autoAwayMinutes || 10)
         refreshQsoAutomation()
+        refreshPrivacyPanel()
+        if (inquiryPreviewCall.length === 0 && selectedRemoteCall.length > 0)
+            inquiryPreviewCall = selectedRemoteCall
+        refreshInquiryPreview()
         callIdIntervalText.text = String(qsoAutomationState.callIdIntervalMinutes || 0)
         autoDisconnectText.text = String(qsoAutomationState.autoDisconnectMinutes || 0)
         incomingPingCheck.checked = qsoAutomationState.incomingPingsEnabled !== false
@@ -957,6 +1100,8 @@ Rectangle {
         autoAwayCheck.checked = !!presenceState.autoAwayEnabled
         autoAwayMinutesText.text = String(presenceState.autoAwayMinutes || 10)
         root.saveQsoAutomation()
+        refreshPrivacyPanel()
+        refreshInquiryPreview()
     }
 
     function saveQsoAutomation() {
@@ -982,6 +1127,8 @@ Rectangle {
             result = ft2Link.configureInfoInquire(infoInquireCheck.checked)
         databaseActionText = prettyJson(result)
         refreshQsoAutomation()
+        refreshPrivacyPanel()
+        refreshInquiryPreview()
         refreshStatistics()
         refreshStoreAudit()
         callIdIntervalText.text = String(qsoAutomationState.callIdIntervalMinutes || 0)
@@ -1002,6 +1149,9 @@ Rectangle {
         var result = ft2Link.applyPrivacyPreset(String(preset || "CONTROL"))
         databaseActionText = prettyJson(result)
         refreshQsoAutomation()
+        refreshPresence()
+        refreshPrivacyPanel()
+        refreshInquiryPreview()
         refreshStatistics()
         refreshStoreAudit()
         incomingPingCheck.checked = qsoAutomationState.incomingPingsEnabled !== false
@@ -1010,7 +1160,43 @@ Rectangle {
         parkedVmailPeekingCheck.checked = qsoAutomationState.parkedVmailPeekingEnabled !== false
         vmailParkingCheck.checked = qsoAutomationState.vmailParkingEnabled !== false
         snrReportCheck.checked = qsoAutomationState.snrReportSendingEnabled !== false
+        verboseSnrAcceptCheck.checked = !!qsoAutomationState.verboseSnrAutoAcceptEnabled
         infoInquireCheck.checked = qsoAutomationState.infoInquireEnabled !== false
+        autoReplyCheck.checked = !!presenceState.autoReplyEnabled
+        welcomeCheck.checked = !!presenceState.welcomeEnabled
+    }
+
+    function saveInquiryPrivacy() {
+        if (!ft2Link || typeof ft2Link.configureInquiryPrivacy !== "function")
+            return
+        var result = ft2Link.configureInquiryPrivacy(incomingPingCheck.checked,
+                                                     lastHeardPeekingCheck.checked,
+                                                     lastConnectionsPeekingCheck.checked,
+                                                     parkedVmailPeekingCheck.checked,
+                                                     vmailParkingCheck.checked,
+                                                     snrReportCheck.checked,
+                                                     verboseSnrAcceptCheck.checked,
+                                                     infoInquireCheck.checked,
+                                                     autoReplyCheck.checked,
+                                                     welcomeCheck.checked,
+                                                     nowMs())
+        databaseActionText = prettyJson(result)
+        refreshPresence()
+        refreshQsoAutomation()
+        refreshPrivacyPanel()
+        refreshInquiryPreview()
+        refreshStatistics()
+        refreshStoreAudit()
+        incomingPingCheck.checked = qsoAutomationState.incomingPingsEnabled !== false
+        lastHeardPeekingCheck.checked = qsoAutomationState.lastHeardPeekingEnabled !== false
+        lastConnectionsPeekingCheck.checked = qsoAutomationState.lastConnectionsPeekingEnabled !== false
+        parkedVmailPeekingCheck.checked = qsoAutomationState.parkedVmailPeekingEnabled !== false
+        vmailParkingCheck.checked = qsoAutomationState.vmailParkingEnabled !== false
+        snrReportCheck.checked = qsoAutomationState.snrReportSendingEnabled !== false
+        verboseSnrAcceptCheck.checked = !!qsoAutomationState.verboseSnrAutoAcceptEnabled
+        infoInquireCheck.checked = qsoAutomationState.infoInquireEnabled !== false
+        autoReplyCheck.checked = !!presenceState.autoReplyEnabled
+        welcomeCheck.checked = !!presenceState.welcomeEnabled
     }
 
     function privacyPresetName() {
@@ -1243,6 +1429,31 @@ Rectangle {
                              ? ("Marked read " + changed + " received file"
                                 + (changed === 1 ? "" : "s"))
                              : "No unread received files"
+    }
+
+    function deleteReceivedFile(item) {
+        if (!ft2Link || !item || typeof ft2Link.deleteReceivedFile !== "function")
+            return
+        var name = String(item.fileName || "received file")
+        if (ft2Link.deleteReceivedFile(Number(item.id || 0))) {
+            refreshFileTransfers()
+            refreshReceivedFiles()
+            receivedFileStatus = "Deleted " + name
+        } else {
+            receivedFileStatus = "Delete failed: " + String(ft2Link.lastError || "")
+        }
+    }
+
+    function clearReadReceivedFiles() {
+        if (!ft2Link || typeof ft2Link.clearReceivedFiles !== "function")
+            return
+        var removed = Number(ft2Link.clearReceivedFiles(true) || 0)
+        refreshFileTransfers()
+        refreshReceivedFiles()
+        receivedFileStatus = removed > 0
+                             ? ("Deleted " + removed + " read received file"
+                                + (removed === 1 ? "" : "s"))
+                             : "No read received files"
     }
 
     function saveReceivedFile(item) {
@@ -2057,10 +2268,20 @@ Rectangle {
             return
         if (!ft2Link.radioTxArmed)
             ft2Link.setRadioTxArmed(true)
-        startRadioSession(call)
+        requestSlotSniffedTx("CONNECT",
+                             "HELLO " + normalizeStationCall(call),
+                             false,
+                             ({ call: String(call) }))
     }
 
     function transmitBeacon(cq) {
+        requestSlotSniffedTx(cq ? "CQ" : "BEACON",
+                             cq ? "CQ" : "BEACON",
+                             cq && !skipCqSlot,
+                             ({ cq: cq }))
+    }
+
+    function transmitBeaconNow(cq) {
         if (!ft2Link)
             return
         syncLocalStation()
@@ -2154,6 +2375,10 @@ Rectangle {
     }
 
     function cqTxButtonText() {
+        if (slotSnifferActive() && slotSnifferAction === "CQ")
+            return "SNIFF " + slotSnifferRemainingSeconds() + "s"
+        if (cqSlotWaitRemainingSeconds() > 0)
+            return "WAIT " + cqSlotWaitRemainingSeconds() + "s"
         return "CQ TX"
     }
 
@@ -2309,6 +2534,12 @@ Rectangle {
     }
 
     function sendBroadcastText() {
+        if (!ft2Link)
+            return
+        requestSlotSniffedTx("BCAST", "BCAST", false, ({}))
+    }
+
+    function sendBroadcastTextNow() {
         if (!ft2Link)
             return
         var text = broadcastText.text.trim()
@@ -2612,6 +2843,217 @@ Rectangle {
         }
     }
 
+    function configureDigipeater() {
+        if (!ft2Link || typeof ft2Link.configureDigipeater !== "function")
+            return
+        var result = ft2Link.configureDigipeater(digipeaterEnabledSetting,
+                                                 digipeaterMaxHopsSetting)
+        digipeaterState = result || ({})
+        refreshDigipeater()
+    }
+
+    function configureBbsFileServer() {
+        if (!ft2Link || typeof ft2Link.configureBbsFileServer !== "function")
+            return
+        var result = ft2Link.configureBbsFileServer(bbsFileServerEnabledSetting)
+        bbsFileServerState = result || ({})
+        refreshBbsFileServer()
+    }
+
+    function clearBbsServerBinarySelection() {
+        bbsServerContentBase64 = ""
+        bbsServerBinary = false
+        bbsServerBytes = 0
+    }
+
+    function publishBbsServerFile() {
+        if (!ft2Link || typeof ft2Link.publishBbsSharedFileText !== "function")
+            return
+        var name = bbsServerFileNameText.text.trim()
+        var body = bbsServerBodyText.text
+        if (name.length === 0
+                || (!bbsServerBinary && body.length === 0)
+                || (bbsServerBinary && bbsServerContentBase64.length === 0)) {
+            bbsServerStatus = "Choose a file name and content"
+            return
+        }
+        var result = null
+        if (bbsServerBinary) {
+            if (typeof ft2Link.publishBbsSharedFileBytes !== "function") {
+                bbsServerStatus = "Binary BBS publish unavailable"
+                return
+            }
+            result = ft2Link.publishBbsSharedFileBytes(name,
+                                                       bbsServerContentBase64,
+                                                       nowMs())
+        } else {
+            result = ft2Link.publishBbsSharedFileText(name, body, nowMs())
+        }
+        if (result && result.ok) {
+            bbsServerStatus = "Published " + String(result.fileName || name)
+                              + (bbsServerBinary ? " binary" : "")
+            bbsFileServerEnabledSetting = true
+            configureBbsFileServer()
+            refreshBbsFileServer()
+        } else {
+            bbsServerStatus = "Publish failed: "
+                              + String(result && result.error ? result.error
+                                       : (ft2Link.lastError || "unknown"))
+        }
+    }
+
+    function loadBbsServerTextFile() {
+        if (!bridge || typeof bridge.openFileDialog !== "function"
+                || typeof bridge.readTextFile !== "function") {
+            bbsServerStatus = "File picker unavailable"
+            return
+        }
+        var path = bridge.openFileDialog("Publish FT2-Link BBS text file",
+                                         "",
+                                         ["Text files (*.txt *.md *.log *.csv *.json)",
+                                          "All files (*)"])
+        if (!path || path.length === 0)
+            return
+        var result = bridge.readTextFile(path, root.filePayloadLimitBytes)
+        if (!result || !result.ok) {
+            bbsServerStatus = "Load failed: "
+                              + String(result && result.error ? result.error : "unknown")
+            return
+        }
+        bbsServerFileNameText.text = root.baseFileName(path)
+        bbsServerBodyText.text = String(result.text || "")
+        clearBbsServerBinarySelection()
+        bbsServerStatus = "Loaded " + bbsServerFileNameText.text
+    }
+
+    function loadBbsServerBinaryFile() {
+        if (!bridge || typeof bridge.openFileDialog !== "function"
+                || typeof bridge.readFileBytes !== "function") {
+            bbsServerStatus = "Binary file picker unavailable"
+            return
+        }
+        var path = bridge.openFileDialog("Publish FT2-Link BBS binary file",
+                                         "",
+                                         ["All files (*)",
+                                          "Images (*.png *.jpg *.jpeg *.gif *.bmp)",
+                                          "Documents (*.txt *.md *.pdf *.json)"])
+        if (!path || path.length === 0)
+            return
+        var result = bridge.readFileBytes(path, root.filePayloadLimitBytes)
+        if (!result || !result.ok) {
+            bbsServerStatus = "Load failed: "
+                              + String(result && result.error ? result.error : "unknown")
+            return
+        }
+        var bytes = Number(result.bytes || 0)
+        var fullSize = Number(result.fileSize || bytes)
+        if (result.truncated || fullSize > root.filePayloadLimitBytes) {
+            clearBbsServerBinarySelection()
+            bbsServerStatus = "File too large: " + fullSize + " B / max "
+                              + root.filePayloadLimitBytes + " B"
+            return
+        }
+        bbsServerFileNameText.text = root.baseFileName(path)
+        bbsServerBodyText.text = "Binary payload " + bytes + " B"
+        bbsServerContentBase64 = String(result.base64 || "")
+        bbsServerBinary = true
+        bbsServerBytes = bytes
+        bbsServerStatus = "Loaded binary " + bbsServerFileNameText.text
+                          + " " + bytes + " B"
+    }
+
+    function requestBbsFileList() {
+        if (!ft2Link || typeof ft2Link.requestBbsFileListRadio !== "function")
+            return
+        if (!root.selectedSessionConnected) {
+            bbsServerStatus = "BBS list requires a connected session"
+            return
+        }
+        if (!ft2Link.radioTxArmed) {
+            ft2Link.setRadioTxArmed(true)
+            bbsServerStatus = "BBS list armed"
+            return
+        }
+        if (ft2Link.requestBbsFileListRadio(root.selectedSessionId, nowMs())) {
+            bbsServerStatus = "BBS list request sent"
+            refreshSessions()
+        } else {
+            bbsServerStatus = "BBS list request failed: " + String(ft2Link.lastError || "")
+        }
+    }
+
+    function requestBbsFileByName(name) {
+        if (!ft2Link || typeof ft2Link.requestBbsFileRadio !== "function")
+            return
+        var fileName = String(name || bbsRequestFileText.text || "").trim()
+        if (fileName.length === 0) {
+            bbsServerStatus = "Enter a BBS file name"
+            return
+        }
+        if (!root.selectedSessionConnected) {
+            bbsServerStatus = "BBS download requires a connected session"
+            return
+        }
+        if (!ft2Link.radioTxArmed) {
+            ft2Link.setRadioTxArmed(true)
+            bbsServerStatus = "BBS download armed"
+            return
+        }
+        if (ft2Link.requestBbsFileRadio(root.selectedSessionId, fileName, nowMs())) {
+            bbsServerStatus = "BBS file request sent " + fileName
+            refreshSessions()
+        } else {
+            bbsServerStatus = "BBS file request failed: " + String(ft2Link.lastError || "")
+        }
+    }
+
+    function removeBbsSharedFile(item) {
+        if (!ft2Link || !item || typeof ft2Link.removeBbsSharedFile !== "function")
+            return
+        if (ft2Link.removeBbsSharedFile(Number(item.id || 0))) {
+            bbsServerStatus = "Removed " + String(item.fileName || "file")
+            refreshBbsFileServer()
+        } else {
+            bbsServerStatus = "Remove failed: " + String(ft2Link.lastError || "")
+        }
+    }
+
+    function sendDigipeaterText() {
+        if (!ft2Link)
+            return
+        var target = digipeaterTargetText.text.trim().toUpperCase()
+        var body = digipeaterMessageText.text.trim()
+        if (target.length === 0)
+            target = "ALL"
+        if (body.length === 0)
+            return
+        requestSlotSniffedTx("DIGI",
+                             "DIGI " + target,
+                             false,
+                             ({ target: target, body: body,
+                                hops: digipeaterMaxHopsSetting }))
+    }
+
+    function sendDigipeaterTextNow(target, body, hops) {
+        if (!ft2Link || typeof ft2Link.transmitDigipeaterRadio !== "function")
+            return
+        if (ft2Link.transmitDigipeaterRadio(String(target || "ALL"),
+                                           String(body || ""),
+                                           Number(hops || 0),
+                                           nowMs())) {
+            digipeaterMessageText.text = ""
+            refreshBroadcasts()
+            refreshDigipeater()
+        }
+    }
+
+    function clearDigipeaterLog() {
+        if (!ft2Link || typeof ft2Link.clearDigipeaterEvents !== "function")
+            return
+        ft2Link.clearDigipeaterEvents()
+        refreshDigipeater()
+    }
+
     function sendMailboxText() {
         if (!ft2Link || selectedSessionId === 0)
             return
@@ -2748,6 +3190,55 @@ Rectangle {
             return
         if (ft2Link.markMailboxRead(Number(item.id || 0), read, nowMs()))
             refreshMailbox()
+    }
+
+    function mailboxRelayCallForItem(item) {
+        if (!item)
+            return ""
+        var selected = String(selectedRemoteCall || "").trim().toUpperCase()
+        if (selected.length > 0)
+            return selected
+        var suggested = String(item.suggestedRelayCall || "").trim().toUpperCase()
+        if (suggested.length > 0)
+            return suggested
+        return String(item.toCall || "").trim().toUpperCase()
+    }
+
+    function markMailboxItemRelayReady(item) {
+        if (!ft2Link || !item || typeof ft2Link.markMailboxRelayReady !== "function")
+            return
+        if (ft2Link.markMailboxRelayReady(Number(item.id || 0), nowMs()))
+            refreshMailbox()
+    }
+
+    function markMailboxItemPendingRelay(item) {
+        if (!ft2Link || !item || typeof ft2Link.markMailboxPendingRelay !== "function")
+            return
+        var relay = mailboxRelayCallForItem(item)
+        if (relay.length === 0)
+            return
+        if (ft2Link.markMailboxPendingRelay(Number(item.id || 0), relay, nowMs()))
+            refreshMailbox()
+    }
+
+    function cancelMailboxItemRelay(item) {
+        if (!ft2Link || !item || typeof ft2Link.cancelMailboxRelay !== "function")
+            return
+        if (ft2Link.cancelMailboxRelay(Number(item.id || 0), nowMs()))
+            refreshMailbox()
+    }
+
+    function transmitMailboxCenterRelay(item) {
+        if (!ft2Link || !item || selectedSessionId === 0)
+            return
+        if (!guardWideTx("RELAY"))
+            return
+        if (ft2Link.transmitRelayMailboxRadio(selectedSessionId,
+                                              Number(item.id || 0),
+                                              nowMs())) {
+            refreshMailbox()
+            refreshSessions()
+        }
     }
 
     function markAllMailboxRead() {
@@ -3379,6 +3870,23 @@ Rectangle {
             cqSlotWaitSeconds = 60
     }
 
+    function cycleSlotSnifferSeconds() {
+        if (slotSnifferSeconds < 5)
+            slotSnifferSeconds = 5
+        else if (slotSnifferSeconds < 8)
+            slotSnifferSeconds = 8
+        else if (slotSnifferSeconds < 12)
+            slotSnifferSeconds = 12
+        else if (slotSnifferSeconds < 20)
+            slotSnifferSeconds = 20
+        else
+            slotSnifferSeconds = 3
+    }
+
+    function slotSnifferText() {
+        return slotSnifferSeconds + "s"
+    }
+
     function cqSlotWaitText() {
         if (cqSlotWaitSeconds < 60)
             return cqSlotWaitSeconds + "s"
@@ -3406,27 +3914,183 @@ Rectangle {
     }
 
     function cqSlotStatusText() {
+        if (slotSnifferActive() && slotSnifferAction === "CQ")
+            return "SNIFF"
         var remaining = cqSlotWaitRemainingSeconds()
         if (remaining > 0)
             return "WAIT " + remaining + "s"
         return cqSlotBusy() ? "BUSY" : "FREE"
     }
 
+    function slotSnifferActive() {
+        return slotSnifferAction.length > 0
+    }
+
+    function slotSnifferRemainingSeconds() {
+        if (!slotSnifferActive())
+            return 0
+        return Math.max(0, Math.ceil((slotSnifferUntilMs - nowMs()) / 1000))
+    }
+
+    function slotSnifferBusyReason(requireSlotClear) {
+        if (ft2Link && ft2Link.transportBusy)
+            return "TX busy"
+        if (ft2Link && ft2Link.liveChannelBusy)
+            return "channel busy"
+        if (requireSlotClear && cqSlotBusy())
+            return "slot busy"
+        return ""
+    }
+
+    function slotSnifferLine() {
+        if (!slotSnifferActive())
+            return slotSnifferStatus
+        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear)
+        if (reason.length > 0)
+            return "SNIFF " + slotSnifferLabel + " " + reason
+        return "SNIFF " + slotSnifferLabel + " " + slotSnifferRemainingSeconds() + "s"
+    }
+
+    function clearSlotSniffer(status) {
+        slotSnifferAction = ""
+        slotSnifferLabel = ""
+        slotSnifferRequireSlotClear = false
+        slotSnifferUntilMs = 0
+        slotSnifferDeadlineMs = 0
+        slotSnifferPayload = ({})
+        slotSnifferStatus = String(status || "")
+    }
+
+    function requestSlotSniffedTx(action, label, requireSlotClear, payload) {
+        if (!ft2Link)
+            return false
+        if (slotSnifferActive()) {
+            databaseActionText = slotSnifferLine()
+            return false
+        }
+        slotSnifferAction = String(action || "")
+        slotSnifferLabel = String(label || slotSnifferAction)
+        slotSnifferRequireSlotClear = !!requireSlotClear
+        slotSnifferPayload = payload || ({})
+        var now = nowMs()
+        slotSnifferUntilMs = now + slotSnifferSeconds * 1000
+        slotSnifferDeadlineMs = now + Math.max(slotSnifferSeconds * 3, 24) * 1000
+        slotSnifferStatus = "SNIFF " + slotSnifferLabel
+        slotSnifferTimer.restart()
+        continueSlotSniffer()
+        return true
+    }
+
+    function continueSlotSniffer() {
+        if (!slotSnifferActive())
+            return
+        var now = nowMs()
+        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear)
+        if (reason.length > 0) {
+            if (now >= slotSnifferDeadlineMs) {
+                clearSlotSniffer("SNIFF abort: " + reason)
+                databaseActionText = slotSnifferStatus
+                return
+            }
+            slotSnifferUntilMs = now + slotSnifferSeconds * 1000
+            slotSnifferStatus = "SNIFF " + slotSnifferLabel + " " + reason
+            return
+        }
+        if (now < slotSnifferUntilMs) {
+            slotSnifferStatus = "SNIFF " + slotSnifferLabel
+            return
+        }
+        var action = slotSnifferAction
+        var payload = slotSnifferPayload
+        clearSlotSniffer("SNIFF clear: " + String(action))
+        dispatchSlotSnifferAction(action, payload)
+    }
+
+    function dispatchSlotSnifferAction(action, payload) {
+        var key = String(action || "")
+        if (key === "CQ" || key === "BEACON") {
+            armStrictNextTx()
+            transmitBeaconNow(!!(payload && payload.cq))
+            return
+        }
+        if (key === "CONNECT") {
+            if (payload && payload.call) {
+                armStrictNextTx()
+                startRadioSession(String(payload.call))
+            }
+            return
+        }
+        if (key === "BCAST") {
+            armStrictNextTx()
+            sendBroadcastTextNow()
+            return
+        }
+        if (key === "DIGI") {
+            if (payload && payload.body) {
+                armStrictNextTx()
+                sendDigipeaterTextNow(String(payload.target || "ALL"),
+                                      String(payload.body || ""),
+                                      Number(payload.hops || 0))
+            }
+            return
+        }
+        if (key === "QSY_INVITE") {
+            if (payload && payload.text) {
+                armStrictNextTx()
+                sendQsyInviteNow(String(payload.text))
+            }
+            return
+        }
+    }
+
+    function armStrictNextTx() {
+        if (!ft2Link || typeof ft2Link.armStrictListenBeforeTransmit !== "function")
+            return
+        ft2Link.armStrictListenBeforeTransmit(Math.max(24000, slotSnifferSeconds * 3000))
+    }
+
     function insertQsySlotTag() {
         var slot = currentQsySlot()
         if (!slot)
             return
+        root.insertCannedMessage(currentQsySlotTag(slot))
+    }
+
+    function currentQsySlotTag(slot) {
+        if (!slot)
+            return ""
         var dial = currentDialFrequencyHz()
         var offset = Number(slot.offsetHz || 0)
         if (ft2Link && typeof ft2Link.qsyFrequencyTag === "function"
                 && dial > 0 && offset !== 0) {
             var absoluteTag = ft2Link.qsyFrequencyTag(Math.round(dial + offset))
-            if (String(absoluteTag || "").length > 0) {
-                root.insertCannedMessage(String(absoluteTag))
-                return
-            }
+            if (String(absoluteTag || "").length > 0)
+                return String(absoluteTag)
         }
-        root.insertCannedMessage(String(slot.tag || ""))
+        return String(slot.tag || "")
+    }
+
+    function sendQsySlotInvite() {
+        var slot = currentQsySlot()
+        if (!slot)
+            return
+        var tag = currentQsySlotTag(slot)
+        if (tag.length === 0)
+            return
+        if (!selectedSessionConnected) {
+            insertCannedMessage(tag)
+            databaseActionText = "QSY tag inserted: select a connected session to send"
+            return
+        }
+        requestSlotSniffedTx("QSY_INVITE",
+                             "QSY " + currentQsySlotLabel(),
+                             false,
+                             ({ text: tag }))
+    }
+
+    function sendQsyInviteNow(text) {
+        composeText.text = String(text || "")
+        sendChatText()
     }
 
     function currentDialFrequencyHz() {
@@ -3724,12 +4388,15 @@ Rectangle {
         refreshForms()
         refreshFileTransfers()
         refreshReceivedFiles()
+        configureBbsFileServer()
+        refreshBbsFileServer()
         refreshBulletins()
         refreshQsoLog()
         refreshLogbookOutbox()
         refreshContactHistory()
         refreshPingLog()
         refreshPathReports()
+        configureDigipeater()
         refreshBeaconHistory()
         updateClusterFromRig()
         refreshPathAnalysis()
@@ -3761,6 +4428,18 @@ Rectangle {
         repeat: true
         onTriggered: {
             root.uiNowMs = Date.now()
+        }
+    }
+
+    Timer {
+        id: slotSnifferTimer
+        interval: 250
+        running: root.slotSnifferActive()
+        repeat: true
+        onTriggered: root.continueSlotSniffer()
+        onRunningChanged: {
+            if (!running && root.slotSnifferActive())
+                root.clearSlotSniffer("SNIFF cancelled")
         }
     }
 
@@ -3905,12 +4584,14 @@ Rectangle {
         function onMailboxChanged() { root.refreshMailbox(); root.refreshContactTimeline(); root.refreshStatistics() }
         function onFormsChanged() { root.refreshForms(); root.refreshContactTimeline(); root.refreshStatistics() }
         function onFileTransfersChanged() { root.refreshFileTransfers(); root.refreshReceivedFiles(); root.refreshContactTimeline(); root.refreshStatistics() }
+        function onBbsFileServerChanged() { root.refreshBbsFileServer(); root.refreshStatistics(); root.refreshStoreAudit() }
         function onBulletinsChanged() { root.refreshBulletins(); root.refreshContactTimeline(); root.refreshStatistics() }
         function onQsoLogChanged() { root.refreshQsoLog(); root.refreshContactTimeline(); root.refreshStatistics() }
         function onLogbookOutboxChanged() { root.refreshLogbookOutbox(); root.refreshStatistics(); root.refreshStoreAudit() }
         function onContactHistoryChanged() { root.refreshContactHistory(); root.refreshContactTimeline(); root.refreshStatistics(); root.refreshPathAnalysis() }
         function onPingLogChanged() { root.refreshPingLog(); root.refreshContactTimeline(); root.refreshStatistics() }
         function onPathReportsChanged() { root.refreshPathReports(); root.refreshPathAnalysis(); root.refreshContactTimeline(); root.refreshStatistics() }
+        function onDigipeaterChanged() { root.refreshDigipeater(); root.refreshPathReports(); root.refreshStatistics() }
         function onBeaconHistoryChanged() { root.refreshBeaconHistory(); root.refreshStatistics(); root.refreshStoreAudit() }
         function onClusterLastHeardChanged() { root.refreshClusterLastHeard(); root.refreshStatistics(); root.refreshStoreAudit() }
         function onLocalStoreChanged() { root.refreshStoreAudit(); root.refreshPresence(); root.refreshQsoAutomation(); root.refreshBlockedCalls(); root.refreshClusterLastHeard(); root.refreshLogbookOutbox() }
@@ -4332,11 +5013,11 @@ Rectangle {
             }
 
             SmallButton {
-                text: "X"
-                implicitWidth: 34
-                accent: root.red
-                tip: "Exit FT2-Link"
-                onClicked: root.closeRequested()
+                text: root.poppedOut ? "DOCK" : "POP"
+                implicitWidth: root.poppedOut ? 56 : 44
+                accent: root.cyan
+                tip: root.poppedOut ? "Dock FT2-Link panel" : "Pop out FT2-Link panel"
+                onClicked: root.popDockRequested()
             }
         }
 
@@ -4500,6 +5181,14 @@ Rectangle {
                             tip: "Auto CQ interval"
                             onClicked: root.cycleBeaconInterval()
                         }
+
+                        SmallButton {
+                            text: "SNIFF " + root.slotSnifferText()
+                            implicitWidth: 72
+                            accent: root.cyan
+                            tip: "Listen-before-transmit window"
+                            onClicked: root.cycleSlotSnifferSeconds()
+                        }
                     }
 
                     RowLayout {
@@ -4570,144 +5259,6 @@ Rectangle {
                             tip: "CQ slot wait time"
                             onClicked: root.cycleCqSlotWait()
                         }
-                    }
-                }
-
-                ListView {
-                    id: stationList
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.topMargin: 6
-                    // 1.0.462 iu8lmc: floor esplicito (~4 righe da 50px) cosi la
-                    // lista resta visibile e cliccabile anche su finestre basse
-                    // (monitor ~775px): la ColumnLayout le riserva questo spazio
-                    // togliendolo alle altre sezioni fillHeight (sessioni/chat).
-                    Layout.minimumHeight: 124
-                    clip: true
-                    model: root.stationHistoryMode ? root.beaconHistory : root.stations
-                    boundsBehavior: Flickable.StopAtBounds
-                    ScrollBar.vertical: ScrollBar {
-                        policy: ScrollBar.AsNeeded
-                    }
-
-                    delegate: Rectangle {
-                        id: stationCard
-                        // 1.0.462 iu8lmc: modelData come REQUIRED PROPERTY.
-                        // Per un modello ad array JS il 'modelData' nudo e' un
-                        // context property: funziona nelle binding ma NON nei
-                        // signal handler (onClicked) -> il click su una stazione
-                        // non connetteva. Dichiararlo required lo rende una
-                        // property vera del delegato, in scope ovunque.
-                        required property var modelData
-                        width: stationList.width
-                        height: 62
-                        clip: true
-                        color: stationMouse.containsMouse
-                               ? root.rowHover
-                               : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.06)
-                        border.color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.40)
-                        border.width: 1
-                        radius: 4
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 8
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-                                    Text {
-                                        text: String(modelData.call || "")
-                                        font.family: root.mono
-                                        font.pixelSize: 20
-                                        font.bold: true
-                                        color: root.cyan
-                                    }
-                                    Text {
-                                        text: modelData.cq ? String(modelData.cqType || "CQ") : "BCN"
-                                        font.family: root.mono
-                                        font.pixelSize: 11
-                                        font.bold: true
-                                        color: modelData.cq ? root.green : root.textSecondary
-                                    }
-                                    Text {
-                                        text: modelData.capabilities
-                                              ? String(modelData.capabilities.preferredProfileName || "")
-                                              : ""
-                                        font.family: root.mono
-                                        font.pixelSize: 10
-                                        color: root.amber
-                                        Layout.fillWidth: true
-                                        elide: Text.ElideRight
-                                    }
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: root.stationSubtitle(modelData)
-                                    elide: Text.ElideRight
-                                    font.family: root.mono
-                                    font.pixelSize: 10
-                                    color: root.stationSubtitleColor(modelData)
-                                }
-                            }
-
-                            SmallButton {
-                                id: stationRelayButton
-                                readonly property var workflow: root.stationRelayWorkflow(modelData)
-                                text: "FWD"
-                                implicitWidth: 42
-                                implicitHeight: 26
-                                labelSize: 9
-                                accent: !workflow ? root.amber
-                                        : (String(workflow.priority || "") === "EMCOMM" ? root.red : root.amber)
-                                visible: !root.stationHistoryMode && workflow !== null
-                                enabled: visible
-                                tip: "Call relay and prepare parked mail forwarding"
-                                onClicked: root.useStationRelayWorkflow(modelData)
-                            }
-
-                            SmallButton {
-                                text: root.stationConnectText(modelData.call)
-                                implicitWidth: 112
-                                implicitHeight: 36
-                                labelSize: 12
-                                accent: root.isStationConnecting(modelData.call) ? root.amber : root.green
-                                visible: !root.stationHistoryMode
-                                enabled: visible
-                                interactive: root.stationConnectEnabled(modelData.call)
-                                tip: root.stationConnectTip(modelData.call)
-                                onClicked: root.connectStationRadio(modelData.call)
-                            }
-                        }
-
-                        MouseArea {
-                            id: stationMouse
-                            anchors.fill: parent
-                            z: -1
-                            hoverEnabled: true
-                            cursorShape: root.stationConnectEnabled(modelData.call)
-                                         ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: {
-                                if (root.stationConnectEnabled(modelData.call))
-                                    root.connectStationRadio(modelData.call)
-                            }
-                        }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        visible: stationList.count === 0
-                        text: root.stationHistoryMode ? "No CQ/beacon history"
-                                                      : "No FT2-Link stations"
-                        font.family: root.mono
-                        font.pixelSize: 11
-                        color: root.textSecondary
                     }
                 }
 
@@ -4795,7 +5346,156 @@ Rectangle {
                         }
                     }
                 }
-            }
+
+                ListView {
+                    id: stationList
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.topMargin: 6
+                    // 1.0.462 iu8lmc: floor esplicito (~4 righe da 50px) cosi la
+                    // lista resta visibile e cliccabile anche su finestre basse
+                    // (monitor ~775px): la ColumnLayout le riserva questo spazio
+                    // togliendolo alle altre sezioni fillHeight (sessioni/chat).
+                    // 1.0.478: su pannelli bassi questa soglia tagliava il composer
+                    // manuale; ora la lista si comprime e i campi CALL/GRID restano
+                    // sempre raggiungibili.
+                    Layout.minimumHeight: Math.max(64, Math.min(124, root.height * 0.16))
+                    clip: true
+                    model: root.stationHistoryMode ? root.beaconHistory : root.stations
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                    }
+
+                    delegate: Rectangle {
+                        id: stationCard
+                        // 1.0.462 iu8lmc: modelData come REQUIRED PROPERTY.
+                        // Per un modello ad array JS il 'modelData' nudo e' un
+                        // context property: funziona nelle binding ma NON nei
+                        // signal handler (onClicked) -> il click su una stazione
+                        // non connetteva. Dichiararlo required lo rende una
+                        // property vera del delegato, in scope ovunque.
+                        required property var modelData
+                        width: stationList.width
+                        height: Math.max(62, stationCardContent.implicitHeight + 16)
+                        clip: true
+                        color: stationMouse.containsMouse
+                               ? root.rowHover
+                               : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.06)
+                        border.color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.40)
+                        border.width: 1
+                        radius: 4
+
+                        RowLayout {
+                            id: stationCardContent
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            spacing: 8
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+                                    Text {
+                                        text: String(modelData.call || "")
+                                        font.family: root.mono
+                                        font.pixelSize: 20
+                                        font.bold: true
+                                        color: root.cyan
+                                    }
+	                                    Text {
+	                                        text: modelData.cq ? String(modelData.cqType || "CQ") : "BCN"
+	                                        font.family: root.mono
+	                                        font.pixelSize: 11
+	                                        font.bold: true
+	                                        color: modelData.cq ? root.green : root.textSecondary
+	                                    }
+	                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.capabilities
+                                          ? String(modelData.capabilities.beaconSummary
+                                                   || modelData.capabilities.preferredProfileName
+                                                   || "")
+                                          : ""
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.amber
+                                    visible: text.length > 0
+                                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    maximumLineCount: 2
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.stationSubtitle(modelData)
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.stationSubtitleColor(modelData)
+                                }
+                            }
+
+                            SmallButton {
+                                id: stationRelayButton
+                                readonly property var workflow: root.stationRelayWorkflow(modelData)
+                                text: "FWD"
+                                implicitWidth: 42
+                                implicitHeight: 26
+                                labelSize: 9
+                                accent: !workflow ? root.amber
+                                        : (String(workflow.priority || "") === "EMCOMM" ? root.red : root.amber)
+                                visible: !root.stationHistoryMode && workflow !== null
+                                enabled: visible
+                                tip: "Call relay and prepare parked mail forwarding"
+                                onClicked: root.useStationRelayWorkflow(modelData)
+                            }
+
+                            SmallButton {
+                                text: root.stationConnectText(modelData.call)
+                                implicitWidth: 112
+                                implicitHeight: 36
+                                labelSize: 12
+                                accent: root.isStationConnecting(modelData.call) ? root.amber : root.green
+                                visible: !root.stationHistoryMode
+                                enabled: visible
+                                interactive: root.stationConnectEnabled(modelData.call)
+                                tip: root.stationConnectTip(modelData.call)
+                                onClicked: root.connectStationRadio(modelData.call)
+                            }
+                        }
+
+                        MouseArea {
+                            id: stationMouse
+                            anchors.fill: parent
+                            z: -1
+                            hoverEnabled: true
+                            cursorShape: root.stationConnectEnabled(modelData.call)
+                                         ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: {
+                                if (root.stationConnectEnabled(modelData.call))
+                                    root.connectStationRadio(modelData.call)
+                            }
+                        }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: stationList.count === 0
+                        text: root.stationHistoryMode ? "No CQ/beacon history"
+                                                      : "No FT2-Link stations"
+                        font.family: root.mono
+                        font.pixelSize: 11
+                        color: root.textSecondary
+                    }
+                }
+
+	            }
 
             PaneResizeHandle {
                 targetPane: "station"
@@ -4841,17 +5541,24 @@ Rectangle {
                     }
 
                     delegate: Rectangle {
+                        id: sessionDelegate
                         // 1.0.463 iu8lmc: required property -> modelData in scope anche
                         // negli onClicked del delegato sessione (era blank/ReferenceError).
                         required property var modelData
+                        readonly property string capsText: String(modelData.capabilitySummary
+                                                                  || (modelData.capabilities
+                                                                      ? modelData.capabilities.beaconSummary
+                                                                      : "")
+                                                                  || "")
                         width: sessionList.width
-                        height: 44
+                        height: Math.max(44, sessionContent.implicitHeight + 12)
                         radius: 3
                         color: root.selectedSessionId === Number(modelData.sessionId)
                                ? root.rowSelect
                                : (sessionMouse.containsMouse ? root.rowHover : "transparent")
 
                         Column {
+                            id: sessionContent
                             anchors.fill: parent
                             anchors.margins: 6
                             spacing: 2
@@ -4873,6 +5580,19 @@ Rectangle {
                                 color: modelData.stateName === "Closed" ? root.red
                                       : (modelData.accepted ? root.green
                                                             : (modelData.stateName === "Calling" ? root.amber : root.textSecondary))
+                            }
+                            Text {
+                                text: sessionMouse.containsMouse && String(modelData.serviceSummary || "").length > 0
+                                      ? sessionDelegate.capsText
+                                      : String(modelData.waveformSummary || sessionDelegate.capsText)
+                                width: parent.width
+                                visible: text.length > 0
+                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                maximumLineCount: sessionMouse.containsMouse ? 2 : 1
+                                elide: Text.ElideRight
+                                font.family: root.mono
+                                font.pixelSize: 9
+                                color: root.amber
                             }
                         }
 
@@ -5259,166 +5979,13 @@ Rectangle {
                     color: root.borderSoft
                 }
 
-                RowLayout {
+                FT2LinkTabBar {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 26
-                    spacing: 6
-                    SmallButton {
-                        text: "CHAT"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 0
-                        accent: root.green
-                        onClicked: root.toolPageIndex = 0
-                    }
-                    SmallButton {
-                        text: "FORM"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 1
-                        accent: root.amber
-                        onClicked: root.toolPageIndex = 1
-                    }
-                    SmallButton {
-                        text: "FILE"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 2
-                        accent: root.cyan
-                        onClicked: root.toolPageIndex = 2
-                    }
-                    SmallButton {
-                        text: root.bulletinUnreadCount > 0 ? "BBS*" : "BBS"
-                        implicitWidth: 48
-                        checked: root.toolPageIndex === 3
-                        accent: root.bulletinUnreadCount > 0 ? root.amber : root.textPrimary
-                        tip: root.bulletinUnreadCount > 0
-                             ? "Unread BBS bulletins"
-                             : "BBS bulletins"
-                        onClicked: {
-                            root.refreshBulletins()
-                            root.toolPageIndex = 3
-                        }
-                    }
-                    SmallButton {
-                        text: "BCAST"
-                        implicitWidth: 62
-                        checked: root.toolPageIndex === 4
-                        accent: root.alerts.length > 0 ? root.red : root.amber
-                        onClicked: root.toolPageIndex = 4
-                    }
-                    SmallButton {
-                        text: ft2Link && ft2Link.mailboxUnreadCount > 0 ? "MAIL*" : "MAIL"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 5
-                        accent: ft2Link && ft2Link.mailboxUnreadCount > 0 ? root.amber : root.green
-                        onClicked: root.toolPageIndex = 5
-                    }
-                    SmallButton {
-                        text: "INFO"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 6
-                        accent: root.cyan
-                        onClicked: {
-                            root.toolPageIndex = 6
-                            root.loadPresenceEditor()
-                        }
-                    }
-                    SmallButton {
-                        text: "CALL"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 7
-                        accent: root.amber
-                        onClicked: root.toolPageIndex = 7
-                    }
-                    SmallButton {
-                        text: "STAT"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 10
-                        accent: root.green
-                        onClicked: root.toolPageIndex = 10
-                    }
-                    SmallButton {
-                        text: root.receivedFileUnreadCount > 0 ? "RXF*" : "RXF"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 11
-                        accent: root.receivedFileUnreadCount > 0 ? root.amber : root.cyan
-                        tip: root.receivedFileUnreadCount > 0
-                             ? "Unread received files"
-                             : "Received files"
-                        onClicked: root.openReceivedFilesQueue()
-                    }
-                    SmallButton {
-                        text: "PATH"
-                        implicitWidth: 54
-                        checked: root.toolPageIndex === 9
-                        accent: root.amber
-                        onClicked: root.toolPageIndex = 9
-                    }
-                    SmallButton {
-                        text: "LOG"
-                        implicitWidth: 48
-                        checked: root.toolPageIndex === 12
-                        accent: root.textPrimary
-                        onClicked: {
-                            root.toolPageIndex = 12
-                            if (root.logExportText.length === 0)
-                                root.exportLog("OPS")
-                        }
-                    }
-                    SmallButton {
-                        text: "DB"
-                        implicitWidth: 40
-                        checked: root.toolPageIndex === 13
-                        accent: root.red
-                        onClicked: {
-                            root.toolPageIndex = 13
-                            root.auditStore()
-                        }
-                    }
-                    SmallButton {
-                        text: "PRE"
-                        implicitWidth: 44
-                        checked: root.toolPageIndex === 14
-                        accent: root.amber
-                        onClicked: root.toolPageIndex = 14
-                    }
-                    SmallButton {
-                        text: "FREQ"
-                        implicitWidth: 52
-                        checked: root.toolPageIndex === 15
-                        accent: root.cyan
-                        onClicked: {
-                            root.toolPageIndex = 15
-                            if (ft2Link) {
-                                frequencyPresetText.text = ft2Link.frequencyPresetsText()
-                                allowedQsyRangeText.text = ft2Link.allowedQsyRangesText()
-                                frequencyScheduleText.text = typeof ft2Link.frequencyScheduleText === "function"
-                                                             ? ft2Link.frequencyScheduleText()
-                                                             : ""
-                            }
-                        }
-                    }
-                    SmallButton {
-                        text: "BLK"
-                        implicitWidth: 44
-                        checked: root.toolPageIndex === 16
-                        accent: root.red
-                        onClicked: {
-                            root.toolPageIndex = 16
-                            root.refreshBlockedCalls()
-                            if (ft2Link && typeof ft2Link.blockedCallsText === "function")
-                                blockedCallsText.text = ft2Link.blockedCallsText()
-                        }
-                    }
-                    SmallButton {
-                        text: "CLST"
-                        implicitWidth: 50
-                        checked: root.toolPageIndex === 8
-                        accent: root.green
-                        onClicked: {
-                            root.toolPageIndex = 8
-                            root.updateClusterFromRig()
-                        }
-                    }
-                    Item { Layout.fillWidth: true }
+                    Layout.preferredHeight: visible ? 32 : 0
+                    Layout.minimumHeight: visible ? 32 : 0
+                    Layout.maximumHeight: visible ? 32 : 0
+                    visible: !root.toolTabsExternal
+                    panel: root
                 }
 
                 Item {
@@ -5477,6 +6044,15 @@ Rectangle {
                                 enabled: root.receivedFileUnreadCount > 0
                                 tip: "Clear unread marker for all received files"
                                 onClicked: root.markAllReceivedFilesRead()
+                            }
+
+                            SmallButton {
+                                text: "CLEAR READ"
+                                implicitWidth: 86
+                                accent: root.red
+                                enabled: !!ft2Link && root.receivedFiles.length > root.receivedFileUnreadCount
+                                tip: "Delete received files already marked read"
+                                onClicked: root.clearReadReceivedFiles()
                             }
                         }
 
@@ -5607,6 +6183,15 @@ Rectangle {
                                             root.receivedFileStatus = "Copied "
                                                                       + String(rxFilePanelDelegate.modelData.fileName || "received file")
                                         }
+                                    }
+
+                                    SmallButton {
+                                        text: "DEL"
+                                        implicitWidth: 40
+                                        accent: root.red
+                                        enabled: !!ft2Link
+                                        tip: "Delete this received file entry"
+                                        onClicked: root.deleteReceivedFile(rxFilePanelDelegate.modelData)
                                     }
                                 }
                             }
@@ -5770,8 +6355,10 @@ Rectangle {
                                     implicitWidth: 44
                                     accent: root.amber
                                     enabled: root.selectedSessionId > 0 && root.qsySlots.length > 0
-                                    tip: root.currentQsySlotTip()
-                                    onClicked: root.insertQsySlotTag()
+                                    tip: root.selectedSessionConnected
+                                         ? "Sniff, then send QSY invitation"
+                                         : root.currentQsySlotTip()
+                                    onClicked: root.sendQsySlotInvite()
                                 }
 
                                 TextField {
@@ -6229,6 +6816,261 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                spacing: 6
+
+                                CompactCheck {
+                                    text: "SERVER"
+                                    checked: root.bbsFileServerEnabledSetting
+                                    accent: root.green
+                                    tip: "Enable BBS file server replies for BLR/BG requests"
+                                    onToggled: function(nextChecked) {
+                                        root.bbsFileServerEnabledSetting = nextChecked
+                                        root.configureBbsFileServer()
+                                    }
+                                }
+
+                                TextField {
+                                    id: bbsServerFileNameText
+                                    Layout.preferredWidth: 150
+                                    Layout.minimumWidth: 90
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "server-file.txt"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    selectByMouse: true
+                                    background: Rectangle {
+                                        radius: 4
+                                        color: Qt.rgba(1, 1, 1, 0.045)
+                                        border.width: 1
+                                        border.color: bbsServerFileNameText.activeFocus
+                                                      ? root.cyan
+                                                      : Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.42)
+                                    }
+                                }
+
+                                TextField {
+                                    id: bbsServerBodyText
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 120
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "BBS server file body"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    selectByMouse: true
+                                    maximumLength: root.filePayloadLimitBytes
+                                    onTextEdited: root.clearBbsServerBinarySelection()
+                                    background: Rectangle {
+                                        radius: 4
+                                        color: Qt.rgba(1, 1, 1, 0.045)
+                                        border.width: 1
+                                        border.color: bbsServerBodyText.activeFocus
+                                                      ? root.green
+                                                      : Qt.rgba(root.green.r, root.green.g, root.green.b, 0.42)
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: "LOAD TXT"
+                                    implicitWidth: 68
+                                    implicitHeight: 24
+                                    accent: root.cyan
+                                    tip: "Load a text file into the BBS file server composer"
+                                    onClicked: root.loadBbsServerTextFile()
+                                }
+
+                                SmallButton {
+                                    text: "LOAD BIN"
+                                    implicitWidth: 68
+                                    implicitHeight: 24
+                                    accent: root.amber
+                                    enabled: !!bridge && typeof bridge.openFileDialog === "function"
+                                             && typeof bridge.readFileBytes === "function"
+                                    tip: "Load a binary file into the BBS file server"
+                                    onClicked: root.loadBbsServerBinaryFile()
+                                }
+
+                                SmallButton {
+                                    text: "PUBLISH"
+                                    implicitWidth: 72
+                                    implicitHeight: 24
+                                    accent: root.green
+                                    enabled: !!ft2Link && bbsServerFileNameText.text.trim().length > 0
+                                             && ((root.bbsServerBinary
+                                                  && root.bbsServerContentBase64.length > 0)
+                                                 || (!root.bbsServerBinary
+                                                     && bbsServerBodyText.text.length > 0))
+                                    tip: "Publish this file in the local BBS file server"
+                                    onClicked: root.publishBbsServerFile()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                spacing: 6
+
+                                Text {
+                                    text: "REQ"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: root.amber
+                                }
+
+                                TextField {
+                                    id: bbsRequestFileText
+                                    Layout.preferredWidth: 180
+                                    Layout.minimumWidth: 100
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "remote-file.txt"
+                                    enabled: root.selectedSessionConnected
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    selectByMouse: true
+                                    onAccepted: root.requestBbsFileByName("")
+                                    background: Rectangle {
+                                        radius: 4
+                                        color: bbsRequestFileText.enabled
+                                               ? Qt.rgba(1, 1, 1, 0.045)
+                                               : Qt.rgba(1, 1, 1, 0.020)
+                                        border.width: 1
+                                        border.color: bbsRequestFileText.activeFocus
+                                                      ? root.amber
+                                                      : Qt.rgba(root.amber.r, root.amber.g, root.amber.b, 0.42)
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "REQ LIST" : "ARM L"
+                                    implicitWidth: 72
+                                    implicitHeight: 24
+                                    accent: root.amber
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                    tip: "Request remote BBS file list"
+                                    onClicked: root.requestBbsFileList()
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "REQ FILE" : "ARM F"
+                                    implicitWidth: 72
+                                    implicitHeight: 24
+                                    accent: root.cyan
+                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                             && bbsRequestFileText.text.trim().length > 0
+                                    tip: "Request a remote BBS file by name"
+                                    onClicked: root.requestBbsFileByName("")
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.bbsServerStatus.length > 0
+                                          ? root.bbsServerStatus
+                                          : String(root.bbsFileServerState.line || "BBS file server OFF")
+                                    elide: Text.ElideMiddle
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.bbsFileServerEnabledSetting ? root.green : root.textSecondary
+                                }
+                            }
+
+                            ListView {
+                                id: bbsSharedFileList
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 58
+                                clip: true
+                                spacing: 2
+                                boundsBehavior: Flickable.StopAtBounds
+                                model: root.bbsSharedFiles
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                delegate: Rectangle {
+                                    required property var modelData
+                                    width: bbsSharedFileList.width
+                                    height: 24
+                                    radius: 4
+                                    color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.035)
+                                    border.width: 1
+                                    border.color: Qt.rgba(root.cyan.r, root.cyan.g, root.cyan.b, 0.16)
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 6
+                                        anchors.rightMargin: 6
+                                        spacing: 6
+
+                                        Text {
+                                            Layout.preferredWidth: 42
+                                            text: modelData.binary ? "BIN" : "TXT"
+                                            font.family: root.mono
+                                            font.pixelSize: 9
+                                            font.bold: true
+                                            color: modelData.binary ? root.amber : root.cyan
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 160
+                                            text: String(modelData.fileName || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 10
+                                            color: root.green
+                                        }
+
+                                        Text {
+                                            Layout.preferredWidth: 70
+                                            text: String(modelData.sizeBytes || 0) + " B"
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 9
+                                            color: root.textSecondary
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: String(modelData.preview || "")
+                                            elide: Text.ElideRight
+                                            font.family: root.mono
+                                            font.pixelSize: 9
+                                            color: root.textPrimary
+                                        }
+
+                                        SmallButton {
+                                            text: "REQ"
+                                            implicitWidth: 42
+                                            implicitHeight: 20
+                                            labelSize: 8
+                                            accent: root.amber
+                                            enabled: root.selectedSessionConnected
+                                            tip: "Request this file name from the connected peer"
+                                            onClicked: root.requestBbsFileByName(String(modelData.fileName || ""))
+                                        }
+
+                                        SmallButton {
+                                            text: "DEL"
+                                            implicitWidth: 40
+                                            implicitHeight: 20
+                                            labelSize: 8
+                                            accent: root.red
+                                            enabled: !!ft2Link
+                                            tip: "Remove from local BBS file server"
+                                            onClicked: root.removeBbsSharedFile(modelData)
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: bbsSharedFileList.count === 0
+                                    text: "No BBS server files"
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.textSecondary
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
                                 Layout.preferredHeight: 24
                                 spacing: 6
 
@@ -6643,7 +7485,10 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 22
+                                Layout.preferredHeight: visible ? 22 : 0
+                                Layout.minimumHeight: visible ? 22 : 0
+                                Layout.maximumHeight: visible ? 22 : 0
+                                visible: root.pathRelayHint() !== null
                                 spacing: 6
 
                                 Text {
@@ -6681,6 +7526,112 @@ Rectangle {
                                     enabled: relayHint !== null && !!relayHint.readyToForward
                                     tip: "Prepare parked mail and call relay"
                                     onClicked: root.forwardPathRelay()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                spacing: 6
+
+                                CompactCheck {
+                                    id: digipeaterEnableCheck
+                                    text: "DIGI"
+                                    accent: root.green
+                                    checked: root.digipeaterEnabledSetting
+                                    onToggled: function(nextChecked) {
+                                        root.digipeaterEnabledSetting = nextChecked
+                                        root.configureDigipeater()
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: "H" + root.digipeaterMaxHopsSetting
+                                    implicitWidth: 44
+                                    implicitHeight: 24
+                                    accent: root.amber
+                                    tip: "Cycle maximum digipeater hops"
+                                    onClicked: {
+                                        root.digipeaterMaxHopsSetting = (root.digipeaterMaxHopsSetting + 1) % 4
+                                        root.configureDigipeater()
+                                    }
+                                }
+
+                                TextField {
+                                    id: digipeaterTargetText
+                                    Layout.preferredWidth: 100
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "TO/ALL"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    maximumLength: 16
+                                    selectByMouse: true
+                                }
+
+                                TextField {
+                                    id: digipeaterMessageText
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 26
+                                    placeholderText: "Digipeater payload"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    maximumLength: 96
+                                    selectByMouse: true
+                                    onAccepted: root.sendDigipeaterText()
+                                }
+
+                                SmallButton {
+                                    text: ft2Link && ft2Link.radioTxArmed ? "DIGI TX" : "ARM D"
+                                    implicitWidth: 70
+                                    implicitHeight: 24
+                                    accent: root.cyan
+                                    enabled: !!ft2Link && digipeaterMessageText.text.trim().length > 0
+                                    tip: "Send an explicit digipeater frame"
+                                    onClicked: {
+                                        if (!ft2Link.radioTxArmed) {
+                                            ft2Link.setRadioTxArmed(true)
+                                            return
+                                        }
+                                        root.sendDigipeaterText()
+                                    }
+                                }
+
+                                SmallButton {
+                                    text: "CLR"
+                                    implicitWidth: 42
+                                    implicitHeight: 24
+                                    accent: root.red
+                                    enabled: root.digipeaterEvents.length > 0
+                                    tip: "Clear digipeater event log"
+                                    onClicked: root.clearDigipeaterLog()
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 22
+                                spacing: 8
+
+                                Text {
+                                    text: "DIGIPEATER"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: root.cyan
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: String(root.digipeaterState.line || "Digi OFF")
+                                          + (root.digipeaterEvents.length > 0
+                                             ? (" / last " + String(root.digipeaterEvents[0].state || "--")
+                                                + " " + String(root.digipeaterEvents[0].originCall || "--")
+                                                + ">" + String(root.digipeaterEvents[0].targetCall || "--"))
+                                             : "")
+                                    elide: Text.ElideRight
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    color: root.digipeaterEnabledSetting ? root.green : root.textSecondary
                                 }
                             }
 
@@ -6954,21 +7905,52 @@ Rectangle {
                                     onToggled: function(nextChecked) { mailEmcommCheck.checked = nextChecked }
                                 }
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: ft2Link ? ("UNREAD " + ft2Link.mailboxUnreadCount
-                                                     + " / " + ft2Link.mailboxCount
-                                                     + "   RLY " + ft2Link.relayQueueCount) : "UNREAD --"
-                                    elide: Text.ElideRight
-                                    font.family: root.mono
-                                    font.pixelSize: 10
-                                    font.bold: ft2Link && (ft2Link.mailboxUnreadCount > 0 || ft2Link.relayQueueCount > 0)
+	                                Text {
+	                                    Layout.fillWidth: true
+	                                    text: ft2Link
+	                                          ? ("MAILBOX CENTER  "
+	                                             + String(root.mailboxCenterState.summary || "")
+	                                             + "  FLAGS "
+	                                             + (root.mailboxCenterState.parkingEnabled ? "PARK" : "NO-PARK")
+	                                             + "/"
+	                                             + (root.mailboxCenterState.peekingEnabled ? "PEEK" : "NO-PEEK"))
+	                                          : "MAILBOX CENTER --"
+	                                    elide: Text.ElideRight
+	                                    font.family: root.mono
+	                                    font.pixelSize: 10
+	                                    font.bold: ft2Link && (ft2Link.mailboxUnreadCount > 0 || ft2Link.relayQueueCount > 0)
                                     color: ft2Link && ft2Link.mailboxUnreadCount > 0 ? root.green
-                                           : (ft2Link && ft2Link.relayQueueCount > 0 ? root.amber : root.textSecondary)
-                                }
+	                                           : (ft2Link && ft2Link.relayQueueCount > 0 ? root.amber : root.textSecondary)
+	                                }
 
-                                SmallButton {
-                                    text: "COPY"
+	                                SmallButton {
+	                                    text: ft2Link && ft2Link.vmailParkingEnabled ? "PARK ON" : "PARK OFF"
+	                                    implicitWidth: 70
+	                                    labelSize: 9
+	                                    accent: ft2Link && ft2Link.vmailParkingEnabled ? root.green : root.red
+	                                    enabled: !!ft2Link && typeof ft2Link.configureVmailParking === "function"
+	                                    tip: "Toggle inbound relay mailbox parking"
+	                                    onClicked: {
+	                                        ft2Link.configureVmailParking(!(ft2Link && ft2Link.vmailParkingEnabled))
+	                                        refreshMailbox()
+	                                    }
+	                                }
+
+	                                SmallButton {
+	                                    text: ft2Link && ft2Link.parkedVmailPeekingEnabled ? "PEEK ON" : "PEEK OFF"
+	                                    implicitWidth: 70
+	                                    labelSize: 9
+	                                    accent: ft2Link && ft2Link.parkedVmailPeekingEnabled ? root.green : root.red
+	                                    enabled: !!ft2Link && typeof ft2Link.configureParkedVmailPeeking === "function"
+	                                    tip: "Toggle parked mailbox peek replies"
+	                                    onClicked: {
+	                                        ft2Link.configureParkedVmailPeeking(!(ft2Link && ft2Link.parkedVmailPeekingEnabled))
+	                                        refreshMailbox()
+	                                    }
+	                                }
+
+	                                SmallButton {
+	                                    text: "COPY"
                                     implicitWidth: 52
                                     accent: root.cyan
                                     enabled: !!ft2Link && root.mailbox.length > 0
@@ -7208,77 +8190,128 @@ Rectangle {
                                 clip: true
                                 spacing: 2
                                 boundsBehavior: Flickable.StopAtBounds
-                                model: root.mailbox
+	                                model: root.mailboxCenterState.rows || root.mailbox
                                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
                                 delegate: Item {
                                     id: mailDelegate
                                     required property var modelData
-                                    readonly property string mailDirection: String(modelData.direction || "")
-                                    readonly property string mailState: String(modelData.state || "--")
-                                    readonly property string peer: mailDirection === "Incoming"
-                                                                   ? String(modelData.fromCall || "--")
-                                                                   : String(modelData.toCall || "--")
-                                    readonly property string priority: String(modelData.priority || "NORMAL")
-                                    width: mailboxList.width
-                                    height: 28
+	                                    readonly property string mailDirection: String(modelData.direction || "")
+	                                    readonly property string mailState: String(modelData.state || "--")
+	                                    readonly property string mailRole: String(modelData.role || modelData.direction || "MAIL")
+	                                    readonly property string peer: mailDirection === "Incoming"
+	                                                                   ? String(modelData.fromCall || "--")
+	                                                                   : String(modelData.toCall || "--")
+	                                    readonly property string priority: String(modelData.priority || "NORMAL")
+	                                    width: mailboxList.width
+	                                    height: 34
 
                                     RowLayout {
                                         anchors.fill: parent
                                         spacing: 5
 
-                                        Text {
-                                            Layout.preferredWidth: 62
-                                            text: mailDelegate.mailState
-                                            elide: Text.ElideRight
-                                            font.family: root.mono
-                                            font.pixelSize: 10
-                                            color: mailDelegate.modelData.unread ? root.green
-                                                                                 : (mailDelegate.mailState === "Read" ? root.textSecondary : root.amber)
-                                        }
+	                                        Text {
+	                                            Layout.preferredWidth: 64
+	                                            text: mailDelegate.mailRole
+	                                            elide: Text.ElideRight
+	                                            font.family: root.mono
+	                                            font.pixelSize: 10
+	                                            font.bold: true
+	                                            color: mailDelegate.modelData.relayActive ? root.amber
+	                                                                                      : (mailDelegate.modelData.unread ? root.green : root.textSecondary)
+	                                        }
 
-                                        Text {
-                                            Layout.preferredWidth: 58
-                                            text: mailDelegate.priority === "NORMAL" ? "--" : mailDelegate.priority
-                                            elide: Text.ElideRight
-                                            font.family: root.mono
-                                            font.pixelSize: 10
-                                            font.bold: mailDelegate.priority !== "NORMAL"
-                                            color: mailDelegate.modelData.urgent ? root.red
-                                                                                 : (mailDelegate.modelData.emcomm ? root.amber : root.textSecondary)
-                                        }
+	                                        Text {
+	                                            Layout.preferredWidth: 78
+	                                            text: mailDelegate.mailState
+	                                            elide: Text.ElideRight
+	                                            font.family: root.mono
+	                                            font.pixelSize: 10
+	                                            color: mailDelegate.modelData.unread ? root.green
+	                                                                                 : (mailDelegate.mailState === "Read" ? root.textSecondary : root.amber)
+	                                        }
 
-                                        Text {
-                                            Layout.preferredWidth: 54
-                                            text: mailDelegate.modelData.relayEnvelope
-                                                  ? "RLY" + String(mailDelegate.modelData.relayHopCount || 0)
-                                                  : (String(mailDelegate.modelData.direction || "") === "Relay" ? "RLY" : "--")
-                                            elide: Text.ElideRight
-                                            font.family: root.mono
-                                            font.pixelSize: 10
-                                            color: mailDelegate.modelData.relayEnvelope ? root.amber : root.textSecondary
-                                        }
+	                                        Text {
+	                                            Layout.preferredWidth: 68
+	                                            text: mailDelegate.priority === "NORMAL" ? "--" : mailDelegate.priority
+	                                            elide: Text.ElideRight
+	                                            font.family: root.mono
+	                                            font.pixelSize: 10
+	                                            font.bold: mailDelegate.priority !== "NORMAL"
+	                                            color: mailDelegate.modelData.urgent ? root.red
+	                                                                                 : (mailDelegate.modelData.emcomm ? root.amber : root.textSecondary)
+	                                        }
 
-                                        Text {
-                                            Layout.preferredWidth: 76
-                                            text: mailDelegate.modelData.relayEnvelope
-                                                  && String(mailDelegate.modelData.relayViaCall || "").length > 0
-                                                  ? String(mailDelegate.modelData.relayViaCall || "--")
-                                                  : mailDelegate.peer
-                                            elide: Text.ElideRight
-                                            font.family: root.mono
-                                            font.pixelSize: 10
-                                            color: root.textPrimary
-                                        }
+	                                        Text {
+	                                            Layout.preferredWidth: 94
+	                                            text: mailDelegate.modelData.relayActive
+	                                                  ? ("RLY "
+	                                                     + (String(mailDelegate.modelData.suggestedRelayCall || "").length > 0
+	                                                        ? String(mailDelegate.modelData.suggestedRelayCall)
+	                                                        : String(mailDelegate.modelData.relayViaCall || "--")))
+	                                                  : mailDelegate.peer
+	                                            elide: Text.ElideRight
+	                                            font.family: root.mono
+	                                            font.pixelSize: 10
+	                                            color: mailDelegate.modelData.canRelayNow ? root.green
+	                                                                                     : (mailDelegate.modelData.relayActive ? root.amber : root.textPrimary)
+	                                        }
 
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: String(mailDelegate.modelData.subject || "") + "  " + String(mailDelegate.modelData.body || "")
-                                            elide: Text.ElideRight
-                                            font.family: root.mono
-                                            font.pixelSize: 10
-                                            color: root.textSecondary
-                                        }
+	                                        Text {
+	                                            Layout.fillWidth: true
+	                                            text: String(mailDelegate.modelData.summaryLine || (String(mailDelegate.modelData.subject || "") + "  " + String(mailDelegate.modelData.body || "")))
+	                                            elide: Text.ElideRight
+	                                            font.family: root.mono
+	                                            font.pixelSize: 10
+	                                            color: root.textSecondary
+	                                        }
+
+	                                        SmallButton {
+	                                            text: "READY"
+	                                            implicitWidth: 52
+	                                            labelSize: 9
+	                                            accent: root.amber
+	                                            enabled: !!ft2Link && mailDelegate.modelData.relayActive
+	                                                     && !mailDelegate.modelData.pendingRelay
+	                                                     && mailDelegate.mailState !== "Relay ready"
+	                                            tip: "Mark parked mail ready for relay"
+	                                            onClicked: root.markMailboxItemRelayReady(mailDelegate.modelData)
+	                                        }
+
+	                                        SmallButton {
+	                                            text: "PEND"
+	                                            implicitWidth: 46
+	                                            labelSize: 9
+	                                            accent: root.cyan
+	                                            enabled: !!ft2Link && mailDelegate.modelData.relayActive
+	                                                     && !mailDelegate.modelData.pendingRelay
+	                                            tip: "Mark relay item pending through current or suggested station"
+	                                            onClicked: root.markMailboxItemPendingRelay(mailDelegate.modelData)
+	                                        }
+
+	                                        SmallButton {
+	                                            text: "RELAY"
+	                                            implicitWidth: 52
+	                                            labelSize: 9
+	                                            accent: root.green
+	                                            enabled: !!ft2Link && root.selectedSessionConnected
+	                                                     && mailDelegate.modelData.relayActive
+	                                                     && mailDelegate.modelData.canRelayNow
+	                                            tip: "Transmit this parked relay item on the current session"
+	                                            onClicked: root.transmitMailboxCenterRelay(mailDelegate.modelData)
+	                                        }
+
+	                                        SmallButton {
+	                                            text: "CANCEL"
+	                                            implicitWidth: 58
+	                                            labelSize: 9
+	                                            accent: root.red
+	                                            enabled: !!ft2Link && mailDelegate.modelData.relayActive
+	                                                     && (mailDelegate.modelData.pendingRelay
+	                                                         || mailDelegate.mailState === "Relay ready")
+	                                            tip: "Return relay item to parked state"
+	                                            onClicked: root.cancelMailboxItemRelay(mailDelegate.modelData)
+	                                        }
 
                                         SmallButton {
                                             text: mailDelegate.mailState === "Read" ? "NEW" : "READ"
@@ -7347,16 +8380,21 @@ Rectangle {
                     Item {
                         clip: true
                         Flickable {
+                            id: infoFlick
                             anchors.fill: parent
                             clip: true
                             contentWidth: width
-                            contentHeight: Math.max(height, infoColumn.implicitHeight + 8)
+                            contentHeight: Math.max(height + 1,
+                                                    infoColumn.y + Math.max(infoColumn.height,
+                                                                            infoColumn.implicitHeight,
+                                                                            infoColumn.childrenRect.height) + 28)
                             boundsBehavior: Flickable.StopAtBounds
+                            flickableDirection: Flickable.VerticalFlick
                             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
                             ColumnLayout {
                                 id: infoColumn
-                                width: parent.width
+                                width: infoFlick.width
                                 spacing: 4
 
                             RowLayout {
@@ -7791,27 +8829,178 @@ Rectangle {
                                     implicitWidth: 52
                                     accent: root.green
                                     enabled: !!ft2Link
-                                    tip: "Save QSO automation toggles"
-                                    onClicked: root.saveQsoAutomation()
+                                    tip: "Save inquiry, peeking and privacy toggles"
+                                    onClicked: root.saveInquiryPrivacy()
                                 }
 
-	                                Item {
+		                                Item {
+		                                    Layout.fillWidth: true
+		                                }
+		                            }
+
+	                            RowLayout {
+	                                Layout.fillWidth: true
+	                                Layout.preferredHeight: 28
+	                                spacing: 6
+
+	                                Text {
+	                                    text: "INQUIRY"
+	                                    color: root.cyan
+	                                    font.family: root.mono
+	                                    font.pixelSize: 10
+	                                    font.bold: true
+	                                    Layout.preferredWidth: 62
+	                                }
+
+	                                TextField {
+	                                    id: inquiryPreviewCallText
+	                                    Layout.preferredWidth: 112
+	                                    Layout.preferredHeight: 24
+	                                    text: root.inquiryPreviewCall
+	                                    placeholderText: root.selectedRemoteCall.length > 0
+	                                                     ? root.selectedRemoteCall
+	                                                     : "CALL"
+	                                    font.family: root.mono
+	                                    font.pixelSize: 10
+	                                    maximumLength: 16
+	                                    selectByMouse: true
+	                                    enabled: !!ft2Link
+	                                    onAccepted: {
+	                                        root.inquiryPreviewCall = text.trim().toUpperCase()
+	                                        root.refreshInquiryPreview()
+	                                    }
+	                                    onEditingFinished: {
+	                                        root.inquiryPreviewCall = text.trim().toUpperCase()
+	                                        root.refreshInquiryPreview()
+	                                    }
+	                                }
+
+	                                SmallButton {
+	                                    text: "PREVIEW"
+	                                    implicitWidth: 72
+	                                    accent: root.cyan
+	                                    enabled: !!ft2Link
+	                                    tip: "Preview automatic replies for this callsign"
+	                                    onClicked: {
+	                                        root.inquiryPreviewCall = inquiryPreviewCallText.text.trim().toUpperCase()
+	                                        root.refreshInquiryPreview()
+	                                    }
+	                                }
+
+	                                Text {
 	                                    Layout.fillWidth: true
+	                                    text: String(root.inquiryPreviewState.summary
+	                                                 || root.privacyPanelState.inquirySummary
+	                                                 || "")
+	                                    color: root.inquiryPreviewState.blocked ? root.red : root.textSecondary
+	                                    font.family: root.mono
+	                                    font.pixelSize: 9
+	                                    elide: Text.ElideRight
+	                                }
+
+	                                SmallButton {
+	                                    text: "PANEL"
+	                                    implicitWidth: 58
+	                                    accent: root.amber
+	                                    enabled: !!ft2Link
+	                                    tip: "Refresh privacy panel"
+	                                    onClicked: {
+	                                        root.refreshPrivacyPanel()
+	                                        root.refreshInquiryPreview()
+	                                    }
 	                                }
 	                            }
-	                        }
-		                    }
-		                }
+
+	                            ListView {
+	                                id: inquiryPreviewList
+	                                Layout.fillWidth: true
+	                                Layout.preferredHeight: 74
+	                                clip: true
+	                                spacing: 3
+	                                boundsBehavior: Flickable.StopAtBounds
+	                                model: root.inquiryPreviewState.rows || root.privacyPanelState.exposures || []
+	                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+	                                delegate: Rectangle {
+	                                    required property var modelData
+	                                    width: inquiryPreviewList.width
+	                                    height: 22
+	                                    radius: 4
+	                                    color: Qt.rgba(1, 1, 1, 0.025)
+	                                    border.width: 1
+	                                    border.color: modelData.status === "SHARE"
+	                                                  ? Qt.rgba(root.green.r, root.green.g, root.green.b, 0.38)
+	                                                  : (modelData.status === "BLOCK"
+	                                                     ? Qt.rgba(root.red.r, root.red.g, root.red.b, 0.42)
+	                                                     : Qt.rgba(root.amber.r, root.amber.g, root.amber.b, 0.32))
+
+	                                    RowLayout {
+	                                        anchors.fill: parent
+	                                        anchors.leftMargin: 7
+	                                        anchors.rightMargin: 7
+	                                        spacing: 7
+
+	                                        Text {
+	                                            Layout.preferredWidth: 46
+	                                            text: String(modelData.status || "--")
+	                                            color: modelData.status === "SHARE" ? root.green
+	                                                   : (modelData.status === "BLOCK" ? root.red : root.amber)
+	                                            font.family: root.mono
+	                                            font.pixelSize: 9
+	                                            font.bold: true
+	                                            elide: Text.ElideRight
+	                                        }
+
+	                                        Text {
+	                                            Layout.preferredWidth: 94
+	                                            text: String(modelData.label || modelData.key || "")
+	                                            color: root.textPrimary
+	                                            font.family: root.mono
+	                                            font.pixelSize: 9
+	                                            elide: Text.ElideRight
+	                                        }
+
+	                                        Text {
+	                                            Layout.preferredWidth: 80
+	                                            text: String(modelData.request || "")
+	                                            color: root.cyan
+	                                            font.family: root.mono
+	                                            font.pixelSize: 9
+	                                            elide: Text.ElideRight
+	                                        }
+
+	                                        Text {
+	                                            Layout.fillWidth: true
+	                                            text: String(modelData.reply || modelData.detail || "")
+	                                            color: root.textSecondary
+	                                            font.family: root.mono
+	                                            font.pixelSize: 9
+	                                            elide: Text.ElideRight
+	                                        }
+	                                    }
+	                                }
+	                            }
+
+	                            Item {
+	                                Layout.fillWidth: true
+	                                Layout.preferredHeight: 20
+	                            }
+		                        }
+			                    }
+			                }
 
 		                    Item {
 	                        ColumnLayout {
 	                            anchors.fill: parent
 	                            spacing: 4
 
-	                            RowLayout {
-	                                Layout.fillWidth: true
-	                                Layout.preferredHeight: 28
-	                                spacing: 5
+                            RowLayout {
+                                visible: root.toolPageIndex === 7
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: visible ? 28 : 0
+                                Layout.minimumHeight: visible ? 28 : 0
+                                Layout.maximumHeight: visible ? 28 : 0
+                                spacing: 5
 
 	                                TextField {
 	                                    id: contactCallText
@@ -7886,10 +9075,11 @@ Rectangle {
 	                                }
 	                            }
 
-		                            RowLayout {
-		                                Layout.fillWidth: true
-		                                Layout.fillHeight: true
-		                                spacing: 6
+			                            RowLayout {
+			                                visible: root.toolPageIndex === 7
+			                                Layout.fillWidth: true
+			                                Layout.fillHeight: visible
+			                                spacing: 6
 
 		                                ListView {
 		                                    id: contactList
@@ -8086,8 +9276,11 @@ Rectangle {
 	                        }
 	                    }
 
-                    Item {
-                        RowLayout {
+	                    Item {
+	                        visible: root.toolPageIndex === 8
+	                        Layout.fillWidth: true
+	                        Layout.fillHeight: visible
+	                        RowLayout {
                             anchors.fill: parent
                             spacing: 6
 
@@ -8623,11 +9816,15 @@ Rectangle {
                                             Layout.preferredWidth: 54
                                             text: pathReportDelegate.modelData.snrValid
                                                   ? (String(pathReportDelegate.modelData.snrDb || 0) + " dB")
-                                                  : ("q " + Number(pathReportDelegate.modelData.quality || 0).toFixed(2))
+                                                  : (pathReportDelegate.modelData.qualityValid
+                                                     ? ("q " + Number(pathReportDelegate.modelData.quality || 0).toFixed(2))
+                                                     : String(pathReportDelegate.modelData.kind || "PATH"))
                                             elide: Text.ElideRight
                                             font.family: root.mono
                                             font.pixelSize: 10
-                                            color: pathReportDelegate.modelData.snrValid ? root.green : root.cyan
+                                            color: pathReportDelegate.modelData.snrValid
+                                                   ? root.green
+                                                   : (pathReportDelegate.modelData.qualityValid ? root.cyan : root.amber)
                                         }
 
                                         Text {
@@ -8641,7 +9838,9 @@ Rectangle {
 
                                         Text {
                                             Layout.preferredWidth: 64
-                                            text: String(pathReportDelegate.modelData.source || "")
+                                            text: String(pathReportDelegate.modelData.targetCall || "").length > 0
+                                                  ? ("T>" + String(pathReportDelegate.modelData.targetCall || ""))
+                                                  : String(pathReportDelegate.modelData.source || "")
                                             elide: Text.ElideRight
                                             font.family: root.mono
                                             font.pixelSize: 10
@@ -8650,7 +9849,10 @@ Rectangle {
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: String(pathReportDelegate.modelData.atUtc || "--")
+                                            text: String(pathReportDelegate.modelData.detail || "").length > 0
+                                                  ? (String(pathReportDelegate.modelData.detail || "")
+                                                     + "  " + String(pathReportDelegate.modelData.atUtc || "--"))
+                                                  : String(pathReportDelegate.modelData.atUtc || "--")
                                             elide: Text.ElideRight
                                             font.family: root.mono
                                             font.pixelSize: 10
@@ -9175,6 +10377,15 @@ Rectangle {
                                     tip: "Clear unread marker for all received files"
                                     onClicked: root.markAllReceivedFilesRead()
                                 }
+
+                                SmallButton {
+                                    text: "CLEAR READ"
+                                    implicitWidth: 86
+                                    accent: root.red
+                                    enabled: !!ft2Link && root.receivedFiles.length > root.receivedFileUnreadCount
+                                    tip: "Delete received files already marked read"
+                                    onClicked: root.clearReadReceivedFiles()
+                                }
                             }
 
                             ListView {
@@ -9273,6 +10484,7 @@ Rectangle {
                                             implicitWidth: 48
                                             accent: root.green
                                             enabled: String(rxFileDelegate.modelData.content || "").length > 0
+                                                     || String(rxFileDelegate.modelData.contentBase64 || "").length > 0
                                             tip: "Save received file to disk"
                                             onClicked: root.saveReceivedFile(rxFileDelegate.modelData)
                                         }
@@ -9303,6 +10515,15 @@ Rectangle {
                                                 root.receivedFileStatus = "Copied "
                                                                           + String(rxFileDelegate.modelData.fileName || "received file")
                                             }
+                                        }
+
+                                        SmallButton {
+                                            text: "DEL"
+                                            implicitWidth: 40
+                                            accent: root.red
+                                            enabled: !!ft2Link
+                                            tip: "Delete this received file entry"
+                                            onClicked: root.deleteReceivedFile(rxFileDelegate.modelData)
                                         }
                                     }
                                 }

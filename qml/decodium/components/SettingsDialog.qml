@@ -1741,7 +1741,42 @@ Dialog {
                             contentItem: TextInput { text: stPowerSpin.textFromValue(stPowerSpin.value, stPowerSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !stPowerSpin.editable; validator: stPowerSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
+                        Text { text: qsTr("WSPR Power:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: wsprPowerCombo
+                            model: bridge.wsprPowerOptions()
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: fieldMinWidth
+                            implicitHeight: controlHeight
+                            function optionIndexFor(dbm) {
+                                var needle = String(Number(dbm || 37)) + " dBm"
+                                for (var i = 0; i < model.length; ++i) {
+                                    if (String(model[i]).indexOf(needle) === 0)
+                                        return i
+                                }
+                                return 11
+                            }
+                            currentIndex: optionIndexFor(bridge.wsprPowerDbm)
+                            onActivated: function(index) {
+                                if (index < 0 || index >= model.length)
+                                    return
+                                var dbm = parseInt(String(model[index] || ""), 10)
+                                if (!isNaN(dbm)) {
+                                    bridge.wsprPowerDbm = dbm
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                            Connections {
+                                target: bridge
+                                function onWsprPowerDbmChanged() {
+                                    wsprPowerCombo.currentIndex = wsprPowerCombo.optionIndexFor(bridge.wsprPowerDbm)
+                                }
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: parent.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                        }
                     }
                 }
 

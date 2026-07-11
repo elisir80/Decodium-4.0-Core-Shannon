@@ -58,12 +58,14 @@ using decodium::ft2link::WideTxAudioPlan;
 
 constexpr quint64 kMinBeaconIntervalMs = 60000u;
 constexpr quint64 kPathFinderMaxAgeMs = 24u * 60u * 60u * 1000u;
+constexpr quint64 kDigipeaterSeenTtlMs = 2u * 60u * 60u * 1000u;
+constexpr int kDigipeaterMaxPayloadChars = 96;
 constexpr quint64 kDuplicateDeliveredWindowMs = 120u * 1000u;
 constexpr int kLocalStoreVersion = 1;
 constexpr int kMaxRelayHopCount = 9;
 constexpr int kMaxTextFilePayloadBytes = 16384;
 constexpr int kAckRepeatCount = 3;
-constexpr int kHelloAckTurnaroundDelayMs = 1800;
+constexpr int kHelloAckTurnaroundDelayMs = 3500;
 // Live RX samples come from Decodium's decimated detector/audio tap. TX audio
 // is rendered at 48 kHz for the sound device, but the decoder sees 12 kHz PCM.
 constexpr double kLiveWideSampleRate = 12000.0;
@@ -83,6 +85,7 @@ decodium::ft2link::W2300WaveformConfig liveW2300RxConfig ()
   decodium::ft2link::W2300WaveformConfig config;
   config.sampleRate = kLiveWideSampleRate;
   config.rateMode = W2300RateMode::Fast;
+  config.maxDecodeMillis = 900;
   return config;
 }
 
@@ -1485,6 +1488,26 @@ QString cqTypeNameFromCode (quint16 code)
     }
 }
 
+QVariantList beaconCapabilityTags (QString const& summary)
+{
+  QVariantList tags;
+  for (QString const& token : summary.split (QLatin1Char (' '),
+                                            Qt::SkipEmptyParts))
+    {
+      tags.push_back (token);
+    }
+  return tags;
+}
+
+std::uint16_t normalizedBeaconWaveformFlags (
+    LinkCapabilities const& capabilities,
+    std::uint16_t flags)
+{
+  return flags == 0u
+      ? decodium::ft2link::beaconWaveformCapabilityFlags (capabilities)
+      : flags;
+}
+
 QString sanitizedCqLocator (QString const& locator)
 {
   QString out;
@@ -1533,13 +1556,30 @@ QString clusterKey (QString const& nodeId,
       + QLatin1Char ('|') + call.trimmed ().toUpper ();
 }
 
-QVariantMap capabilitiesMap (LinkCapabilities const& capabilities)
+QVariantMap capabilitiesMap (LinkCapabilities const& capabilities,
+                             std::uint16_t waveformFlags = 0u,
+                             std::uint16_t serviceFlags = 0u)
 {
   QVariantMap map;
+  waveformFlags = normalizedBeaconWaveformFlags (capabilities, waveformFlags);
+  QString const waveformSummary = QString::fromStdString (
+      decodium::ft2link::beaconWaveformCapabilitySummary (waveformFlags));
+  QString const serviceSummary = QString::fromStdString (
+      decodium::ft2link::beaconServiceCapabilitySummary (serviceFlags));
+  QString const beaconSummary = serviceSummary.isEmpty ()
+      ? waveformSummary
+      : waveformSummary + QStringLiteral (" | ") + serviceSummary;
+
   map.insert (QStringLiteral ("supportsW500"), capabilities.supportsW500);
   map.insert (QStringLiteral ("supportsW2300"), capabilities.supportsW2300);
   map.insert (QStringLiteral ("supportsW2300Fast"), capabilities.supportsW2300Fast);
   map.insert (QStringLiteral ("supportsW2300Robust"), capabilities.supportsW2300Robust);
+  map.insert (QStringLiteral ("supportsW2300Weak"),
+              (waveformFlags & decodium::ft2link::BeaconWaveW2300Weak) != 0u);
+  map.insert (QStringLiteral ("supportsW2300Deep"),
+              (waveformFlags & decodium::ft2link::BeaconWaveW2300Deep) != 0u);
+  map.insert (QStringLiteral ("supportsW2300Ultra"),
+              (waveformFlags & decodium::ft2link::BeaconWaveW2300Ultra) != 0u);
   map.insert (QStringLiteral ("preferredProfile"),
               static_cast<int> (capabilities.preferredProfile));
   map.insert (QStringLiteral ("preferredProfileName"),
@@ -1547,6 +1587,44 @@ QVariantMap capabilitiesMap (LinkCapabilities const& capabilities)
                   capabilities.preferredProfile)));
   map.insert (QStringLiteral ("preferredW2300RateMode"),
               static_cast<int> (capabilities.preferredW2300RateMode));
+  map.insert (QStringLiteral ("preferredW2300RateModeName"),
+              QString::fromLatin1 (decodium::ft2link::w2300RateModeName (
+                  capabilities.preferredW2300RateMode)));
+  map.insert (QStringLiteral ("waveformFlags"),
+              static_cast<int> (waveformFlags));
+  map.insert (QStringLiteral ("serviceFlags"),
+              static_cast<int> (serviceFlags));
+  map.insert (QStringLiteral ("waveformSummary"), waveformSummary);
+  map.insert (QStringLiteral ("serviceSummary"), serviceSummary);
+  map.insert (QStringLiteral ("beaconSummary"), beaconSummary);
+  map.insert (QStringLiteral ("waveformTags"),
+              beaconCapabilityTags (waveformSummary));
+  map.insert (QStringLiteral ("serviceTags"),
+              beaconCapabilityTags (serviceSummary));
+  map.insert (QStringLiteral ("supportsChat"),
+              (serviceFlags & decodium::ft2link::BeaconServiceChat) != 0u);
+  map.insert (QStringLiteral ("supportsMail"),
+              (serviceFlags & decodium::ft2link::BeaconServiceMail) != 0u);
+  map.insert (QStringLiteral ("supportsForm"),
+              (serviceFlags & decodium::ft2link::BeaconServiceForm) != 0u);
+  map.insert (QStringLiteral ("supportsFile"),
+              (serviceFlags & decodium::ft2link::BeaconServiceFile) != 0u);
+  map.insert (QStringLiteral ("supportsBbs"),
+              (serviceFlags & decodium::ft2link::BeaconServiceBbs) != 0u);
+  map.insert (QStringLiteral ("supportsBroadcast"),
+              (serviceFlags & decodium::ft2link::BeaconServiceBroadcast) != 0u);
+  map.insert (QStringLiteral ("supportsInfo"),
+              (serviceFlags & decodium::ft2link::BeaconServiceInfo) != 0u);
+  map.insert (QStringLiteral ("supportsQsy"),
+              (serviceFlags & decodium::ft2link::BeaconServiceQsy) != 0u);
+  map.insert (QStringLiteral ("supportsPath"),
+              (serviceFlags & decodium::ft2link::BeaconServicePath) != 0u);
+  map.insert (QStringLiteral ("supportsPing"),
+              (serviceFlags & decodium::ft2link::BeaconServicePing) != 0u);
+  map.insert (QStringLiteral ("supportsRelay"),
+              (serviceFlags & decodium::ft2link::BeaconServiceRelay) != 0u);
+  map.insert (QStringLiteral ("supportsAlert"),
+              (serviceFlags & decodium::ft2link::BeaconServiceAlert) != 0u);
   return map;
 }
 
@@ -1578,11 +1656,14 @@ QVariantMap stationMap (StationAdvertisement const& advertisement,
   map.insert (QStringLiteral ("heardAtMs"),
               QVariant::fromValue<qulonglong> (advertisement.heardAtMs));
   map.insert (QStringLiteral ("capabilities"),
-              capabilitiesMap (advertisement.capabilities));
+              capabilitiesMap (advertisement.capabilities,
+                               advertisement.waveformCapabilityFlags,
+                               advertisement.serviceCapabilityFlags));
   return map;
 }
 
-QVariantMap sessionMap (AppSession const& session)
+QVariantMap sessionMap (AppSession const& session,
+                        StationAdvertisement const* advertisement = nullptr)
 {
   QVariantMap map;
   map.insert (QStringLiteral ("sessionId"), session.sessionId);
@@ -1598,6 +1679,27 @@ QVariantMap sessionMap (AppSession const& session)
                   session.negotiated.profile)));
   map.insert (QStringLiteral ("w2300RateMode"),
               static_cast<int> (session.negotiated.w2300RateMode));
+  QVariantMap const remoteCapabilities = advertisement
+      ? capabilitiesMap (advertisement->capabilities,
+                         advertisement->waveformCapabilityFlags,
+                         advertisement->serviceCapabilityFlags)
+      : capabilitiesMap (session.remoteCapabilities);
+  map.insert (QStringLiteral ("capabilities"), remoteCapabilities);
+  map.insert (QStringLiteral ("capabilitySummary"),
+              remoteCapabilities.value (QStringLiteral ("beaconSummary")));
+  map.insert (QStringLiteral ("waveformSummary"),
+              remoteCapabilities.value (QStringLiteral ("waveformSummary")));
+  map.insert (QStringLiteral ("serviceSummary"),
+              remoteCapabilities.value (QStringLiteral ("serviceSummary")));
+  if (advertisement)
+    {
+      map.insert (QStringLiteral ("remoteLocator"),
+                  QString::fromStdString (advertisement->station.locator));
+      map.insert (QStringLiteral ("remoteName"),
+                  QString::fromStdString (advertisement->station.name));
+      map.insert (QStringLiteral ("remoteCqType"),
+                  QString::fromStdString (advertisement->cqType));
+    }
   map.insert (QStringLiteral ("messageCount"),
               static_cast<int> (session.messages.size ()));
   map.insert (QStringLiteral ("openedAtMs"),
@@ -2494,6 +2596,104 @@ bool parsePathFinderResponse (QString const& text,
   return false;
 }
 
+struct ParsedDigipeaterEnvelope
+{
+  QString originCall;
+  QString targetCall;
+  QString id;
+  int ttl {0};
+  QStringList path;
+  QString payloadText;
+};
+
+QString sanitizedDigipeaterCall (QString const& value)
+{
+  QString call = normalizeCallsign (value);
+  call.replace (QRegularExpression {QStringLiteral ("[^A-Z0-9/.-]")},
+                QString {});
+  return call.left (24);
+}
+
+QString sanitizedDigipeaterId (QString const& value)
+{
+  QString id = value.trimmed ().toUpper ();
+  id.replace (QRegularExpression {QStringLiteral ("[^A-Z0-9]")},
+              QString {});
+  return id.left (24);
+}
+
+QStringList sanitizedDigipeaterPath (QStringList const& path)
+{
+  QStringList clean;
+  for (QString const& hop : path)
+    {
+      QString const call = sanitizedDigipeaterCall (hop);
+      if (!call.isEmpty () && !clean.contains (call))
+        {
+          clean.push_back (call);
+        }
+    }
+  return clean;
+}
+
+QString formatDigipeaterEnvelope (ParsedDigipeaterEnvelope const& envelope)
+{
+  QByteArray const payload =
+      envelope.payloadText.left (kDigipeaterMaxPayloadChars)
+          .toUtf8 ()
+          .toHex ()
+          .toUpper ();
+  return QStringLiteral ("DG1|%1|%2|%3|%4|%5|%6")
+      .arg (sanitizedDigipeaterCall (envelope.originCall),
+            sanitizedDigipeaterCall (envelope.targetCall),
+            sanitizedDigipeaterId (envelope.id))
+      .arg (std::max (0, std::min (kMaxRelayHopCount, envelope.ttl)))
+      .arg (sanitizedDigipeaterPath (envelope.path).join (QLatin1Char (',')),
+            QString::fromLatin1 (payload));
+}
+
+bool parseDigipeaterEnvelope (QString const& text,
+                              ParsedDigipeaterEnvelope* envelope)
+{
+  QString const trimmed = text.trimmed ();
+  if (!trimmed.startsWith (QStringLiteral ("DG1|")))
+    {
+      return false;
+    }
+  QStringList const parts = trimmed.split (QLatin1Char ('|'));
+  if (parts.size () != 7 || parts[0] != QStringLiteral ("DG1"))
+    {
+      return false;
+    }
+  bool ttlOk = false;
+  int const ttl = parts[4].toInt (&ttlOk);
+  QByteArray const payload = QByteArray::fromHex (parts[6].toLatin1 ());
+  QString const origin = sanitizedDigipeaterCall (parts[1]);
+  QString const target = sanitizedDigipeaterCall (parts[2]);
+  QString const id = sanitizedDigipeaterId (parts[3]);
+  QStringList path = sanitizedDigipeaterPath (
+      parts[5].split (QLatin1Char (','), Qt::SkipEmptyParts));
+  if (!ttlOk || origin.isEmpty () || target.isEmpty () || id.isEmpty ()
+      || payload.isEmpty ())
+    {
+      return false;
+    }
+  if (path.isEmpty ())
+    {
+      path.push_back (origin);
+    }
+  if (envelope)
+    {
+      envelope->originCall = origin;
+      envelope->targetCall = target;
+      envelope->id = id;
+      envelope->ttl = std::max (0, std::min (kMaxRelayHopCount, ttl));
+      envelope->path = path;
+      envelope->payloadText = QString::fromUtf8 (payload).simplified ();
+    }
+  return true;
+}
+
 bool isHexText (QString const& text)
 {
   if (text.size () % 2 != 0)
@@ -2765,6 +2965,19 @@ QString sha256Hex (QByteArray const& bytes)
       QCryptographicHash::hash (bytes, QCryptographicHash::Sha256).toHex ());
 }
 
+QString safeFt2LinkFileName (QString const& fileName,
+                             QString const& fallback)
+{
+  QString safeName = fileName.trimmed ();
+  safeName.replace (QLatin1Char ('/'), QLatin1Char ('_'));
+  safeName.replace (QLatin1Char ('\\'), QLatin1Char ('_'));
+  safeName.replace (QLatin1Char ('|'), QLatin1Char ('_'));
+  safeName.replace (QLatin1Char ('>'), QLatin1Char ('_'));
+  safeName.replace (QLatin1Char ('<'), QLatin1Char ('_'));
+  safeName = safeName.left (96).trimmed ();
+  return safeName.isEmpty () ? fallback : safeName;
+}
+
 QString makeFileEnvelope (QString const& toCall,
                           QString const& fromCall,
                           QString const& fileName,
@@ -3034,6 +3247,57 @@ QVariantMap mailboxMap (quint32 id,
   return map;
 }
 
+QString mailboxCenterRole (QString const& direction)
+{
+  if (direction == QStringLiteral ("Incoming"))
+    {
+      return QStringLiteral ("INBOX");
+    }
+  if (direction == QStringLiteral ("Outgoing"))
+    {
+      return QStringLiteral ("OUTBOX");
+    }
+  if (direction == QStringLiteral ("Parked"))
+    {
+      return QStringLiteral ("PARKED");
+    }
+  if (direction == QStringLiteral ("Relay"))
+    {
+      return QStringLiteral ("RELAY");
+    }
+  return direction.trimmed ().isEmpty ()
+      ? QStringLiteral ("MAIL")
+      : direction.trimmed ().toUpper ();
+}
+
+QString mailboxSummaryLine (QString const& role,
+                            QString const& state,
+                            QString const& fromCall,
+                            QString const& toCall,
+                            QString const& subject,
+                            QString const& body)
+{
+  QString const subjectText = subject.simplified ().left (48);
+  QString const bodyText = body.simplified ().left (96);
+  QStringList parts;
+  parts << role << state;
+  if (!fromCall.isEmpty () || !toCall.isEmpty ())
+    {
+      parts << QStringLiteral ("%1>%2").arg (
+          fromCall.isEmpty () ? QStringLiteral ("--") : fromCall,
+          toCall.isEmpty () ? QStringLiteral ("--") : toCall);
+    }
+  if (!subjectText.isEmpty ())
+    {
+      parts << subjectText;
+    }
+  if (!bodyText.isEmpty ())
+    {
+      parts << bodyText;
+    }
+  return parts.join (QStringLiteral (" / "));
+}
+
 QString firstEmailAddress (QString const& text)
 {
   QRegularExpression expression (
@@ -3129,6 +3393,9 @@ QVariantMap beaconHistoryMap (QString const& direction,
                               QString const& locator,
                               QString const& name,
                               QString const& profileName,
+                              QString const& capabilitySummary,
+                              quint16 waveformCapabilityFlags,
+                              quint16 serviceCapabilityFlags,
                               bool cq,
                               QString const& cqType,
                               QString const& cqLocator,
@@ -3143,6 +3410,11 @@ QVariantMap beaconHistoryMap (QString const& direction,
   map.insert (QStringLiteral ("locator"), locator);
   map.insert (QStringLiteral ("name"), name);
   map.insert (QStringLiteral ("profileName"), profileName);
+  map.insert (QStringLiteral ("capabilitySummary"), capabilitySummary);
+  map.insert (QStringLiteral ("waveformCapabilityFlags"),
+              static_cast<int> (waveformCapabilityFlags));
+  map.insert (QStringLiteral ("serviceCapabilityFlags"),
+              static_cast<int> (serviceCapabilityFlags));
   map.insert (QStringLiteral ("cq"), cq);
   map.insert (QStringLiteral ("cqType"),
               cqType.isEmpty () ? QStringLiteral ("CQ") : cqType);
@@ -3397,7 +3669,11 @@ QVariantMap pathReportMap (quint32 id,
                            QString const& profileName,
                            QString const& rateName,
                            QString const& source,
-                           quint64 atMs)
+                           quint64 atMs,
+                           QString const& kind = QString {},
+                           QString const& targetCall = QString {},
+                           QString const& relayCall = QString {},
+                           QString const& detail = QString {})
 {
   QDateTime const at =
       QDateTime::fromMSecsSinceEpoch (static_cast<qint64> (atMs),
@@ -3415,6 +3691,10 @@ QVariantMap pathReportMap (quint32 id,
   map.insert (QStringLiteral ("profileName"), profileName);
   map.insert (QStringLiteral ("rateName"), rateName);
   map.insert (QStringLiteral ("source"), source);
+  map.insert (QStringLiteral ("kind"), kind);
+  map.insert (QStringLiteral ("targetCall"), targetCall);
+  map.insert (QStringLiteral ("relayCall"), relayCall);
+  map.insert (QStringLiteral ("detail"), detail);
   map.insert (QStringLiteral ("bandName"), QStringLiteral ("--"));
   map.insert (QStringLiteral ("dialFrequencyHz"),
               QVariant::fromValue<qulonglong> (0u));
@@ -3513,6 +3793,60 @@ QVariantMap fileTransferMap (quint32 id,
               QVariant::fromValue<qulonglong> (atMs));
   map.insert (QStringLiteral ("updatedAtMs"),
               QVariant::fromValue<qulonglong> (updatedAtMs));
+  return map;
+}
+
+QVariantMap bbsSharedFileMap (quint32 id,
+                              QString const& fileName,
+                              QString const& content,
+                              QString const& contentBase64,
+                              QString const& sha256,
+                              bool binary,
+                              bool enabled,
+                              quint64 atMs,
+                              quint64 updatedAtMs,
+                              quint64 lastRequestedAtMs,
+                              int requestCount)
+{
+  QByteArray const bytes = binary
+      ? QByteArray::fromBase64 (contentBase64.trimmed ().toLatin1 ())
+      : content.toUtf8 ();
+  QVariantMap map;
+  map.insert (QStringLiteral ("id"), id);
+  map.insert (QStringLiteral ("fileName"), fileName);
+  map.insert (QStringLiteral ("content"), content);
+  map.insert (QStringLiteral ("contentBase64"),
+              binary
+              ? contentBase64.trimmed ()
+              : QString::fromLatin1 (content.toUtf8 ().toBase64 ()));
+  map.insert (QStringLiteral ("sizeBytes"), bytes.size ());
+  map.insert (QStringLiteral ("sha256"), sha256);
+  map.insert (QStringLiteral ("binary"), binary);
+  map.insert (QStringLiteral ("enabled"), enabled);
+  map.insert (QStringLiteral ("atMs"),
+              QVariant::fromValue<qulonglong> (atMs));
+  map.insert (QStringLiteral ("updatedAtMs"),
+              QVariant::fromValue<qulonglong> (updatedAtMs));
+  map.insert (QStringLiteral ("lastRequestedAtMs"),
+              QVariant::fromValue<qulonglong> (lastRequestedAtMs));
+  map.insert (QStringLiteral ("publishedUtc"), utcMinuteText (atMs));
+  map.insert (QStringLiteral ("updatedUtc"), utcMinuteText (updatedAtMs));
+  map.insert (QStringLiteral ("lastRequestedUtc"),
+              lastRequestedAtMs > 0u ? utcMinuteText (lastRequestedAtMs)
+                                     : QString {});
+  map.insert (QStringLiteral ("requestCount"), requestCount);
+  QString preview = content.simplified ();
+  if (preview.size () > 96)
+    {
+      preview = preview.left (93).trimmed () + QStringLiteral ("...");
+    }
+  map.insert (QStringLiteral ("preview"), preview);
+  map.insert (QStringLiteral ("imageLike"),
+              fileName.endsWith (QStringLiteral (".png"), Qt::CaseInsensitive)
+              || fileName.endsWith (QStringLiteral (".jpg"), Qt::CaseInsensitive)
+              || fileName.endsWith (QStringLiteral (".jpeg"), Qt::CaseInsensitive)
+              || fileName.endsWith (QStringLiteral (".gif"), Qt::CaseInsensitive)
+              || fileName.endsWith (QStringLiteral (".webp"), Qt::CaseInsensitive));
   return map;
 }
 
@@ -4322,6 +4656,8 @@ FT2LinkQmlAdapter::FT2LinkQmlAdapter (QObject* parent)
            this, persistOnChange);
   connect (this, &FT2LinkQmlAdapter::fileTransfersChanged,
            this, persistOnChange);
+  connect (this, &FT2LinkQmlAdapter::bbsFileServerChanged,
+           this, persistOnChange);
   connect (this, &FT2LinkQmlAdapter::bulletinsChanged,
            this, persistOnChange);
   connect (this, &FT2LinkQmlAdapter::qsoLogChanged,
@@ -4701,6 +5037,31 @@ int FT2LinkQmlAdapter::pathReportCount () const
   return static_cast<int> (m_pathReports.size ());
 }
 
+bool FT2LinkQmlAdapter::digipeaterEnabled () const
+{
+  return m_digipeaterEnabled;
+}
+
+int FT2LinkQmlAdapter::digipeaterMaxHops () const
+{
+  return m_digipeaterMaxHops;
+}
+
+int FT2LinkQmlAdapter::digipeaterEventCount () const
+{
+  return static_cast<int> (m_digipeaterEvents.size ());
+}
+
+bool FT2LinkQmlAdapter::bbsFileServerEnabled () const
+{
+  return m_bbsFileServerEnabled;
+}
+
+int FT2LinkQmlAdapter::bbsSharedFileCount () const
+{
+  return static_cast<int> (m_bbsSharedFiles.size ());
+}
+
 int FT2LinkQmlAdapter::beaconHistoryCount () const
 {
   return static_cast<int> (m_beaconHistory.size ());
@@ -4949,6 +5310,9 @@ bool FT2LinkQmlAdapter::observeStation (QString const& call,
   advertisement.capabilities.preferredProfile = profileFromInt (preferredProfile);
   advertisement.capabilities.preferredW2300RateMode =
       rateModeFromInt (preferredW2300RateMode);
+  advertisement.waveformCapabilityFlags =
+      decodium::ft2link::beaconWaveformCapabilityFlags (
+          advertisement.capabilities);
 
   std::string error;
   if (!m_model.observeStation (advertisement, &error))
@@ -5471,6 +5835,634 @@ bool FT2LinkQmlAdapter::transmitPathFinderResponseRadio (
   return true;
 }
 
+QVariantMap FT2LinkQmlAdapter::digipeaterState (quint64 nowMs) const
+{
+  Q_UNUSED (nowMs)
+  QVariantMap map;
+  map.insert (QStringLiteral ("enabled"), m_digipeaterEnabled);
+  map.insert (QStringLiteral ("maxHops"), m_digipeaterMaxHops);
+  map.insert (QStringLiteral ("seenCount"),
+              static_cast<int> (m_digipeaterSeen.size ()));
+  map.insert (QStringLiteral ("eventCount"),
+              static_cast<int> (m_digipeaterEvents.size ()));
+  map.insert (QStringLiteral ("line"),
+              QStringLiteral ("Digi %1 / max %2 hop%3 / %4 seen")
+                  .arg (m_digipeaterEnabled ? QStringLiteral ("ON")
+                                             : QStringLiteral ("OFF"))
+                  .arg (m_digipeaterMaxHops)
+                  .arg (m_digipeaterMaxHops == 1 ? QString {} : QStringLiteral ("s"))
+                  .arg (static_cast<int> (m_digipeaterSeen.size ())));
+  return map;
+}
+
+QVariantList FT2LinkQmlAdapter::digipeaterEvents () const
+{
+  QVariantList list;
+  for (DigipeaterEvent const& event : m_digipeaterEvents)
+    {
+      QVariantMap map;
+      map.insert (QStringLiteral ("id"), event.id);
+      map.insert (QStringLiteral ("direction"), event.direction);
+      map.insert (QStringLiteral ("originCall"), event.originCall);
+      map.insert (QStringLiteral ("targetCall"), event.targetCall);
+      map.insert (QStringLiteral ("viaCall"), event.viaCall);
+      map.insert (QStringLiteral ("path"), event.path.join (QLatin1Char ('>')));
+      map.insert (QStringLiteral ("payloadText"), event.payloadText);
+      map.insert (QStringLiteral ("state"), event.state);
+      map.insert (QStringLiteral ("ttl"), event.ttl);
+      map.insert (QStringLiteral ("detail"), event.detail);
+      map.insert (QStringLiteral ("atMs"),
+                  QVariant::fromValue<qulonglong> (
+                      static_cast<qulonglong> (event.atMs)));
+      list.prepend (map);
+    }
+  return list;
+}
+
+QVariantMap FT2LinkQmlAdapter::configureDigipeater (bool enabled,
+                                                    int maxHops)
+{
+  int const clampedHops = std::max (0, std::min (kMaxRelayHopCount, maxHops));
+  bool const changed = m_digipeaterEnabled != enabled
+      || m_digipeaterMaxHops != clampedHops;
+  m_digipeaterEnabled = enabled;
+  m_digipeaterMaxHops = clampedHops;
+  if (changed)
+    {
+      emit digipeaterChanged ();
+    }
+
+  QVariantMap result = digipeaterState (
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
+  result.insert (QStringLiteral ("ok"), true);
+  return result;
+}
+
+bool FT2LinkQmlAdapter::clearDigipeaterEvents ()
+{
+  if (m_digipeaterEvents.empty () && m_digipeaterSeen.empty ())
+    {
+      return false;
+    }
+  m_digipeaterEvents.clear ();
+  m_digipeaterSeen.clear ();
+  emit digipeaterChanged ();
+  return true;
+}
+
+QString FT2LinkQmlAdapter::digipeaterEnvelopeText (
+    QString const& targetCall,
+    QString const& payloadText,
+    int maxHops,
+    quint64 nowMs) const
+{
+  QString const localCall = sanitizedDigipeaterCall (
+      QString::fromStdString (m_model.localStation ().call));
+  QString target = sanitizedDigipeaterCall (targetCall);
+  if (target.isEmpty ())
+    {
+      target = QStringLiteral ("ALL");
+    }
+  QString const payload = payloadText.simplified ().left (
+      kDigipeaterMaxPayloadChars);
+  if (localCall.isEmpty () || payload.isEmpty ())
+    {
+      return {};
+    }
+
+  QByteArray const seed = QStringLiteral ("%1|%2|%3|%4")
+      .arg (localCall,
+            target,
+            payload,
+            QString::number (static_cast<qulonglong> (nowMs)))
+      .toUtf8 ();
+  ParsedDigipeaterEnvelope envelope;
+  envelope.originCall = localCall;
+  envelope.targetCall = target;
+  envelope.id = QString::fromLatin1 (
+      QCryptographicHash::hash (seed, QCryptographicHash::Sha1)
+          .toHex ()
+          .left (12)
+          .toUpper ());
+  envelope.ttl = std::max (0, std::min (kMaxRelayHopCount, maxHops));
+  envelope.path = QStringList {localCall};
+  envelope.payloadText = payload;
+  return formatDigipeaterEnvelope (envelope);
+}
+
+bool FT2LinkQmlAdapter::transmitDigipeaterEnvelopeRadio (
+    QString const& envelopeText,
+    quint64 nowMs,
+    bool requireArm)
+{
+  if (requireArm && !m_radioTxArmed)
+    {
+      setLastError (QStringLiteral ("FT2-Link digipeater TX is not armed"));
+      return false;
+    }
+  bool const temporaryArm = !requireArm && !m_radioTxArmed;
+  if (temporaryArm)
+    {
+      setRadioTxArmed (true);
+    }
+  bool const ok = transmitBroadcastRadio (envelopeText, nowMs);
+  if (!ok && temporaryArm && m_radioTxArmed)
+    {
+      setRadioTxArmed (false);
+    }
+  return ok;
+}
+
+bool FT2LinkQmlAdapter::transmitDigipeaterRadio (QString const& targetCall,
+                                                 QString const& payloadText,
+                                                 int maxHops,
+                                                 quint64 nowMs)
+{
+  QString const envelope = digipeaterEnvelopeText (
+      targetCall, payloadText, maxHops, nowMs);
+  if (envelope.isEmpty ())
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link digipeater requires MYCALL and a payload"));
+      return false;
+    }
+  if (!transmitDigipeaterEnvelopeRadio (envelope, nowMs, true))
+    {
+      return false;
+    }
+
+  ParsedDigipeaterEnvelope parsed;
+  parseDigipeaterEnvelope (envelope, &parsed);
+  recordDigipeaterEvent (QStringLiteral ("TX"),
+                         parsed.originCall,
+                         parsed.targetCall,
+                         QString {},
+                         parsed.path,
+                         parsed.payloadText,
+                         QStringLiteral ("Originated"),
+                         parsed.ttl,
+                         QStringLiteral ("DIGI originated"),
+                         nowMs);
+  setTransportState (QStringLiteral ("DIGI TX"));
+  return true;
+}
+
+QVariantMap FT2LinkQmlAdapter::bbsFileServerState (quint64 nowMs) const
+{
+  Q_UNUSED (nowMs)
+  int enabledCount = 0;
+  int totalBytes = 0;
+  int requestCount = 0;
+  for (BbsSharedFile const& file : m_bbsSharedFiles)
+    {
+      if (!file.enabled)
+        {
+          continue;
+        }
+      ++enabledCount;
+      totalBytes += fileTransferByteSize (
+          file.content, file.contentBase64, file.binary);
+      requestCount += std::max (0, file.requestCount);
+    }
+
+  QVariantMap map;
+  map.insert (QStringLiteral ("enabled"), m_bbsFileServerEnabled);
+  map.insert (QStringLiteral ("fileCount"),
+              static_cast<int> (m_bbsSharedFiles.size ()));
+  map.insert (QStringLiteral ("enabledFileCount"), enabledCount);
+  map.insert (QStringLiteral ("totalBytes"), totalBytes);
+  map.insert (QStringLiteral ("requestCount"), requestCount);
+  map.insert (QStringLiteral ("line"),
+              QStringLiteral ("BBS file server %1 / %2 file%3 / %4 B")
+                  .arg (m_bbsFileServerEnabled ? QStringLiteral ("ON")
+                                                : QStringLiteral ("OFF"))
+                  .arg (enabledCount)
+                  .arg (enabledCount == 1 ? QString {} : QStringLiteral ("s"))
+                  .arg (totalBytes));
+  return map;
+}
+
+QVariantList FT2LinkQmlAdapter::bbsSharedFiles () const
+{
+  QVariantList list;
+  for (BbsSharedFile const& file : m_bbsSharedFiles)
+    {
+      list.push_back (bbsSharedFileMap (
+          file.id,
+          file.fileName,
+          file.content,
+          file.contentBase64,
+          file.sha256,
+          file.binary,
+          file.enabled,
+          file.atMs,
+          file.updatedAtMs,
+          file.lastRequestedAtMs,
+          file.requestCount));
+    }
+  return list;
+}
+
+QVariantMap FT2LinkQmlAdapter::configureBbsFileServer (bool enabled)
+{
+  if (m_bbsFileServerEnabled != enabled)
+    {
+      m_bbsFileServerEnabled = enabled;
+      emit bbsFileServerChanged ();
+    }
+
+  QVariantMap result = bbsFileServerState (
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
+  result.insert (QStringLiteral ("ok"), true);
+  clearLastError ();
+  return result;
+}
+
+QVariantMap FT2LinkQmlAdapter::publishBbsSharedFileText (
+    QString const& fileName,
+    QString const& content,
+    quint64 nowMs)
+{
+  QByteArray const bytes = content.toUtf8 ();
+  QVariantMap result;
+  if (bytes.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file content is empty"));
+      result.insert (QStringLiteral ("ok"), false);
+      result.insert (QStringLiteral ("error"), lastError ());
+      return result;
+    }
+  if (bytes.size () > kMaxTextFilePayloadBytes)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS file exceeds %1 bytes").arg (
+              kMaxTextFilePayloadBytes));
+      result.insert (QStringLiteral ("ok"), false);
+      result.insert (QStringLiteral ("error"), lastError ());
+      return result;
+    }
+
+  QString const safeName = safeFt2LinkFileName (
+      fileName, QStringLiteral ("bbs-file.txt"));
+  QString const checksum = sha256Hex (bytes);
+  QString const key = safeName.toLower ();
+  for (BbsSharedFile& existing : m_bbsSharedFiles)
+    {
+      if (existing.fileName.trimmed ().toLower () != key)
+        {
+          continue;
+        }
+      existing.content = content;
+      existing.contentBase64 = QString::fromLatin1 (bytes.toBase64 ());
+      existing.sha256 = checksum;
+      existing.binary = false;
+      existing.enabled = true;
+      existing.updatedAtMs = nowMs;
+      emit bbsFileServerChanged ();
+      clearLastError ();
+      result = bbsSharedFileMap (
+          existing.id,
+          existing.fileName,
+          existing.content,
+          existing.contentBase64,
+          existing.sha256,
+          existing.binary,
+          existing.enabled,
+          existing.atMs,
+          existing.updatedAtMs,
+          existing.lastRequestedAtMs,
+          existing.requestCount);
+      result.insert (QStringLiteral ("ok"), true);
+      result.insert (QStringLiteral ("updated"), true);
+      return result;
+    }
+
+  BbsSharedFile file;
+  file.id = m_nextBbsSharedFileId++;
+  if (m_nextBbsSharedFileId == 0u)
+    {
+      m_nextBbsSharedFileId = 1u;
+    }
+  file.fileName = safeName;
+  file.content = content;
+  file.contentBase64 = QString::fromLatin1 (bytes.toBase64 ());
+  file.sha256 = checksum;
+  file.binary = false;
+  file.enabled = true;
+  file.atMs = nowMs;
+  file.updatedAtMs = nowMs;
+  m_bbsSharedFiles.push_back (file);
+  emit bbsFileServerChanged ();
+  clearLastError ();
+
+  result = bbsSharedFileMap (
+      file.id,
+      file.fileName,
+      file.content,
+      file.contentBase64,
+      file.sha256,
+      file.binary,
+      file.enabled,
+      file.atMs,
+      file.updatedAtMs,
+      file.lastRequestedAtMs,
+      file.requestCount);
+  result.insert (QStringLiteral ("ok"), true);
+  result.insert (QStringLiteral ("updated"), false);
+  return result;
+}
+
+QVariantMap FT2LinkQmlAdapter::publishBbsSharedFileBytes (
+    QString const& fileName,
+    QString const& contentBase64,
+    quint64 nowMs)
+{
+  QByteArray const bytes = QByteArray::fromBase64 (
+      contentBase64.trimmed ().toLatin1 ());
+  QVariantMap result;
+  if (bytes.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS binary file content is empty"));
+      result.insert (QStringLiteral ("ok"), false);
+      result.insert (QStringLiteral ("error"), lastError ());
+      return result;
+    }
+  if (bytes.size () > kMaxTextFilePayloadBytes)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS binary file exceeds %1 bytes").arg (
+              kMaxTextFilePayloadBytes));
+      result.insert (QStringLiteral ("ok"), false);
+      result.insert (QStringLiteral ("error"), lastError ());
+      return result;
+    }
+
+  QString const safeName = safeFt2LinkFileName (
+      fileName, QStringLiteral ("bbs-file.bin"));
+  QString const normalizedBase64 = QString::fromLatin1 (bytes.toBase64 ());
+  QString const checksum = sha256Hex (bytes);
+  QString const key = safeName.toLower ();
+  for (BbsSharedFile& existing : m_bbsSharedFiles)
+    {
+      if (existing.fileName.trimmed ().toLower () != key)
+        {
+          continue;
+        }
+      existing.content = QString::fromUtf8 (bytes);
+      existing.contentBase64 = normalizedBase64;
+      existing.sha256 = checksum;
+      existing.binary = true;
+      existing.enabled = true;
+      existing.updatedAtMs = nowMs;
+      emit bbsFileServerChanged ();
+      clearLastError ();
+      result = bbsSharedFileMap (
+          existing.id,
+          existing.fileName,
+          existing.content,
+          existing.contentBase64,
+          existing.sha256,
+          existing.binary,
+          existing.enabled,
+          existing.atMs,
+          existing.updatedAtMs,
+          existing.lastRequestedAtMs,
+          existing.requestCount);
+      result.insert (QStringLiteral ("ok"), true);
+      result.insert (QStringLiteral ("updated"), true);
+      return result;
+    }
+
+  BbsSharedFile file;
+  file.id = m_nextBbsSharedFileId++;
+  if (m_nextBbsSharedFileId == 0u)
+    {
+      m_nextBbsSharedFileId = 1u;
+    }
+  file.fileName = safeName;
+  file.content = QString::fromUtf8 (bytes);
+  file.contentBase64 = normalizedBase64;
+  file.sha256 = checksum;
+  file.binary = true;
+  file.enabled = true;
+  file.atMs = nowMs;
+  file.updatedAtMs = nowMs;
+  m_bbsSharedFiles.push_back (file);
+  emit bbsFileServerChanged ();
+  clearLastError ();
+
+  result = bbsSharedFileMap (
+      file.id,
+      file.fileName,
+      file.content,
+      file.contentBase64,
+      file.sha256,
+      file.binary,
+      file.enabled,
+      file.atMs,
+      file.updatedAtMs,
+      file.lastRequestedAtMs,
+      file.requestCount);
+  result.insert (QStringLiteral ("ok"), true);
+  result.insert (QStringLiteral ("updated"), false);
+  return result;
+}
+
+bool FT2LinkQmlAdapter::removeBbsSharedFile (quint32 fileId)
+{
+  if (fileId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file id is invalid"));
+      return false;
+    }
+  for (std::vector<BbsSharedFile>::iterator it = m_bbsSharedFiles.begin ();
+       it != m_bbsSharedFiles.end ();
+       ++it)
+    {
+      if (it->id != fileId)
+        {
+          continue;
+        }
+      m_bbsSharedFiles.erase (it);
+      emit bbsFileServerChanged ();
+      clearLastError ();
+      return true;
+    }
+  setLastError (QStringLiteral ("FT2-Link BBS file not found"));
+  return false;
+}
+
+bool FT2LinkQmlAdapter::clearBbsSharedFiles ()
+{
+  if (m_bbsSharedFiles.empty ())
+    {
+      return false;
+    }
+  m_bbsSharedFiles.clear ();
+  emit bbsFileServerChanged ();
+  clearLastError ();
+  return true;
+}
+
+bool FT2LinkQmlAdapter::requestBbsFileListRadio (quint16 sessionId,
+                                                 quint64 nowMs)
+{
+  if (!m_radioTxArmed)
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS list request TX is not armed"));
+      return false;
+    }
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS list request requires a connected session"));
+      return false;
+    }
+  return transmitPreparedRadioTxAudio (
+      sessionId, QStringLiteral ("<BLR>"), nowMs);
+}
+
+bool FT2LinkQmlAdapter::requestBbsFileRadio (quint16 sessionId,
+                                             QString const& fileName,
+                                             quint64 nowMs)
+{
+  if (!m_radioTxArmed)
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file request TX is not armed"));
+      return false;
+    }
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS file request requires a connected session"));
+      return false;
+    }
+  QString const safeName = safeFt2LinkFileName (
+      fileName, QStringLiteral (""));
+  if (safeName.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file request needs a file name"));
+      return false;
+    }
+  return transmitPreparedRadioTxAudio (
+      sessionId, QStringLiteral ("<BG:%1>").arg (safeName), nowMs);
+}
+
+bool FT2LinkQmlAdapter::transmitBbsSharedFileListRadio (quint16 sessionId,
+                                                        quint64 nowMs)
+{
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS file list requires a connected session"));
+      return false;
+    }
+  if (!m_bbsFileServerEnabled)
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file server is disabled"));
+      return false;
+    }
+
+  QString reply = bbsFileListReply (nowMs);
+  if (reply.trimmed ().isEmpty ())
+    {
+      reply = QStringLiteral ("<BLJ>");
+    }
+  QString const remoteCall = normalizeCallsign (
+      QString::fromStdString (session->remoteCall));
+  QString const displayText = QStringLiteral ("BBS FILE LIST to %1")
+      .arg (remoteCall.isEmpty () ? QStringLiteral ("remote") : remoteCall);
+
+  QVariantMap planExtras;
+  planExtras.insert (QStringLiteral ("bbsFileServer"), true);
+  planExtras.insert (QStringLiteral ("bbsFileList"), true);
+
+  bool const autoArmed = !m_radioTxArmed;
+  if (autoArmed)
+    {
+      setRadioTxArmed (true);
+    }
+  bool const ok = transmitApplicationPayloadRadio (
+      sessionId,
+      reply,
+      displayText,
+      QStringLiteral ("FT2-Link BBS LIST"),
+      QStringLiteral ("BBS LIST TX"),
+      planExtras,
+      nowMs);
+  if (!ok && autoArmed)
+    {
+      setRadioTxArmed (false);
+    }
+  return ok;
+}
+
+bool FT2LinkQmlAdapter::transmitBbsSharedFileRadio (quint16 sessionId,
+                                                    QString const& fileName,
+                                                    quint64 nowMs)
+{
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected)
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link BBS file download requires a connected session"));
+      return false;
+    }
+
+  BbsSharedFile const* shared = bbsSharedFileForName (fileName);
+  if (!shared)
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file is not available"));
+      return false;
+    }
+
+  quint32 const sharedId = shared->id;
+  QString const sharedName = shared->fileName;
+  QString const content = shared->content;
+  QString const contentBase64 = shared->contentBase64;
+  bool const binary = shared->binary;
+
+  bool const autoArmed = !m_radioTxArmed;
+  if (autoArmed)
+    {
+      setRadioTxArmed (true);
+    }
+  bool const ok = binary
+      ? transmitFileRadioBytes (sessionId,
+                                QString {},
+                                sharedName,
+                                contentBase64,
+                                nowMs)
+      : transmitFileRadio (sessionId,
+                           QString {},
+                           sharedName,
+                           content,
+                           nowMs);
+  if (!ok)
+    {
+      if (autoArmed)
+        {
+          setRadioTxArmed (false);
+        }
+      return false;
+    }
+
+  for (BbsSharedFile& file : m_bbsSharedFiles)
+    {
+      if (file.id == sharedId)
+        {
+          file.lastRequestedAtMs = nowMs;
+          file.requestCount = std::max (0, file.requestCount) + 1;
+          break;
+        }
+    }
+  emit bbsFileServerChanged ();
+  return true;
+}
+
 bool FT2LinkQmlAdapter::transmitPingRadio (QString const& remoteCall,
                                            quint64 nowMs)
 {
@@ -5669,8 +6661,18 @@ bool FT2LinkQmlAdapter::queueBeaconRadio (bool cq,
       kind += QLatin1Char (' ');
       kind += normalizedCqType;
     }
+  if (automatic)
+    {
+      m_nextRadioTxStrictLbt = true;
+      m_nextRadioTxStrictLbtCancelMs = 12000;
+    }
   if (!requestControlRadioTx (beacon, kind, QString {}, nowMs))
     {
+      if (automatic)
+        {
+          m_nextRadioTxStrictLbt = false;
+          m_nextRadioTxStrictLbtCancelMs = 24000;
+        }
       return false;
     }
 
@@ -5685,12 +6687,34 @@ bool FT2LinkQmlAdapter::queueBeaconRadio (bool cq,
   StationAdvertisement localAdvertisement;
   localAdvertisement.station = m_model.localStation ();
   localAdvertisement.capabilities = m_model.localCapabilities ();
+  localAdvertisement.waveformCapabilityFlags =
+      decodium::ft2link::beaconWaveformCapabilityFlags (
+          localAdvertisement.capabilities);
+  localAdvertisement.serviceCapabilityFlags =
+      decodium::ft2link::defaultBeaconServiceCapabilityFlags ();
   localAdvertisement.cq = cq;
   localAdvertisement.heardAtMs = nowMs;
   localAdvertisement.cqType = toStdString (normalizedCqType);
   localAdvertisement.cqLocator = toStdString (normalizedCqLocator);
   localAdvertisement.cqSlotId = normalizedSlotId;
   localAdvertisement.cqSlotSizeHz = normalizedSlotSizeHz;
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][BEACON] TX call=%1 cq=%2 type=%3 wave=0x%4 svc=0x%5 caps=\"%6%7%8\"")
+          .arg (QString::fromStdString (localAdvertisement.station.call))
+          .arg (localAdvertisement.cq ? 1 : 0)
+          .arg (QString::fromStdString (localAdvertisement.cqType))
+          .arg (localAdvertisement.waveformCapabilityFlags, 0, 16)
+          .arg (localAdvertisement.serviceCapabilityFlags, 0, 16)
+          .arg (QString::fromStdString (
+              decodium::ft2link::beaconWaveformCapabilitySummary (
+                  localAdvertisement.waveformCapabilityFlags)))
+          .arg (localAdvertisement.serviceCapabilityFlags == 0u
+                ? QString {}
+                : QStringLiteral (" | "))
+          .arg (QString::fromStdString (
+              decodium::ft2link::beaconServiceCapabilitySummary (
+                  localAdvertisement.serviceCapabilityFlags))));
   recordBeaconHistory (QStringLiteral ("TX"), localAdvertisement,
                        automatic ? QStringLiteral ("AUTO")
                                  : QStringLiteral ("MANUAL"),
@@ -6983,6 +8007,16 @@ bool FT2LinkQmlAdapter::transmitBulletinRadio (quint16 sessionId,
   m_liveOutboundFormId.erase (sessionId);
   m_liveOutboundFileTransferId.erase (sessionId);
   return true;
+}
+
+void FT2LinkQmlAdapter::armStrictListenBeforeTransmit (int cancelAfterMs)
+{
+  m_nextRadioTxStrictLbt = true;
+  m_nextRadioTxStrictLbtCancelMs = qBound (5000, cancelAfterMs, 120000);
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][LBT] strict next TX armed cancelAfterMs=%1")
+          .arg (m_nextRadioTxStrictLbtCancelMs));
 }
 
 void FT2LinkQmlAdapter::setRadioTxArmed (bool armed)
@@ -8894,6 +9928,23 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           setLastError (QString::fromStdString (error));
           return false;
         }
+      QString const waveformSummary = QString::fromStdString (
+          decodium::ft2link::beaconWaveformCapabilitySummary (
+              advertisement.waveformCapabilityFlags));
+      QString const serviceSummary = QString::fromStdString (
+          decodium::ft2link::beaconServiceCapabilitySummary (
+              advertisement.serviceCapabilityFlags));
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][BEACON] RX call=%1 cq=%2 type=%3 wave=0x%4 svc=0x%5 caps=\"%6%7%8\"")
+              .arg (QString::fromStdString (advertisement.station.call))
+              .arg (advertisement.cq ? 1 : 0)
+              .arg (QString::fromStdString (advertisement.cqType))
+              .arg (advertisement.waveformCapabilityFlags, 0, 16)
+              .arg (advertisement.serviceCapabilityFlags, 0, 16)
+              .arg (waveformSummary)
+              .arg (serviceSummary.isEmpty () ? QString {} : QStringLiteral (" | "))
+              .arg (serviceSummary));
       touchContact (QString::fromStdString (advertisement.station.call),
                     nowMs,
                     advertisement.cq ? QStringLiteral ("CQ RX")
@@ -8978,11 +10029,15 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       recordBroadcast (fromCall, displayText, nowMs, QStringLiteral ("RX"));
       bool const pathFinder = handlePathFinderBroadcast (
           fromCall, displayText, nowMs);
-      setTransportState (pathFinder
+      bool const digipeater = handleDigipeaterBroadcast (
+          fromCall, displayText, nowMs);
+      setTransportState (digipeater
+                         ? QStringLiteral ("DIGI RX")
+                         : (pathFinder
                          ? QStringLiteral ("PATH RX")
                          : (tags.isEmpty ()
                          ? QStringLiteral ("BCAST RX")
-                         : QStringLiteral ("ALERT RX")));
+                         : QStringLiteral ("ALERT RX"))));
       clearLastError ();
       return true;
     }
@@ -11288,6 +12343,284 @@ QVariantMap FT2LinkQmlAdapter::privacyProfile () const
   return map;
 }
 
+QVariantMap FT2LinkQmlAdapter::inquiryPreview (QString const& remoteCall,
+                                               quint64 nowMs) const
+{
+  if (nowMs == 0u)
+    {
+      nowMs = static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    }
+
+  QString target = normalizeCallsign (remoteCall);
+  if (target.isEmpty ())
+    {
+      AppSession const* session = m_model.session (m_activeSessionId);
+      if (session)
+        {
+          target = normalizeCallsign (
+              QString::fromStdString (session->remoteCall));
+        }
+    }
+  if (target.isEmpty ())
+    {
+      target = QStringLiteral ("REMOTE");
+    }
+
+  bool const blocked = isCallBlocked (target);
+  QVariantList rows;
+  int sharedCount = 0;
+  int withheldCount = 0;
+
+  auto addRow = [&rows, &sharedCount, &withheldCount, blocked] (
+      QString const& key,
+      QString const& label,
+      bool enabled,
+      QString const& requestTag,
+      QString const& reply,
+      QString const& detail) {
+    QVariantMap row;
+    row.insert (QStringLiteral ("key"), key);
+    row.insert (QStringLiteral ("label"), label);
+    row.insert (QStringLiteral ("request"), requestTag);
+    row.insert (QStringLiteral ("reply"), blocked ? QStringLiteral ("BLOCKED")
+                                                  : reply);
+    row.insert (QStringLiteral ("detail"), blocked ? QStringLiteral (
+                    "Callsign is blocked; no automatic answer")
+                                                   : detail);
+    row.insert (QStringLiteral ("enabled"), !blocked && enabled);
+    QString status;
+    if (blocked)
+      {
+        status = QStringLiteral ("BLOCK");
+        ++withheldCount;
+      }
+    else if (enabled)
+      {
+        status = QStringLiteral ("SHARE");
+        ++sharedCount;
+      }
+    else
+      {
+        status = QStringLiteral ("HOLD");
+        ++withheldCount;
+      }
+    row.insert (QStringLiteral ("status"), status);
+    rows.push_back (row);
+  };
+
+  QString const infoReply = m_infoInquireEnabled
+      ? expandCannedMessage (
+            QStringLiteral (
+                "<NAME:<NAME>> <QTH:<QTH>> <LOC:<MYGRID>> <RIG:<RIG>> <ANT:<ANT>> <PWR:<PWR>>"),
+            m_activeSessionId,
+            nowMs)
+      : QStringLiteral ("INFO inquiries disabled");
+  QString const gpsReply = m_infoInquireEnabled
+      ? (m_localProfile.gps.trimmed ().isEmpty ()
+         ? QStringLiteral ("No GPS profile configured")
+         : QStringLiteral ("<GPS:%1>").arg (m_localProfile.gps.trimmed ()))
+      : QStringLiteral ("INFO inquiries disabled");
+  QString const locatorReply = m_infoInquireEnabled
+      ? QStringLiteral ("<LOC:%1>").arg (
+            QString::fromStdString (m_model.localStation ().locator))
+      : QStringLiteral ("INFO inquiries disabled");
+
+  addRow (QStringLiteral ("PING"),
+          QStringLiteral ("Incoming ping"),
+          m_incomingPingsEnabled,
+          QStringLiteral ("PING"),
+          m_incomingPingsEnabled ? QStringLiteral ("PONG / RTT")
+                                 : QStringLiteral ("No ping reply"),
+          QStringLiteral ("Allows remote liveness and latency checks"));
+  addRow (QStringLiteral ("INFO"),
+          QStringLiteral ("Profile info"),
+          m_infoInquireEnabled,
+          QStringLiteral ("<INFO>"),
+          infoReply,
+          QStringLiteral ("Shares name, QTH, locator, rig, antenna and power"));
+  addRow (QStringLiteral ("LOC"),
+          QStringLiteral ("Locator"),
+          m_infoInquireEnabled,
+          QStringLiteral ("<LOCR>"),
+          locatorReply,
+          QStringLiteral ("Shares local grid locator"));
+  addRow (QStringLiteral ("GPS"),
+          QStringLiteral ("GPS"),
+          m_infoInquireEnabled && !m_localProfile.gps.trimmed ().isEmpty (),
+          QStringLiteral ("<GPSR>"),
+          gpsReply,
+          QStringLiteral ("Shares configured GPS/free-form location only"));
+  addRow (QStringLiteral ("LH"),
+          QStringLiteral ("Last heard"),
+          m_lastHeardPeekingEnabled,
+          QStringLiteral ("<LHR>"),
+          lastHeardTagReply (nowMs),
+          QStringLiteral ("Shares currently heard calls"));
+  addRow (QStringLiteral ("LHC"),
+          QStringLiteral ("Call heard detail"),
+          m_lastHeardPeekingEnabled,
+          QStringLiteral ("<LHC:CALL>"),
+          lastHeardSpecificTagReply (target, nowMs),
+          QStringLiteral ("Shares last-heard age and locator for one callsign"));
+  addRow (QStringLiteral ("LC"),
+          QStringLiteral ("Recent connections"),
+          m_lastConnectionsPeekingEnabled,
+          QStringLiteral ("<LCR>"),
+          lastConnectionsTagReply (),
+          QStringLiteral ("Shares recent QSO callsigns"));
+  addRow (QStringLiteral ("VM"),
+          QStringLiteral ("Parked VMail peek"),
+          m_parkedVmailPeekingEnabled,
+          QStringLiteral ("<VRP>"),
+          parkedMailboxTagReply (target),
+          QStringLiteral ("Shares whether parked mail is waiting for the caller"));
+  addRow (QStringLiteral ("SNR"),
+          QStringLiteral ("SNR report"),
+          m_snrReportSendingEnabled,
+          QStringLiteral ("<SR>"),
+          m_snrReportSendingEnabled
+          ? QStringLiteral ("<R+00> after checking RX metrics")
+          : QStringLiteral ("SNR report disabled"),
+          QStringLiteral ("Allows manual or suggested signal report replies"));
+  addRow (QStringLiteral ("VER"),
+          QStringLiteral ("Version"),
+          true,
+          QStringLiteral ("<VER>"),
+          expandCannedMessage (
+              QStringLiteral ("FT2-Link Decodium v0.1 <PROFILE> <RATE>"),
+              m_activeSessionId,
+              nowMs),
+          QStringLiteral ("Protocol/application version response"));
+
+  QVariantMap map;
+  map.insert (QStringLiteral ("ok"), true);
+  map.insert (QStringLiteral ("remoteCall"), target);
+  map.insert (QStringLiteral ("blocked"), blocked);
+  map.insert (QStringLiteral ("rows"), rows);
+  map.insert (QStringLiteral ("sharedCount"), sharedCount);
+  map.insert (QStringLiteral ("withheldCount"), withheldCount);
+  map.insert (QStringLiteral ("autoReplyEnabled"), m_autoReplyEnabled);
+  map.insert (QStringLiteral ("welcomeEnabled"), m_welcomeEnabled);
+  map.insert (QStringLiteral ("vmailParkingEnabled"), m_vmailParkingEnabled);
+  map.insert (QStringLiteral ("summary"),
+              blocked
+              ? QStringLiteral ("%1 is blocked").arg (target)
+              : QStringLiteral ("%1 shared / %2 held for %3")
+                .arg (QString::number (sharedCount),
+                      QString::number (withheldCount),
+                      target));
+  return map;
+}
+
+QVariantMap FT2LinkQmlAdapter::privacyPanel (quint64 nowMs) const
+{
+  if (nowMs == 0u)
+    {
+      nowMs = static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    }
+
+  QVariantMap profile = privacyProfile ();
+  QVariantMap preview = inquiryPreview (QString {}, nowMs);
+  QVariantList exposures = preview.value (QStringLiteral ("rows")).toList ();
+
+  int parkedCount = 0;
+  int pendingRelayCount = 0;
+  for (MailboxMessage const& message : m_mailbox)
+    {
+      if (message.state == QStringLiteral ("Parked")
+          || message.state == QStringLiteral ("Relay ready")
+          || message.state == QStringLiteral ("Pending relay"))
+        {
+          ++parkedCount;
+          if (message.state == QStringLiteral ("Relay ready")
+              || message.state == QStringLiteral ("Pending relay"))
+            {
+              ++pendingRelayCount;
+            }
+        }
+    }
+
+  QVariantMap map = profile;
+  map.insert (QStringLiteral ("exposures"), exposures);
+  map.insert (QStringLiteral ("preview"), preview);
+  map.insert (QStringLiteral ("sharedCount"),
+              preview.value (QStringLiteral ("sharedCount")).toInt ());
+  map.insert (QStringLiteral ("withheldCount"),
+              preview.value (QStringLiteral ("withheldCount")).toInt ());
+  map.insert (QStringLiteral ("autoReplyEnabled"), m_autoReplyEnabled);
+  map.insert (QStringLiteral ("welcomeEnabled"), m_welcomeEnabled);
+  map.insert (QStringLiteral ("blockedCallCount"), m_blockedCalls.size ());
+  map.insert (QStringLiteral ("contactCount"),
+              static_cast<int> (m_contactHistory.size ()));
+  map.insert (QStringLiteral ("qsoCount"),
+              static_cast<int> (m_qsoLog.size ()));
+  map.insert (QStringLiteral ("parkedMailboxCount"), parkedCount);
+  map.insert (QStringLiteral ("pendingRelayCount"), pendingRelayCount);
+  map.insert (QStringLiteral ("inquirySummary"),
+              QStringLiteral ("%1 shared / %2 held, %3 blocked, %4 parked")
+              .arg (QString::number (
+                        preview.value (QStringLiteral ("sharedCount")).toInt ()),
+                    QString::number (
+                        preview.value (QStringLiteral ("withheldCount")).toInt ()),
+                    QString::number (m_blockedCalls.size ()),
+                    QString::number (parkedCount)));
+  return map;
+}
+
+QVariantMap FT2LinkQmlAdapter::configureInquiryPrivacy (
+    bool incomingPings,
+    bool lastHeardPeeking,
+    bool lastConnectionsPeeking,
+    bool parkedVmailPeeking,
+    bool vmailParking,
+    bool snrReportSending,
+    bool verboseSnrAutoAccept,
+    bool infoInquire,
+    bool autoReply,
+    bool welcome,
+    quint64 nowMs)
+{
+  bool const qsoChanged =
+      m_incomingPingsEnabled != incomingPings
+      || m_lastHeardPeekingEnabled != lastHeardPeeking
+      || m_lastConnectionsPeekingEnabled != lastConnectionsPeeking
+      || m_parkedVmailPeekingEnabled != parkedVmailPeeking
+      || m_vmailParkingEnabled != vmailParking
+      || m_snrReportSendingEnabled != snrReportSending
+      || m_verboseSnrAutoAcceptEnabled != verboseSnrAutoAccept
+      || m_infoInquireEnabled != infoInquire;
+  bool const presenceChangedValue =
+      m_autoReplyEnabled != autoReply || m_welcomeEnabled != welcome;
+
+  m_incomingPingsEnabled = incomingPings;
+  m_lastHeardPeekingEnabled = lastHeardPeeking;
+  m_lastConnectionsPeekingEnabled = lastConnectionsPeeking;
+  m_parkedVmailPeekingEnabled = parkedVmailPeeking;
+  m_vmailParkingEnabled = vmailParking;
+  m_snrReportSendingEnabled = snrReportSending;
+  m_verboseSnrAutoAcceptEnabled = verboseSnrAutoAccept;
+  m_infoInquireEnabled = infoInquire;
+  m_autoReplyEnabled = autoReply;
+  m_welcomeEnabled = welcome;
+
+  QVariantMap result = privacyPanel (nowMs);
+  result.insert (QStringLiteral ("changed"),
+                 qsoChanged || presenceChangedValue);
+  if (qsoChanged)
+    {
+      emit qsoAutomationChanged ();
+    }
+  if (presenceChangedValue)
+    {
+      emit presenceChanged ();
+    }
+  if (qsoChanged || presenceChangedValue)
+    {
+      persistLocalStore ();
+    }
+  return result;
+}
+
 QVariantMap FT2LinkQmlAdapter::applyPrivacyPreset (QString const& preset)
 {
   QString clean = preset.trimmed ().toUpper ();
@@ -11999,6 +13332,229 @@ QVariantList FT2LinkQmlAdapter::relayQueue (quint64 nowMs) const
   return list;
 }
 
+QVariantMap FT2LinkQmlAdapter::mailboxCenter (quint64 nowMs) const
+{
+  QVariantMap center;
+  QVariantList rows;
+  QVariantList queue = relayQueue (nowMs);
+  QStringList connectedCalls;
+  for (AppSession const& session : m_model.sessions ())
+    {
+      if (session.state != AppSessionState::Connected)
+        {
+          continue;
+        }
+      QString const call = normalizeCallsign (
+          QString::fromStdString (session.remoteCall));
+      if (!call.isEmpty () && !connectedCalls.contains (call))
+        {
+          connectedCalls.push_back (call);
+        }
+    }
+
+  int incoming = 0;
+  int unread = 0;
+  int outgoing = 0;
+  int parked = 0;
+  int relay = 0;
+  int relayReady = 0;
+  int pendingRelay = 0;
+  int failed = 0;
+  int urgent = 0;
+  int emcomm = 0;
+  int canRelayNow = 0;
+
+  for (std::vector<MailboxMessage>::const_reverse_iterator it =
+           m_mailbox.rbegin ();
+       it != m_mailbox.rend ();
+       ++it)
+    {
+      MailboxMessage const& message = *it;
+      QString const role = mailboxCenterRole (message.direction);
+      bool const isIncoming = message.direction == QStringLiteral ("Incoming");
+      bool const isOutgoing = message.direction == QStringLiteral ("Outgoing");
+      bool const relayCandidate =
+          message.direction == QStringLiteral ("Parked")
+          || message.direction == QStringLiteral ("Relay");
+      bool const activeRelayState =
+          message.state == QStringLiteral ("Parked")
+          || message.state == QStringLiteral ("Relay ready")
+          || message.state == QStringLiteral ("Pending relay")
+          || message.state == QStringLiteral ("Failed");
+      bool const rowUnread = isIncoming
+          && message.state != QStringLiteral ("Read");
+      if (isIncoming)
+        {
+          ++incoming;
+        }
+      if (rowUnread)
+        {
+          ++unread;
+        }
+      if (isOutgoing)
+        {
+          ++outgoing;
+        }
+      if (message.direction == QStringLiteral ("Parked"))
+        {
+          ++parked;
+        }
+      if (message.direction == QStringLiteral ("Relay"))
+        {
+          ++relay;
+        }
+      if (message.state == QStringLiteral ("Relay ready"))
+        {
+          ++relayReady;
+        }
+      if (message.state == QStringLiteral ("Pending relay"))
+        {
+          ++pendingRelay;
+        }
+      if (message.state == QStringLiteral ("Failed"))
+        {
+          ++failed;
+        }
+      if (message.urgent)
+        {
+          ++urgent;
+        }
+      if (message.emcomm)
+        {
+          ++emcomm;
+        }
+
+      QVariantMap row = mailboxMap (
+          message.id,
+          message.direction,
+          message.fromCall,
+          message.toCall,
+          message.subject,
+          message.body,
+          message.state,
+          message.atMs,
+          message.updatedAtMs,
+          message.relayNotifiedAtMs,
+          message.urgent,
+          message.emcomm,
+          message.relayViaCall,
+          message.relayHopCount,
+          message.relayProtocol,
+          message.emailGatewayState,
+          message.emailGatewayDetail,
+          message.emailGatewayAtMs);
+
+      QString const peer = isIncoming ? message.fromCall : message.toCall;
+      quint64 const createdAgeMs =
+          nowMs >= message.atMs ? nowMs - message.atMs : 0u;
+      quint64 const updatedAgeMs =
+          nowMs >= message.updatedAtMs ? nowMs - message.updatedAtMs : 0u;
+      QVariantMap const pathHint = relayCandidate
+          ? pathRelayCandidate (message.toCall, nowMs)
+          : QVariantMap {};
+      QString const suggestedRelay =
+          pathHint.value (QStringLiteral ("relayCall")).toString ();
+      bool const directConnected =
+          !message.toCall.isEmpty () && connectedCalls.contains (message.toCall);
+      bool const suggestedConnected =
+          !suggestedRelay.isEmpty () && connectedCalls.contains (suggestedRelay);
+      bool const relaysNow = relayCandidate && activeRelayState
+          && !message.body.trimmed ().isEmpty ()
+          && (directConnected || suggestedConnected);
+      if (relaysNow)
+        {
+          ++canRelayNow;
+        }
+
+      QString action = QStringLiteral ("NONE");
+      if (rowUnread)
+        {
+          action = QStringLiteral ("READ");
+        }
+      else if (relayCandidate && message.state == QStringLiteral ("Pending relay"))
+        {
+          action = QStringLiteral ("WAIT_ACK");
+        }
+      else if (relaysNow)
+        {
+          action = QStringLiteral ("RELAY_NOW");
+        }
+      else if (relayCandidate && message.state == QStringLiteral ("Relay ready"))
+        {
+          action = QStringLiteral ("CONNECT_RELAY");
+        }
+      else if (relayCandidate && message.state == QStringLiteral ("Parked"))
+        {
+          action = QStringLiteral ("MARK_READY");
+        }
+      else if (relayCandidate && message.state == QStringLiteral ("Failed"))
+        {
+          action = QStringLiteral ("RETRY_RELAY");
+        }
+
+      row.insert (QStringLiteral ("role"), role);
+      row.insert (QStringLiteral ("peerCall"), peer);
+      row.insert (QStringLiteral ("parked"), relayCandidate);
+      row.insert (QStringLiteral ("relayActive"), relayCandidate && activeRelayState);
+      row.insert (QStringLiteral ("pendingRelay"),
+                  message.state == QStringLiteral ("Pending relay"));
+      row.insert (QStringLiteral ("failed"),
+                  message.state == QStringLiteral ("Failed"));
+      row.insert (QStringLiteral ("canRelayNow"), relaysNow);
+      row.insert (QStringLiteral ("directConnected"), directConnected);
+      row.insert (QStringLiteral ("suggestedRelayConnected"), suggestedConnected);
+      row.insert (QStringLiteral ("suggestedRelayCall"), suggestedRelay);
+      row.insert (QStringLiteral ("suggestedRelayLocator"),
+                  pathHint.value (QStringLiteral ("locator")).toString ());
+      row.insert (QStringLiteral ("ageMinutes"),
+                  QVariant::fromValue<qulonglong> (
+                      static_cast<qulonglong> (createdAgeMs / 60000u)));
+      row.insert (QStringLiteral ("updatedAgeMinutes"),
+                  QVariant::fromValue<qulonglong> (
+                      static_cast<qulonglong> (updatedAgeMs / 60000u)));
+      row.insert (QStringLiteral ("centerAction"), action);
+      row.insert (QStringLiteral ("summaryLine"),
+                  mailboxSummaryLine (role,
+                                      message.state,
+                                      message.fromCall,
+                                      message.toCall,
+                                      message.subject,
+                                      message.body));
+      rows.push_back (row);
+    }
+
+  center.insert (QStringLiteral ("total"), static_cast<int> (m_mailbox.size ()));
+  center.insert (QStringLiteral ("incoming"), incoming);
+  center.insert (QStringLiteral ("unread"), unread);
+  center.insert (QStringLiteral ("outgoing"), outgoing);
+  center.insert (QStringLiteral ("parked"), parked);
+  center.insert (QStringLiteral ("relay"), relay);
+  center.insert (QStringLiteral ("relayReady"), relayReady);
+  center.insert (QStringLiteral ("pendingRelay"), pendingRelay);
+  center.insert (QStringLiteral ("failed"), failed);
+  center.insert (QStringLiteral ("urgent"), urgent);
+  center.insert (QStringLiteral ("emcomm"), emcomm);
+  center.insert (QStringLiteral ("relayQueue"),
+                 static_cast<int> (queue.size ()));
+  center.insert (QStringLiteral ("canRelayNow"), canRelayNow);
+  center.insert (QStringLiteral ("parkingEnabled"), m_vmailParkingEnabled);
+  center.insert (QStringLiteral ("peekingEnabled"), m_parkedVmailPeekingEnabled);
+  center.insert (QStringLiteral ("connectedCalls"), connectedCalls);
+  center.insert (QStringLiteral ("rows"), rows);
+  center.insert (QStringLiteral ("relayQueueRows"), queue);
+  center.insert (QStringLiteral ("summary"),
+                 QStringLiteral (
+                     "IN %1/%2  PARK %3  RLY %4  READY %5  PEND %6  NOW %7")
+                     .arg (unread)
+                     .arg (incoming)
+                     .arg (parked)
+                     .arg (relay)
+                     .arg (relayReady)
+                     .arg (pendingRelay)
+                     .arg (canRelayNow));
+  return center;
+}
+
 QVariantList FT2LinkQmlAdapter::formTemplates () const
 {
   QVariantList list;
@@ -12415,7 +13971,9 @@ QVariantList FT2LinkQmlAdapter::contactTimeline (QString const& call) const
         }
       QString summary = report.snrValid
           ? QStringLiteral ("SNR %1 dB").arg (report.snrDb)
-          : QStringLiteral ("quality %1").arg (report.quality, 0, 'f', 2);
+          : (report.qualityValid
+             ? QStringLiteral ("quality %1").arg (report.quality, 0, 'f', 2)
+             : report.detail);
       QString details = report.source;
       if (!report.profileName.isEmpty ())
         {
@@ -12427,13 +13985,27 @@ QVariantList FT2LinkQmlAdapter::contactTimeline (QString const& call) const
           details += QStringLiteral (" off %1 Hz").arg (
               report.frequencyOffsetHz, 0, 'f', 1);
         }
+      if (!report.targetCall.isEmpty ())
+        {
+          details += details.isEmpty ()
+              ? QStringLiteral ("target %1").arg (report.targetCall)
+              : QStringLiteral (" target %1").arg (report.targetCall);
+        }
+      if (!report.relayCall.isEmpty ())
+        {
+          details += details.isEmpty ()
+              ? QStringLiteral ("via %1").arg (report.relayCall)
+              : QStringLiteral (" via %1").arg (report.relayCall);
+        }
       list.push_back (timelineEntryMap (
           QStringLiteral ("PATH"),
-          QStringLiteral ("PATH"),
+          report.kind.isEmpty () ? QStringLiteral ("PATH") : report.kind,
           report.direction,
           report.remoteCall,
           report.snrValid ? QStringLiteral ("SNR")
-                          : QStringLiteral ("Metric"),
+                          : (report.qualityValid
+                             ? QStringLiteral ("Metric")
+                             : QStringLiteral ("Event")),
           summary,
           details,
           report.atMs,
@@ -13388,7 +14960,11 @@ QVariantList FT2LinkQmlAdapter::pathReports () const
           report.profileName,
           report.rateName,
           report.source,
-          report.atMs));
+          report.atMs,
+          report.kind,
+          report.targetCall,
+          report.relayCall,
+          report.detail));
     }
   return list;
 }
@@ -13404,6 +14980,9 @@ QVariantList FT2LinkQmlAdapter::beaconHistory () const
           entry.locator,
           entry.name,
           entry.profileName,
+          entry.capabilitySummary,
+          entry.waveformCapabilityFlags,
+          entry.serviceCapabilityFlags,
           entry.cq,
           entry.cqType,
           entry.cqLocator,
@@ -13431,6 +15010,12 @@ QString FT2LinkQmlAdapter::beaconHistoryText () const
       fields << item.value (QStringLiteral ("call")).toString ();
       fields << item.value (QStringLiteral ("locator")).toString ();
       fields << item.value (QStringLiteral ("profileName")).toString ();
+      QString const capabilitySummary = item.value (
+          QStringLiteral ("capabilitySummary")).toString ();
+      if (!capabilitySummary.isEmpty ())
+        {
+          fields << capabilitySummary;
+        }
       QString const slot = item.value (QStringLiteral ("cqSlotLabel")).toString ();
       if (!slot.isEmpty ())
         {
@@ -14012,7 +15597,11 @@ QVariantMap FT2LinkQmlAdapter::pathAnalysis (QString const& call,
               report.profileName,
               report.rateName,
               report.source,
-              report.atMs));
+              report.atMs,
+              report.kind,
+              report.targetCall,
+              report.relayCall,
+              report.detail));
         }
     }
 
@@ -14272,6 +15861,27 @@ QVariantMap FT2LinkQmlAdapter::statistics () const
           bulletin.updatedAtMs > 0u ? bulletin.updatedAtMs : bulletin.atMs);
     }
 
+  quint64 bbsSharedBytes = 0u;
+  quint64 bbsSharedRequests = 0u;
+  quint64 bbsSharedEnabled = 0u;
+  for (BbsSharedFile const& file : m_bbsSharedFiles)
+    {
+      if (file.enabled)
+        {
+          ++bbsSharedEnabled;
+        }
+      bbsSharedBytes += static_cast<quint64> (
+          fileTransferByteSize (
+              file.content,
+              file.contentBase64,
+              file.binary));
+      bbsSharedRequests += static_cast<quint64> (
+          std::max (0, file.requestCount));
+      lastActivityMs = std::max (
+          lastActivityMs,
+          std::max (file.updatedAtMs, file.lastRequestedAtMs));
+    }
+
   quint64 pingsSent = 0u;
   quint64 pingsReceived = 0u;
   quint64 pingReplies = 0u;
@@ -14393,6 +16003,11 @@ QVariantMap FT2LinkQmlAdapter::statistics () const
   insertU64 (QStringLiteral ("filesReceived"), filesIncoming);
   insertU64 (QStringLiteral ("filesSent"), filesOutgoing);
   insertU64 (QStringLiteral ("receivedFileBytes"), receivedFileBytes);
+  insertU64 (QStringLiteral ("bbsSharedFiles"),
+             static_cast<quint64> (m_bbsSharedFiles.size ()));
+  insertU64 (QStringLiteral ("bbsSharedEnabled"), bbsSharedEnabled);
+  insertU64 (QStringLiteral ("bbsSharedBytes"), bbsSharedBytes);
+  insertU64 (QStringLiteral ("bbsSharedRequests"), bbsSharedRequests);
   insertU64 (QStringLiteral ("bulletinsIncoming"), bulletinsIncoming);
   insertU64 (QStringLiteral ("bulletinsOutgoing"), bulletinsOutgoing);
   insertU64 (QStringLiteral ("pingsSent"), pingsSent);
@@ -14477,7 +16092,8 @@ QVariantMap FT2LinkQmlAdapter::statistics () const
              static_cast<quint64> (
                  m_broadcasts.size () + m_alerts.size () + m_mailbox.size ()
                  + m_forms.size () + m_fileTransfers.size ()
-                 + m_bulletins.size () + m_qsoLog.size ()
+                 + m_bbsSharedFiles.size () + m_bulletins.size ()
+                 + m_qsoLog.size ()
                  + m_logbookOutbox.size ()
                  + m_pingLog.size () + m_pathReports.size ()
                  + m_beaconHistory.size ()
@@ -14538,6 +16154,11 @@ QString FT2LinkQmlAdapter::statisticsText () const
       u64 ("chatMessagesSent"));
   text += QStringLiteral ("Live chat received: %1\n").arg (
       u64 ("chatMessagesReceived"));
+  text += QStringLiteral ("BBS shared files: %1 enabled %2 bytes %3 requests %4\n")
+      .arg (u64 ("bbsSharedFiles"))
+      .arg (u64 ("bbsSharedEnabled"))
+      .arg (u64 ("bbsSharedBytes"))
+      .arg (u64 ("bbsSharedRequests"));
   text += QStringLiteral ("Pings sent: %1\n").arg (u64 ("pingsSent"));
   text += QStringLiteral ("Pings received: %1\n").arg (
       u64 ("pingsReceived"));
@@ -15074,9 +16695,156 @@ bool FT2LinkQmlAdapter::markMailboxRead (quint32 messageId,
           clearLastError ();
           return true;
         }
-      message.state = state;
+	      message.state = state;
+	      message.updatedAtMs = nowMs;
+	      emit mailboxChanged ();
+	      persistLocalStore ();
+	      clearLastError ();
+	      return true;
+	    }
+
+	  setLastError (QStringLiteral ("FT2-Link mailbox item not found"));
+	  return false;
+}
+
+bool FT2LinkQmlAdapter::markMailboxRelayReady (quint32 messageId,
+                                               quint64 nowMs)
+{
+  if (messageId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link mailbox item id is invalid"));
+      return false;
+    }
+
+  for (MailboxMessage& message : m_mailbox)
+    {
+      if (message.id != messageId)
+        {
+          continue;
+        }
+      bool const relayCandidate =
+          message.direction == QStringLiteral ("Parked")
+          || message.direction == QStringLiteral ("Relay");
+      if (!relayCandidate || message.body.trimmed ().isEmpty ())
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item cannot be prepared for relay"));
+          return false;
+        }
+      if (message.state == QStringLiteral ("Delivered")
+          || message.state == QStringLiteral ("Forwarded"))
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item is already completed"));
+          return false;
+        }
+
+      message.state = QStringLiteral ("Relay ready");
+      message.relayNotifiedAtMs = nowMs;
       message.updatedAtMs = nowMs;
       emit mailboxChanged ();
+      persistLocalStore ();
+      clearLastError ();
+      return true;
+    }
+
+  setLastError (QStringLiteral ("FT2-Link mailbox item not found"));
+  return false;
+}
+
+bool FT2LinkQmlAdapter::markMailboxPendingRelay (quint32 messageId,
+                                                 QString const& relayCall,
+                                                 quint64 nowMs)
+{
+  QString const relay = normalizeCallsign (relayCall);
+  if (messageId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link mailbox item id is invalid"));
+      return false;
+    }
+  if (relay.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link relay call is empty"));
+      return false;
+    }
+
+  for (MailboxMessage& message : m_mailbox)
+    {
+      if (message.id != messageId)
+        {
+          continue;
+        }
+      bool const relayCandidate =
+          message.direction == QStringLiteral ("Parked")
+          || message.direction == QStringLiteral ("Relay");
+      if (!relayCandidate || message.body.trimmed ().isEmpty ())
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item cannot be marked pending relay"));
+          return false;
+        }
+      if (message.state == QStringLiteral ("Delivered")
+          || message.state == QStringLiteral ("Forwarded"))
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item is already completed"));
+          return false;
+        }
+
+      message.state = QStringLiteral ("Pending relay");
+      message.relayViaCall = relay;
+      if (message.relayProtocol.trimmed ().isEmpty ())
+        {
+          message.relayProtocol = QStringLiteral ("MANUAL");
+        }
+      message.updatedAtMs = nowMs;
+      emit mailboxChanged ();
+      persistLocalStore ();
+      clearLastError ();
+      return true;
+    }
+
+  setLastError (QStringLiteral ("FT2-Link mailbox item not found"));
+  return false;
+}
+
+bool FT2LinkQmlAdapter::cancelMailboxRelay (quint32 messageId,
+                                            quint64 nowMs)
+{
+  if (messageId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link mailbox item id is invalid"));
+      return false;
+    }
+
+  for (MailboxMessage& message : m_mailbox)
+    {
+      if (message.id != messageId)
+        {
+          continue;
+        }
+      bool const relayCandidate =
+          message.direction == QStringLiteral ("Parked")
+          || message.direction == QStringLiteral ("Relay");
+      if (!relayCandidate)
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item is not a relay item"));
+          return false;
+        }
+      if (message.state == QStringLiteral ("Delivered")
+          || message.state == QStringLiteral ("Forwarded"))
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link mailbox item is already completed"));
+          return false;
+        }
+
+      message.state = QStringLiteral ("Parked");
+      message.relayNotifiedAtMs = 0u;
+      message.updatedAtMs = nowMs;
+      emit mailboxChanged ();
+      persistLocalStore ();
       clearLastError ();
       return true;
     }
@@ -15125,6 +16893,61 @@ bool FT2LinkQmlAdapter::markReceivedFileRead (quint32 transferId,
 
   setLastError (QStringLiteral ("FT2-Link received file item not found"));
   return false;
+}
+
+bool FT2LinkQmlAdapter::deleteReceivedFile (quint32 transferId)
+{
+  if (transferId == 0u)
+    {
+      setLastError (QStringLiteral ("FT2-Link received file id is invalid"));
+      return false;
+    }
+
+  for (std::vector<FileTransfer>::iterator it = m_fileTransfers.begin ();
+       it != m_fileTransfers.end ();
+       ++it)
+    {
+      if (it->id != transferId)
+        {
+          continue;
+        }
+      if (it->direction != QStringLiteral ("Incoming"))
+        {
+          setLastError (QStringLiteral (
+              "FT2-Link delete received file applies only to incoming files"));
+          return false;
+        }
+      m_fileTransfers.erase (it);
+      emit fileTransfersChanged ();
+      clearLastError ();
+      return true;
+    }
+
+  setLastError (QStringLiteral ("FT2-Link received file item not found"));
+  return false;
+}
+
+int FT2LinkQmlAdapter::clearReceivedFiles (bool readOnly)
+{
+  int removed = 0;
+  for (std::vector<FileTransfer>::iterator it = m_fileTransfers.begin ();
+       it != m_fileTransfers.end ();)
+    {
+      if (it->direction == QStringLiteral ("Incoming")
+          && (!readOnly || it->read))
+        {
+          it = m_fileTransfers.erase (it);
+          ++removed;
+          continue;
+        }
+      ++it;
+    }
+  if (removed > 0)
+    {
+      emit fileTransfersChanged ();
+    }
+  clearLastError ();
+  return removed;
 }
 
 bool FT2LinkQmlAdapter::markBulletinRead (quint32 bulletinId,
@@ -15198,11 +17021,12 @@ bool FT2LinkQmlAdapter::deleteMailboxMessage (quint32 messageId)
         {
           continue;
         }
-      m_mailbox.erase (it);
-      emit mailboxChanged ();
-      clearLastError ();
-      return true;
-    }
+	      m_mailbox.erase (it);
+	      emit mailboxChanged ();
+	      persistLocalStore ();
+	      clearLastError ();
+	      return true;
+	    }
 
   setLastError (QStringLiteral ("FT2-Link mailbox item not found"));
   return false;
@@ -15214,8 +17038,9 @@ void FT2LinkQmlAdapter::clearMailbox ()
     {
       return;
     }
-  m_mailbox.clear ();
-  emit mailboxChanged ();
+	  m_mailbox.clear ();
+	  emit mailboxChanged ();
+	  persistLocalStore ();
 }
 
 void FT2LinkQmlAdapter::clearForms ()
@@ -15456,7 +17281,10 @@ bool FT2LinkQmlAdapter::saveLocalStore (QString const& path)
 QVariantMap FT2LinkQmlAdapter::sessionInfo (quint16 sessionId) const
 {
   AppSession const* session = m_model.session (sessionId);
-  return session ? sessionMap (*session) : QVariantMap {};
+  return session
+      ? sessionMap (*session,
+                    m_model.stationAdvertisement (session->remoteCall))
+      : QVariantMap {};
 }
 
 QVariantList FT2LinkQmlAdapter::sessions () const
@@ -15465,7 +17293,9 @@ QVariantList FT2LinkQmlAdapter::sessions () const
   std::vector<AppSession> sessions = m_model.sessions ();
   for (AppSession const& session : sessions)
     {
-      list.push_back (sessionMap (session));
+      list.push_back (sessionMap (
+          session,
+          m_model.stationAdvertisement (session.remoteCall)));
     }
   return list;
 }
@@ -15684,6 +17514,35 @@ bool FT2LinkQmlAdapter::handlePathFinderBroadcast (QString const& fromCall,
           requestor = normalizeCallsign (fromCall);
         }
       QVariantMap const candidate = pathFinderCandidate (target, nowMs);
+      QString requestDetail = QStringLiteral ("PATH request from %1 for %2")
+          .arg (requestor.isEmpty () ? QStringLiteral ("UNKNOWN") : requestor,
+                target.isEmpty () ? QStringLiteral ("UNKNOWN") : target);
+      QString requestLocator;
+      if (candidate.value (QStringLiteral ("canRespond")).toBool ())
+        {
+          requestLocator = candidate.value (
+              QStringLiteral ("locator")).toString ().trimmed ().toUpper ();
+          quint64 const ageMinutes = candidate.value (
+              QStringLiteral ("ageMinutes")).toULongLong ();
+          requestDetail += QStringLiteral (": heard %1m ago").arg (
+              ageMinutes);
+          if (!requestLocator.isEmpty ())
+            {
+              requestDetail += QStringLiteral (" at %1").arg (requestLocator);
+            }
+        }
+      else
+        {
+          requestDetail += QStringLiteral (": no recent local path");
+        }
+      recordPathFinderReport (QStringLiteral ("Incoming"),
+                              requestor.isEmpty () ? fromCall : requestor,
+                              target,
+                              QString {},
+                              requestLocator,
+                              QStringLiteral ("PATH?"),
+                              requestDetail,
+                              nowMs);
       if (candidate.value (QStringLiteral ("canRespond")).toBool ())
         {
           QString const age = QString::number (
@@ -15721,6 +17580,17 @@ bool FT2LinkQmlAdapter::handlePathFinderBroadcast (QString const& fromCall,
           message += QStringLiteral (" age %1m").arg (ageMinutes);
         }
       QString const pathCall = via.isEmpty () ? fromCall : via;
+      QString const detail = message;
+      recordPathFinderReport (QStringLiteral ("Incoming"),
+                              normalizeCallsign (pathCall).isEmpty ()
+                              ? fromCall
+                              : pathCall,
+                              target,
+                              pathCall,
+                              locator,
+                              QStringLiteral ("PATH!"),
+                              detail,
+                              nowMs);
       recordPathFinderAlert (pathCall, message, nowMs);
       QString const normalizedRelay = normalizeCallsign (pathCall);
       if (!target.isEmpty () && !normalizedRelay.isEmpty ())
@@ -15760,6 +17630,233 @@ bool FT2LinkQmlAdapter::handlePathFinderBroadcast (QString const& fromCall,
     }
 
   return false;
+}
+
+void FT2LinkQmlAdapter::pruneDigipeaterSeen (quint64 nowMs)
+{
+  for (std::map<QString, quint64>::iterator it = m_digipeaterSeen.begin ();
+       it != m_digipeaterSeen.end ();)
+    {
+      quint64 const seenAt = it->second;
+      if (nowMs >= seenAt && nowMs - seenAt > kDigipeaterSeenTtlMs)
+        {
+          it = m_digipeaterSeen.erase (it);
+        }
+      else
+        {
+          ++it;
+        }
+    }
+}
+
+void FT2LinkQmlAdapter::recordDigipeaterEvent (
+    QString const& direction,
+    QString const& originCall,
+    QString const& targetCall,
+    QString const& viaCall,
+    QStringList const& path,
+    QString const& payloadText,
+    QString const& state,
+    int ttl,
+    QString const& detail,
+    quint64 nowMs)
+{
+  DigipeaterEvent event;
+  event.id = m_nextDigipeaterEventId++;
+  if (m_nextDigipeaterEventId == 0u)
+    {
+      m_nextDigipeaterEventId = 1u;
+    }
+  event.direction = direction.trimmed ().isEmpty ()
+      ? QStringLiteral ("RX")
+      : direction.trimmed ();
+  event.originCall = sanitizedDigipeaterCall (originCall);
+  event.targetCall = sanitizedDigipeaterCall (targetCall);
+  event.viaCall = sanitizedDigipeaterCall (viaCall);
+  event.path = sanitizedDigipeaterPath (path);
+  event.payloadText = payloadText.simplified ().left (kDigipeaterMaxPayloadChars);
+  event.state = state.trimmed ().isEmpty ()
+      ? QStringLiteral ("Seen")
+      : state.trimmed ();
+  event.ttl = std::max (0, std::min (kMaxRelayHopCount, ttl));
+  event.detail = detail.simplified ();
+  event.atMs = nowMs;
+  m_digipeaterEvents.push_back (event);
+  if (m_digipeaterEvents.size () > 100u)
+    {
+      m_digipeaterEvents.erase (m_digipeaterEvents.begin ());
+    }
+  emit digipeaterChanged ();
+
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][DIGI] dir=%1 state=%2 origin=%3 target=%4 via=%5 ttl=%6 path=%7 text=\"%8\" detail=\"%9\"")
+          .arg (event.direction,
+                event.state,
+                event.originCall,
+                event.targetCall,
+                event.viaCall.isEmpty () ? QStringLiteral ("-") : event.viaCall)
+          .arg (event.ttl)
+          .arg (event.path.join (QLatin1Char ('>')),
+                event.payloadText,
+                event.detail));
+}
+
+bool FT2LinkQmlAdapter::handleDigipeaterBroadcast (QString const& fromCall,
+                                                   QString const& text,
+                                                   quint64 nowMs)
+{
+  ParsedDigipeaterEnvelope envelope;
+  if (!parseDigipeaterEnvelope (text, &envelope))
+    {
+      return false;
+    }
+
+  pruneDigipeaterSeen (nowMs);
+  QString const localCall = sanitizedDigipeaterCall (
+      QString::fromStdString (m_model.localStation ().call));
+  QString const seenKey = QStringLiteral ("%1|%2")
+      .arg (envelope.originCall, envelope.id);
+  bool const duplicate = m_digipeaterSeen.find (seenKey)
+      != m_digipeaterSeen.end ();
+  if (!duplicate)
+    {
+      m_digipeaterSeen[seenKey] = nowMs;
+    }
+
+  QStringList path = sanitizedDigipeaterPath (envelope.path);
+  if (path.isEmpty ())
+    {
+      path.push_back (envelope.originCall);
+    }
+  bool const forLocal = !localCall.isEmpty ()
+      && envelope.targetCall == localCall;
+  bool const broadcastAll = envelope.targetCall == QStringLiteral ("ALL");
+  bool const localAlreadyInPath = !localCall.isEmpty ()
+      && path.contains (localCall);
+
+  QString const remote = sanitizedDigipeaterCall (fromCall).isEmpty ()
+      ? envelope.originCall
+      : sanitizedDigipeaterCall (fromCall);
+
+  if (duplicate)
+    {
+      recordDigipeaterEvent (QStringLiteral ("RX"),
+                             envelope.originCall,
+                             envelope.targetCall,
+                             remote,
+                             path,
+                             envelope.payloadText,
+                             QStringLiteral ("Duplicate"),
+                             envelope.ttl,
+                             QStringLiteral ("duplicate ignored"),
+                             nowMs);
+      return true;
+    }
+
+  if (forLocal || broadcastAll)
+    {
+      QString const detail = forLocal
+          ? QStringLiteral ("delivered locally")
+          : QStringLiteral ("ALL received locally");
+      recordDigipeaterEvent (QStringLiteral ("RX"),
+                             envelope.originCall,
+                             envelope.targetCall,
+                             remote,
+                             path,
+                             envelope.payloadText,
+                             QStringLiteral ("Delivered"),
+                             envelope.ttl,
+                             detail,
+                             nowMs);
+      recordPathFinderReport (QStringLiteral ("Incoming"),
+                              envelope.originCall,
+                              envelope.targetCall,
+                              remote,
+                              QString {},
+                              QStringLiteral ("DIGI"),
+                              QStringLiteral ("%1 via %2: %3")
+                                  .arg (detail,
+                                        remote,
+                                        envelope.payloadText),
+                              nowMs);
+      return true;
+    }
+
+  if (localCall.isEmpty () || localAlreadyInPath)
+    {
+      recordDigipeaterEvent (QStringLiteral ("RX"),
+                             envelope.originCall,
+                             envelope.targetCall,
+                             remote,
+                             path,
+                             envelope.payloadText,
+                             QStringLiteral ("Loop guard"),
+                             envelope.ttl,
+                             QStringLiteral ("local call already in path"),
+                             nowMs);
+      return true;
+    }
+  if (!m_digipeaterEnabled)
+    {
+      recordDigipeaterEvent (QStringLiteral ("RX"),
+                             envelope.originCall,
+                             envelope.targetCall,
+                             remote,
+                             path,
+                             envelope.payloadText,
+                             QStringLiteral ("Held"),
+                             envelope.ttl,
+                             QStringLiteral ("digipeater disabled"),
+                             nowMs);
+      return true;
+    }
+  if (envelope.ttl <= 0 || m_digipeaterMaxHops <= 0)
+    {
+      recordDigipeaterEvent (QStringLiteral ("RX"),
+                             envelope.originCall,
+                             envelope.targetCall,
+                             remote,
+                             path,
+                             envelope.payloadText,
+                             QStringLiteral ("Expired"),
+                             envelope.ttl,
+                             QStringLiteral ("TTL exhausted"),
+                             nowMs);
+      return true;
+    }
+
+  ParsedDigipeaterEnvelope forwarded = envelope;
+  forwarded.ttl = std::min (envelope.ttl, m_digipeaterMaxHops) - 1;
+  forwarded.path = path;
+  forwarded.path.push_back (localCall);
+  QString const forwardText = formatDigipeaterEnvelope (forwarded);
+  bool const ok = transmitDigipeaterEnvelopeRadio (forwardText, nowMs, false);
+  recordDigipeaterEvent (QStringLiteral ("FWD"),
+                         envelope.originCall,
+                         envelope.targetCall,
+                         localCall,
+                         forwarded.path,
+                         envelope.payloadText,
+                         ok ? QStringLiteral ("Forwarded")
+                            : QStringLiteral ("Forward failed"),
+                         forwarded.ttl,
+                         ok ? QStringLiteral ("queued RF repeat")
+                            : lastError (),
+                         nowMs);
+  recordPathFinderReport (QStringLiteral ("Relay"),
+                          envelope.originCall,
+                          envelope.targetCall,
+                          localCall,
+                          QString {},
+                          QStringLiteral ("DIGI"),
+                          QStringLiteral ("DIGI %1 -> %2 via %3 ttl %4")
+                              .arg (envelope.originCall,
+                                    envelope.targetCall,
+                                    localCall)
+                              .arg (forwarded.ttl),
+                          nowMs);
+  return true;
 }
 
 quint32 FT2LinkQmlAdapter::recordMailbox (QString const& direction,
@@ -15840,11 +17937,12 @@ bool FT2LinkQmlAdapter::updateMailboxState (quint32 messageId,
         {
           return true;
         }
-      message.state = state;
-      message.updatedAtMs = nowMs;
-      emit mailboxChanged ();
-      return true;
-    }
+	      message.state = state;
+	      message.updatedAtMs = nowMs;
+	      emit mailboxChanged ();
+	      persistLocalStore ();
+	      return true;
+	    }
   return false;
 }
 
@@ -15896,11 +17994,12 @@ void FT2LinkQmlAdapter::notifyParkedMailboxForCall (QString const& call,
       touchContact (target, nowMs, QStringLiteral ("mail relay ready"));
     }
 
-  if (mailboxUpdated)
-    {
-      emit mailboxChanged ();
-      emit contactHistoryChanged ();
-    }
+	  if (mailboxUpdated)
+	    {
+	      emit mailboxChanged ();
+	      emit contactHistoryChanged ();
+	      persistLocalStore ();
+	    }
   if (alertUpdated)
     {
       emit alertsChanged ();
@@ -15925,6 +18024,21 @@ void FT2LinkQmlAdapter::recordBeaconHistory (
   entry.profileName = QString::fromStdString (
       decodium::ft2link::profileName (
           advertisement.capabilities.preferredProfile));
+  quint16 const waveformFlags = advertisement.waveformCapabilityFlags == 0u
+      ? static_cast<quint16> (
+          decodium::ft2link::beaconWaveformCapabilityFlags (
+              advertisement.capabilities))
+      : advertisement.waveformCapabilityFlags;
+  quint16 const serviceFlags = advertisement.serviceCapabilityFlags;
+  QString const waveformSummary = QString::fromStdString (
+      decodium::ft2link::beaconWaveformCapabilitySummary (waveformFlags));
+  QString const serviceSummary = QString::fromStdString (
+      decodium::ft2link::beaconServiceCapabilitySummary (serviceFlags));
+  entry.waveformCapabilityFlags = waveformFlags;
+  entry.serviceCapabilityFlags = serviceFlags;
+  entry.capabilitySummary = serviceSummary.isEmpty ()
+      ? waveformSummary
+      : waveformSummary + QStringLiteral (" | ") + serviceSummary;
   entry.cq = advertisement.cq;
   entry.cqType = QString::fromStdString (advertisement.cqType).trimmed ();
   if (entry.cqType.isEmpty ())
@@ -16808,6 +18922,86 @@ void FT2LinkQmlAdapter::recordPathReport (
   touchContact (normalizedCall, nowMs, event, report.locator);
 }
 
+void FT2LinkQmlAdapter::recordPathFinderReport (
+    QString const& direction,
+    QString const& remoteCall,
+    QString const& targetCall,
+    QString const& relayCall,
+    QString const& locator,
+    QString const& kind,
+    QString const& detail,
+    quint64 nowMs)
+{
+  QString normalizedCall = normalizeCallsign (remoteCall);
+  if (normalizedCall.isEmpty ())
+    {
+      normalizedCall = QStringLiteral ("UNKNOWN");
+    }
+
+  PathReport report;
+  report.id = m_nextPathReportId++;
+  if (m_nextPathReportId == 0u)
+    {
+      m_nextPathReportId = 1u;
+    }
+  report.direction = direction.trimmed ().isEmpty ()
+      ? QStringLiteral ("Incoming")
+      : direction.trimmed ();
+  report.remoteCall = normalizedCall;
+  report.locator = locator.trimmed ().toUpper ();
+  report.source = kind.trimmed ().isEmpty ()
+      ? QStringLiteral ("PATH")
+      : kind.trimmed ().toUpper ();
+  report.kind = report.source;
+  report.targetCall = normalizeCallsign (targetCall);
+  report.relayCall = normalizeCallsign (relayCall);
+  report.detail = detail.simplified ();
+  report.atMs = nowMs;
+
+  if (report.detail.isEmpty ())
+    {
+      if (report.kind == QStringLiteral ("PATH?"))
+        {
+          report.detail = QStringLiteral ("PATH request for %1")
+              .arg (report.targetCall.isEmpty ()
+                    ? QStringLiteral ("UNKNOWN")
+                    : report.targetCall);
+        }
+      else if (report.kind == QStringLiteral ("PATH!"))
+        {
+          report.detail = QStringLiteral ("PATH response for %1 via %2")
+              .arg (report.targetCall.isEmpty ()
+                    ? QStringLiteral ("UNKNOWN")
+                    : report.targetCall,
+                    report.relayCall.isEmpty ()
+                    ? report.remoteCall
+                    : report.relayCall);
+        }
+      else
+        {
+          report.detail = QStringLiteral ("PATH event");
+        }
+    }
+
+  m_pathReports.push_back (report);
+  if (m_pathReports.size () > 200u)
+    {
+      m_pathReports.erase (m_pathReports.begin ());
+    }
+  emit pathReportsChanged ();
+
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][PATHRX] kind=%1 remote=%2 target=%3 relay=%4 loc=%5 detail=\"%6\"")
+          .arg (report.kind,
+                report.remoteCall,
+                report.targetCall,
+                report.relayCall,
+                report.locator,
+                report.detail));
+  touchContact (report.remoteCall, nowMs, report.kind, report.locator);
+}
+
 void FT2LinkQmlAdapter::recordSnrReportsForText (
     quint16 sessionId,
     QString const& direction,
@@ -17243,6 +19437,61 @@ QString FT2LinkQmlAdapter::bbsFileListReply (quint64 nowMs) const
 
   QStringList seen;
   QStringList tags;
+  if (m_bbsFileServerEnabled)
+    {
+      for (std::vector<BbsSharedFile>::const_reverse_iterator it =
+               m_bbsSharedFiles.rbegin ();
+           it != m_bbsSharedFiles.rend ();
+           ++it)
+        {
+          if (!it->enabled
+              || fileTransferByteSize (
+                  it->content,
+                  it->contentBase64,
+                  it->binary) <= 0)
+            {
+              continue;
+            }
+          QString const safeName = safeFt2LinkFileName (
+              it->fileName, QString {});
+          if (safeName.isEmpty ())
+            {
+              continue;
+            }
+          QString const key = safeName.toLower ();
+          if (seen.contains (key))
+            {
+              continue;
+            }
+          seen.push_back (key);
+
+          QString date = QDateTime::fromMSecsSinceEpoch (
+              static_cast<qint64> (it->updatedAtMs > 0u
+                                   ? it->updatedAtMs
+                                   : it->atMs),
+              QTimeZone(QByteArrayLiteral("UTC")))
+              .date ().toString (Qt::ISODate);
+          if (date.isEmpty ())
+            {
+              date = QStringLiteral ("1970-01-01");
+            }
+          int const size = fileTransferByteSize (
+              it->content,
+              it->contentBase64,
+              it->binary);
+          tags.push_back (QStringLiteral ("<BL:%1|%2|%3>")
+                          .arg (safeName, date, QString::number (size)));
+          if (tags.size () >= 8)
+            {
+              break;
+            }
+        }
+      if (!tags.isEmpty ())
+        {
+          return tags.join (QStringLiteral (" "));
+        }
+    }
+
   for (std::vector<FileTransfer>::const_reverse_iterator it =
            m_fileTransfers.rbegin ();
        it != m_fileTransfers.rend ();
@@ -17299,6 +19548,10 @@ bool FT2LinkQmlAdapter::bbsFileAvailable (QString const& fileName) const
     {
       return false;
     }
+  if (bbsSharedFileForName (fileName))
+    {
+      return true;
+    }
   for (FileTransfer const& transfer : m_fileTransfers)
     {
       if (transfer.fileName.trimmed ().toLower () == wanted
@@ -17311,6 +19564,146 @@ bool FT2LinkQmlAdapter::bbsFileAvailable (QString const& fileName) const
         }
     }
   return false;
+}
+
+FT2LinkQmlAdapter::BbsSharedFile const*
+FT2LinkQmlAdapter::bbsSharedFileForName (QString const& fileName) const
+{
+  QString const wanted = safeFt2LinkFileName (
+      fileName, QString {}).toLower ();
+  if (wanted.isEmpty () || !m_bbsFileServerEnabled)
+    {
+      return nullptr;
+    }
+  for (BbsSharedFile const& file : m_bbsSharedFiles)
+    {
+      if (file.enabled
+          && file.fileName.trimmed ().toLower () == wanted
+          && fileTransferByteSize (
+              file.content, file.contentBase64, file.binary) > 0)
+        {
+          return &file;
+        }
+    }
+  return nullptr;
+}
+
+bool FT2LinkQmlAdapter::queueBbsSharedFileListReply (
+    quint16 sessionId,
+    QString const& remoteCall,
+    quint64 nowMs)
+{
+  QString reply = bbsFileListReply (nowMs);
+  if (reply.isEmpty ())
+    {
+      reply = QStringLiteral ("<BLJ>");
+    }
+  QString const displayCall = normalizeCallsign (remoteCall).isEmpty ()
+      ? QStringLiteral ("remote")
+      : normalizeCallsign (remoteCall);
+  std::string error;
+  QByteArray const bytes = reply.toUtf8 ();
+  if (!m_model.queueOutgoingText (
+          sessionId,
+          std::string (bytes.constData (),
+                       static_cast<std::size_t> (bytes.size ())),
+          nowMs,
+          &error))
+    {
+      setLastError (QString::fromStdString (error));
+      return false;
+    }
+  appendChatLogEntry (sessionId,
+                      QStringLiteral ("Outgoing"),
+                      QStringLiteral ("Pending"),
+                      reply,
+                      nowMs);
+  appendSystemText (sessionId,
+                    QStringLiteral ("BBS file list queued for %1")
+                        .arg (displayCall),
+                    nowMs);
+  emit messagesChanged (sessionId);
+  emit sessionsChanged ();
+  clearLastError ();
+  return true;
+}
+
+bool FT2LinkQmlAdapter::queueBbsSharedFileDownload (
+    quint16 sessionId,
+    QString const& remoteCall,
+    QString const& fileName,
+    quint64 nowMs)
+{
+  QString const toCall = normalizeCallsign (remoteCall);
+  QString const fromCall = normalizeCallsign (
+      QString::fromStdString (m_model.localStation ().call));
+  BbsSharedFile const* shared = bbsSharedFileForName (fileName);
+  if (!shared || toCall.isEmpty () || fromCall.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link BBS file is not available"));
+      return false;
+    }
+
+  QString const envelope = shared->binary
+      ? makeFileEnvelopeBytes (
+          toCall,
+          fromCall,
+          shared->fileName,
+          QByteArray::fromBase64 (
+              shared->contentBase64.trimmed ().toLatin1 ()))
+      : makeFileEnvelope (
+          toCall,
+          fromCall,
+          shared->fileName,
+          shared->content);
+  QByteArray const envelopeBytes = envelope.toUtf8 ();
+  std::string error;
+  if (!m_model.queueOutgoingText (
+          sessionId,
+          std::string (envelopeBytes.constData (),
+                       static_cast<std::size_t> (envelopeBytes.size ())),
+          nowMs,
+          &error))
+    {
+      setLastError (QString::fromStdString (error));
+      return false;
+    }
+
+  for (BbsSharedFile& file : m_bbsSharedFiles)
+    {
+      if (file.id == shared->id)
+        {
+          file.lastRequestedAtMs = nowMs;
+          file.requestCount = std::max (0, file.requestCount) + 1;
+          break;
+        }
+    }
+
+  recordFileTransfer (QStringLiteral ("Outgoing"),
+                      fromCall,
+                      toCall,
+                      shared->fileName,
+                      shared->content,
+                      shared->contentBase64,
+                      shared->sha256,
+                      QStringLiteral ("Queued BBS"),
+                      shared->binary,
+                      nowMs);
+  appendChatLogEntry (sessionId,
+                      QStringLiteral ("Outgoing"),
+                      QStringLiteral ("Pending"),
+                      QStringLiteral ("BBS FILE %1 to %2")
+                          .arg (shared->fileName, toCall),
+                      nowMs);
+  appendSystemText (sessionId,
+                    QStringLiteral ("BBS file %1 queued for %2")
+                        .arg (shared->fileName, toCall),
+                    nowMs);
+  emit bbsFileServerChanged ();
+  emit messagesChanged (sessionId);
+  emit sessionsChanged ();
+  clearLastError ();
+  return true;
 }
 
 void FT2LinkQmlAdapter::setTypingPeer (QString const& call,
@@ -18077,10 +20470,28 @@ bool FT2LinkQmlAdapter::handleIncomingControlTags (
   if (containsControlTag (trimmed, QStringLiteral ("<BLR>")))
     {
       QString const reply = bbsFileListReply (nowMs);
-      notices.push_back (QStringLiteral (
-          "TAG %1 requested BBS file list; suggested reply: %2")
-                         .arg (displayCall, reply));
-      addAutoReply (reply);
+      if (m_bbsFileServerEnabled
+          && transmitBbsSharedFileListRadio (sessionId, nowMs))
+        {
+          notices.push_back (QStringLiteral (
+              "TAG %1 requested BBS file list; server reply sent: %2")
+                             .arg (displayCall, reply));
+        }
+      else if (m_bbsFileServerEnabled
+               && queueBbsSharedFileListReply (
+                   sessionId, displayCall, nowMs))
+        {
+          notices.push_back (QStringLiteral (
+              "TAG %1 requested BBS file list; queued server reply: %2")
+                             .arg (displayCall, reply));
+        }
+      else
+        {
+          notices.push_back (QStringLiteral (
+              "TAG %1 requested BBS file list; suggested reply: %2")
+                             .arg (displayCall, reply));
+          addAutoReply (reply);
+        }
     }
   for (QString const& listing : controlTagValues (
            trimmed, QStringLiteral ("BL")))
@@ -18110,7 +20521,30 @@ bool FT2LinkQmlAdapter::handleIncomingControlTags (
            trimmed, QStringLiteral ("BG")))
     {
       QString const fileName = requestedFile.trimmed ();
-      if (bbsFileAvailable (fileName))
+      if (bbsSharedFileForName (fileName))
+        {
+          if (transmitBbsSharedFileRadio (sessionId, fileName, nowMs))
+            {
+              notices.push_back (QStringLiteral (
+                  "TAG %1 requested BBS file %2; server transfer sent")
+                                 .arg (displayCall, fileName));
+            }
+          else if (queueBbsSharedFileDownload (
+                       sessionId, displayCall, fileName, nowMs))
+            {
+              notices.push_back (QStringLiteral (
+                  "TAG %1 requested BBS file %2; queued file transfer")
+                                 .arg (displayCall, fileName));
+            }
+          else
+            {
+              notices.push_back (QStringLiteral (
+                  "TAG %1 requested BBS file %2; queue failed: %3")
+                                 .arg (displayCall, fileName, lastError ()));
+              addAutoReply (QStringLiteral ("<BGJ>"));
+            }
+        }
+      else if (bbsFileAvailable (fileName))
         {
           notices.push_back (QStringLiteral (
               "TAG %1 requested BBS file %2; available locally, use FILE TX or reply <BGJ>")
@@ -18792,6 +21226,19 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
   quint64 const effectiveNow =
       static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
   item.enqueuedAtMs = effectiveNow;
+  item.strictLbt = m_nextRadioTxStrictLbt;
+  if (item.strictLbt)
+    {
+      item.lbtCancelAtMs =
+          effectiveNow
+          + static_cast<quint64> (m_nextRadioTxStrictLbtCancelMs);
+      item.plan.insert (QStringLiteral ("strictLbt"), true);
+      item.plan.insert (QStringLiteral ("strictLbtCancelAtMs"),
+                        QVariant::fromValue<qulonglong> (
+                            static_cast<qulonglong> (item.lbtCancelAtMs)));
+    }
+  m_nextRadioTxStrictLbt = false;
+  m_nextRadioTxStrictLbtCancelMs = 24000;
   bool const channelBusy = isLiveChannelBusy (effectiveNow);
   bool const deferBroadcast = shouldDeferBroadcastTx (
       item.plan, item.sessionId);
@@ -18962,6 +21409,41 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
       scheduleRadioQueueDrain (effectiveNow);
       return;
     }
+  bool lbtBusy = isLiveChannelBusy (effectiveNow);
+  if (lbtBusy && !m_radioTxQueue.empty ())
+    {
+      bool cancelledStrict = false;
+      for (std::deque<RadioTxQueueItem>::iterator it = m_radioTxQueue.begin ();
+           it != m_radioTxQueue.end ();)
+        {
+          if (it->strictLbt && it->lbtCancelAtMs != 0u
+              && effectiveNow >= it->lbtCancelAtMs)
+            {
+              logFt2LinkDiagnostic (
+                  QStringLiteral (
+                      "[Ft2Link][LBT] strict TX cancelled display=[%1]"
+                      " session=%2 busyUntil=%3")
+                      .arg (it->displayMessage)
+                      .arg (it->sessionId)
+                      .arg (m_liveChannelBusyUntilMs));
+              setLastError (
+                  QStringLiteral (
+                      "FT2-Link TX cancelled: channel stayed busy"));
+              it = m_radioTxQueue.erase (it);
+              cancelledStrict = true;
+              continue;
+            }
+          ++it;
+        }
+      if (cancelledStrict)
+        {
+          setTransportState (QStringLiteral ("LBT cancelled"));
+          if (m_radioTxQueue.empty ())
+            {
+              return;
+            }
+        }
+    }
   // Hold-off LBT massimo: la LBT non deve bloccare all'infinito una TX richiesta
   // dall'operatore. Su un'antenna HF reale il rumore di banda tiene il canale
   // "occupato" costantemente (kBusyRmsThreshold molto basso) -> senza questo il
@@ -18972,12 +21454,14 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
   if (!m_radioTxQueue.empty ())
     {
       quint64 const oldest = m_radioTxQueue.front ().enqueuedAtMs;
-      if (oldest != 0u && effectiveNow >= oldest + kMaxLbtHoldMs)
+      if (!m_radioTxQueue.front ().strictLbt
+          && oldest != 0u
+          && effectiveNow >= oldest + kMaxLbtHoldMs)
         {
           forceThroughLbt = true;
         }
     }
-  if (!forceThroughLbt && isLiveChannelBusy (effectiveNow))
+  if (!forceThroughLbt && lbtBusy)
     {
       setTransportState (QStringLiteral ("LBT wait"));
       scheduleRadioQueueDrain (effectiveNow);
@@ -19571,6 +22055,8 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
                QString::number (m_nextFormId));
   root.insert (QStringLiteral ("nextFileTransferId"),
                QString::number (m_nextFileTransferId));
+  root.insert (QStringLiteral ("nextBbsSharedFileId"),
+               QString::number (m_nextBbsSharedFileId));
   root.insert (QStringLiteral ("nextBulletinId"),
                QString::number (m_nextBulletinId));
   root.insert (QStringLiteral ("nextAlertId"),
@@ -19616,6 +22102,8 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
                m_verboseSnrAutoAcceptEnabled);
   root.insert (QStringLiteral ("infoInquireEnabled"),
                m_infoInquireEnabled);
+  root.insert (QStringLiteral ("bbsFileServerEnabled"),
+               m_bbsFileServerEnabled);
   root.insert (QStringLiteral ("clusterEnabled"), m_clusterEnabled);
   root.insert (QStringLiteral ("clusterNodeId"),
                sanitizedClusterNodeId (m_clusterNodeId));
@@ -19712,6 +22200,24 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           transfer.updatedAtMs)));
     }
   root.insert (QStringLiteral ("fileTransfers"), fileTransfers);
+
+  QJsonArray bbsSharedFiles;
+  for (BbsSharedFile const& file : m_bbsSharedFiles)
+    {
+      bbsSharedFiles.append (jsonObjectFromMap (bbsSharedFileMap (
+          file.id,
+          file.fileName,
+          file.content,
+          file.contentBase64,
+          file.sha256,
+          file.binary,
+          file.enabled,
+          file.atMs,
+          file.updatedAtMs,
+          file.lastRequestedAtMs,
+          file.requestCount)));
+    }
+  root.insert (QStringLiteral ("bbsSharedFiles"), bbsSharedFiles);
 
   QJsonArray bulletins;
   for (Bulletin const& bulletin : m_bulletins)
@@ -19838,7 +22344,11 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           report.profileName,
           report.rateName,
           report.source,
-          report.atMs)));
+          report.atMs,
+          report.kind,
+          report.targetCall,
+          report.relayCall,
+          report.detail)));
     }
   root.insert (QStringLiteral ("pathReports"), pathReports);
 
@@ -19851,6 +22361,9 @@ QByteArray FT2LinkQmlAdapter::serializeLocalStore () const
           entry.locator,
           entry.name,
           entry.profileName,
+          entry.capabilitySummary,
+          entry.waveformCapabilityFlags,
+          entry.serviceCapabilityFlags,
           entry.cq,
           entry.cqType,
           entry.cqLocator,
@@ -19985,6 +22498,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   std::vector<MailboxMessage> mailbox;
   std::vector<FormMessage> forms;
   std::vector<FileTransfer> fileTransfers;
+  std::vector<BbsSharedFile> bbsSharedFiles;
   std::vector<Bulletin> bulletins;
   std::map<QString, ContactHistory> contacts;
   std::map<quint16, QsoLogEntry> qsoLog;
@@ -20045,6 +22559,8 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       root.value (QStringLiteral ("verboseSnrAutoAcceptEnabled")).toBool (false);
   bool const infoInquireEnabledValue =
       root.value (QStringLiteral ("infoInquireEnabled")).toBool (true);
+  bool const bbsFileServerEnabledValue =
+      root.value (QStringLiteral ("bbsFileServerEnabled")).toBool (false);
   bool const clusterEnabledValue =
       root.value (QStringLiteral ("clusterEnabled")).toBool (true);
   QString const clusterNodeIdValue = sanitizedClusterNodeId (
@@ -20064,6 +22580,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   quint32 maxMailboxId = 0u;
   quint32 maxFormId = 0u;
   quint32 maxFileTransferId = 0u;
+  quint32 maxBbsSharedFileId = 0u;
   quint32 maxBulletinId = 0u;
   quint32 maxAlertId = 0u;
   quint32 maxPathReportId = 0u;
@@ -20252,6 +22769,66 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
           object, QStringLiteral ("updatedAtMs"), transfer.atMs);
       fileTransfers.push_back (transfer);
       maxFileTransferId = std::max (maxFileTransferId, transfer.id);
+    }
+
+  for (QJsonValue const& value : root.value (
+           QStringLiteral ("bbsSharedFiles")).toArray ())
+    {
+      QJsonObject const object = value.toObject ();
+      BbsSharedFile file;
+      file.id = jsonU32 (object, QStringLiteral ("id"));
+      if (file.id == 0u)
+        {
+          continue;
+        }
+      file.fileName = safeFt2LinkFileName (
+          jsonString (object, QStringLiteral ("fileName")),
+          QString {});
+      file.content = object.value (
+          QStringLiteral ("content")).toString ();
+      file.contentBase64 = object.value (
+          QStringLiteral ("contentBase64")).toString ().trimmed ();
+      file.binary = object.value (QStringLiteral ("binary")).toBool (
+          !file.contentBase64.isEmpty () && file.content.isEmpty ());
+      if (file.contentBase64.isEmpty () && !file.content.isEmpty ())
+        {
+          file.contentBase64 = QString::fromLatin1 (
+              file.content.toUtf8 ().toBase64 ());
+        }
+      if (file.binary && file.content.isEmpty ()
+          && !file.contentBase64.isEmpty ())
+        {
+          file.content = QString::fromUtf8 (
+              QByteArray::fromBase64 (
+                  file.contentBase64.trimmed ().toLatin1 ()));
+        }
+      file.sha256 = jsonString (object, QStringLiteral ("sha256"));
+      QByteArray const bytes = file.binary
+          ? QByteArray::fromBase64 (file.contentBase64.trimmed ().toLatin1 ())
+          : file.content.toUtf8 ();
+      if (!bytes.isEmpty ())
+        {
+          QString const digest = sha256Hex (bytes);
+          if (file.sha256.isEmpty ()
+              || file.sha256.compare (digest, Qt::CaseInsensitive) != 0)
+            {
+              file.sha256 = digest;
+            }
+        }
+      file.enabled = object.value (QStringLiteral ("enabled")).toBool (true);
+      file.atMs = jsonU64 (object, QStringLiteral ("atMs"));
+      file.updatedAtMs = jsonU64 (
+          object, QStringLiteral ("updatedAtMs"), file.atMs);
+      file.lastRequestedAtMs = jsonU64 (
+          object, QStringLiteral ("lastRequestedAtMs"));
+      file.requestCount = std::max (
+          0, jsonInt (object, QStringLiteral ("requestCount")));
+      if (file.fileName.isEmpty () || bytes.isEmpty ())
+        {
+          continue;
+        }
+      bbsSharedFiles.push_back (file);
+      maxBbsSharedFileId = std::max (maxBbsSharedFileId, file.id);
     }
 
   for (QJsonValue const& value : root.value (
@@ -20499,8 +23076,15 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       report.rateName = jsonString (
           object, QStringLiteral ("rateName"));
       report.source = jsonString (object, QStringLiteral ("source"));
+      report.kind = jsonString (object, QStringLiteral ("kind")).toUpper ();
+      report.targetCall = normalizeCallsign (
+          object.value (QStringLiteral ("targetCall")).toString ());
+      report.relayCall = normalizeCallsign (
+          object.value (QStringLiteral ("relayCall")).toString ());
+      report.detail = jsonString (object, QStringLiteral ("detail"));
       report.atMs = jsonU64 (object, QStringLiteral ("atMs"));
-      if (!report.snrValid && !report.qualityValid)
+      if (!report.snrValid && !report.qualityValid
+          && report.kind.isEmpty () && report.detail.isEmpty ())
         {
           continue;
         }
@@ -20526,6 +23110,16 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
       entry.name = jsonString (object, QStringLiteral ("name"));
       entry.profileName = jsonString (
           object, QStringLiteral ("profileName"));
+      entry.capabilitySummary = jsonString (
+          object, QStringLiteral ("capabilitySummary"));
+      entry.waveformCapabilityFlags = static_cast<quint16> (std::clamp (
+          jsonInt (object, QStringLiteral ("waveformCapabilityFlags")),
+          0,
+          0xffff));
+      entry.serviceCapabilityFlags = static_cast<quint16> (std::clamp (
+          jsonInt (object, QStringLiteral ("serviceCapabilityFlags")),
+          0,
+          0xffff));
       entry.cq = object.value (QStringLiteral ("cq")).toBool (false);
       entry.cqType = jsonString (
           object, QStringLiteral ("cqType")).toUpper ();
@@ -20830,6 +23424,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   m_mailbox = mailbox;
   m_forms = forms;
   m_fileTransfers = fileTransfers;
+  m_bbsSharedFiles = bbsSharedFiles;
   m_bulletins = bulletins;
   m_contactHistory = contacts;
   m_qsoLog = qsoLog;
@@ -20864,6 +23459,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   m_snrReportSendingEnabled = snrReportSendingEnabledValue;
   m_verboseSnrAutoAcceptEnabled = verboseSnrAutoAcceptEnabledValue;
   m_infoInquireEnabled = infoInquireEnabledValue;
+  m_bbsFileServerEnabled = bbsFileServerEnabledValue;
   m_clusterEnabled = clusterEnabledValue;
   m_clusterNodeId = clusterNodeIdValue;
   m_clusterBand = clusterBandValue;
@@ -20879,6 +23475,9 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   m_nextFileTransferId = nextU32 (
       jsonU32 (root, QStringLiteral ("nextFileTransferId"), 1u),
       maxFileTransferId);
+  m_nextBbsSharedFileId = nextU32 (
+      jsonU32 (root, QStringLiteral ("nextBbsSharedFileId"), 1u),
+      maxBbsSharedFileId);
   m_nextBulletinId = nextU32 (
       jsonU32 (root, QStringLiteral ("nextBulletinId"), 1u),
       maxBulletinId);
@@ -20908,6 +23507,7 @@ bool FT2LinkQmlAdapter::applyLocalStoreBytes (QByteArray const& bytes,
   emit beaconHistoryChanged ();
   emit clusterLastHeardChanged ();
   emit logbookOutboxChanged ();
+  emit bbsFileServerChanged ();
   emit presenceChanged ();
   emit qsoAutomationChanged ();
   return true;

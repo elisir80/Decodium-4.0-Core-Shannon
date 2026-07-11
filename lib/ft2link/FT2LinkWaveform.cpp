@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -3283,6 +3284,27 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
   Frame bestFrame;
   bool haveBestFrame = false;
   std::string lastCandidateError;
+  auto const decodeStart = std::chrono::steady_clock::now ();
+  auto const decodeDeadline = config.maxDecodeMillis > 0
+      ? decodeStart + std::chrono::milliseconds {config.maxDecodeMillis}
+      : std::chrono::steady_clock::time_point::max ();
+  std::atomic_bool decodeTimedOut {false};
+  auto timedOut = [&] {
+    if (config.maxDecodeMillis <= 0)
+      {
+        return false;
+      }
+    if (decodeTimedOut.load ())
+      {
+        return true;
+      }
+    bool const expired = std::chrono::steady_clock::now () >= decodeDeadline;
+    if (expired)
+      {
+        decodeTimedOut.store (true);
+      }
+    return expired;
+  };
 
   auto considerCandidate = [&] (W2300PhaseSearchOutcome* outcome,
                                 W2300DecodeCandidate candidate) {
@@ -3348,6 +3370,10 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
     SubcarrierBasis const basis = makeSubcarrierBasis (nsps, searchConfig);
     std::vector<double> const residualOffsets = residualOffsetsHz;
     std::vector<double> const driftSearch = driftSearchHz;
+    if (timedOut ())
+      {
+        return;
+      }
     std::size_t const minimumSamples =
         (headerSymbols + 1u) * static_cast<std::size_t> (nsps);
     if (wave.size () < minimumSamples)
@@ -3369,7 +3395,7 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
       W2300PhaseSearchOutcome outcome;
       for (std::size_t phase = beginPhase; phase < endPhase; ++phase)
         {
-          if (foundCandidate.load ())
+          if (foundCandidate.load () || timedOut ())
             {
               return outcome;
             }
@@ -3454,14 +3480,29 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
   static std::vector<double> const noResidualCfo {0.0};
   static std::vector<double> const noDrift {0.0};
   searchWithConfig (config, noResidualCfo, noDrift, false);
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
+    }
   if (!best.ok)
     {
       searchWithConfig (config, w2300ResidualCfoSearchHz (), noDrift, true);
+    }
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
     }
   if (!best.ok)
     {
       searchWithConfig (
           config, w2300ResidualCfoSearchHz (), w2300DriftSearchHz (), true);
+    }
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
     }
   if (!best.ok)
     {
@@ -3482,7 +3523,16 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
             {
               break;
             }
+          if (timedOut ())
+            {
+              break;
+            }
         }
+    }
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
     }
   if (!best.ok)
     {
@@ -3502,7 +3552,16 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
             {
               break;
             }
+          if (timedOut ())
+            {
+              break;
+            }
         }
+    }
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
     }
   if (!best.ok)
     {
@@ -3523,7 +3582,16 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
             {
               break;
             }
+          if (timedOut ())
+            {
+              break;
+            }
         }
+    }
+  if (timedOut ())
+    {
+      setError (error, "W2300 decode timed out");
+      return false;
     }
 
   if (best.ok)

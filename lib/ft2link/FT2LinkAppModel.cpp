@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 
 namespace decodium
 {
@@ -126,6 +127,114 @@ HandshakeIdentity handshakeIdentityFromStation (StationIdentity const& station)
   identity.locator = station.locator;
   return identity;
 }
+
+void appendSummaryToken (std::ostringstream* stream,
+                         char const* token,
+                         bool enabled)
+{
+  if (!stream || !enabled)
+    {
+      return;
+}
+  if (stream->tellp () > 0)
+    {
+      *stream << ' ';
+    }
+  *stream << token;
+}
+	}
+
+std::uint16_t beaconWaveformCapabilityFlags (
+    LinkCapabilities const& capabilities)
+{
+  std::uint16_t flags = 0;
+  if (capabilities.supportsW500)
+    {
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW500);
+    }
+  if (capabilities.supportsW2300)
+    {
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300);
+    }
+  if (capabilities.supportsW2300Fast)
+    {
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Fast);
+    }
+  if (capabilities.supportsW2300Robust)
+    {
+      flags = static_cast<std::uint16_t> (
+          flags | BeaconWaveW2300Robust | BeaconWaveW2300Weak
+          | BeaconWaveW2300Deep | BeaconWaveW2300Ultra);
+    }
+
+  switch (capabilities.preferredW2300RateMode)
+    {
+    case W2300RateMode::Fast:
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Fast);
+      break;
+    case W2300RateMode::Robust:
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Robust);
+      break;
+    case W2300RateMode::Weak:
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Weak);
+      break;
+    case W2300RateMode::Deep:
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Deep);
+      break;
+    case W2300RateMode::Ultra:
+      flags = static_cast<std::uint16_t> (flags | BeaconWaveW2300Ultra);
+      break;
+    }
+
+  if (capabilities.preferredProfile == Profile::Wide500)
+    {
+      flags = static_cast<std::uint16_t> (flags | BeaconWavePreferredW500);
+    }
+  else if (capabilities.preferredProfile == Profile::Wide2300)
+    {
+      flags = static_cast<std::uint16_t> (flags | BeaconWavePreferredW2300);
+    }
+  return flags;
+}
+
+std::uint16_t defaultBeaconServiceCapabilityFlags ()
+{
+  return static_cast<std::uint16_t> (
+      BeaconServiceChat | BeaconServiceMail | BeaconServiceForm
+      | BeaconServiceFile | BeaconServiceBbs | BeaconServiceBroadcast
+      | BeaconServiceInfo | BeaconServiceQsy | BeaconServicePath
+      | BeaconServicePing | BeaconServiceRelay | BeaconServiceAlert);
+}
+
+std::string beaconWaveformCapabilitySummary (std::uint16_t flags)
+{
+  std::ostringstream stream;
+  appendSummaryToken (&stream, "W2300", (flags & BeaconWaveW2300) != 0u);
+  appendSummaryToken (&stream, "W500", (flags & BeaconWaveW500) != 0u);
+  appendSummaryToken (&stream, "FAST", (flags & BeaconWaveW2300Fast) != 0u);
+  appendSummaryToken (&stream, "ROBUST", (flags & BeaconWaveW2300Robust) != 0u);
+  appendSummaryToken (&stream, "WEAK", (flags & BeaconWaveW2300Weak) != 0u);
+  appendSummaryToken (&stream, "DEEP", (flags & BeaconWaveW2300Deep) != 0u);
+  appendSummaryToken (&stream, "ULTRA", (flags & BeaconWaveW2300Ultra) != 0u);
+  return stream.str ();
+}
+
+std::string beaconServiceCapabilitySummary (std::uint16_t flags)
+{
+  std::ostringstream stream;
+  appendSummaryToken (&stream, "CHAT", (flags & BeaconServiceChat) != 0u);
+  appendSummaryToken (&stream, "MAIL", (flags & BeaconServiceMail) != 0u);
+  appendSummaryToken (&stream, "FORM", (flags & BeaconServiceForm) != 0u);
+  appendSummaryToken (&stream, "FILE", (flags & BeaconServiceFile) != 0u);
+  appendSummaryToken (&stream, "BBS", (flags & BeaconServiceBbs) != 0u);
+  appendSummaryToken (&stream, "BCAST", (flags & BeaconServiceBroadcast) != 0u);
+  appendSummaryToken (&stream, "INFO", (flags & BeaconServiceInfo) != 0u);
+  appendSummaryToken (&stream, "QSY", (flags & BeaconServiceQsy) != 0u);
+  appendSummaryToken (&stream, "PATH", (flags & BeaconServicePath) != 0u);
+  appendSummaryToken (&stream, "PING", (flags & BeaconServicePing) != 0u);
+  appendSummaryToken (&stream, "RLY", (flags & BeaconServiceRelay) != 0u);
+  appendSummaryToken (&stream, "ALERT", (flags & BeaconServiceAlert) != 0u);
+  return stream.str ();
 }
 
 FT2LinkAppModel::FT2LinkAppModel (StationIdentity const& local)
@@ -170,6 +279,9 @@ StationAdvertisement FT2LinkAppModel::makeLocalAdvertisement (
   StationAdvertisement advertisement;
   advertisement.station = m_local;
   advertisement.capabilities = m_localCapabilities;
+  advertisement.waveformCapabilityFlags =
+      beaconWaveformCapabilityFlags (m_localCapabilities);
+  advertisement.serviceCapabilityFlags = defaultBeaconServiceCapabilityFlags ();
   advertisement.cq = cq;
   advertisement.cqType = cq ? normalizeCqType (cqType) : std::string {};
   advertisement.cqLocator = cq
@@ -202,10 +314,13 @@ Frame FT2LinkAppModel::makeLocalBeaconFrame (bool cq,
     }
   Frame frame = makeBeaconFrame (
       m_localCapabilities, handshakeIdentityFromStation (identity), cq);
+  frame.sessionId = beaconWaveformCapabilityFlags (m_localCapabilities);
+  frame.ackBitmap = defaultBeaconServiceCapabilityFlags ();
   int const normalizedSlotId = cq ? normalizeSlotId (cqSlotId) : 0;
   if (cq)
     {
-      frame.ackBitmap = encodeCqType (cqType);
+      frame.ackBitmap = static_cast<std::uint16_t> (
+          frame.ackBitmap | encodeCqType (cqType));
     }
   if (normalizedSlotId != 0)
     {
@@ -257,6 +372,11 @@ bool FT2LinkAppModel::observeBeacon (Frame const& beacon,
   observed.station.call = identity.call;
   observed.station.locator = identity.locator;
   observed.capabilities = capabilities;
+  observed.waveformCapabilityFlags = beacon.sessionId == 0u
+      ? beaconWaveformCapabilityFlags (capabilities)
+      : beacon.sessionId;
+  observed.serviceCapabilityFlags = static_cast<std::uint16_t> (
+      beacon.ackBitmap & 0xfff0u);
   observed.cq = cq;
   if (cq)
     {
@@ -321,6 +441,28 @@ bool FT2LinkAppModel::hasActiveStation (std::string const& call,
   std::map<std::string, StationAdvertisement>::const_iterator it =
       m_stations.find (call);
   return it != m_stations.end () && isActiveAt (it->second, nowMs, maxAgeMs);
+}
+
+StationAdvertisement const* FT2LinkAppModel::stationAdvertisement (
+    std::string const& call) const
+{
+  std::map<std::string, StationAdvertisement>::const_iterator it =
+      m_stations.find (call);
+  if (it != m_stations.end ())
+    {
+      return &it->second;
+    }
+
+  std::string const normalized = uppercaseAscii (call);
+  if (normalized != call)
+    {
+      it = m_stations.find (normalized);
+      if (it != m_stations.end ())
+        {
+          return &it->second;
+        }
+    }
+  return nullptr;
 }
 
 Frame FT2LinkAppModel::startSession (std::string const& remoteCall,

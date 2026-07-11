@@ -4,9 +4,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "../../panels"
 
 Item {
     id: txPanel
+    implicitHeight: panelColumn.implicitHeight + 8
 
     // 1.0.262 — CALL feature: signal emesso quando l'utente clicca il pulsante CALL
     signal callRequested()
@@ -14,6 +16,7 @@ Item {
 
     // Required property - reference to the app engine
     required property var engine
+    property var ft2LinkToolPanel: null
     property bool handleLogPrompt: true
     property bool showAsyncIcon: true
     // 1.0.342 — nascondi la band-bar interna quando un'altra (es. DX-Pedition ROW2) e' gia' presente.
@@ -326,7 +329,9 @@ Item {
     readonly property int toolbarHoldButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
     readonly property int toolbarWideButtonWidth: toolbarActionWidth("CLEAR", "")
     readonly property int toolbarLongButtonWidth: toolbarActionWidth("ALT 1/2", "\u21C4")
-    readonly property int toolbarModeWidth: toolbarActionWidth("FT2-Link", "\u25BE")
+    readonly property int toolbarModeWidth: isFt2LinkMode
+                                            ? Math.max(132, toolbarActionWidth("FT2-Link", "\u25BE") + 24)
+                                            : toolbarActionWidth("FT2-Link", "\u25BE")
     readonly property int toolbarLabelSize: Math.max(9, Math.round(9 * toolbarScale))
     readonly property int toolbarGlyphSize: Math.max(12, Math.round(13 * toolbarScale))
     readonly property int qsoInfoControlHeight: 30
@@ -359,6 +364,30 @@ Item {
     }
 
     readonly property bool isFt2LinkMode: displayModeName(engine ? engine.mode : "") === "FT2-Link"
+    readonly property var ft2LinkHiddenTxPanelIds: ({
+        "mam": true,
+        "deep": true,
+        "ap": true,
+        "seq": true,
+        "quickqso": true,
+        "enabletx": true,
+        "holdfreq": true,
+        "autocq": true,
+        "call": true,
+        "txphase": true,
+        "alt12": true,
+        "clear": true,
+        "cqfilter": true,
+        "async": true,
+        "hound": true,
+        "waitpounce": true
+    })
+
+    function txPanelButtonVisible(buttonId, defaultVisible) {
+        if (txPanel.isFt2LinkMode && txPanel.ft2LinkHiddenTxPanelIds[String(buttonId || "")])
+            return false
+        return !!defaultVisible
+    }
 
     function syncModeSelector() {
         if (typeof modeSelector === "undefined" || !modeSelector)
@@ -366,6 +395,20 @@ Item {
         var mode = displayModeName(engine ? engine.mode : "FT8")
         var idx = modeSelector.model.indexOf(mode)
         modeSelector.currentIndex = idx >= 0 ? idx : 0
+    }
+
+    function wsprPowerDbmFromLabel(label) {
+        var parsed = parseInt(String(label || ""), 10)
+        return isNaN(parsed) ? 37 : parsed
+    }
+
+    function wsprPowerIndexFor(dbm, model) {
+        var needle = String(Number(dbm || 37)) + " dBm"
+        for (var i = 0; model && i < model.length; ++i) {
+            if (String(model[i]).indexOf(needle) === 0)
+                return i
+        }
+        return 11
     }
 
     function qsoInfoWidth(text, placeholder, minWidth, maxWidth) {
@@ -465,6 +508,7 @@ Item {
     }
 
     Rectangle {
+        id: panelFrame
         anchors.fill: parent
         color: glassBg
         border.color: txPanel.txVisualActive ? errorRed : glassBorder
@@ -472,6 +516,7 @@ Item {
         radius: 12
 
         ColumnLayout {
+            id: panelColumn
             anchors.fill: parent
             anchors.margins: 4
             spacing: 3
@@ -647,6 +692,65 @@ Item {
                             }
                         }
 
+                        Rectangle {
+                            visible: engine && String(engine.mode || "").toUpperCase() === "WSPR"
+                            width: Math.max(94, Math.round(108 * txPanel.toolbarScale))
+                            height: txPanel.toolbarButtonHeight
+                            radius: 5
+                            color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.14)
+                            border.color: accentGreen
+                            border.width: 1
+
+                            StyledComboBox {
+                                id: wsprPowerSelector
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                model: engine ? engine.wsprPowerOptions() : []
+                                currentIndex: txPanel.wsprPowerIndexFor(engine ? engine.wsprPowerDbm : 37, model)
+                                onActivated: function(index) {
+                                    if (!engine || index < 0 || index >= model.length)
+                                        return
+                                    engine.wsprPowerDbm = txPanel.wsprPowerDbmFromLabel(model[index])
+                                }
+                                Connections {
+                                    target: engine
+                                    function onWsprPowerDbmChanged() {
+                                        if (wsprPowerSelector)
+                                            wsprPowerSelector.currentIndex = txPanel.wsprPowerIndexFor(engine.wsprPowerDbm, wsprPowerSelector.model)
+                                    }
+                                }
+                                font.family: decodiumMonoFontFamily
+                                font.pixelSize: Math.max(10, Math.round(10 * txPanel.toolbarScale))
+                                itemHeight: 34
+                                popupMinWidth: 150
+                                textHorizontalAlignment: Text.AlignHCenter
+                                leftPadding: 4
+                                rightPadding: 18
+                                topPadding: 4
+                                bottomPadding: 4
+                                bgColor: "transparent"
+                                borderColor: "transparent"
+                            }
+                        }
+
+                        FT2LinkTabBar {
+                            id: ft2LinkToolTabs
+                            visible: txPanel.isFt2LinkMode && txPanel.ft2LinkToolPanel !== null
+                            panel: txPanel.ft2LinkToolPanel
+                            readonly property real availableWidth: Math.max(260,
+                                                                            topControlsFlow.width
+                                                                            - txPanel.toolbarModeWidth
+                                                                            - (txPanel.toolbarButtonWidth * 2)
+                                                                            - (txPanel.toolbarSpacing * 6)
+                                                                            - 16)
+                            width: visible
+                                   ? Math.max(260,
+                                              Math.min(Math.max(260, implicitWidth),
+                                                       availableWidth))
+                                   : 0
+                            height: visible ? implicitHeight : 0
+                        }
+
                         // ── Pulsanti TX panel riordinabili via drag&drop magnetico ──
                         // Replica STEP 1 (toolbar in Main.qml): un Repeater itera il modello
                         // ORDINATO (txPanel.uiTxPanelOrder) e un Loader per slot carica il
@@ -708,7 +812,7 @@ Item {
                             delegate: Item {
                                 id: slot
                                 property string buttonId: modelData
-                                property bool slotVisible: btnLoader.item ? btnLoader.item.btnVisible : false
+                                property bool slotVisible: btnLoader.item ? txPanel.txPanelButtonVisible(buttonId, btnLoader.item.btnVisible) : false
                                 property bool dragging: txCtrlRepeater.dragIndex === index
 
                                 visible: slotVisible
@@ -1392,7 +1496,13 @@ Item {
 
             // DX Station info row
             RowLayout {
+                id: classicQsoInfoRow
+                visible: !txPanel.isFt2LinkMode
+                enabled: visible
                 Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                Layout.minimumHeight: visible ? implicitHeight : 0
+                Layout.maximumHeight: visible ? implicitHeight : 0
                 spacing: 5
 
                 // QSO State indicator

@@ -56,6 +56,8 @@ Window {
     readonly property int bandDtWidth: compactBandColumns ? 42 : 50
     readonly property int bandDtFreqGapWidth: compactBandColumns ? 6 : 8
     readonly property int bandFreqWidth: compactBandColumns ? 42 : 50
+    readonly property bool bandShowWsprDrift: bridge && bridge.mode === "WSPR"
+    readonly property int bandDriftWidth: bandShowWsprDrift ? (compactBandColumns ? 36 : 42) : 0
     readonly property int bandGapWidth: compactBandColumns ? 8 : 12
     readonly property int bandDxccWidth: showDxccInfo ? (compactBandColumns ? 92 : 132) : 0
     readonly property int bandAzWidth: showDxccInfo ? (compactBandColumns ? 42 : 52) : 0
@@ -1000,6 +1002,21 @@ Window {
                                 horizontalAlignment: Text.AlignRight
                                 Layout.preferredWidth: decodeWindow.bandFreqWidth
                             }
+                            Item {
+                                visible: decodeWindow.bandShowWsprDrift
+                                Layout.preferredWidth: decodeWindow.bandDriftWidth
+                                Layout.fillHeight: true
+                                Text {
+                                    anchors.fill: parent
+                                    text: "Drift"
+                                    font.family: decodiumMonoFontFamily
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: secondaryCyan
+                                    horizontalAlignment: Text.AlignRight
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                            }
                             Item { Layout.preferredWidth: decodeWindow.bandGapWidth }
                             Text {
                                 text: "Message"
@@ -1064,7 +1081,7 @@ Window {
 	                            // 7+ binding ternari ciascuna = costo CPU/GPU significativo
 	                            // ad ogni model change). 600 = ~23 row buffer, smooth ma
 	                            // 5× meno overhead. Su PC vecchi user-reported -10% CPU.
-	                            cacheBuffer: 600
+	                            cacheBuffer: 360
 	                            reuseItems: true
 	                            property bool followTail: true
                             property bool tailFollowPending: false
@@ -1103,21 +1120,10 @@ Window {
         if (!bandActivityList)
             return
         var targetY = bandActivityList.tailContentY()
-        var distance = Math.abs(bandActivityList.contentY - targetY)
         bandActivityTailAnimation.stop()
         bandActivityList.tailFollowPending = true
-        if (bandActivityList.shouldSnapTailFollow()
-                || distance < 1
-                || distance > Math.max(12000, bandActivityList.height * 18)) {
-            bandActivityList.contentY = targetY
-            bandActivityList.finishTailFollow()
-            return
-        }
-        bandActivityTailAnimation.from = bandActivityList.contentY
-        bandActivityTailAnimation.to = targetY
-        // 1.0.125: tail follow piu' snappy (was 130 + 0.24 * distance, max 620)
-        bandActivityTailAnimation.duration = Math.max(90, Math.min(240, 70 + distance * 0.10))
-        bandActivityTailAnimation.start()
+        bandActivityList.contentY = targetY
+        bandActivityList.finishTailFollow()
     })
 }
 NumberAnimation {
@@ -1167,6 +1173,7 @@ NumberAnimation {
 	                                }
 	                            }
                             onCountChanged: {
+                                if (!followTail) return
                                 forceTailFollow()
                             }
 	                            // 1.0.125: rimosse animazioni add/addDisplaced/moveDisplaced/
@@ -1379,6 +1386,20 @@ Component.onCompleted: {
                                         font.bold: modelData.isTx === true
                                         horizontalAlignment: Text.AlignRight
                                         Layout.preferredWidth: decodeWindow.bandFreqWidth
+                                    }
+                                    Item {
+                                        visible: decodeWindow.bandShowWsprDrift
+                                        Layout.preferredWidth: decodeWindow.bandDriftWidth
+                                        Layout.fillHeight: true
+                                        Text {
+                                            anchors.fill: parent
+                                            text: modelData.mode === "WSPR" ? (modelData.drift || "0") : ""
+                                            font.family: decodiumMonoFontFamily
+                                            font.pixelSize: 11
+                                            color: decodeWindow.boostedDecodeTextColor(textSecondary)
+                                            horizontalAlignment: Text.AlignRight
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
                                     }
 
                                     Item { Layout.preferredWidth: decodeWindow.bandGapWidth }
@@ -1606,7 +1627,7 @@ Component.onCompleted: {
 	                            spacing: 1
 	                            interactive: true
 	                            // 1.0.140: ridotto da 3000 — vedi commento bandActivityList
-	                            cacheBuffer: 600
+	                            cacheBuffer: 360
 	                            reuseItems: true
 	                            // Pattern identico a bandActivityList: model property-backed
                             // (decodeWindow.rxDecodeModel) + followTail/isNearTail/updateFollowTail
@@ -1651,21 +1672,10 @@ Component.onCompleted: {
         if (!rxFrequencyList)
             return
         var targetY = rxFrequencyList.tailContentY()
-        var distance = Math.abs(rxFrequencyList.contentY - targetY)
         rxFrequencyTailAnimation.stop()
         rxFrequencyList.tailFollowPending = true
-        if (rxFrequencyList.shouldSnapTailFollow()
-                || distance < 1
-                || distance > Math.max(12000, rxFrequencyList.height * 18)) {
-            rxFrequencyList.contentY = targetY
-            rxFrequencyList.finishTailFollow()
-            return
-        }
-        rxFrequencyTailAnimation.from = rxFrequencyList.contentY
-        rxFrequencyTailAnimation.to = targetY
-        // 1.0.125: tail follow piu' snappy (was 130 + 0.24 * distance, max 620)
-        rxFrequencyTailAnimation.duration = Math.max(90, Math.min(240, 70 + distance * 0.10))
-        rxFrequencyTailAnimation.start()
+        rxFrequencyList.contentY = targetY
+        rxFrequencyList.finishTailFollow()
     })
 }
 NumberAnimation {
@@ -1715,6 +1725,7 @@ NumberAnimation {
 	                                }
 	                            }
                             onCountChanged: {
+                                if (!followTail) return
                                 forceTailFollow()
                             }
 	                            // 1.0.125: rimosse animazioni add/addDisplaced/moveDisplaced/
