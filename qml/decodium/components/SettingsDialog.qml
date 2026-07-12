@@ -4628,7 +4628,7 @@ Dialog {
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
                         // 1.0.180 — Quality preset: gate per effetti visivi pesanti.
-                        Text { text: qsTr("UI Quality preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("UI Quality preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: uiQualityCombo
                             Layout.preferredWidth: 180
@@ -4650,12 +4650,12 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.388 — Priorità processo Windows (scheduling CPU)
-                        Text { text: qsTr("Priorità processo:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("Process priority:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: processPriorityCombo
                             Layout.preferredWidth: 180
                             Layout.columnSpan: 1
-                            model: [qsTr("Normale"), qsTr("Sopra il normale"), qsTr("Alta (consigliata)"), qsTr("Tempo reale ⚠️")]
+                            model: [qsTr("Normal"), qsTr("Above normal"), qsTr("High (recommended)"), qsTr("Realtime ⚠️")]
                             currentIndex: bridge ? bridge.processPriority : 1
                             onActivated: {
                                 if (bridge && bridge.processPriority !== currentIndex)
@@ -4664,12 +4664,12 @@ Dialog {
                             hoverEnabled: true
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Priorità di scheduling CPU del processo (Windows).\n\nNormale / Sopra il normale (default) = sicure.\nAlta = più fluidità per audio/decode, rischio basso (consigliata se noti scatti).\nTempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).\n\nSe non sei sicuro usa 'Alta'.")
+                            ToolTip.text: qsTr("CPU scheduling priority for the Decodium process (Windows).\n\nNormal / Above normal (default) = safe.\nHigh = smoother audio/decode with low risk (recommended if you notice stutters).\nRealtime ⚠️ = maximum scheduling priority, but it can make the PC unresponsive (mouse/keyboard) and requires administrator privileges. Without admin rights Windows downgrades it to High.\n\nIf unsure, use High.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.180 — Style (richiede restart)
-                        Text { text: qsTr("UI Style (restart):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("UI Style (restart):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: uiStyleCombo
                             Layout.preferredWidth: 180
@@ -4703,7 +4703,7 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.180 — Frameless pop-out
-                        Text { text: qsTr("Frameless pop-out:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("Frameless pop-out:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         CheckBox {
                             id: framelessPopoutsCheck
                             Layout.leftMargin: 24
@@ -4721,7 +4721,7 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.186 — Auto-detach Full Spectrum (Pasquale-pattern)
-                        Text { text: qsTr("Detach Full Spectrum:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("Detach Full Spectrum:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         CheckBox {
                             id: autoDetachFullSpectrumCheck
                             Layout.leftMargin: 24
@@ -4739,21 +4739,21 @@ Dialog {
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.412 — Schermo intero (opt-in, non persistito: al riavvio torna a finestra)
-                        Text { text: qsTr("Schermo intero:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("Full screen:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         Button {
                             Layout.leftMargin: 24
                             Layout.preferredHeight: controlHeight
-                            text: qsTr("Attiva (F11)")
+                            text: qsTr("Enable (F11)")
                             hoverEnabled: true
                             onClicked: { settingsDialog.fullScreenRequested(); settingsDialog.close() }
                             ToolTip.visible: hovered
                             ToolTip.delay: 400
-                            ToolTip.text: qsTr("Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.")
+                            ToolTip.text: qsTr("Switch Decodium to full screen. To exit: F11, Esc, or the top ✕ button. This is not saved: Decodium starts in normal window mode after restart.")
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
                         // 1.0.186 — Spectrum FPS cap (15/20/30)
-                        Text { text: qsTr("Spectrum FPS cap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("Spectrum FPS cap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: spectrumFpsCombo
                             Layout.preferredWidth: 170
@@ -4779,10 +4779,10 @@ Dialog {
 
                         // 1.0.189 — Telemetria pressione CPU (sessione corrente, read-only).
                         // Se i contatori sono alti, considera Low Quality / FPS cap=15 / Detach ON.
-                        Text { text: qsTr("Eventi CPU pressure:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.columnSpan: 1 }
+                        Text { text: qsTr("CPU pressure:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         Text {
                             id: cpuPressureTelemetryText
-                            Layout.preferredWidth: 240
+                            Layout.preferredWidth: 280
                             Layout.columnSpan: 1
                             color: {
                                 if (!bridge) return textSecondary
@@ -4793,10 +4793,10 @@ Dialog {
                             }
                             font.pixelSize: 12
                             text: bridge
-                                  ? qsTr("totale=%1 · severi=%2 (sessione)")
+                                  ? qsTr("events: total=%1 · severe=%2 (session)")
                                         .arg(bridge.cpuPressureEventCount)
                                         .arg(bridge.cpuPressureSevereEventCount)
-                                  : qsTr("totale=0 · severi=0")
+                                  : qsTr("events: total=0 · severe=0")
                             // 1.0.190 hotfix — hoverEnabled / ToolTip.* non sono
                             // proprieta' di Text. Tooltip e' attached property
                             // gestita da MouseArea con .text dedicato.
@@ -7502,10 +7502,12 @@ Dialog {
                             Layout.preferredHeight: controlHeight
                         }
                         Button {
+                            id: forceLotwUpdateButton
                             text: qsTr("Force Update")
                             enabled: !bridge.lotwUpdating
                             implicitHeight: controlHeight
-                            Layout.preferredWidth: 132
+                            Layout.minimumWidth: 170
+                            Layout.preferredWidth: Math.max(170, implicitWidth + 12)
                             onClicked: bridge.forceUpdateLotwUsers()
                         }
                         Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }
@@ -7523,10 +7525,12 @@ Dialog {
                             Layout.preferredHeight: controlHeight
                         }
                         Button {
+                            id: forceUsStateUpdateButton
                             text: qsTr("Force Update")
                             enabled: !bridge.usStateDataUpdating
                             implicitHeight: controlHeight
-                            Layout.preferredWidth: 132
+                            Layout.minimumWidth: 170
+                            Layout.preferredWidth: Math.max(170, implicitWidth + 12)
                             onClicked: bridge.updateUsStateData()
                         }
                         Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }

@@ -1425,26 +1425,32 @@ Item {
                             }
                         }
 
-                        // W&P badge (display-only, gate: waitPounceActive)
+                        // W&P toggle
                         Component {
                             id: comp_waitpounce
                             Rectangle {
                                 property bool hovered: false
-                                readonly property bool btnVisible: engine && engine.waitPounceActive
-                                readonly property real prefWidth: 54
-                                readonly property string tip: qsTr("Wait & Pounce active")
-                                function activate(mouse) {}
+                                readonly property bool btnVisible: true
+                                readonly property bool active: engine && engine.waitPounceActive
+                                readonly property real prefWidth: txPanel.toolbarActionWidth("W&P", "")
+                                readonly property string tip: active
+                                      ? qsTr("Wait & Pounce is active\nClick to disable")
+                                      : qsTr("Wait & Pounce\nClick to answer filtered CQ decodes only when TX/CQ is armed")
+                                function activate(mouse) {
+                                    if (engine)
+                                        engine.waitPounceActive = !engine.waitPounceActive
+                                }
                                 radius: 5
-                                color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
-                                border.color: secondaryCyan
-                                border.width: 2
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "W&P"
-                                    color: secondaryCyan
-                                    font.family: decodiumMonoFontFamily
-                                    font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
-                                    font.bold: true
+                                color: active ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.28)
+                                              : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, hovered ? 0.12 : 0.06)
+                                border.color: active ? secondaryCyan : (hovered ? secondaryCyan : glassBorder)
+                                border.width: active ? 2 : 1
+                                ToolbarButtonContent {
+                                    anchors.fill: parent
+                                    label: "W&P"
+                                    foreground: parent.active ? secondaryCyan : textPrimary
+                                    labelSize: txPanel.toolbarLabelSize
+                                    boldLabel: parent.active
                                 }
                             }
                         }

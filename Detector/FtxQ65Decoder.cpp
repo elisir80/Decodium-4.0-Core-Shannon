@@ -68,7 +68,6 @@ extern "C"
 
 namespace
 {
-  using decodium::fft_compat::forward_complex;
   constexpr int kQ65MaxLines {200};
   constexpr int kQ65Bits {77};
   constexpr int kQ65DecodedChars {37};
@@ -169,6 +168,48 @@ namespace
       }
     std::copy_n (workspace.buffer.begin (), nfft2, c0.begin ());
     return true;
+  }
+
+  struct Q65SymspecWorkspace
+  {
+    ~Q65SymspecWorkspace ()
+    {
+      if (forward)
+        {
+          decodium::fft_compat::destroy_plan (forward);
+        }
+    }
+
+    void ensure (int new_nfft)
+    {
+      if (new_nfft == nfft)
+        {
+          return;
+        }
+      if (forward)
+        {
+          decodium::fft_compat::destroy_plan (forward);
+          forward = nullptr;
+        }
+      nfft = new_nfft;
+      time.assign (static_cast<size_t> (std::max (1, nfft)), 0.0f);
+      spectrum.assign (static_cast<size_t> (std::max (1, nfft / 2 + 1)),
+                       std::complex<float> {});
+      auto* out = reinterpret_cast<fftwf_complex*> (spectrum.data ());
+      forward = decodium::fft_compat::plan_dft_r2c_1d (nfft, time.data (), out,
+                                                       FFTW_ESTIMATE);
+    }
+
+    int nfft {0};
+    std::vector<float> time;
+    std::vector<std::complex<float>> spectrum;
+    fftwf_plan forward {nullptr};
+  };
+
+  Q65SymspecWorkspace& q65_symspec_workspace ()
+  {
+    static thread_local Q65SymspecWorkspace workspace;
+    return workspace;
   }
 
   struct Q65Candidate
@@ -515,29 +556,31 @@ namespace
     int const nfft = nsps;
     float const fac = 1.0f / 32767.0f;
 
-    std::vector<std::complex<float>> c0 (static_cast<size_t> (nfft));
+    Q65SymspecWorkspace& workspace = q65_symspec_workspace ();
+    workspace.ensure (nfft);
     std::fill (s1.begin (), s1.end (), 0.0f);
 
     for (int j = 1; j <= jz; j += 2)
       {
         int const i1 = (j - 1) * istep;
         int const i2 = i1 + nsps - 1;
-        int k = -1;
-        for (int i = i1; i <= i2 && (i + 1) < static_cast<int> (iwave.size ()); i += 2)
+        int k = 0;
+        for (int i = i1; i <= i2 && k < nfft; ++i, ++k)
           {
-            float const xx = static_cast<float> (iwave[static_cast<size_t> (i)]);
-            float const yy = static_cast<float> (iwave[static_cast<size_t> (i + 1)]);
-            ++k;
-            c0[static_cast<size_t> (k)] = fac * std::complex<float> {xx, yy};
+            workspace.time[static_cast<size_t> (k)] =
+                (i >= 0 && i < static_cast<int> (iwave.size ()))
+                    ? fac * static_cast<float> (iwave[static_cast<size_t> (i)])
+                    : 0.0f;
           }
-        if (k + 1 < nfft)
+        if (k < nfft)
           {
-            std::fill (c0.begin () + (k + 1), c0.end (), std::complex<float> {});
+            std::fill (workspace.time.begin () + k, workspace.time.end (), 0.0f);
           }
-        forward_complex (c0.data (), nfft);
+        auto* out = reinterpret_cast<fftwf_complex*> (workspace.spectrum.data ());
+        fftwf_execute_dft_r2c (workspace.forward, workspace.time.data (), out);
         for (int i = 1; i <= iz; ++i)
           {
-            std::complex<float> const value = c0[static_cast<size_t> (i - 1)];
+            std::complex<float> const value = workspace.spectrum[static_cast<size_t> (i)];
             s1[static_cast<size_t> (col_major_index (i - 1, j - 1, iz))] =
                 value.real () * value.real () + value.imag () * value.imag ();
           }
@@ -1430,6 +1473,7 @@ namespace
     int npasses = (nqsoprogress == 5) ? 3 : 2;
     int nused = 1;
     int iavg = 0;
+    bool have_primary_decode = false;
     std::vector<std::string> session_decodes;
     std::vector<float> decoded_freqs;
 
@@ -1470,11 +1514,10 @@ namespace
     if (dec0.idec >= 0)
       {
         emit_decode (dec0, dec0.xdt, dec0.f0, dec0.idec, nused);
-        nqf.assign (20, 0);
-        return;
+        have_primary_decode = true;
       }
 
-    if (!(ncontest == 1 && lagain && (ndepth & 16) == 16))
+    if (!have_primary_decode && !(ncontest == 1 && lagain && (ndepth & 16) == 16))
       {
         if (!(ncontest == 1 && lagain && (ndepth & 16) == 0))
           {
@@ -1489,6 +1532,7 @@ namespace
             if (ana64_native (audio.data (), npts, c00))
               {
                 int passes = lapcqonly ? 1 : npasses;
+                bool loop_decoded = false;
                 for (int ipass = 0; ipass <= passes; ++ipass)
                   {
                     int apmask_bits[kQ65ApBits] {};
@@ -1550,16 +1594,17 @@ namespace
                             loop_dec.dat4 = dat4;
                             std::copy_n (decoded_chars, kQ65DecodedChars, loop_dec.decoded.begin ());
                             emit_decode (loop_dec, xdt1, f1, idec, nused);
-                            nqf.assign (20, 0);
-                            return;
+                            loop_decoded = true;
+                            break;
                           }
                       }
                   }
+                have_primary_decode = loop_decoded;
               }
           }
       }
 
-    if ((ndepth & 16) != 0 && state.navg[iseq] >= 2)
+    if (!have_primary_decode && (ndepth & 16) != 0 && state.navg[iseq] >= 2)
       {
         iavg = 1;
         Q65Dec0Result avg_list = q65_dec0 (state, audio, 1, ntrperiod, nfqso, ntol, false,
@@ -1569,24 +1614,25 @@ namespace
           {
             nused = state.navg[iseq];
             emit_decode (avg_list, avg_list.xdt, avg_list.f0, avg_list.idec, nused);
-            nqf.assign (20, 0);
-            return;
+            have_primary_decode = true;
           }
 
-        iavg = 2;
-        Q65Dec0Result avg_q012 = q65_dec0 (state, audio, 2, ntrperiod, nfqso, ntol, false,
-                                           lnewdat, emedelay, nsps, mode_q65, nfa, nfb,
-                                           ibwa, ibwb, npasses, maxiters, max_drift, 0, iseq);
-        if (avg_q012.idec >= 0)
+        if (!have_primary_decode)
           {
-            nused = state.navg[iseq];
-            emit_decode (avg_q012, avg_q012.xdt, avg_q012.f0, avg_q012.idec, nused);
-            nqf.assign (20, 0);
-            return;
+            iavg = 2;
+            Q65Dec0Result avg_q012 = q65_dec0 (state, audio, 2, ntrperiod, nfqso, ntol, false,
+                                               lnewdat, emedelay, nsps, mode_q65, nfa, nfb,
+                                               ibwa, ibwb, npasses, maxiters, max_drift, 0, iseq);
+            if (avg_q012.idec >= 0)
+              {
+                nused = state.navg[iseq];
+                emit_decode (avg_q012, avg_q012.xdt, avg_q012.f0, avg_q012.idec, nused);
+                have_primary_decode = true;
+              }
           }
       }
 
-    if (max_drift == 50)
+    if (!have_primary_decode && max_drift == 50)
       {
         Q65Dec0Result drift_dec = q65_dec0 (state, audio, iavg, ntrperiod, nfqso, ntol, false,
                                             lnewdat, emedelay, nsps, mode_q65, nfa, nfb,
@@ -1594,6 +1640,7 @@ namespace
         if (drift_dec.idec >= 0)
           {
             emit_decode (drift_dec, drift_dec.xdt, drift_dec.f0, drift_dec.idec, nused);
+            have_primary_decode = true;
           }
       }
 

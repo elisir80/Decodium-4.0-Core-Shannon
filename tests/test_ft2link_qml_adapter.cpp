@@ -4342,7 +4342,20 @@ private Q_SLOTS:
       }
     quint64 const nowMs =
         static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+
+    QVector<short> noisyIdleSamples;
+    noisyIdleSamples.reserve (2400);
+    for (int i = 0; i < 2400; ++i)
+      {
+        noisyIdleSamples.push_back (
+            i % 40 == 0 ? 7000 : (i % 2 == 0 ? 1400 : -1400));
+      }
+    QVERIFY (!caller.ingestRxSamples (noisyIdleSamples, "", nowMs));
+    QVERIFY (caller.liveChannelBusy ());
+    QVERIFY (!caller.liveChannelLbtBusy ());
+
     QVERIFY (!caller.ingestRxSamples (busySamples, "", nowMs));
+    QVERIFY (caller.liveChannelLbtBusy ());
 
     QSignalSpy radioSpy {&caller, &FT2LinkQmlAdapter::radioTxAudioRequested};
     caller.setRadioTxArmed (true);

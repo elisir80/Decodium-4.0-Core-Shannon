@@ -115,6 +115,7 @@ class FT2LinkQmlAdapter : public QObject
   Q_PROPERTY(int autoBeaconIntervalSeconds READ autoBeaconIntervalSeconds NOTIFY autoBeaconChanged)
   Q_PROPERTY(bool autoBeaconCq READ autoBeaconCq NOTIFY autoBeaconChanged)
   Q_PROPERTY(bool liveChannelBusy READ liveChannelBusy NOTIFY liveChannelChanged)
+  Q_PROPERTY(bool liveChannelLbtBusy READ liveChannelLbtBusy NOTIFY liveChannelChanged)
   Q_PROPERTY(double liveChannelRms READ liveChannelRms NOTIFY liveChannelChanged)
   Q_PROPERTY(double liveChannelPeak READ liveChannelPeak NOTIFY liveChannelChanged)
   Q_PROPERTY(int broadcastCount READ broadcastCount NOTIFY broadcastsChanged)
@@ -184,6 +185,7 @@ public:
   int autoBeaconIntervalSeconds () const;
   bool autoBeaconCq () const;
   bool liveChannelBusy () const;
+  bool liveChannelLbtBusy () const;
   double liveChannelRms () const;
   double liveChannelPeak () const;
   int broadcastCount () const;
@@ -817,6 +819,7 @@ private:
                                         QVariantMap const& planExtras,
                                         quint64 nowMs);
   bool isLiveChannelBusy (quint64 nowMs) const;
+  bool isLiveChannelLbtBusy (quint64 nowMs) const;
   // P0b: il calcolo dell'energia avviene sul worker; qui si applica il
   // risultato allo stato LBT (main). Sostituisce observeRxEnergy(samples).
   void applyObservedRxEnergy (double rms, double peak, quint64 nowMs);
@@ -1479,6 +1482,8 @@ private:
   quint64 m_lastBeaconTxMs {0};
   quint64 m_liveChannelBusyUntilMs {0};
   bool m_liveChannelBusy {false};
+  quint64 m_liveChannelLbtBusyUntilMs {0};
+  bool m_liveChannelLbtBusy {false};
   double m_liveChannelRms {0.0};
   double m_liveChannelPeak {0.0};
   bool m_autoBeaconEnabled {false};

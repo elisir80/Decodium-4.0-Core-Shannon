@@ -71,6 +71,8 @@ constexpr int kHelloAckTurnaroundDelayMs = 3500;
 constexpr double kLiveWideSampleRate = 12000.0;
 constexpr double kFt2LinkBusyRmsThreshold = 0.006;
 constexpr double kFt2LinkBusyPeakThreshold = 0.014;
+constexpr double kFt2LinkLbtBusyRmsThreshold = 0.085;
+constexpr double kFt2LinkLbtBusyPeakThreshold = 0.300;
 constexpr quint64 kFt2LinkBusyHoldMs = 750u;
 
 decodium::ft2link::W500WaveformConfig liveW500RxConfig ()
@@ -4716,14 +4718,43 @@ FT2LinkQmlAdapter::FT2LinkQmlAdapter (QObject* parent)
 
   m_liveChannelTimer.setSingleShot (true);
   connect (&m_liveChannelTimer, &QTimer::timeout, this, [this] {
-    if (!m_liveChannelBusy)
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    bool changed = false;
+    if (m_liveChannelBusy && nowMs >= m_liveChannelBusyUntilMs)
       {
+        m_liveChannelBusy = false;
+        changed = true;
+      }
+    if (m_liveChannelLbtBusy && nowMs >= m_liveChannelLbtBusyUntilMs)
+      {
+        m_liveChannelLbtBusy = false;
+        changed = true;
+      }
+    if (changed)
+      {
+        emit liveChannelChanged ();
+      }
+    quint64 nextUntil = 0u;
+    if (m_liveChannelBusy && m_liveChannelBusyUntilMs > nowMs)
+      {
+        nextUntil = m_liveChannelBusyUntilMs;
+      }
+    if (m_liveChannelLbtBusy && m_liveChannelLbtBusyUntilMs > nowMs)
+      {
+        nextUntil = nextUntil == 0u
+            ? m_liveChannelLbtBusyUntilMs
+            : std::min (nextUntil, m_liveChannelLbtBusyUntilMs);
+      }
+    if (nextUntil != 0u)
+      {
+        m_liveChannelTimer.start (
+            static_cast<int> (std::min<quint64> (
+                nextUntil - nowMs, 2147483647u)));
         return;
       }
-    m_liveChannelBusy = false;
-    emit liveChannelChanged ();
     drainRadioTxQueue (
-        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
+        nowMs);
   });
 
   m_frequencyPresets = defaultFrequencyPresets ();
@@ -4923,6 +4954,12 @@ bool FT2LinkQmlAdapter::autoBeaconCq () const
 bool FT2LinkQmlAdapter::liveChannelBusy () const
 {
   return isLiveChannelBusy (
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
+}
+
+bool FT2LinkQmlAdapter::liveChannelLbtBusy () const
+{
+  return isLiveChannelLbtBusy (
       static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
 }
 
@@ -9230,8 +9267,8 @@ void FT2LinkDecodeWorker::observeEnergy (std::vector<float> const& chunk,
   m_lastRms = rms;
   m_lastPeak = peak;
 
-  // Same threshold as the main LBT state (applyObservedRxEnergy). Real loopback
-  // captures can be visible on the waterfall but sit just below the old gate.
+  // Keep this threshold sensitive for RX observability: it answers "is audio
+  // reaching the decoder?", not "is the channel too busy to transmit?".
   bool const wasBusy = busyNow (nowMs);
   if (rms >= kFt2LinkBusyRmsThreshold || peak >= kFt2LinkBusyPeakThreshold)
     {
@@ -21003,6 +21040,11 @@ bool FT2LinkQmlAdapter::isLiveChannelBusy (quint64 nowMs) const
   return m_liveChannelBusy && nowMs < m_liveChannelBusyUntilMs;
 }
 
+bool FT2LinkQmlAdapter::isLiveChannelLbtBusy (quint64 nowMs) const
+{
+  return m_liveChannelLbtBusy && nowMs < m_liveChannelLbtBusyUntilMs;
+}
+
 void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
                                                double peak,
                                                quint64 nowMs)
@@ -21013,8 +21055,12 @@ void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
 
   bool const energyBusy = rms >= kFt2LinkBusyRmsThreshold
       || peak >= kFt2LinkBusyPeakThreshold;
+  bool const lbtEnergyBusy = rms >= kFt2LinkLbtBusyRmsThreshold
+      || peak >= kFt2LinkLbtBusyPeakThreshold;
   quint64 const previousBusyUntil = m_liveChannelBusyUntilMs;
   bool const previousBusy = isLiveChannelBusy (nowMs);
+  quint64 const previousLbtBusyUntil = m_liveChannelLbtBusyUntilMs;
+  bool const previousLbtBusy = isLiveChannelLbtBusy (nowMs);
   if (energyBusy && !previousBusy)
     {
       // Osservabilita RX: fronte di salita del canale (silenzio -> energia).
@@ -21030,16 +21076,50 @@ void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
       m_liveChannelBusyUntilMs = std::max (
           m_liveChannelBusyUntilMs, nowMs + kFt2LinkBusyHoldMs);
       m_liveChannelBusy = true;
-      m_liveChannelTimer.start (
-          static_cast<int> (std::min<quint64> (
-              m_liveChannelBusyUntilMs > nowMs
-              ? m_liveChannelBusyUntilMs - nowMs
-              : 1u,
-              2147483647u)));
     }
   else if (nowMs >= m_liveChannelBusyUntilMs)
     {
       m_liveChannelBusy = false;
+    }
+  if (lbtEnergyBusy)
+    {
+      m_liveChannelLbtBusyUntilMs = std::max (
+          m_liveChannelLbtBusyUntilMs, nowMs + kFt2LinkBusyHoldMs);
+      m_liveChannelLbtBusy = true;
+      if (!previousLbtBusy)
+        {
+          logFt2LinkDiagnostic (
+              QStringLiteral (
+                  "[Ft2Link][LBTBUSY] rms=%1 peak=%2 rmsThr=%3 peakThr=%4"
+                  " holdMs=%5")
+                  .arg (rms, 0, 'f', 4)
+                  .arg (peak, 0, 'f', 4)
+                  .arg (kFt2LinkLbtBusyRmsThreshold, 0, 'f', 4)
+                  .arg (kFt2LinkLbtBusyPeakThreshold, 0, 'f', 4)
+                  .arg (kFt2LinkBusyHoldMs));
+        }
+    }
+  else if (nowMs >= m_liveChannelLbtBusyUntilMs)
+    {
+      m_liveChannelLbtBusy = false;
+    }
+  quint64 nextTimerUntil = 0u;
+  if (m_liveChannelBusy && m_liveChannelBusyUntilMs > nowMs)
+    {
+      nextTimerUntil = m_liveChannelBusyUntilMs;
+    }
+  if (m_liveChannelLbtBusy && m_liveChannelLbtBusyUntilMs > nowMs)
+    {
+      nextTimerUntil = nextTimerUntil == 0u
+          ? m_liveChannelLbtBusyUntilMs
+          : std::min (nextTimerUntil, m_liveChannelLbtBusyUntilMs);
+    }
+  if (nextTimerUntil != 0u)
+    {
+      m_liveChannelTimer.start (
+          static_cast<int> (std::min<quint64> (
+              nextTimerUntil > nowMs ? nextTimerUntil - nowMs : 1u,
+              2147483647u)));
     }
 
   bool const rmsChanged = std::fabs (m_liveChannelRms - rms) > 0.0005;
@@ -21047,7 +21127,9 @@ void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
   m_liveChannelRms = rms;
   m_liveChannelPeak = peak;
   if (previousBusy != isLiveChannelBusy (nowMs)
+      || previousLbtBusy != isLiveChannelLbtBusy (nowMs)
       || previousBusyUntil != m_liveChannelBusyUntilMs
+      || previousLbtBusyUntil != m_liveChannelLbtBusyUntilMs
       || rmsChanged
       || peakChanged)
     {
@@ -21126,7 +21208,7 @@ bool FT2LinkQmlAdapter::requestControlRadioTx (Frame const& frame,
               .arg (samples.size ())
               .arg (m_radioTxBusyUntilMs > nowMs ? 1 : 0)
               .arg (m_radioTxQueue.size ())
-              .arg (isLiveChannelBusy (nowMs) ? 1 : 0)
+              .arg (isLiveChannelLbtBusy (nowMs) ? 1 : 0)
               .arg (turnaroundDelayMs));
     }
 
@@ -21249,7 +21331,7 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
     }
   m_nextRadioTxStrictLbt = false;
   m_nextRadioTxStrictLbtCancelMs = 24000;
-  bool const channelBusy = isLiveChannelBusy (effectiveNow);
+  bool const channelBusy = isLiveChannelLbtBusy (effectiveNow);
   bool const deferBroadcast = shouldDeferBroadcastTx (
       item.plan, item.sessionId);
   if (m_radioTxQueue.empty () && m_radioTxBusyUntilMs <= effectiveNow
@@ -21281,7 +21363,7 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
       item.plan.insert (QStringLiteral ("channelBusyUntilMs"),
                         QVariant::fromValue<qulonglong> (
                             static_cast<qulonglong> (
-                                m_liveChannelBusyUntilMs)));
+                                m_liveChannelLbtBusyUntilMs)));
       setTransportState (QStringLiteral ("LBT wait"));
     }
   if (deferBroadcast)
@@ -21419,7 +21501,7 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
       scheduleRadioQueueDrain (effectiveNow);
       return;
     }
-  bool lbtBusy = isLiveChannelBusy (effectiveNow);
+  bool lbtBusy = isLiveChannelLbtBusy (effectiveNow);
   if (lbtBusy && !m_radioTxQueue.empty ())
     {
       bool cancelledStrict = false;
@@ -21435,7 +21517,7 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
                       " session=%2 busyUntil=%3")
                       .arg (it->displayMessage)
                       .arg (it->sessionId)
-                      .arg (m_liveChannelBusyUntilMs));
+                      .arg (m_liveChannelLbtBusyUntilMs));
               setLastError (
                   QStringLiteral (
                       "FT2-Link TX cancelled: channel stayed busy"));
@@ -21577,9 +21659,9 @@ void FT2LinkQmlAdapter::scheduleRadioQueueDrain (quint64 nowMs)
       ? static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ())
       : nowMs;
   quint64 readyAtMs = m_radioTxBusyUntilMs;
-  if (isLiveChannelBusy (effectiveNow))
+  if (isLiveChannelLbtBusy (effectiveNow))
     {
-      readyAtMs = std::max (readyAtMs, m_liveChannelBusyUntilMs);
+      readyAtMs = std::max (readyAtMs, m_liveChannelLbtBusyUntilMs);
     }
   quint64 const delayMs = readyAtMs > effectiveNow
       ? readyAtMs - effectiveNow

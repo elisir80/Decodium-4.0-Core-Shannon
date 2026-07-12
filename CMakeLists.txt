@@ -1137,15 +1137,21 @@ if(WSJT_BUILD_UTILS)
 add_executable (q65sim utils/q65sim.cpp)
 link_wsjtx_cycle_group (q65sim wsjt_qt wsjt_cxx wsjt_fort)
 
-add_executable (EchoCallSim
-  utils/EchoCallSim.cpp
-  utils/EchoToolSupport.cpp)
-link_wsjtx_cycle_group (EchoCallSim wsjt_qt wsjt_cxx wsjt_fort)
+if (EXISTS ${CMAKE_SOURCE_DIR}/utils/EchoCallSim.cpp
+    AND EXISTS ${CMAKE_SOURCE_DIR}/utils/EchoToolSupport.cpp)
+  add_executable (EchoCallSim
+    utils/EchoCallSim.cpp
+    utils/EchoToolSupport.cpp)
+  link_wsjtx_cycle_group (EchoCallSim wsjt_qt wsjt_cxx wsjt_fort)
+endif ()
 
-add_executable (testEchoCall
-  utils/testEchoCall.cpp
-  utils/EchoToolSupport.cpp)
-link_wsjtx_cycle_group (testEchoCall wsjt_qt wsjt_cxx wsjt_fort)
+if (EXISTS ${CMAKE_SOURCE_DIR}/utils/testEchoCall.cpp
+    AND EXISTS ${CMAKE_SOURCE_DIR}/utils/EchoToolSupport.cpp)
+  add_executable (testEchoCall
+    utils/testEchoCall.cpp
+    utils/EchoToolSupport.cpp)
+  link_wsjtx_cycle_group (testEchoCall wsjt_qt wsjt_cxx wsjt_fort)
+endif ()
 
 add_executable (q65code utils/q65code.cpp)
 link_wsjtx_cycle_group (q65code wsjt_qt wsjt_cxx wsjt_fort)
@@ -1224,10 +1230,13 @@ link_wsjtx_cycle_group (ft8code wsjt_qt wsjt_cxx wsjt_fort)
 add_executable (ft4code utils/ft4code.cpp)
 link_wsjtx_cycle_group (ft4code wsjt_qt wsjt_cxx wsjt_fort)
 
-add_executable (echosim
-  utils/echosim.cpp
-  utils/EchoToolSupport.cpp)
-link_wsjtx_cycle_group (echosim wsjt_qt wsjt_cxx wsjt_fort)
+if (EXISTS ${CMAKE_SOURCE_DIR}/utils/echosim.cpp
+    AND EXISTS ${CMAKE_SOURCE_DIR}/utils/EchoToolSupport.cpp)
+  add_executable (echosim
+    utils/echosim.cpp
+    utils/EchoToolSupport.cpp)
+  link_wsjtx_cycle_group (echosim wsjt_qt wsjt_cxx wsjt_fort)
+endif ()
 
 add_executable (ft8sim utils/ft8sim.cpp)
 link_wsjtx_cycle_group (ft8sim wsjt_qt wsjt_cxx wsjt_fort)
@@ -2067,10 +2076,18 @@ install (TARGETS wsprd
   )
 
 if(WSJT_BUILD_UTILS)
-install (TARGETS jt9 fmtave fcal fmeasure
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
-  BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
-  )
+  set(_wsjt_optional_install_targets)
+  foreach(_wsjt_optional_target IN ITEMS jt9 fmtave fcal fmeasure)
+    if(TARGET ${_wsjt_optional_target})
+      list(APPEND _wsjt_optional_install_targets ${_wsjt_optional_target})
+    endif()
+  endforeach()
+  if(_wsjt_optional_install_targets)
+    install (TARGETS ${_wsjt_optional_install_targets}
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+      BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+      )
+  endif()
 endif(WSJT_BUILD_UTILS)
 
 install (PROGRAMS

@@ -97,8 +97,11 @@ void parkSoundOutputCoreAudioSink(QAudioSink *stream, QString const& reason)
   if (!stream) {
     return;
   }
-  QObject *context = QCoreApplication::instance();
-  stream->setParent(context);
+  // Qt 6/CoreAudio can crash inside QCoreAudioSinkStream::stopAudioUnit()
+  // while a retired sink is being destroyed. Do not parent parked macOS sinks
+  // to the application object and do not delete them during runtime; the OS
+  // reclaims them when the process exits.
+  stream->setParent(nullptr);
 
   QList<QPointer<QAudioSink>>& sinks = parkedSoundOutputCoreAudioSinks();
   for (int i = sinks.size() - 1; i >= 0; --i) {
@@ -107,16 +110,9 @@ void parkSoundOutputCoreAudioSink(QAudioSink *stream, QString const& reason)
     }
   }
 
-  static constexpr int kMaxParkedSoundOutputCoreAudioSinks = 12;
   sinks.append(QPointer<QAudioSink>(stream));
-  while (sinks.size() > kMaxParkedSoundOutputCoreAudioSinks) {
-    QPointer<QAudioSink> old = sinks.takeFirst();
-    if (!old || old.data() == stream) {
-      continue;
-    }
-    old->disconnect();
-    old->deleteLater();
-    qInfo() << "TX SoundOutput CoreAudio parked sink cap reached; released oldest parked sink:"
+  if ((sinks.size() % 16) == 0) {
+    qInfo() << "TX SoundOutput CoreAudio parked sinks retained:"
             << reason
             << "count=" << sinks.size();
   }
@@ -302,22 +298,6 @@ void SoundOutput::restart(QIODevice* source)
   m_pendingWrite.clear();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-#if defined(Q_OS_MAC)
-  if (m_stream && m_coreAudioKeepAlive) {
-    qInfo().noquote() << "[TX-TL] sound_output_restart"
-                      << "reuse=0"
-                      << "reason=parked_keepalive_recreate"
-                      << "state=" << audioStateName(m_stream->state())
-                      << "error=" << audioErrorName(m_stream->error())
-                      << "pending_bytes=" << m_pendingWrite.size()
-                      << "dev=" << m_device.description();
-    m_streamDevice.clear();
-    m_sourceDevice.clear();
-    m_pendingWrite.clear();
-    m_coreAudioKeepAlive = false;
-    retireStream(QStringLiteral("restart-parked-keepalive"));
-  }
-#endif
   if (m_stream
       && !m_streamDevice.isNull()
       && m_openDeviceId == m_device.id()

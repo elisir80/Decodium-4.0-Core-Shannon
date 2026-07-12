@@ -119,42 +119,16 @@ target_compile_definitions (ft2link_rflab_corpus
 
 if (WSJT_BUILD_UTILS)
   # CLI smoke tests for utility binaries that are built in the main project.
-  add_test (NAME test_q65_usage COMMAND $<TARGET_FILE:test_q65>)
-  set_tests_properties (test_q65_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME test_snr_usage COMMAND $<TARGET_FILE:test_snr>)
-  set_tests_properties (test_snr_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME testEchoCall_usage COMMAND $<TARGET_FILE:testEchoCall>)
-  set_tests_properties (testEchoCall_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME encode77_usage COMMAND $<TARGET_FILE:encode77>)
-  set_tests_properties (encode77_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME hash22calc_usage COMMAND $<TARGET_FILE:hash22calc>)
-  set_tests_properties (hash22calc_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:|Given a valid callsign")
-
-  add_test (NAME msk144code_usage COMMAND $<TARGET_FILE:msk144code>)
-  set_tests_properties (msk144code_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME msk144sim_usage COMMAND $<TARGET_FILE:msk144sim>)
-  set_tests_properties (msk144sim_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME fst4sim_usage COMMAND $<TARGET_FILE:fst4sim>)
-  set_tests_properties (fst4sim_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME ldpcsim240_101_usage COMMAND $<TARGET_FILE:ldpcsim240_101>)
-  set_tests_properties (ldpcsim240_101_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME ldpcsim240_74_usage COMMAND $<TARGET_FILE:ldpcsim240_74>)
-  set_tests_properties (ldpcsim240_74_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME sfoxsim_usage COMMAND $<TARGET_FILE:sfoxsim>)
-  set_tests_properties (sfoxsim_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME sfrx_usage COMMAND $<TARGET_FILE:sfrx>)
-  set_tests_properties (sfrx_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
-
-  add_test (NAME sftx_usage COMMAND $<TARGET_FILE:sftx>)
-  set_tests_properties (sftx_usage PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
+  foreach(_utility_usage_target IN ITEMS
+      test_q65 test_snr testEchoCall encode77 hash22calc msk144code msk144sim
+      fst4sim ldpcsim240_101 ldpcsim240_74 sfoxsim sfrx sftx)
+    if(TARGET ${_utility_usage_target})
+      set(_usage_regex "Usage:")
+      if(_utility_usage_target STREQUAL "hash22calc")
+        set(_usage_regex "Usage:|Given a valid callsign")
+      endif()
+      add_test (NAME ${_utility_usage_target}_usage COMMAND $<TARGET_FILE:${_utility_usage_target}>)
+      set_tests_properties (${_utility_usage_target}_usage PROPERTIES PASS_REGULAR_EXPRESSION "${_usage_regex}")
+    endif()
+  endforeach()
 endif ()

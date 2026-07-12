@@ -3935,7 +3935,7 @@ Rectangle {
     function slotSnifferBusyReason(requireSlotClear) {
         if (ft2Link && ft2Link.transportBusy)
             return "TX busy"
-        if (ft2Link && ft2Link.liveChannelBusy)
+        if (ft2Link && ft2Link.liveChannelLbtBusy)
             return "channel busy"
         if (requireSlotClear && cqSlotBusy())
             return "slot busy"
@@ -3976,7 +3976,6 @@ Rectangle {
         slotSnifferUntilMs = now + slotSnifferSeconds * 1000
         slotSnifferDeadlineMs = now + Math.max(slotSnifferSeconds * 3, 24) * 1000
         slotSnifferStatus = "SNIFF " + slotSnifferLabel
-        slotSnifferTimer.restart()
         continueSlotSniffer()
         return true
     }
@@ -4363,7 +4362,7 @@ Rectangle {
     }
 
     function radioLine() {
-        var lbt = ft2Link && ft2Link.liveChannelBusy ? "  LBT BUSY" : ""
+        var lbt = ft2Link && ft2Link.liveChannelLbtBusy ? "  LBT BUSY" : ""
         var guard = callingFrequencyGuard("RF TX")
         var cf = guard && guard.blocked ? "  CF GUARD" : ""
         return "RADIO " + String(radioMetric("profileName", "--"))

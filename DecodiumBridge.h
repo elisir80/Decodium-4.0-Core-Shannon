@@ -136,6 +136,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(DecodeListModel* rxDecodeModel READ rxDecodeModel CONSTANT)
     Q_PROPERTY(QVariantList rxDecodeList READ rxDecodeList NOTIFY rxDecodeListChanged)
     Q_PROPERTY(int periodProgress READ periodProgress NOTIFY periodProgressChanged)
+    Q_PROPERTY(int periodMilliseconds READ periodMilliseconds NOTIFY periodMillisecondsChanged)
     Q_PROPERTY(QString utcTime READ utcTime NOTIFY utcTimeChanged)
 
     // === TX MESSAGES ===
@@ -566,6 +567,7 @@ public:
     QVariantList decodeList() const;
     QVariantList rxDecodeList() const;
     int periodProgress() const;
+    int periodMilliseconds() const;
     QString utcTime() const;
 
     // TX Messages
@@ -1459,6 +1461,7 @@ signals:
     void worldMapContactAddedByLonLat(const QString& call, double sourceLon, double sourceLat, const QString& destinationGrid, int role);
     void worldMapContactDowngraded(const QString& call);
     void periodProgressChanged();
+    void periodMillisecondsChanged();
     void utcTimeChanged();
     void tx1Changed(); void tx2Changed(); void tx3Changed();
     void tx4Changed(); void tx5Changed(); void tx6Changed();
@@ -1939,6 +1942,7 @@ private:
     bool isDirectedToLocalHashFromActivePartner(const QString& message,
                                                 QString* partnerOut = nullptr) const;
     bool isDirectedActivePartnerSignoffDecode(const QStringList& fields) const;
+    bool signoffDecodeWatchActive() const;
     void armFt2AutoCqAwaitingPartnerDecode(int txNum, const QString& reason);
     void clearFt2AutoCqAwaitingPartnerDecode(const QString& reason);
     void armFt2AutoCqOneShotAfterCompletedTx(int txNum, const QString& reason);
@@ -3539,25 +3543,38 @@ private:
         QString const normalizedMode = mode.trimmed().toUpper();
         if (normalizedMode=="FT2-LINK" || normalizedMode=="FT2LINK") return 15000;
         if (normalizedMode=="FT2") return 3750;
-        if (mode=="FT4")      return 7500;
-        if (mode=="Q65")      return 60000;
-        if (mode=="MSK144")   return 15000;
-        if (mode=="WSPR")     return 120000;
-        if (mode=="JT65")     return 60000;
-        if (mode=="JT9")      return 60000;
-        if (mode=="JT4")      return 60000;
-        if (mode=="FST4")     return 60000;
-        if (mode=="FST4W")    return 120000;
+        if (normalizedMode=="FT4")      return 7500;
+        if (normalizedMode=="Q65")      return 60000;
+        if (normalizedMode.startsWith("Q65-")) {
+            int end = 4;
+            while (end < normalizedMode.size() && normalizedMode.at(end).isDigit()) {
+                ++end;
+            }
+            bool ok = false;
+            int const trPeriod = normalizedMode.mid(4, end - 4).toInt(&ok);
+            if (ok && (trPeriod == 15 || trPeriod == 30 || trPeriod == 60
+                       || trPeriod == 120 || trPeriod == 300)) {
+                return trPeriod * 1000;
+            }
+            return 60000;
+        }
+        if (normalizedMode=="MSK144")   return 15000;
+        if (normalizedMode=="WSPR")     return 120000;
+        if (normalizedMode=="JT65")     return 60000;
+        if (normalizedMode=="JT9")      return 60000;
+        if (normalizedMode=="JT4")      return 60000;
+        if (normalizedMode=="FST4")     return 60000;
+        if (normalizedMode=="FST4W")    return 120000;
         // C12 — FST4/FST4W multi-period
-        if (mode=="FST4-15")  return 15000;
-        if (mode=="FST4-30")  return 30000;
-        if (mode=="FST4-60")  return 60000;
-        if (mode=="FST4-120") return 120000;
-        if (mode=="FST4-300") return 300000;
-        if (mode=="FST4-900") return 900000;
-        if (mode=="FST4W-120") return 120000;
-        if (mode=="FST4W-300") return 300000;
-        if (mode=="FST4W-900") return 900000;
+        if (normalizedMode=="FST4-15")  return 15000;
+        if (normalizedMode=="FST4-30")  return 30000;
+        if (normalizedMode=="FST4-60")  return 60000;
+        if (normalizedMode=="FST4-120") return 120000;
+        if (normalizedMode=="FST4-300") return 300000;
+        if (normalizedMode=="FST4-900") return 900000;
+        if (normalizedMode=="FST4W-120") return 120000;
+        if (normalizedMode=="FST4W-300") return 300000;
+        if (normalizedMode=="FST4W-900") return 900000;
         return 15000;  // FT8 default
     }
     void updateSoundOutputDevice();

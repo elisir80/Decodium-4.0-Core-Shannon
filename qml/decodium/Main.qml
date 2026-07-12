@@ -889,7 +889,7 @@ ApplicationWindow {
             id: fsExitRow
             anchors.centerIn: parent
             spacing: 10
-            Text { text: qsTr("Schermo intero"); color: "#ffffff"; font.pixelSize: 12; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: qsTr("Full screen"); color: "#ffffff"; font.pixelSize: 12; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             Text { text: "F11 / Esc"; color: textSecondary; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
             Rectangle {
                 width: 24; height: 24; radius: 12
@@ -6657,7 +6657,48 @@ ApplicationWindow {
                     property string normalizedMode: bridge ? String(bridge.mode || "").toUpperCase() : ""
                     property bool ft2LinkPeriodMode: normalizedMode === "FT2-LINK" || normalizedMode === "FT2LINK"
                     property bool ft2CadenceMode: normalizedMode === "FT2"
-                    property real periodLength: ft2CadenceMode ? 3.75 : (ft2LinkPeriodMode ? 15 : (bridge.mode === "FT4" ? 7.5 : (bridge.mode === "WSPR" ? 120 : 15)))
+                    function configuredPeriodSeconds() {
+                        var ms = bridge ? Number(bridge.periodMilliseconds || 0) : 0
+                        if (ms > 0)
+                            return ms / 1000.0
+                        if (ft2CadenceMode)
+                            return 3.75
+                        if (ft2LinkPeriodMode)
+                            return 15
+                        if (normalizedMode === "FT4")
+                            return 7.5
+                        if (normalizedMode === "WSPR")
+                            return 120
+                        if (normalizedMode.indexOf("Q65") === 0)
+                            return 60
+                        return 15
+                    }
+                    function txDurationSecondsForMode() {
+                        var period = configuredPeriodSeconds()
+                        if (ft2CadenceMode)
+                            return 2.87
+                        if (ft2LinkPeriodMode)
+                            return 10.0
+                        if (normalizedMode === "FT4")
+                            return 5.04
+                        if (normalizedMode === "WSPR")
+                            return 110.6
+                        if (normalizedMode.indexOf("Q65") === 0) {
+                            if (period <= 15.5)
+                                return 0.5 + (85 * 1800 / 12000.0)
+                            if (period <= 30.5)
+                                return 0.5 + (85 * 3600 / 12000.0)
+                            if (period <= 60.5)
+                                return 1.0 + (85 * 7200 / 12000.0)
+                            if (period <= 120.5)
+                                return 1.0 + (85 * 16000 / 12000.0)
+                            if (period <= 300.5)
+                                return 1.0 + (85 * 41472 / 12000.0)
+                            return Math.min(period, 52.0)
+                        }
+                        return 12.64
+                    }
+                    property real periodLength: configuredPeriodSeconds()
 
                     // IU8LMC: Reactive property for all decodes (Band Activity)
                     property bool showTxMessagesInRx: mainWindow.showTxMessagesInRx
@@ -7178,7 +7219,7 @@ ApplicationWindow {
                         border.width: 1
 
                         property real periodLen: decodePanel.periodLength
-                        property real txDuration: decodePanel.ft2CadenceMode ? 2.87 : (decodePanel.ft2LinkPeriodMode ? 10.0 : (bridge.mode === "FT4" ? 5.04 : (bridge.mode === "WSPR" ? 110.6 : 12.64)))
+                        property real txDuration: decodePanel.txDurationSecondsForMode()
                         property real progress: 0.0
                         property real secInPeriod: 0.0
                         property bool isTxPhase: !!(bridge && bridge.transmitting)
