@@ -183,8 +183,8 @@ Item {
     // unica con holdTimer (click-vs-drag) + ghost proxy + snap magnetico.
     // Il Mode selector NON è nel modello (resta primo elemento fisso).
     // 1.0.388 — aggiunto "cqfilter" (selettore livello filtro CQ) accanto a "tune", movibile come gli altri.
-    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,cqfilter,async,hound,waitpounce"
-    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","cqfilter","async","hound","waitpounce"]
+    readonly property string uiTxPanelOrderDefault: "mam,deep,ap,seq,quickqso,enabletx,holdfreq,autocq,call,txphase,alt12,halt,clear,tune,cqfilter,async,hound"
+    readonly property var uiTxPanelKnownIds: ["mam","deep","ap","seq","quickqso","enabletx","holdfreq","autocq","call","txphase","alt12","halt","clear","tune","cqfilter","async","hound"]
     property var uiTxPanelOrder: parseTxPanelOrder(String(bridge.getSetting("uiTxPanelOrder", "") || ""))
 
     // Parsa il CSV salvato in una lista di id; ripristina il default se assente/corrotto.
@@ -379,8 +379,7 @@ Item {
         "clear": true,
         "cqfilter": true,
         "async": true,
-        "hound": true,
-        "waitpounce": true
+        "hound": true
     })
 
     function txPanelButtonVisible(buttonId, defaultVisible) {
@@ -779,7 +778,6 @@ Item {
                                     case "cqfilter":  return comp_cqfilter
                                     case "async":     return comp_async
                                     case "hound":     return comp_hound
-                                    case "waitpounce":return comp_waitpounce
                                     default:          return null
                                 }
                             }
@@ -1421,36 +1419,6 @@ Item {
                                     font.family: decodiumMonoFontFamily
                                     font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                     font.bold: true
-                                }
-                            }
-                        }
-
-                        // W&P toggle
-                        Component {
-                            id: comp_waitpounce
-                            Rectangle {
-                                property bool hovered: false
-                                readonly property bool btnVisible: true
-                                readonly property bool active: engine && engine.waitPounceActive
-                                readonly property real prefWidth: txPanel.toolbarActionWidth("W&P", "")
-                                readonly property string tip: active
-                                      ? qsTr("Wait & Pounce is active\nClick to disable")
-                                      : qsTr("Wait & Pounce\nClick to answer filtered CQ decodes only when TX/CQ is armed")
-                                function activate(mouse) {
-                                    if (engine)
-                                        engine.waitPounceActive = !engine.waitPounceActive
-                                }
-                                radius: 5
-                                color: active ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.28)
-                                              : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, hovered ? 0.12 : 0.06)
-                                border.color: active ? secondaryCyan : (hovered ? secondaryCyan : glassBorder)
-                                border.width: active ? 2 : 1
-                                ToolbarButtonContent {
-                                    anchors.fill: parent
-                                    label: "W&P"
-                                    foreground: parent.active ? secondaryCyan : textPrimary
-                                    labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.active
                                 }
                             }
                         }

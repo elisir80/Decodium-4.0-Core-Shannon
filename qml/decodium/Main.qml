@@ -1903,6 +1903,7 @@ ApplicationWindow {
     property string warningDialogSummary: ""
     property string warningDialogDetails: ""
     property bool warningDialogDetailsVisible: false
+    property bool catFailureDialogShown: false
 
     property bool txPanelDockHighlighted: false
 
@@ -10155,19 +10156,13 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                     return
             }
             console.error("[Bridge ERROR]", msg)
+
             // Estrai prefisso "Sorgente: dettaglio" per titolo specifico
             // (es. "DX Cluster: Cannot send spot..." → title=DX Cluster, summary=Cannot send spot...)
             var prefixMatch = String(msg).match(/^([^:]{1,40}):\s*([\s\S]+)$/)
-            if (prefixMatch) {
-                warningDialogTitle = prefixMatch[1].trim()
-                warningDialogSummary = prefixMatch[2].trim()
-            } else {
-                warningDialogTitle = "Error"
-                warningDialogSummary = msg
-            }
-            warningDialogDetails = ""
-            warningDialogDetailsVisible = false
-            warningDialog.open()
+            var title = prefixMatch ? prefixMatch[1].trim() : "Error"
+            var summary = prefixMatch ? prefixMatch[2].trim() : String(msg)
+            mainWindow.openWarningDialog(title, summary, "")
         }
         function onWarningRaised(title, summary, details) {
             // Quando il CAT nativo gestisce il rig, i warning Hamlib dal legacy
@@ -10186,11 +10181,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                     lower.indexOf("com ") >= 0 || lower.indexOf("timed out") >= 0)
                     return
             }
-            warningDialogTitle = title
-            warningDialogSummary = summary
-            warningDialogDetails = details
-            warningDialogDetailsVisible = details.length > 0
-            warningDialog.open()
+            mainWindow.openWarningDialog(title, summary, details)
         }
         function onTimeSyncSettingsRequested() {
             timeSyncPanelVisible = true
@@ -10215,10 +10206,36 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         }
     }
 
+    function warningLooksLikeCatFailure(title, summary, details) {
+        var lower = (String(title) + " " + String(summary) + " " + String(details)).toLowerCase()
+        return lower.indexOf("cat failure") >= 0
+                || lower.indexOf("comunicazione cat") >= 0
+                || (lower.indexOf("hamlib") >= 0
+                    && (lower.indexOf("communication") >= 0
+                        || lower.indexOf("timed out") >= 0
+                        || lower.indexOf("bus error") >= 0))
+    }
+
+    function openWarningDialog(title, summary, details) {
+        var safeDetails = details || ""
+        if (warningLooksLikeCatFailure(title, summary, safeDetails)) {
+            if (catFailureDialogShown)
+                return
+            catFailureDialogShown = true
+        }
+        warningDialogTitle = title || "Error"
+        warningDialogSummary = summary || ""
+        warningDialogDetails = safeDetails
+        warningDialogDetailsVisible = false
+        if (warningDialog.visible)
+            warningDialog.close()
+        warningDialog.open()
+    }
+
     Dialog {
         id: warningDialog
         modal: true
-        width: Math.max(360, Math.min(parent ? parent.width - 48 : 560, 620))
+        width: Math.max(420, Math.min(parent ? parent.width - 48 : 640, 760))
         anchors.centerIn: parent
         closePolicy: Popup.NoAutoClose
         title: warningDialogTitle
@@ -10293,7 +10310,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         }
 
         contentItem: ColumnLayout {
-            spacing: 14
+            spacing: 16
 
             Text {
                 Layout.fillWidth: true
@@ -10346,37 +10363,41 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                     }
                 }
             }
-        }
 
-        footer: DialogButtonBox {
-            alignment: Qt.AlignRight
-            background: Rectangle {
-                color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.72)
-                radius: 8
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: glassBorder
             }
 
-            Button {
-                text: "OK"
-                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-                onClicked: warningDialog.close()
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
 
-                contentItem: Text {
-                    text: parent.text
-                    color: textPrimary
-                    font.pixelSize: 13
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
+                Item { Layout.fillWidth: true }
 
-                background: Rectangle {
-                    implicitWidth: 112
-                    implicitHeight: 38
-                    color: parent.hovered ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
-                                          : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
-                    border.color: secondaryCyan
-                    border.width: 1
-                    radius: 8
+                Button {
+                    text: "OK"
+                    Layout.preferredWidth: 128
+                    Layout.preferredHeight: 40
+                    onClicked: warningDialog.close()
+
+                    contentItem: Text {
+                        text: parent.text
+                        color: textPrimary
+                        font.pixelSize: 14
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: parent.hovered ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.22)
+                                              : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
+                        border.color: secondaryCyan
+                        border.width: 1
+                        radius: 8
+                    }
                 }
             }
         }
