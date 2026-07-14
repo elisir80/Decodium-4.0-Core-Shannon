@@ -2005,6 +2005,7 @@ int main(int argc, char* argv[])
                 bridge.setTxOutputLevel(labTxOutputLevel);
                 active = true;
             }
+            bool modeAppliedWithDial = false;
             if (!labMode.isEmpty()) {
                 if (labMode.compare(QStringLiteral("FT2-Link"), Qt::CaseInsensitive) == 0
                     && !bridge.ft2LinkAccessUnlocked()) {
@@ -2016,12 +2017,18 @@ int main(int argc, char* argv[])
                         qInfo() << "[LAB] FT2-Link lab mode requested without DECODIUM_FT2LINK_LAB_PASSWORD";
                     }
                 }
-                bridge.setMode(labMode);
+                if (labDialHz > 0 && labDialOverrideActive
+                    && *labDialOverrideActive) {
+                    bridge.qsyTo(static_cast<double>(labDialHz), labMode);
+                    modeAppliedWithDial = true;
+                } else {
+                    bridge.setMode(labMode);
+                }
                 active = true;
             }
             if (labDialHz > 0 && labDialOverrideActive
-                && *labDialOverrideActive) {
-                bridge.setFrequency(static_cast<double>(labDialHz));
+                && *labDialOverrideActive && !modeAppliedWithDial) {
+                bridge.qsyTo(static_cast<double>(labDialHz), QString());
                 active = true;
             }
             if (!labDxCall.isEmpty()) {

@@ -2247,6 +2247,7 @@ private:
     QString m_mapLastClickCall;
     qint64 m_mapLastClickMs {0};
     int m_periodProgress {0};
+    int m_lastPublishedPeriodMilliseconds {0};
     QString m_utcTime;
     QString m_tx1, m_tx2, m_tx3, m_tx4, m_tx5, m_tx6;
     int m_currentTx {1};
@@ -2608,6 +2609,7 @@ private:
         QString mode;
         QString message;
         int txAudioFrequency {0};
+        int periodMs {0};
         bool tciAudio {false};
         QString outputDeviceName;
         QString outputDeviceDescription;
@@ -3539,6 +3541,7 @@ private:
     void scheduleDeferredAutoTxAfterTimeSyncDecode(const QString& modeSnapshot,
                                                   quint64 sessionId);
     void autoSequenceStep(const QStringList& parsedFields);
+    int effectivePeriodMsForMode(const QString& mode) const;
     static int periodMsForMode(const QString& mode) {
         QString const normalizedMode = mode.trimmed().toUpper();
         if (normalizedMode=="FT2-LINK" || normalizedMode=="FT2LINK") return 15000;

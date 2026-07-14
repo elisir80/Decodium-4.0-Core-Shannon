@@ -707,6 +707,11 @@ QString DecodiumLegacyBackend::mode() const
     return m_mainWindow ? m_mainWindow->legacyMode() : QString {};
 }
 
+int DecodiumLegacyBackend::trPeriodSeconds() const
+{
+    return m_mainWindow ? m_mainWindow->legacyTrPeriodSeconds() : 0;
+}
+
 QString DecodiumLegacyBackend::rigName() const
 {
     return m_mainWindow ? m_mainWindow->legacyRigName() : QString {};

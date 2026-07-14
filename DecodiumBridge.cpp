@@ -2236,7 +2236,10 @@ static bool bridgeTxPeriodIsEven(int txPeriod)
     return txPeriod != 0;
 }
 
-static int replyTxPeriodForClickedDecode(QString const& mode, QString const& timeStr, int fallbackTxPeriod)
+static int replyTxPeriodForClickedDecode(QString const& mode,
+                                         QString const& timeStr,
+                                         int fallbackTxPeriod,
+                                         int configuredPeriodMs = 0)
 {
     int const msgSecond = secondsFromUtcDisplayToken(timeStr);
     if (msgSecond < 0) {
@@ -2261,7 +2264,7 @@ static int replyTxPeriodForClickedDecode(QString const& mode, QString const& tim
     if (normalizedMode == QStringLiteral("FT2")) {
         pMs = 3750;
     } else if (normalizedMode == QStringLiteral("MSK144")) {
-        pMs = 15000;
+        pMs = configuredPeriodMs > 0 ? configuredPeriodMs : 15000;
     }
     if (pMs <= 0) {
         return fallbackTxPeriod != 0 ? 1 : 0;
@@ -3765,6 +3768,74 @@ static bool isPlausibleDecodedCallsign(QString const& token)
         || isSpecialEventStyleCallsign(token);
 }
 
+static int digitRunCount(QString const& token)
+{
+    int runs = 0;
+    bool inDigitRun = false;
+    for (QChar const& ch : token) {
+        if (ch.isDigit()) {
+            if (!inDigitRun) {
+                ++runs;
+                inDigitRun = true;
+            }
+        } else {
+            inDigitRun = false;
+        }
+    }
+    return runs;
+}
+
+static bool isPlausibleFt2CqCallsign(QString const& token)
+{
+    if (isStrictAmateurCallsign(token)) {
+        return true;
+    }
+    if (!isSpecialEventStyleCallsign(token)) {
+        return false;
+    }
+
+    QString const base = Radio::base_callsign(normalizeCallToken(token))
+                             .trimmed()
+                             .toUpper();
+    // FT2 CQ false positives often pass the broad special-event gate as
+    // long letter/digit soup with multiple separated numeric islands
+    // (for example "CQ KS58OQ94M"). Real event calls normally have one
+    // contiguous event number, while normal calls are accepted above.
+    return digitRunCount(base) <= 1;
+}
+
+static bool isCqRoutingModifierToken(QString const& token)
+{
+    QString const upper = normalizeCallToken(token).trimmed().toUpper();
+    if (isDirectedCqModifierToken(upper)) {
+        return true;
+    }
+    static const QRegularExpression numericCqTag {
+        R"(\A[0-9]{3}\z)"
+    };
+    return numericCqTag.match(upper).hasMatch();
+}
+
+static bool isValidFt2CqTrailingPayload(QStringList const& tokens,
+                                        int callIdx,
+                                        QString* reason)
+{
+    for (int i = callIdx + 1; i < tokens.size(); ++i) {
+        QString const token = normalizeCallToken(tokens.at(i)).trimmed().toUpper();
+        if (token == QStringLiteral("?")) {
+            continue;
+        }
+        if (i == callIdx + 1 && isGridTokenStrict(token)) {
+            continue;
+        }
+        if (reason) {
+            *reason = QStringLiteral("FT2 CQ trailing payload invalid (ghost)");
+        }
+        return false;
+    }
+    return true;
+}
+
 static bool hasHighConfidenceGhostPrefix(QString const& callRaw)
 {
     QString call = callRaw.trimmed().toUpper();
@@ -5135,6 +5206,7 @@ static bool bridgeGeneratedTxWaveMode(QString const& mode)
     return normalized == QStringLiteral("FT8")
         || normalized == QStringLiteral("FT4")
         || normalized == QStringLiteral("FT2")
+        || normalized == QStringLiteral("MSK144")
         || normalized == QStringLiteral("Q65")
         || normalized.startsWith(QStringLiteral("Q65-"))
         || normalized == QStringLiteral("WSPR");
@@ -5264,6 +5336,7 @@ static int q65SamplesPerSymbolAt48k(QString const& mode)
 static QVector<float> buildTxWaveformForMessage(QString const& mode,
                                                 QString const& msg,
                                                 int txFrequency,
+                                                double trPeriodSeconds,
                                                 QString* errorOut = nullptr)
 {
     QVector<float> wave;
@@ -5291,6 +5364,23 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
             return {};
         }
         wave = decodium::txwave::generateFt8Wave(enc.tones.constData(), 79, 7680, 2.0f, 48000.0f, freq);
+    } else if (normalizedMode == QStringLiteral("MSK144")) {
+        auto enc = decodium::txmsg::encodeMsk144(msg);
+        if (!enc.ok || enc.tones.isEmpty()) {
+            if (errorOut) *errorOut = QStringLiteral("Codifica MSK144 fallita");
+            return {};
+        }
+        int symbolCount = 144;
+        if (enc.tones.size() > 40 && enc.tones.at(40) < 0) {
+            symbolCount = 40;
+        }
+        if (enc.tones.size() < symbolCount) {
+            if (errorOut) *errorOut = QStringLiteral("Sequenza MSK144 incompleta");
+            return {};
+        }
+        wave = decodium::txwave::generateMsk144Wave(enc.tones.constData(), symbolCount,
+                                                     48000.0f, freq,
+                                                     qBound(5.0, trPeriodSeconds, 60.0));
     } else if (normalizedMode == QStringLiteral("WSPR")) {
         auto enc = decodium::txmsg::encodeWspr(msg);
         if (!enc.ok || enc.tones.size() < 162) {
@@ -5505,6 +5595,7 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bo
     if (mode == QStringLiteral("FT8")
         || mode == QStringLiteral("FT4")
         || mode == QStringLiteral("FT2")
+        || mode == QStringLiteral("MSK144")
         || mode == QStringLiteral("Q65")
         || mode.startsWith(QStringLiteral("Q65-"))) {
         int const d3CapMs = (periodMs * 3) / 4;
@@ -5520,6 +5611,7 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bo
         // accettano shift fino a ~2s; ripristina il "TX immediato al click" stile 1.0.283).
         if (mode == QStringLiteral("FT8")
             || mode == QStringLiteral("FT4")
+            || mode == QStringLiteral("MSK144")
             || mode == QStringLiteral("Q65")
             || mode.startsWith(QStringLiteral("Q65-"))) {
             // 1.0.316 (hotfix Pasquale): 2000ms era troppo stretto — su FT8 (slot 15s)
@@ -5527,7 +5619,12 @@ static int latestD3CompatibleSyncTxStartMs(const QString& mode, int periodMs, bo
             // immediateClickTx ON la finestra sale a d3CapMs (75% slot) = comportamento
             // 1.0.283 reale. Trade-off: click molto tardi (>50% slot) → TX shiftato e
             // il partner potrebbe non decodificare; il toggle è opt-in e l'utente sceglie.
+            // MSK144 fills all but the final 500 ms of its configured T/R
+            // period. A late start therefore crosses into the peer's slot even
+            // though the repeated frame itself may decode. Never relax this
+            // boundary for immediate-click operation.
             int const latestCleanStartMs = immediateClickTx
+                && mode != QStringLiteral("MSK144")
                 ? d3CapMs
                 : (txSyncLeadInMsForMode(mode) + 150);
             return qMax(0, qMin(d3CapMs, latestCleanStartMs));
@@ -10639,6 +10736,8 @@ void DecodiumBridge::syncLegacyBackendState()
         : QString {};
     bool const activeProfileRequested =
         !decodium::activeSettingsProfileName().isEmpty();
+    bool const labStationIdentityOverrideActive =
+        !labCallsign.isEmpty() || !labGrid.isEmpty();
     bool labStationIdentityChanged = false;
     if (!labCallsign.isEmpty()) {
         if (m_callsign != labCallsign) {
@@ -10662,7 +10761,7 @@ void DecodiumBridge::syncLegacyBackendState()
             updateString(m_grid, legacyGrid, [this]() { emit gridChanged(); });
         }
     }
-    if (!labCallsign.isEmpty() || !labGrid.isEmpty()) {
+    if (labStationIdentityOverrideActive) {
         QString const normalizedMode = m_mode.trimmed().toUpper();
         QString const grid4 = m_grid.left(4).toUpper();
         QString const expectedTx6 = normalizedMode == QStringLiteral("WSPR")
@@ -10674,18 +10773,23 @@ void DecodiumBridge::syncLegacyBackendState()
         bool const staleLabTxMessages =
             !expectedTx6.isEmpty()
             && m_tx6.trimmed().compare(expectedTx6, Qt::CaseInsensitive) != 0;
-        if (labStationIdentityChanged || staleLabTxMessages) {
+        bool const staleLegacyLabTxMessages =
+            !expectedTx6.isEmpty()
+            && m_legacyBackend->txMessage(6).trimmed().compare(
+                   expectedTx6, Qt::CaseInsensitive) != 0;
+        if (labStationIdentityChanged || staleLabTxMessages || staleLegacyLabTxMessages) {
             refreshPskReporterLocalStation();
             if (m_dxCluster) {
                 m_dxCluster->setCallsign(m_callsign);
             }
             regenerateTxMessages();
             syncLegacyBackendTxState();
-            bridgeLog(QStringLiteral("lab station identity synced: call=%1 grid=%2 tx6=%3 stale=%4")
+            bridgeLog(QStringLiteral("lab station identity synced: call=%1 grid=%2 tx6=%3 bridgeStale=%4 legacyStale=%5")
                           .arg(m_callsign,
                                m_grid,
                                m_tx6,
-                               staleLabTxMessages ? QStringLiteral("1") : QStringLiteral("0")));
+                               staleLabTxMessages ? QStringLiteral("1") : QStringLiteral("0"),
+                               staleLegacyLabTxMessages ? QStringLiteral("1") : QStringLiteral("0")));
         }
     }
 
@@ -10929,6 +11033,20 @@ void DecodiumBridge::syncLegacyBackendState()
         }
     }
 
+    int const publishedPeriodMs = effectivePeriodMsForMode(m_mode);
+    if (publishedPeriodMs != m_lastPublishedPeriodMilliseconds) {
+        int const previousPeriodMs = m_lastPublishedPeriodMilliseconds;
+        m_lastPublishedPeriodMilliseconds = publishedPeriodMs;
+        m_periodTicks = 0;
+        m_lastPeriodSlot = -1;
+        updatePeriodTicksMax();
+        emit periodMillisecondsChanged();
+        bridgeLog(QStringLiteral("Mode period updated: mode=%1 period=%2ms previous=%3ms")
+                      .arg(m_mode)
+                      .arg(publishedPeriodMs)
+                      .arg(previousPeriodMs));
+    }
+
     double const legacyDialFrequency = m_legacyBackend->dialFrequency();
     if (legacyDialFrequency > 0.0) {
         bool const catOwnsDialFrequency =
@@ -11000,26 +11118,28 @@ void DecodiumBridge::syncLegacyBackendState()
         m_callerQueue.clear();
         emit callerQueueChanged();
     }
-    updateTxMessage(m_tx1, m_legacyBackend->txMessage(1),
-                    [this]() { emit tx1Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateTxMessage(m_tx2, m_legacyBackend->txMessage(2),
-                    [this]() { emit tx2Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateTxMessage(m_tx3, m_legacyBackend->txMessage(3),
-                    [this]() { emit tx3Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateTxMessage(m_tx4, m_legacyBackend->txMessage(4),
-                    [this]() { emit tx4Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateTxMessage(m_tx5, m_legacyBackend->txMessage(5),
-                    [this]() { emit tx5Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateTxMessage(m_tx6, m_legacyBackend->txMessage(6),
-                    [this]() { emit tx6Changed(); },
-                    [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
-    updateInt(m_currentTx, qBound(1, m_legacyBackend->currentTx(), 6),
-              [this]() { emit currentTxChanged(); emit currentTxMessageChanged(); });
+    if (!labStationIdentityOverrideActive) {
+        updateTxMessage(m_tx1, m_legacyBackend->txMessage(1),
+                        [this]() { emit tx1Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateTxMessage(m_tx2, m_legacyBackend->txMessage(2),
+                        [this]() { emit tx2Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateTxMessage(m_tx3, m_legacyBackend->txMessage(3),
+                        [this]() { emit tx3Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateTxMessage(m_tx4, m_legacyBackend->txMessage(4),
+                        [this]() { emit tx4Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateTxMessage(m_tx5, m_legacyBackend->txMessage(5),
+                        [this]() { emit tx5Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateTxMessage(m_tx6, m_legacyBackend->txMessage(6),
+                        [this]() { emit tx6Changed(); },
+                        [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
+        updateInt(m_currentTx, qBound(1, m_legacyBackend->currentTx(), 6),
+                  [this]() { emit currentTxChanged(); emit currentTxMessageChanged(); });
+    }
     if (legacyTxStartedForMirror) {
         appendTxDecodeEntry(buildCurrentTxMessage());
     }
@@ -13126,17 +13246,25 @@ void DecodiumBridge::setFrequency(double v) {
     quint64 const monitorSessionId = m_periodTimerSessionId;
     bool frequencyChangedForRecovery = false;
     double oldFreq = m_frequency;
+    bool const legacyDialNeedsSync =
+        legacyBackendAvailable()
+        && (m_legacyBackend->dialFrequency() <= 0.0
+            || std::abs(m_legacyBackend->dialFrequency() - v) > 1.0);
     if (!qFuzzyCompare(m_frequency + 1.0, v + 1.0)) {
         m_frequency = v;
         frequencyChangedForRecovery = true;
         emit frequencyChanged();
-        if (legacyBackendAvailable()) {
-            m_legacyBackend->setDialFrequency(v);
-        }
         // Pulisci le finestre decode quando cambia banda (differenza > 100kHz)
         if (std::abs(v - oldFreq) > 100000.0) {
             clearDecodeWindowsForBandChange(oldFreq, v, QStringLiteral("set-frequency"));
         }
+    }
+    // A legacy mode switch can retune its own band selector while the bridge
+    // already holds the requested dial frequency. Reassert the dial in that
+    // case as well, otherwise UI and decoder can silently use different bands.
+    if (legacyBackendAvailable()
+        && (frequencyChangedForRecovery || legacyDialNeedsSync)) {
+        m_legacyBackend->setDialFrequency(v);
     }
     if (m_bandManager) {
         m_bandManager->updateFromFrequency(v);
@@ -13880,7 +14008,7 @@ void DecodiumBridge::armPeriodTimerForCurrentMode(quint64 sessionId, const QStri
     m_periodTimer->stop();
 
     QString const modeSnapshot = m_mode;
-    int const periodMs = periodMsForMode(modeSnapshot);
+    int const periodMs = effectivePeriodMsForMode(modeSnapshot);
     qint64 const msNow = correctedUtcMsecsSinceStartOfDay();
     int const msInPeriod = (periodMs > 0) ? static_cast<int>(msNow % static_cast<qint64>(periodMs)) : 0;
     int msToNext = (periodMs > 0) ? (periodMs - msInPeriod) : TIMER_MS;
@@ -13942,7 +14070,7 @@ int DecodiumBridge::minimumDecodeSamplesForMode(const QString& mode) const
 
 int DecodiumBridge::targetDecodeSamplesForMode(const QString& mode) const
 {
-    int const periodMs = periodMsForMode(mode);
+    int const periodMs = effectivePeriodMsForMode(mode);
     if (periodMs <= 0) {
         return 0;
     }
@@ -14902,7 +15030,23 @@ void DecodiumBridge::setUiPaletteIndex(int v)
 QVariantList DecodiumBridge::decodeList() const { return m_decodeList; }
 QVariantList DecodiumBridge::rxDecodeList() const { return m_rxDecodeList; }
 int DecodiumBridge::periodProgress() const { return m_periodProgress; }
-int DecodiumBridge::periodMilliseconds() const { return periodMsForMode(m_mode); }
+
+int DecodiumBridge::effectivePeriodMsForMode(const QString& mode) const
+{
+    QString const normalized = mode.trimmed().toUpper();
+    if (normalized == QStringLiteral("MSK144")
+        && m_legacyBackend
+        && m_legacyBackend->available()
+        && m_legacyBackend->mode().trimmed().toUpper() == normalized) {
+        int const seconds = m_legacyBackend->trPeriodSeconds();
+        if (seconds == 5 || seconds == 10 || seconds == 15 || seconds == 30) {
+            return seconds * 1000;
+        }
+    }
+    return periodMsForMode(normalized);
+}
+
+int DecodiumBridge::periodMilliseconds() const { return effectivePeriodMsForMode(m_mode); }
 QString DecodiumBridge::utcTime() const { return m_utcTime; }
 
 // === TX MESSAGES ===
@@ -16339,6 +16483,7 @@ bool DecodiumBridge::shouldUseBridgeAudioForLegacyDigitalTx() const
         && (mode == QStringLiteral("FT8")
             || mode == QStringLiteral("FT4")
             || mode == QStringLiteral("FT2")
+            || mode == QStringLiteral("MSK144")
             || mode == QStringLiteral("Q65")
             || mode.startsWith(QStringLiteral("Q65-")));
 #else
@@ -16384,6 +16529,30 @@ bool DecodiumBridge::preflightLegacyBridgeTxBeforePtt(const QString& reason)
     if (legacyBridgeAudioTxInFlight()) {
         bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight already in-flight (%1)").arg(reason));
         return true;
+    }
+
+    bool const forceImmediateLabTx = truthyEnvironmentFlag("DECODIUM_LAB_FORCE_TX_IMMEDIATE");
+    if (m_monitoring && !forceImmediateLabTx) {
+        int elapsedMs = -1;
+        int latestStartMs = 0;
+        if (isSyncTxStartTooLate(&elapsedMs, &latestStartMs)) {
+            bridgeLog(QStringLiteral("legacyBridgeTxAudio preflight deferred late %1 TX%2 elapsed=%3ms latest=%4ms (%5)")
+                          .arg(m_mode)
+                          .arg(m_currentTx)
+                          .arg(elapsedMs)
+                          .arg(latestStartMs)
+                          .arg(reason));
+            if (usesDeferredManualSyncTx() && !m_autoCqRepeat) {
+                m_deferredManualSyncTx = true;
+            }
+            scheduleSyncTxAtNextValidSlot(QStringLiteral("legacy-preflight:%1").arg(reason),
+                                          elapsedMs,
+                                          latestStartMs);
+            emit statusMessage(QStringLiteral("TX%1 rimandato: slot %2 troppo avanzato")
+                                   .arg(m_currentTx)
+                                   .arg(m_mode));
+            return false;
+        }
     }
 
     QElapsedTimer phaseTimer;
@@ -16653,7 +16822,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     bool const syncAlignedPayload = shouldAlignTxAudioToCurrentSyncSlot();
     phaseTimer.restart();
     if (syncAlignedPayload && pcmFmt.isValid() && pcmFmt.sampleRate() > 0) {
-        int const syncPeriodMs = periodMsForMode(m_mode);
+        int const syncPeriodMs = effectivePeriodMsForMode(m_mode);
         if (syncPeriodMs > 0) {
             syncSlotElapsedMs =
                 static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(syncPeriodMs));
@@ -18291,6 +18460,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
         : (m_cwTxActive ? QStringLiteral("CW") : m_mode.trimmed().toUpper());
     QString const message = msg.trimmed();
     bool const tciAudio = usingTciAudioInput();
+    int const effectivePeriodMs = effectivePeriodMsForMode(mode);
     auto logResult = [&](bool cacheHit,
                          qint64 waveMs,
                          qint64 resolveMs,
@@ -18320,6 +18490,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
             && m_txAudioCache.mode == mode
             && m_txAudioCache.message == message
             && m_txAudioCache.txAudioFrequency == txAudioFrequency
+            && m_txAudioCache.periodMs == effectivePeriodMs
             && m_txAudioCache.tciAudio == tciAudio;
     };
 
@@ -18402,7 +18573,9 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     } else if (multiStreamActive()) {
         wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
     } else {
-        wave = buildTxWaveformForMessage(mode, message, txAudioFrequency, &buildError);
+        wave = buildTxWaveformForMessage(mode, message, txAudioFrequency,
+                                         effectivePeriodMsForMode(mode) / 1000.0,
+                                         &buildError);
     }
     qint64 const waveMs = phaseTimer.elapsed();
     if (wave.isEmpty()) {
@@ -18458,6 +18631,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     m_txAudioCache.mode = mode;
     m_txAudioCache.message = message;
     m_txAudioCache.txAudioFrequency = txAudioFrequency;
+    m_txAudioCache.periodMs = effectivePeriodMs;
     m_txAudioCache.tciAudio = tciAudio;
     m_txAudioCache.outputDeviceName = needPcm ? m_audioOutputDevice : QString {};
     m_txAudioCache.outputDeviceDescription = needPcm ? device.description() : QString {};
@@ -18663,6 +18837,7 @@ bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
         || normalized == QStringLiteral("FT4")
         || normalized == QStringLiteral("Q65")
         || normalized.startsWith(QStringLiteral("Q65-"))
+        || normalized == QStringLiteral("MSK144")
         || (normalized == QStringLiteral("FT2") && (!m_asyncTxEnabled || ft2AutoCqCalling));
 }
 
@@ -18678,7 +18853,7 @@ bool DecodiumBridge::isSyncTxStartTooLate(int* elapsedMsOut, int* latestStartMsO
         return false;
     }
 
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         return false;
     }
@@ -19073,7 +19248,7 @@ qint64 DecodiumBridge::syncTxPcmStartOffsetBytes(const QAudioFormat& format,
         return 0;
     }
 
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         return 0;
     }
@@ -19131,7 +19306,7 @@ void DecodiumBridge::scheduleSyncTxBoundaryStop(const QString& reason, quint64 t
     if (!shouldAlignTxAudioToCurrentSyncSlot()) {
         return;
     }
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         return;
     }
@@ -19737,7 +19912,9 @@ void DecodiumBridge::startTx()
         bridgeLog("startTx: delegating to legacy backend");
         if (m_recordTxEnabled) {
             QString recordingError;
-            QVector<float> const wave = buildTxWaveformForMessage(m_mode, msg, effectiveTxAudioFrequencyHz(), &recordingError);
+            QVector<float> const wave = buildTxWaveformForMessage(
+                m_mode, msg, effectiveTxAudioFrequencyHz(),
+                effectivePeriodMsForMode(m_mode) / 1000.0, &recordingError);
             if (!wave.isEmpty()) {
                 QString const txRecordPath = buildTxRecordingPath(m_mode, false);
                 saveTxRecordingAsync(txRecordPath, wave, 48000, QStringLiteral("TX legacy"));
@@ -19831,7 +20008,7 @@ void DecodiumBridge::startTx()
             return;
         }
 
-        int const macPeriodMs = periodMsForMode(txMode);
+        int const macPeriodMs = effectivePeriodMsForMode(txMode);
         int const macSlotElapsedMs = macPeriodMs > 0
             ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(macPeriodMs))
             : -1;
@@ -20226,7 +20403,7 @@ void DecodiumBridge::startTx()
 
         double const periodSeconds = ft2LinkTci
             ? qMax(0.1, static_cast<double> (wave.size ()) / 48000.0 + 0.3)
-            : qMax(0.1, periodMsForMode(m_mode) / 1000.0);
+            : qMax(0.1, effectivePeriodMsForMode(m_mode) / 1000.0);
         if (!startTciTxAudioStream(wave,
                                    txMode,
                                    symbolsLength,
@@ -20277,7 +20454,7 @@ void DecodiumBridge::startTx()
                                if (m_transmitting && usingTciAudioInput())
                                    completeTxPlayback(QStringLiteral("tci-watchdog"));
                            });
-        int const tciPeriodMs = periodMsForMode(txMode);
+        int const tciPeriodMs = effectivePeriodMsForMode(txMode);
         int const tciSlotElapsedMs = tciPeriodMs > 0
             ? static_cast<int>(correctedUtcEpochMs() % static_cast<qint64>(tciPeriodMs))
             : -1;
@@ -20809,6 +20986,8 @@ QString DecodiumBridge::validateTxMessage(const QString& message) const
         ok = decodium::txmsg::encodeFt8(msg).ok;
     } else if (mode == QStringLiteral("WSPR")) {
         ok = decodium::txmsg::encodeWspr(msg, true).ok;
+    } else if (mode == QStringLiteral("MSK144")) {
+        ok = decodium::txmsg::encodeMsk144(msg, true).ok;
     } else if (mode == QStringLiteral("Q65") || mode.startsWith(QStringLiteral("Q65-"))) {
         ok = decodium::txmsg::encodeQ65(msg, true).ok;
     }
@@ -27245,7 +27424,8 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     // troncati: gestirli come secondi pieni spostava la TX nello stesso slot
     // del chiamante.
     int const previousTxPeriod = m_txPeriod;
-    int const replyTxPeriod = replyTxPeriodForClickedDecode(m_mode, timeStr, m_txPeriod);
+    int const replyTxPeriod = replyTxPeriodForClickedDecode(
+        m_mode, timeStr, m_txPeriod, effectivePeriodMsForMode(m_mode));
     if (m_txPeriod != replyTxPeriod) {
         m_txPeriod = replyTxPeriod;
         emit txPeriodChanged();
@@ -28392,10 +28572,17 @@ bool DecodiumBridge::shouldSuppressRecentLocalTxEchoDecode(const QString& messag
 
 bool DecodiumBridge::usesDeferredManualSyncTx() const
 {
+    QString const normalized = m_mode.trimmed().toUpper();
+    // MSK144 uses the bridge PCM path on macOS even when sequencing remains
+    // owned by the legacy backend. It must therefore be schedulable here too,
+    // otherwise a direct legacy PTT request can bypass the late-slot guard.
+    if (normalized == QStringLiteral("MSK144")) {
+        return true;
+    }
     return !usingLegacyBackendForTx()
-        && (m_mode == QStringLiteral("FT8")
-            || m_mode == QStringLiteral("FT4")
-            || (m_mode == QStringLiteral("FT2") && !m_asyncTxEnabled));
+        && (normalized == QStringLiteral("FT8")
+            || normalized == QStringLiteral("FT4")
+            || (normalized == QStringLiteral("FT2") && !m_asyncTxEnabled));
 }
 
 bool DecodiumBridge::shouldDeferManualSyncTxStart() const
@@ -28412,7 +28599,7 @@ bool DecodiumBridge::shouldDeferManualSyncTxStart() const
         return false;
     }
 
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         return false;
     }
@@ -28446,7 +28633,7 @@ bool DecodiumBridge::tryStartDeferredManualSyncTx()
         return false;
     }
 
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         clearDeferredManualSyncTx(QStringLiteral("invalid-period"));
         return false;
@@ -28498,7 +28685,7 @@ void DecodiumBridge::scheduleSyncTxAtNextValidSlot(const QString& reason,
         return;
     }
 
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     if (periodMs <= 0) {
         return;
     }
@@ -30083,7 +30270,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
 
     if (!skipPeriodCheck) {
         qint64 msNow = correctedUtcMsecsSinceStartOfDay();
-        int pMs  = periodMsForMode(m_mode);
+        int pMs  = effectivePeriodMsForMode(m_mode);
         if (pMs <= 0) return;
         int pidx = (int)(msNow / (qint64)pMs);
         bool const isEven = (pidx % 2 == 0);
@@ -31232,7 +31419,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     bool const profileNeedsOwn73BeforeLog =
         ((m_mode == QStringLiteral("FT2") && !m_quickQsoEnabled)
          || m_mode == QStringLiteral("FT8")
-         || m_mode == QStringLiteral("FT4"));
+         || m_mode == QStringLiteral("FT4")
+         || m_mode == QStringLiteral("MSK144"));
     bool const partnerSignoffNeedsOwn73 =
         partnerAnySignoff
         && !localFinal73AlreadyArmedOrSentForMessagePartner
@@ -31712,7 +31900,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("auto-seq TX%1").arg(nextTx));
         if (ft2AutomatedExchange && nextTx >= 1 && nextTx <= 5) {
             int const previousTxPeriod = m_txPeriod;
-            int const replyTxPeriod = replyTxPeriodForClickedDecode(m_mode, f.value(0), m_txPeriod);
+            int const replyTxPeriod = replyTxPeriodForClickedDecode(
+                m_mode, f.value(0), m_txPeriod, effectivePeriodMsForMode(m_mode));
             if (replyTxPeriod != m_txPeriod) {
                 setTxPeriod(replyTxPeriod);
                 bridgeLog(QStringLiteral("autoSeq: FT2 automated TX period adjusted %1 -> %2 from partner decode time=%3")
@@ -33544,13 +33733,18 @@ QVariantList DecodiumBridge::augmentLegacyMirrorWithAllTxt(QVariantList const& m
         for (int const index : indexes) {
             QVariantMap existing = augmented.at(index).toMap();
             QString const existingTime = normalizeUtcDisplayToken(existing.value(QStringLiteral("time")).toString());
+            bool const existingMskZeroTime =
+                normalizedMode == QStringLiteral("MSK144")
+                && existingTime == QStringLiteral("000000");
             if (existing.value(QStringLiteral("isTx")).toBool()) {
                 continue;
             }
-            if (existingTime.size() >= 6) {
+            if (existingTime.size() >= 6 && !existingMskZeroTime) {
                 continue;
             }
-            if (!existingTime.isEmpty() && !entry.value(QStringLiteral("time")).toString().startsWith(existingTime)) {
+            if (!existingMskZeroTime
+                && !existingTime.isEmpty()
+                && !entry.value(QStringLiteral("time")).toString().startsWith(existingTime)) {
                 continue;
             }
             existing[QStringLiteral("time")] = entry.value(QStringLiteral("time")).toString();
@@ -35334,12 +35528,23 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         if (tokens.size() >= 2) {
             int callIdx = 1;
             QString const t1 = tokens.at(1);
-            if (tokens.size() >= 3 && isDirectedCqModifierToken(t1)) {
+            if (tokens.size() >= 3 && isCqRoutingModifierToken(t1)) {
                 callIdx = 2;
             }
             if (callIdx < tokens.size() && !isPlausibleDecodedCallsign(tokens.at(callIdx))) {
                 if (reason) *reason = QStringLiteral("CQ from invalid callsign (ghost)");
                 return false;
+            }
+            if (ft2StrictSemanticGate && callIdx < tokens.size()) {
+                if (!isPlausibleFt2CqCallsign(tokens.at(callIdx))) {
+                    if (reason) *reason = QStringLiteral("FT2 CQ from invalid callsign (ghost)");
+                    return false;
+                }
+                QString cqPayloadReason;
+                if (!isValidFt2CqTrailingPayload(tokens, callIdx, &cqPayloadReason)) {
+                    if (reason) *reason = cqPayloadReason;
+                    return false;
+                }
             }
         }
         return true;
@@ -36842,8 +37047,29 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     }
 
     QString const decodeMode = serialMode;
-    QString const forcedUtcToken = m_decodeUtcTokenBySerial.value(serial);
+    QString const forcedUtcRaw = m_decodeUtcTokenBySerial.value(serial).trimmed();
+    QString const forcedUtcToken = forcedUtcRaw.isEmpty()
+        ? QString()
+        : normalizeUtcDisplayToken(forcedUtcRaw);
     bool const trackTimeSync = isTimeSyncDecodeMode(decodeMode);
+    bool const msk144DecodeMode = decodeMode == QStringLiteral("MSK144");
+    auto decodeEntryTimeForRow = [&](QString const& rawTime) -> QString {
+        if (trackTimeSync && !forcedUtcToken.isEmpty()) {
+            return forcedUtcToken;
+        }
+
+        // The MSK144 worker can return a zero UTC prefix when the bridge owns
+        // the decode slot timing. If we keep "000000", the same RF decode is
+        // later mirrored from ALL.TXT with the real UTC and appears twice.
+        QString const normalizedRaw = normalizeUtcDisplayToken(rawTime);
+        if (msk144DecodeMode
+            && !forcedUtcToken.isEmpty()
+            && normalizedRaw == QStringLiteral("000000")) {
+            return forcedUtcToken;
+        }
+
+        return rawTime;
+    };
     if (decodeMode == QStringLiteral("FT8") && elapsedMs > 7000) {
         bridgeLog("onFt8DecodeReady: slow FT8 serial=" + QString::number(serial) +
                   " rows=" + QString::number(rows.size()) +
@@ -36917,7 +37143,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 filteredRows.append(row);
                 continue;
             }
-            QString const key = decodeDedupKey((trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0],
+            QString const key = decodeDedupKey(decodeEntryTimeForRow(f[0]),
                                                f[7],
                                                f[4]);
             if (key.isEmpty()) {
@@ -37049,7 +37275,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 
         // Calcola proprietà derivate
         QString msg     = f[4];
-        QString const entryTime = (trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0];
+        QString const entryTime = decodeEntryTimeForRow(f[0]);
         if (msg.contains(QStringLiteral("<...>"))) {
             QString hashResolveSource;
             QString const resolvedMsg =
@@ -37304,7 +37530,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 && isDirectedToLocalHashFromActivePartner(msgText, &localHashPartner);
             if (!shouldAcceptDecodedMessage(msgText, nullptr, directedToLocalHash)) continue;
             QString const autoSeqDedupKey = f.size() >= 8
-                ? decodeDedupKey((trackTimeSync && !forcedUtcToken.isEmpty()) ? forcedUtcToken : f[0],
+                ? decodeDedupKey(decodeEntryTimeForRow(f[0]),
                                  f[7],
                                  msgText)
                 : QString();
@@ -38547,7 +38773,7 @@ void DecodiumBridge::onPeriodTimer()
     qint64 const nowMs     = correctedUtcEpochMs();
     QString const modeSnapshot = m_mode;
     bool   const timeSyncMode = isTimeSyncDecodeMode(modeSnapshot);
-    int    const periodMs  = periodMsForMode(modeSnapshot);
+    int    const periodMs  = effectivePeriodMsForMode(modeSnapshot);
     qint64 const utcSlot   = (periodMs > 0) ? (nowMs / periodMs) : 0;
     int    const msInSlot  = (periodMs > 0) ? (int)(nowMs % periodMs) : 0;
     // Progress ancorato all'UTC: l'utente vede la barra sincrona al vero
@@ -41314,7 +41540,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     emit decodingChanged();
 
     quint64 serial = ++m_decodeSerial;
-    int const decodePeriodMs = periodMsForMode(modeSnapshot);
+    int const decodePeriodMs = effectivePeriodMsForMode(modeSnapshot);
     qint64 slotIndexForUtc = completedUtcSlot;
     if (slotIndexForUtc < 0 && decodePeriodMs > 0) {
         slotIndexForUtc = correctedUtcEpochMs() / decodePeriodMs;
@@ -41734,7 +41960,12 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         decodium::msk144::DecodeRequest req;
         req.serial  = serial; req.audio = audioSnapshot;
         req.nutc    = nutc;
+        req.kdone   = audioSnapshot.size();
+        req.maxlines = 8;
         req.rxfreq  = m_rxFrequency;
+        req.ftol    = 50;
+        req.aggressive = qBound(1, decodeDepth & 7, 3);
+        req.trperiod = effectivePeriodMsForMode(modeSnapshot) / 1000.0;
         req.mycall  = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
         QMetaObject::invokeMethod(m_mskWorker, [this, req]() {
@@ -41894,7 +42125,7 @@ void DecodiumBridge::updatePeriodTicksMax()
 {
     // Keep the period table centralized in periodMsForMode(), including
     // configured variants such as Q65-30A/Q65-60B and FST4/FST4W periods.
-    int const periodMs = periodMsForMode(m_mode);
+    int const periodMs = effectivePeriodMsForMode(m_mode);
     m_periodTicksMax = qMax(1, qRound(static_cast<double>(periodMs) / TIMER_MS));
 }
 
@@ -44929,6 +45160,14 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
 
     int imported = 0;
     QStringList importedCalls;
+    QStringList const activeQsoCalls {
+        m_dxCall,
+        m_promptLogCall,
+        m_pendingAutoLogCall,
+        m_lateAutoLogCall,
+    };
+    QString const activeMode = m_mode.trimmed().toUpper();
+    bool importedActiveQso = false;
     for (ParsedAdifRecord const& record : sourceRecords) {
         ParsedAdifRecord normalizedRecord = normalizeImportedAdifRecord(record);
         QString const key = adifRecordDedupeKey(normalizedRecord.fields);
@@ -44943,6 +45182,20 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
         QString const call = normalizedRecord.fields.value(QStringLiteral("CALL")).trimmed().toUpper();
         if (!call.isEmpty() && !importedCalls.contains(call)) {
             importedCalls.append(call);
+        }
+
+        QString const recordMode = normalizedRecord.fields
+                                       .value(QStringLiteral("SUBMODE"),
+                                              normalizedRecord.fields.value(QStringLiteral("MODE")))
+                                       .trimmed().toUpper();
+        QString const baseCall = Radio::base_callsign(call).trimmed().toUpper();
+        bool const activeCallMatch = std::any_of(activeQsoCalls.cbegin(), activeQsoCalls.cend(),
+                                                  [&baseCall](QString const& activeCall) {
+            return !baseCall.isEmpty()
+                && Radio::base_callsign(activeCall).trimmed().toUpper() == baseCall;
+        });
+        if (activeCallMatch && (activeMode.isEmpty() || recordMode.isEmpty() || recordMode == activeMode)) {
+            importedActiveQso = true;
         }
     }
 
@@ -44965,6 +45218,12 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
     emit qsoCountChanged();
     emit workedCountChanged();
     emit qsoLogCacheChanged();
+    if (importedActiveQso && !m_qsoLogged) {
+        // The embedded legacy state machine has already committed this QSO.
+        // Mark it before the QML auto-sequence reaches its own logging branch.
+        m_qsoLogged = true;
+        bridgeLog(QStringLiteral("legacy ADIF matched active QSO; bridge duplicate log suppressed"));
+    }
     bridgeLog(QStringLiteral("legacy ADIF mirrored to active logbook: imported=%1 total=%2 calls=%3 path=%4")
                   .arg(imported)
                   .arg(m_qsoCountCache)

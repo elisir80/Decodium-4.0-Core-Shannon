@@ -169,6 +169,7 @@ public:
   QString legacyCallsign() const;
   QString legacyGrid() const;
   QString legacyMode() const;
+  int legacyTrPeriodSeconds() const;
   QString legacyRigName() const;
   Frequency legacyDialFrequency() const;
   int legacyRxFrequency() const;
@@ -623,6 +624,7 @@ private slots:
   void on_actionTime_Sync_triggered();
   void alertQSYmessage();
   void on_actionShort_list_of_add_on_prefixes_and_suffixes_triggered();
+  void restoreMsk144PeriodForCurrentBand();
   void band_changed (Frequency);
   void monitor (bool);
   void end_tuning ();

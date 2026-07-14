@@ -1070,6 +1070,7 @@ private:
     quint64 lbtCancelAtMs {0};
     bool priority {false};
     quint64 enqueuedAtMs {0};  // per hold-off LBT massimo
+    quint64 notBeforeMs {0};   // pre-TX CCA/jitter gate
   };
 
   struct LiveOutboundRetry
@@ -1484,6 +1485,7 @@ private:
   bool m_liveChannelBusy {false};
   quint64 m_liveChannelLbtBusyUntilMs {0};
   bool m_liveChannelLbtBusy {false};
+  quint64 m_liveChannelLastLbtEnergyMs {0};
   double m_liveChannelRms {0.0};
   double m_liveChannelPeak {0.0};
   bool m_autoBeaconEnabled {false};

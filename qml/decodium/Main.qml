@@ -6684,6 +6684,8 @@ ApplicationWindow {
                             return 5.04
                         if (normalizedMode === "WSPR")
                             return 110.6
+                        if (normalizedMode === "MSK144")
+                            return Math.max(0.5, period - 0.5)
                         if (normalizedMode.indexOf("Q65") === 0) {
                             if (period <= 15.5)
                                 return 0.5 + (85 * 1800 / 12000.0)

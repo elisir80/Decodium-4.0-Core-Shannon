@@ -4646,17 +4646,34 @@ MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
 
 QString MainWindow::legacyCallsign() const
 {
+  if (auto const * app = QCoreApplication::instance ()) {
+    auto const labCallsign = app->property ("decodiumLabCallsign").toString ().trimmed ().toUpper ();
+    if (!labCallsign.isEmpty ()) {
+      return labCallsign;
+    }
+  }
   return m_config.my_callsign();
 }
 
 QString MainWindow::legacyGrid() const
 {
+  if (auto const * app = QCoreApplication::instance ()) {
+    auto const labGrid = app->property ("decodiumLabGrid").toString ().trimmed ().toUpper ();
+    if (!labGrid.isEmpty ()) {
+      return labGrid;
+    }
+  }
   return m_config.my_grid();
 }
 
 QString MainWindow::legacyMode() const
 {
   return m_mode;
+}
+
+int MainWindow::legacyTrPeriodSeconds() const
+{
+  return qMax(1, qRound(m_TRperiod));
 }
 
 QString MainWindow::legacyRigName() const
@@ -5010,6 +5027,10 @@ void MainWindow::legacyClearRxFrequency()
 
 void MainWindow::legacySetMode(QString const& mode)
 {
+  auto const effectiveCallsign = legacyCallsign ();
+  if (!effectiveCallsign.isEmpty ()) {
+    m_baseCall = Radio::base_callsign (effectiveCallsign);
+  }
   if (mode != m_mode || mode != "FT2")
     {
       m_embeddedFt2MonitorPrepared = false;
@@ -6412,9 +6433,7 @@ void MainWindow::readSettings()
   }
   if (m_mode=="MSK144") {
     ui->sbFtol->setValue (m_settings->value("Ftol_MSK144",50).toInt());
-    if (!(m_currentBand=="6m" or m_currentBand=="4m" or m_currentBand=="2m")) ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144", 30).toInt());
-    if (m_currentBand=="6m" or m_currentBand=="4m") ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_6m", 15).toInt());
-    if (m_currentBand=="2m") ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_2m", 30).toInt());
+    restoreMsk144PeriodForCurrentBand();
   }
   if (m_mode=="MSK144") m_bShMsgs=m_settings->value("ShMsgs_MSK144",false).toBool();
   if (m_mode=="Q65") m_bShMsgs=m_settings->value("ShMsgs_Q65",false).toBool();
@@ -7484,6 +7503,9 @@ void MainWindow::fastSink(qint64 frames)
 
   if(bmsk144 and (line[0]!=0)) {
     QString message {QString::fromLatin1 (line)};
+    if (isDuplicateDecode (message)) {
+      return;
+    }
     DecodedText decodedtext {message.replace (QChar::LineFeed, "")};
 
     QString text = decodedtext.string().replace("<","").replace(">","");   // for Wait features
@@ -7845,14 +7867,16 @@ void MainWindow::fastSink(qint64 frames)
     }
 
     // Stop Wait & Call timeout when in QSO with this station for MSK144
-    if (ui->DX_Call_Button->isChecked() && m_hisCall!="" && text.contains(" " + m_config.my_callsign() + " " + m_hisCall)) {
+    auto const effectiveMyCallsign = legacyCallsign ();
+    auto const effectiveMyGrid = legacyGrid ();
+    if (ui->DX_Call_Button->isChecked() && m_hisCall!="" && text.contains(" " + effectiveMyCallsign + " " + m_hisCall)) {
         stopWCTimer.stop();                                                   // stop any Wait & Call timeout
         if (ui->DX_Call_Button->isChecked()) ui->DX_Call_Button->click ();    // disable Wait & Call
         no_wait_and_call = false;                                             // reset Wait & Call
     }
 
     // Wait & Reply for MSK144
-    if (text.contains(" " + m_config.my_callsign() + " " + m_hisCall) && m_hisCall!="" &&
+    if (text.contains(" " + effectiveMyCallsign + " " + m_hisCall) && m_hisCall!="" &&
         !text.contains("73 ") && m_mode=="MSK144" && m_config.Wait_features_enabled()
         && !ui->autoButton->isChecked()
         && (!(ui->actionFull_Duplex_Mode->isChecked() && m_txing))) {
@@ -7878,7 +7902,7 @@ void MainWindow::fastSink(qint64 frames)
 
     // CQ: First for MSK144
     if(((pounce && text.contains(" CQ ") && m_config.Wait_features_enabled())
-        or (m_auto && m_bCallingCQ && text.contains(" " + m_config.my_callsign() + " "))) && !ignored
+        or (m_auto && m_bCallingCQ && text.contains(" " + effectiveMyCallsign + " "))) && !ignored
         && !filtered && !selected && legacyRespondSelectionEnabled () && ui->respondComboBox->currentText()=="CQ: First"
         && (!(ui->actionFull_Duplex_Mode->isChecked() && m_txing))) {
                   m_bDoubleClicked=true;
@@ -7899,9 +7923,9 @@ void MainWindow::fastSink(qint64 frames)
         decodedtext.deCallAndGrid(/*out*/deCall,deGrid);
         if (!filtered && !ignored && (deGrid.contains(grid_regexp) or m_bCallingCQ) && (
              (pounce && text.contains(" CQ ") && !txLog.contains(deCall) && m_config.Wait_features_enabled()) or
-             (m_bCallingCQ && text.contains(" " + m_config.my_callsign() + " ") && !text.contains("73 "))
+             (m_bCallingCQ && text.contains(" " + effectiveMyCallsign + " ") && !text.contains("73 "))
                                                                     )) {
-            GeoDistanceInfo const geo = geo_distance (m_config.my_grid (), deGrid, 0.0);
+            GeoDistanceInfo const geo = geo_distance (effectiveMyGrid, deGrid, 0.0);
             Dpoints=geo.km;
             if (!deGrid.contains(grid_regexp)) Dpoints=1;
             if(Dpoints>maxDPoints) {
@@ -7932,7 +7956,7 @@ void MainWindow::fastSink(qint64 frames)
         decodedtext.deCallAndGrid(/*out*/deCall,deGrid);
         if (!filtered && !ignored && (
              (pounce && text.contains(" CQ ") && !txLog.contains(deCall) && m_config.Wait_features_enabled()) or
-             (m_bCallingCQ && text.contains(" " + m_config.my_callsign() + " ") && !text.contains("73 "))
+             (m_bCallingCQ && text.contains(" " + effectiveMyCallsign + " ") && !text.contains("73 "))
                           )) {
             dBpoints=decodedtext.string().mid(7,3).toInt();
             if(dBpoints>maxdBPoints) {
@@ -7963,7 +7987,7 @@ void MainWindow::fastSink(qint64 frames)
         decodedtext.deCallAndGrid(/*out*/deCall,deGrid);
         if (!filtered && !ignored && (
              (pounce && text.contains(" CQ ") && !txLog.contains(deCall) && m_config.Wait_features_enabled()) or
-             (m_bCallingCQ && text.contains(" " + m_config.my_callsign() + " ") && !text.contains("73 "))
+             (m_bCallingCQ && text.contains(" " + effectiveMyCallsign + " ") && !text.contains("73 "))
                           )) {
             dBpoints2=decodedtext.string().mid(7,3).toInt();
             if(dBpoints2<mindBPoints) {
@@ -7992,8 +8016,8 @@ void MainWindow::fastSink(qint64 frames)
         QString deGrid;
         decodedtext.deCallAndGrid(deCall,deGrid);
         if ((m_config.showDistance() || m_config.showAzimuth()) && deGrid.contains(grid_regexp)) {
-            QString my_Grid = m_config.my_grid();
-            if (my_Grid.length() < 5) my_Grid = m_config.my_grid().left(4)+"mm";
+            QString my_Grid = effectiveMyGrid;
+            if (my_Grid.length() < 5) my_Grid = effectiveMyGrid.left(4)+"mm";
             QString de_Grid= deGrid.left(4)+"mm";
             GeoDistanceInfo const geo = geo_distance (my_Grid, de_Grid, 0.0);
             if (m_config.showDistance()) {
@@ -8055,14 +8079,14 @@ void MainWindow::fastSink(qint64 frames)
         bool bDisplayPoints {false};
         m_points = 0;
 
-        ui->decodedTextBrowser->displayDecodedText (decodedtext, m_config.my_callsign (), m_mode, m_config.DXCC (),
+        ui->decodedTextBrowser->displayDecodedText (decodedtext, effectiveMyCallsign, m_mode, m_config.DXCC (),
           m_logBook, m_currentBandPeriod, m_config.ppfx (),
           ui->cbCQonly->isVisible() && ui->cbCQonly->isChecked(),
           haveFSpread, fSpread, bDisplayPoints, m_points, distance, m_muted);
 
 
     auto const& message_words = decodedtext.messageWords ();//avt 12/11/21
-    if (m_auto && decodedtext.isStandardMessage () && message_words.at(1) == m_config.my_callsign () //avt 12/11/21
+    if (m_auto && decodedtext.isStandardMessage () && message_words.at(1) == effectiveMyCallsign //avt 12/11/21
           && m_bCallingCQ && !m_bAutoReply && legacyRespondSelectionEnabled () && ui->respondComboBox->currentIndex() > 0) {  //avt to-do
       m_bAutoReply = true;  //avt 12/11/21
       //debugToFile(QString{"fastSink:    m_bAutoReply:%1 m_bCallingCQ:%2"}.arg(m_bAutoReply).arg(m_bCallingCQ));   //avt 1/4/24
@@ -8074,7 +8098,7 @@ void MainWindow::fastSink(qint64 frames)
         // display "73" messages for us also in the right pane
         if (ui->decodedTextBrowser2 && ui->decodedTextBrowser2->isVisible()
             && m_mode=="MSK144" && text.mid(22).contains(m_baseCall + " " + m_hisCall + " 73")) {
-            ui->decodedTextBrowser2->displayDecodedText (decodedtext, m_config.my_callsign (), m_mode, m_config.DXCC (),
+            ui->decodedTextBrowser2->displayDecodedText (decodedtext, effectiveMyCallsign, m_mode, m_config.DXCC (),
               m_logBook, m_currentBand, m_config.ppfx (), false, false, 0.0, false, -99, "", m_muted);
         }
     }
@@ -12349,9 +12373,11 @@ void MainWindow::decode()                                       //decode()
     dec_data.params.lwidedxcsearch=m_FT8WideDxCallSearch ? 1 : 0;
   }
   ::memcpy(dec_data.params.datetime, m_dateTime.toLatin1()+"    ", sizeof dec_data.params.datetime);
-  ::memcpy(dec_data.params.mycall, (m_config.my_callsign()+"            ").toLatin1(),12);
+  auto const effectiveCallsign = legacyCallsign ();
+  auto const effectiveGrid = legacyGrid ();
+  ::memcpy(dec_data.params.mycall, (effectiveCallsign+"            ").toLatin1(),12);
   
-  ::memcpy(dec_data.params.mybcall, (Radio::base_callsign(m_config.my_callsign())+"            ").toLatin1(),12);
+  ::memcpy(dec_data.params.mybcall, (Radio::base_callsign(effectiveCallsign)+"            ").toLatin1(),12);
   ::memcpy(dec_data.params.hiscall,(hisCall+"            ").toLatin1(),12);
   if(hisCall.length()<3) { 
     hisCall.clear();
@@ -12360,7 +12386,7 @@ void MainWindow::decode()                                       //decode()
     ::memcpy(dec_data.params.hisbcall,(Radio::base_callsign(hisCall)+"            ").toLatin1(),12);
   }
   ::memcpy(dec_data.params.hisgrid,(hisGrid+"      ").toLatin1(),6);    
-  ::memcpy(dec_data.params.mygrid, (m_config.my_grid()+"      ").toLatin1(),6);
+  ::memcpy(dec_data.params.mygrid, (effectiveGrid+"      ").toLatin1(),6);
   
   if(!hisCall.isEmpty() && !m_auto && hisCall != m_lastloggedcall) dec_data.params.lenabledxcsearch=true;  //ft8md was && !m_enableTx
   else dec_data.params.lenabledxcsearch=false;
@@ -12502,6 +12528,9 @@ void MainWindow::processFastDecodedRows (QStringList const& rows)
         row, myCallUpper, myBaseUpper, activePartnerCall);
     if(message.length()>80) message=message.left (80);
     if(narg[13]/8==narg[12]) message=message.trimmed().replace("<...>",m_calls);
+    if (m_mode == "MSK144" && isDuplicateDecode (message)) {
+      continue;
+    }
 
 //Left (Band activity) window
     DecodedText decodedtext {message.replace (QChar::LineFeed, "")};
@@ -13943,6 +13972,15 @@ void MainWindow::requestInProcessMsk144Decode ()
   request.audio.resize (360000);
   std::copy_n (dec_data.d2, request.audio.size (), request.audio.begin ());
   request.nutc = dec_data.params.nutc;
+  if (!m_diskData) {
+    QDateTime slotStart = m_dateTimeSeqStart;
+    if (!slotStart.isValid ()) {
+      int const periodMs = qMax (1000, qRound (m_TRperiod * 1000.0));
+      slotStart = qt_truncate_date_time_to (QDateTime::currentDateTimeUtc (), periodMs);
+    }
+    QTime const slotTime = slotStart.toUTC ().time ();
+    request.nutc = slotTime.hour () * 10000 + slotTime.minute () * 100 + slotTime.second ();
+  }
   request.kdone = qMin (int (12000.0 * m_TRperiod), int (m_kdone));
   request.nsubmode = m_nSubMode;
   request.newdat = dec_data.params.newdat ? 1 : 0;
@@ -17695,7 +17733,8 @@ void MainWindow::startTx2()
   bool const force_embedded_macos_ftx =
 #if defined(Q_OS_MAC)
       !tci_active && m_embeddedShellMode && !m_embeddedRigControlEnabled
-      && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2");
+      && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2"
+          || m_mode == "MSK144");
 #else
       false;
 #endif
@@ -17726,7 +17765,8 @@ void MainWindow::startTx2()
     bool const bridgeOwnsNormalFtxAudio =
         m_embeddedShellMode && !m_embeddedRigControlEnabled && !m_tci_audio && !m_tune
         && SpecOp::FOX != m_specOp && SpecOp::HOUND != m_specOp
-        && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2");
+        && (m_mode == "FT8" || m_mode == "FT4" || m_mode == "FT2"
+            || m_mode == "MSK144");
     updateEmbeddedBridgeTxAudioMute (bridgeOwnsNormalFtxAudio, QStringLiteral ("startTx2"));
 #endif
     transmit (snr);
@@ -18522,7 +18562,18 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
       && m_auto
       && m_QSOProgress > CALLING
       && !m_bDoubleClicked;
-  if (!lockTxPeriodInFt2AsyncQso) {
+  int const decodedSecond = static_cast<int> (message.timeInSeconds ());
+  qint64 nowMs = preciseCurrentMSecsSinceEpoch () % 86400000;
+  if (nowMs < 0) nowMs += 86400000;
+  int const nowSecond = static_cast<int> (nowMs / 1000);
+  int decodeAgeSeconds = nowSecond - decodedSecond;
+  if (decodeAgeSeconds < -43200) decodeAgeSeconds += 86400;
+  if (decodeAgeSeconds > 43200) decodeAgeSeconds -= 86400;
+  int const liveParityWindowSeconds = qMax (5, qCeil (2.0 * m_TRperiod) + 2);
+  bool const decodedSlotIsCurrent = m_diskData
+      || m_bDoubleClicked
+      || qAbs (decodeAgeSeconds) <= liveParityWindowSeconds;
+  if (!lockTxPeriodInFt2AsyncQso && decodedSlotIsCurrent) {
     int nmod;
     if(m_TRperiod < 5.0) {
       int period = (int)round(double(message.timeInSeconds()) / m_TRperiod);
@@ -18534,6 +18585,12 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
     if(SpecOp::HOUND == m_specOp) m_txFirst=false;          //Hound must not transmit first
     if(SpecOp::FOX == m_specOp) m_txFirst=true;             //Fox must always transmit first
     ui->txFirstCheckBox->setChecked(m_txFirst);
+  } else if (!decodedSlotIsCurrent) {
+    debugToFile (QString {"processMess  preserve TX parity for stale/synthetic UTC:%1 age:%2s period:%3 msg:%4"}
+                     .arg (decodedSecond, 6, 10, QLatin1Char ('0'))
+                     .arg (decodeAgeSeconds)
+                     .arg (m_TRperiod, 0, 'f', 2)
+                     .arg (message.string ().trimmed ()));
   }
 
   auto const& message_words = message.messageWords ();
@@ -18989,7 +19046,7 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
       bool const profileNeedsOwn73BeforeLog =
           ((m_mode == "FT2"
             && m_ft2QsoMessageProfile == Ft2QsoMessageProfile::Full5)
-           || ((m_mode == "FT8" || m_mode == "FT4")
+           || ((m_mode == "FT8" || m_mode == "FT4" || m_mode == "MSK144")
                && m_specOp == SpecOp::NONE));
       m_txRetryCount = 0;
       m_lastNtx = -1;
@@ -19174,7 +19231,7 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
         bool const profileNeedsOwn73BeforeLog =
             ((m_mode == "FT2"
               && m_ft2QsoMessageProfile == Ft2QsoMessageProfile::Full5)
-             || ((m_mode == "FT8" || m_mode == "FT4")
+             || ((m_mode == "FT8" || m_mode == "FT4" || m_mode == "MSK144")
                  && m_specOp == SpecOp::NONE));
         bool const partnerSignoffNeedsOwn73 =
             partnerAnySignoff
@@ -19636,11 +19693,12 @@ void MainWindow::setTxMsg(int n)
 
 void MainWindow::genCQMsg ()
 {
-  auto const& my_callsign = m_config.my_callsign ();
-  auto is_compound = my_callsign != m_baseCall;
-  auto is_type_two = !is77BitMode () && is_compound && stdCall (m_baseCall) && !shortList (my_callsign);
-  if(my_callsign.size () && m_config.my_grid().size ()) {
-    auto const& grid = m_config.my_grid ();
+  auto const my_callsign = legacyCallsign ();
+  auto const my_base_call = Radio::base_callsign (my_callsign);
+  auto is_compound = my_callsign != my_base_call;
+  auto is_type_two = !is77BitMode () && is_compound && stdCall (my_base_call) && !shortList (my_callsign);
+  if(my_callsign.size () && legacyGrid ().size ()) {
+    auto const grid = legacyGrid ();
     if (ui->cbCQTx->isEnabled () && ui->cbCQTx->isVisible () && ui->cbCQTx->isChecked ()) {
       if(stdCall (my_callsign)
          || is_type_two) {
@@ -19748,10 +19806,11 @@ void MainWindow::genStdMsgs(QString rpt, bool unconditional)
     return;
   }
   m_hisCall0 = hisCall;
-  auto const& my_callsign = m_config.my_callsign ();
-  auto is_compound = my_callsign != m_baseCall;
+  auto const my_callsign = legacyCallsign ();
+  auto const my_base_call = Radio::base_callsign (my_callsign);
+  auto is_compound = my_callsign != my_base_call;
   auto is_type_one = !is77BitMode () && is_compound && shortList (my_callsign);
-  auto const& my_grid = m_config.my_grid ().left (4);
+  auto const my_grid = legacyGrid ().left (4);
   auto const& hisBase = Radio::base_callsign (hisCall);
   save_dxbase_(const_cast <char *> ((hisBase + "   ").left(6).toLatin1().constData()), (FCL)6);
   auto eme_short_codes = m_config.enable_VHF_features () && ui->cbShMsgs->isChecked ()
@@ -19760,7 +19819,7 @@ void MainWindow::genStdMsgs(QString rpt, bool unconditional)
   bool bMyCall=stdCall(my_callsign);
   bool bHisCall=stdCall(hisCall);
 
-  QString t0=hisBase + " " + m_baseCall + " ";
+  QString t0=hisBase + " " + my_base_call + " ";
   QString t0s=hisCall + " " + my_callsign + " ";
   QString t0a,t0b;
 
@@ -19774,7 +19833,7 @@ void MainWindow::genStdMsgs(QString rpt, bool unconditional)
   msgtype(t, ui->tx1);
   if (eme_short_codes) {
     t=t+" OOO";
-    if(!bHisCall) t=hisCall + " " + m_baseCall + " OOO";
+    if(!bHisCall) t=hisCall + " " + my_base_call + " OOO";
     if(!bMyCall) t=hisBase + " " + my_callsign + " OOO";
     msgtype(t, ui->tx2);
     msgtype("RO", ui->tx3);
@@ -19822,7 +19881,7 @@ void MainWindow::genStdMsgs(QString rpt, bool unconditional)
         QString a;
         t="<" + t0s.split(" ").at(0) + "> <" + t0s.split(" ").at(1) + "> ";
         a = a.asprintf("%4.4d ",ui->sbSerialNumber->value());
-        sent=rs + a + m_config.my_grid();
+        sent=rs + a + legacyGrid ();
       }
       msgtype(t + sent, ui->tx2);
       if(sent==rpt) {
@@ -23915,6 +23974,34 @@ void MainWindow::on_actionQ65_triggered()
   statusChanged();
 }
 
+void MainWindow::restoreMsk144PeriodForCurrentBand()
+{
+  if (m_mode != "MSK144" || !ui || !ui->sbTR) return;
+
+  QString effectiveBand = m_currentBand;
+  if (m_freqNominal > 0) {
+    QString const nominalBand = m_config.bands()->find(m_freqNominal);
+    if (!nominalBand.isEmpty()) effectiveBand = nominalBand;
+  }
+
+  QString key {"TRPeriod_MSK144"};
+  int defaultPeriod {30};
+  if (effectiveBand == "6m" || effectiveBand == "4m") {
+    key = "TRPeriod_MSK144_6m";
+    defaultPeriod = 15;
+  } else if (effectiveBand == "2m") {
+    key = "TRPeriod_MSK144_2m";
+  }
+  int const period = m_settings->value (key, defaultPeriod).toInt ();
+  debugToFile (QString {"mskPeriod  restore currentBand:%1 nominalHz:%2 effectiveBand:%3 key:%4 value:%5"}
+                 .arg (m_currentBand)
+                 .arg (m_freqNominal)
+                 .arg (effectiveBand)
+                 .arg (key)
+                 .arg (period));
+  ui->sbTR->setValue (period);
+}
+
 void MainWindow::on_actionMSK144_triggered()
 {
   m_hsymStop=105;
@@ -23957,9 +24044,7 @@ void MainWindow::on_actionMSK144_triggered()
   m_bFast9=false;
   ui->sbTR->values ({5, 10, 15, 30});
   // restore last used parameters
-  if (!(m_currentBand=="6m" or m_currentBand=="4m" or m_currentBand=="2m")) ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144", 30).toInt());
-  if (m_currentBand=="6m" or m_currentBand=="4m") ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_6m", 15).toInt());
-  if (m_currentBand=="2m") ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_2m", 30).toInt());
+  restoreMsk144PeriodForCurrentBand();
   ui->txFirstCheckBox->setEnabled(true);
   QTimer::singleShot (50, [=] {on_sbTR_valueChanged (ui->sbTR->value());});
   ui->sbFtol->setValue (m_settings->value ("Ftol_MSK144", 50).toInt());   // restore last used parameter
@@ -24580,12 +24665,7 @@ void MainWindow::band_changed (Frequency f)
 {
   msk144qsy = false;  // MSK144 QSY
   QTimer::singleShot (900, [=] {
-      if (m_mode=="MSK144" && (!(m_currentBand=="6m" or m_currentBand=="4m" or m_currentBand=="2m")))
-          ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144", 30).toInt());
-      if (m_mode=="MSK144" && (m_currentBand=="6m" or m_currentBand=="4m"))
-          ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_6m", 15).toInt());
-      if (m_mode=="MSK144" && m_currentBand=="2m")
-          ui->sbTR->setValue (m_settings->value ("TRPeriod_MSK144_2m", 30).toInt());
+      restoreMsk144PeriodForCurrentBand();
   });
   // Don't allow a7 decodes during the first period because they can be leftovers from the previous band
   no_a7_decodes = true;
@@ -25975,6 +26055,13 @@ void::MainWindow::VHF_features_enabled(bool b)
 
 void MainWindow::on_sbTR_valueChanged(int value)
 {
+  if (m_mode == "MSK144") {
+    debugToFile (QString {"mskPeriod  changed old:%1 new:%2 currentBand:%3 nominalHz:%4"}
+                   .arg (m_TRperiod)
+                   .arg (value)
+                   .arg (m_currentBand)
+                   .arg (m_freqNominal));
+  }
   //  if(!m_bFastMode and n>m_nSubMode) m_MinW=m_nSubMode;
   if(m_bFastMode or m_mode=="FreqCal" or m_mode=="FST4" or m_mode=="FST4W" or m_mode=="Q65") {
     m_TRperiod = value;
@@ -33312,10 +33399,8 @@ void MainWindow::onRemoteSetDialFrequencyRequested(QString const& commandId, qin
       m_rigState.tx_frequency(frequency);
     }
   m_currentBand = m_config.bands()->find(frequency);
-  if (m_embeddedShellMode
-      && !m_embeddedRigControlEnabled
-      && (qEnvironmentVariableIsSet("DECODIUM_RX_RECORD_SECONDS")
-          || qEnvironmentVariableIsSet("DECODIUM_RX_RECORD_DIAL_HZ")))
+  restoreMsk144PeriodForCurrentBand();
+  if (m_embeddedShellMode && !m_embeddedRigControlEnabled)
     {
       m_freqNominal = frequency;
       m_freqTxNominal = frequency;

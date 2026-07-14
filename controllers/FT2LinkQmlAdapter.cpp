@@ -74,6 +74,9 @@ constexpr double kFt2LinkBusyPeakThreshold = 0.014;
 constexpr double kFt2LinkLbtBusyRmsThreshold = 0.085;
 constexpr double kFt2LinkLbtBusyPeakThreshold = 0.300;
 constexpr quint64 kFt2LinkBusyHoldMs = 750u;
+constexpr quint64 kFt2LinkPreTxCcaMinMs = 280u;
+constexpr quint64 kFt2LinkPreTxCcaJitterMs = 720u;
+constexpr quint64 kFt2LinkWallClockMsFloor = 946684800000u; // 2000-01-01
 
 decodium::ft2link::W500WaveformConfig liveW500RxConfig ()
 {
@@ -229,6 +232,22 @@ quint64 jsonU64 (QJsonObject const& object, QString const& key,
       return fallback;
     }
   return value.toVariant ().toULongLong ();
+}
+
+quint64 deterministicPreTxCcaDelayMs (QString const& seed)
+{
+  QByteArray const digest =
+      QCryptographicHash::hash (seed.toUtf8 (),
+                                QCryptographicHash::Sha256);
+  quint32 value = 0u;
+  for (int i = 0; i < 4 && i < digest.size (); ++i)
+    {
+      value = (value << 8)
+          | static_cast<quint8> (digest.at (i));
+    }
+  return kFt2LinkPreTxCcaMinMs
+      + static_cast<quint64> (
+          value % static_cast<quint32> (kFt2LinkPreTxCcaJitterMs + 1u));
 }
 
 quint32 jsonU32 (QJsonObject const& object, QString const& key,
@@ -21083,6 +21102,7 @@ void FT2LinkQmlAdapter::applyObservedRxEnergy (double rms,
     }
   if (lbtEnergyBusy)
     {
+      m_liveChannelLastLbtEnergyMs = nowMs;
       m_liveChannelLbtBusyUntilMs = std::max (
           m_liveChannelLbtBusyUntilMs, nowMs + kFt2LinkBusyHoldMs);
       m_liveChannelLbtBusy = true;
@@ -21314,10 +21334,10 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
   item.cancelIfNoOutbound = cancelIfNoOutbound;
   item.priority = priority;
 
-  Q_UNUSED (nowMs);
   quint64 const effectiveNow =
       static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
   item.enqueuedAtMs = effectiveNow;
+  item.notBeforeMs = effectiveNow;
   item.strictLbt = m_nextRadioTxStrictLbt;
   if (item.strictLbt)
     {
@@ -21331,11 +21351,28 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
     }
   m_nextRadioTxStrictLbt = false;
   m_nextRadioTxStrictLbtCancelMs = 24000;
+  bool const wallClockRequest = nowMs >= kFt2LinkWallClockMsFloor;
+  if (!priority && wallClockRequest)
+    {
+      QString const localCall = QString::fromStdString (
+          m_model.localStation ().call).trimmed ().toUpper ();
+      QString const seed = QStringLiteral ("%1|%2|%3|%4")
+          .arg (localCall,
+                displayMessage,
+                QString::number (sessionId),
+                plan.value (QStringLiteral ("kind")).toString ());
+      quint64 const ccaDelayMs = deterministicPreTxCcaDelayMs (seed);
+      item.notBeforeMs = effectiveNow + ccaDelayMs;
+      item.plan.insert (QStringLiteral ("preTxCcaMs"),
+                        QVariant::fromValue<qulonglong> (
+                            static_cast<qulonglong> (ccaDelayMs)));
+      item.plan.insert (QStringLiteral ("ccaDeferred"), true);
+    }
   bool const channelBusy = isLiveChannelLbtBusy (effectiveNow);
   bool const deferBroadcast = shouldDeferBroadcastTx (
       item.plan, item.sessionId);
   if (m_radioTxQueue.empty () && m_radioTxBusyUntilMs <= effectiveNow
-      && !channelBusy && !deferBroadcast)
+      && item.notBeforeMs <= effectiveNow && !channelBusy && !deferBroadcast)
     {
       QVariantMap emittedPlan = item.plan;
       emittedPlan.insert (QStringLiteral ("queued"), false);
@@ -21365,6 +21402,10 @@ void FT2LinkQmlAdapter::enqueueRadioTx (QString const& displayMessage,
                             static_cast<qulonglong> (
                                 m_liveChannelLbtBusyUntilMs)));
       setTransportState (QStringLiteral ("LBT wait"));
+    }
+  else if (item.notBeforeMs > effectiveNow)
+    {
+      setTransportState (QStringLiteral ("CCA wait"));
     }
   if (deferBroadcast)
     {
@@ -21502,6 +21543,11 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
       return;
     }
   bool lbtBusy = isLiveChannelLbtBusy (effectiveNow);
+  bool const activeLbtEnergy =
+      lbtBusy
+      && m_liveChannelLastLbtEnergyMs != 0u
+      && effectiveNow <= m_liveChannelLastLbtEnergyMs
+          + kFt2LinkBusyHoldMs + 300u;
   if (lbtBusy && !m_radioTxQueue.empty ())
     {
       bool cancelledStrict = false;
@@ -21548,6 +21594,7 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
       quint64 const oldest = m_radioTxQueue.front ().enqueuedAtMs;
       if (!m_radioTxQueue.front ().strictLbt
           && oldest != 0u
+          && !activeLbtEnergy
           && effectiveNow >= oldest + kMaxLbtHoldMs)
         {
           forceThroughLbt = true;
@@ -21563,6 +21610,7 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
   std::size_t fallbackIndex = std::numeric_limits<std::size_t>::max ();
   bool const deferBroadcasts = hasPendingSessionRadioTraffic ();
   bool skippedBroadcast = false;
+  quint64 nextNotBeforeMs = 0u;
   for (std::size_t index = 0u; index < m_radioTxQueue.size ();)
     {
       RadioTxQueueItem const& queued = m_radioTxQueue[index];
@@ -21573,6 +21621,14 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
               m_radioTxQueue.begin ()
               + static_cast<std::deque<RadioTxQueueItem>::difference_type> (
                   index));
+          continue;
+        }
+      if (queued.notBeforeMs > effectiveNow)
+        {
+          nextNotBeforeMs = nextNotBeforeMs == 0u
+              ? queued.notBeforeMs
+              : std::min (nextNotBeforeMs, queued.notBeforeMs);
+          ++index;
           continue;
         }
       QString const kind = queued.plan.value (
@@ -21621,6 +21677,14 @@ void FT2LinkQmlAdapter::drainRadioTxQueue (quint64 nowMs)
                   .arg (m_radioTxQueue.size ()));
           m_radioTxQueueTimer.start (750);
         }
+      else if (nextNotBeforeMs > effectiveNow)
+        {
+          setTransportState (QStringLiteral ("CCA wait"));
+          m_radioTxQueueTimer.start (
+              static_cast<int> (std::min<quint64> (
+                  nextNotBeforeMs - effectiveNow,
+                  2147483647u)));
+        }
       return;
     }
 
@@ -21662,6 +21726,27 @@ void FT2LinkQmlAdapter::scheduleRadioQueueDrain (quint64 nowMs)
   if (isLiveChannelLbtBusy (effectiveNow))
     {
       readyAtMs = std::max (readyAtMs, m_liveChannelLbtBusyUntilMs);
+    }
+  quint64 nextNotBeforeMs = 0u;
+  for (RadioTxQueueItem const& item : m_radioTxQueue)
+    {
+      if (item.notBeforeMs > effectiveNow)
+        {
+          nextNotBeforeMs = nextNotBeforeMs == 0u
+              ? item.notBeforeMs
+              : std::min (nextNotBeforeMs, item.notBeforeMs);
+        }
+      else
+        {
+          nextNotBeforeMs = 0u;
+          break;
+        }
+    }
+  if (nextNotBeforeMs != 0u)
+    {
+      readyAtMs = readyAtMs == 0u
+          ? nextNotBeforeMs
+          : std::max (readyAtMs, nextNotBeforeMs);
     }
   quint64 const delayMs = readyAtMs > effectiveNow
       ? readyAtMs - effectiveNow

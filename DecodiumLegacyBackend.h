@@ -26,6 +26,7 @@ public:
     QString callsign() const;
     QString grid() const;
     QString mode() const;
+    int trPeriodSeconds() const;
     QString rigName() const;
     double dialFrequency() const;
     int rxFrequency() const;

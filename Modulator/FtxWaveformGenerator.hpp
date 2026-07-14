@@ -14,6 +14,8 @@ namespace txwave
 QVector<float> generateFt2Wave (int const* itone, int nsym, int nsps, float fsample, float f0);
 QVector<float> generateFt4Wave (int const* itone, int nsym, int nsps, float fsample, float f0);
 QVector<float> generateFt8Wave (int const* itone, int nsym, int nsps, float bt, float fsample, float f0);
+QVector<float> generateMsk144Wave (int const* itone, int nsym, float fsample, float centerFrequency,
+                                   double trPeriodSeconds);
 QVector<float> generateFst4Wave (int const* itone, int nsym, int nsps, float fsample, int hmod, float f0);
 QVector<float> generateToneWave (int const* itone, int nsym, int nsps, float fsample,
                                  float toneSpacing, float f0);

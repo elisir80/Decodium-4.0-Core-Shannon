@@ -4371,6 +4371,80 @@ private Q_SLOTS:
     QVERIFY (plan.value ("lbtDeferred").toBool ());
   }
 
+  void radioTxUsesPreTxCcaForWallClockRequests ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter caller;
+    caller.setLocalStation ("TESTA", "JN70", "Salvo");
+    quint16 const sessionId =
+        connectWideSession (caller, "TESTB", "JN71", 1000);
+    QVERIFY (sessionId != 0u);
+
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+
+    QSignalSpy radioSpy {&caller, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    caller.setRadioTxArmed (true);
+    QVERIFY (caller.transmitPreparedRadioTxAudio (
+        sessionId, QStringLiteral ("cca collision guard"), nowMs));
+    QCOMPARE (radioSpy.size (), 0);
+    QCOMPARE (caller.transportState (), QStringLiteral ("CCA wait"));
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 3000);
+    QVariantMap const plan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (plan.value (QStringLiteral ("queued")).toBool ());
+    QVERIFY (plan.value (QStringLiteral ("ccaDeferred")).toBool ());
+    QVERIFY (plan.value (QStringLiteral ("preTxCcaMs")).toULongLong () >= 280u);
+  }
+
+  void radioTxStaggersSimultaneousWallClockRequests ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter testa;
+    FT2LinkQmlAdapter testb;
+    testa.setLocalStation ("TESTA", "JN70", "Salvo");
+    testb.setLocalStation ("TESTB", "JN71", "Martino");
+    quint16 const sessionA =
+        connectWideSession (testa, "TESTB", "JN71", 1000);
+    quint16 const sessionB =
+        connectWideSession (testb, "TESTA", "JN70", 1000);
+    QVERIFY (sessionA != 0u);
+    QVERIFY (sessionB != 0u);
+
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+
+    QSignalSpy radioSpyA {&testa, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    QSignalSpy radioSpyB {&testb, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    testa.setRadioTxArmed (true);
+    testb.setRadioTxArmed (true);
+    QVERIFY (testa.transmitPreparedRadioTxAudio (
+        sessionA, QStringLiteral ("simultaneous guard"), nowMs));
+    QVERIFY (testb.transmitPreparedRadioTxAudio (
+        sessionB, QStringLiteral ("simultaneous guard"), nowMs));
+
+    QCOMPARE (radioSpyA.size (), 0);
+    QCOMPARE (radioSpyB.size (), 0);
+    QCOMPARE (testa.transportState (), QStringLiteral ("CCA wait"));
+    QCOMPARE (testb.transportState (), QStringLiteral ("CCA wait"));
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpyA.size () >= 1, 3000);
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpyB.size () >= 1, 3000);
+    QVariantMap const planA = radioSpyA.takeFirst ()[2].toMap ();
+    QVariantMap const planB = radioSpyB.takeFirst ()[2].toMap ();
+    quint64 const delayA =
+        planA.value (QStringLiteral ("preTxCcaMs")).toULongLong ();
+    quint64 const delayB =
+        planB.value (QStringLiteral ("preTxCcaMs")).toULongLong ();
+    QVERIFY (delayA >= 280u);
+    QVERIFY (delayB >= 280u);
+    QVERIFY (delayA <= 1000u);
+    QVERIFY (delayB <= 1000u);
+    QVERIFY (delayA != delayB);
+  }
+
   void adapterRoundTripsNarrowBeaconAudio ()
   {
     qRegisterMetaType<QVector<float>> ("QVector<float>");

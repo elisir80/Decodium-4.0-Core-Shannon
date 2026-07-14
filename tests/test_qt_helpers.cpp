@@ -1384,6 +1384,92 @@ private:
     }
   }
 
+  Q_SLOT void msk144_bridge_waveform_round_trips_through_native_decoder ()
+  {
+    QStringList const messages {
+      QStringLiteral ("CQ K1ABC FN42"),
+      QStringLiteral ("K1ABC W9XYZ EN37"),
+      QStringLiteral ("W9XYZ K1ABC +00"),
+      QStringLiteral ("K1ABC W9XYZ R+00"),
+      QStringLiteral ("W9XYZ K1ABC RR73"),
+      QStringLiteral ("K1ABC W9XYZ 73"),
+    };
+
+    quint64 serial = 0;
+    for (int messageIndex = 0; messageIndex < messages.size (); ++messageIndex)
+      {
+        QString const& message = messages.at (messageIndex);
+        decodium::txmsg::EncodedMessage const encoded = decodium::txmsg::encodeMsk144 (message);
+        QVERIFY2 (encoded.ok, qPrintable (message));
+        QCOMPARE (encoded.tones.size (), 144);
+
+        QVector<float> const txWave = decodium::txwave::generateMsk144Wave (
+            encoded.tones.constData (), 144, 48000.0f, 1500.0f, 15.0);
+        QCOMPARE (txWave.size (), 696000);
+
+        decodium::msk144::DecodeRequest request;
+        request.serial = ++serial;
+        request.audio.resize (txWave.size () / 4);
+        for (int i = 0; i < request.audio.size (); ++i)
+          {
+            request.audio[i] = static_cast<short> (
+                qBound (-32767, qRound (30000.0f * txWave.at (4 * i)), 32767));
+          }
+        request.nutc = 123456;
+        request.kdone = request.audio.size ();
+        request.t1_ms = request.audio.size () * 1000 / kMsk144SampleRate;
+        request.maxlines = kMsk144MaxLines;
+        request.rxfreq = 1500;
+        request.ftol = 20;
+        request.aggressive = 3;
+        request.trperiod = 15.0;
+        request.mycall = QByteArrayLiteral ("W9XYZ");
+        request.hiscall = QByteArrayLiteral ("K1ABC");
+
+        decodium::msk144::resetMsk144DecoderState ();
+        QStringList const rows = decodium::msk144::decodeMsk144Rows (request);
+        QVERIFY2 (!rows.isEmpty (), qPrintable (QStringLiteral ("No rows for %1").arg (message)));
+        QVERIFY2 (rows.join (QStringLiteral ("\n")).contains (message),
+                  qPrintable (rows.join (QStringLiteral ("\n"))));
+
+        if (messageIndex == 0)
+          {
+            for (int const trSeconds : {5, 10, 15, 30})
+              {
+                QVector<float> const periodWave = decodium::txwave::generateMsk144Wave (
+                    encoded.tones.constData (), 144, 48000.0f, 1500.0f, trSeconds);
+                QCOMPARE (periodWave.size (), (trSeconds * 48000) - 24000);
+
+                decodium::msk144::DecodeRequest periodRequest;
+                periodRequest.serial = ++serial;
+                periodRequest.audio.resize (periodWave.size () / 4);
+                for (int i = 0; i < periodRequest.audio.size (); ++i)
+                  {
+                    periodRequest.audio[i] = static_cast<short> (
+                        qBound (-32767, qRound (30000.0f * periodWave.at (4 * i)), 32767));
+                  }
+                periodRequest.nutc = 123456;
+                periodRequest.kdone = periodRequest.audio.size ();
+                periodRequest.t1_ms = periodRequest.audio.size () * 1000 / kMsk144SampleRate;
+                periodRequest.maxlines = kMsk144MaxLines;
+                periodRequest.rxfreq = 1500;
+                periodRequest.ftol = 20;
+                periodRequest.aggressive = 3;
+                periodRequest.trperiod = trSeconds;
+                periodRequest.mycall = QByteArrayLiteral ("W9XYZ");
+                periodRequest.hiscall = QByteArrayLiteral ("K1ABC");
+
+                decodium::msk144::resetMsk144DecoderState ();
+                QStringList const periodRows = decodium::msk144::decodeMsk144Rows (periodRequest);
+                QVERIFY2 (periodRows.join (QStringLiteral ("\n")).contains (message),
+                          qPrintable (QStringLiteral ("No %1 s round-trip for %2: %3")
+                                        .arg (trSeconds)
+                                        .arg (message, periodRows.join (QStringLiteral ("\n")))));
+              }
+          }
+      }
+  }
+
   Q_SLOT void fst4_encoder_matches_frozen_reference ()
   {
     auto check = [] (QString const& message, bool wspr_hint, QByteArray const& expected_msgsent,

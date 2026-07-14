@@ -1770,6 +1770,56 @@ QVector<float> generateFt8Wave (int const* itone, int nsym, int nsps, float bt, 
   return generate_ft8_wave (itone, nsym, nsps, bt, fsample, f0);
 }
 
+QVector<float> generateMsk144Wave (int const* itone, int nsym, float fsample,
+                                   float centerFrequency, double trPeriodSeconds)
+{
+  if (!itone || nsym <= 0 || fsample <= 0.0f || trPeriodSeconds <= 0.5)
+    {
+      return {};
+    }
+
+  // WSJT-X MSK144: 2000 baud continuous-phase 2-FSK, tones at center +/-500 Hz.
+  // The encoded 144-symbol frame (or 40-symbol shorthand) is repeated until
+  // 500 ms before the end of the T/R period. The final 17 ms follows the same
+  // exponential key-down ramp used by the reference Modulator.
+  constexpr double kTwoPi = 6.28318530717958647692;
+  constexpr double kBaud = 2000.0;
+  int const samplesPerSymbol = qMax (1, qRound (static_cast<double> (fsample) / kBaud));
+  int const payloadSamples = qMax (
+      0, qRound ((trPeriodSeconds - 0.5) * static_cast<double> (fsample)));
+  if (payloadSamples <= 0)
+    {
+      return {};
+    }
+
+  QVector<float> wave (payloadSamples);
+  double const dphi0 = kTwoPi * (static_cast<double> (centerFrequency) - 0.25 * kBaud)
+                       / static_cast<double> (fsample);
+  double const dphi1 = kTwoPi * (static_cast<double> (centerFrequency) + 0.25 * kBaud)
+                       / static_cast<double> (fsample);
+  int const fadeSamples = qMin (payloadSamples, qMax (1, qRound (0.017 * fsample)));
+  int const fadeStart = payloadSamples - fadeSamples;
+  double phase = 0.0;
+  double amplitude = 1.0;
+
+  for (int i = 0; i < payloadSamples; ++i)
+    {
+      int const symbol = (i / samplesPerSymbol) % nsym;
+      double const dphi = itone[symbol] == 0 ? dphi0 : dphi1;
+      if (i >= fadeStart)
+        {
+          amplitude *= 0.98;
+        }
+      wave[i] = static_cast<float> (amplitude * std::sin (phase));
+      phase += dphi;
+      if (phase >= kTwoPi)
+        {
+          phase = std::fmod (phase, kTwoPi);
+        }
+    }
+  return wave;
+}
+
 QVector<float> generateToneWave (int const* itone, int nsym, int nsps, float fsample,
                                  float toneSpacing, float f0)
 {
