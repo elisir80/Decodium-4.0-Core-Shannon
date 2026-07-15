@@ -2033,13 +2033,8 @@ struct DecodeUserFilterConfig {
     QStringList territoryTerms;
 };
 
-static DecodeUserFilterConfig readDecodeUserFilterConfig(const DecodiumBridge& bridge);
 static bool shouldAcceptDecodeEntryByUserFilters(const QVariantMap& entry,
                                                  const DecodeUserFilterConfig& filters,
-                                                 bool waitPounceScope,
-                                                 QString* reason = nullptr);
-static bool shouldAcceptDecodeEntryByUserFilters(const DecodiumBridge& bridge,
-                                                 const QVariantMap& entry,
                                                  bool waitPounceScope,
                                                  QString* reason = nullptr);
 
@@ -3583,8 +3578,12 @@ static bool tokenMatchesCall(QString const& token,
 
 static QStringList normalizedMessageTokens(QString const& message)
 {
-    QStringList const rawTokens = message.toUpper().split(QRegularExpression("\\s+"),
-                                                          Qt::SkipEmptyParts);
+    // This runs for every decoded row, often several times per row.  A temporary
+    // QRegularExpression forces PCRE compilation/JIT work in the main thread at
+    // every decode burst.  simplified() has the same whitespace semantics for
+    // FTx payloads and the character split does not compile a regex.
+    QStringList const rawTokens = message.toUpper().simplified().split(QLatin1Char(' '),
+                                                                       Qt::SkipEmptyParts);
     QStringList normalized;
     normalized.reserve(rawTokens.size());
     for (QString const& token : rawTokens) {
@@ -4142,6 +4141,18 @@ static QString decodeMirrorEntryKey(QVariantMap const& entry)
            (entry.value("isTx").toBool() ? QStringLiteral("1") : QStringLiteral("0"));
 }
 
+static QString decodeMirrorSemanticKey(QVariantMap const& entry)
+{
+    return entry.value(QStringLiteral("mode")).toString().trimmed().toUpper()
+        + QLatin1Char('|')
+        + entry.value(QStringLiteral("freq")).toString().trimmed()
+        + QLatin1Char('|')
+        + canonicalDecodeMessage(entry.value(QStringLiteral("message")).toString())
+        + QLatin1Char('|')
+        + (entry.value(QStringLiteral("isTx")).toBool()
+               ? QStringLiteral("1") : QStringLiteral("0"));
+}
+
 static QString decodeRxClearEntryKey(QVariantMap const& entry)
 {
     QString key = decodeMirrorEntryKey(entry);
@@ -4154,6 +4165,30 @@ static QString decodeRxClearEntryKey(QVariantMap const& entry)
         }
     }
     return key;
+}
+
+static QVariantList decodeEntriesNotInPrevious(QVariantList const& entries,
+                                                QVariantList const& previousEntries)
+{
+    QSet<QString> previousKeys;
+    previousKeys.reserve(previousEntries.size());
+    for (QVariant const& value : previousEntries) {
+        QString const key = decodeMirrorEntryKey(value.toMap());
+        if (!key.isEmpty()) {
+            previousKeys.insert(key);
+        }
+    }
+
+    QVariantList added;
+    added.reserve(qMax(0, entries.size() - previousEntries.size()));
+    for (QVariant const& value : entries) {
+        QVariantMap const entry = value.toMap();
+        QString const key = decodeMirrorEntryKey(entry);
+        if (key.isEmpty() || !previousKeys.contains(key)) {
+            added.append(entry);
+        }
+    }
+    return added;
 }
 
 static QString currentTxVisualTimeToken(QString const& mode)
@@ -4422,8 +4457,8 @@ static QStringList hashResolveLogCandidatePaths(QString const& primaryAllTxtPath
 
 static QStringList hashResolveMessageTokens(QString const& message)
 {
-    return canonicalDecodeMessage(message).toUpper().split(QRegularExpression("\\s+"),
-                                                           Qt::SkipEmptyParts);
+    return canonicalDecodeMessage(message).toUpper().simplified().split(
+        QLatin1Char(' '), Qt::SkipEmptyParts);
 }
 
 static bool hashResolveMessagesCompatible(QString const& hashedMessage,
@@ -4511,7 +4546,7 @@ static QString inferPartnerFromDirectedMessage(QString const& message,
                                                QString const& myCall,
                                                QString const& myBase)
 {
-    QStringList const words = message.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList const words = message.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (words.size() < 2) {
         return {};
     }
@@ -4617,7 +4652,7 @@ void pruneRecentDuplicateCache(QHash<QString, QDateTime>& cache, QDateTime const
 
 bool messageCarries73Payload(QString const& message)
 {
-    QStringList const parts = message.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList const parts = message.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     for (QString const& token : parts) {
         QString const upper = token.trimmed().toUpper();
         if (upper == QStringLiteral("73")
@@ -5997,7 +6032,7 @@ bool decodeListModel_isTelemetryHexToken(QString const& token)
 
 bool decodeListModel_isTelemetryOnlyMessage(QString const& message)
 {
-    QStringList const parts = message.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList const parts = message.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (parts.size() != 1) return false;
     return decodeListModel_isTelemetryHexToken(parts.first());
 }
@@ -6006,6 +6041,17 @@ bool decodeListModel_isTelemetryOnlyMessage(QString const& message)
 
 bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry) const
 {
+    bool const hideWorkedBand = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
+    bool const hideWorkedToday = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    return shouldDisplayEntryForBandActivity(entry, hideWorkedBand, hideWorkedToday);
+}
+
+bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry,
+                                                       bool hideWorkedBand,
+                                                       bool hideWorkedToday) const
+{
     if (entry.isEmpty()) return false;
     // 1.0.145: prima cosa, filter ghost decode se attivo. Le entries TX sono
     // certe; MyCall resta passante solo quando non mostra segnali strutturali
@@ -6013,13 +6059,11 @@ bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry)
     if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) return false;
     bool const isTxEntry = entry.value(QStringLiteral("isTx")).toBool()
         || entry.value(QStringLiteral("db")).toString().trimmed().compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
-    if (!m_filtersBypassed && !isTxEntry) {
-        if (getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool()
-            && entry.value(QStringLiteral("dxIsWorkedBand")).toBool()) {
+    if (!isTxEntry) {
+        if (hideWorkedBand && entry.value(QStringLiteral("dxIsWorkedBand")).toBool()) {
             return false;
         }
-        if (getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool()
-            && entry.value(QStringLiteral("dxIsWorkedToday")).toBool()) {
+        if (hideWorkedToday && entry.value(QStringLiteral("dxIsWorkedToday")).toBool()) {
             return false;
         }
     }
@@ -6113,8 +6157,8 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
             QString const fallback = entry.value(QStringLiteral("message"))
                                           .toString().trimmed().toUpper();
             QString const source = msg.isEmpty() ? fallback : msg;
-            QStringList const tokens = source.split(QRegularExpression(QStringLiteral("\\s+")),
-                                                    Qt::SkipEmptyParts);
+            QStringList const tokens = source.simplified().split(QLatin1Char(' '),
+                                                                  Qt::SkipEmptyParts);
             if (tokens.size() >= 2) {
                 partnerCandidate = tokens.at(1);
                 partnerCandidate.remove('<');
@@ -6147,8 +6191,8 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
             QString const msgFallback = entry.value(QStringLiteral("message"))
                                               .toString().trimmed().toUpper();
             QString const msgText = msgFull.isEmpty() ? msgFallback : msgFull;
-            QStringList const allTokens = msgText.split(QRegularExpression(QStringLiteral("\\s+")),
-                                                         Qt::SkipEmptyParts);
+            QStringList const allTokens = msgText.simplified().split(QLatin1Char(' '),
+                                                                      Qt::SkipEmptyParts);
             if (allTokens.size() >= 3) {
                 static QRegularExpression const corruptedTokenRe(
                     QStringLiteral("(\\.\\.)|(\\.+$)|(^[A-Z]\\.+\\d)"));
@@ -6177,8 +6221,8 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
         QString const msgFallback = entry.value(QStringLiteral("message"))
                                           .toString().trimmed().toUpper();
         QString const msgText = msgFull.isEmpty() ? msgFallback : msgFull;
-        QStringList const rawTokens = msgText.split(QRegularExpression(QStringLiteral("\\s+")),
-                                                    Qt::SkipEmptyParts);
+        QStringList const rawTokens = msgText.simplified().split(QLatin1Char(' '),
+                                                                  Qt::SkipEmptyParts);
         bool const lowConfidence = !rawTokens.isEmpty()
             && rawTokens.constLast().trimmed() == QStringLiteral("?");
         QString grid = entry.value(QStringLiteral("dxGrid")).toString().trimmed().toUpper();
@@ -6426,8 +6470,8 @@ bool DecodiumBridge::shouldSuppressDirectedGhostDecode(const QStringList& fields
                 // 1.0.416: also suppress high-confidence weak first-calls when the
                 // mismatch is extreme. Active/manual targets returned earlier, so
                 // QSO replies stay visible even with a corrupt grid.
-                QStringList const ghostTokens = msg.split(QRegularExpression(QStringLiteral("\\s+")),
-                                                          Qt::SkipEmptyParts);
+                QStringList const ghostTokens = msg.simplified().split(QLatin1Char(' '),
+                                                                        Qt::SkipEmptyParts);
                 bool const ghostLowConfidence = !ghostTokens.isEmpty()
                     && ghostTokens.constLast().trimmed() == QStringLiteral("?");
                 bool snrOk = false;
@@ -8074,8 +8118,10 @@ bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
 void DecodiumBridge::injectPeriodSeparators(QVariantList& filtered) const
 {
     if (!m_decodeShowPeriodSeparator || filtered.size() <= 1) {
-        bridgeLog(QStringLiteral("injectPeriodSeparators skipped: enabled=%1 size=%2")
-            .arg(m_decodeShowPeriodSeparator).arg(filtered.size()));
+        if (qEnvironmentVariableIsSet("DECODIUM_DECODE_MODEL_DEBUG")) {
+            bridgeLog(QStringLiteral("injectPeriodSeparators skipped: enabled=%1 size=%2")
+                .arg(m_decodeShowPeriodSeparator).arg(filtered.size()));
+        }
         return;
     }
     QVariantList withSep;
@@ -8107,8 +8153,10 @@ void DecodiumBridge::injectPeriodSeparators(QVariantList& filtered) const
         if (ts > 0) prevTs = ts;
         withSep.append(it);
     }
-    bridgeLog(QStringLiteral("injectPeriodSeparators inserted=%1 rows=%2 -> %3")
-        .arg(sepCount).arg(filtered.size()).arg(withSep.size()));
+    if (qEnvironmentVariableIsSet("DECODIUM_DECODE_MODEL_DEBUG")) {
+        bridgeLog(QStringLiteral("injectPeriodSeparators inserted=%1 rows=%2 -> %3")
+            .arg(sepCount).arg(filtered.size()).arg(withSep.size()));
+    }
     filtered = withSep;
 }
 
@@ -8116,9 +8164,13 @@ QVariantList DecodiumBridge::filterEntriesForBandActivity(QVariantList const& so
 {
     QVariantList filtered;
     filtered.reserve(source.size());
+    bool const hideWorkedBand = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
+    bool const hideWorkedToday = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
     for (QVariant const& v : source) {
         QVariantMap const e = v.toMap();
-        if (shouldDisplayEntryForBandActivity(e)) {
+        if (shouldDisplayEntryForBandActivity(e, hideWorkedBand, hideWorkedToday)) {
             filtered.append(e);
         }
     }
@@ -8133,13 +8185,17 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
     filtered.reserve(source.size());
     bool const showTxMessagesInRx =
         getSetting(QStringLiteral("TXMessagesToRX"), true).toBool();
+    bool const hideWorkedBand = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
+    bool const hideWorkedToday = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
     for (QVariant const& v : source) {
         QVariantMap const e = v.toMap();
-        if (!shouldDisplayEntryForBandActivity(e)) continue;  // stesso filter telemetry
+        if (!shouldDisplayEntryForBandActivity(e, hideWorkedBand, hideWorkedToday)) continue;
         if (e.value(QStringLiteral("isTx")).toBool() && !showTxMessagesInRx) continue;
         QString const key = decodeRxClearEntryKey(e);
         if (!key.isEmpty() && m_clearedRxDecodeKeys.contains(key)) continue;
-        if (entryBelongsToCurrentQso(e)) {
+        if (e.value(QStringLiteral("forceRxPane")).toBool() || entryBelongsToCurrentQso(e)) {
             filtered.append(e);
         }
     }
@@ -8186,7 +8242,9 @@ void DecodiumBridge::rebuildRxDecodeModel()
                                    .arg(m_rxDecodeList.size())
                                    .arg(m_decodeList.size()));
     QVariantList merged;
-    merged.reserve(m_rxDecodeList.size() + m_decodeList.size());
+    bool const legacyMirrorOwnsRxHistory = usingLegacyBackendForTx();
+    merged.reserve(m_rxDecodeList.size()
+                   + (legacyMirrorOwnsRxHistory ? 0 : m_decodeList.size()));
     QSet<QString> seen;
     auto appendUnique = [&merged, &seen](QVariant const& value) {
         QVariantMap const entry = value.toMap();
@@ -8198,7 +8256,12 @@ void DecodiumBridge::rebuildRxDecodeModel()
         merged.append(entry);
     };
     for (QVariant const& value : std::as_const(m_rxDecodeList)) appendUnique(value);
-    for (QVariant const& value : std::as_const(m_decodeList)) appendUnique(value);
+    // The legacy mirror has already merged directed Band Activity rows into
+    // m_rxDecodeList. Re-scanning the complete band list here repeats message,
+    // DXCC and QSO routing checks on the GUI thread for no visible benefit.
+    if (!legacyMirrorOwnsRxHistory) {
+        for (QVariant const& value : std::as_const(m_decodeList)) appendUnique(value);
+    }
     QVariantList const filtered = filterEntriesForRxDecode(merged);
     m_rxDecodeModel->setEntries(filtered);
     trace.addDetail(QStringLiteral("merged_rows=%1 filtered_rows=%2")
@@ -8440,7 +8503,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // fase 1 (emitDecodeListChangedThrottled max 4 emit/sec).
     connect(this, &DecodiumBridge::decodeListChanged, this, [this]() {
         rebuildBandActivityModel();
-        rebuildRxDecodeModel();
+        // In legacy mode Signal RX has its own complete, throttled history and
+        // emits rxDecodeListChanged. Avoid rebuilding it a second time for each
+        // Band Activity early/final/deep pass.
+        if (!usingLegacyBackendForTx()) {
+            rebuildRxDecodeModel();
+        }
     });
     connect(this, &DecodiumBridge::rxDecodeListChanged, this, [this]() {
         rebuildRxDecodeModel();
@@ -11523,7 +11591,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         return;
     }
 
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     auto applyLegacyUiFilters = [this, &userFilterConfig](QVariantList const& entries, bool applyCqOnly) {
         QVariantList filtered;
         filtered.reserve(entries.size());
@@ -11605,21 +11673,10 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             maybeEnqueueMamCallerFromMessage(message, freqOk ? freq : -1, snr, true);
         }
     };
-    auto publishWorldMapFromEntries = [this](QVariantList const& entries,
-                                             QVariantList const& previousEntries) {
-        QSet<QString> previousKeys;
-        previousKeys.reserve(previousEntries.size());
-        for (QVariant const& value : previousEntries) {
-            previousKeys.insert(decodeMirrorEntryKey(value.toMap()));
-        }
-
+    auto publishWorldMapFromEntries = [this](QVariantList const& entries) {
         bool published = false;
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
-            QString const key = decodeMirrorEntryKey(entry);
-            if (!key.isEmpty() && previousKeys.contains(key)) {
-                continue;
-            }
             queueWorldMapEntryForReplay(entry, false, 250);
             published = true;
         }
@@ -11640,21 +11697,10 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         diff = qMin(diff, 86400 - diff);
         return diff <= freshnessWindowSeconds;
     };
-    auto queuePskReporterFromEntries = [this, &isFreshLegacyDecodeForPsk](QVariantList const& entries,
-                                                                         QVariantList const& previousEntries) {
-        QSet<QString> previousKeys;
-        previousKeys.reserve(previousEntries.size());
-        for (QVariant const& value : previousEntries) {
-            previousKeys.insert(decodeMirrorEntryKey(value.toMap()));
-        }
-
+    auto queuePskReporterFromEntries = [this, &isFreshLegacyDecodeForPsk](QVariantList const& entries) {
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
             if (entry.value(QStringLiteral("isTx")).toBool()) {
-                continue;
-            }
-            QString const key = decodeMirrorEntryKey(entry);
-            if (!key.isEmpty() && previousKeys.contains(key)) {
                 continue;
             }
             QString const message = entry.value(QStringLiteral("message")).toString().trimmed();
@@ -11683,19 +11729,10 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
     };
     auto feedWaitPounceFromEntries = [this](QVariantList const& entries,
-                                            QVariantList const& previousEntries,
+                                            QVariantList const& contextEntries,
                                             QString const& source) {
         if (!m_waitPounceActive) {
             return;
-        }
-
-        QSet<QString> previousKeys;
-        previousKeys.reserve(previousEntries.size());
-        for (QVariant const& value : previousEntries) {
-            QString const key = decodeMirrorEntryKey(value.toMap());
-            if (!key.isEmpty()) {
-                previousKeys.insert(key);
-            }
         }
 
         for (QVariant const& value : entries) {
@@ -11703,11 +11740,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             if (entry.value(QStringLiteral("isTx")).toBool()) {
                 continue;
             }
-            QString const key = decodeMirrorEntryKey(entry);
-            if (!key.isEmpty() && previousKeys.contains(key)) {
-                continue;
-            }
-            if (tryStartWaitPounceFromEntry(entry, previousEntries, source)) {
+            if (tryStartWaitPounceFromEntry(entry, contextEntries, source)) {
                 bridgeLog(QStringLiteral("legacy-mirror Wait & Pounce feed accepted source=%1 msg=%2")
                               .arg(source,
                                    entry.value(QStringLiteral("message")).toString().trimmed()));
@@ -11715,20 +11748,13 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             }
         }
     };
-    auto feedAutoSequenceFromEntries = [this](QVariantList const& entries,
-                                              QVariantList const& previousEntries) {
+    auto feedAutoSequenceFromEntries = [this](QVariantList const& entries) {
         bool const autoSeqActive = !m_callsign.isEmpty()
             && ((m_autoSeq && (m_txEnabled || !m_dxCall.isEmpty()))
                 || m_autoCqRepeat);
         if (!autoSeqActive || m_manualTxHold) {
             return;
         }
-        QSet<QString> previousKeys;
-        previousKeys.reserve(previousEntries.size());
-        for (QVariant const& value : previousEntries) {
-            previousKeys.insert(decodeMirrorEntryKey(value.toMap()));
-        }
-
         QString const myCallUpper = m_callsign.trimmed().toUpper();
         QString const myBaseUpper = normalizedBaseCall(myCallUpper);
         int const nowSeconds =
@@ -11748,10 +11774,6 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
             if (entry.value(QStringLiteral("isTx")).toBool()) {
-                continue;
-            }
-            QString const key = decodeMirrorEntryKey(entry);
-            if (previousKeys.contains(key)) {
                 continue;
             }
             QString const message = entry.value(QStringLiteral("message")).toString().trimmed();
@@ -11818,12 +11840,14 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         mirroredDecodes = dropModeChangeClearedEntries(mirroredDecodes);
         mirroredDecodes = dropPrunedBandEntries(mirroredDecodes);
         mirroredDecodes = dropConflictingDirectedReportEntries(mirroredDecodes, QStringLiteral("legacy-band"));
-        feedMamQueueFromEntries(mirroredDecodes);
-        feedWaitPounceFromEntries(mirroredDecodes, m_decodeList, QStringLiteral("legacy-band"));
-        feedAutoSequenceFromEntries(mirroredDecodes, m_decodeList);
-        publishWorldMapFromEntries(mirroredDecodes, m_decodeList);
-        queuePskReporterFromEntries(mirroredDecodes, m_decodeList);
-        persistHistoryFromEntries(mirroredDecodes, QStringLiteral("legacy-band"));
+        QVariantList const newBandDecodes =
+            decodeEntriesNotInPrevious(mirroredDecodes, m_decodeList);
+        feedMamQueueFromEntries(newBandDecodes);
+        feedWaitPounceFromEntries(newBandDecodes, m_decodeList, QStringLiteral("legacy-band"));
+        feedAutoSequenceFromEntries(newBandDecodes);
+        publishWorldMapFromEntries(newBandDecodes);
+        queuePskReporterFromEntries(newBandDecodes);
+        persistHistoryFromEntries(newBandDecodes, QStringLiteral("legacy-band"));
         if (m_activeStations) {
             m_activeStations->clear();
             for (QVariant const& value : std::as_const(mirroredDecodes)) {
@@ -11922,12 +11946,14 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
 
         mergedRxDecodes = dropConflictingDirectedReportEntries(mergedRxDecodes, QStringLiteral("legacy-rx"));
-        feedMamQueueFromEntries(mergedRxDecodes);
-        feedWaitPounceFromEntries(mergedRxDecodes, m_rxDecodeList, QStringLiteral("legacy-rx"));
-        feedAutoSequenceFromEntries(mergedRxDecodes, m_rxDecodeList);
-        publishWorldMapFromEntries(mergedRxDecodes, m_rxDecodeList);
-        queuePskReporterFromEntries(mergedRxDecodes, m_rxDecodeList);
-        persistHistoryFromEntries(mergedRxDecodes, QStringLiteral("legacy-rx"));
+        QVariantList const newRxDecodes =
+            decodeEntriesNotInPrevious(mergedRxDecodes, m_rxDecodeList);
+        feedMamQueueFromEntries(newRxDecodes);
+        feedWaitPounceFromEntries(newRxDecodes, m_rxDecodeList, QStringLiteral("legacy-rx"));
+        feedAutoSequenceFromEntries(newRxDecodes);
+        publishWorldMapFromEntries(newRxDecodes);
+        queuePskReporterFromEntries(newRxDecodes);
+        persistHistoryFromEntries(newRxDecodes, QStringLiteral("legacy-rx"));
 
         // The legacy backend exposes RX Frequency as its current widget rows.
         // Keep Signal RX as a running history, otherwise switching to the next
@@ -11969,7 +11995,7 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
                                                      bool rxPane,
                                                      QVariantList const& previousEntries) const
 {
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     return mirrorLegacyDecodeLines(lines, rxPane, previousEntries, userFilterConfig);
 }
 
@@ -12042,6 +12068,12 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
                                                      QVariantList const& previousEntries,
                                                      DecodeUserFilterConfig const& userFilterConfig) const
 {
+    MainThreadTraceScope trace(QStringLiteral("mirror_legacy_decode_lines"),
+                               QStringLiteral("source_rows=%1 previous_rows=%2 rx=%3")
+                                   .arg(lines.size())
+                                   .arg(previousEntries.size())
+                                   .arg(rxPane ? 1 : 0),
+                               25);
     QVariantList mirroredDecodes;
     mirroredDecodes.reserve(lines.size());
 
@@ -12055,6 +12087,51 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         QRegularExpression::CaseInsensitiveOption
     };
 
+    auto rawIdentityKey = [](QVariantMap const& entry, QString const& rawTime) {
+        return rawTime.left(4)
+            + QLatin1Char('|') + entry.value(QStringLiteral("freq")).toString().trimmed()
+            + QLatin1Char('|') + canonicalDecodeMessage(entry.value(QStringLiteral("message")).toString())
+            + QLatin1Char('|') + entry.value(QStringLiteral("db")).toString().trimmed()
+            + QLatin1Char('|') + entry.value(QStringLiteral("dt")).toString().trimmed()
+            + QLatin1Char('|') + (entry.value(QStringLiteral("isTx")).toBool()
+                                      ? QStringLiteral("1") : QStringLiteral("0"));
+    };
+
+    // A legacy snapshot contains the complete visible history.  Re-enriching
+    // every old row performs DXCC/worked/grid/highlight lookups O(N) at each
+    // decode pass.  Index the previous snapshot once and enrich only genuinely
+    // new or changed rows.
+    QHash<QString, QVariantMap> previousByMirrorKey;
+    QMultiHash<QString, QVariantMap> previousBySemanticKey;
+    QHash<QString, QString> previousTimeByRawIdentity;
+    previousByMirrorKey.reserve(previousEntries.size());
+    previousBySemanticKey.reserve(previousEntries.size());
+    previousTimeByRawIdentity.reserve(previousEntries.size());
+    for (QVariant const& value : previousEntries) {
+        QVariantMap const previous = value.toMap();
+        QString const mirrorKey = decodeMirrorEntryKey(previous);
+        if (!mirrorKey.isEmpty()) {
+            previousByMirrorKey.insert(mirrorKey, previous);
+        }
+        previousBySemanticKey.insert(decodeMirrorSemanticKey(previous), previous);
+        QString const previousTime =
+            normalizeUtcDisplayToken(previous.value(QStringLiteral("time")).toString());
+        if (previousTime.size() >= 6) {
+            previousTimeByRawIdentity.insert(rawIdentityKey(previous, previousTime),
+                                             previousTime.left(6));
+        }
+    }
+
+    QStringList const localCalls = localDecodeCallCandidates();
+    auto mentionsLocalCall = [&localCalls](QString const& message) {
+        for (QString const& call : localCalls) {
+            if (messageContainsCallToken(message, call, normalizedBaseCall(call))) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     bool const isTimeSyncMode = isTimeSyncDecodeMode(m_mode);
     int const periodMs = periodMsForMode(m_mode);
     auto stabilizeLegacyTimeToken = [&](QVariantMap& entry) {
@@ -12064,27 +12141,8 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
             return;
         }
 
-        QString const message = canonicalDecodeMessage(entry.value(QStringLiteral("message")).toString());
-        QString const freq = entry.value(QStringLiteral("freq")).toString().trimmed();
-        QString const db = entry.value(QStringLiteral("db")).toString().trimmed();
-        QString const dt = entry.value(QStringLiteral("dt")).toString().trimmed();
-        QString resolvedTime;
-
-        for (auto it = previousEntries.crbegin(); it != previousEntries.crend(); ++it) {
-            QVariantMap const previous = it->toMap();
-            QString const previousTime = normalizeUtcDisplayToken(previous.value(QStringLiteral("time")).toString());
-            if (previousTime.size() < 6 || !previousTime.startsWith(rawTime)) {
-                continue;
-            }
-            if (canonicalDecodeMessage(previous.value(QStringLiteral("message")).toString()) != message
-                || previous.value(QStringLiteral("freq")).toString().trimmed() != freq
-                || previous.value(QStringLiteral("db")).toString().trimmed() != db
-                || previous.value(QStringLiteral("dt")).toString().trimmed() != dt) {
-                continue;
-            }
-            resolvedTime = previousTime.left(6);
-            break;
-        }
+        QString resolvedTime =
+            previousTimeByRawIdentity.value(rawIdentityKey(entry, rawTime));
 
         if (resolvedTime.isEmpty()) {
             // Match Decodium3's DecodedText HHMM handling: missing seconds are
@@ -12095,6 +12153,71 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         }
 
         entry[QStringLiteral("time")] = resolvedTime.isEmpty() ? rawTime : resolvedTime;
+    };
+
+    int reusedEntries = 0;
+    int enrichedEntries = 0;
+    auto enrichOrReuse = [this, &previousByMirrorKey, &previousBySemanticKey,
+                          &mentionsLocalCall, &reusedEntries,
+                          &enrichedEntries](QVariantMap& entry) {
+        static const QStringList stableInputFields {
+            QStringLiteral("db"), QStringLiteral("dt"), QStringLiteral("aptype"),
+            QStringLiteral("quality"), QStringLiteral("mode"), QStringLiteral("isTx"),
+            QStringLiteral("isCQ")
+        };
+        auto inputsMatch = [&entry](QVariantMap const& previous) {
+            for (QString const& field : stableInputFields) {
+                if (previous.value(field) != entry.value(field)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        auto reuse = [&entry, &reusedEntries](QVariantMap const& previous) {
+            bool const forceRxPane = entry.value(QStringLiteral("forceRxPane")).toBool();
+            QString const currentTime = entry.value(QStringLiteral("time")).toString();
+            entry = previous;
+            entry[QStringLiteral("forceRxPane")] = forceRxPane;
+            entry[QStringLiteral("time")] = currentTime;
+
+            QString digits;
+            digits.reserve(currentTime.size());
+            for (QChar const ch : currentTime) {
+                if (ch.isDigit()) digits.append(ch);
+            }
+            entry[QStringLiteral("formattedTime")] = digits.size() >= 6
+                ? digits.left(2) + QLatin1Char(':') + digits.mid(2, 2)
+                    + QLatin1Char(':') + digits.mid(4, 2)
+                : (digits.size() == 4
+                       ? digits.left(2) + QLatin1Char(':') + digits.mid(2, 2)
+                       : currentTime);
+            ++reusedEntries;
+        };
+
+        QString const key = decodeMirrorEntryKey(entry);
+        auto const previousIt = previousByMirrorKey.constFind(key);
+        if (previousIt != previousByMirrorKey.constEnd() && inputsMatch(previousIt.value())) {
+            reuse(previousIt.value());
+            return;
+        }
+
+        // Legacy rows can initially expose HHMM and later HHMMSS for the same
+        // decode. The enrichment metadata is unchanged; reuse it instead of
+        // repeating DXCC/worked/grid/highlight lookups on the GUI thread.
+        auto const semanticCandidates = previousBySemanticKey.values(decodeMirrorSemanticKey(entry));
+        for (QVariantMap const& previous : semanticCandidates) {
+            if (inputsMatch(previous)) {
+                reuse(previous);
+                return;
+            }
+        }
+
+        QString const message = entry.value(QStringLiteral("message")).toString();
+        bool const isCQ = entry.value(QStringLiteral("isCQ")).toBool();
+        entry[QStringLiteral("isMyCall")] = mentionsLocalCall(message);
+        entry[QStringLiteral("fromCall")] = extractDecodedCallsign(message, isCQ);
+        enrichDecodeEntry(entry);
+        ++enrichedEntries;
     };
 
     for (QString rawLine : lines) {
@@ -12126,11 +12249,9 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
             entry["mode"] = m_mode;
             entry["isTx"] = true;
             entry["isCQ"] = isCQ;
-            entry["isMyCall"] = messageMentionsLocalCall(message);
-            entry["fromCall"] = extractDecodedCallsign(message, isCQ);
             entry["forceRxPane"] = rxPane;
             stabilizeLegacyTimeToken(entry);
-            enrichDecodeEntry(entry);
+            enrichOrReuse(entry);
             QString userFilterReason;
             if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilterConfig, false, &userFilterReason)) {
                 bridgeLog(QStringLiteral("user decode filter legacy-mirror: %1 msg='%2'")
@@ -12194,7 +12315,6 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         bool const isCQ = message.startsWith("CQ ", Qt::CaseInsensitive)
                        || message == "CQ"
                        || message.startsWith("QRZ ", Qt::CaseInsensitive);
-        bool const isMyCall = messageMentionsLocalCall(message);
 
         QVariantMap entry;
         entry["time"] = timeStr;
@@ -12207,11 +12327,9 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         entry["mode"] = m_mode;
         entry["isTx"] = false;
         entry["isCQ"] = isCQ;
-        entry["isMyCall"] = isMyCall;
-        entry["fromCall"] = extractDecodedCallsign(message, isCQ);
         entry["forceRxPane"] = rxPane;
         stabilizeLegacyTimeToken(entry);
-        enrichDecodeEntry(entry);
+        enrichOrReuse(entry);
         if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
             bridgeLog(QStringLiteral("ghost decode filter legacy-mirror: msg='%1'")
                           .arg(message));
@@ -12226,6 +12344,10 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         mirroredDecodes.append(entry);
     }
 
+    trace.addDetail(QStringLiteral("output_rows=%1 reused=%2 enriched=%3")
+                        .arg(mirroredDecodes.size())
+                        .arg(reusedEntries)
+                        .arg(enrichedEntries));
     return mirroredDecodes;
 }
 
@@ -27093,7 +27215,11 @@ bool DecodiumBridge::tryStartWaitPounceFromEntry(const QVariantMap& entry,
         return false;
     }
     QString userFilterRejectReason;
-    if (!shouldAcceptDecodeEntryByUserFilters(*this, entry, true, &userFilterRejectReason)) {
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
+    if (!shouldAcceptDecodeEntryByUserFilters(entry,
+                                              userFilterConfig,
+                                              true,
+                                              &userFilterRejectReason)) {
         bridgeLog(QStringLiteral("Wait/Pounce filter reject (%1): %2")
                       .arg(userFilterRejectReason, message));
         return false;
@@ -27230,7 +27356,7 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
         }
     }
 
-    QStringList parts = message.trimmed().split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList parts = message.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (parts.isEmpty()) return;
 
     QString hisCall, hisGrid;
@@ -27796,7 +27922,7 @@ void DecodiumBridge::maybeEnqueueMamCallerFromMessage(const QString& message,
     }
 
     QString const msg = message.trimmed();
-    QStringList const parts = msg.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList const parts = msg.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (parts.size() < 2) {
         return;
     }
@@ -30852,7 +30978,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                       .arg(semanticRejectReason, msg));
         return;
     }
-    QStringList parts = msg.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    QStringList parts = msg.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (parts.size() < 2) return;
 
     bool const filterIsCQ = msg.startsWith(QStringLiteral("CQ "), Qt::CaseInsensitive)
@@ -30866,7 +30992,11 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     filterEntry[QStringLiteral("fromCall")] = extractDecodedCallsign(msg, filterIsCQ);
     enrichDecodeEntry(filterEntry);
     QString userFilterRejectReason;
-    if (!shouldAcceptDecodeEntryByUserFilters(*this, filterEntry, true, &userFilterRejectReason)) {
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
+    if (!shouldAcceptDecodeEntryByUserFilters(filterEntry,
+                                              userFilterConfig,
+                                              true,
+                                              &userFilterRejectReason)) {
         bridgeLog(QStringLiteral("autoSequenceStep: user filter reject (%1): %2")
                       .arg(userFilterRejectReason, msg));
         return;
@@ -33701,7 +33831,7 @@ QVariantList DecodiumBridge::augmentLegacyMirrorWithAllTxt(QVariantList const& m
     QString const normalizedMode = m_mode.trimmed().toUpper();
     int upgradedTimes = 0;
     int appended = 0;
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     for (QString const& rawLine : tailLines) {
         QRegularExpressionMatch const lineMatch = allTxtPattern.match(rawLine.trimmed());
         if (!lineMatch.hasMatch()) {
@@ -35009,8 +35139,8 @@ static QString displayMessageWithCallsignsActorFirst(const QString& message,
 static bool messageHasUnresolvedPeerPlaceholder(const QString& message,
                                                 const QString& myCall)
 {
-    QStringList const words = message.split(QRegularExpression(QStringLiteral("\\s+")),
-                                            Qt::SkipEmptyParts);
+    QStringList const words = message.simplified().split(QLatin1Char(' '),
+                                                         Qt::SkipEmptyParts);
     if (words.size() < 2) {
         return false;
     }
@@ -35113,14 +35243,8 @@ QString DecodiumBridge::lookupUsStateForDecode(const QString& call, const QStrin
     return m_usStateData->stateForCall(call, gridHint);
 }
 
-static bool decodeFilterBoolSetting(const DecodiumBridge& bridge,
-                                    const QString& key,
-                                    bool fallback = false)
-{
-    return bridge.getSetting(key, fallback).toBool();
-}
-
-static QStringList decodeFilterTerms(const DecodiumBridge& bridge,
+template <typename SettingReader>
+static QStringList decodeFilterTerms(SettingReader const& readSetting,
                                      const QString& prefix,
                                      int count)
 {
@@ -35128,7 +35252,7 @@ static QStringList decodeFilterTerms(const DecodiumBridge& bridge,
     terms.reserve(count);
     for (int i = 1; i <= count; ++i) {
         QString const term =
-            bridge.getSetting(prefix + QString::number(i), QString())
+            readSetting(prefix + QString::number(i), QString())
                 .toString()
                 .trimmed()
                 .toUpper();
@@ -35182,13 +35306,15 @@ static QString canonicalDecodeFilterTerritoryTerm(QString term)
     return {};
 }
 
-static QStringList decodeFilterTerritoryTerms(const DecodiumBridge& bridge)
+template <typename SettingReader>
+static QStringList decodeFilterTerritoryTerms(SettingReader const& readSetting)
 {
     QStringList terms;
     terms.reserve(6);
     for (int i = 1; i <= 6; ++i) {
         QString const term = canonicalDecodeFilterTerritoryTerm(
-            bridge.getSetting(QStringLiteral("Territory") + QString::number(i), QString()).toString());
+            readSetting(QStringLiteral("Territory") + QString::number(i),
+                        QString()).toString());
         if (!term.isEmpty() && !terms.contains(term)) {
             terms.append(term);
         }
@@ -35196,26 +35322,81 @@ static QStringList decodeFilterTerritoryTerms(const DecodiumBridge& bridge)
     return terms;
 }
 
-static DecodeUserFilterConfig readDecodeUserFilterConfig(const DecodiumBridge& bridge)
+DecodeUserFilterConfig DecodiumBridge::readDecodeUserFilterConfig() const
 {
     DecodeUserFilterConfig filters;
-    if (bridge.filtersBypassed()) {
+    if (filtersBypassed()) {
         return filters;
     }
+
+    // Keep getSetting()'s legacy-INI-first precedence, but open each backing
+    // store only once for the complete filter snapshot. Constructing two or
+    // more QSettings objects per key was a visible decode-delivery spike on
+    // Windows and also performed repeated filesystem/profile discovery.
+    QSettings legacySettings(legacyIniPath(), QSettings::IniFormat);
+    legacySettings.beginGroup(QStringLiteral("MultiSettings"));
+    QString legacyCurrentGroup = legacySettings.value(QStringLiteral("CurrentName")).toString();
+    legacySettings.endGroup();
+    if (legacyCurrentGroup.isEmpty()) {
+        legacyCurrentGroup = QStringLiteral("Default");
+    }
+    QStringList legacyGroups {
+        legacyCurrentGroup,
+        QStringLiteral("Configuration"),
+        QStringLiteral("Default")
+    };
+    legacyGroups.removeDuplicates();
+
+    QSettings profileSettings(QSettings::IniFormat, QSettings::UserScope,
+                              QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    beginConfiguredBridgeSettingsGroup(profileSettings);
+
+    auto readLegacySetting = [&legacySettings, &legacyGroups](QString const& key) {
+        QVariant value = legacySettings.value(key);
+        if (value.isValid()) {
+            return value;
+        }
+        for (QString const& group : legacyGroups) {
+            legacySettings.beginGroup(group);
+            value = legacySettings.value(key);
+            legacySettings.endGroup();
+            if (value.isValid()) {
+                return value;
+            }
+        }
+        return QVariant {};
+    };
+
+    auto readSetting = [&readLegacySetting, &profileSettings](QString const& key,
+                                                              QVariant const& fallback) {
+        QVariant value = readLegacySetting(key);
+        QString const alias = aliasedBridgeSettingKey(key);
+        if (!value.isValid() && alias != key) {
+            value = readLegacySetting(alias);
+        }
+        if (!value.isValid()) {
+            value = profileSettings.value(key);
+        }
+        if (!value.isValid() && alias != key) {
+            value = profileSettings.value(alias);
+        }
+        return value.isValid() ? value : fallback;
+    };
+
     filters.waitPounceOnly =
-        decodeFilterBoolSetting(bridge, QStringLiteral("FiltersForWaitAndPounceOnly"), false);
+        readSetting(QStringLiteral("FiltersForWaitAndPounceOnly"), false).toBool();
     filters.callingOnly =
-        decodeFilterBoolSetting(bridge, QStringLiteral("FiltersForWord2"), false);
+        readSetting(QStringLiteral("FiltersForWord2"), false).toBool();
     filters.blacklistEnabled =
-        decodeFilterBoolSetting(bridge, QStringLiteral("Blacklisted"), false);
+        readSetting(QStringLiteral("Blacklisted"), false).toBool();
     filters.whitelistEnabled =
-        decodeFilterBoolSetting(bridge, QStringLiteral("Whitelisted"), false);
+        readSetting(QStringLiteral("Whitelisted"), false).toBool();
     filters.alwaysPassEnabled =
-        decodeFilterBoolSetting(bridge, QStringLiteral("AlwaysPass"), false);
-    filters.blacklistTerms = decodeFilterTerms(bridge, QStringLiteral("Blacklist"), 12);
-    filters.whitelistTerms = decodeFilterTerms(bridge, QStringLiteral("Whitelist"), 12);
-    filters.passTerms = decodeFilterTerms(bridge, QStringLiteral("Pass"), 12);
-    filters.territoryTerms = decodeFilterTerritoryTerms(bridge);
+        readSetting(QStringLiteral("AlwaysPass"), false).toBool();
+    filters.blacklistTerms = decodeFilterTerms(readSetting, QStringLiteral("Blacklist"), 12);
+    filters.whitelistTerms = decodeFilterTerms(readSetting, QStringLiteral("Whitelist"), 12);
+    filters.passTerms = decodeFilterTerms(readSetting, QStringLiteral("Pass"), 12);
+    filters.territoryTerms = decodeFilterTerritoryTerms(readSetting);
     return filters;
 }
 
@@ -35436,17 +35617,6 @@ static bool decodeFilterEntryMatchesTerritory(const QVariantMap& entry,
         }
     }
     return false;
-}
-
-static bool shouldAcceptDecodeEntryByUserFilters(const DecodiumBridge& bridge,
-                                                 const QVariantMap& entry,
-                                                 bool waitPounceScope,
-                                                 QString* reason)
-{
-    return shouldAcceptDecodeEntryByUserFilters(entry,
-                                                readDecodeUserFilterConfig(bridge),
-                                                waitPounceScope,
-                                                reason);
 }
 
 static bool shouldAcceptDecodeEntryByUserFilters(const QVariantMap& entry,
@@ -37134,7 +37304,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     int myCallOnlyFiltered = 0;
     int duplicatesSkipped = 0;
     int accepted = 0;
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     QString const flowMode = decodeMode.isEmpty() ? m_mode : decodeMode;
     bool const timeSyncFlowMode =
         flowMode == QStringLiteral("FT8")
@@ -38133,7 +38303,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     int semanticFiltered = 0;
     int parseFailures = 0;
     int bestSnr = -99;
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     for (const auto& row : rows) {
         QStringList f = parseFt8Row(row);
         if (f.size() < 8) {
@@ -38576,7 +38746,7 @@ void DecodiumBridge::onWsprDecodeReady(quint64 serial, QStringList rows,
     int filtered = 0;
     QString const forcedUtcToken = m_decodeUtcTokenBySerial.value(serial).trimmed();
     QVector<double> dtSamples;
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     QSet<QString> recentDecodeDedupKeys;
     int const listSize = m_decodeList.size();
     int const firstRecent = qMax(0, listSize - 300);
@@ -38697,7 +38867,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
     }
     Q_UNUSED(serial)
     bool changed = false;
-    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig(*this);
+    DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
     for (const auto& row : rows) {
         QStringList f = parseJt65Row(row);
         if (f.size() < 8) {

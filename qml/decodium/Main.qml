@@ -7981,7 +7981,9 @@ ApplicationWindow {
                                         anchors.fill: parent
                                         anchors.margins: 2
                                         clip: true
-                                        model: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : decodePanel.allDecodes
+                                        model: !period1Detached
+                                               ? ((bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : decodePanel.allDecodes)
+                                               : null
                                         spacing: 1
                                         // 1.0.228 — cacheBuffer 3000 → 600 (allineato a DecodeList.qml).
                                         // Pre-1.0.228 con 3000px buffer e delegate complessi (RowLayout
@@ -8727,13 +8729,15 @@ NumberAnimation {
                                             updateFollowTail()
                                         })
                                         onContentYChanged: updateFollowTail()
-	                                        onContentHeightChanged: {
-	                                            if (followTail || tailFollowPending)
-	                                                rxFrequencyTailSettleTimer.restart()
-	                                        }
-	                                        onHeightChanged: {
-	                                            if (followTail || tailFollowPending)
-	                                                forceTailFollow()
+                                        onContentHeightChanged: {
+                                            if (rxFreqDetached) return
+                                            if (followTail || tailFollowPending)
+                                                rxFrequencyTailSettleTimer.restart()
+                                        }
+                                        onHeightChanged: {
+                                            if (rxFreqDetached) return
+                                            if (followTail || tailFollowPending)
+                                                forceTailFollow()
 	                                            else
 	                                                updateFollowTail()
 	                                        }
@@ -8745,6 +8749,7 @@ NumberAnimation {
 	                                            }
 	                                        }
                                         onCountChanged: {
+                                            if (rxFreqDetached) return
                                             if (!followTail) {
                                                 rxFrequencyList.pendingNewDecodes++
                                                 return
@@ -8754,10 +8759,13 @@ NumberAnimation {
 
                                         property int _ver: decodePanel.rxDecodeListVersion
                                         on_VerChanged: {
+                                            if (rxFreqDetached) return
                                             if (!followTail) return
                                             forceTailFollow()
                                         }
-                                        model: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes
+                                        model: !rxFreqDetached
+                                               ? ((bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes)
+                                               : null
 	                                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
 	                                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                                        // pattern allineato a DecodeList.qml:243-251.
@@ -12892,7 +12900,9 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                         anchors.margins: 4
                         clip: true
                         spacing: 1
-                        model: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : decodePanel.allDecodes
+                        model: period1Detached && period1FloatingWindow.visible
+                               ? ((bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : decodePanel.allDecodes)
+                               : null
                         cacheBuffer: 360  // 1.0.478 — meno delegate offscreen durante pile-up FT8/4/2
                         reuseItems: true
                         interactive: true
@@ -13573,10 +13583,12 @@ NumberAnimation {
                         })
                         onContentYChanged: updateFollowTail()
 	                        onContentHeightChanged: {
+	                            if (!rxFreqDetached) return
 	                            if (followTail || tailFollowPending)
 	                                rxFrequencyFloatingTailSettleTimer.restart()
 	                        }
 	                        onHeightChanged: {
+	                            if (!rxFreqDetached) return
 	                            if (followTail || tailFollowPending)
 	                                forceTailFollow()
 	                            else
@@ -13590,18 +13602,22 @@ NumberAnimation {
 	                            }
 	                        }
 	                        onCountChanged: {
+	                            if (!rxFreqDetached) return
 	                            if (!followTail) {
 	                                rxFrequencyFloatingList.pendingNewDecodes++
 	                                return
 	                            }
 	                            forceTailFollow()
                         }
-                        property int _ver: decodePanel.rxDecodeListVersion
+	                        property int _ver: decodePanel.rxDecodeListVersion
 		                        on_VerChanged: {
+	                            if (!rxFreqDetached) return
 	                            if (!followTail) return
                             forceTailFollow()
                         }
-                        model: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes
+                        model: rxFreqDetached && rxFreqFloatingWindow.visible
+                               ? ((bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes)
+                               : null
 	                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
 	                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
 	                        // pattern allineato a DecodeList.qml:243-251.

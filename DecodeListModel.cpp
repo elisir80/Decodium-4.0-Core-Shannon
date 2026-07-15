@@ -1,5 +1,7 @@
 #include "DecodeListModel.h"
 
+#include <utility>
+
 namespace {
 // Mapping role → field name nella QVariantMap. Allinea con quello che
 // enrichDecodeEntry() di DecodiumBridge popola.
@@ -133,34 +135,57 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
     int const newCount = newEntries.size();
     int const oldCount = m_entries.size();
 
+    // QVariant::toMap() and decodeMatchKey() are both allocation-heavy. Cache
+    // their results once per snapshot so the structural probes below stay
+    // linear even when early/final/deep passes replace a busy 500-row model.
+    QVector<QVariantMap> incomingEntries;
+    incomingEntries.reserve(newCount);
+    QVector<QString> newKeys;
+    newKeys.reserve(newCount);
+    for (QVariant const& value : newEntries) {
+        QVariantMap const entry = value.toMap();
+        incomingEntries.append(entry);
+        newKeys.append(decodeMatchKey(entry));
+    }
+
+    QVector<QString> oldKeys;
+    oldKeys.reserve(oldCount);
+    for (QVariantMap const& entry : std::as_const(m_entries)) {
+        oldKeys.append(decodeMatchKey(entry));
+    }
+
     // 1.0.144: scoped dataChanged — emette dataChanged SOLO per regioni
     // consecutive di row effettivamente cambiate, invece di "tutto il prefix".
     // Su FT2 attivo con append-only, normalmente il prefix è invariato →
     // zero dataChanged emit, solo InsertRows in coda.
-    auto applyPrefixDiff = [this, &newEntries](int prefixEnd) {
+    auto applyRangeDiff = [this, &incomingEntries](int modelStart, int newStart, int count) {
         int regionStart = -1;
-        for (int i = 0; i < prefixEnd; ++i) {
-            QVariantMap const candidate = newEntries.at(i).toMap();
-            bool const changed = (m_entries[i] != candidate);
+        for (int i = 0; i < count; ++i) {
+            int const modelIndex = modelStart + i;
+            QVariantMap const& candidate = incomingEntries.at(newStart + i);
+            bool const changed = (m_entries[modelIndex] != candidate);
             if (changed) {
-                m_entries[i] = candidate;
-                if (regionStart < 0) regionStart = i;
+                m_entries[modelIndex] = candidate;
+                if (regionStart < 0) regionStart = modelIndex;
             } else if (regionStart >= 0) {
-                emit dataChanged(index(regionStart), index(i - 1));
+                emit dataChanged(index(regionStart), index(modelIndex - 1));
                 regionStart = -1;
             }
         }
         if (regionStart >= 0) {
-            emit dataChanged(index(regionStart), index(prefixEnd - 1));
+            emit dataChanged(index(regionStart), index(modelStart + count - 1));
         }
+    };
+
+    auto applyPrefixDiff = [&applyRangeDiff](int prefixEnd) {
+        applyRangeDiff(0, 0, prefixEnd);
     };
 
     // --- Caso 1: append-only (prefix identico, append in coda) ---
     if (newCount >= oldCount) {
         bool prefixMatches = true;
         for (int i = 0; i < oldCount; ++i) {
-            QVariantMap const candidate = newEntries.at(i).toMap();
-            if (decodeMatchKey(m_entries.at(i)) != decodeMatchKey(candidate)) {
+            if (oldKeys.at(i) != newKeys.at(i)) {
                 prefixMatches = false;
                 break;
             }
@@ -170,7 +195,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
             if (newCount > oldCount) {
                 beginInsertRows(QModelIndex(), oldCount, newCount - 1);
                 for (int i = oldCount; i < newCount; ++i) {
-                    m_entries.append(newEntries.at(i).toMap());
+                    m_entries.append(incomingEntries.at(i));
                 }
                 endInsertRows();
             }
@@ -182,8 +207,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
     if (newCount < oldCount) {
         bool prefixMatches = true;
         for (int i = 0; i < newCount; ++i) {
-            QVariantMap const candidate = newEntries.at(i).toMap();
-            if (decodeMatchKey(m_entries.at(i)) != decodeMatchKey(candidate)) {
+            if (oldKeys.at(i) != newKeys.at(i)) {
                 prefixMatches = false;
                 break;
             }
@@ -211,8 +235,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
             if (overlapLen <= 0 || overlapLen > newCount) continue;
             bool overlapMatches = true;
             for (int i = 0; i < overlapLen; ++i) {
-                if (decodeMatchKey(m_entries.at(i + shift))
-                    != decodeMatchKey(newEntries.at(i).toMap())) {
+                if (oldKeys.at(i + shift) != newKeys.at(i)) {
                     overlapMatches = false;
                     break;
                 }
@@ -226,7 +249,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
             if (tailNew > 0) {
                 beginInsertRows(QModelIndex(), overlapLen, overlapLen + tailNew - 1);
                 for (int i = overlapLen; i < newCount; ++i) {
-                    m_entries.append(newEntries.at(i).toMap());
+                    m_entries.append(incomingEntries.at(i));
                 }
                 endInsertRows();
             }
@@ -235,12 +258,84 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
         }
     }
 
-    // --- Caso 4 (fallback ultimo): struttura cambiata, reset model ---
-    beginResetModel();
-    m_entries.clear();
-    m_entries.reserve(newCount);
-    for (int i = 0; i < newCount; ++i) {
-        m_entries.append(newEntries.at(i).toMap());
+    // --- Caso 4: prepend-N + prune-M dalla coda ---
+    // Usato dalle viste newest-first e da snapshot che inseriscono il nuovo
+    // slot davanti alla history. Prima cadeva nel reset completo del model:
+    // Qt Quick distruggeva e ricreava tutti i delegate proprio alla consegna
+    // dei risultati FT4/FT8, producendo il blocco grafico periodico.
+    if (oldCount > 0 && newCount > 0) {
+        int const maxPrepend = qMin(newCount, 256);
+        for (int prepend = 1; prepend <= maxPrepend; ++prepend) {
+            int const overlapLen = newCount - prepend;
+            if (overlapLen <= 0 || overlapLen > oldCount) continue;
+
+            bool overlapMatches = true;
+            for (int i = 0; i < overlapLen; ++i) {
+                if (oldKeys.at(i) != newKeys.at(prepend + i)) {
+                    overlapMatches = false;
+                    break;
+                }
+            }
+            if (!overlapMatches) continue;
+
+            if (overlapLen < oldCount) {
+                beginRemoveRows(QModelIndex(), overlapLen, oldCount - 1);
+                m_entries.resize(overlapLen);
+                endRemoveRows();
+            }
+
+            beginInsertRows(QModelIndex(), 0, prepend - 1);
+            for (int i = prepend - 1; i >= 0; --i) {
+                m_entries.insert(0, incomingEntries.at(i));
+            }
+            endInsertRows();
+
+            applyRangeDiff(prepend, prepend, overlapLen);
+            return;
+        }
     }
-    endResetModel();
+
+    // --- Caso 5: replace della sola regione realmente cambiata ---
+    // Le passate early/final/deep dello stesso slot non sono necessariamente
+    // append-only: il decoder puo sostituire il tail provvisorio mantenendo
+    // intatta tutta la history. Un model reset distrugge comunque tutti i
+    // delegate visibili e coincide con gli scatti FT4/FT8. Conserva invece il
+    // prefix e il suffix comuni e sostituisci soltanto la regione centrale.
+    int commonPrefix = 0;
+    int const commonLimit = qMin(oldCount, newCount);
+    while (commonPrefix < commonLimit
+           && oldKeys.at(commonPrefix) == newKeys.at(commonPrefix)) {
+        ++commonPrefix;
+    }
+
+    int commonSuffix = 0;
+    while (commonSuffix < oldCount - commonPrefix
+           && commonSuffix < newCount - commonPrefix
+           && oldKeys.at(oldCount - 1 - commonSuffix)
+                == newKeys.at(newCount - 1 - commonSuffix)) {
+        ++commonSuffix;
+    }
+
+    applyRangeDiff(0, 0, commonPrefix);
+
+    int const oldMiddleCount = oldCount - commonPrefix - commonSuffix;
+    if (oldMiddleCount > 0) {
+        beginRemoveRows(QModelIndex(), commonPrefix, commonPrefix + oldMiddleCount - 1);
+        m_entries.remove(commonPrefix, oldMiddleCount);
+        endRemoveRows();
+    }
+
+    int const newMiddleCount = newCount - commonPrefix - commonSuffix;
+    if (newMiddleCount > 0) {
+        beginInsertRows(QModelIndex(), commonPrefix, commonPrefix + newMiddleCount - 1);
+        for (int i = 0; i < newMiddleCount; ++i) {
+            m_entries.insert(commonPrefix + i, incomingEntries.at(commonPrefix + i));
+        }
+        endInsertRows();
+    }
+
+    if (commonSuffix > 0) {
+        int const suffixStart = commonPrefix + newMiddleCount;
+        applyRangeDiff(suffixStart, suffixStart, commonSuffix);
+    }
 }

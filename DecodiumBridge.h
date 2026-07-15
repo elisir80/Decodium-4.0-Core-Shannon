@@ -753,6 +753,10 @@ public:
     Q_INVOKABLE void recordFt8DecodeCount(int count);
     int    ftThreads()            const { return m_ftThreads; }
     bool   ftThreadsAuto()        const { return m_ftThreadsAuto; }
+    // Shared with the embedded FT4/FT8 workers.  Those workers used to read
+    // only the legacy FT8threads setting and could therefore consume every
+    // logical core even though the QML bridge had reserved cores for the UI.
+    Q_INVOKABLE int effectiveFtThreadLimitForDecode() const { return effectiveFtThreadLimit(); }
     Q_INVOKABLE void setFtThreads(int v);
     Q_INVOKABLE void setFtThreadsAuto(bool enabled);
     Q_INVOKABLE void cycleFtThreads();
@@ -3092,6 +3096,9 @@ private:
     QVariantList filterEntriesForBandActivity(QVariantList const& source) const;
     QVariantList filterEntriesForRxDecode(QVariantList const& source) const;
     bool shouldDisplayEntryForBandActivity(QVariantMap const& entry) const;
+    bool shouldDisplayEntryForBandActivity(QVariantMap const& entry,
+                                           bool hideWorkedBand,
+                                           bool hideWorkedToday) const;
     bool entryBelongsToCurrentQso(QVariantMap const& entry) const;
     void injectPeriodSeparators(QVariantList& filtered) const;
     // 1.0.145: detection ghost decode (SNR marginale + AP-aided high-FP-rate).
@@ -3490,6 +3497,7 @@ private:
     void clearDecodeWindowsForModeChange(const QString& previousMode, const QString& nextMode);
     void reloadBridgeSettingsFromPersistentStore();
     void syncLegacyBackendDecodeList();
+    DecodeUserFilterConfig readDecodeUserFilterConfig() const;
     QVariantList mirrorLegacyDecodeLines(QStringList const& lines,
                                          bool rxPane,
                                          QVariantList const& previousEntries) const;

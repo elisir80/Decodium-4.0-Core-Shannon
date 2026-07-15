@@ -73,8 +73,9 @@ public:
     // Sostituisce il contenuto con la nuova lista applicando diff smart:
     //  - new size > old + prefix identico → beginInsertRows in coda
     //  - new size < old + prefix identico → beginRemoveRows in coda
-    //  - cambi nel mezzo → dataChanged per le row modificate
-    //  - altrimenti (struttura cambiata) → fallback beginResetModel
+    //  - prepend + prune dalla coda → insert/remove incrementali
+    //  - cambi nel mezzo → replace incrementale della sola regione cambiata
+    //  - valori cambiati con chiave stabile → dataChanged sulle sole row coinvolte
     // La diff confronta entries via decodeMatchKey() (freq+message+timestamp).
     void setEntries(QVariantList const& newEntries);
 

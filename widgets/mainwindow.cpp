@@ -1446,8 +1446,30 @@ namespace
   int embedded_decode_thread_count ()
   {
     int const configured = int (dec_data.params.nmt);
+    int interactiveLimit = 0;
+    if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr)
+      {
+        Qt::ConnectionType const connectionType =
+          QThread::currentThread () == bridge->thread ()
+            ? Qt::DirectConnection
+            : Qt::BlockingQueuedConnection;
+        QMetaObject::invokeMethod (bridge, "effectiveFtThreadLimitForDecode",
+                                   connectionType,
+                                   Q_RETURN_ARG (int, interactiveLimit));
+      }
+
+    if (interactiveLimit > 0)
+      {
+        int const boundedLimit = qBound (1, interactiveLimit, kMaxEmbeddedDecodeThreads);
+        return configured > 0
+          ? qMin (qBound (1, configured, kMaxEmbeddedDecodeThreads), boundedLimit)
+          : boundedLimit;
+      }
+
     if (configured <= 0) {
-      return qBound (1, QThread::idealThreadCount (), kMaxEmbeddedDecodeThreads);
+      // Non-QML fallback: leave at least one logical core available to the UI.
+      int const cores = qMax (1, QThread::idealThreadCount ());
+      return qBound (1, cores > 1 ? cores - 1 : 1, kMaxEmbeddedDecodeThreads);
     }
     return qBound (1, configured, kMaxEmbeddedDecodeThreads);
   }
@@ -4001,7 +4023,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 #else
   m_ft4DecodeThread.setStackSize (8 * 1024 * 1024);
 #endif
-  m_ft4DecodeThread.start ();
+  m_ft4DecodeThread.start (QThread::LowPriority);
 
   m_fst4DecodeWorker = new decodium::fst4::FST4DecodeWorker;
   m_fst4DecodeWorker->moveToThread (&m_fst4DecodeThread);
@@ -4031,7 +4053,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 #else
   m_ft8DecodeThread.setStackSize (8 * 1024 * 1024);
 #endif
-  m_ft8DecodeThread.start ();
+  m_ft8DecodeThread.start (QThread::LowPriority);
 
   m_jt9FastDecodeWorker = new decodium::jt9fast::JT9FastDecodeWorker;
   m_jt9FastDecodeWorker->moveToThread (&m_jt9FastDecodeThread);
@@ -27078,7 +27100,7 @@ void MainWindow::processWsprDecoderLine (QString const& inputLine)
   t += "                                                  ";
   t.remove(QRegularExpression("\\s+$"));
 
-  QStringList rxFields = t.split(QRegularExpression("\\s+"));
+  QStringList rxFields = t.simplified().split(QLatin1Char(' '));
   QString rxLine;
   QString grid;
   if ( rxFields.count() == 8 ) {

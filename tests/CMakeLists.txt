@@ -92,6 +92,12 @@ add_executable (test_streaming_list_model test_streaming_list_model.cpp)
 target_link_libraries (test_streaming_list_model Qt6::Test Qt6::Concurrent)
 add_test (NAME test_streaming_list_model COMMAND $<TARGET_FILE:test_streaming_list_model>)
 
+add_executable (test_decode_list_model
+  test_decode_list_model.cpp
+  ../DecodeListModel.cpp)
+target_link_libraries (test_decode_list_model Qt6::Test Qt6::Core)
+add_test (NAME test_decode_list_model COMMAND $<TARGET_FILE:test_decode_list_model>)
+
 add_executable (test_ft2link test_ft2link.cpp)
 target_link_libraries (test_ft2link ft2link_core Qt6::Test)
 add_test (NAME test_ft2link COMMAND $<TARGET_FILE:test_ft2link>)
