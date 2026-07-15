@@ -10,12 +10,17 @@
 
 namespace {
 
+constexpr auto kLegacyOrg  = "IU8LMC";
+
+#ifdef Q_OS_WIN
+
 // Nuova identita' unica. Vecchia: org "IU8LMC" (dati sotto %APPDATA%\IU8LMC\...)
 // e org "Decodium"/app "Decodium3" (registro).
 constexpr auto kNewOrg     = "Decodium";
 constexpr auto kAppDefault = "Decodium";   // scope di QSettings() default
 constexpr auto kAppBridge  = "Decodium3";  // scope di QSettings("Decodium","Decodium3")
-constexpr auto kLegacyOrg  = "IU8LMC";
+
+#endif
 
 #ifdef Q_OS_WIN
 

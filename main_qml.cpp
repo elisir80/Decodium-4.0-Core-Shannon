@@ -1762,9 +1762,17 @@ int main(int argc, char* argv[])
     if (parser.isSet(labStandardWaitPounceMsOption)) {
         app.setProperty("decodiumLabPassiveWaitPounce", true);
     }
-    if (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) {
+    // Standard FTx lab triggers intentionally bypass slot timing so short
+    // tests can start immediately. JT9 is different: its decoder searches
+    // sync within a 60-second UTC window, so forcing an arbitrary TX start
+    // would create a false decoder failure. Let the bridge schedule JT9 on
+    // the next valid slot instead.
+    bool const labJt9SlotTest = labMode.trimmed().compare(QStringLiteral("JT9"), Qt::CaseInsensitive) == 0;
+    if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) && !labJt9SlotTest) {
         qputenv("DECODIUM_LAB_FORCE_TX_IMMEDIATE", QByteArrayLiteral("1"));
         qInfo() << "[LAB] immediate TX timing bypass enabled by lab standard TX trigger";
+    } else if (labJt9SlotTest && (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))) {
+        qInfo() << "[LAB] JT9 TX slot timing preserved for decoder validation";
     }
     bool const labNoMonitor = parser.isSet(labNoMonitorOption);
     if (labNoMonitor) {

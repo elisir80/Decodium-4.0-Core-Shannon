@@ -207,6 +207,17 @@ QString osStatusName(OSStatus status)
       ? QStringLiteral("'%1' (%2)").arg(QString::fromLatin1(text, 4)).arg(status)
       : QString::number(status);
 }
+
+bool isVirtualMacAudioInput (QAudioDevice const& device)
+{
+  QString const identity = (device.description () + QLatin1Char (' ')
+                            + QString::fromLatin1 (device.id ())).toCaseFolded ();
+  return identity.contains (QStringLiteral ("blackhole"))
+      || identity.contains (QStringLiteral ("soundflower"))
+      || identity.contains (QStringLiteral ("loopback"))
+      || identity.contains (QStringLiteral ("vb-cable"))
+      || identity.contains (QStringLiteral ("virtual audio"));
+}
 #endif
 }
 
@@ -287,7 +298,121 @@ void SoundInput::audioQueueInputCallback (void * userData,
   if (self->m_audioQueue == queue)
     {
       AudioQueueEnqueueBuffer (queue, buffer, 0, nullptr);
+  }
+}
+
+void SoundInput::pullAudioData ()
+{
+  if (!m_usingPullAudio || !m_pullDevice || !m_sink || !m_sink->isOpen ())
+    {
+      return;
     }
+
+  int const frameBytes = m_pullBytesPerFrame > 0
+      ? m_pullBytesPerFrame
+      : (m_stream ? m_stream->format ().bytesPerFrame () : 0);
+  if (frameBytes <= 0)
+    {
+      return;
+    }
+
+  qint64 const available = m_pullDevice->bytesAvailable ();
+  if (available > 0)
+    {
+      qint64 const maxRead = qMin<qint64> (available, 65536);
+      m_pullReadBuffer.resize (static_cast<int> (maxRead));
+      qint64 const read = m_pullDevice->read (m_pullReadBuffer.data (), maxRead);
+      if (read > 0)
+        {
+          m_pullPendingData.append (m_pullReadBuffer.constData (), static_cast<int> (read));
+          ++m_pullReadCalls;
+
+          qint64 const completeBytes = m_pullPendingData.size ()
+              - (m_pullPendingData.size () % frameBytes);
+          if (completeBytes > 0)
+            {
+              qint64 const written = m_sink->write (m_pullPendingData.constData (), completeBytes);
+              if (written > 0)
+                {
+                  qint64 const consumed = qMin (written, completeBytes);
+                  // The legacy detector consumes signed 16-bit PCM. Keep a
+                  // cheap signal sanity check here so a live callback that
+                  // carries only zeros is immediately distinguishable from
+                  // useful BlackHole audio.
+                  if (qEnvironmentVariableIsSet ("DECODIUM_LEGACY_AUDIO_TRACE"))
+                    {
+                      qint64 const sampleCount = consumed / static_cast<qint64> (sizeof (qint16));
+                      auto const *samples = reinterpret_cast<qint16 const *> (m_pullPendingData.constData ());
+                      for (qint64 i = 0; i < sampleCount; ++i)
+                        {
+                          qint32 const value = samples[i];
+                          qint32 const absolute = value < 0 ? -value : value;
+                          m_pullSignalSamples += 1;
+                          m_pullSignalEnergy += static_cast<double> (value) * static_cast<double> (value);
+                          if (value != 0)
+                            {
+                              m_pullSignalNonZero += 1;
+                            }
+                          if (absolute > m_pullSignalPeak)
+                            {
+                              m_pullSignalPeak = absolute;
+                            }
+                        }
+                    }
+                  m_pullPendingData.remove (0, static_cast<int> (consumed));
+                  m_pullReadFrames += static_cast<quint64> (consumed / frameBytes);
+                }
+            }
+        }
+    }
+
+  if (qEnvironmentVariableIsSet ("DECODIUM_LEGACY_AUDIO_TRACE"))
+    {
+      qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
+      if (m_pullLastTraceMs < 0 || nowMs - m_pullLastTraceMs >= 1000)
+        {
+          qInfo ().nospace ()
+              << "[AUDIO-PULL] dev=" << m_deviceDescription
+              << " available=" << available
+              << " readCalls=" << m_pullReadCalls
+              << " frames=" << m_pullReadFrames
+              << " peak16=" << m_pullSignalPeak
+              << " rms16=" << (m_pullSignalSamples > 0
+                                  ? std::sqrt (m_pullSignalEnergy / static_cast<double> (m_pullSignalSamples))
+                                  : 0.0)
+              << " nonzeroPct=" << (m_pullSignalSamples > 0
+                                      ? (100.0 * static_cast<double> (m_pullSignalNonZero)
+                                         / static_cast<double> (m_pullSignalSamples))
+                                      : 0.0)
+              << " pendingBytes=" << m_pullPendingData.size ()
+              << " state=" << (m_stream ? static_cast<int> (m_stream->state ()) : -1)
+              << " error=" << (m_stream ? static_cast<int> (m_stream->error ()) : -1);
+          m_pullReadCalls = 0;
+          m_pullReadFrames = 0;
+          m_pullSignalSamples = 0;
+          m_pullSignalNonZero = 0;
+          m_pullSignalPeak = 0;
+          m_pullSignalEnergy = 0.0;
+          m_pullLastTraceMs = nowMs;
+        }
+    }
+}
+
+void SoundInput::stopPullAudio ()
+{
+  m_pullTimer.stop ();
+  m_usingPullAudio = false;
+  m_pullDevice.clear ();
+  m_pullPendingData.clear ();
+  m_pullReadBuffer.clear ();
+  m_pullBytesPerFrame = 0;
+  m_pullReadCalls = 0;
+  m_pullReadFrames = 0;
+  m_pullSignalSamples = 0;
+  m_pullSignalNonZero = 0;
+  m_pullSignalPeak = 0;
+  m_pullSignalEnergy = 0.0;
+  m_pullLastTraceMs = -1;
 }
 
 bool SoundInput::startNativeMacInput (QAudioDevice const& device,
@@ -692,17 +817,27 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 
 #if defined(Q_OS_MACOS)
   QString nativeFailureReason;
-  qDebug() << "SoundInput: trying native macOS AudioQueue input" << device.description();
-  if (startNativeMacInput (device, format, framesPerBuffer, sink, channel,
-                           &nativeFailureReason))
+  bool const virtualMacInput = isVirtualMacAudioInput (device);
+  if (!virtualMacInput)
     {
-      m_startInProgress = false;
-      return;
+      qDebug() << "SoundInput: trying native macOS AudioQueue input" << device.description();
+      if (startNativeMacInput (device, format, framesPerBuffer, sink, channel,
+                               &nativeFailureReason))
+        {
+          m_startInProgress = false;
+          return;
+        }
+      qWarning() << "SoundInput: native macOS AudioQueue input unavailable for"
+                 << device.description()
+                 << "-" << nativeFailureReason
+                 << "; falling back to QAudioSource pull mode";
     }
-  qWarning() << "SoundInput: native macOS AudioQueue input unavailable for"
-             << device.description()
-             << "-" << nativeFailureReason
-             << "; falling back to QAudioSource";
+  else
+    {
+      nativeFailureReason = QStringLiteral ("virtual macOS input uses QAudioSource pull mode");
+      qInfo() << "SoundInput: using QAudioSource pull mode for virtual macOS input"
+              << device.description();
+    }
 #endif
     {
       m_stream.reset (new QAudioSource {device, format});
@@ -731,12 +866,44 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
     }
   if (m_sink->initialize (QIODevice::WriteOnly, channel, format.channelCount ()))
     {
+#if defined(Q_OS_MACOS)
+      // Qt's macOS push path can report ActiveState while never invoking the
+      // destination QIODevice for virtual devices. Pulling from the source
+      // explicitly keeps capture on the SoundInput event loop and makes the
+      // samples visible to the detector without reopening CoreAudio.
+      m_pullDevice = m_stream->start ();
+      if (!m_pullDevice)
+        {
+          Q_EMIT error (tr ("Audio RX pull stream could not be started: input device=\"%1\"")
+                        .arg (m_deviceDescription));
+          m_startInProgress = false;
+          return;
+        }
+      m_pullBytesPerFrame = format.bytesPerFrame ();
+      m_pullPendingData.clear ();
+      m_pullReadBuffer.clear ();
+      m_pullReadCalls = 0;
+      m_pullReadFrames = 0;
+      m_pullSignalSamples = 0;
+      m_pullSignalNonZero = 0;
+      m_pullSignalPeak = 0;
+      m_pullSignalEnergy = 0.0;
+      m_pullLastTraceMs = QDateTime::currentMSecsSinceEpoch ();
+      m_usingPullAudio = true;
+      m_pullTimer.start (5);
+#else
       m_stream->start (sink);
+#endif
       checkStream ();
       cummulative_lost_usec_ = -1;
-      trace.addDetail(QStringLiteral("state=%1 error=%2")
+      trace.addDetail(QStringLiteral("state=%1 error=%2 path=%3")
                           .arg(audioStateName(m_stream->state()),
-                               audioErrorName(m_stream->error())));
+                               audioErrorName(m_stream->error()),
+#if defined(Q_OS_MACOS)
+                               QStringLiteral("pull")));
+#else
+                               QStringLiteral("push")));
+#endif
     }
   else
     {
@@ -952,6 +1119,9 @@ void SoundInput::handleStateChanged (QAudio::State newState)
 
 void SoundInput::retireCurrentStream ()
 {
+#if defined(Q_OS_MACOS)
+  stopPullAudio ();
+#endif
   auto *stream = m_stream.take ();
   if (!stream)
     {

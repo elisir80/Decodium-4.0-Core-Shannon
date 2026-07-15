@@ -5206,6 +5206,8 @@ static bool bridgeGeneratedTxWaveMode(QString const& mode)
     return normalized == QStringLiteral("FT8")
         || normalized == QStringLiteral("FT4")
         || normalized == QStringLiteral("FT2")
+        || normalized == QStringLiteral("JT65")
+        || normalized == QStringLiteral("JT9")
         || normalized == QStringLiteral("MSK144")
         || normalized == QStringLiteral("Q65")
         || normalized.startsWith(QStringLiteral("Q65-"))
@@ -5364,6 +5366,30 @@ static QVector<float> buildTxWaveformForMessage(QString const& mode,
             return {};
         }
         wave = decodium::txwave::generateFt8Wave(enc.tones.constData(), 79, 7680, 2.0f, 48000.0f, freq);
+    } else if (normalizedMode == QStringLiteral("JT65")) {
+        auto enc = decodium::txmsg::encodeJt65(msg);
+        if (!enc.ok || enc.tones.size() < 126) {
+            if (errorOut) *errorOut = QStringLiteral("Codifica JT65 fallita");
+            return {};
+        }
+        wave = decodium::txwave::generateJt65Wave(enc.tones.constData(), 126, 48000.0f, freq);
+    } else if (normalizedMode == QStringLiteral("JT9")) {
+        auto enc = decodium::txmsg::encodeJt9(msg);
+        if (!enc.ok || enc.tones.size() < 85) {
+            if (errorOut) *errorOut = QStringLiteral("Codifica JT9 fallita");
+            return {};
+        }
+        // JT9-1: 85 symbols, 6912 samples/symbol at 12 kHz. Render at the
+        // bridge's 48 kHz audio rate while preserving 1.736111 Hz spacing.
+        static constexpr int kJt9Symbols = 85;
+        static constexpr int kJt9SamplesPerSymbol = 4 * 6912;
+        static constexpr float kJt9ToneSpacing = 12000.0f / 6912.0f;
+        wave = decodium::txwave::generateToneWave(enc.tones.constData(),
+                                                   kJt9Symbols,
+                                                   kJt9SamplesPerSymbol,
+                                                   48000.0f,
+                                                   kJt9ToneSpacing,
+                                                   freq);
     } else if (normalizedMode == QStringLiteral("MSK144")) {
         auto enc = decodium::txmsg::encodeMsk144(msg);
         if (!enc.ok || enc.tones.isEmpty()) {
@@ -16483,6 +16509,7 @@ bool DecodiumBridge::shouldUseBridgeAudioForLegacyDigitalTx() const
         && (mode == QStringLiteral("FT8")
             || mode == QStringLiteral("FT4")
             || mode == QStringLiteral("FT2")
+            || mode == QStringLiteral("JT65")
             || mode == QStringLiteral("MSK144")
             || mode == QStringLiteral("Q65")
             || mode.startsWith(QStringLiteral("Q65-")));
@@ -18828,6 +18855,9 @@ bool DecodiumBridge::shouldAlignTxAudioToCurrentSyncSlot() const
     if (m_cwTxActive) return false;
     if (m_ft2LinkTxActive) return false;
     QString const normalized = m_mode.trimmed().toUpper();
+    if (normalized == QStringLiteral("JT65") && catSuppressedByEnvironment()) {
+        return true;
+    }
     bool const ft2AutoCqCalling =
         normalized == QStringLiteral("FT2")
         && m_asyncTxEnabled
@@ -20984,6 +21014,10 @@ QString DecodiumBridge::validateTxMessage(const QString& message) const
         ok = decodium::txmsg::encodeFt4(msg, true).ok;
     } else if (mode == QStringLiteral("FT8") || mode.isEmpty()) {
         ok = decodium::txmsg::encodeFt8(msg).ok;
+    } else if (mode == QStringLiteral("JT65")) {
+        ok = decodium::txmsg::encodeJt65(msg, true).ok;
+    } else if (mode == QStringLiteral("JT9")) {
+        ok = decodium::txmsg::encodeJt9(msg, true).ok;
     } else if (mode == QStringLiteral("WSPR")) {
         ok = decodium::txmsg::encodeWspr(msg, true).ok;
     } else if (mode == QStringLiteral("MSK144")) {
@@ -28573,6 +28607,15 @@ bool DecodiumBridge::shouldSuppressRecentLocalTxEchoDecode(const QString& messag
 bool DecodiumBridge::usesDeferredManualSyncTx() const
 {
     QString const normalized = m_mode.trimmed().toUpper();
+    // JT65 and JT9 are normally scheduled by the embedded legacy backend.
+    // When CAT is disabled, the bridge owns PCM playback and must preserve
+    // the 60-second UTC slot parity; otherwise a payload can start at an
+    // arbitrary point in the receive window and sync9 cannot find it.
+    if ((normalized == QStringLiteral("JT65")
+         || normalized == QStringLiteral("JT9"))
+        && catSuppressedByEnvironment()) {
+        return true;
+    }
     // MSK144 uses the bridge PCM path on macOS even when sequencing remains
     // owned by the legacy backend. It must therefore be schedulable here too,
     // otherwise a direct legacy PTT request can bypass the late-slot guard.
@@ -42032,14 +42075,33 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.mode    = modeSnapshot;
         req.audio   = audioSnapshot;
         req.nutc    = nutc;
-        req.nfqso   = nfqso;
-        req.nfa     = m_nfa;
-        req.nfb     = m_nfb;
+        req.nfqso   = qBound(0, nfqso, 5000);
+        req.nfa     = qBound(0, m_nfa, 4950);
+        req.nfb     = qBound(req.nfa + 50, m_nfb, 5000);
         req.ndepth  = decodeDepth;
         req.mycall  = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
         req.hisgrid = m_dxGrid.toLocal8Bit();
         req.dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toLocal8Bit();
+        if (modeSnapshot == QStringLiteral("JT9")) {
+            // JT9-1 uses a 60 s, 12 kHz window and the decoder consumes one
+            // eighth-sized count for its legacy npts8 contract.
+            req.npts8 = audioSnapshot.size() / 8;
+            req.nzhsym = 184;
+            req.ntol = 20;
+            req.newdat = 1;
+            req.nagain = 0;
+            req.nsubmode = 0;
+            bridgeLog(QStringLiteral("JT9 dispatch: serial=%1 samples=%2 npts8=%3 nzhsym=%4 nfqso=%5 range=%6-%7 depth=%8")
+                          .arg(serial)
+                          .arg(audioSnapshot.size())
+                          .arg(req.npts8)
+                          .arg(req.nzhsym)
+                          .arg(req.nfqso)
+                          .arg(req.nfa)
+                          .arg(req.nfb)
+                          .arg(req.ndepth));
+        }
         QMetaObject::invokeMethod(m_legacyJtWorker, [this, req]() {
             m_legacyJtWorker->decode(req);
         }, Qt::QueuedConnection);

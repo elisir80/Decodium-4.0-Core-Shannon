@@ -6930,6 +6930,9 @@ void MainWindow::dataSink(qint64 frames)
   if (k > 0)
     {
       m_last_audio_frame_ms = QDateTime::currentMSecsSinceEpoch ();
+      // A real callback proves that the current capture path is healthy.
+      // Allow a future, independent outage to use its one recovery attempt.
+      m_audio_input_health_reopen_attempts = 0;
     }
 
   bool const snapshotFt8LiveAudio =
@@ -7139,7 +7142,22 @@ void MainWindow::dataSink(qint64 frames)
 
   bool bCallDecoder=false;
 
-  if(m_ihsym==m_hsymStop) bCallDecoder=true;
+  bool const legacyJtMode = m_mode == "JT4" || m_mode == "JT65" || m_mode == "JT9";
+  if (legacyJtMode) {
+    // Audio callbacks are block-sized.  The callback can advance ihsym from
+    // 171 to 175, so an equality check can miss the entire JT decode point.
+    // Trigger once after the stop boundary has been reached, then wait for
+    // the next slot (ihsym <= 2) before arming it again.
+    if (m_ihsym <= 2) {
+      m_legacyJtDecodeStopTriggered = false;
+    }
+    if (m_ihsym >= m_hsymStop && !m_legacyJtDecodeStopTriggered) {
+      bCallDecoder = true;
+      m_legacyJtDecodeStopTriggered = true;
+    }
+  } else if (m_ihsym == m_hsymStop) {
+    bCallDecoder=true;
+  }
 
   if(m_mode=="FT8" && !m_diskData) {  //ft8md Try to call MTD two times when "Very early" has been selected
     if(ft8FirstEarlyDecodeTrigger) bCallDecoder=true;
@@ -7147,6 +7165,34 @@ void MainWindow::dataSink(qint64 frames)
   }
 
   if(bCallDecoder) {
+    if (m_mode == "JT9" && qEnvironmentVariableIsSet ("DECODIUM_JT9_TRACE")) {
+      float ssMin = std::numeric_limits<float>::max ();
+      float ssMax = std::numeric_limits<float>::lowest ();
+      int ssFinite = 0;
+      int ssNonZero = 0;
+      int const ssCount = 184 * NSMAX;
+      for (int i = 0; i < ssCount; ++i) {
+        float const value = dec_data.ss[i];
+        if (!std::isfinite (value)) continue;
+        ssMin = std::min (ssMin, value);
+        ssMax = std::max (ssMax, value);
+        ++ssFinite;
+        if (value > 0.0f) ++ssNonZero;
+      }
+      qInfo () << "[LEGACY-JT9] decode trigger"
+               << "ihsym=" << m_ihsym
+               << "hsymStop=" << m_hsymStop
+               << "k=" << k
+               << "npts8=" << dec_data.params.npts8
+               << "nzhsym=" << dec_data.params.nzhsym
+               << "audioSamples=" << (sizeof dec_data.d2 / sizeof dec_data.d2[0])
+               << "ssFinite=" << ssFinite
+               << "ssNonZero=" << ssNonZero
+               << "ssMin=" << ssMin
+               << "ssMax=" << ssMax
+               << "monitoring=" << m_monitoring;
+    }
+
     if(m_mode=="Echo") {
       float dBerr=0.0;
       int nfrit=0;
@@ -8487,6 +8533,15 @@ void MainWindow::armAudioInputHealthChecks (qint64 baseline_ms)
           debugToFile (QString {"audioCheck  no RX frames after %1 ms, reopening"}
                          .arg (delay_ms));
 
+          if (m_audio_input_health_reopen_attempts >= 1)
+            {
+              LOG_WARN ("audio health-check: recovery already attempted; suppressing repeated audio reopen");
+              debugToFile (QString {"audioCheck  recovery already attempted after %1 ms, keeping stream/UI responsive"}
+                             .arg (delay_ms));
+              return;
+            }
+          ++m_audio_input_health_reopen_attempts;
+
           bool const was_monitoring = m_monitoring;
           if (was_monitoring)
             {
@@ -8529,7 +8584,6 @@ void MainWindow::armAudioInputHealthChecks (qint64 baseline_ms)
               debugToFile (QString {"audioCheck  reopen applied after %1 ms monitor:%2"}
                              .arg (delay_ms)
                              .arg (m_monitoring));
-              armAudioInputHealthChecks (QDateTime::currentMSecsSinceEpoch ());
             });
         });
     }
@@ -9132,6 +9186,10 @@ void MainWindow::monitor (bool state)
 
   if (activating || deactivating)
     {
+      if (activating)
+        {
+          m_audio_input_health_reopen_attempts = 0;
+        }
       // MON off/on can happen while an in-process decode worker is still active.
       // If we keep the old busy/pending state, the next RX period may never arm
       // a new decode and the UI looks frozen until restart.
@@ -14075,6 +14133,33 @@ void MainWindow::requestInProcessLegacyJtDecode ()
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
   request.hisgrid = QByteArray (dec_data.params.hisgrid, int (sizeof dec_data.params.hisgrid));
   request.tempDir = m_config.temp_dir ().absolutePath ().toLocal8Bit ();
+
+  if (m_mode == "JT9" && qEnvironmentVariableIsSet ("DECODIUM_JT9_TRACE")) {
+    float ssMin = std::numeric_limits<float>::max ();
+    float ssMax = std::numeric_limits<float>::lowest ();
+    int ssFinite = 0;
+    int ssNonZero = 0;
+    for (float const value : request.ss) {
+      if (!std::isfinite (value)) continue;
+      ssMin = std::min (ssMin, value);
+      ssMax = std::max (ssMax, value);
+      ++ssFinite;
+      if (value > 0.0f) ++ssNonZero;
+    }
+    qInfo () << "[LEGACY-JT9] request"
+             << "serial=" << request.serial
+             << "audio=" << request.audio.size ()
+             << "audioUsed=" << qMin (request.audio.size (), qMax (0, request.npts8 * 8))
+             << "npts8=" << request.npts8
+             << "nzhsym=" << request.nzhsym
+             << "newdat=" << request.newdat
+             << "ss=" << request.ss.size ()
+             << "ssFinite=" << ssFinite
+             << "ssNonZero=" << ssNonZero
+             << "ssMin=" << ssMin
+             << "ssMax=" << ssMax
+             << "threadRunning=" << m_legacyJtDecodeThread.isRunning ();
+  }
 
   m_legacyJtDecodePending = true;
   m_decodedTransportQueue.clear ();
@@ -30262,6 +30347,13 @@ void MainWindow::processLegacyJtDecodedRows (quint64 serial, QStringList const& 
 {
   if (serial != m_legacyJtDecodeSerial) {
     return;
+  }
+
+  if (m_mode == "JT9" && qEnvironmentVariableIsSet ("DECODIUM_JT9_TRACE")) {
+    qInfo () << "[LEGACY-JT9] rows received" << "serial=" << serial << "rows=" << rows.size ();
+    for (auto const& row : rows) {
+      qInfo () << "[LEGACY-JT9] row" << row;
+    }
   }
 
   m_legacyJtDecodePending = false;

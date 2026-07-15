@@ -909,6 +909,7 @@ private:
   int m_tx_audio_buffer_frames;
   qint64 m_last_audio_frame_ms;
   quint64 m_audio_input_health_check_id {0};
+  int m_audio_input_health_reopen_attempts {0};
   qint64 m_last_tx_audio_rebind_ms;
   qint64 m_last_wake_audio_rebind_ms;
   Qt::ApplicationState m_last_application_state;
@@ -1338,6 +1339,7 @@ private:
   decodium::legacyjt::LegacyJtDecodeWorker * m_legacyJtDecodeWorker {nullptr};
   quint64 m_legacyJtDecodeSerial {0};
   bool m_legacyJtDecodePending {false};
+  bool m_legacyJtDecodeStopTriggered {false};
   QThread m_wsprDecodeThread;
   decodium::wspr::WSPRDecodeWorker * m_wsprDecodeWorker {nullptr};
   quint64 m_wsprDecodeSerial {0};

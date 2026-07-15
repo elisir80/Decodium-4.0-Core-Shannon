@@ -1132,7 +1132,13 @@ function (link_wsjtx_cycle_group target)
   endif ()
 endfunction ()
 
-if(WSJT_BUILD_UTILS) 
+if(WSJT_BUILD_UTILS)
+
+# The application no longer links the historical Fortran runtime.  These
+# verification utilities compare the maintained C++ JT65 implementation with
+# an independently built official WSJT-X Fortran archive, when one is supplied.
+set (DECODIUM_JT65_REFERENCE_LIBRARY "" CACHE FILEPATH
+  "Path to an official WSJT-X libwsjt_fort.a used by JT65 comparison utilities")
 
 add_executable (q65sim utils/q65sim.cpp)
 link_wsjtx_cycle_group (q65sim wsjt_qt wsjt_cxx wsjt_fort)
@@ -1168,34 +1174,80 @@ target_link_libraries (q65params wsjt_qt wsjt_cxx)
 add_executable (rtty_spec utils/rtty_spec.cpp)
 link_wsjtx_cycle_group (rtty_spec wsjt_qt wsjt_cxx wsjt_fort)
 
-add_executable (jt65_compare utils/jt65_compare.cpp)
-link_wsjtx_cycle_group (jt65_compare wsjt_qt wsjt_cxx)
+if (DECODIUM_JT65_REFERENCE_LIBRARY)
+  find_program (DECODIUM_GFORTRAN_EXECUTABLE NAMES gfortran REQUIRED)
+  execute_process (
+    COMMAND ${DECODIUM_GFORTRAN_EXECUTABLE} -print-file-name=libgfortran${CMAKE_SHARED_LIBRARY_SUFFIX}
+    OUTPUT_VARIABLE DECODIUM_GFORTRAN_RUNTIME
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT EXISTS ${DECODIUM_GFORTRAN_RUNTIME})
+    message (FATAL_ERROR "Cannot locate the gfortran runtime needed by JT65 reference comparison utilities")
+  endif ()
+  add_executable (jt65_compare
+    utils/jt65_compare.cpp
+    Modulator/FtxWaveformGenerator.cpp)
+  link_wsjtx_cycle_group (jt65_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_symspec_compare utils/jt65_symspec_compare.cpp)
-link_wsjtx_cycle_group (jt65_symspec_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_symspec_compare utils/jt65_symspec_compare.cpp)
+  link_wsjtx_cycle_group (jt65_symspec_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_sync_compare
-  utils/jt65_sync_compare.cpp)
-link_wsjtx_cycle_group (jt65_sync_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_sync_compare
+    utils/jt65_sync_compare.cpp)
+  link_wsjtx_cycle_group (jt65_sync_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_extract_primitives_compare
-  utils/jt65_extract_primitives_compare.cpp)
-link_wsjtx_cycle_group (jt65_extract_primitives_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_extract_primitives_compare
+    utils/jt65_extract_primitives_compare.cpp)
+  link_wsjtx_cycle_group (jt65_extract_primitives_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_extract_compare
-  utils/jt65_extract_compare.cpp)
-link_wsjtx_cycle_group (jt65_extract_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_extract_compare
+    utils/jt65_extract_compare.cpp)
+  link_wsjtx_cycle_group (jt65_extract_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_decode65b_compare
-  utils/jt65_decode65b_compare.cpp)
-link_wsjtx_cycle_group (jt65_decode65b_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_decode65b_compare
+    utils/jt65_decode65b_compare.cpp)
+  link_wsjtx_cycle_group (jt65_decode65b_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
 
-add_executable (jt65_decode65a_compare
-  utils/jt65_decode65a_compare.cpp)
-link_wsjtx_cycle_group (jt65_decode65a_compare wsjt_qt wsjt_cxx wsjt_fort)
+  add_executable (jt65_decode65a_compare
+    utils/jt65_decode65a_compare.cpp)
+  link_wsjtx_cycle_group (jt65_decode65a_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
+else ()
+  message (STATUS "JT65 reference comparison utilities disabled: set DECODIUM_JT65_REFERENCE_LIBRARY to an official WSJT-X libwsjt_fort.a")
+endif ()
 
-add_executable (jt9_compare utils/jt9_compare.cpp)
-link_wsjtx_cycle_group (jt9_compare wsjt_qt wsjt_cxx wsjt_fort)
+if (DECODIUM_JT65_REFERENCE_LIBRARY)
+  add_executable (jt9_compare utils/jt9_compare.cpp)
+  link_wsjtx_cycle_group (jt9_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
+endif ()
+
+add_executable (jt9_narrow_compare
+  utils/jt9_narrow_compare.cpp
+  Detector/FftCompat.cpp
+  Detector/JT9FastDecoder.cpp
+  Detector/JT9FastHelpers.cpp
+  Detector/JT9NarrowDecoder.cpp
+  Detector/LegacyDspIoHelpers.cpp
+  lib/wsprd/fano.c
+)
+target_include_directories (jt9_narrow_compare PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${FFTW3_INCLUDE_DIRS}
+)
+target_link_libraries (jt9_narrow_compare
+  Qt6::Core
+  ${FFTW3_LIBRARIES}
+  ${LIBM_LIBRARIES}
+  wsjt_cxx
+  wsjt_qt
+)
 
 add_executable (jt4_compare utils/jt4_compare.cpp)
 link_wsjtx_cycle_group (jt4_compare wsjt_qt wsjt_cxx wsjt_fort)
@@ -1468,7 +1520,12 @@ if (WSJT_BUILD_UTILS)
     Detector/MSK144DecodeWorker.cpp
     Detector/Q65DecodeWorker.cpp
     )
-  link_wsjtx_cycle_group (jt9 wsjt_qt wsjt_cxx wsjt_fort)
+  if (DECODIUM_JT65_REFERENCE_LIBRARY)
+    link_wsjtx_cycle_group (jt9 wsjt_qt wsjt_cxx wsjt_fort
+                            ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
+  else ()
+    link_wsjtx_cycle_group (jt9 wsjt_qt wsjt_cxx wsjt_fort)
+  endif ()
 
   add_executable (jt9a utils/jt9.cpp)
   target_sources (jt9a PRIVATE
@@ -1479,7 +1536,12 @@ if (WSJT_BUILD_UTILS)
     Detector/MSK144DecodeWorker.cpp
     Detector/Q65DecodeWorker.cpp
     )
-  link_wsjtx_cycle_group (jt9a wsjt_qt wsjt_cxx wsjt_fort)
+  if (DECODIUM_JT65_REFERENCE_LIBRARY)
+    link_wsjtx_cycle_group (jt9a wsjt_qt wsjt_cxx wsjt_fort
+                            ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
+  else ()
+    link_wsjtx_cycle_group (jt9a wsjt_qt wsjt_cxx wsjt_fort)
+  endif ()
 
   if (NOT APPLE)
     add_executable (record_time_signal Audio/tools/record_time_signal.cpp)

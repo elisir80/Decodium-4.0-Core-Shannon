@@ -12,6 +12,8 @@
 #include <QAudioFormat>
 #include <QAudioSource>
 #include <QAudioDevice>
+#include <QByteArray>
+#include <QTimer>
 
 #if defined(Q_OS_MACOS)
 #include <AudioToolbox/AudioToolbox.h>
@@ -33,6 +35,11 @@ public:
     : QObject {parent}
     , cummulative_lost_usec_ {std::numeric_limits<qint64>::min ()}
   {
+#if defined(Q_OS_MACOS)
+    m_pullTimer.setParent (this);
+    m_pullTimer.setTimerType (Qt::PreciseTimer);
+    connect (&m_pullTimer, &QTimer::timeout, this, &SoundInput::pullAudioData);
+#endif
   }
 
   ~SoundInput ();
@@ -60,6 +67,8 @@ private:
   void emitStatusIfChanged (QString const& message, QAudio::State state);
   void retireCurrentStream ();
 #if defined(Q_OS_MACOS)
+	  void pullAudioData ();
+	  void stopPullAudio ();
 	  bool startNativeMacInput (QAudioDevice const&, QAudioFormat const&,
 	                            int framesPerBuffer, AudioDevice *,
 	                            AudioDevice::Channel, QString *failureReason);
@@ -75,7 +84,20 @@ private:
   AudioQueueRef m_audioQueue {nullptr};
   QVector<AudioQueueBufferRef> m_audioQueueBuffers;
   QAudioFormat m_nativeInputFormat;
+  QPointer<QIODevice> m_pullDevice;
+  QByteArray m_pullPendingData;
+  QByteArray m_pullReadBuffer;
+  int m_pullBytesPerFrame {0};
+  quint64 m_pullReadCalls {0};
+  quint64 m_pullReadFrames {0};
+  quint64 m_pullSignalSamples {0};
+  quint64 m_pullSignalNonZero {0};
+  qint32 m_pullSignalPeak {0};
+  double m_pullSignalEnergy {0.0};
+  qint64 m_pullLastTraceMs {-1};
+  bool m_usingPullAudio {false};
 #endif
+  QTimer m_pullTimer;
   qint64 cummulative_lost_usec_;
   qint64 last_dropped_warning_ms_ {-1};
   float m_inputGain {1.0f};

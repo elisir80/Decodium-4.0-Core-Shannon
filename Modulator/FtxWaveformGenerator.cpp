@@ -1770,6 +1770,51 @@ QVector<float> generateFt8Wave (int const* itone, int nsym, int nsps, float bt, 
   return generate_ft8_wave (itone, nsym, nsps, bt, fsample, f0);
 }
 
+QVector<float> generateJt65Wave (int const* itone, int nsym, float fsample, float f0)
+{
+  if (!itone || nsym <= 0 || fsample <= 0.0f)
+    {
+      return {};
+    }
+
+  // WSJT-X gen65 constants: 4096 samples/symbol at 11025 Hz and
+  // 11025/4096 Hz tone spacing. Rounding every boundary avoids accumulated
+  // timing error when the reference waveform is rendered at 48 kHz.
+  constexpr double kReferenceRate = 11025.0;
+  constexpr double kSamplesPerSymbol = 4096.0;
+  constexpr double kToneSpacing = kReferenceRate / kSamplesPerSymbol;
+  constexpr double kTwoPi = 6.28318530717958647692;
+  int const outputSamples = std::max (
+      1, static_cast<int> (std::llround (static_cast<double> (nsym)
+                                         * kSamplesPerSymbol * fsample
+                                         / kReferenceRate)));
+  QVector<float> wave (outputSamples, 0.0f);
+  double phase = 0.0;
+  int start = 0;
+  for (int symbol = 0; symbol < nsym && start < outputSamples; ++symbol)
+    {
+      int const end = std::min (
+          outputSamples,
+          static_cast<int> (std::llround (static_cast<double> (symbol + 1)
+                                           * kSamplesPerSymbol * fsample
+                                           / kReferenceRate)));
+      double const frequency = static_cast<double> (f0)
+                               + static_cast<double> (itone[symbol]) * kToneSpacing;
+      double const phaseStep = kTwoPi * frequency / static_cast<double> (fsample);
+      for (int sample = start; sample < end; ++sample)
+        {
+          wave[sample] = static_cast<float> (std::sin (phase));
+          phase += phaseStep;
+          if (phase >= kTwoPi || phase <= -kTwoPi)
+            {
+              phase = std::fmod (phase, kTwoPi);
+            }
+        }
+      start = end;
+    }
+  return wave;
+}
+
 QVector<float> generateMsk144Wave (int const* itone, int nsym, float fsample,
                                    float centerFrequency, double trPeriodSeconds)
 {
