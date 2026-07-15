@@ -21,6 +21,23 @@ Item {
     // Global context handle, default-bound (never shadow-undefined under async Loader).
     property var bridge: (typeof appEngine !== 'undefined' ? appEngine : null)
 
+    // IU8LMC: apre la scheda del nominativo su QRZ.com nel browser (call base).
+    function openQrzLookup(entry) {
+        if (!entry) return
+        var raw = String(entry.dxCallsign || "")
+        if (raw.length === 0) {
+            var parts = String(entry.message || "").split(/\s+/)
+            for (var i = 0; i < parts.length; ++i) {
+                var t = parts[i].replace(/[^A-Za-z0-9\/]/g, "")
+                if (/[A-Za-z]/.test(t) && /[0-9]/.test(t)) { raw = t; break }
+            }
+        }
+        var segs = String(raw).split("/"), best = ""
+        for (var j = 0; j < segs.length; ++j) if (segs[j].length > best.length) best = segs[j]
+        var call = (best.length ? best : raw).toUpperCase().replace(/[^A-Z0-9]/g, "")
+        if (call.length > 0) Qt.openUrlExternally("https://www.qrz.com/db/" + call)
+    }
+
     // Theme tokens (Fase 1) with safe fallbacks — NO hardcoded UI hex.
     readonly property var tm: bridge ? bridge.themeManager : null
     readonly property color cAccent:   tm ? tm.accentColor    : "#19ff88"
@@ -337,7 +354,11 @@ Item {
                         if (!root.bridge.holdTxFreq)
                             root.bridge.txFrequency = parseInt(del.entry.freq || "0")
                     } else if (mouse.button === Qt.RightButton) {
-                        root.bridge.rxFrequency = parseInt(del.entry.freq || "0")
+                        // Destro = imposta RX freq; Shift+Destro = QRZ.com (IU8LMC)
+                        if (mouse.modifiers & Qt.ShiftModifier)
+                            root.openQrzLookup(del.entry)
+                        else
+                            root.bridge.rxFrequency = parseInt(del.entry.freq || "0")
                     }
                 }
                 onDoubleClicked: function(mouse) {

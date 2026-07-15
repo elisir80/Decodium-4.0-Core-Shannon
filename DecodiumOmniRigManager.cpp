@@ -590,7 +590,7 @@ void DecodiumOmniRigManager::applyPollInterval()
 
 void DecodiumOmniRigManager::saveSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     m_pttMethod = normalizePttMethod(m_pttMethod);
     m_pollInterval = boundedPollInterval(m_pollInterval);
@@ -619,7 +619,7 @@ void DecodiumOmniRigManager::setSplitMode(const QString& v)
 
 void DecodiumOmniRigManager::loadSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_OmniRig");
     const bool hasRigName = s.contains("rigName");
@@ -760,7 +760,7 @@ void DecodiumOmniRigManager::applyPollInterval()
 
 void DecodiumOmniRigManager::saveSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     m_pttMethod = normalizePttMethod(m_pttMethod);
     m_pollInterval = boundedPollInterval(m_pollInterval);
@@ -789,7 +789,7 @@ void DecodiumOmniRigManager::setSplitMode(const QString& v)
 
 void DecodiumOmniRigManager::loadSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_OmniRig");
     const bool hasRigName = s.contains("rigName");

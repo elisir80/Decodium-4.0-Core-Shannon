@@ -194,6 +194,16 @@ Rectangle {
                     id: stnMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    // IU8LMC: click destro -> apre la scheda del nominativo su QRZ.com
+                    onClicked: (mouse) => {
+                        if (mouse.button !== Qt.RightButton || !bridge.activeStations) return
+                        var c = String(bridge.activeStations.callsignAt(index) || "").toUpperCase()
+                        var segs = c.split("/"), best = ""
+                        for (var j = 0; j < segs.length; ++j) if (segs[j].length > best.length) best = segs[j]
+                        var call = (best.length ? best : c).replace(/[^A-Z0-9]/g, "")
+                        if (call.length > 0) Qt.openUrlExternally("https://www.qrz.com/db/" + call)
+                    }
                     onDoubleClicked: {
                         // Use bridge to handle double-click on a callsign
                         if (bridge.activeStations) {

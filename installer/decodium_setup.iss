@@ -101,6 +101,22 @@ russian.RebootCountdown=Decodium обновлён. Компьютер перез
 chinesesimplified.RebootCountdown=Decodium 已更新。计算机将在 15 秒后重新启动。请保存正在进行的工作。
 chinesetraditional.RebootCountdown=Decodium 已更新。電腦將在 15 秒後重新啟動。請儲存正在進行的工作。
 latvian.RebootCountdown=Decodium atjaunināts. Dators tiks restartēts pēc 15 sekundēm. Saglabājiet atvērto darbu.
+; 1.0.482 — disinstallazione senza residui. Le impostazioni vengono sempre rimosse;
+; i DATI personali (database QSO, cache, log) solo su conferma esplicita. Il default
+; e' NO per non far perdere il log a chi disinstalla per sbaglio. Vedi [Code]/CurUninstallStepChanged.
+english.RemoveDataPrompt=Decodium settings have been removed.%n%nDo you also want to delete your personal data: the QSO log database, caches and logs?%n%nChoose NO to keep your QSO log (recommended if you plan to reinstall Decodium).
+italian.RemoveDataPrompt=Le impostazioni di Decodium sono state rimosse.%n%nVuoi eliminare anche i tuoi dati personali: database del log QSO, cache e log?%n%nScegli NO per conservare il log dei QSO (consigliato se pensi di reinstallare Decodium).
+catalan.RemoveDataPrompt=S'han eliminat els paràmetres de Decodium.%n%nVoleu eliminar també les vostres dades personals: la base de dades del log de QSO, les memòries cau i els registres?%n%nTrieu NO per conservar el log de QSO (recomanat si penseu reinstal·lar Decodium).
+danish.RemoveDataPrompt=Decodiums indstillinger er fjernet.%n%nVil du også slette dine personlige data: QSO-logdatabasen, cache og logfiler?%n%nVælg NEJ for at beholde din QSO-log (anbefales, hvis du vil geninstallere Decodium).
+german.RemoveDataPrompt=Die Einstellungen von Decodium wurden entfernt.%n%nMöchten Sie auch Ihre persönlichen Daten löschen: die QSO-Log-Datenbank, Caches und Protokolle?%n%nWählen Sie NEIN, um Ihr QSO-Log zu behalten (empfohlen, wenn Sie Decodium neu installieren möchten).
+spanish.RemoveDataPrompt=Se han eliminado los ajustes de Decodium.%n%n¿Quieres borrar también tus datos personales: la base de datos del log de QSO, las cachés y los registros?%n%nElige NO para conservar tu log de QSO (recomendado si piensas reinstalar Decodium).
+french.RemoveDataPrompt=Les réglages de Decodium ont été supprimés.%n%nVoulez-vous aussi supprimer vos données personnelles : la base de données du log QSO, les caches et les journaux ?%n%nChoisissez NON pour conserver votre log QSO (recommandé si vous prévoyez de réinstaller Decodium).
+hungarian.RemoveDataPrompt=A Decodium beállításai eltávolítva.%n%nTörölni szeretné a személyes adatait is: a QSO-napló adatbázisát, a gyorsítótárakat és a naplókat?%n%nVálassza a NEM lehetőséget a QSO-napló megtartásához (ajánlott, ha újratelepíti a Decodiumot).
+japanese.RemoveDataPrompt=Decodium の設定を削除しました。%n%n個人データ（QSO ログのデータベース・キャッシュ・ログ）も削除しますか？%n%nQSO ログを残す場合は「いいえ」を選んでください（Decodium を再インストールする予定がある場合におすすめします）。
+russian.RemoveDataPrompt=Настройки Decodium удалены.%n%nУдалить также ваши личные данные: базу данных журнала QSO, кэш и логи?%n%nВыберите НЕТ, чтобы сохранить журнал QSO (рекомендуется, если вы планируете переустановить Decodium).
+chinesesimplified.RemoveDataPrompt=Decodium 的设置已删除。%n%n是否同时删除您的个人数据：QSO 日志数据库、缓存和日志？%n%n选择“否”可保留您的 QSO 日志（如果打算重新安装 Decodium，建议保留）。
+chinesetraditional.RemoveDataPrompt=Decodium 的設定已刪除。%n%n是否同時刪除您的個人資料：QSO 日誌資料庫、快取與日誌？%n%n選擇「否」可保留您的 QSO 日誌（若打算重新安裝 Decodium，建議保留）。
+latvian.RemoveDataPrompt=Decodium iestatījumi ir noņemti.%n%nVai vēlaties dzēst arī savus personiskos datus: QSO žurnāla datubāzi, kešatmiņu un žurnālus?%n%nIzvēlieties NĒ, lai saglabātu savu QSO žurnālu (ieteicams, ja plānojat Decodium instalēt no jauna).
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -154,9 +170,12 @@ Name: "{group}\{#AppName}";              Filename: "{app}\{#AppExeName}"; IconFi
 Name: "{group}\Disinstalla {#AppName}";  Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}";        Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
-[Registry]
-Root: HKCU; Subkey: "Software\{#AppPublisher}\{#AppName}"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\{#AppPublisher}\{#AppName}"; ValueType: string; ValueName: "Version"; ValueData: "{#AppVersion}"
+; 1.0.482 — [Registry] rimossa di proposito: Decodium non scrive PIU' nulla di suo
+; nel registro (richiesta utente). Le vecchie voci InstallPath/Version sotto
+; HKCU\Software\IU8LMC\Decodium non erano lette da nessuna parte del codice, e
+; ricrearle avrebbe vanificato la bonifica fatta da DecodiumStorageMigration.
+; L'unica chiave che resta e' quella di Windows in ...\CurrentVersion\Uninstall,
+; gestita da Inno stesso: e' il meccanismo di "App e funzionalita'", non roba nostra.
 
 [Run]
 ; 1.0.430 — avvio automatico DISABILITATO: a fine installazione interattiva viene
@@ -206,6 +225,47 @@ begin
   begin
     Sleep(500);
     Waited := Waited + 1;
+  end;
+end;
+
+{ 1.0.482 — Disinstallazione senza residui (richiesta utente: niente valori zombie
+  che sopravvivono alla disinstallazione, come l'uiSpectrumHeight=2808 che rendeva
+  inservibile la barra del waterfall).
+
+  ATTENZIONE, TRAPPOLA: questa procedura gira ANCHE durante l'auto-disinstallazione
+  che UninstallPreviousVersion esegue a OGNI aggiornamento (con /VERYSILENT). Senza
+  la guardia UninstallSilent ogni update azzererebbe impostazioni e log QSO di tutti
+  gli utenti. Percio': silenzioso = aggiornamento = non si tocca NULLA.
+
+  Le impostazioni (.ini) vengono rimosse sempre; i DATI personali (database QSO,
+  cache, log) solo se l'utente conferma. Default del MsgBox = NO. }
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep <> usPostUninstall then
+    Exit;
+  if UninstallSilent then
+    Exit;
+
+  { Impostazioni: sono la fonte dei valori zombie -> via sempre. }
+  DeleteFile(ExpandConstant('{userappdata}\Decodium\Decodium3.ini'));
+  DeleteFile(ExpandConstant('{userappdata}\Decodium\Decodium.ini'));
+
+  { Registro legacy (pre-1.0.482 le impostazioni stavano qui). }
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Decodium');
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\IU8LMC');
+
+  { Dati personali: solo su conferma esplicita. }
+  if MsgBox(ExpandConstant('{cm:RemoveDataPrompt}'), mbConfirmation,
+            MB_YESNO or MB_DEFBUTTON2) = IDYES then
+  begin
+    DelTree(ExpandConstant('{userappdata}\Decodium'), True, True, True);
+    DelTree(ExpandConstant('{localappdata}\Decodium'), True, True, True);
+    { layout legacy, se la migrazione non era mai girata }
+    DelTree(ExpandConstant('{userappdata}\IU8LMC'), True, True, True);
+    DelTree(ExpandConstant('{localappdata}\IU8LMC'), True, True, True);
+    { log sparsi nella radice di %LOCALAPPDATA% (path del log corretto in 1.0.482) }
+    DelTree(ExpandConstant('{localappdata}\decodium_*.log'), False, True, False);
+    DelTree(ExpandConstant('{localappdata}\decodium_diagnostic*.bak'), False, True, False);
   end;
 end;
 

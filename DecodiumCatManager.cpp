@@ -1030,7 +1030,7 @@ void DecodiumCatManager::refreshPorts()
 
 void DecodiumCatManager::saveSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_Native");
     s.setValue("rigName",        m_rigName);
@@ -1069,7 +1069,7 @@ void DecodiumCatManager::setSplitMode(const QString& v)
 
 void DecodiumCatManager::loadSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_Native");
     m_rigName        = s.value("rigName",        "Kenwood TS-590S").toString();

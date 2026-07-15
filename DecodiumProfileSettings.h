@@ -25,7 +25,7 @@ inline void ensureSettingsProfileInitialized(const QString& profileName)
         return;
     }
 
-    QSettings settings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     settings.beginGroup(QStringLiteral("MultiSettings"));
     settings.beginGroup(profileName);
     bool const alreadyInitialized =
@@ -74,7 +74,7 @@ inline QVariant profiledSettingsValue(const QString& group,
                                       const QString& key,
                                       const QVariant& defaultValue = QVariant {})
 {
-    QSettings profiled(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    QSettings profiled(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     if (beginActiveSettingsProfile(profiled)) {
         if (!group.isEmpty()) {
             profiled.beginGroup(group);
@@ -84,7 +84,7 @@ inline QVariant profiledSettingsValue(const QString& group,
         }
     }
 
-    QSettings root(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    QSettings root(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     if (!group.isEmpty()) {
         root.beginGroup(group);
     }

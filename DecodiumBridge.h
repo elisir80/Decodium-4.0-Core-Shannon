@@ -609,7 +609,7 @@ public:
     void setProcessPriority(int v);          // 1.0.388 — implementato in .cpp (SetPriorityClass)
     void applyProcessPriority();             // 1.0.388 — applica m_processPriority al processo
     int  maxCallerRetries()  const { return m_maxCallerRetries; }
-    Q_INVOKABLE void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store. Q_INVOKABLE: il QML chiama setMaxCallerRetries() come metodo (1.0.383 fix: senza Q_INVOKABLE falliva con TypeError silenzioso → non persisteva, restava sempre 10)
+    Q_INVOKABLE void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store. Q_INVOKABLE: il QML chiama setMaxCallerRetries() come metodo (1.0.383 fix: senza Q_INVOKABLE falliva con TypeError silenzioso → non persisteva, restava sempre 10)
     int  txDisabledMask() const { return m_txDisabledMask; }
     Q_INVOKABLE bool isTxDisabled(int n) const { return n >= 1 && n <= 6 && (m_txDisabledMask & (1 << (n - 1))); }
     Q_INVOKABLE void setTxDisabled(int n, bool disabled);

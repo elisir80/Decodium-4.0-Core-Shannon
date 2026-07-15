@@ -1287,8 +1287,13 @@ Component.onCompleted: {
                                     enabled: !parent.isPeriodSeparator
                                     anchors.fill: parent
                                     hoverEnabled: true
-                                    onClicked: {
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    onClicked: (mouse) => {
                                         if (parent.isPeriodSeparator) return
+                                        if (mouse.button === Qt.RightButton) {
+                                            openQrzLookup(modelData)   // IU8LMC: click destro -> QRZ.com
+                                            return
+                                        }
                                         appEngine.selectDecode(index)
                                         // Set RX frequency to this decode's frequency
                                         appEngine.rxFrequency = parseInt(modelData.freq)
@@ -1829,6 +1834,12 @@ Component.onCompleted: {
                                     enabled: !parent.isPeriodSeparator
                                     anchors.fill: parent
                                     hoverEnabled: true
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    onClicked: (mouse) => {
+                                        if (parent.isPeriodSeparator) return
+                                        if (mouse.button === Qt.RightButton)
+                                            openQrzLookup(modelData)   // IU8LMC: click destro -> QRZ.com
+                                    }
                                     onDoubleClicked: {
                                         if (parent.isPeriodSeparator) return
                                         // Set TX and RX frequency to decode frequency
@@ -2068,6 +2079,19 @@ Component.onCompleted: {
                 return token
         }
         return ""
+    }
+
+    // IU8LMC: click destro su un decode -> apre la scheda del nominativo su QRZ.com nel browser.
+    // Usa la call base (i portable/prefix risolvono sulla scheda dell'operatore).
+    function openQrzLookup(modelData) {
+        if (!modelData)
+            return
+        var call = callsignBase(String(modelData.dxCallsign || ""))
+        if (call.length === 0)
+            call = callsignBase(String(extractCall(modelData.message || "")))
+        if (call.length === 0)
+            return
+        Qt.openUrlExternally("https://www.qrz.com/db/" + call.toUpperCase())
     }
 
     function messageElideMode(message) {

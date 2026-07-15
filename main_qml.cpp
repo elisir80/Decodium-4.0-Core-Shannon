@@ -63,6 +63,7 @@
 #include "DecodiumDiagnostics.h"
 #include "DecodiumDxCluster.h"
 #include "DecodiumLogging.hpp"
+#include "DecodiumStorageMigration.hpp"
 #include "controllers/FT2LinkQmlAdapter.hpp"
 #include "L10nLoader.hpp"
 #include "MetaDataRegistry.hpp"
@@ -312,13 +313,17 @@ static QString persistentD3d11FallbackUtcKey()
 
 static bool persistentD3d11FallbackEnabled()
 {
-    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QString::fromLatin1(DecodiumStorageMigration::organizationName()),
+                        QStringLiteral("Decodium")};
     return settings.value(persistentD3d11FallbackKey(), false).toBool();
 }
 
 static void writePersistentD3d11Fallback(const QString& reason)
 {
-    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QString::fromLatin1(DecodiumStorageMigration::organizationName()),
+                        QStringLiteral("Decodium")};
     settings.setValue(persistentD3d11FallbackKey(), true);
     settings.setValue(persistentD3d11FallbackReasonKey(), reason);
     settings.setValue(persistentD3d11FallbackUtcKey(),
@@ -328,7 +333,9 @@ static void writePersistentD3d11Fallback(const QString& reason)
 
 static void clearPersistentD3d11Fallback()
 {
-    QSettings settings {QStringLiteral("IU8LMC"), QStringLiteral("Decodium")};
+    QSettings settings {QSettings::IniFormat, QSettings::UserScope,
+                        QString::fromLatin1(DecodiumStorageMigration::organizationName()),
+                        QStringLiteral("Decodium")};
     settings.remove(persistentD3d11FallbackKey());
     settings.remove(persistentD3d11FallbackReasonKey());
     settings.remove(persistentD3d11FallbackUtcKey());
@@ -828,6 +835,11 @@ static bool ensureLegacySqliteDatabase()
 
 int main(int argc, char* argv[])
 {
+    // IU8LMC — persistenza fuori dal registro di Windows + migrazione one-shot.
+    // DEVE restare la prima istruzione: da qui in poi ogni QSettings, il log e
+    // il database devono gia' vedere il nuovo layout su file.
+    DecodiumStorageMigration::configure();
+
     decodium::fft_compat::initialize_planner_thread_safety();
 
     qInstallMessageHandler(qtMsgHandler);
@@ -859,7 +871,7 @@ int main(int argc, char* argv[])
     // Persistita come "uiScaleFactor" nello store canonico (Decodium3). Default 1.0 = nessun
     // cambio. Si applica al riavvio. Rispetta un QT_SCALE_FACTOR gia' impostato dall'utente.
     if (!qEnvironmentVariableIsSet("QT_SCALE_FACTOR")) {
-        double const uiScale = QSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        double const uiScale = QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
                                    .value(QStringLiteral("uiScaleFactor"), 1.0).toDouble();
         if (uiScale >= 0.8 && uiScale <= 2.5 && !qFuzzyCompare(uiScale, 1.0)) {
             qputenv("QT_SCALE_FACTOR", QByteArray::number(uiScale, 'g', 4));
@@ -1063,7 +1075,7 @@ int main(int argc, char* argv[])
     // creates paths such as ~/.cache/AppRun.decodium-real.
     app.setApplicationName("Decodium");
     app.setApplicationVersion(QStringLiteral(FORK_RELEASE_VERSION));
-    app.setOrganizationName("IU8LMC");
+    app.setOrganizationName(DecodiumStorageMigration::organizationName());  // IU8LMC: "Decodium" su Windows
     app.setOrganizationDomain("decodium.iu8lmc.it");
 
     // 1.0.180 — Pipeline cache shader: build path here, apply via objectCreated
@@ -1148,7 +1160,7 @@ int main(int argc, char* argv[])
     L("Qt Quick text render type forced: QtTextRendering");
     app.setApplicationName("Decodium");
     app.setApplicationVersion(QStringLiteral(FORK_RELEASE_VERSION));
-    app.setOrganizationName("IU8LMC");
+    app.setOrganizationName(DecodiumStorageMigration::organizationName());  // IU8LMC: "Decodium" su Windows
     app.setOrganizationDomain("decodium.iu8lmc.it");
 #ifdef Q_OS_WIN
     QGuiApplication::setDesktopFileName(QStringLiteral("IU8LMC.Decodium4"));
@@ -1158,7 +1170,7 @@ int main(int argc, char* argv[])
     // 1.0.183 — Lettura UI/Style DOPO QApplication cosi' QSettings() default
     // usa OrganizationName "IU8LMC" + ApplicationName "Decodium" — lo stesso
     // scope di DecodiumBridge::setUiStyle(). PRIMA della 1.0.183 usavamo
-    // QSettings("Decodium","Decodium3") che leggeva un registry path diverso
+    // QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3") che leggeva un registry path diverso
     // e il setter del bridge non era mai visto, fallback a "Material" sempre.
     // QQuickStyle::setStyle DEVE essere chiamato PRIMA di engine.load(),
     // qui siamo molto prima quindi OK.
@@ -1691,7 +1703,7 @@ int main(int argc, char* argv[])
     ensureLegacySqliteDatabase();
 
     QString configName = parser.value(configOption).trimmed();
-    QSettings rootSettings(QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    QSettings rootSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     if (configName.isEmpty() && !rigName.isEmpty()) {
         configName = rigName;
     }

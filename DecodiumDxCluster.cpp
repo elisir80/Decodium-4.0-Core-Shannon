@@ -1421,7 +1421,7 @@ QString DecodiumDxCluster::bandLabelFromFrequencyKhz(double freqKhz)
 
 void DecodiumDxCluster::saveSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     beginConfiguredSettingsGroup(s);
     s.beginGroup("DXCluster");
     s.setValue("host",     m_host);
@@ -1437,7 +1437,7 @@ void DecodiumDxCluster::saveSettings()
 
 void DecodiumDxCluster::loadSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     beginConfiguredSettingsGroup(s);
     QString loadedHost;
     int loadedPort = 0;

@@ -619,7 +619,7 @@ int HRDTransceiver::do_start ()
       // the first inventory radio introduced in 1.0.176 upstream (b1b2ec9). When the
       // configured radio is no longer current in HRD, fail loudly instead of driving a
       // different rig without telling the user.
-      QSettings strictSettings (QStringLiteral ("Decodium"), QStringLiteral ("Decodium3"));
+      QSettings strictSettings (QSettings::IniFormat, QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("Decodium3"));
       strictSettings.beginGroup (QStringLiteral ("Transceiver"));
       bool const strict_radio_match = strictSettings.value (QStringLiteral ("hrdStrictRadioMatch"), true).toBool ();
       strictSettings.endGroup ();

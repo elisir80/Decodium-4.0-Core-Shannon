@@ -105,7 +105,7 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_dxPedition {
 DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     : QObject(parent)
 {
-    QSettings s("Decodium", "Decodium");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium");
     QString const startupTheme = QStringLiteral("Ocean Blue");
     // One-shot migration: from 1.0.70 the dark Ocean Blue theme is the
     // canonical default. Reset any persisted choice once so the upgrade
@@ -117,7 +117,7 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
         // a sensible spectrum palette instead of an all-white waterfall.
         // uiPaletteIndex is persisted by DecodiumBridge under the
         // "Decodium3" store, not the same one used for theme/current.
-        QSettings bridgeStore("Decodium", "Decodium3");
+        QSettings bridgeStore(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
         if (bridgeStore.value("uiPaletteIndex", 0).toInt() == 11)
             bridgeStore.setValue("uiPaletteIndex", 0);
         s.setValue("theme/migrated_v2", true);
@@ -133,7 +133,7 @@ DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     m_currentTheme = stored;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
     {
-        QSettings ds("Decodium", "Decodium3");
+        QSettings ds(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
         QString const av = ds.value("ThemeAccentVariant", "phosphor").toString();
         if (av == "phosphor" || av == "cyan" || av == "amber" || av == "red")
             m_accentVariant = av;
@@ -176,7 +176,7 @@ void DecodiumThemeManager::setCustomColorsEnabled(bool v)
 {
     if (m_customColorsEnabled == v) return;
     m_customColorsEnabled = v;
-    QSettings("Decodium", "Decodium").setValue("theme/customEnabled", v);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customEnabled", v);
     emit paletteChanged();
 }
 
@@ -185,7 +185,7 @@ void DecodiumThemeManager::setCustomBgColor(const QString& hex)
     QString const h = hex.trimmed();
     if (m_customBgColor == h) return;
     m_customBgColor = h;
-    QSettings("Decodium", "Decodium").setValue("theme/customBg", h);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customBg", h);
     if (m_customColorsEnabled) emit paletteChanged();
 }
 
@@ -194,7 +194,7 @@ void DecodiumThemeManager::setCustomTextColor(const QString& hex)
     QString const h = hex.trimmed();
     if (m_customTextColor == h) return;
     m_customTextColor = h;
-    QSettings("Decodium", "Decodium").setValue("theme/customText", h);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customText", h);
     if (m_customColorsEnabled) emit paletteChanged();
 }
 
@@ -210,7 +210,7 @@ void DecodiumThemeManager::setCurrentTheme(const QString& name)
     if (m_currentTheme == name) return;
     if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium") return;
     m_currentTheme = name;
-    QSettings("Decodium", "Decodium").setValue("theme/current", name);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/current", name);
     emit currentThemeChanged();
     emit paletteChanged();
 }
@@ -236,7 +236,7 @@ void DecodiumThemeManager::setAccentVariant(const QString& name)
     if (n != "phosphor" && n != "cyan" && n != "amber" && n != "red") return;
     if (m_accentVariant == n) return;
     m_accentVariant = n;
-    QSettings("Decodium", "Decodium3").setValue("ThemeAccentVariant", n);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue("ThemeAccentVariant", n);
     // Influisce sui colori solo quando il tema DX-Pedition è attivo, ma emettiamo
     // comunque: i binding QML restano corretti e l'effetto è nullo sugli altri temi.
     emit paletteChanged();
@@ -248,7 +248,7 @@ void DecodiumThemeManager::setDensity(const QString& name)
     if (n != "compact" && n != "regular" && n != "comfy") return;
     if (m_density == n) return;
     m_density = n;
-    QSettings("Decodium", "Decodium3").setValue("ThemeDensity", n);
+    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue("ThemeDensity", n);
     emit densityChanged();
 }
 

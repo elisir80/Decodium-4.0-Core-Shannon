@@ -2420,6 +2420,19 @@ ApplicationWindow {
         return ""
     }
 
+    // IU8LMC: click destro su un decode -> apre la scheda del nominativo su QRZ.com nel browser.
+    // Usa la call base (i portable/prefix risolvono sulla scheda dell'operatore).
+    function openQrzLookup(modelData) {
+        if (!modelData)
+            return
+        var call = callsignBase(String(modelData.dxCallsign || ""))
+        if (call.length === 0)
+            call = callsignBase(firstMessageCallsign(modelData.message || ""))
+        if (call.length === 0)
+            return
+        Qt.openUrlExternally("https://www.qrz.com/db/" + call.toUpperCase())
+    }
+
     function isLocalDistanceEntry(modelData) {
         if (!modelData)
             return true
@@ -8184,8 +8197,11 @@ NumberAnimation {
                                                         if (!bridge.holdTxFreq)
 	                                                            bridge.txFrequency = parseInt(entry.freq || "0")
                                                     } else if (mouse.button === Qt.RightButton) {
-                                                        // Destro = imposta RX freq
-	                                                        bridge.rxFrequency = parseInt(entry.freq || "0")
+                                                        // Destro = imposta RX freq; Shift+Destro = QRZ.com (IU8LMC)
+	                                                        if (mouse.modifiers & Qt.ShiftModifier)
+	                                                            mainWindow.openQrzLookup(entry)
+	                                                        else
+	                                                            bridge.rxFrequency = parseInt(entry.freq || "0")
                                                     }
                                                 }
                                                 onDoubleClicked: function(mouse) {
@@ -8814,8 +8830,11 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 	                                                        if (!bridge.holdTxFreq)
 	                                                            bridge.txFrequency = parseInt(rxFrequencyDelegate.entry.freq || "0")
 	                                                    } else if (mouse.button === Qt.RightButton) {
-	                                                        // Destro = imposta RX freq
-	                                                        bridge.rxFrequency = parseInt(rxFrequencyDelegate.entry.freq || "0")
+	                                                        // Destro = imposta RX freq; Shift+Destro = QRZ.com (IU8LMC)
+	                                                        if (mouse.modifiers & Qt.ShiftModifier)
+	                                                            mainWindow.openQrzLookup(rxFrequencyDelegate.entry)
+	                                                        else
+	                                                            bridge.rxFrequency = parseInt(rxFrequencyDelegate.entry.freq || "0")
 	                                                    }
 	                                                }
 	                                                onDoubleClicked: function(mouse) {
@@ -13114,7 +13133,9 @@ NumberAnimation {
 	                            MouseArea {
 	                                enabled: !parent.isPeriodSeparator
 	                                anchors.fill: parent
-		                                onDoubleClicked: { if (!parent.isPeriodSeparator && !entry.isTx) decodePanel.handleDecodeDoubleClick(entry) }
+		                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                                onClicked: (mouse) => { if (!parent.isPeriodSeparator && mouse.button === Qt.RightButton) mainWindow.openQrzLookup(entry) }
+                                                onDoubleClicked: { if (!parent.isPeriodSeparator && !entry.isTx) decodePanel.handleDecodeDoubleClick(entry) }
 	                            }
 	                        }
                     }
@@ -13657,7 +13678,9 @@ NumberAnimation {
 	                            MouseArea {
 	                                enabled: !parent.isPeriodSeparator
 	                                anchors.fill: parent
-	                                onDoubleClicked: { if (!parent.isPeriodSeparator && !modelData.isTx) decodePanel.handleDecodeDoubleClick(modelData) }
+	                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                                onClicked: (mouse) => { if (!parent.isPeriodSeparator && mouse.button === Qt.RightButton) mainWindow.openQrzLookup(modelData) }
+                                                onDoubleClicked: { if (!parent.isPeriodSeparator && !modelData.isTx) decodePanel.handleDecodeDoubleClick(modelData) }
 	                            }
 	                        }
                     }

@@ -31,7 +31,17 @@ Item {
     // (decidere quale aprire di più). Spettro 40..(altezza-24), cascata ≥24.
     readonly property bool controlsVisible: showControls && controlsExpanded
     readonly property int spectrumMinHeight: 40
-    readonly property int spectrumMaxHeight: 4000
+    // IU8LMC FIX — era un 4000 FISSO: il drag poteva portare spectrumHeight molto oltre
+    // l'altezza reale del pannello (es. 2808 salvato con pannello alto 152). Il render
+    // (PanadapterItem.spectrumHeight, sotto) clampa a height-waterfallMinHeight, quindi il
+    // valore restava fuori scala e trascinare la barra non cambiava NULLA -> "barra bloccata".
+    // Ora il tetto del drag coincide col tetto del render: si auto-ripara al primo drag.
+    // Finche' il layout non e' pronto (height<=0) resta permissivo (4000) per non
+    // clampare a 40 durante il restore delle impostazioni (onSettingValueChanged).
+    readonly property int spectrumMaxHeight: waterfallDisplay.height > 0
+                                             ? Math.max(spectrumMinHeight,
+                                                        waterfallDisplay.height - waterfallMinHeight)
+                                             : 4000
     readonly property int waterfallMinHeight: controlsVisible ? 24 : 12
 
     // Colors

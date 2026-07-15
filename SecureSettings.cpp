@@ -165,7 +165,7 @@ namespace
 #elif defined (Q_OS_WIN)
       // Windows DPAPI: the encrypted blob is stored in a QSettings key
       // named "dpapi:<service>/<account>" as a base64 string.
-      QSettings reg (QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
+      QSettings reg (QSettings::IniFormat, QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
       auto const key = service + QStringLiteral ("/") + account;
       auto const blob64 = reg.value (key).toByteArray ();
       if (blob64.isEmpty ())
@@ -271,7 +271,7 @@ namespace
         }
       auto const blob64 = QByteArray (reinterpret_cast<char *> (out_blob.pbData), static_cast<int> (out_blob.cbData)).toBase64 ();
       LocalFree (out_blob.pbData);
-      QSettings reg (QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
+      QSettings reg (QSettings::IniFormat, QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
       auto const key = service + QStringLiteral ("/") + account;
       reg.setValue (key, blob64);
       return true;
@@ -352,7 +352,7 @@ namespace
       return false;
 #elif defined (Q_OS_WIN)
       Q_UNUSED (error);
-      QSettings reg (QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
+      QSettings reg (QSettings::IniFormat, QSettings::UserScope, QStringLiteral ("Decodium"), QStringLiteral ("SecureStore"));
       auto const key = service + QStringLiteral ("/") + account;
       reg.remove (key);
       return true;

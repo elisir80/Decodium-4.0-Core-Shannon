@@ -1622,6 +1622,8 @@ set (DECODIUM_QML_LEGACY_SRCS
   )
 add_executable (decodium_qml
   main_qml.cpp
+  DecodiumStorageMigration.cpp
+  DecodiumStorageMigration.hpp
   DecodiumBridge.cpp
   DecodiumBridge.h
   UsStateDataManager.cpp

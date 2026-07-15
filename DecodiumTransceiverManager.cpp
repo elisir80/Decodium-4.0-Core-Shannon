@@ -2564,7 +2564,7 @@ void DecodiumTransceiverManager::saveSettings()
     bool const canForceDtr = forceDtrAvailable();
     bool const canForceRts = forceRtsAvailable();
 
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
     s.setValue("rigName",      m_rigName);
@@ -2594,7 +2594,7 @@ void DecodiumTransceiverManager::saveSettings()
 
 void DecodiumTransceiverManager::loadSettings()
 {
-    QSettings s("Decodium", "Decodium3");
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
     auto get = [&](const QString& k, const QVariant& def) { return s.value(k, def); };

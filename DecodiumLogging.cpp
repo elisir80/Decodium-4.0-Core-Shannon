@@ -304,7 +304,18 @@ static QFile* g_diagFile = nullptr;
 // thread → ri-lock di un QMutex non-ricorsivo = DEADLOCK che congelava il log a 5MB.
 static thread_local bool g_inDiag = false;
 
-static QString diagDir() { return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation); }
+// IU8LMC - risolto UNA VOLTA SOLA. OrganizationName/ApplicationName cambiano a
+// runtime (DecodiumLegacyBackend azzera l'org per il backend legacy e poi la
+// ripristina), quindi ricalcolare qui faceva migrare il log a meta' sessione:
+// una parte in %LOCALAPPDATA%\, una parte in %LOCALAPPDATA%\<org>\Decodium\.
+// L'identita' e' fissata da DecodiumStorageMigration::configure() a inizio main().
+static QString diagDir()
+{
+    static const QString dir =
+        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QDir().mkpath(dir);
+    return dir;
+}
 static QString diagPath() { return QDir(diagDir()).absoluteFilePath("decodium_diagnostic.log"); }
 
 static QString diagSampleFormatName(QAudioFormat::SampleFormat format)
