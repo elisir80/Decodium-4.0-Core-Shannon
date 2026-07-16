@@ -61,6 +61,14 @@ how the Windows runtime is assembled, validated and published.
 - The macOS Apple Silicon, macOS Intel, Linux x86_64 and Linux aarch64 packages
   are rebuilt from the same 1.0.486 tag.
 
+### Resilient Linux ARM packaging
+
+- The Linux aarch64 workflow now uses HTTPS for the Ubuntu ports repository.
+- APT is restricted to IPv4 on the hosted ARM runner and uses bounded retries
+  and timeouts for index and package downloads.
+- A failed index refresh is retried explicitly and stops the workflow before
+  the long Qt build if the mirror remains unavailable.
+
 ### Upgrade guidance for Windows
 
 - Close Decodium before starting the installer.
@@ -126,6 +134,14 @@ The tagged source tree is available through GitHub's automatic source archives.
   pipeline concorrente.
 - I pacchetti macOS Apple Silicon, macOS Intel, Linux x86_64 e Linux aarch64
   vengono ricostruiti dallo stesso tag 1.0.486.
+
+### Packaging Linux ARM piu' resiliente
+
+- Il workflow Linux aarch64 usa ora HTTPS per il repository Ubuntu ports.
+- APT viene limitato a IPv4 sul runner ARM e utilizza retry e timeout bounded
+  per indici e download dei pacchetti.
+- Un aggiornamento degli indici fallito viene riprovato esplicitamente e ferma
+  il workflow prima della lunga build Qt se il mirror resta irraggiungibile.
 
 ### Indicazioni di aggiornamento per Windows
 

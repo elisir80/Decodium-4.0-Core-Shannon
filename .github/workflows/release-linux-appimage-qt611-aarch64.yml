@@ -79,7 +79,33 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
+
+          # GitHub's native ARM runners occasionally cannot reach the Ubuntu
+          # ports mirror over plain HTTP. Prefer HTTPS and make transient mirror
+          # failures retryable before starting the long Qt build.
+          sudo find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i 's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' {} +
+          sudo tee /etc/apt/apt.conf.d/80decodium-network-retries >/dev/null <<'EOF'
+          Acquire::Retries "5";
+          Acquire::ForceIPv4 "true";
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          EOF
+
+          apt_updated=false
+          for attempt in 1 2 3; do
+            if sudo apt-get update -qq --error-on=any; then
+              apt_updated=true
+              break
+            fi
+            echo "APT index refresh failed (attempt ${attempt}/3); retrying..."
+            sleep "$((attempt * 15))"
+          done
+          if [[ "${apt_updated}" != true ]]; then
+            echo "APT index refresh failed after 3 attempts" >&2
+            exit 1
+          fi
+
           sudo apt-get install -y -qq \
             autoconf \
             automake \
