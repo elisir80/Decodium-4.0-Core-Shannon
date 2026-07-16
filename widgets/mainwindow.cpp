@@ -125,6 +125,7 @@ extern "C" void ftx_ft8_a7_save_c (int jseq, float dt, float freq, char const* m
 #include "fastplot.h"
 #include "fastgraph.h"
 #include "LegacyUiHelpers.hpp"
+#include "LegacyDecodeWindow.hpp"
 
 namespace
 {
@@ -4834,7 +4835,8 @@ QStringList MainWindow::legacyBandActivityLines() const
     return {};
   }
 
-  return recentDecodedTextLines(ui->decodedTextBrowser->document(), 1800);
+  return recentDecodedTextLines(ui->decodedTextBrowser->document(),
+                                decodium::legacy::kLiveDecodeSnapshotRows);
 }
 
 int MainWindow::legacyRxFrequencyRevision() const
@@ -4850,7 +4852,8 @@ QStringList MainWindow::legacyRxFrequencyLines() const
     return {};
   }
 
-  return recentDecodedTextLines(ui->decodedTextBrowser2->document(), 1800);
+  return recentDecodedTextLines(ui->decodedTextBrowser2->document(),
+                                decodium::legacy::kLiveDecodeSnapshotRows);
 }
 
 QString MainWindow::legacyTxMessage(int index) const
@@ -13910,13 +13913,15 @@ void MainWindow::dispatchFt8DecodeRequest (decodium::ft8::DecodeRequest request,
   m_ft8DecodePendingUtc = request.nutc;
   m_decodedTransportQueue.clear ();
   m_decodeStartMs = QDateTime::currentMSecsSinceEpoch ();
-  debugToFile (QString {"ft8Decode   start utc:%1 nzhsym:%2 depth:%3 maxMs:%4 samples:%5 deep:%6"}
+  debugToFile (QString {"ft8Decode   start utc:%1 nzhsym:%2 depth:%3 maxMs:%4 samples:%5 deep:%6 threads:%7 cores:%8"}
                  .arg (request.nutc)
                  .arg (request.nzhsym)
                  .arg (request.ndepth)
                  .arg (request.maxDecodeMs)
                  .arg (request.availableSamples)
-                 .arg (deepFollowup ? 1 : 0));
+                 .arg (deepFollowup ? 1 : 0)
+                 .arg (request.threadCount)
+                 .arg (qMax (1, QThread::idealThreadCount ())));
   decodeBusy (true);
 
   auto * worker = m_ft8DecodeWorker;

@@ -34,6 +34,7 @@ private slots:
     void prependAndTailPruneStayIncremental();
     void provisionalTailReplacementKeepsHistoryIncremental();
     void highVolumePassReplacementAvoidsReset();
+    void disjointReplacementNeverExposesEmptyModel();
 };
 
 void TestDecodeListModel::appendAndShiftStayIncremental()
@@ -103,7 +104,7 @@ void TestDecodeListModel::provisionalTailReplacementKeepsHistoryIncremental()
                            decodeRow("120030", "CQ FINAL3 FF33")}));
 
     QCOMPARE(resetSpy.count(), 0);
-    QCOMPARE(removeSpy.count(), 1);
+    QCOMPARE(removeSpy.count(), 0);
     QCOMPARE(insertSpy.count(), 1);
     QCOMPARE(model.rowCount(), 5);
     QCOMPARE(model.entry(0).value("message").toString(), QStringLiteral("CQ A1AAA AA00"));
@@ -136,11 +137,49 @@ void TestDecodeListModel::highVolumePassReplacementAvoidsReset()
     model.setEntries(finalRows);
 
     QCOMPARE(resetSpy.count(), 0);
-    QCOMPARE(removeSpy.count(), 1);
+    QCOMPARE(removeSpy.count(), 0);
     QCOMPARE(insertSpy.count(), 1);
     QCOMPARE(model.rowCount(), 510);
     QCOMPARE(model.entry(449).value("message").toString(), QStringLiteral("EARLY ROW 449"));
     QCOMPARE(model.entry(450).value("message").toString(), QStringLiteral("FINAL ROW 0"));
+}
+
+void TestDecodeListModel::disjointReplacementNeverExposesEmptyModel()
+{
+    QVariantList initialRows;
+    QVariantList replacementRows;
+    initialRows.reserve(180);
+    replacementRows.reserve(180);
+    for (int i = 0; i < 180; ++i) {
+        initialRows.append(decodeRow(QString::number(120000 + i),
+                                     QStringLiteral("OLD ROW %1").arg(i)));
+        replacementRows.append(decodeRow(QString::number(130000 + i),
+                                         QStringLiteral("NEW ROW %1").arg(i)));
+    }
+
+    DecodeListModel model;
+    model.setEntries(initialRows);
+
+    bool exposedEmptyModel = false;
+    connect(&model, &QAbstractItemModel::rowsRemoved, &model,
+            [&model, &exposedEmptyModel] {
+                exposedEmptyModel = exposedEmptyModel || model.rowCount() == 0;
+            });
+    QSignalSpy resetSpy(&model, &QAbstractItemModel::modelReset);
+    QSignalSpy insertSpy(&model, &QAbstractItemModel::rowsInserted);
+    QSignalSpy removeSpy(&model, &QAbstractItemModel::rowsRemoved);
+    QSignalSpy changeSpy(&model, &QAbstractItemModel::dataChanged);
+
+    model.setEntries(replacementRows);
+
+    QCOMPARE(resetSpy.count(), 0);
+    QCOMPARE(removeSpy.count(), 0);
+    QCOMPARE(insertSpy.count(), 0);
+    QVERIFY(changeSpy.count() > 0);
+    QVERIFY(!exposedEmptyModel);
+    QCOMPARE(model.rowCount(), 180);
+    QCOMPARE(model.entry(0).value("message").toString(), QStringLiteral("NEW ROW 0"));
+    QCOMPARE(model.entry(179).value("message").toString(), QStringLiteral("NEW ROW 179"));
 }
 
 QTEST_MAIN(TestDecodeListModel)

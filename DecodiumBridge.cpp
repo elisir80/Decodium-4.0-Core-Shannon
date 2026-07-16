@@ -1,5 +1,7 @@
 #include "DecodiumBridge.h"
 #include "DecodeListModel.h"
+#include "FtDecodeThreadBudget.hpp"
+#include "LegacyDecodeWindow.hpp"
 #include "PanadapterItem.hpp"
 #include "lib/persistence/DecodeHistoryWorker.h"  // 1.0.238 Phase 5.2 perf roadmap
 #include "DecodiumLogging.hpp"
@@ -1241,6 +1243,15 @@ int autoFtThreadCountForCores(int cores)
     int const boundedCores = qMax(1, cores);
     int const reserve = ftAutoUiReserveForCores(boundedCores);
     return qBound(1, boundedCores - reserve, kMaxFtDecodeThreads);
+}
+
+int adaptiveInteractiveFtThreadCount(int normalLimit)
+{
+    // effectiveFtThreadLimit() has already applied manual settings and
+    // runtime CPU-pressure reductions. This second cap reserves execution
+    // capacity for Qt Quick, the render thread and the OS compositor.
+    return decodium::decode::adaptiveInteractiveThreadCount(
+        QThread::idealThreadCount(), normalLimit, kMaxFtDecodeThreads);
 }
 
 #ifdef Q_OS_WIN
@@ -11814,6 +11825,9 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
     };
 
+    QVariantList currentBandFallbackSnapshot;
+    bool currentBandFallbackSnapshotReady = false;
+
     if (bandChanged || allTxtChanged) {
         m_legacyBandActivityRevision = bandRevision;
         QStringList const bandLines = m_legacyBackend->bandActivityLines();
@@ -11840,6 +11854,8 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         mirroredDecodes = dropModeChangeClearedEntries(mirroredDecodes);
         mirroredDecodes = dropPrunedBandEntries(mirroredDecodes);
         mirroredDecodes = dropConflictingDirectedReportEntries(mirroredDecodes, QStringLiteral("legacy-band"));
+        currentBandFallbackSnapshot = mirroredDecodes;
+        currentBandFallbackSnapshotReady = true;
         QVariantList const newBandDecodes =
             decodeEntriesNotInPrevious(mirroredDecodes, m_decodeList);
         feedMamQueueFromEntries(newBandDecodes);
@@ -11919,9 +11935,14 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
 
         // CQ Only is a Band Activity filter only: keep using the raw legacy band
         // mirror here so direct callers and QSO replies still reach Signal RX.
-        QVariantList bandFallbackDecodes =
-            mirrorLegacyDecodeLines(m_legacyBackend->bandActivityLines(), false, m_decodeList, userFilterConfig);
-        bandFallbackDecodes = augmentLegacyMirrorWithAllTxt(bandFallbackDecodes, false);
+        QVariantList bandFallbackDecodes;
+        if (currentBandFallbackSnapshotReady) {
+            bandFallbackDecodes = currentBandFallbackSnapshot;
+        } else {
+            bandFallbackDecodes = mirrorLegacyDecodeLines(
+                m_legacyBackend->bandActivityLines(), false, m_decodeList, userFilterConfig);
+            bandFallbackDecodes = augmentLegacyMirrorWithAllTxt(bandFallbackDecodes, false);
+        }
         bandFallbackDecodes = dropModeChangeClearedEntries(bandFallbackDecodes);
         bandFallbackDecodes = dropPrunedBandEntries(bandFallbackDecodes);
         bandFallbackDecodes = dropRxClearedEntries(bandFallbackDecodes);
@@ -12068,14 +12089,19 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
                                                      QVariantList const& previousEntries,
                                                      DecodeUserFilterConfig const& userFilterConfig) const
 {
+    int const sourceRowCount = lines.size();
+    int const firstSourceRow =
+        decodium::legacy::recent_decode_window_start(sourceRowCount);
+    int const scannedRowCount = sourceRowCount - firstSourceRow;
     MainThreadTraceScope trace(QStringLiteral("mirror_legacy_decode_lines"),
-                               QStringLiteral("source_rows=%1 previous_rows=%2 rx=%3")
-                                   .arg(lines.size())
+                               QStringLiteral("source_rows=%1 scanned_rows=%2 previous_rows=%3 rx=%4")
+                                   .arg(sourceRowCount)
+                                   .arg(scannedRowCount)
                                    .arg(previousEntries.size())
                                    .arg(rxPane ? 1 : 0),
                                25);
     QVariantList mirroredDecodes;
-    mirroredDecodes.reserve(lines.size());
+    mirroredDecodes.reserve(scannedRowCount);
 
     static const QRegularExpression timePrefix {R"(^(\d{4}|\d{6}))"};
     static const QRegularExpression txPattern {
@@ -12220,7 +12246,8 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
         ++enrichedEntries;
     };
 
-    for (QString rawLine : lines) {
+    for (int row = firstSourceRow; row < sourceRowCount; ++row) {
+        QString rawLine = lines.at(row);
         rawLine = stripLegacyDecodeAppendage(rawLine);
         if (rawLine.isEmpty() || rawLine.contains(QStringLiteral("------"))) {
             continue;
@@ -33568,6 +33595,14 @@ int DecodiumBridge::effectiveFtThreadLimit() const
     return normalLimit;
 }
 
+int DecodiumBridge::effectiveFtThreadLimitForDecode() const
+{
+    // Embedded legacy workers share the process with the Qt Quick GUI and its
+    // render thread. Preserve additional interactive headroom on every CPU
+    // topology while still honoring manual and pressure-reduced limits.
+    return adaptiveInteractiveFtThreadCount(effectiveFtThreadLimit());
+}
+
 bool DecodiumBridge::ft4AdaptiveCpuLimitActive(qint64 nowMs) const
 {
     if (nowMs <= 0) {
@@ -37992,18 +38027,21 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             // skippedDuplicateDecodeKeys, quindi niente doppio autoSequenceStep.
             // List-only resta SOLO per il follow-up in TX (niente avanzamenti di
             // stato mentre trasmettiamo).
-            bridgeLog(QStringLiteral("FT8 final deep followup dispatch: triggerSerial=%1 serial=%2 depth=%3 ft8ap=%4 maxMs=%5 listOnly=%6%7")
+            int const deepThreadCount = adaptiveInteractiveFtThreadCount(effectiveFtThreadLimit());
+            bridgeLog(QStringLiteral("FT8 final deep followup dispatch: triggerSerial=%1 serial=%2 depth=%3 ft8ap=%4 maxMs=%5 threads=%6 listOnly=%7%8")
                           .arg(serial)
                           .arg(deepSerial)
                           .arg(pendingDeep.decodeDepth)
                           .arg(pendingDeep.ft8ApEnabled ? 1 : 0)
                           .arg(budgetMs)
+                          .arg(deepThreadCount)
                           .arg(pendingDeep.inTx ? 1 : 0)
                           .arg(pendingDeep.inTx ? QStringLiteral(" inTx=1") : QString()));
             queueFt8DecodeRequest(pendingDeep.audio, deepSerial, pendingDeep.nutc,
                                   pendingDeep.slotIndex, pendingDeep.decodeDepth,
                                   pendingDeep.decodeQsoProgress, pendingDeep.cqHint,
-                                  50, pendingDeep.ft8ApEnabled, false, pendingDeep.inTx, budgetMs);
+                                  50, pendingDeep.ft8ApEnabled, false, pendingDeep.inTx,
+                                  budgetMs, false, deepThreadCount);
             if (m_ft8SubpassHarvest) {
                 // F1: prepara l'harvest subpass (terzo decode nel gap dopo il deep).
                 Ft8PendingDeepFollowup harvest = pendingDeep;
@@ -41217,7 +41255,8 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
                                            int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                            int decodeQsoProgress, int cqHint, int nzhsym,
                                            bool ft8ApEnabled, bool suppressUiRows,
-                                           bool listOnlyRows, int maxDecodeMsOverride, bool subpassRequested)
+                                           bool listOnlyRows, int maxDecodeMsOverride,
+                                           bool subpassRequested, int threadCountOverride)
 {
     if (!m_ft8Worker) {
         return;
@@ -41235,7 +41274,10 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.nzhsym = qBound(41, nzhsym, 50);
     bool const txAudioActive = m_transmitting || m_tuning;
     req.ndepth = txAudioActive ? qMin(decodeDepth, 2) : decodeDepth;
-    req.threadCount = effectiveFtThreadLimit();
+    int const normalThreadCount = effectiveFtThreadLimit();
+    req.threadCount = threadCountOverride > 0
+        ? qBound(1, qMin(threadCountOverride, normalThreadCount), kMaxFtDecodeThreads)
+        : normalThreadCount;
     req.ncontest = m_ncontest;
     req.emedelay = 0.0f;
     req.nagain = 0;
@@ -41847,6 +41889,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             --m_ft8DeepFollowupCooldownSlots;
         }
         int const ftThreadLimit = effectiveFtThreadLimit();
+        int const interactiveThreadLimit = adaptiveInteractiveFtThreadCount(ftThreadLimit);
         bool const deepThreadsOk = ftThreadLimit >= kFt8DeepFollowupMinThreads;
         qint64 deepFollowupLatestCompleteMs = 0;
         if (modeSnapshot == QStringLiteral("FT8") && decodePeriodMs > 0 && slotIndexForUtc >= 0) {
@@ -41900,7 +41943,7 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             && deepFollowupLatestCompleteMs > ft8DispatchNowMs
             && signoffFullPassBudgetMs >= kFt8ConservativeFullPassMinMs;
         qInfo().noquote()
-            << QStringLiteral("[FT8DISPATCH] serial=%1 effectiveDepth=%2 baseDepth=%3 deepSearch=%4 avg=%5 ft8ap=%6 txPending=%7 txAudio=%8 deepInTx=%9 runFollowup=%10 signoffWatch=%11 latestMs=%12 nowMs=%13")
+            << QStringLiteral("[FT8DISPATCH] serial=%1 effectiveDepth=%2 baseDepth=%3 deepSearch=%4 avg=%5 ft8ap=%6 txPending=%7 txAudio=%8 deepInTx=%9 runFollowup=%10 signoffWatch=%11 latestMs=%12 nowMs=%13 threads=%14/%15 cores=%16")
                    .arg(serial)
                    .arg(decodeDepth)
                    .arg(m_ndepth)
@@ -41913,28 +41956,31 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                    .arg(runDeepFollowup ? 1 : 0)
                    .arg(signoffWatchActive ? 1 : 0)
                    .arg(deepFollowupLatestCompleteMs)
-                   .arg(ft8DispatchNowMs);
+                   .arg(ft8DispatchNowMs)
+                   .arg(interactiveThreadLimit)
+                   .arg(ftThreadLimit)
+                   .arg(qMax(1, QThread::idealThreadCount()));
         if (runSignoffFullPass) {
             int const signoffDepth = qMax(decodeDepth, 4);
             bridgeLog("FT8 final signoff-watch full pass: serial=" + QString::number(serial) +
                       " depth=" + QString::number(signoffDepth) +
                       " ft8ap=1" +
-                      " threads=" + QString::number(ftThreadLimit) +
+                      " threads=" + QString::number(interactiveThreadLimit) +
                       " maxMs=" + QString::number(signoffFullPassBudgetMs) +
                       " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
             queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, signoffDepth,
                                   decodeQsoProgress, cqHint, 50, true, false,
-                                  false, signoffFullPassBudgetMs);
+                                  false, signoffFullPassBudgetMs, false, interactiveThreadLimit);
         } else if (runConservativeFullPass) {
             bridgeLog("FT8 final conservative full pass: serial=" + QString::number(serial) +
                       " depth=" + QString::number(decodeDepth) +
                       " ft8ap=" + QString::number(m_ft8ApEnabled ? 1 : 0) +
-                      " threads=" + QString::number(ftThreadLimit) +
+                      " threads=" + QString::number(interactiveThreadLimit) +
                       " maxMs=" + QString::number(conservativeFullPassBudgetMs) +
                       " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
             queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, decodeDepth,
                                   decodeQsoProgress, cqHint, 50, m_ft8ApEnabled, false,
-                                  false, conservativeFullPassBudgetMs);
+                                  false, conservativeFullPassBudgetMs, false, interactiveThreadLimit);
         } else {
             bridgeLog("FT8 final fast pass: serial=" + QString::number(serial) +
                       " depth=" + QString::number(fastDepth) +
@@ -41943,7 +41989,8 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                       (txStartPending ? " txPending=1" : QString()) +
                       " deepLatestMs=" + QString::number(deepFollowupLatestCompleteMs));
             queueFt8DecodeRequest(audioSnapshot, serial, nutc, slotIndexForUtc, fastDepth,
-                                  decodeQsoProgress, cqHint, 50, false, false);
+                                  decodeQsoProgress, cqHint, 50, false, false,
+                                  false, 0, false, interactiveThreadLimit);
         }
 
         if (runDeepFollowup) {

@@ -756,7 +756,7 @@ public:
     // Shared with the embedded FT4/FT8 workers.  Those workers used to read
     // only the legacy FT8threads setting and could therefore consume every
     // logical core even though the QML bridge had reserved cores for the UI.
-    Q_INVOKABLE int effectiveFtThreadLimitForDecode() const { return effectiveFtThreadLimit(); }
+    Q_INVOKABLE int effectiveFtThreadLimitForDecode() const;
     Q_INVOKABLE void setFtThreads(int v);
     Q_INVOKABLE void setFtThreadsAuto(bool enabled);
     Q_INVOKABLE void cycleFtThreads();
@@ -3385,7 +3385,8 @@ private:
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint, int nzhsym,
                                bool ft8ApEnabled, bool suppressUiRows,
-                               bool listOnlyRows = false, int maxDecodeMsOverride = 0, bool subpassRequested = false);
+                               bool listOnlyRows = false, int maxDecodeMsOverride = 0,
+                               bool subpassRequested = false, int threadCountOverride = 0);
     void queueFt4DecodeRequest(const QVector<short>& audioSnapshot, quint64 serial,
                                int nutc, qint64 slotIndexForUtc, int decodeDepth,
                                int decodeQsoProgress, int cqHint);

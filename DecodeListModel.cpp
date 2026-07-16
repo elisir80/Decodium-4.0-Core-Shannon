@@ -319,17 +319,27 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
     applyRangeDiff(0, 0, commonPrefix);
 
     int const oldMiddleCount = oldCount - commonPrefix - commonSuffix;
-    if (oldMiddleCount > 0) {
-        beginRemoveRows(QModelIndex(), commonPrefix, commonPrefix + oldMiddleCount - 1);
-        m_entries.remove(commonPrefix, oldMiddleCount);
-        endRemoveRows();
-    }
-
     int const newMiddleCount = newCount - commonPrefix - commonSuffix;
-    if (newMiddleCount > 0) {
-        beginInsertRows(QModelIndex(), commonPrefix, commonPrefix + newMiddleCount - 1);
-        for (int i = 0; i < newMiddleCount; ++i) {
-            m_entries.insert(commonPrefix + i, incomingEntries.at(commonPrefix + i));
+    int const replaceCount = qMin(oldMiddleCount, newMiddleCount);
+
+    // Aggiorna prima le righe sovrapposte in-place. Il vecchio remove-all +
+    // insert-all portava temporaneamente rowCount() a zero quando due snapshot
+    // erano disgiunti; ListView mostrava "No decodes" e le transizioni potevano
+    // lasciare Full Spectrum vuoto fino al frame successivo sotto carico.
+    applyRangeDiff(commonPrefix, commonPrefix, replaceCount);
+
+    if (oldMiddleCount > newMiddleCount) {
+        int const removeStart = commonPrefix + newMiddleCount;
+        int const removeCount = oldMiddleCount - newMiddleCount;
+        beginRemoveRows(QModelIndex(), removeStart, removeStart + removeCount - 1);
+        m_entries.remove(removeStart, removeCount);
+        endRemoveRows();
+    } else if (newMiddleCount > oldMiddleCount) {
+        int const insertStart = commonPrefix + oldMiddleCount;
+        int const insertCount = newMiddleCount - oldMiddleCount;
+        beginInsertRows(QModelIndex(), insertStart, insertStart + insertCount - 1);
+        for (int i = 0; i < insertCount; ++i) {
+            m_entries.insert(insertStart + i, incomingEntries.at(insertStart + i));
         }
         endInsertRows();
     }

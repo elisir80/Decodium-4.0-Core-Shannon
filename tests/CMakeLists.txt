@@ -98,6 +98,14 @@ add_executable (test_decode_list_model
 target_link_libraries (test_decode_list_model Qt6::Test Qt6::Core)
 add_test (NAME test_decode_list_model COMMAND $<TARGET_FILE:test_decode_list_model>)
 
+add_executable (test_ft_decode_thread_budget test_ft_decode_thread_budget.cpp)
+target_link_libraries (test_ft_decode_thread_budget Qt6::Test Qt6::Core)
+add_test (NAME test_ft_decode_thread_budget COMMAND $<TARGET_FILE:test_ft_decode_thread_budget>)
+
+add_executable (test_legacy_decode_window test_legacy_decode_window.cpp)
+target_link_libraries (test_legacy_decode_window Qt6::Test Qt6::Core)
+add_test (NAME test_legacy_decode_window COMMAND $<TARGET_FILE:test_legacy_decode_window>)
+
 add_executable (test_ft2link test_ft2link.cpp)
 target_link_libraries (test_ft2link ft2link_core Qt6::Test)
 add_test (NAME test_ft2link COMMAND $<TARGET_FILE:test_ft2link>)
