@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 env:
   HAMLIB_TAG: "4.7.0"
@@ -307,6 +306,49 @@ jobs:
             exit 1
           fi
 
+          test -f "${DIST}/Qt6Core.dll"
+          core_private_abis="$(
+            objdump -p "${DIST}/Qt6Core.dll" 2>/dev/null |
+              grep -oE 'QtPrivate_[0-9]+_[0-9]+_[0-9]+' |
+              sort -u || true
+          )"
+          if [[ -z "${core_private_abis}" ]]; then
+            echo "Unable to determine the private Qt ABI exported by Qt6Core.dll" >&2
+            exit 1
+          fi
+
+          qt_abi_mismatch=0
+          qt_source_mismatch=0
+          while IFS= read -r -d '' qt_dll; do
+            qt_name="$(basename "${qt_dll}")"
+            required_abis="$(
+              objdump -p "${qt_dll}" 2>/dev/null |
+                grep -oE 'QtPrivate_[0-9]+_[0-9]+_[0-9]+' |
+                sort -u || true
+            )"
+            while IFS= read -r required_abi; do
+              [[ -n "${required_abi}" ]] || continue
+              if ! grep -Fxq "${required_abi}" <<< "${core_private_abis}"; then
+                echo "Qt ABI mismatch: ${qt_name} requires ${required_abi}, but Qt6Core.dll exports:" >&2
+                printf '  %s\n' "${core_private_abis}" >&2
+                qt_abi_mismatch=1
+              fi
+            done <<< "${required_abis}"
+
+            qt_source="/mingw64/bin/${qt_name}"
+            if [[ -f "${qt_source}" ]] && ! cmp -s "${qt_dll}" "${qt_source}"; then
+              echo "Qt runtime mismatch: ${qt_dll} differs from ${qt_source}" >&2
+              qt_source_mismatch=1
+            fi
+          done < <(find "${DIST}" -type f -iname 'Qt6*.dll' -print0)
+
+          if [[ "${qt_abi_mismatch}" -ne 0 || "${qt_source_mismatch}" -ne 0 ]]; then
+            echo "Refusing to package a mixed Qt runtime." >&2
+            exit 1
+          fi
+
+          echo "Qt runtime ABI verified: $(tr '\n' ' ' <<< "${core_private_abis}")"
+
           printf '%s\n' "Runtime DLLs bundled:" > "${DIST}/runtime-dll-report.txt"
           find "${DIST}" -maxdepth 1 -type f -iname '*.dll' -printf '%f\n' | sort -fu >> "${DIST}/runtime-dll-report.txt"
 
@@ -382,114 +424,3 @@ jobs:
           foreach ($asset in $assets) {
             gh release upload $tag $asset.FullName --repo $repo --clobber
           }
-
-  # ── SignPath Code Signing ──────────────────────────────────────────
-  sign:
-    needs: build-windows-x64
-    runs-on: ubuntu-latest
-    # Numeric release tags publish the unsigned Windows installer from the
-    # build job. SignPath packaging is only attempted for explicit v* tags.
-    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
-    outputs:
-      enabled: ${{ steps.signpath-credentials.outputs.enabled }}
-    env:
-      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
-      SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-
-    steps:
-      - name: Check SignPath credentials
-        id: signpath-credentials
-        shell: bash
-        run: |
-          if [[ -n "${SIGNPATH_API_TOKEN}" && -n "${SIGNPATH_ORGANIZATION_ID}" ]]; then
-            echo "enabled=true" >> "${GITHUB_OUTPUT}"
-          else
-            echo "enabled=false" >> "${GITHUB_OUTPUT}"
-            echo "SignPath credentials are not configured; keeping unsigned release asset."
-          fi
-
-      - name: Download portable bundle
-        if: steps.signpath-credentials.outputs.enabled == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: decodium-windows-x64-portable
-          path: unsigned
-
-      - name: Repackage for SignPath
-        if: steps.signpath-credentials.outputs.enabled == 'true'
-        run: |
-          cd unsigned
-          zip -r ../decodium-x64.zip .
-
-      - name: Upload for SignPath
-        if: steps.signpath-credentials.outputs.enabled == 'true'
-        id: upload-for-signing
-        uses: actions/upload-artifact@v4
-        with:
-          name: decodium-to-sign-x64
-          path: decodium-x64.zip
-
-      - name: Submit signing request
-        if: steps.signpath-credentials.outputs.enabled == 'true'
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
-          organization-id: '${{ env.SIGNPATH_ORGANIZATION_ID }}'
-          project-slug: 'decodium'
-          signing-policy-slug: >-
-            ${{ startsWith(github.ref, 'refs/tags/v')
-                && 'release-signing'
-                || 'test-signing' }}
-          github-artifact-id: '${{ steps.upload-for-signing.outputs.artifact-id }}'
-          wait-for-completion: true
-          output-artifact-directory: 'signed'
-
-      - name: Upload signed bundle
-        if: steps.signpath-credentials.outputs.enabled == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: decodium-signed-x64
-          path: signed
-          if-no-files-found: error
-
-  # ── Build signed installer ────────────────────────────────────────
-  package-signed:
-    needs: sign
-    runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/v') && needs.sign.outputs.enabled == 'true'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Extract version
-        id: version
-        run: |
-          $VER = "$env:GITHUB_REF" -replace 'refs/tags/v',''
-          echo "version=$VER" >> $env:GITHUB_OUTPUT
-        shell: pwsh
-
-      - name: Download signed bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: decodium-signed-x64
-          path: dist-windows-x64
-
-      - name: Build signed installer
-        shell: pwsh
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
-            /DAppVersion="${{ steps.version.outputs.version }}" `
-            /DBuildDir="dist-windows-x64" `
-            /DSourceRoot="." `
-            /DOutputDir="installer-output" `
-            /DOutputBaseFilename="Decodium_${{ steps.version.outputs.version }}_Setup_x64" `
-            "installer\decodium_setup.iss"
-
-      - name: Create signed release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: false
-          generate_release_notes: true
-          files: |
-            installer-output/*.exe
