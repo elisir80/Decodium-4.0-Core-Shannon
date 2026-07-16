@@ -59,7 +59,7 @@ how the Windows runtime is assembled, validated and published.
 - The canonical workflow generated and uploaded a working Windows installer
   without a competing release workflow.
 - The macOS Apple Silicon, macOS Intel, Linux x86_64 and Linux aarch64 packages
-  are rebuilt from the same 1.0.486 tag.
+  use the same 1.0.486 application source.
 
 ### Resilient Linux ARM packaging
 
@@ -68,6 +68,14 @@ how the Windows runtime is assembled, validated and published.
   and timeouts for index and package downloads.
 - A failed index refresh is retried explicitly and stops the workflow before
   the long Qt build if the mirror remains unavailable.
+
+### Canonical release publishing
+
+- Platform workflows now normalize release references to the canonical
+  `v<version>` format.
+- This prevents a manual build started with `1.0.486` from creating a second
+  release beside `v1.0.486`.
+- All Windows, macOS and Linux packages are consolidated under one release page.
 
 ### Upgrade guidance for Windows
 
@@ -133,7 +141,7 @@ The tagged source tree is available through GitHub's automatic source archives.
 - Il workflow canonico ha generato e pubblicato l'installer senza una seconda
   pipeline concorrente.
 - I pacchetti macOS Apple Silicon, macOS Intel, Linux x86_64 e Linux aarch64
-  vengono ricostruiti dallo stesso tag 1.0.486.
+  usano lo stesso codice applicativo della 1.0.486.
 
 ### Packaging Linux ARM piu' resiliente
 
@@ -142,6 +150,14 @@ The tagged source tree is available through GitHub's automatic source archives.
   per indici e download dei pacchetti.
 - Un aggiornamento degli indici fallito viene riprovato esplicitamente e ferma
   il workflow prima della lunga build Qt se il mirror resta irraggiungibile.
+
+### Pubblicazione canonica della release
+
+- I workflow delle varie piattaforme normalizzano ora il riferimento nel
+  formato canonico `v<versione>`.
+- Una build manuale avviata con `1.0.486` non puo' piu' creare una seconda
+  release accanto a `v1.0.486`.
+- Tutti i pacchetti Windows, macOS e Linux sono raccolti in un'unica pagina.
 
 ### Indicazioni di aggiornamento per Windows
 

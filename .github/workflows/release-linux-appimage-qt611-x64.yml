@@ -60,7 +60,7 @@ jobs:
           fi
 
           VERSION="${RAW_VERSION#v}"
-          RELEASE_REF="${RAW_VERSION}"
+          RELEASE_REF="v${VERSION}"
           if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
             echo "Invalid release version: ${RAW_VERSION}" >&2
             exit 1

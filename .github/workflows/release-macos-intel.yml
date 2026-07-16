@@ -328,12 +328,12 @@ jobs:
           elif [[ -z "${VERSION}" ]]; then
             VERSION="0.0.0-ci-${GITHUB_SHA::7}"
           fi
-          RELEASE_REF="${VERSION}"
           VERSION="${VERSION#v}"
           if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
             echo "Invalid release version: ${VERSION}" >&2
             exit 1
           fi
+          RELEASE_REF="v${VERSION}"
           printf 'version=%s\n' "${VERSION}" >> "$GITHUB_OUTPUT"
           printf 'release_ref=%s\n' "${RELEASE_REF}" >> "$GITHUB_OUTPUT"
           echo "Using version: ${VERSION}"
