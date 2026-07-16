@@ -108,7 +108,7 @@
 #include <QThread>
 #include <QThreadPool>
 #include <QFutureWatcher>
-#include <QtConcurrentRun>
+#include <QtConcurrent/QtConcurrentRun>
 #include <QOperatingSystemVersion>
 #include "Network/FoxVerifier.hpp"
 #include "wsjtx_config.h"

@@ -414,6 +414,8 @@ set (wsjtx_CXXSRCS
   main.cpp
   DecodiumBridge.cpp
   DecodiumBridge.h
+  DecodiumSelfCheck.cpp
+  DecodiumSelfCheck.hpp
   UsStateDataManager.cpp
   UsStateDataManager.h
   lib/persistence/DecodeHistoryWorker.cpp
