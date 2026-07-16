@@ -336,9 +336,13 @@ jobs:
             done <<< "${required_abis}"
 
             qt_source="/mingw64/bin/${qt_name}"
-            if [[ -f "${qt_source}" ]] && ! cmp -s "${qt_dll}" "${qt_source}"; then
-              echo "Qt runtime mismatch: ${qt_dll} differs from ${qt_source}" >&2
-              qt_source_mismatch=1
+            if [[ -f "${qt_source}" ]]; then
+              qt_hash="$(sha256sum "${qt_dll}" | awk '{print $1}')"
+              qt_source_hash="$(sha256sum "${qt_source}" | awk '{print $1}')"
+              if [[ "${qt_hash}" != "${qt_source_hash}" ]]; then
+                echo "Qt runtime mismatch: ${qt_dll} differs from ${qt_source}" >&2
+                qt_source_mismatch=1
+              fi
             fi
           done < <(find "${DIST}" -type f -iname 'Qt6*.dll' -print0)
 
