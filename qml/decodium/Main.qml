@@ -1855,6 +1855,49 @@ ApplicationWindow {
         qsyDialogLoader.item.open()
     }
 
+    // IU8LMC — Il BugReportDialog esisteva (con diagnostica, report e invio a
+    // GitHub) ma NESSUNO lo apriva: loader active:false e zero punti di ingresso
+    // = infrastruttura irraggiungibile. Da qui l'utente ci arriva davvero, e
+    // l'autodiagnosi gli mostra le cause note prima che scriva.
+    function openBugReportDialog() {
+        bugReportDialogLoader.active = true
+        runWhenLoaded(bugReportDialogLoader, function (item) { item.open() })
+    }
+
+    // IU8LMC — Aggiornamento: avviso + conferma.
+    Loader { id: updateDialogLoader; source: "components/UpdateDialog.qml"; active: false }
+
+    function openUpdateDialog() {
+        updateDialogLoader.active = true
+        runWhenLoaded(updateDialogLoader, function (item) { item.open() })
+    }
+
+    Connections {
+        target: updater
+        // Scatta sia dal controllo all'avvio sia da quello manuale: se c'e' una
+        // versione nuova (e non e' stata saltata) l'utente lo deve sapere.
+        function onUpdateFound(version) { openUpdateDialog() }
+        // Controllo manuale: l'utente ha cliccato, una risposta gliela diamo
+        // comunque (riuso il toast gia' esistente, niente UI nuova).
+        function onUpToDate(version) {
+            showStatusToast(qsTr("Decodium is up to date (%1).").arg(version), secondaryCyan)
+        }
+        function onErrorOccurred(message) {
+            showStatusToast(message, "#ff6b6b")
+        }
+    }
+
+    // Il controllo parte qualche secondo DOPO l'avvio: all'avvio audio e decoder
+    // stanno gia' lavorando e la finestra deve comparire subito, una richiesta di
+    // rete non deve entrarci in mezzo. checkOnStartupIfDue() rispetta comunque
+    // l'impostazione dell'utente e non ricontrolla piu' di una volta al giorno.
+    Timer {
+        interval: 8000
+        running: true
+        repeat: false
+        onTriggered: if (typeof updater !== "undefined") updater.checkOnStartupIfDue()
+    }
+
     function runWhenLoaded(loader, action) {
         if (loader.item) {
             action(loader.item)
@@ -10911,11 +10954,27 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
             }
         }
 
+        // IU8LMC: punto di ingresso all'assistenza (prima il dialog era irraggiungibile).
         MenuItem {
-            enabled: false
-            text: "☁ " + qsTr("Update checks disabled")
+            text: "🛟 " + qsTr("Report a problem...")
+            onTriggered: openBugReportDialog()
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text; font.pixelSize: 12; color: textSecondary; leftPadding: 10
+            }
+        }
+
+        // IU8LMC: era enabled:false ("Update checks disabled") perche' il checker
+        // del bridge e' spento dalla 1.0.62. Ora usa DecodiumUpdater, che avvisa
+        // davvero e sa scaricare e installare.
+        MenuItem {
+            enabled: !updater.busy
+            text: "☁ " + (updater.busy ? qsTr("Checking...") : qsTr("Check for updates..."))
             onTriggered: {
-                bridge.checkForUpdates()
+                updater.check(false)   // manuale: rispondi anche se non c'e' nulla di nuovo
             }
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"

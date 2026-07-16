@@ -1,0 +1,332 @@
+#include "DecodiumUpdater.hpp"
+
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QProcess>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QUrl>
+
+#ifndef FORK_RELEASE_VERSION
+#define FORK_RELEASE_VERSION "0.0.0"
+#endif
+
+namespace {
+
+// Le release da controllare sono quelle del FORK, non di elisir80: gli utenti
+// installano i pacchetti provvisti pubblicati qui, e l'asset da scaricare vive
+// solo su questo repo. (DecodiumBridge::checkForUpdates guarda invece elisir80,
+// ed e' comunque spento dalla 1.0.62.)
+constexpr auto kReleasesApi =
+    "https://api.github.com/repos/iu8lmc/Decodium-4.0-Core-Shannon/releases/latest";
+constexpr auto kReleasesPage =
+    "https://github.com/iu8lmc/Decodium-4.0-Core-Shannon/releases/latest";
+
+// Chiavi nello store impostazioni (dalla 1.0.482 e' un INI, non piu' il registro).
+constexpr auto kKeyCheckOnStartup = "Update/CheckOnStartup";
+constexpr auto kKeyLastCheckUtc   = "Update/LastCheckUtc";
+constexpr auto kKeySkippedVersion = "Update/SkippedVersion";
+
+QSettings settingsStore()
+{
+    return QSettings(QSettings::IniFormat, QSettings::UserScope,
+                     QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+}
+
+// "1.0.482" -> {1,0,482}. Confronto numerico: "1.0.9" < "1.0.10", che il
+// confronto fra stringhe sbaglierebbe.
+QList<int> splitVersion(const QString& v)
+{
+    QList<int> parts;
+    const auto tokens = v.split(QLatin1Char('.'));
+    for (const QString& t : tokens)
+        parts << t.toInt();
+    while (parts.size() < 3)
+        parts << 0;
+    return parts;
+}
+
+bool isNewer(const QString& candidate, const QString& current)
+{
+    const QList<int> c = splitVersion(candidate);
+    const QList<int> k = splitVersion(current);
+    for (int i = 0; i < 3; ++i) {
+        if (c[i] != k[i])
+            return c[i] > k[i];
+    }
+    return false;
+}
+
+// L'asset giusto per questa piattaforma. Su Windows e' l'installer Inno.
+bool isAssetForThisPlatform(const QString& name)
+{
+#if defined(Q_OS_WIN)
+    return name.endsWith(QLatin1String(".exe"), Qt::CaseInsensitive)
+           && name.contains(QLatin1String("Setup"), Qt::CaseInsensitive);
+#elif defined(Q_OS_MACOS)
+    return name.endsWith(QLatin1String(".dmg"), Qt::CaseInsensitive);
+#else
+    return name.endsWith(QLatin1String(".AppImage"), Qt::CaseInsensitive);
+#endif
+}
+
+}  // namespace
+
+DecodiumUpdater::DecodiumUpdater(QObject* parent)
+    : QObject(parent)
+    , m_nam(new QNetworkAccessManager(this))
+    , m_currentVersion(QStringLiteral(FORK_RELEASE_VERSION))
+{
+    m_checkOnStartup = settingsStore().value(kKeyCheckOnStartup, true).toBool();
+}
+
+void DecodiumUpdater::setBusy(bool b)
+{
+    if (m_busy == b)
+        return;
+    m_busy = b;
+    emit busyChanged();
+}
+
+void DecodiumUpdater::setProgress(int p)
+{
+    if (m_progress == p)
+        return;
+    m_progress = p;
+    emit progressChanged();
+}
+
+void DecodiumUpdater::setStatus(const QString& s)
+{
+    if (m_statusText == s)
+        return;
+    m_statusText = s;
+    emit statusTextChanged();
+}
+
+void DecodiumUpdater::setCheckOnStartup(bool on)
+{
+    if (m_checkOnStartup == on)
+        return;
+    m_checkOnStartup = on;
+    QSettings s = settingsStore();
+    s.setValue(kKeyCheckOnStartup, on);
+    s.sync();
+    emit checkOnStartupChanged();
+}
+
+void DecodiumUpdater::checkOnStartupIfDue()
+{
+    if (!m_checkOnStartup)
+        return;
+    // Non tempestare GitHub (e l'utente) a ogni avvio: al massimo una volta al
+    // giorno. Chi vuole puo' sempre forzare il controllo dal menu.
+    const QDateTime last = settingsStore().value(kKeyLastCheckUtc).toDateTime();
+    if (last.isValid() && last.secsTo(QDateTime::currentDateTimeUtc()) < 24 * 3600)
+        return;
+    check(/*silent=*/true);
+}
+
+void DecodiumUpdater::check(bool silent)
+{
+    if (m_busy)
+        return;
+    setBusy(true);
+    setProgress(-1);
+    setStatus(tr("Checking for updates..."));
+
+    QNetworkRequest req{QUrl(QString::fromLatin1(kReleasesApi))};
+    req.setRawHeader("Accept", "application/vnd.github+json");
+    req.setRawHeader("User-Agent", "Decodium/4.0");
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                     QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply* reply = m_nam->get(req);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, silent]() {
+        onCheckFinished(reply, silent);
+    });
+}
+
+void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
+{
+    reply->deleteLater();
+    setBusy(false);
+    setProgress(0);
+
+    QSettings s = settingsStore();
+    s.setValue(kKeyLastCheckUtc, QDateTime::currentDateTimeUtc());
+    s.sync();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        setStatus(tr("Could not check for updates: %1").arg(reply->errorString()));
+        // All'avvio un problema di rete non e' affar dell'utente: e' rumore.
+        if (!silent)
+            emit errorOccurred(m_statusText);
+        return;
+    }
+
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    if (!doc.isObject()) {
+        setStatus(tr("Could not read the release information."));
+        if (!silent)
+            emit errorOccurred(m_statusText);
+        return;
+    }
+
+    const QJsonObject root = doc.object();
+    const QString tag = root.value(QStringLiteral("tag_name")).toString();
+    if (tag.isEmpty()) {
+        setStatus(tr("Could not read the release information."));
+        if (!silent)
+            emit errorOccurred(m_statusText);
+        return;
+    }
+
+    QString version = tag;
+    if (version.startsWith(QLatin1Char('v'), Qt::CaseInsensitive))
+        version.remove(0, 1);
+
+    m_latestVersion = version;
+    m_releaseNotes  = root.value(QStringLiteral("body")).toString();
+
+    m_downloadUrl.clear();
+    m_assetName.clear();
+    const QJsonArray assets = root.value(QStringLiteral("assets")).toArray();
+    for (const QJsonValue& v : assets) {
+        const QJsonObject a = v.toObject();
+        const QString name = a.value(QStringLiteral("name")).toString();
+        if (isAssetForThisPlatform(name)) {
+            m_assetName   = name;
+            m_downloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
+            break;
+        }
+    }
+
+    const QString skipped = settingsStore().value(kKeySkippedVersion).toString();
+    const bool newer = isNewer(m_latestVersion, m_currentVersion);
+    m_available = newer;
+    emit stateChanged();
+
+    if (!newer) {
+        setStatus(tr("Decodium is up to date (%1).").arg(m_currentVersion));
+        if (!silent)
+            emit upToDate(m_currentVersion);
+        return;
+    }
+
+    setStatus(tr("Version %1 is available.").arg(m_latestVersion));
+
+    // "Salta questa versione" vale solo per quella versione: se ne esce una
+    // nuova, l'utente va avvisato lo stesso.
+    if (silent && skipped == m_latestVersion)
+        return;
+
+    emit updateFound(m_latestVersion);
+}
+
+void DecodiumUpdater::skipThisVersion()
+{
+    if (m_latestVersion.isEmpty())
+        return;
+    QSettings s = settingsStore();
+    s.setValue(kKeySkippedVersion, m_latestVersion);
+    s.sync();
+    setStatus(tr("Version %1 will be skipped.").arg(m_latestVersion));
+}
+
+void DecodiumUpdater::downloadAndInstall()
+{
+    if (m_busy)
+        return;
+
+    // Nessun asset per questa piattaforma: non lasciamo l'utente a mani vuote,
+    // apriamo la pagina della release.
+    if (m_downloadUrl.isEmpty()) {
+        QDesktopServices::openUrl(QUrl(QString::fromLatin1(kReleasesPage)));
+        return;
+    }
+
+    const QString dir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QDir().mkpath(dir);
+    const QString target = QDir(dir).absoluteFilePath(m_assetName);
+    QFile::remove(target);  // un download interrotto in precedenza sarebbe corrotto
+
+    auto* file = new QFile(target);
+    if (!file->open(QIODevice::WriteOnly)) {
+        delete file;
+        setStatus(tr("Cannot write to the temporary folder."));
+        emit errorOccurred(m_statusText);
+        return;
+    }
+
+    setBusy(true);
+    setProgress(0);
+    setStatus(tr("Downloading %1...").arg(m_latestVersion));
+
+    QNetworkRequest req{QUrl(m_downloadUrl)};
+    req.setRawHeader("User-Agent", "Decodium/4.0");
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                     QNetworkRequest::NoLessSafeRedirectPolicy);
+    QNetworkReply* reply = m_nam->get(req);
+
+    connect(reply, &QNetworkReply::readyRead, this, [reply, file]() {
+        file->write(reply->readAll());
+    });
+    connect(reply, &QNetworkReply::downloadProgress, this,
+            [this](qint64 got, qint64 total) {
+                setProgress(total > 0 ? int((got * 100) / total) : -1);
+            });
+    connect(reply, &QNetworkReply::finished, this, [this, reply, file, target]() {
+        reply->deleteLater();
+        file->write(reply->readAll());
+        file->flush();
+        const qint64 size = file->size();
+        file->close();
+        file->deleteLater();
+        setBusy(false);
+
+        if (reply->error() != QNetworkReply::NoError) {
+            QFile::remove(target);
+            setStatus(tr("Download failed: %1").arg(reply->errorString()));
+            emit errorOccurred(m_statusText);
+            return;
+        }
+        // Un file troncato manderebbe in errore l'installer con un messaggio
+        // incomprensibile: meglio accorgersene qui.
+        if (size < 1024 * 1024) {
+            QFile::remove(target);
+            setStatus(tr("The downloaded file is incomplete. Please try again."));
+            emit errorOccurred(m_statusText);
+            return;
+        }
+        launchInstaller(target);
+    });
+}
+
+void DecodiumUpdater::launchInstaller(const QString& path)
+{
+#if defined(Q_OS_WIN)
+    setStatus(tr("Starting the installer..."));
+    // Decodium DEVE uscire: l'installer disinstalla la versione precedente e non
+    // puo' rimpiazzare un eseguibile in uso. Lo avviamo staccato e chiudiamo.
+    if (!QProcess::startDetached(path, QStringList{})) {
+        setStatus(tr("Could not start the installer."));
+        emit errorOccurred(m_statusText);
+        return;
+    }
+    QCoreApplication::quit();
+#else
+    // Fuori da Windows non c'e' un installer da lanciare: mostriamo il file.
+    QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(path).absolutePath()));
+#endif
+}

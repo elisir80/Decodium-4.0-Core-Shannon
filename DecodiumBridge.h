@@ -1154,6 +1154,8 @@ public:
 
     // Diagnostic log
     Q_INVOKABLE QString diagnosticLogPath() const;
+    // IU8LMC: autodiagnosi -> filtra i NON-bug prima che diventino segnalazioni.
+    Q_INVOKABLE QVariantList runSelfCheck();
     Q_INVOKABLE void openDiagnosticLog() const;
     Q_INVOKABLE void requestSafeGraphicsNextLaunch(const QString& reason = QString());
     Q_INVOKABLE void notifyMainQmlLoadStarted();
@@ -2018,6 +2020,7 @@ private:
     // Retry finiti e distanziati: nessun loop infinito.
     int m_startupCatRetryCount {0};
     bool m_monitoring {false};
+    QDateTime m_monitoringSince;  // IU8LMC: inizio ascolto (autodiagnosi banda morta)
     bool m_monitorRequested {false};
     bool m_transmitting {false};
     bool m_tuning {false};

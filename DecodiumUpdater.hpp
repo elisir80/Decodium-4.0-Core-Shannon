@@ -1,0 +1,105 @@
+#ifndef DECODIUMUPDATER_HPP
+#define DECODIUMUPDATER_HPP
+
+#include <QObject>
+#include <QString>
+
+class QNetworkAccessManager;
+class QNetworkReply;
+
+// IU8LMC — Aggiornamento automatico con avviso e conferma.
+//
+// PERCHE': la causa numero uno delle segnalazioni e' l'uso di versioni
+// vecchissime (report da 1.0.262/348/368 su bug gia' corretti da decine di
+// release). Il motivo non era la pigrizia degli utenti: il controllo
+// aggiornamenti esisteva in DecodiumBridge::checkForUpdates() ma era SPENTO a
+// compile-time (kDecodiumUpdateCheckerEnabled=false dalla 1.0.62), partiva solo
+// da una voce di menu per giunta disabilitata, non aveva interfaccia e non
+// scaricava nulla. L'app non ha mai detto a nessuno che esisteva una versione
+// nuova.
+//
+// Qui il ciclo e' completo: controlla -> avvisa -> l'utente conferma ->
+// scarica -> lancia l'installer -> esce. Mai nulla di automatico alle spalle
+// dell'utente: nessun download parte senza un clic esplicito.
+//
+// Classe separata dal bridge di proposito: DecodiumBridge.cpp e' il file che
+// elisir80 riscrive di piu' e ogni riga toccata li' e' un conflitto agli
+// assorbimenti.
+
+class DecodiumUpdater : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(bool    available       READ available       NOTIFY stateChanged)
+    Q_PROPERTY(QString currentVersion  READ currentVersion  CONSTANT)
+    Q_PROPERTY(QString latestVersion   READ latestVersion   NOTIFY stateChanged)
+    Q_PROPERTY(QString releaseNotes    READ releaseNotes    NOTIFY stateChanged)
+    Q_PROPERTY(bool    busy            READ busy            NOTIFY busyChanged)
+    Q_PROPERTY(int     progress        READ progress        NOTIFY progressChanged)  // 0-100, -1 = indeterminato
+    Q_PROPERTY(QString statusText      READ statusText      NOTIFY statusTextChanged)
+    Q_PROPERTY(bool    checkOnStartup  READ checkOnStartup  WRITE setCheckOnStartup NOTIFY checkOnStartupChanged)
+
+public:
+    explicit DecodiumUpdater(QObject* parent = nullptr);
+
+    bool    available()      const { return m_available; }
+    QString currentVersion() const { return m_currentVersion; }
+    QString latestVersion()  const { return m_latestVersion; }
+    QString releaseNotes()   const { return m_releaseNotes; }
+    bool    busy()           const { return m_busy; }
+    int     progress()       const { return m_progress; }
+    QString statusText()     const { return m_statusText; }
+    bool    checkOnStartup() const { return m_checkOnStartup; }
+    void    setCheckOnStartup(bool on);
+
+    // Interroga le release del fork. silent=true (avvio) non disturba l'utente
+    // se non c'e' nulla di nuovo o se la rete non risponde.
+    Q_INVOKABLE void check(bool silent = false);
+
+    // Da chiamare all'avvio: rispetta checkOnStartup e non ricontrolla piu' di
+    // una volta al giorno.
+    Q_INVOKABLE void checkOnStartupIfDue();
+
+    // Scarica l'installer della versione trovata e lo lancia, poi chiude
+    // Decodium (l'installer disinstalla da solo la versione precedente).
+    // Parte SOLO su conferma esplicita dell'utente.
+    Q_INVOKABLE void downloadAndInstall();
+
+    // "Salta questa versione": non avvisare piu' finche' non ne esce un'altra.
+    Q_INVOKABLE void skipThisVersion();
+
+signals:
+    void stateChanged();
+    void busyChanged();
+    void progressChanged();
+    void statusTextChanged();
+    void checkOnStartupChanged();
+
+    // Emesso quando c'e' davvero una versione nuova non ancora saltata:
+    // la QML apre il dialog di conferma.
+    void updateFound(const QString& version);
+    // Controllo manuale senza novita': l'utente ha cliccato, merita una risposta.
+    void upToDate(const QString& version);
+    void errorOccurred(const QString& message);
+
+private:
+    void setBusy(bool b);
+    void setProgress(int p);
+    void setStatus(const QString& s);
+    void onCheckFinished(QNetworkReply* reply, bool silent);
+    void launchInstaller(const QString& path);
+
+    QNetworkAccessManager* m_nam {nullptr};
+    QString m_currentVersion;
+    QString m_latestVersion;
+    QString m_releaseNotes;
+    QString m_downloadUrl;
+    QString m_assetName;
+    bool    m_available {false};
+    bool    m_busy {false};
+    int     m_progress {0};
+    QString m_statusText;
+    bool    m_checkOnStartup {true};
+};
+
+#endif  // DECODIUMUPDATER_HPP

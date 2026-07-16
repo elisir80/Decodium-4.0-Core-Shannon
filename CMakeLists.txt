@@ -1686,6 +1686,12 @@ add_executable (decodium_qml
   main_qml.cpp
   DecodiumStorageMigration.cpp
   DecodiumStorageMigration.hpp
+  DecodiumSelfCheck.cpp
+  DecodiumSelfCheck.hpp
+  DecodiumUpdater.cpp
+  DecodiumUpdater.hpp
+  DecodiumCommunityReport.cpp
+  DecodiumCommunityReport.hpp
   DecodiumBridge.cpp
   DecodiumBridge.h
   UsStateDataManager.cpp

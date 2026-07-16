@@ -209,8 +209,9 @@ void DecodiumDiagnostics::matchKnownBugs()
          "Serial port receiving corrupted data without terminator",
          "FIXED v1.0.22: 4KB buffer guard added"},
         {"DPAPI CryptUnprotectData failed",
-         "Windows credential decryption failed — registry may be corrupted",
-         "OPEN: clear HKCU\\Software\\Decodium\\SecureStore and re-enter credentials"},
+         "Windows credential decryption failed — stored credentials unreadable",
+         "OPEN: delete the [SecureStore] section from %APPDATA%\\Decodium\\Decodium3.ini "
+         "and re-enter credentials (before 1.0.482 these lived in the registry)"},
         {"SoundInput.*error",
          "Audio input device error — device may be disconnected or in use",
          "Check: verify audio device in Settings"},

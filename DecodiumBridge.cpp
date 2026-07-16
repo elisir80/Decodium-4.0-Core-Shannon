@@ -10,6 +10,7 @@
 #include "DecodiumPropagationManager.h"
 #include "DecodiumProfileSettings.h"
 #include "DecodiumDxCluster.h"
+#include "DecodiumSelfCheck.hpp"
 #include "Network/MessageClient.hpp"
 #include "DxccLookup.h"
 #include "DecodiumLegacyBackend.h"
@@ -14737,7 +14738,34 @@ void DecodiumBridge::setMode(const QString& v) {
 // === RX/TX STATE ===
 bool DecodiumBridge::monitoring() const { return m_monitoring; }
 void DecodiumBridge::setMonitoring(bool v) {
+    // IU8LMC: da quando ascoltiamo. Serve all'autodiagnosi per distinguere
+    // "banda chiusa / audio scollegato" (zero decode dopo minuti) dall'impazienza
+    // di chi guarda per 20 secondi. Vedi DecodiumSelfCheck.
+    if (v && !m_monitoring)
+        m_monitoringSince = QDateTime::currentDateTimeUtc();
     if (v) startRx(); else stopRx();
+}
+
+QVariantList DecodiumBridge::runSelfCheck()
+{
+    DecodiumSelfCheck::State s;
+    s.appVersion      = QStringLiteral(FORK_RELEASE_VERSION);
+    s.latestVersion   = m_latestVersion;
+    s.updateAvailable = m_updateAvailable;
+    s.mode            = mode();
+    s.callsign        = m_callsign;
+    s.monitoring      = m_monitoring;
+    s.ntpEnabled      = ntpEnabled();
+    s.ntpSynced       = ntpSynced();
+    s.ntpOffsetMs     = m_ntpOffsetMs;
+    s.mamMultiStream  = mamMultiStream();
+    s.ftThreads       = m_ftThreads;
+    s.cpuCores        = QThread::idealThreadCount();
+    s.totalDecodesReceived = totalDecodesReceived();
+    s.monitoringSeconds = (m_monitoring && m_monitoringSince.isValid())
+                              ? m_monitoringSince.secsTo(QDateTime::currentDateTimeUtc())
+                              : 0;
+    return DecodiumSelfCheck::toVariantList(DecodiumSelfCheck::run(s));
 }
 bool DecodiumBridge::transmitting() const { return m_transmitting; }
 bool DecodiumBridge::decoding() const { return m_decoding; }

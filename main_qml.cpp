@@ -64,6 +64,8 @@
 #include "DecodiumDxCluster.h"
 #include "DecodiumLogging.hpp"
 #include "DecodiumStorageMigration.hpp"
+#include "DecodiumUpdater.hpp"
+#include "DecodiumCommunityReport.hpp"
 #include "controllers/FT2LinkQmlAdapter.hpp"
 #include "L10nLoader.hpp"
 #include "MetaDataRegistry.hpp"
@@ -3115,6 +3117,15 @@ int main(int argc, char* argv[])
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("appEngine", &bridge);
     engine.rootContext()->setContextProperty("ft2Link", &ft2Link);
+    // IU8LMC: aggiornamento automatico con avviso e conferma. Il checker
+    // storico (DecodiumBridge::checkForUpdates) e' spento dalla 1.0.62 e non ha
+    // mai avvisato nessuno: e' il motivo per cui i tester restano su release
+    // vecchissime e segnalano bug gia' corretti.
+    static DecodiumUpdater updater;
+    engine.rootContext()->setContextProperty("updater", &updater);
+    // IU8LMC: segnalazione problemi al forum community.ft2.it (sostituisce GitHub).
+    static DecodiumCommunityReport community;
+    engine.rootContext()->setContextProperty("community", &community);
     engine.rootContext()->setContextProperty(
         "decodiumMonoFontFamily",
         fixedFontFamily.isEmpty() ? QStringLiteral("monospace") : fixedFontFamily);
