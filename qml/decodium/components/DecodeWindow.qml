@@ -73,6 +73,8 @@ Window {
     readonly property int rxDistanceWidth: compactRxColumns ? 0 : 50
     property int decodeListVersion: 0
     property int rxDecodeListVersion: 0
+    property bool bandActivitySnapshotPending: false
+    property bool rxSnapshotPending: false
     property var bandActivityModel: (bridge && bridge.bandActivityModel) ? [] : filteredDecodeEntries(appEngine.decodeList)
     property bool highlight73: bridge.getSetting("Highlight73", true)
     property bool highlightOrange: bridge.getSetting("HighlightOrange", false)
@@ -164,49 +166,97 @@ Window {
         return decodeWindow.rxDecodeModel.length
     }
 
+    function queueDecodeSnapshotUiCommit(bandPending, rxPending) {
+        bandActivitySnapshotPending = bandActivitySnapshotPending || bandPending
+        rxSnapshotPending = rxSnapshotPending || rxPending
+        decodeSnapshotUiCommitTimer.restart()
+    }
+
+    Timer {
+        id: decodeSnapshotUiCommitTimer
+        interval: 60
+        repeat: false
+        onTriggered: {
+            if (decodeWindow.bandActivitySnapshotPending) {
+                decodeWindow.bandActivitySnapshotPending = false
+                decodeWindow.decodeListVersion++
+                if (bandActivityList)
+                    bandActivityList.followTailAfterModelUpdate()
+            }
+            if (decodeWindow.rxSnapshotPending) {
+                decodeWindow.rxSnapshotPending = false
+                decodeWindow.rxDecodeListVersion++
+                if (rxFrequencyList)
+                    rxFrequencyList.followTailAfterModelUpdate()
+            }
+        }
+    }
+
+    Connections {
+        target: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : null
+        ignoreUnknownSignals: true
+        function onSnapshotApplied() {
+            decodeWindow.queueDecodeSnapshotUiCommit(true, false)
+        }
+    }
+
+    Connections {
+        target: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : null
+        ignoreUnknownSignals: true
+        function onSnapshotApplied() {
+            decodeWindow.queueDecodeSnapshotUiCommit(false, true)
+        }
+    }
+
 	    Connections {
 	        target: appEngine
 	        function onDecodeListChanged() {
-            if (!decodeWindow.hasNativeBandActivityModel())
+            if (!decodeWindow.hasNativeBandActivityModel()) {
                 decodeWindow.bandActivityModel = filteredDecodeEntries(appEngine.decodeList)
-            decodeWindow.decodeListVersion++
-            if (!decodeWindow.hasNativeRxDecodeModel())
+                decodeWindow.decodeListVersion++
+                if (bandActivityList)
+                    bandActivityList.followTailAfterModelUpdate()
+            }
+            if (!decodeWindow.hasNativeRxDecodeModel()) {
                 decodeWindow.rxDecodeModel = currentRxDecodes()
-            decodeWindow.rxDecodeListVersion++
-            if (bandActivityList)
-                bandActivityList.followTailAfterModelUpdate()
-            if (rxFrequencyList)
-                rxFrequencyList.followTailAfterModelUpdate()
+                decodeWindow.rxDecodeListVersion++
+                if (rxFrequencyList)
+                    rxFrequencyList.followTailAfterModelUpdate()
+            }
         }
         function onRxDecodeListChanged() {
-            if (!decodeWindow.hasNativeRxDecodeModel())
+            if (!decodeWindow.hasNativeRxDecodeModel()) {
                 decodeWindow.rxDecodeModel = currentRxDecodes()
-            decodeWindow.rxDecodeListVersion++
+	            decodeWindow.rxDecodeListVersion++
 	            if (rxFrequencyList)
 	                rxFrequencyList.followTailAfterModelUpdate()
+	        }
 	        }
 	        function onDxCallChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
-	            if (!decodeWindow.hasNativeRxDecodeModel())
+	            if (!decodeWindow.hasNativeRxDecodeModel()) {
 	                decodeWindow.rxDecodeModel = currentRxDecodes()
-	            decodeWindow.rxDecodeListVersion++
-	            if (rxFrequencyList)
-	                rxFrequencyList.followTailAfterModelUpdate()
+	                decodeWindow.rxDecodeListVersion++
+	                if (rxFrequencyList)
+	                    rxFrequencyList.followTailAfterModelUpdate()
+	            }
 	        }
 	        function onRxFrequencyChanged() {
 	            decodeWindow.clearedRxDecodeKeys = ({})
-	            if (!decodeWindow.hasNativeRxDecodeModel())
+	            if (!decodeWindow.hasNativeRxDecodeModel()) {
 	                decodeWindow.rxDecodeModel = currentRxDecodes()
-	            decodeWindow.rxDecodeListVersion++
-	            if (rxFrequencyList)
-	                rxFrequencyList.followTailAfterModelUpdate()
+	                decodeWindow.rxDecodeListVersion++
+	                if (rxFrequencyList)
+	                    rxFrequencyList.followTailAfterModelUpdate()
+	            }
 	        }
 	    }
 
     // Refresh rxDecodeModel anche quando cambia il filtro Tx2QSO/TXMessagesToRX
     onShowTxMessagesInRxChanged: {
-        if (!decodeWindow.hasNativeRxDecodeModel())
-            rxDecodeModel = currentRxDecodes()
+        if (decodeWindow.hasNativeRxDecodeModel())
+            return
+        rxDecodeModel = currentRxDecodes()
         rxDecodeListVersion++
         if (rxFrequencyList)
             rxFrequencyList.followTailAfterModelUpdate()
@@ -1173,6 +1223,7 @@ NumberAnimation {
 	                                }
 	                            }
                             onCountChanged: {
+                                if (decodeWindow.hasNativeBandActivityModel()) return
                                 if (!followTail) return
                                 forceTailFollow()
                             }
@@ -1730,6 +1781,7 @@ NumberAnimation {
 	                                }
 	                            }
                             onCountChanged: {
+                                if (decodeWindow.hasNativeRxDecodeModel()) return
                                 if (!followTail) return
                                 forceTailFollow()
                             }

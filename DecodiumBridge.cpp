@@ -107,6 +107,8 @@
 #include <QScopeGuard>
 #include <QThread>
 #include <QThreadPool>
+#include <QFutureWatcher>
+#include <QtConcurrentRun>
 #include <QOperatingSystemVersion>
 #include "Network/FoxVerifier.hpp"
 #include "wsjtx_config.h"
@@ -6049,6 +6051,276 @@ bool decodeListModel_isTelemetryOnlyMessage(QString const& message)
     return decodeListModel_isTelemetryHexToken(parts.first());
 }
 
+constexpr int kDecodeUiRefreshBand = 0x01;
+constexpr int kDecodeUiRefreshRx = 0x02;
+constexpr int kDecodeUiRefreshFullSpectrum = 0x04;
+
+struct DecodeUiClassifiedSource
+{
+    QVariantList entries;
+    QVector<quint8> ghostRejected;
+    QVector<quint8> rxMembership;
+};
+
+struct DecodeUiSnapshotJob
+{
+    DecodeUiClassifiedSource bandSource;
+    DecodeUiClassifiedSource rxSource;
+    QSet<QString> clearedRxKeys;
+    QString mode;
+    quint64 generation {0};
+    int flags {0};
+    bool includeBandSourceInRx {false};
+    bool hideWorkedBand {false};
+    bool hideWorkedToday {false};
+    bool hideTelemetry {true};
+    bool showTxMessagesInRx {true};
+    bool newestFirst {false};
+    bool showPeriodSeparators {true};
+};
+
+struct DecodeUiSnapshotResult
+{
+    DecodeListModel::PreparedSnapshot bandEntries;
+    DecodeListModel::PreparedSnapshot rxEntries;
+    DecodeListModel::PreparedSnapshot fullSpectrumEntries;
+    quint64 generation {0};
+    int flags {0};
+    qint64 workerMs {0};
+};
+
+static QString decodeUiPredicateCacheKey(QVariantMap const& entry)
+{
+    QString key = decodeMirrorEntryKey(entry);
+    key.reserve(key.size() + 160);
+    key += QLatin1Char('|') + entry.value(QStringLiteral("mode")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("db")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("aptype")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("quality")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("fromCall")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("dxCallsign")).toString();
+    key += QLatin1Char('|') + entry.value(QStringLiteral("dxDistance")).toString();
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("isMyCall")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("isB4")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorked")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedBand")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedToday")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("forceRxPane")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    return key;
+}
+
+static bool decodeUiEntryPassesBandFilters(QVariantMap const& entry,
+                                           bool ghostRejected,
+                                           DecodeUiSnapshotJob const& job)
+{
+    if (entry.isEmpty() || ghostRejected) return false;
+    bool const isTxEntry = entry.value(QStringLiteral("isTx")).toBool()
+        || entry.value(QStringLiteral("db")).toString().trimmed()
+               .compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
+    if (!isTxEntry) {
+        if (job.hideWorkedBand
+            && entry.value(QStringLiteral("dxIsWorkedBand")).toBool()) {
+            return false;
+        }
+        if (job.hideWorkedToday
+            && entry.value(QStringLiteral("dxIsWorkedToday")).toBool()) {
+            return false;
+        }
+    }
+    if (!job.hideTelemetry) return true;
+    QString const display = entry.value(QStringLiteral("displayMessage")).toString();
+    QString const fallback = entry.value(QStringLiteral("message")).toString();
+    return !decodeListModel_isTelemetryOnlyMessage(display.isEmpty() ? fallback : display);
+}
+
+static void injectDecodeUiPeriodSeparators(QVariantList& entries, bool enabled)
+{
+    if (!enabled || entries.size() <= 1) return;
+
+    QVariantList withSeparators;
+    withSeparators.reserve(entries.size() * 11 / 10 + 1);
+    QString previousPeriod;
+    qint64 previousTimestamp = 0;
+    for (QVariant const& value : std::as_const(entries)) {
+        QVariantMap const entry = value.toMap();
+        QString const time = entry.value(QStringLiteral("time")).toString();
+        qint64 const timestamp =
+            static_cast<qint64>(entry.value(QStringLiteral("timestamp")).toULongLong());
+        bool newPeriod = false;
+        if (!time.isEmpty()) {
+            newPeriod = !previousPeriod.isEmpty() && time != previousPeriod;
+        } else {
+            newPeriod = previousTimestamp > 0 && timestamp > 0
+                && (timestamp - previousTimestamp) > 1500;
+        }
+        if (newPeriod) {
+            QVariantMap separator;
+            separator.insert(QStringLiteral("isSeparator"), true);
+            separator.insert(QStringLiteral("time"), time);
+            separator.insert(QStringLiteral("timestamp"),
+                             QVariant::fromValue(static_cast<qulonglong>(timestamp)));
+            withSeparators.append(separator);
+        }
+        if (!time.isEmpty()) previousPeriod = time;
+        if (timestamp > 0) previousTimestamp = timestamp;
+        withSeparators.append(entry);
+    }
+    entries = withSeparators;
+}
+
+static QVariantMap decodeDeltaBoundaryEntry(DecodeListModel const* model,
+                                            bool first)
+{
+    if (!model) return {};
+    int const count = model->count();
+    int index = first ? 0 : count - 1;
+    int const step = first ? 1 : -1;
+    while (index >= 0 && index < count) {
+        QVariantMap const entry = model->entry(index);
+        if (!entry.value(QStringLiteral("isSeparator")).toBool()) return entry;
+        index += step;
+    }
+    return {};
+}
+
+static QVariantMap decodeDeltaListBoundaryEntry(QVariantList const& entries,
+                                                bool first)
+{
+    int index = first ? 0 : entries.size() - 1;
+    int const step = first ? 1 : -1;
+    while (index >= 0 && index < entries.size()) {
+        QVariantMap const entry = entries.at(index).toMap();
+        if (!entry.value(QStringLiteral("isSeparator")).toBool()) return entry;
+        index += step;
+    }
+    return {};
+}
+
+static bool decodeDeltaPeriodChanged(QVariantMap const& previous,
+                                     QVariantMap const& next)
+{
+    if (previous.isEmpty() || next.isEmpty()) return false;
+    QString const previousTime = previous.value(QStringLiteral("time")).toString();
+    QString const nextTime = next.value(QStringLiteral("time")).toString();
+    if (!previousTime.isEmpty() && !nextTime.isEmpty()) {
+        return previousTime != nextTime;
+    }
+    qint64 const previousTs = static_cast<qint64>(
+        previous.value(QStringLiteral("timestamp")).toULongLong());
+    qint64 const nextTs = static_cast<qint64>(
+        next.value(QStringLiteral("timestamp")).toULongLong());
+    return previousTs > 0 && nextTs > 0
+        && std::abs(nextTs - previousTs) > 1500;
+}
+
+static QVariantList addDecodeDeltaBoundarySeparator(
+    QVariantList entries,
+    DecodeListModel const* model,
+    bool prepend,
+    bool enabled)
+{
+    if (!enabled || entries.isEmpty() || !model || model->count() <= 0) {
+        return entries;
+    }
+
+    QVariantMap const previous = prepend
+        ? decodeDeltaListBoundaryEntry(entries, false)
+        : decodeDeltaBoundaryEntry(model, false);
+    QVariantMap const next = prepend
+        ? decodeDeltaBoundaryEntry(model, true)
+        : decodeDeltaListBoundaryEntry(entries, true);
+    if (!decodeDeltaPeriodChanged(previous, next)) return entries;
+
+    QVariantMap separator;
+    separator.insert(QStringLiteral("isSeparator"), true);
+    separator.insert(QStringLiteral("time"),
+                     next.value(QStringLiteral("time")));
+    separator.insert(QStringLiteral("timestamp"),
+                     next.value(QStringLiteral("timestamp")));
+    if (prepend) {
+        entries.append(separator);
+    } else {
+        entries.prepend(separator);
+    }
+    return entries;
+}
+
+static DecodeUiSnapshotResult prepareDecodeUiSnapshot(DecodeUiSnapshotJob job)
+{
+    QElapsedTimer elapsed;
+    elapsed.start();
+
+    DecodeUiSnapshotResult result;
+    result.generation = job.generation;
+    result.flags = job.flags;
+
+    if (job.flags & (kDecodeUiRefreshBand | kDecodeUiRefreshFullSpectrum)) {
+        QVariantList bandEntries;
+        bandEntries.reserve(job.bandSource.entries.size());
+        for (int i = 0; i < job.bandSource.entries.size(); ++i) {
+            QVariantMap const entry = job.bandSource.entries.at(i).toMap();
+            bool const ghost = job.bandSource.ghostRejected.value(i, 0) != 0;
+            if (decodeUiEntryPassesBandFilters(entry, ghost, job)) {
+                bandEntries.append(entry);
+            }
+        }
+        if (job.newestFirst) {
+            std::reverse(bandEntries.begin(), bandEntries.end());
+        }
+        injectDecodeUiPeriodSeparators(bandEntries,
+                                       job.showPeriodSeparators);
+        result.bandEntries = DecodeListModel::prepareSnapshot(bandEntries);
+        if (job.flags & kDecodeUiRefreshFullSpectrum) {
+            // Qt containers are implicitly shared: this is a cheap handoff and
+            // preserves a separately movable target for the delayed panel.
+            result.fullSpectrumEntries = result.bandEntries;
+        }
+    }
+
+    if (job.flags & kDecodeUiRefreshRx) {
+        QSet<QString> seen;
+        QVariantList rxEntries;
+        auto appendSource = [&rxEntries, &job, &seen](DecodeUiClassifiedSource const& source) {
+            for (int i = 0; i < source.entries.size(); ++i) {
+                QVariantMap const entry = source.entries.at(i).toMap();
+                bool const ghost = source.ghostRejected.value(i, 0) != 0;
+                if (!decodeUiEntryPassesBandFilters(entry, ghost, job)) continue;
+                if (entry.value(QStringLiteral("isTx")).toBool()
+                    && !job.showTxMessagesInRx) {
+                    continue;
+                }
+                QString const clearKey = decodeRxClearEntryKey(entry);
+                if (!clearKey.isEmpty() && job.clearedRxKeys.contains(clearKey)) {
+                    continue;
+                }
+                if (source.rxMembership.value(i, 0) == 0) continue;
+
+                QString const key = decodeMirrorEntryKey(entry);
+                if (!key.isEmpty()) {
+                    if (seen.contains(key)) continue;
+                    seen.insert(key);
+                }
+                rxEntries.append(entry);
+            }
+        };
+
+        rxEntries.reserve(job.rxSource.entries.size()
+                          + (job.includeBandSourceInRx
+                                 ? job.bandSource.entries.size()
+                                 : 0));
+        appendSource(job.rxSource);
+        if (job.includeBandSourceInRx) appendSource(job.bandSource);
+        coalesceRxPaneTxRows(rxEntries, job.mode);
+        normalizeDecodeEntriesForDisplay(rxEntries, 1500, job.mode);
+        injectDecodeUiPeriodSeparators(rxEntries,
+                                       job.showPeriodSeparators);
+        result.rxEntries = DecodeListModel::prepareSnapshot(rxEntries);
+    }
+
+    result.workerMs = elapsed.elapsed();
+    return result;
+}
+
 } // namespace
 
 bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry) const
@@ -6603,6 +6875,8 @@ void DecodiumBridge::setHideGhostDecodes(bool v)
     m_hideGhostDecodes = v;
     bridgeLog(QStringLiteral("setHideGhostDecodes: %1").arg(v ? "ON" : "OFF"));
     saveSettings();
+    invalidateDecodeUiPredicateCaches();
+    invalidateLegacyDecodeModelDeltaFastPath();
     // Rigenera i model con la nuova policy di filter.
     rebuildBandActivityModel();
     rebuildRxDecodeModel();
@@ -6617,6 +6891,8 @@ void DecodiumBridge::setFiltersBypassed(bool v)
     settings.setValue(QStringLiteral("FiltersBypassed"), m_filtersBypassed);
     settings.sync();
     bridgeLog(QStringLiteral("Decode filters bypass: %1").arg(m_filtersBypassed ? "ON" : "OFF"));
+    invalidateDecodeUiPredicateCaches();
+    invalidateLegacyDecodeModelDeltaFastPath();
     emit filtersBypassedChanged();
     emit settingValueChanged(QStringLiteral("filtersBypassed"), m_filtersBypassed);
     emit settingValueChanged(QStringLiteral("FiltersBypassed"), m_filtersBypassed);
@@ -7927,6 +8203,7 @@ void DecodiumBridge::setDecodeShowPeriodSeparator(bool v)
     bridgeLog(QStringLiteral("setDecodeShowPeriodSeparator: %1")
         .arg(v ? "ON" : "OFF"));
     saveSettings();
+    invalidateLegacyDecodeModelDeltaFastPath();
     rebuildBandActivityModel();
     rebuildRxDecodeModel();
 }
@@ -8117,14 +8394,17 @@ QString DecodiumBridge::webServerQrUrl() const
     return m_webServer ? m_webServer->qrUrl() : QString();
 }
 
-bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry) const
+bool DecodiumBridge::entryBelongsToCurrentQso(QVariantMap const& entry,
+                                              bool ghostAlreadyAccepted) const
 {
     if (entry.isEmpty()) return false;
     // Keep the rebuilt native model aligned with appendRxDecodeEntry().
     // Otherwise a manual double-click on an older CQ/third-party row changes
     // dxCall and TX messages, but Signal RX does not show that selected
     // partner until a new decode arrives.
-    return shouldMirrorToRxPane(entry);
+    // Il filtro Band Activity ha gia validato il ghost gate prima di arrivare
+    // qui; non ripetere regex, lookup DXCC e parsing del messaggio.
+    return shouldMirrorToRxPane(entry, ghostAlreadyAccepted);
 }
 
 void DecodiumBridge::injectPeriodSeparators(QVariantList& filtered) const
@@ -8207,7 +8487,8 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
         if (e.value(QStringLiteral("isTx")).toBool() && !showTxMessagesInRx) continue;
         QString const key = decodeRxClearEntryKey(e);
         if (!key.isEmpty() && m_clearedRxDecodeKeys.contains(key)) continue;
-        if (e.value(QStringLiteral("forceRxPane")).toBool() || entryBelongsToCurrentQso(e)) {
+        if (e.value(QStringLiteral("forceRxPane")).toBool()
+            || entryBelongsToCurrentQso(e, true)) {
             filtered.append(e);
         }
     }
@@ -8238,47 +8519,255 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
 
 void DecodiumBridge::rebuildBandActivityModel()
 {
-    if (!m_bandActivityModel) return;
-    MainThreadTraceScope trace(QStringLiteral("rebuild_band_activity_model"),
-                               QStringLiteral("decode_rows=%1").arg(m_decodeList.size()));
-    QVariantList const filtered = filterEntriesForBandActivity(m_decodeList);
-    m_bandActivityModel->setEntries(filtered);
-    trace.addDetail(QStringLiteral("filtered_rows=%1").arg(filtered.size()));
+    scheduleDecodeUiRefresh(kDecodeUiRefreshBand
+                            | kDecodeUiRefreshFullSpectrum);
 }
 
 void DecodiumBridge::rebuildRxDecodeModel()
 {
-    if (!m_rxDecodeModel) return;
-    MainThreadTraceScope trace(QStringLiteral("rebuild_rx_decode_model"),
-                               QStringLiteral("rx_rows=%1 decode_rows=%2")
-                                   .arg(m_rxDecodeList.size())
-                                   .arg(m_decodeList.size()));
-    QVariantList merged;
-    bool const legacyMirrorOwnsRxHistory = usingLegacyBackendForTx();
-    merged.reserve(m_rxDecodeList.size()
-                   + (legacyMirrorOwnsRxHistory ? 0 : m_decodeList.size()));
-    QSet<QString> seen;
-    auto appendUnique = [&merged, &seen](QVariant const& value) {
-        QVariantMap const entry = value.toMap();
-        QString const key = decodeMirrorEntryKey(entry);
-        if (!key.isEmpty()) {
-            if (seen.contains(key)) return;
-            seen.insert(key);
-        }
-        merged.append(entry);
-    };
-    for (QVariant const& value : std::as_const(m_rxDecodeList)) appendUnique(value);
-    // The legacy mirror has already merged directed Band Activity rows into
-    // m_rxDecodeList. Re-scanning the complete band list here repeats message,
-    // DXCC and QSO routing checks on the GUI thread for no visible benefit.
-    if (!legacyMirrorOwnsRxHistory) {
-        for (QVariant const& value : std::as_const(m_decodeList)) appendUnique(value);
+    scheduleDecodeUiRefresh(kDecodeUiRefreshRx);
+}
+
+bool DecodiumBridge::decodeUiBurstActive() const
+{
+    return QDateTime::currentMSecsSinceEpoch() < m_decodeUiBurstUntilMs;
+}
+
+int DecodiumBridge::decodeUiRowsPerCycle() const
+{
+    int const cores = qMax(1, QThread::idealThreadCount());
+    int budget = 48;
+    if (cores <= 4) {
+        budget = 16;
+    } else if (cores <= 8) {
+        budget = 24;
+    } else if (cores <= 12) {
+        budget = 32;
     }
-    QVariantList const filtered = filterEntriesForRxDecode(merged);
-    m_rxDecodeModel->setEntries(filtered);
-    trace.addDetail(QStringLiteral("merged_rows=%1 filtered_rows=%2")
-                        .arg(merged.size())
-                        .arg(filtered.size()));
+    if (m_uiQuality.compare(QStringLiteral("Low"), Qt::CaseInsensitive) == 0) {
+        budget = qMin(budget, 20);
+    }
+    if (isUiStallActive(90, 2500)) {
+        budget = qMin(budget, 16);
+    }
+    return budget;
+}
+
+void DecodiumBridge::invalidateDecodeUiPredicateCaches()
+{
+    m_decodeUiGhostCache.clear();
+    m_decodeUiRxMembershipCache.clear();
+}
+
+void DecodiumBridge::scheduleDecodeUiRefresh(int flags, int delayMs)
+{
+    if (flags == 0) return;
+    m_decodeUiPendingFlags |= flags;
+    ++m_decodeUiSnapshotGeneration;
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    // Keep map/full-spectrum work outside the short decode delivery window.
+    m_decodeUiBurstUntilMs = qMax(m_decodeUiBurstUntilMs, nowMs + 650);
+
+    if (!m_decodeUiRefreshTimer) {
+        m_decodeUiRefreshTimer = new QTimer(this);
+        m_decodeUiRefreshTimer->setSingleShot(true);
+        connect(m_decodeUiRefreshTimer, &QTimer::timeout,
+                this, &DecodiumBridge::startDecodeUiSnapshotRefresh);
+    }
+    if (!m_decodeUiSnapshotInFlight) {
+        // Restarting this short quiet-window timer coalesces Band Activity and
+        // Signal RX notifications into one worker snapshot.
+        m_decodeUiRefreshTimer->start(qMax(0, delayMs));
+    }
+}
+
+void DecodiumBridge::startDecodeUiSnapshotRefresh()
+{
+    if (m_decodeUiSnapshotInFlight || m_decodeUiPendingFlags == 0) return;
+
+    int const flags = std::exchange(m_decodeUiPendingFlags, 0);
+    DecodeUiSnapshotJob job;
+    job.flags = flags;
+    job.generation = m_decodeUiSnapshotGeneration;
+    job.mode = m_mode;
+    job.hideWorkedBand = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
+    job.hideWorkedToday = !m_filtersBypassed
+        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    job.hideTelemetry = m_hideTelemetryOnlyDecodes;
+    job.showTxMessagesInRx =
+        getSetting(QStringLiteral("TXMessagesToRX"), true).toBool();
+    job.newestFirst = m_decodeNewestFirst;
+    job.showPeriodSeparators = m_decodeShowPeriodSeparator;
+    job.clearedRxKeys = m_clearedRxDecodeKeys;
+    job.includeBandSourceInRx =
+        (flags & kDecodeUiRefreshRx) && !usingLegacyBackendForTx();
+
+    bool const needsRxMembership = (flags & kDecodeUiRefreshRx) != 0;
+    QString const rxStateKey = m_callsign.trimmed().toUpper()
+        + QLatin1Char('|') + m_dxCall.trimmed().toUpper()
+        + QLatin1Char('|') + m_autoCqLockedCall.trimmed().toUpper()
+        + QLatin1Char('|') + inferredPartnerForAutolog().trimmed().toUpper();
+
+    if (m_decodeUiGhostCache.size() > 4096
+        || m_decodeUiRxMembershipCache.size() > 4096) {
+        invalidateDecodeUiPredicateCaches();
+    }
+
+    auto classifySource = [this, needsRxMembership, &rxStateKey]
+        (QVariantList const& entries) {
+        DecodeUiClassifiedSource classified;
+        classified.entries = entries;
+        classified.ghostRejected.reserve(entries.size());
+        classified.rxMembership.reserve(entries.size());
+        for (QVariant const& value : entries) {
+            QVariantMap const entry = value.toMap();
+            QString const predicateKey = decodeUiPredicateCacheKey(entry);
+
+            bool ghostRejected = false;
+            if (m_hideGhostDecodes) {
+                auto const ghostIt = m_decodeUiGhostCache.constFind(predicateKey);
+                if (ghostIt != m_decodeUiGhostCache.constEnd()) {
+                    ghostRejected = ghostIt.value();
+                } else {
+                    ghostRejected = looksLikeGhostDecode(entry);
+                    m_decodeUiGhostCache.insert(predicateKey, ghostRejected);
+                }
+            }
+            classified.ghostRejected.append(ghostRejected ? 1 : 0);
+
+            bool rxMember = false;
+            if (needsRxMembership && !ghostRejected) {
+                QString const membershipKey = predicateKey
+                    + QStringLiteral("|rx=") + rxStateKey;
+                auto const memberIt =
+                    m_decodeUiRxMembershipCache.constFind(membershipKey);
+                if (memberIt != m_decodeUiRxMembershipCache.constEnd()) {
+                    rxMember = memberIt.value();
+                } else {
+                    rxMember = entryBelongsToCurrentQso(entry, true);
+                    m_decodeUiRxMembershipCache.insert(membershipKey, rxMember);
+                }
+            }
+            classified.rxMembership.append(rxMember ? 1 : 0);
+        }
+        return classified;
+    };
+
+    bool const needsBandSource =
+        (flags & (kDecodeUiRefreshBand | kDecodeUiRefreshFullSpectrum))
+        || job.includeBandSourceInRx;
+    if (needsBandSource) {
+        job.bandSource = classifySource(m_decodeList);
+    }
+    if (flags & kDecodeUiRefreshRx) {
+        job.rxSource = classifySource(m_rxDecodeList);
+    }
+
+    if (!m_decodeUiThreadPool) {
+        m_decodeUiThreadPool = new QThreadPool(this);
+        m_decodeUiThreadPool->setMaxThreadCount(1);
+        m_decodeUiThreadPool->setExpiryTimeout(30000);
+    }
+
+    m_decodeUiSnapshotInFlight = true;
+    auto* watcher = new QFutureWatcher<DecodeUiSnapshotResult>(this);
+    connect(watcher, &QFutureWatcher<DecodeUiSnapshotResult>::finished,
+            this, [this, watcher]() {
+        DecodeUiSnapshotResult result = watcher->result();
+        watcher->deleteLater();
+        m_decodeUiSnapshotInFlight = false;
+
+        bool const stale = result.generation != m_decodeUiSnapshotGeneration
+            && m_decodeUiPendingFlags != 0;
+        if (stale) {
+            // Preserve all requested panes when a newer snapshot supersedes
+            // this one; otherwise a late RX notification could drop a pending
+            // Band Activity refresh.
+            m_decodeUiPendingFlags |= result.flags;
+        } else {
+            MainThreadTraceScope trace(
+                QStringLiteral("apply_decode_ui_snapshot"),
+                QStringLiteral("generation=%1 flags=%2 band=%3 rx=%4 worker_ms=%5")
+                    .arg(result.generation)
+                    .arg(result.flags)
+                    .arg(result.bandEntries.entries.size())
+                    .arg(result.rxEntries.entries.size())
+                    .arg(result.workerMs),
+                25);
+            int const budget = decodeUiRowsPerCycle();
+            if ((result.flags & kDecodeUiRefreshBand)
+                && m_bandActivityModel) {
+                m_bandActivityModel->setEntriesBudgeted(std::move(result.bandEntries),
+                                                        budget);
+            }
+            if ((result.flags & kDecodeUiRefreshRx)
+                && m_rxDecodeModel) {
+                m_rxDecodeModel->setEntriesBudgeted(std::move(result.rxEntries),
+                                                    qMax(12, budget / 2));
+            }
+            if (result.flags & kDecodeUiRefreshFullSpectrum) {
+                m_pendingFullSpectrumModelEntries =
+                    std::move(result.fullSpectrumEntries.entries);
+                m_pendingFullSpectrumModelKeys =
+                    std::move(result.fullSpectrumEntries.keys);
+                m_fullSpectrumSnapshotPending = true;
+                scheduleFullSpectrumModelRefresh();
+            }
+        }
+
+        if (m_decodeUiPendingFlags != 0) {
+            if (m_decodeUiRefreshTimer) m_decodeUiRefreshTimer->start(0);
+        } else {
+            qint64 const remainingMs =
+                qMax<qint64>(0, m_decodeUiBurstUntilMs
+                                   - QDateTime::currentMSecsSinceEpoch());
+            scheduleDeferredWorldMapFeedFlush(
+                static_cast<int>(remainingMs + 80));
+        }
+    });
+
+    watcher->setFuture(QtConcurrent::run(
+        m_decodeUiThreadPool,
+        [job = std::move(job)]() mutable {
+            QThread::currentThread()->setPriority(QThread::LowPriority);
+            return prepareDecodeUiSnapshot(std::move(job));
+        }));
+}
+
+void DecodiumBridge::scheduleFullSpectrumModelRefresh()
+{
+    if (!m_fullSpectrumSnapshotPending) return;
+    if (!m_fullSpectrumRefreshTimer) {
+        m_fullSpectrumRefreshTimer = new QTimer(this);
+        m_fullSpectrumRefreshTimer->setSingleShot(true);
+        connect(m_fullSpectrumRefreshTimer, &QTimer::timeout,
+                this, &DecodiumBridge::applyPendingFullSpectrumSnapshot);
+    }
+    qint64 const remainingMs =
+        qMax<qint64>(0, m_decodeUiBurstUntilMs
+                           - QDateTime::currentMSecsSinceEpoch());
+    m_fullSpectrumRefreshTimer->start(
+        static_cast<int>(qMax<qint64>(80, remainingMs + 80)));
+}
+
+void DecodiumBridge::applyPendingFullSpectrumSnapshot()
+{
+    if (!m_fullSpectrumSnapshotPending || !m_fullSpectrumModel) return;
+    if (decodeUiBurstActive()) {
+        scheduleFullSpectrumModelRefresh();
+        return;
+    }
+
+    DecodeListModel::PreparedSnapshot target;
+    target.entries = std::move(m_pendingFullSpectrumModelEntries);
+    target.keys = std::move(m_pendingFullSpectrumModelKeys);
+    m_pendingFullSpectrumModelEntries.clear();
+    m_pendingFullSpectrumModelKeys.clear();
+    m_fullSpectrumSnapshotPending = false;
+    m_fullSpectrumModel->setEntriesBudgeted(
+        std::move(target), qMax(12, decodeUiRowsPerCycle() / 2));
 }
 
 // 1.0.233 — DevOverlay metrics (Sprint 2 Phase 7).
@@ -8410,6 +8899,9 @@ void DecodiumBridge::setDevOverlayActive(bool v)
 
 void DecodiumBridge::emitDecodeListChangedThrottled()
 {
+    m_decodeUiBurstUntilMs = qMax(
+        m_decodeUiBurstUntilMs,
+        QDateTime::currentMSecsSinceEpoch() + 900);
     MainThreadTraceScope trace(QStringLiteral("emit_decode_list_changed_throttled"),
                                QStringLiteral("decode_rows=%1 rx_rows=%2 timer_active=%3")
                                    .arg(m_decodeList.size())
@@ -8453,6 +8945,9 @@ void DecodiumBridge::emitDecodeListChangedThrottled()
 
 void DecodiumBridge::emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit)
 {
+    m_decodeUiBurstUntilMs = qMax(
+        m_decodeUiBurstUntilMs,
+        QDateTime::currentMSecsSinceEpoch() + 900);
     MainThreadTraceScope trace(QStringLiteral("emit_rx_decode_list_changed_throttled"),
                                QStringLiteral("rx_rows=%1 timer_active=%2 normalize=%3")
                                    .arg(m_rxDecodeList.size())
@@ -8476,13 +8971,12 @@ void DecodiumBridge::emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit)
                                                   .arg(m_rxDecodeList.size())
                                                   .arg(m_rxDecodeListNormalizePending ? 1 : 0),
                                               30);
-            bool const shouldNormalize = m_rxDecodeListNormalizePending;
             m_rxDecodeListEmitPending = false;
             m_rxDecodeListNormalizePending = false;
-            if (shouldNormalize) {
-                coalesceRxPaneTxRows(m_rxDecodeList, m_mode);
-                normalizeDecodeEntriesForDisplay(m_rxDecodeList, 1500, m_mode);
-            }
+            // Dedup, parsing and chronological sort are performed by the
+            // decode UI snapshot worker. The source history remains append-
+            // oriented here, keeping this timer callback O(1) on the GUI
+            // thread even after several minutes of operation.
             emit rxDecodeListChanged();
             if (m_rxDecodeListEmitPending) {
                 m_rxDecodeListEmitTimer->start();
@@ -8500,21 +8994,24 @@ void DecodiumBridge::emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit)
 DecodiumBridge::DecodiumBridge(QObject* parent)
     : QObject(parent)
 {
-    // 1.0.143 fase 2: istanzia i 2 model nativi prima di tutto, così se
-    // qualcuno chiama bandActivityModel()/rxDecodeModel() durante il
-    // resto del costruttore (es. carica setting che invoca slot di
-    // refresh), non riceve nullptr.
+    // Istanzia i tre model nativi prima di tutto, così QML non vede mai un
+    // puntatore nullo durante il caricamento asincrono dei pannelli.
     applyFtOpenMpSchedulerProfile();
 #ifdef Q_OS_WIN
     applyWindowsInteractiveSchedulingProfile();
 #endif
 
     m_bandActivityModel = new DecodeListModel(this);
+    m_fullSpectrumModel = new DecodeListModel(this);
     m_rxDecodeModel = new DecodeListModel(this);
     // Sync dei model dopo ogni decodeListChanged. Auto-throttled dalla
     // fase 1 (emitDecodeListChangedThrottled max 4 emit/sec).
     connect(this, &DecodiumBridge::decodeListChanged, this, [this]() {
-        rebuildBandActivityModel();
+        bool const modelAlreadyUpdated = usingLegacyBackendForTx()
+            && std::exchange(m_skipNextLegacyBandModelSnapshot, false);
+        if (!modelAlreadyUpdated) {
+            rebuildBandActivityModel();
+        }
         // In legacy mode Signal RX has its own complete, throttled history and
         // emits rxDecodeListChanged. Avoid rebuilding it a second time for each
         // Band Activity early/final/deep pass.
@@ -8523,7 +9020,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
     });
     connect(this, &DecodiumBridge::rxDecodeListChanged, this, [this]() {
-        rebuildRxDecodeModel();
+        bool const modelAlreadyUpdated = usingLegacyBackendForTx()
+            && std::exchange(m_skipNextLegacyRxModelSnapshot, false);
+        if (!modelAlreadyUpdated) {
+            rebuildRxDecodeModel();
+        }
     });
     connect(this, &DecodiumBridge::frequencyChanged,
             this, &DecodiumBridge::displayFrequencyChanged);
@@ -8535,9 +9036,18 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, &DecodiumBridge::displayFrequencyChanged);
     connect(this, &DecodiumBridge::modeChanged,
             this, &DecodiumBridge::displayFrequencyChanged);
+    connect(this, &DecodiumBridge::modeChanged, this, [this]() {
+        invalidateLegacyDecodeModelDeltaFastPath();
+        invalidateDecodeUiPredicateCaches();
+        scheduleDecodeUiRefresh(kDecodeUiRefreshBand
+                                | kDecodeUiRefreshRx
+                                | kDecodeUiRefreshFullSpectrum);
+    });
     // RX model dipende anche da dxCall / rxFrequency / callsign / mode.
     connect(this, &DecodiumBridge::dxCallChanged, this, [this]() {
+        m_skipNextLegacyRxModelSnapshot = false;
         m_clearedRxDecodeKeys.clear();
+        invalidateDecodeUiPredicateCaches();
         rebuildRxDecodeModel();
     });
     // 1.0.266 (fork-only iu8lmc) — RIMOSSA connect rxFrequencyChanged -> rebuildRxDecodeModel.
@@ -8545,7 +9055,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // quindi un cambio di rxFrequency non richiede piu' alcun rebuild. Evita rebuild
     // inutili ogni volta che l'utente trascina il marker nel waterfall.
     connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
+        m_skipNextLegacyRxModelSnapshot = false;
         m_clearedRxDecodeKeys.clear();
+        invalidateDecodeUiPredicateCaches();
         rebuildRxDecodeModel();
     });
     connect(this, &DecodiumBridge::settingValueChanged, this,
@@ -8560,6 +9072,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 || key == QStringLiteral("HideWorkedBand")
                 || key == QStringLiteral("HideToday")
                 || key == QStringLiteral("HideWorkedToday")) {
+                invalidateLegacyDecodeModelDeltaFastPath();
+                invalidateDecodeUiPredicateCaches();
                 // 1.0.434: passa per il throttle 500ms (come il path decode
                 // normale) invece di rebuildare i 2 model in diretta. La 1.0.432
                 // li chiamava sincroni qui, bypassando il coalescing e aggiungendo
@@ -8781,10 +9295,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
     });
     connect(this, &DecodiumBridge::decodeListChanged, this, [this]() {
+        if (usingLegacyBackendForTx()) return;
         publishRemoteActivityEntries(m_decodeList);
         replayPskReporterRecentEntries(m_decodeList, QStringLiteral("decodeListChanged"));
     });
     connect(this, &DecodiumBridge::rxDecodeListChanged, this, [this]() {
+        if (usingLegacyBackendForTx()) return;
         publishRemoteActivityEntries(m_rxDecodeList);
         replayPskReporterRecentEntries(m_rxDecodeList, QStringLiteral("rxDecodeListChanged"));
     });
@@ -10433,6 +10949,10 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
 
     m_legacyBackend->setRigControlEnabled(
         embeddedLegacyRigControlEnabledForBackend(m_catBackend, legacyTxBackendRequested()));
+    {
+        QMutexLocker locker(&m_ft8MicroStallGuardMutex);
+        m_legacyBackend->setFt8DeepThreadPenalty(m_ft8MicroStallGuard.active());
+    }
     scheduleLegacyStateRefreshBurst();
 
     return true;
@@ -10785,6 +11305,12 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
+    if (m_mode == QStringLiteral("FT8") && m_monitoring) {
+        int const periodMs = effectivePeriodMsForMode(m_mode);
+        if (periodMs > 0) {
+            noteFt8AdaptivePeriod(correctedUtcEpochMs() / periodMs);
+        }
+    }
     MainThreadTraceScope trace(QStringLiteral("sync_legacy_backend_state"),
                                QStringLiteral("mode=%1 monitoring=%2 tx=%3 tune=%4 bridge_audio=%5")
                                    .arg(m_mode)
@@ -11380,6 +11906,7 @@ void DecodiumBridge::clearDecodeWindowsForModeChange(const QString& previousMode
 {
     bridgeLog(QStringLiteral("mode-change decode/map reset: %1 -> %2").arg(previousMode, nextMode));
     ++m_decodeSessionId;
+    invalidateLegacyDecodeModelDeltaFastPath();
 
     resetWorldMapDisplayFromCurrentDecodes();
 
@@ -11449,6 +11976,7 @@ void DecodiumBridge::clearDecodeWindowsForBandChange(double previousFrequency,
                        nextBand.isEmpty() ? QStringLiteral("--") : nextBand,
                        reason));
     ++m_decodeSessionId;
+    invalidateLegacyDecodeModelDeltaFastPath();
 
     resetWorldMapDisplayFromCurrentDecodes();
 
@@ -11492,6 +12020,205 @@ void DecodiumBridge::clearDecodeWindowsForBandChange(double previousFrequency,
     }
     emit decodeListChanged();
     emit rxDecodeListChanged();
+}
+
+void DecodiumBridge::queueLegacyDecodeSecondaryWork(QVariantList const& entries,
+                                                     QString const& source)
+{
+    for (QVariant const& value : entries) {
+        QVariantMap const entry = value.toMap();
+        QString key = decodeMirrorEntryKey(entry);
+        if (key.isEmpty()) {
+            key = entry.value(QStringLiteral("time")).toString()
+                + QLatin1Char('|') + entry.value(QStringLiteral("freq")).toString()
+                + QLatin1Char('|') + entry.value(QStringLiteral("message")).toString();
+        }
+        if (m_legacyDecodeSecondaryPendingKeys.contains(key)) {
+            continue;
+        }
+        m_legacyDecodeSecondaryPendingKeys.insert(key);
+        m_legacyDecodeSecondaryQueue.enqueue({entry, source, key});
+    }
+    if (!m_legacyDecodeSecondaryQueue.isEmpty()) {
+        scheduleLegacyDecodeSecondaryDrain();
+    }
+}
+
+void DecodiumBridge::scheduleLegacyDecodeSecondaryDrain(int delayMs)
+{
+    if (m_legacyDecodeSecondaryDrainScheduled) {
+        return;
+    }
+    m_legacyDecodeSecondaryDrainScheduled = true;
+    QTimer::singleShot(qMax(0, delayMs), this, [this] {
+        m_legacyDecodeSecondaryDrainScheduled = false;
+        drainLegacyDecodeSecondaryWork();
+    });
+}
+
+void DecodiumBridge::drainLegacyDecodeSecondaryWork()
+{
+    constexpr qint64 kSecondaryBudgetMs = 4;
+    constexpr int kSecondaryRowsPerCycle = 8;
+    QElapsedTimer budget;
+    budget.start();
+    int processed = 0;
+    int persisted = 0;
+
+    auto isFreshForPsk = [this](QString const& token) {
+        int const decodeSeconds = secondsFromUtcDisplayToken(token);
+        if (decodeSeconds < 0) {
+            return true;
+        }
+        int const nowSeconds =
+            QDateTime::currentDateTimeUtc().time().msecsSinceStartOfDay() / 1000;
+        int const periodMs = periodMsForMode(m_mode);
+        int const freshnessWindowSeconds = qMax(90, (periodMs > 0 ? periodMs / 1000 : 15) * 4);
+        int diff = std::abs(nowSeconds - decodeSeconds);
+        diff = qMin(diff, 86400 - diff);
+        return diff <= freshnessWindowSeconds;
+    };
+
+    while (processed < kSecondaryRowsPerCycle
+           && budget.elapsed() < kSecondaryBudgetMs
+           && !m_legacyDecodeSecondaryQueue.isEmpty()) {
+        LegacyDecodeSecondaryWork const work = m_legacyDecodeSecondaryQueue.dequeue();
+        m_legacyDecodeSecondaryPendingKeys.remove(work.key);
+        QVariantMap const& entry = work.entry;
+        QString const entryMode = entry.value(QStringLiteral("mode")).toString().trimmed().toUpper();
+        if (!entryMode.isEmpty() && entryMode != m_mode.trimmed().toUpper()) {
+            ++processed;
+            continue;
+        }
+
+        queueWorldMapEntryForReplay(entry, false, 250);
+        QVariantList singleEntry;
+        singleEntry.append(entry);
+        publishRemoteActivityEntries(singleEntry);
+        if (!entry.value(QStringLiteral("isTx")).toBool()) {
+            QString const message = entry.value(QStringLiteral("message")).toString().trimmed();
+            if (!message.isEmpty()
+                && isFreshForPsk(entry.value(QStringLiteral("time")).toString())) {
+                maybeQueuePskReporterSpot(entry,
+                                          message,
+                                          entry.value(QStringLiteral("isCQ")).toBool(),
+                                          entry.value(QStringLiteral("freq")).toString(),
+                                          entry.value(QStringLiteral("db")).toString(),
+                                          entry.value(QStringLiteral("mode"), m_mode).toString());
+            }
+        }
+        if (persistDecodeHistoryEntry(entry)) {
+            ++persisted;
+        }
+        ++processed;
+    }
+
+    if (persisted > 0) {
+        bridgeLog(QStringLiteral("decode-history deferred: %1 new rows").arg(persisted));
+    }
+    if (!m_legacyDecodeSecondaryQueue.isEmpty()) {
+        scheduleLegacyDecodeSecondaryDrain();
+    }
+}
+
+void DecodiumBridge::invalidateLegacyDecodeModelDeltaFastPath()
+{
+    m_skipNextLegacyBandModelSnapshot = false;
+    m_skipNextLegacyRxModelSnapshot = false;
+    m_pendingLegacyFullSpectrumDelta.clear();
+    if (m_legacyFullSpectrumDeltaTimer) {
+        m_legacyFullSpectrumDeltaTimer->stop();
+    }
+}
+
+bool DecodiumBridge::applyLegacyBandModelDelta(QVariantList const& entries)
+{
+    if (!m_bandActivityModel || !m_fullSpectrumModel) return false;
+    // Non sovrapporre un delta a uno snapshot integrale ancora in volo. Il
+    // segnale coalesciuto eseguira un nuovo snapshot contenente anche le righe
+    // appena aggiunte.
+    if (m_decodeUiSnapshotInFlight || m_decodeUiPendingFlags != 0
+        || m_fullSpectrumSnapshotPending) {
+        return false;
+    }
+
+    QVariantList filtered = filterEntriesForBandActivity(entries);
+    QVariantList const fullSpectrumDelta = filtered;
+    filtered = addDecodeDeltaBoundarySeparator(
+        std::move(filtered), m_bandActivityModel, m_decodeNewestFirst,
+        m_decodeShowPeriodSeparator);
+    if (!filtered.isEmpty()) {
+        m_bandActivityModel->appendEntriesBudgeted(
+            filtered, m_decodeNewestFirst, qMax(8, decodeUiRowsPerCycle() / 2));
+    }
+    queueLegacyFullSpectrumModelDelta(fullSpectrumDelta);
+    m_skipNextLegacyBandModelSnapshot = true;
+    return true;
+}
+
+bool DecodiumBridge::applyLegacyRxModelDelta(QVariantList const& entries)
+{
+    if (!m_rxDecodeModel) return false;
+    if (m_decodeUiSnapshotInFlight || m_decodeUiPendingFlags != 0) return false;
+
+    QVariantList filtered = filterEntriesForRxDecode(entries);
+    filtered = addDecodeDeltaBoundarySeparator(
+        std::move(filtered), m_rxDecodeModel, false,
+        m_decodeShowPeriodSeparator);
+    if (!filtered.isEmpty()) {
+        m_rxDecodeModel->appendEntriesBudgeted(
+            filtered, false, qMax(6, decodeUiRowsPerCycle() / 3));
+    }
+    m_skipNextLegacyRxModelSnapshot = true;
+    return true;
+}
+
+void DecodiumBridge::queueLegacyFullSpectrumModelDelta(
+    QVariantList const& entries)
+{
+    if (entries.isEmpty()) return;
+    if (m_decodeNewestFirst) {
+        QVariantList merged = entries;
+        merged.reserve(entries.size() + m_pendingLegacyFullSpectrumDelta.size());
+        merged += m_pendingLegacyFullSpectrumDelta;
+        m_pendingLegacyFullSpectrumDelta = std::move(merged);
+    } else {
+        m_pendingLegacyFullSpectrumDelta += entries;
+    }
+
+    if (!m_legacyFullSpectrumDeltaTimer) {
+        m_legacyFullSpectrumDeltaTimer = new QTimer(this);
+        m_legacyFullSpectrumDeltaTimer->setSingleShot(true);
+        connect(m_legacyFullSpectrumDeltaTimer, &QTimer::timeout,
+                this, &DecodiumBridge::applyLegacyFullSpectrumModelDelta);
+    }
+    qint64 const remainingMs = qMax<qint64>(
+        0, m_decodeUiBurstUntilMs - QDateTime::currentMSecsSinceEpoch());
+    m_legacyFullSpectrumDeltaTimer->start(
+        static_cast<int>(qMax<qint64>(100, remainingMs + 100)));
+}
+
+void DecodiumBridge::applyLegacyFullSpectrumModelDelta()
+{
+    if (m_pendingLegacyFullSpectrumDelta.isEmpty()
+        || !m_fullSpectrumModel) {
+        return;
+    }
+    if (decodeUiBurstActive()) {
+        qint64 const remainingMs = qMax<qint64>(
+            0, m_decodeUiBurstUntilMs - QDateTime::currentMSecsSinceEpoch());
+        m_legacyFullSpectrumDeltaTimer->start(
+            static_cast<int>(remainingMs + 100));
+        return;
+    }
+
+    QVariantList delta = std::move(m_pendingLegacyFullSpectrumDelta);
+    m_pendingLegacyFullSpectrumDelta.clear();
+    delta = addDecodeDeltaBoundarySeparator(
+        std::move(delta), m_fullSpectrumModel, m_decodeNewestFirst,
+        m_decodeShowPeriodSeparator);
+    m_fullSpectrumModel->appendEntriesBudgeted(
+        delta, m_decodeNewestFirst, qMax(6, decodeUiRowsPerCycle() / 3));
 }
 
 void DecodiumBridge::syncLegacyBackendDecodeList()
@@ -11599,6 +12326,17 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
     }
     bool const allTxtChanged = allTxtRevisionKey != m_legacyAllTxtRevisionKey;
 
+    bool bandDeltaReset = false;
+    bool rxDeltaReset = false;
+    QStringList const bandDeltaLines = bandChanged
+        ? m_legacyBackend->takeBandActivityDelta(&bandDeltaReset)
+        : QStringList {};
+    QStringList const rxDeltaLines = rxChanged
+        ? m_legacyBackend->takeRxFrequencyDelta(&rxDeltaReset)
+        : QStringList {};
+    bool const useBandDelta = m_legacyBandActivityRevision >= 0 && !bandDeltaReset;
+    bool const useRxDelta = m_legacyRxFrequencyRevision >= 0 && !rxDeltaReset;
+
     if (!bandChanged && !rxChanged && !allTxtChanged) {
         return;
     }
@@ -11683,61 +12421,6 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                 continue;
             }
             maybeEnqueueMamCallerFromMessage(message, freqOk ? freq : -1, snr, true);
-        }
-    };
-    auto publishWorldMapFromEntries = [this](QVariantList const& entries) {
-        bool published = false;
-        for (QVariant const& value : entries) {
-            QVariantMap const entry = value.toMap();
-            queueWorldMapEntryForReplay(entry, false, 250);
-            published = true;
-        }
-        if (published) {
-            emitCurrentWorldMapQsoPath();
-        }
-    };
-    auto isFreshLegacyDecodeForPsk = [this](QString const& token) {
-        int const decodeSeconds = secondsFromUtcDisplayToken(token);
-        if (decodeSeconds < 0) {
-            return true;
-        }
-        int const nowSeconds =
-            QDateTime::currentDateTimeUtc().time().msecsSinceStartOfDay() / 1000;
-        int const periodMs = periodMsForMode(m_mode);
-        int const freshnessWindowSeconds = qMax(90, (periodMs > 0 ? periodMs / 1000 : 15) * 4);
-        int diff = std::abs(nowSeconds - decodeSeconds);
-        diff = qMin(diff, 86400 - diff);
-        return diff <= freshnessWindowSeconds;
-    };
-    auto queuePskReporterFromEntries = [this, &isFreshLegacyDecodeForPsk](QVariantList const& entries) {
-        for (QVariant const& value : entries) {
-            QVariantMap const entry = value.toMap();
-            if (entry.value(QStringLiteral("isTx")).toBool()) {
-                continue;
-            }
-            QString const message = entry.value(QStringLiteral("message")).toString().trimmed();
-            if (message.isEmpty() || !isFreshLegacyDecodeForPsk(entry.value(QStringLiteral("time")).toString())) {
-                continue;
-            }
-            maybeQueuePskReporterSpot(entry,
-                                      message,
-                                      entry.value(QStringLiteral("isCQ")).toBool(),
-                                      entry.value(QStringLiteral("freq")).toString(),
-                                      entry.value(QStringLiteral("db")).toString(),
-                                      entry.value(QStringLiteral("mode"), m_mode).toString());
-        }
-    };
-    auto persistHistoryFromEntries = [this](QVariantList const& entries, QString const& source) {
-        int persisted = 0;
-        for (QVariant const& value : entries) {
-            if (persistDecodeHistoryEntry(value.toMap())) {
-                ++persisted;
-            }
-        }
-        if (persisted > 0) {
-            bridgeLog(QStringLiteral("decode-history persist %1: %2 new rows")
-                          .arg(source)
-                          .arg(persisted));
         }
     };
     auto feedWaitPounceFromEntries = [this](QVariantList const& entries,
@@ -11828,8 +12511,110 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
 
     QVariantList currentBandFallbackSnapshot;
     bool currentBandFallbackSnapshotReady = false;
+    auto appendUniqueEntries = [](QVariantList& target, QVariantList const& entries) {
+        QSet<QString> seen;
+        seen.reserve(target.size() + entries.size());
+        for (QVariant const& value : std::as_const(target)) {
+            QString const key = decodeMirrorEntryKey(value.toMap());
+            if (!key.isEmpty()) seen.insert(key);
+        }
+        QVariantList appended;
+        appended.reserve(entries.size());
+        for (QVariant const& value : entries) {
+            QVariantMap const entry = value.toMap();
+            QString const key = decodeMirrorEntryKey(entry);
+            if (key.isEmpty() || seen.contains(key)) {
+                continue;
+            }
+            seen.insert(key);
+            target.append(entry);
+            appended.append(entry);
+        }
+        return appended;
+    };
+    auto updateActiveStationsFromEntries = [this](QVariantList const& entries, bool reset) {
+        if (!m_activeStations) {
+            return;
+        }
+        if (reset) {
+            m_activeStations->clear();
+        }
+        for (QVariant const& value : entries) {
+            QVariantMap const entry = value.toMap();
+            if (entry.value(QStringLiteral("isTx")).toBool()
+                || !entry.value(QStringLiteral("isCQ")).toBool()) {
+                continue;
+            }
+            QString const fromCall = entry.value(QStringLiteral("fromCall")).toString().trimmed();
+            bool ok = false;
+            int const freqHz = entry.value(QStringLiteral("freq")).toString().trimmed().toInt(&ok);
+            if (fromCall.isEmpty() || !ok) {
+                continue;
+            }
+            m_activeStations->addStation(fromCall,
+                                         freqHz,
+                                         entry.value(QStringLiteral("db")).toString().trimmed().toInt(),
+                                         entry.value(QStringLiteral("dxGrid")).toString(),
+                                         entry.value(QStringLiteral("time")).toString(),
+                                         true);
+        }
+    };
 
     if (bandChanged || allTxtChanged) {
+        if (useBandDelta) {
+            if (bandChanged) {
+                m_legacyBandActivityRevision = bandRevision;
+            }
+            QVariantList mirroredDecodes = mirrorLegacyDecodeLines(
+                bandDeltaLines, false, QVariantList {}, userFilterConfig);
+            mirroredDecodes = augmentLegacyMirrorWithAllTxt(mirroredDecodes, false);
+            mirroredDecodes = dropModeChangeClearedEntries(mirroredDecodes);
+            mirroredDecodes = dropPrunedBandEntries(mirroredDecodes);
+            mirroredDecodes = dropConflictingDirectedReportEntries(
+                mirroredDecodes, QStringLiteral("legacy-band-delta"));
+            currentBandFallbackSnapshot = mirroredDecodes;
+            currentBandFallbackSnapshotReady = true;
+
+            QVariantList const newBandDecodes =
+                decodeEntriesNotInPrevious(mirroredDecodes, m_decodeList);
+            feedMamQueueFromEntries(newBandDecodes);
+            feedWaitPounceFromEntries(newBandDecodes, m_decodeList,
+                                      QStringLiteral("legacy-band-delta"));
+            feedAutoSequenceFromEntries(newBandDecodes);
+            queueLegacyDecodeSecondaryWork(newBandDecodes,
+                                           QStringLiteral("legacy-band-delta"));
+            updateActiveStationsFromEntries(newBandDecodes, false);
+
+            QVariantList bandUiDecodes;
+            bandUiDecodes.reserve(newBandDecodes.size());
+            for (QVariant const& value : newBandDecodes) {
+                QVariantMap const entry = value.toMap();
+                if (!entry.value(QStringLiteral("isTx")).toBool()) {
+                    bandUiDecodes.append(entry);
+                }
+            }
+            bandUiDecodes = applyLegacyUiFilters(bandUiDecodes, true);
+            normalizeDecodeEntriesForDisplay(bandUiDecodes, 1500, m_mode);
+            int const previousBandRows = m_decodeList.size();
+            QVariantList const appendedBandEntries =
+                appendUniqueEntries(m_decodeList, bandUiDecodes);
+            if (!appendedBandEntries.isEmpty()) {
+                trimDecodeListsIfNeeded();
+                bool const appendOnly =
+                    m_decodeList.size()
+                    == previousBandRows + appendedBandEntries.size();
+                if (!appendOnly
+                    || !applyLegacyBandModelDelta(appendedBandEntries)) {
+                    invalidateLegacyDecodeModelDeltaFastPath();
+                }
+                emitDecodeListChangedThrottled();
+            }
+            bridgeLog(QStringLiteral("legacy-mirror band delta: raw=%1 accepted=%2 total=%3")
+                          .arg(bandDeltaLines.size())
+                          .arg(bandUiDecodes.size())
+                          .arg(m_decodeList.size()));
+        } else {
+        invalidateLegacyDecodeModelDeltaFastPath();
         m_legacyBandActivityRevision = bandRevision;
         QStringList const bandLines = m_legacyBackend->bandActivityLines();
         QVariantList mirroredDecodes = augmentLegacyMirrorWithAllTxt(QVariantList {}, false);
@@ -11862,9 +12647,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         feedMamQueueFromEntries(newBandDecodes);
         feedWaitPounceFromEntries(newBandDecodes, m_decodeList, QStringLiteral("legacy-band"));
         feedAutoSequenceFromEntries(newBandDecodes);
-        publishWorldMapFromEntries(newBandDecodes);
-        queuePskReporterFromEntries(newBandDecodes);
-        persistHistoryFromEntries(newBandDecodes, QStringLiteral("legacy-band"));
+        queueLegacyDecodeSecondaryWork(newBandDecodes, QStringLiteral("legacy-band"));
         if (m_activeStations) {
             m_activeStations->clear();
             for (QVariant const& value : std::as_const(mirroredDecodes)) {
@@ -11912,9 +12695,78 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             trimDecodeListsIfNeeded();
             emitDecodeListChangedThrottled();  // 1.0.142: throttle mirror replace-all
         }
+        }
     }
 
     if (rxChanged || allTxtChanged || bandChanged) {
+        if (useRxDelta && (rxChanged || currentBandFallbackSnapshotReady)) {
+            if (rxChanged) {
+                m_legacyRxFrequencyRevision = rxRevision;
+            }
+            QVariantList mergedRxDecodes = mirrorLegacyDecodeLines(
+                rxDeltaLines, true, QVariantList {}, userFilterConfig);
+            // If the band branch did not consume a changed ALL.TXT tail, let
+            // the RX branch upgrade timestamps without rebuilding history.
+            if (!currentBandFallbackSnapshotReady && allTxtChanged) {
+                mergedRxDecodes = augmentLegacyMirrorWithAllTxt(mergedRxDecodes, true);
+            }
+            mergedRxDecodes = dropModeChangeClearedEntries(mergedRxDecodes);
+            mergedRxDecodes = dropRxClearedEntries(mergedRxDecodes);
+
+            QSet<QString> seen;
+            for (QVariant const& value : std::as_const(mergedRxDecodes)) {
+                seen.insert(decodeMirrorEntryKey(value.toMap()));
+            }
+            if (currentBandFallbackSnapshotReady) {
+                for (QVariant const& value : std::as_const(currentBandFallbackSnapshot)) {
+                    QVariantMap entry = value.toMap();
+                    if (!shouldMirrorToRxPane(entry)) {
+                        continue;
+                    }
+                    QString const key = decodeMirrorEntryKey(entry);
+                    if (key.isEmpty() || seen.contains(key)
+                        || m_legacyClearedRxMirrorKeys.contains(key)) {
+                        continue;
+                    }
+                    seen.insert(key);
+                    entry[QStringLiteral("forceRxPane")] = true;
+                    mergedRxDecodes.append(entry);
+                }
+            }
+            mergedRxDecodes = dropConflictingDirectedReportEntries(
+                mergedRxDecodes, QStringLiteral("legacy-rx-delta"));
+            QVariantList const newRxDecodes =
+                decodeEntriesNotInPrevious(mergedRxDecodes, m_rxDecodeList);
+            feedMamQueueFromEntries(newRxDecodes);
+            feedWaitPounceFromEntries(newRxDecodes, m_rxDecodeList,
+                                      QStringLiteral("legacy-rx-delta"));
+            feedAutoSequenceFromEntries(newRxDecodes);
+            queueLegacyDecodeSecondaryWork(newRxDecodes,
+                                           QStringLiteral("legacy-rx-delta"));
+
+            QVariantList rxUiDecodes = applyLegacyUiFilters(newRxDecodes, false);
+            coalesceRxPaneTxRows(rxUiDecodes, m_mode);
+            normalizeDecodeEntriesForDisplay(rxUiDecodes, 1500, m_mode);
+            int const previousRxRows = m_rxDecodeList.size();
+            QVariantList const appendedRxEntries =
+                appendUniqueEntries(m_rxDecodeList, rxUiDecodes);
+            if (!appendedRxEntries.isEmpty()) {
+                trimDecodeListsIfNeeded();
+                bool const appendOnly =
+                    m_rxDecodeList.size()
+                    == previousRxRows + appendedRxEntries.size();
+                if (!appendOnly
+                    || !applyLegacyRxModelDelta(appendedRxEntries)) {
+                    m_skipNextLegacyRxModelSnapshot = false;
+                }
+                emitRxDecodeListChangedThrottled(false);
+            }
+            bridgeLog(QStringLiteral("legacy-mirror rx delta: raw=%1 accepted=%2 total=%3")
+                          .arg(rxDeltaLines.size())
+                          .arg(rxUiDecodes.size())
+                          .arg(m_rxDecodeList.size()));
+        } else {
+        invalidateLegacyDecodeModelDeltaFastPath();
         if (rxChanged) {
             m_legacyRxFrequencyRevision = rxRevision;
         }
@@ -11973,9 +12825,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         feedMamQueueFromEntries(newRxDecodes);
         feedWaitPounceFromEntries(newRxDecodes, m_rxDecodeList, QStringLiteral("legacy-rx"));
         feedAutoSequenceFromEntries(newRxDecodes);
-        publishWorldMapFromEntries(newRxDecodes);
-        queuePskReporterFromEntries(newRxDecodes);
-        persistHistoryFromEntries(newRxDecodes, QStringLiteral("legacy-rx"));
+        queueLegacyDecodeSecondaryWork(newRxDecodes, QStringLiteral("legacy-rx"));
 
         // The legacy backend exposes RX Frequency as its current widget rows.
         // Keep Signal RX as a running history, otherwise switching to the next
@@ -12004,6 +12854,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             m_rxDecodeList = mergedRxDecodes;
             trimDecodeListsIfNeeded();
             emitRxDecodeListChangedThrottled(false);
+        }
         }
     }
 
@@ -12379,12 +13230,15 @@ QVariantList DecodiumBridge::mirrorLegacyDecodeLines(QStringList const& lines,
     return mirroredDecodes;
 }
 
-bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry) const
+bool DecodiumBridge::shouldMirrorToRxPane(const QVariantMap& entry,
+                                          bool ghostAlreadyAccepted) const
 {
     if (entry.value("isTx").toBool()) {
         return true;
     }
-    if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) {
+    if (!ghostAlreadyAccepted
+        && m_hideGhostDecodes
+        && looksLikeGhostDecode(entry)) {
         bridgeLog(QStringLiteral("[GhostFilter] Signal RX reject ghost decode msg=%1")
                       .arg(entry.value("message").toString().trimmed()));
         return false;
@@ -33631,6 +34485,57 @@ int DecodiumBridge::effectiveFtThreadLimitForDecode() const
     return adaptiveInteractiveFtThreadCount(effectiveFtThreadLimit());
 }
 
+void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
+{
+    if (deltaMs < decodium::decode::Ft8MicroStallGuard::StallThresholdMs
+        || m_mode != QStringLiteral("FT8")
+        || !m_monitoring) {
+        return;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool activated = false;
+    int recentStallCount = 0;
+    {
+        QMutexLocker locker(&m_ft8MicroStallGuardMutex);
+        activated = m_ft8MicroStallGuard.recordStall(nowMs, deltaMs);
+        recentStallCount = m_ft8MicroStallGuard.recentStallCount();
+    }
+    if (activated) {
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setFt8DeepThreadPenalty(true);
+        }
+        bridgeLog(QStringLiteral("FT8 micro-stall guard active: bridge=0x%1 stalls=%2 windowMs=%3 thresholdMs=%4 deepThreadsPenalty=1 restoreCleanPeriods=%5")
+                      .arg(reinterpret_cast<quintptr>(this), 0, 16)
+                      .arg(recentStallCount)
+                      .arg(decodium::decode::Ft8MicroStallGuard::ObservationWindowMs)
+                      .arg(decodium::decode::Ft8MicroStallGuard::StallThresholdMs)
+                      .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore));
+    }
+}
+
+void DecodiumBridge::noteFt8AdaptivePeriod(qint64 periodId)
+{
+    if (periodId < 0) {
+        return;
+    }
+
+    decodium::decode::Ft8MicroStallGuard::PeriodTransition transition;
+    {
+        QMutexLocker locker(&m_ft8MicroStallGuardMutex);
+        transition = m_ft8MicroStallGuard.notePeriod(periodId);
+    }
+    if (transition != decodium::decode::Ft8MicroStallGuard::PeriodTransition::Restored) {
+        return;
+    }
+
+    if (legacyBackendAvailable()) {
+        m_legacyBackend->setFt8DeepThreadPenalty(false);
+    }
+    bridgeLog(QStringLiteral("FT8 micro-stall guard restored: %1 clean periods, normal DEEP thread budget active")
+                  .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore));
+}
+
 bool DecodiumBridge::ft4AdaptiveCpuLimitActive(qint64 nowMs) const
 {
     if (nowMs <= 0) {
@@ -36237,7 +37142,7 @@ bool DecodiumBridge::worldMapEntryFreshEnough(const QVariantMap& entry, QString*
 
 bool DecodiumBridge::visualFeedsDeferredForTx() const
 {
-    return m_transmitting || m_tuning;
+    return m_transmitting || m_tuning || decodeUiBurstActive();
 }
 
 void DecodiumBridge::queueWorldMapEntryForReplay(const QVariantMap& entry,
@@ -36273,7 +37178,7 @@ void DecodiumBridge::queueWorldMapEntryForReplay(const QVariantMap& entry,
     }
     if (logTxDeferral && !m_worldMapDeferredLogActive) {
         m_worldMapDeferredLogActive = true;
-        bridgeLog(QStringLiteral("LiveMap: deferring decode feed while TX/tune is active"));
+        bridgeLog(QStringLiteral("LiveMap: deferring decode feed during TX/tune/decode burst"));
     }
     scheduleDeferredWorldMapFeedFlush(qMax(0, delayMs));
 }
@@ -36318,14 +37223,17 @@ void DecodiumBridge::flushDeferredWorldMapFeed()
         m_deferredWorldMapFeedQueue.clear();
         m_deferredWorldMapFeedKeys.clear();
         if (m_worldMapDeferredLogActive) {
-            bridgeLog(QStringLiteral("LiveMap: running deferred full replay after TX/tune"));
+            bridgeLog(QStringLiteral("LiveMap: running deferred full replay after critical radio/UI work"));
             m_worldMapDeferredLogActive = false;
         }
         replayWorldMapFeed();
         return;
     }
 
-    static constexpr int kWorldMapFlushChunk = 6;
+    // Map projection, label layout and path signals are non-essential during
+    // decode delivery. Two contacts per turn keep this queue visibly current
+    // without creating another 100-250 ms main-thread burst.
+    static constexpr int kWorldMapFlushChunk = 2;
     int processed = 0;
     while (!m_deferredWorldMapFeedQueue.isEmpty() && processed < kWorldMapFlushChunk) {
         QVariantMap queued = m_deferredWorldMapFeedQueue.takeFirst();
@@ -36339,10 +37247,13 @@ void DecodiumBridge::flushDeferredWorldMapFeed()
     }
 
     if (!m_deferredWorldMapFeedQueue.isEmpty()) {
-        scheduleDeferredWorldMapFeedFlush(25);
+        scheduleDeferredWorldMapFeedFlush(75);
     } else if (m_worldMapDeferredLogActive) {
-        bridgeLog(QStringLiteral("LiveMap: flushed deferred decode feed after TX/tune"));
+        bridgeLog(QStringLiteral("LiveMap: flushed deferred decode feed after critical radio/UI work"));
         m_worldMapDeferredLogActive = false;
+    }
+    if (m_deferredWorldMapFeedQueue.isEmpty()) {
+        emitCurrentWorldMapQsoPath();
     }
 }
 
@@ -37200,6 +38111,10 @@ void DecodiumBridge::refreshDecodeListDxcc()
 
 void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 {
+    if (serial == m_deepDecodeVisualSerial) {
+        m_deepDecodeVisualSerial = 0;
+        m_deepDecodeVisualThrottleUntilMs = 0;
+    }
     noteDecodeReadySlotStart();
     auto decodeReadyPhaseGuard = qScopeGuard([] {
         DecodiumBridge::noteDecodeReadySlotEnd();
@@ -39462,24 +40377,25 @@ void DecodiumBridge::onSpectrumTimer()
             // Era hardcoded 33ms (~30 fps) → su PC modesti causava stall.
             int const fpsCap = qBound(15, m_spectrumFpsCap, 30);
             qint64 const cappedIntervalMs = 1000 / fpsCap;
+            bool const deepDecodeVisualLoad = nowMs < m_deepDecodeVisualThrottleUntilMs;
             qint64 minPanadapterIntervalMs = directVisualFastFeed
                 ? (m_legacyPcmSpectrumFeed ? qMax<qint64>(cappedIntervalMs, 66) : cappedIntervalMs)
-                : 125;
+                : decodium::decode::legacyPanadapterIntervalMs(
+                      deepDecodeVisualLoad,
+                      cpuPressureActive(),
+                      cpuPressureSevereActive());
             if (m_lowCpuModeEnabled) {
                 minPanadapterIntervalMs = qMax<qint64>(
                     minPanadapterIntervalMs,
                     cpuPressureSevereActive() ? 750 : (cpuPressureActive() ? 600 : 500));
-            } else if (cpuPressureSevereActive() && !directVisualFastFeed) {
-                minPanadapterIntervalMs = qMax<qint64>(minPanadapterIntervalMs, 250);
-            } else if (cpuPressureActive() && !directVisualFastFeed) {
-                minPanadapterIntervalMs = qMax<qint64>(minPanadapterIntervalMs, 180);
             }
             if ((cpuPressureActive() || cpuPressureSevereActive())
                 && nowMs - m_lastPanadapterPressureLogMs > 5000) {
                 m_lastPanadapterPressureLogMs = nowMs;
-                bridgeLog(QStringLiteral("panadapter pressure throttle: interval=%1ms direct_visual=%2 severe=%3 low_cpu=%4 spectrum_timer=%5")
+                bridgeLog(QStringLiteral("panadapter pressure throttle: interval=%1ms direct_visual=%2 deep=%3 severe=%4 low_cpu=%5 spectrum_timer=%6")
                               .arg(minPanadapterIntervalMs)
                               .arg(directVisualFastFeed ? 1 : 0)
+                              .arg(deepDecodeVisualLoad ? 1 : 0)
                               .arg(cpuPressureSevereActive() ? 1 : 0)
                               .arg(m_lowCpuModeEnabled ? 1 : 0)
                               .arg(m_spectrumTimer ? m_spectrumTimer->interval() : -1));
@@ -41346,6 +42262,34 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.hiscall = m_dxCall.toLocal8Bit();
     req.hisgrid = m_dxGrid.toLocal8Bit();
     int const boundedDepth = qBound(1, req.ndepth, 4);
+    int const unguardedThreadCount = req.threadCount;
+    int microStallCleanPeriods = 0;
+    int microStallRecentCount = 0;
+    bool microStallGuardActive = false;
+    {
+        QMutexLocker locker(&m_ft8MicroStallGuardMutex);
+        microStallGuardActive = m_ft8MicroStallGuard.active();
+        microStallRecentCount = m_ft8MicroStallGuard.recentStallCount();
+        req.threadCount = m_ft8MicroStallGuard.adjustedThreadCount(
+            req.threadCount, boundedDepth);
+        microStallCleanPeriods = m_ft8MicroStallGuard.cleanPeriods();
+    }
+    bool const microStallThreadReduction = req.threadCount < unguardedThreadCount;
+    if (!microStallThreadReduction && microStallRecentCount > 0) {
+        static qint64 s_lastFt8MicroStallGuardStateLogMs = 0;
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        if (nowMs - s_lastFt8MicroStallGuardStateLogMs >= 5000) {
+            s_lastFt8MicroStallGuardStateLogMs = nowMs;
+            bridgeLog(QStringLiteral("FT8 micro-stall guard dispatch state: bridge=0x%1 serial=%2 depth=%3 threads=%4 recentStalls=%5 active=%6 cleanPeriods=%7")
+                          .arg(reinterpret_cast<quintptr>(this), 0, 16)
+                          .arg(serial)
+                          .arg(boundedDepth)
+                          .arg(req.threadCount)
+                          .arg(microStallRecentCount)
+                          .arg(microStallGuardActive ? 1 : 0)
+                          .arg(microStallCleanPeriods));
+        }
+    }
     req.supplemental = !adaptiveFt8Pressure && !txAudioActive && boundedDepth >= 4;
     req.subpass = !adaptiveFt8Pressure && subpassRequested && !txAudioActive && boundedDepth >= 4;  // F1: solo l'harvest chiede subpass
     req.coherentAvgEnabled = !adaptiveFt8Pressure && !txAudioActive && m_coherentAvgEnabled;
@@ -41372,6 +42316,29 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     }
     if (maxDecodeMsOverride > 0) {
         req.maxDecodeMs = qMin(req.maxDecodeMs, maxDecodeMsOverride);
+    }
+    if (!txAudioActive && boundedDepth >= 3) {
+        qint64 const visualThrottleUntilMs = QDateTime::currentMSecsSinceEpoch()
+            + qMax(500, req.maxDecodeMs) + 250;
+        m_deepDecodeVisualSerial = serial;
+        m_deepDecodeVisualThrottleUntilMs = qMax(
+            m_deepDecodeVisualThrottleUntilMs, visualThrottleUntilMs);
+    }
+    if (microStallThreadReduction) {
+        static qint64 s_lastFt8MicroStallGuardLogMs = 0;
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        if (nowMs - s_lastFt8MicroStallGuardLogMs >= 5000) {
+            s_lastFt8MicroStallGuardLogMs = nowMs;
+            bridgeLog(QStringLiteral("FT8 micro-stall guard deep dispatch: bridge=0x%1 serial=%2 depth=%3 threads=%4->%5 cleanPeriods=%6 recentStalls=%7 active=%8")
+                          .arg(reinterpret_cast<quintptr>(this), 0, 16)
+                          .arg(serial)
+                          .arg(boundedDepth)
+                          .arg(unguardedThreadCount)
+                          .arg(req.threadCount)
+                          .arg(microStallCleanPeriods)
+                          .arg(microStallRecentCount)
+                          .arg(microStallGuardActive ? 1 : 0));
+        }
     }
     if (adaptiveFt8Pressure) {
         static qint64 s_lastFt8AdaptiveRequestLogMs = 0;
@@ -41579,6 +42546,13 @@ void DecodiumBridge::queueFt4DecodeRequest(const QVector<short>& audioSnapshot, 
     req.lapcqonly = cqHint;
     req.mycall = m_callsign.toLocal8Bit();
     req.hiscall = m_dxCall.toLocal8Bit();
+
+    if (!(m_transmitting || m_tuning) && req.ndepth >= 3) {
+        m_deepDecodeVisualSerial = serial;
+        m_deepDecodeVisualThrottleUntilMs = qMax(
+            m_deepDecodeVisualThrottleUntilMs,
+            QDateTime::currentMSecsSinceEpoch() + qint64 {7000});
+    }
 
     bridgeLog("FT4 decode dispatch: serial=" + QString::number(serial) +
               " samples=" + QString::number(audioSnapshot.size()) +
@@ -41827,6 +42801,9 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     qint64 slotIndexForUtc = completedUtcSlot;
     if (slotIndexForUtc < 0 && decodePeriodMs > 0) {
         slotIndexForUtc = correctedUtcEpochMs() / decodePeriodMs;
+    }
+    if (modeSnapshot == QStringLiteral("FT8") && slotIndexForUtc >= 0) {
+        noteFt8AdaptivePeriod(slotIndexForUtc);
     }
 
     int nutc = utcTokenForSlotStart(slotIndexForUtc, decodePeriodMs);
@@ -42182,6 +43159,12 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.lapcqonly = cqHint;
         req.mycall = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
+        if (!txAudioActive && req.ndepth >= 3) {
+            m_deepDecodeVisualSerial = serial;
+            m_deepDecodeVisualThrottleUntilMs = qMax(
+                m_deepDecodeVisualThrottleUntilMs,
+                QDateTime::currentMSecsSinceEpoch() + qint64 {7000});
+        }
         if (txStartPending && !signoffWatchActive && req.ndepth != decodeDepth) {
             bridgeLog(QStringLiteral("FT4 decode depth reduced before TX: %1 -> %2")
                           .arg(decodeDepth)
@@ -44657,6 +45640,7 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     warmLogCacheAsync();
     if (getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool()
         || getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool()) {
+        invalidateDecodeUiPredicateCaches();
         rebuildBandActivityModel();
         rebuildRxDecodeModel();
     }

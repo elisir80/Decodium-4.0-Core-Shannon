@@ -262,14 +262,19 @@ Item {
 
         var labels = []
         var seen = {}
-        var list = bridge.decodeList
+        var nativeModel = (bridge && bridge.bandActivityModel)
+                ? bridge.bandActivityModel : null
+        var list = nativeModel ? null : bridge.decodeList
+        var listCount = nativeModel ? nativeModel.count() : list.length
         // Prendi solo gli ultimi decode (ultimo periodo) — max 30.
         // Scorri al contrario: se la stessa stazione compare piu' volte,
         // il waterfall deve mostrare il valore SNR del decode piu' recente,
         // cioe' quello che l'operatore vede in cima al Full Spectrum.
-        var start = Math.max(0, list.length - 30)
-        for (var i = list.length - 1; i >= start; --i) {
-            var d = list[i]
+        var start = Math.max(0, listCount - 30)
+        for (var i = listCount - 1; i >= start; --i) {
+            var d = nativeModel ? nativeModel.entry(i) : list[i]
+            if (!d || d.isSeparator === true)
+                continue
             if (d.isTx)
                 continue
             var call = d.fromCall || ""
@@ -2027,6 +2032,15 @@ Item {
 
         // Aggiorna i callsign decodificati sul grafico spettro
         function onDecodeListChanged() {
+            if (!bridge.bandActivityModel)
+                waterfallPanel.refreshDecodeLabels()
+        }
+    }
+
+    Connections {
+        target: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : null
+        ignoreUnknownSignals: true
+        function onSnapshotApplied() {
             waterfallPanel.refreshDecodeLabels()
         }
     }

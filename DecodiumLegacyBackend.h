@@ -49,8 +49,10 @@ public:
     double signalLevel() const;
     int bandActivityRevision() const;
     QStringList bandActivityLines() const;
+    QStringList takeBandActivityDelta(bool* reset);
     int rxFrequencyRevision() const;
     QStringList rxFrequencyLines() const;
+    QStringList takeRxFrequencyDelta(bool* reset);
     QString txMessage(int index) const;
     int currentTx() const;
     QString adifLogPath() const;
@@ -72,6 +74,7 @@ public:
     void setTxWatchdogMinutes(int minutes);
     void setAutoCq(bool enabled);
     void setDecodeDepthBits(int bits);
+    void setFt8DeepThreadPenalty(bool enabled);
     void setCqOnly(bool enabled);
     void setRxFrequency(int frequencyHz);
     void setTxFrequency(int frequencyHz);

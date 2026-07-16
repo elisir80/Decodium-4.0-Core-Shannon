@@ -943,7 +943,7 @@ endif ()
 #
 
 # Widgets finds its own dependencies.
-find_package (Qt6 COMPONENTS Widgets SerialPort Multimedia PrintSupport Sql LinguistTools WebSockets Test Core5Compat REQUIRED)
+find_package (Qt6 COMPONENTS Widgets SerialPort Multimedia PrintSupport Sql LinguistTools WebSockets Test Core5Compat Concurrent REQUIRED)
 find_package (Qt6 COMPONENTS Qml Quick QuickControls2 REQUIRED)
 find_package (Qt6 COMPONENTS ShaderTools QUIET)
 find_package (Qt6 COMPONENTS GuiPrivate QUIET)
@@ -1820,6 +1820,7 @@ target_link_libraries (decodium_qml
   Qt6::Network
   Qt6::SerialPort
   Qt6::Sql           # 1.0.238 Phase 5.2: decode history worker thread
+  Qt6::Concurrent    # decode UI snapshot filter/sort off the GUI thread
   Qt6::WebSockets
   wsjt_qtmm
   wsjt_qt

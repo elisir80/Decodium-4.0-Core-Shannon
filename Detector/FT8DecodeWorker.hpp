@@ -4,9 +4,14 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QMetaType>
+#include <QString>
 #include <QStringList>
 #include <QVector>
 #include <atomic>
+#include <optional>
+
+#include "Decoder/decodedtext.h"
 
 namespace decodium
 {
@@ -52,6 +57,30 @@ struct DecodeRequest
   QByteArray hisgrid;
 };
 
+// Immutable transport produced by the DSP worker.  Keep the raw legacy row
+// for the existing renderer, but expose the fields needed by the UI
+// dispatcher so they are not parsed again on the main thread.
+struct DecodedEntry
+{
+  QString row;
+  QString message;
+  std::optional<DecodedText> decodedText0;
+  std::optional<DecodedText> decodedText;
+  int snr {0};
+  float dt {0.0f};
+  int audioFrequency {0};
+  int apType {0};
+  float quality {0.0f};
+  bool addressedToMe {false};
+  bool fromActivePartner {false};
+  bool qsoExchange {false};
+
+  bool isUiPriority () const
+  {
+    return addressedToMe || (fromActivePartner && qsoExchange);
+  }
+};
+
 class FT8DecodeWorker final : public QObject
 {
   Q_OBJECT
@@ -67,6 +96,7 @@ public:
 
 Q_SIGNALS:
   void decodeReady (quint64 serial, QStringList rows);
+  void decodedEntriesReady (quint64 serial, QVector<decodium::ft8::DecodedEntry> entries);
   void neuralSyncHit (double score);
   void turboIterations (int itersUsed);
 
@@ -77,5 +107,8 @@ private:
 
 }
 }
+
+Q_DECLARE_METATYPE (decodium::ft8::DecodedEntry)
+Q_DECLARE_METATYPE (QVector<decodium::ft8::DecodedEntry>)
 
 #endif

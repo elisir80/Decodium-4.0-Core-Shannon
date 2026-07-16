@@ -15,8 +15,12 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMutexLocker>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QSet>
 #include <QStandardPaths>
 #include <QThread>
@@ -55,9 +59,11 @@ namespace
   constexpr int kFt4HashSeedMaxCalls {4096};
   constexpr qint64 kFt4HashSeedInitialSoftBudgetMs {750};
   constexpr qint64 kFt4HashSeedRefreshSoftBudgetMs {160};
-  constexpr qint64 kFt4HashSeedRefreshIntervalMs {10000};
+  constexpr qint64 kFt4HashSeedRefreshIntervalMs {60000};
   constexpr int kFt4HashSeedRefreshMaxFiles {6};
   constexpr int kFt4HashSeedPriorityMonths {2};
+  constexpr int kFt4HashSeedCacheVersion {1};
+  constexpr qint64 kFt4HashSeedCacheMaxBytes {1024 * 1024};
   char constexpr kFt4DspStageEnv[] {"DECODIUM_FT4_CPP_DSP_STAGE"};
   [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
@@ -356,6 +362,196 @@ namespace
     return paths;
   }
 
+  struct HashSeedCacheData
+  {
+    QStringList calls;
+    QStringList sourcePaths;
+    int staleSources {0};
+    bool valid {false};
+  };
+
+  std::mutex& hash_seed_cache_file_mutex ()
+  {
+    static std::mutex mutex;
+    return mutex;
+  }
+
+  QString hash_seed_cache_path ()
+  {
+    QString root = QStandardPaths::writableLocation (QStandardPaths::CacheLocation);
+    if (root.isEmpty ())
+      {
+        root = QStandardPaths::writableLocation (QStandardPaths::TempLocation);
+      }
+    QDir dir {root};
+    if (!dir.exists () && !dir.mkpath (QStringLiteral (".")))
+      {
+        return QString {};
+      }
+    return dir.filePath (QStringLiteral ("ft4_hash_seed_cache_v1.json"));
+  }
+
+  HashSeedCacheData load_hash_seed_cache_unlocked ()
+  {
+    HashSeedCacheData cache;
+    QString const path = hash_seed_cache_path ();
+    QFile file {path};
+    if (path.isEmpty () || !file.open (QIODevice::ReadOnly)
+        || file.size () <= 0 || file.size () > kFt4HashSeedCacheMaxBytes)
+      {
+        return cache;
+      }
+
+    QJsonParseError parseError;
+    QJsonDocument const document = QJsonDocument::fromJson (file.readAll (), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject ())
+      {
+        return cache;
+      }
+    QJsonObject const root = document.object ();
+    if (root.value (QStringLiteral ("version")).toInt () != kFt4HashSeedCacheVersion)
+      {
+        return cache;
+      }
+
+    QSet<QString> seenCalls;
+    for (QJsonValue const& value : root.value (QStringLiteral ("calls")).toArray ())
+      {
+        QString const call = value.toString ().trimmed ().toUpper ();
+        if (!plausible_hash_seed_token (call) || seenCalls.contains (call))
+          {
+            continue;
+          }
+        seenCalls.insert (call);
+        cache.calls.append (call);
+        if (cache.calls.size () >= kFt4HashSeedMaxCalls)
+          {
+            break;
+          }
+      }
+    if (cache.calls.isEmpty ())
+      {
+        return cache;
+      }
+
+    QSet<QString> seenSources;
+    for (QJsonValue const& value : root.value (QStringLiteral ("sources")).toArray ())
+      {
+        QJsonObject const source = value.toObject ();
+        QString const sourcePath = QDir::cleanPath (
+            source.value (QStringLiteral ("path")).toString ());
+        if (sourcePath.isEmpty () || seenSources.contains (sourcePath))
+          {
+            continue;
+          }
+        seenSources.insert (sourcePath);
+        cache.sourcePaths.append (sourcePath);
+
+        bool sizeOk = false;
+        bool mtimeOk = false;
+        qint64 const cachedSize = source.value (QStringLiteral ("size")).toString ()
+                                      .toLongLong (&sizeOk);
+        qint64 const cachedMtime = source.value (QStringLiteral ("mtimeMs")).toString ()
+                                       .toLongLong (&mtimeOk);
+        QFileInfo const info {sourcePath};
+        if (!info.exists () || !info.isFile () || !sizeOk || !mtimeOk
+            || info.size () != cachedSize
+            || info.lastModified ().toMSecsSinceEpoch () != cachedMtime)
+          {
+            ++cache.staleSources;
+          }
+      }
+    cache.valid = true;
+    return cache;
+  }
+
+  HashSeedCacheData load_hash_seed_cache ()
+  {
+    std::lock_guard<std::mutex> lock {hash_seed_cache_file_mutex ()};
+    return load_hash_seed_cache_unlocked ();
+  }
+
+  bool write_hash_seed_cache_unlocked (QStringList const& calls,
+                                       QStringList const& sourcePaths)
+  {
+    QString const path = hash_seed_cache_path ();
+    if (path.isEmpty () || calls.isEmpty ())
+      {
+        return false;
+      }
+
+    QJsonArray callArray;
+    for (QString const& call : calls)
+      {
+        callArray.append (call);
+      }
+
+    QJsonArray sourceArray;
+    QSet<QString> seenSources;
+    for (QString const& sourcePath : sourcePaths)
+      {
+        QString const clean = QDir::cleanPath (sourcePath);
+        if (clean.isEmpty () || seenSources.contains (clean))
+          {
+            continue;
+          }
+        seenSources.insert (clean);
+        QFileInfo const info {clean};
+        QJsonObject source;
+        source.insert (QStringLiteral ("path"), clean);
+        source.insert (QStringLiteral ("size"), QString::number (info.exists () ? info.size () : -1));
+        source.insert (QStringLiteral ("mtimeMs"),
+                       QString::number (info.exists ()
+                                          ? info.lastModified ().toMSecsSinceEpoch ()
+                                          : -1));
+        sourceArray.append (source);
+      }
+
+    QJsonObject root;
+    root.insert (QStringLiteral ("version"), kFt4HashSeedCacheVersion);
+    root.insert (QStringLiteral ("generatedMs"),
+                 QString::number (QDateTime::currentMSecsSinceEpoch ()));
+    root.insert (QStringLiteral ("calls"), callArray);
+    root.insert (QStringLiteral ("sources"), sourceArray);
+
+    QSaveFile file {path};
+    if (!file.open (QIODevice::WriteOnly))
+      {
+        return false;
+      }
+    QByteArray const bytes = QJsonDocument {root}.toJson (QJsonDocument::Compact);
+    return file.write (bytes) == bytes.size () && file.commit ();
+  }
+
+  void merge_into_hash_seed_cache (QStringList const& calls,
+                                   QStringList const& sourcePaths)
+  {
+    if (calls.isEmpty ())
+      {
+        return;
+      }
+    std::lock_guard<std::mutex> lock {hash_seed_cache_file_mutex ()};
+    HashSeedCacheData const existing = load_hash_seed_cache_unlocked ();
+    HashSeedCallAccumulator accumulator;
+    for (QString const& call : existing.calls)
+      {
+        remember_hash_seed_call (accumulator, call);
+      }
+    for (QString const& call : calls)
+      {
+        remember_hash_seed_call (accumulator, call);
+      }
+    QStringList mergedSources = existing.sourcePaths;
+    for (QString const& sourcePath : sourcePaths)
+      {
+        if (!mergedSources.contains (sourcePath))
+          {
+            mergedSources.append (sourcePath);
+          }
+      }
+    write_hash_seed_cache_unlocked (accumulator.to_list (), mergedSources);
+  }
+
   int hash_seed_refresh_priority (QString const& path)
   {
     QFileInfo const info {path};
@@ -473,8 +669,11 @@ namespace
   {
     QStringList calls;
     QStringList sources;
+    QStringList sourcePaths;
     int filesRead {0};
+    int staleSources {0};
     qint64 elapsedMs {0};
+    bool cacheHit {false};
   };
 
   HashSeedSnapshot collect_initial_hash_seed_snapshot ()
@@ -482,6 +681,19 @@ namespace
     QElapsedTimer timer;
     timer.start ();
     HashSeedSnapshot snapshot;
+    HashSeedCacheData const cache = load_hash_seed_cache ();
+    if (cache.valid)
+      {
+        snapshot.calls = cache.calls;
+        snapshot.sourcePaths = cache.sourcePaths;
+        snapshot.staleSources = cache.staleSources;
+        snapshot.cacheHit = true;
+        snapshot.sources.append (QStringLiteral ("cache/")
+                                 + QFileInfo {hash_seed_cache_path ()}.fileName ());
+        snapshot.elapsedMs = timer.elapsed ();
+        return snapshot;
+      }
+
     HashSeedCallAccumulator accumulator;
     for (QString const& path : local_hash_seed_paths ())
       {
@@ -493,6 +705,7 @@ namespace
           {
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
+            snapshot.sourcePaths.append (path);
           }
         if (timer.elapsed () >= kFt4HashSeedInitialSoftBudgetMs)
           {
@@ -500,6 +713,7 @@ namespace
           }
       }
     snapshot.calls = accumulator.to_list ();
+    merge_into_hash_seed_cache (snapshot.calls, snapshot.sourcePaths);
     snapshot.elapsedMs = timer.elapsed ();
     return snapshot;
   }
@@ -521,6 +735,7 @@ namespace
           {
             ++snapshot.filesRead;
             snapshot.sources.append (hash_seed_source_label (path));
+            snapshot.sourcePaths.append (path);
           }
         if (snapshot.filesRead >= kFt4HashSeedRefreshMaxFiles
             || timer.elapsed () >= kFt4HashSeedRefreshSoftBudgetMs)
@@ -529,6 +744,7 @@ namespace
           }
       }
     snapshot.calls = accumulator.to_list ();
+    merge_into_hash_seed_cache (snapshot.calls, snapshot.sourcePaths);
     snapshot.elapsedMs = timer.elapsed ();
     return snapshot;
   }
@@ -614,11 +830,13 @@ namespace
       }
 
     seed_hash_calls (snapshot.calls);
-    if (snapshot.filesRead > 0 && !snapshot.calls.isEmpty ())
+    if (!snapshot.calls.isEmpty ())
       {
         LOG_INFO ("FT4 pack77 hash seed initialized: calls=" << snapshot.calls.size ()
                   << " files=" << snapshot.filesRead
                   << " elapsed_ms=" << snapshot.elapsedMs
+                  << " cache=" << (snapshot.cacheHit ? "hit" : "miss")
+                  << " stale_sources=" << snapshot.staleSources
                   << " sources="
                   << snapshot.sources.join (QStringLiteral (",")).toStdString ());
       }

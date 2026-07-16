@@ -812,6 +812,15 @@ QStringList DecodiumLegacyBackend::bandActivityLines() const
     return m_mainWindow ? m_mainWindow->legacyBandActivityLines() : QStringList {};
 }
 
+QStringList DecodiumLegacyBackend::takeBandActivityDelta(bool* reset)
+{
+    if (!m_mainWindow) {
+        if (reset) *reset = true;
+        return {};
+    }
+    return m_mainWindow->legacyTakeBandActivityDelta(reset);
+}
+
 int DecodiumLegacyBackend::rxFrequencyRevision() const
 {
     return m_mainWindow ? m_mainWindow->legacyRxFrequencyRevision() : -1;
@@ -820,6 +829,15 @@ int DecodiumLegacyBackend::rxFrequencyRevision() const
 QStringList DecodiumLegacyBackend::rxFrequencyLines() const
 {
     return m_mainWindow ? m_mainWindow->legacyRxFrequencyLines() : QStringList {};
+}
+
+QStringList DecodiumLegacyBackend::takeRxFrequencyDelta(bool* reset)
+{
+    if (!m_mainWindow) {
+        if (reset) *reset = true;
+        return {};
+    }
+    return m_mainWindow->legacyTakeRxFrequencyDelta(reset);
 }
 
 QString DecodiumLegacyBackend::txMessage(int index) const
@@ -971,6 +989,13 @@ void DecodiumLegacyBackend::setDecodeDepthBits(int bits)
 {
     if (m_mainWindow) {
         m_mainWindow->legacySetDecodeDepthBits(bits);
+    }
+}
+
+void DecodiumLegacyBackend::setFt8DeepThreadPenalty(bool enabled)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetFt8DeepThreadPenalty(enabled);
     }
 }
 

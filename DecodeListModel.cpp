@@ -1,5 +1,10 @@
 #include "DecodeListModel.h"
 
+#include <QScopeGuard>
+#include <QSet>
+#include <QTimer>
+
+#include <algorithm>
 #include <utility>
 
 namespace {
@@ -132,6 +137,10 @@ QString DecodeListModel::decodeMatchKey(QVariantMap const& entry)
 
 void DecodeListModel::setEntries(QVariantList const& newEntries)
 {
+    if (m_budgetTimer) m_budgetTimer->stop();
+    clearBudgetedTarget();
+    auto snapshotGuard = qScopeGuard([this]() { emit snapshotApplied(); });
+
     int const newCount = newEntries.size();
     int const oldCount = m_entries.size();
 
@@ -148,11 +157,14 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
         newKeys.append(decodeMatchKey(entry));
     }
 
-    QVector<QString> oldKeys;
-    oldKeys.reserve(oldCount);
-    for (QVariantMap const& entry : std::as_const(m_entries)) {
-        oldKeys.append(decodeMatchKey(entry));
+    if (m_entryKeys.size() != oldCount) {
+        m_entryKeys.clear();
+        m_entryKeys.reserve(oldCount);
+        for (QVariantMap const& entry : std::as_const(m_entries)) {
+            m_entryKeys.append(decodeMatchKey(entry));
+        }
     }
+    QVector<QString> const oldKeys = m_entryKeys;
 
     // 1.0.144: scoped dataChanged — emette dataChanged SOLO per regioni
     // consecutive di row effettivamente cambiate, invece di "tutto il prefix".
@@ -199,6 +211,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
                 }
                 endInsertRows();
             }
+            m_entryKeys = newKeys;
             return;
         }
     }
@@ -217,6 +230,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
             m_entries.resize(newCount);
             endRemoveRows();
             applyPrefixDiff(newCount);
+            m_entryKeys = newKeys;
             return;
         }
     }
@@ -254,6 +268,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
                 endInsertRows();
             }
             applyPrefixDiff(overlapLen);  // catch in-place value updates su overlap
+            m_entryKeys = newKeys;
             return;
         }
     }
@@ -291,6 +306,7 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
             endInsertRows();
 
             applyRangeDiff(prepend, prepend, overlapLen);
+            m_entryKeys = newKeys;
             return;
         }
     }
@@ -348,4 +364,261 @@ void DecodeListModel::setEntries(QVariantList const& newEntries)
         int const suffixStart = commonPrefix + newMiddleCount;
         applyRangeDiff(suffixStart, suffixStart, commonSuffix);
     }
+    m_entryKeys = newKeys;
+}
+
+bool DecodeListModel::hasPendingBudgetedUpdate() const
+{
+    if (!m_budgetTargetActive) return false;
+    if (m_budgetTargetEntries.size() != m_entries.size()
+        || m_budgetTargetKeys.size() != m_entryKeys.size()) {
+        return true;
+    }
+    for (int i = 0; i < m_entries.size(); ++i) {
+        if (m_entryKeys.at(i) != m_budgetTargetKeys.at(i)
+            || m_entries.at(i) != m_budgetTargetEntries.at(i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void DecodeListModel::clearBudgetedTarget()
+{
+    m_budgetTargetActive = false;
+    m_budgetTargetEntries.clear();
+    m_budgetTargetKeys.clear();
+}
+
+void DecodeListModel::scheduleBudgetedStep()
+{
+    if (!m_budgetTimer) {
+        m_budgetTimer = new QTimer(this);
+        m_budgetTimer->setSingleShot(true);
+        m_budgetTimer->setInterval(16);
+        connect(m_budgetTimer, &QTimer::timeout,
+                this, &DecodeListModel::applyBudgetedStep);
+    }
+    if (m_budgetTargetActive && !m_budgetTimer->isActive()) {
+        m_budgetTimer->start();
+    }
+}
+
+DecodeListModel::PreparedSnapshot DecodeListModel::prepareSnapshot(
+    QVariantList const& newEntries)
+{
+    PreparedSnapshot prepared;
+    prepared.entries.reserve(newEntries.size());
+    prepared.keys.reserve(newEntries.size());
+    for (QVariant const& value : newEntries) {
+        QVariantMap const entry = value.toMap();
+        prepared.entries.append(entry);
+        prepared.keys.append(decodeMatchKey(entry));
+    }
+    return prepared;
+}
+
+void DecodeListModel::setEntriesBudgeted(QVariantList const& newEntries,
+                                         int maxRowsPerCycle)
+{
+    setEntriesBudgeted(prepareSnapshot(newEntries), maxRowsPerCycle);
+}
+
+void DecodeListModel::setEntriesBudgeted(PreparedSnapshot prepared,
+                                         int maxRowsPerCycle)
+{
+    m_budgetRowsPerCycle = qBound(1, maxRowsPerCycle, 256);
+    if (!prepared.isConsistent()) {
+        prepared.keys.clear();
+        prepared.keys.reserve(prepared.entries.size());
+        for (QVariantMap const& entry : std::as_const(prepared.entries)) {
+            prepared.keys.append(decodeMatchKey(entry));
+        }
+    }
+    m_budgetTargetEntries = std::move(prepared.entries);
+    m_budgetTargetKeys = std::move(prepared.keys);
+    m_budgetTargetActive = true;
+
+    if (m_entryKeys.size() != m_entries.size()) {
+        m_entryKeys.clear();
+        m_entryKeys.reserve(m_entries.size());
+        for (QVariantMap const& entry : std::as_const(m_entries)) {
+            m_entryKeys.append(decodeMatchKey(entry));
+        }
+    }
+
+    if (!hasPendingBudgetedUpdate()) {
+        if (m_budgetTimer) m_budgetTimer->stop();
+        clearBudgetedTarget();
+        emit snapshotApplied();
+        return;
+    }
+
+    // Una nuova snapshot arrivata mentre il modello sta drenando sostituisce
+    // il target precedente. Anche la prima tranche parte nel tick successivo:
+    // il callback del worker resta un handoff breve e non somma conversione,
+    // diff e notifiche QML nello stesso frame.
+    if (m_budgetTimer && m_budgetTimer->isActive()) return;
+    scheduleBudgetedStep();
+}
+
+void DecodeListModel::appendEntriesBudgeted(QVariantList const& newEntries,
+                                            bool prepend,
+                                            int maxRowsPerCycle)
+{
+    if (newEntries.isEmpty()) return;
+
+    m_budgetRowsPerCycle = qBound(1, maxRowsPerCycle, 256);
+    if (m_entryKeys.size() != m_entries.size()) {
+        m_entryKeys.clear();
+        m_entryKeys.reserve(m_entries.size());
+        for (QVariantMap const& entry : std::as_const(m_entries)) {
+            m_entryKeys.append(decodeMatchKey(entry));
+        }
+    }
+
+    if (!m_budgetTargetActive) {
+        m_budgetTargetEntries = m_entries;
+        m_budgetTargetKeys = m_entryKeys;
+        m_budgetTargetActive = true;
+    }
+
+    QSet<QString> knownKeys;
+    knownKeys.reserve(m_budgetTargetKeys.size() + newEntries.size());
+    for (QString const& key : std::as_const(m_budgetTargetKeys)) {
+        if (!key.isEmpty()) knownKeys.insert(key);
+    }
+
+    QVector<QVariantMap> acceptedEntries;
+    QVector<QString> acceptedKeys;
+    acceptedEntries.reserve(newEntries.size());
+    acceptedKeys.reserve(newEntries.size());
+    for (QVariant const& value : newEntries) {
+        QVariantMap const entry = value.toMap();
+        QString const key = decodeMatchKey(entry);
+        if (!key.isEmpty() && knownKeys.contains(key)) continue;
+        if (!key.isEmpty()) knownKeys.insert(key);
+        acceptedEntries.append(entry);
+        acceptedKeys.append(key);
+    }
+    if (acceptedEntries.isEmpty()) return;
+
+    if (prepend) {
+        QVector<QVariantMap> mergedEntries;
+        QVector<QString> mergedKeys;
+        mergedEntries.reserve(acceptedEntries.size() + m_budgetTargetEntries.size());
+        mergedKeys.reserve(acceptedKeys.size() + m_budgetTargetKeys.size());
+        mergedEntries += acceptedEntries;
+        mergedEntries += m_budgetTargetEntries;
+        mergedKeys += acceptedKeys;
+        mergedKeys += m_budgetTargetKeys;
+        m_budgetTargetEntries.swap(mergedEntries);
+        m_budgetTargetKeys.swap(mergedKeys);
+    } else {
+        m_budgetTargetEntries += acceptedEntries;
+        m_budgetTargetKeys += acceptedKeys;
+    }
+
+    // Se una tranche precedente e gia programmata, il target appena esteso
+    // verra drenato da quel timer. Evitiamo due tranche nello stesso frame.
+    if (m_budgetTimer && m_budgetTimer->isActive()) return;
+    applyBudgetedStep();
+}
+
+void DecodeListModel::applyBudgetedStep()
+{
+    if (!hasPendingBudgetedUpdate()) {
+        bool const completedSnapshot = m_budgetTargetActive;
+        clearBudgetedTarget();
+        if (completedSnapshot) emit snapshotApplied();
+        return;
+    }
+
+    int const oldCount = m_entries.size();
+    int const newCount = m_budgetTargetEntries.size();
+    int const commonLimit = qMin(oldCount, newCount);
+
+    int commonPrefix = 0;
+    while (commonPrefix < commonLimit
+           && m_entryKeys.at(commonPrefix) == m_budgetTargetKeys.at(commonPrefix)) {
+        ++commonPrefix;
+    }
+
+    int commonSuffix = 0;
+    while (commonSuffix < oldCount - commonPrefix
+           && commonSuffix < newCount - commonPrefix
+           && m_entryKeys.at(oldCount - 1 - commonSuffix)
+                  == m_budgetTargetKeys.at(newCount - 1 - commonSuffix)) {
+        ++commonSuffix;
+    }
+
+    int const oldMiddleCount = oldCount - commonPrefix - commonSuffix;
+    int const newMiddleCount = newCount - commonPrefix - commonSuffix;
+    int rowsChanged = 0;
+
+    if (oldMiddleCount > 0 && newMiddleCount > 0) {
+        int const replaceCount = std::min({m_budgetRowsPerCycle,
+                                           oldMiddleCount,
+                                           newMiddleCount});
+        for (int i = 0; i < replaceCount; ++i) {
+            int const row = commonPrefix + i;
+            m_entries[row] = m_budgetTargetEntries.at(row);
+            m_entryKeys[row] = m_budgetTargetKeys.at(row);
+        }
+        emit dataChanged(index(commonPrefix),
+                         index(commonPrefix + replaceCount - 1));
+        rowsChanged = replaceCount;
+    } else if (newMiddleCount > 0) {
+        int const insertCount = qMin(m_budgetRowsPerCycle, newMiddleCount);
+        beginInsertRows(QModelIndex(), commonPrefix,
+                        commonPrefix + insertCount - 1);
+        for (int i = 0; i < insertCount; ++i) {
+            int const sourceRow = commonPrefix + i;
+            m_entries.insert(commonPrefix + i,
+                             m_budgetTargetEntries.at(sourceRow));
+            m_entryKeys.insert(commonPrefix + i,
+                               m_budgetTargetKeys.at(sourceRow));
+        }
+        endInsertRows();
+        rowsChanged = insertCount;
+    } else if (oldMiddleCount > 0) {
+        int const removeCount = qMin(m_budgetRowsPerCycle, oldMiddleCount);
+        beginRemoveRows(QModelIndex(), commonPrefix,
+                        commonPrefix + removeCount - 1);
+        m_entries.remove(commonPrefix, removeCount);
+        m_entryKeys.remove(commonPrefix, removeCount);
+        endRemoveRows();
+        rowsChanged = removeCount;
+    } else {
+        // Le chiavi coincidono: restano solo metadati arricchiti cambiati.
+        int regionStart = -1;
+        int regionEnd = -1;
+        QVector<QPair<int, int>> changedRegions;
+        for (int i = 0; i < newCount && rowsChanged < m_budgetRowsPerCycle; ++i) {
+            if (m_entries.at(i) == m_budgetTargetEntries.at(i)) {
+                if (regionStart >= 0) {
+                    changedRegions.append(qMakePair(regionStart, regionEnd));
+                    regionStart = -1;
+                }
+                continue;
+            }
+            m_entries[i] = m_budgetTargetEntries.at(i);
+            ++rowsChanged;
+            if (regionStart < 0) regionStart = i;
+            regionEnd = i;
+        }
+        if (regionStart >= 0) {
+            changedRegions.append(qMakePair(regionStart, regionEnd));
+        }
+        for (auto const& region : std::as_const(changedRegions)) {
+            emit dataChanged(index(region.first), index(region.second));
+        }
+    }
+
+    if (rowsChanged <= 0 || !hasPendingBudgetedUpdate()) {
+        clearBudgetedTarget();
+        emit snapshotApplied();
+        return;
+    }
+    scheduleBudgetedStep();
 }

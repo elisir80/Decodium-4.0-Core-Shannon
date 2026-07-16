@@ -17,6 +17,13 @@ class DecodeListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    struct PreparedSnapshot {
+        QVector<QVariantMap> entries;
+        QVector<QString> keys;
+
+        bool isConsistent() const { return entries.size() == keys.size(); }
+    };
+
     enum Role {
         TimeRole = Qt::UserRole + 1,
         UtcRole,
@@ -79,9 +86,43 @@ public:
     // La diff confronta entries via decodeMatchKey() (freq+message+timestamp).
     void setEntries(QVariantList const& newEntries);
 
+    // Applica lo snapshot in piu turni dell'event loop. Il numero di righe
+    // modificate per frame resta limitato anche quando un decode pass
+    // sostituisce una porzione ampia della history.
+    void setEntriesBudgeted(QVariantList const& newEntries, int maxRowsPerCycle = 48);
+    // La preparazione allocation-heavy (QVariant -> QVariantMap + match key)
+    // puo essere eseguita sul worker e trasferita al model senza ripeterla sul
+    // main thread.
+    static PreparedSnapshot prepareSnapshot(QVariantList const& newEntries);
+    void setEntriesBudgeted(PreparedSnapshot prepared,
+                            int maxRowsPerCycle = 48);
+    // Aggiunge solo le nuove righe a un target gia in corso senza riconvertire
+    // o confrontare l'intera history. prepend=true serve alla vista
+    // newest-first; il drain resta limitato allo stesso budget per frame.
+    void appendEntriesBudgeted(QVariantList const& newEntries,
+                               bool prepend = false,
+                               int maxRowsPerCycle = 48);
+    bool hasPendingBudgetedUpdate() const;
+
+signals:
+    // Emesso una sola volta quando l'intero snapshot e' visibile. QML usa
+    // questo segnale per aggiornare contatori e tail-follow senza reagire a
+    // ogni tranche rowsInserted/dataChanged del budget per-frame.
+    void snapshotApplied();
+
 private:
     QVector<QVariantMap> m_entries;
+    QVector<QString> m_entryKeys;
     QHash<int, QByteArray> m_roleNames;
 
+    QVector<QVariantMap> m_budgetTargetEntries;
+    QVector<QString> m_budgetTargetKeys;
+    class QTimer* m_budgetTimer {nullptr};
+    int m_budgetRowsPerCycle {48};
+    bool m_budgetTargetActive {false};
+
     static QString decodeMatchKey(QVariantMap const& entry);
+    void applyBudgetedStep();
+    void scheduleBudgetedStep();
+    void clearBudgetedTarget();
 };

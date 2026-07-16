@@ -188,8 +188,10 @@ public:
   double legacySignalLevel() const;
   int legacyBandActivityRevision() const;
   QStringList legacyBandActivityLines() const;
+  QStringList legacyTakeBandActivityDelta(bool * reset);
   int legacyRxFrequencyRevision() const;
   QStringList legacyRxFrequencyLines() const;
+  QStringList legacyTakeRxFrequencyDelta(bool * reset);
   QString legacyTxMessage(int index) const;
   int legacyCurrentTx() const;
   QString legacyAdifLogPath() const;
@@ -211,6 +213,7 @@ public:
   void legacySetTxWatchdogMinutes(int minutes);
   void legacySetAutoCq(bool enabled);
   void legacySetDecodeDepthBits(int bits);
+  void legacySetFt8DeepThreadPenalty(bool enabled);
   void legacySetCqOnly(bool enabled);
   void legacySetRxFrequency(int frequencyHz);
   void legacySetTxFrequency(int frequencyHz);
@@ -341,13 +344,26 @@ private:
   void requestInProcessWsprDecode ();
   bool takeNextDecodedTransportRow (QQueue<QByteArray>& splitDecodeQueue, QByteArray& line_read, QString& all_decodes);
   bool prepareDecodedRow (QByteArray line_read, bool bDisplayPoints, DecodedRowSource source,
-                          PreparedDecodedRow& prepared, DecodedRowAction& action);
+                          PreparedDecodedRow& prepared, DecodedRowAction& action,
+                          decodium::ft8::DecodedEntry const* structuredFt8Entry = nullptr);
   void processFastDecodedRows (QStringList const& rows);
   void processFt2AsyncDecodedRows (QStringList const& rows);
   void processFt2DecodedRows (quint64 serial, QStringList const& rows);
   void processFt4DecodedRows (quint64 serial, QStringList const& rows);
   void processFst4DecodedRows (quint64 serial, QStringList const& rows);
-  void processFt8DecodedRows (quint64 serial, QStringList const& rows);
+  void processFt8DecodedEntries (quint64 serial,
+                                 QVector<decodium::ft8::DecodedEntry> const& entries);
+  void enqueueFt8DecodedEntries (QVector<decodium::ft8::DecodedEntry> const& entries);
+  void scheduleFt8UiDispatch ();
+  void drainFt8UiDispatch ();
+  void finishFt8UiDispatch ();
+  void queueFt8LogWork (QString const& txRx, QString const& message);
+  void queueFt8PostDecodeWork (DecodedText const& decodedText);
+  void queueFt8ReportingWork (DecodedText const& decodedText);
+  void scheduleFt8SecondaryDispatch (int delayMs = 0);
+  void drainFt8SecondaryDispatch ();
+  void clearFt8SecondaryWork ();
+  bool dispatchNextQueuedFt8Decode ();
   void processJt9FastDecodedRows (quint64 serial, QStringList const& rows);
   void processQ65DecodedRows (quint64 serial, QStringList const& rows);
   void processMsk144DecodedRows (quint64 serial, QStringList const& rows);
@@ -1315,6 +1331,7 @@ private:
   bool m_ft8DecodePending {false};
   bool m_ft8DecodeDeepFollowupPending {false};
   int m_ft8DecodePendingUtc {0};
+  bool m_legacyFt8DeepThreadPenalty {false};
   bool m_ft8QueuedDecodePending {false};
   decodium::ft8::DecodeRequest m_ft8QueuedDecodeRequest;
   bool m_ft8QueuedDeepFollowupPending {false};
@@ -1323,6 +1340,33 @@ private:
   decodium::ft8::DecodeRequest m_ft8DeepFollowupRequest;
   QVector<short> m_ft8LiveAudioSnapshot;
   int m_ft8LiveAudioSnapshotSamples {0};
+  QQueue<decodium::ft8::DecodedEntry> m_ft8PriorityUiQueue;
+  QQueue<decodium::ft8::DecodedEntry> m_ft8BackgroundUiQueue;
+  QQueue<decodium::ft8::DecodedEntry> m_ft8StructuredTransportQueue;
+  struct Ft8LogWork
+  {
+    QString txRx;
+    QString message;
+  };
+  QQueue<Ft8LogWork> m_ft8LogQueue;
+  QQueue<DecodedText> m_ft8TransportQueue;
+  QQueue<DecodedText> m_ft8MapQueue;
+  QQueue<DecodedText> m_ft8DxccQueue;
+  QQueue<DecodedText> m_ft8ReportingQueue;
+  bool m_ft8UiDispatchScheduled {false};
+  bool m_ft8UiDispatchCompletionPending {false};
+  bool m_ft8UiDispatchCompletedDeepFollowup {false};
+  int m_ft8UiDispatchCompletedUtc {0};
+  int m_ft8UiDispatchBatchRows {0};
+  int m_ft8UiDispatchCycles {0};
+  qint64 m_ft8UiDispatchStartedMs {0};
+  qint64 m_ft8UiDispatchScheduledNs {0};
+  qint64 m_ft8UiDispatchCycleCpuNs {0};
+  qint64 m_ft8UiDispatchMaxCycleCpuNs {0};
+  qint64 m_ft8UiDispatchResumeLagNs {0};
+  qint64 m_ft8UiDispatchMaxResumeLagNs {0};
+  bool m_ft8SecondaryDispatchScheduled {false};
+  int m_ft8SecondaryNextQueue {0};
   QThread m_jt9FastDecodeThread;
   decodium::jt9fast::JT9FastDecodeWorker * m_jt9FastDecodeWorker {nullptr};
   quint64 m_jt9FastDecodeSerial {0};
@@ -1345,6 +1389,10 @@ private:
   quint64 m_wsprDecodeSerial {0};
   bool m_wsprDecodePending {false};
   QQueue<QByteArray> m_decodedTransportQueue;
+  QStringList m_legacyBandActivityDelta;
+  QStringList m_legacyRxFrequencyDelta;
+  bool m_legacyBandActivityDeltaReset {true};
+  bool m_legacyRxFrequencyDeltaReset {true};
   bool m_wasTransmitting {false};
   qint64 m_asyncTxStartMs {0};
   qint64 m_asyncRxStartMs {0};
@@ -1657,6 +1705,9 @@ private:
   void updateWorldMapFromDecode(DecodedText const& decoded_text);
   void replayDecodes ();
   void postDecode (bool is_new, DecodedText decoded_text);  //avt 12/5/20
+  void publishDecodeTransport (bool is_new, DecodedText const& decoded_text);
+  void postDecodeMap (DecodedText const& decoded_text);
+  void postDecodeDxcc (DecodedText const& decoded_text);
   void enqueueDecode (DecodedText decoded_text, bool modifier, bool autoGen, bool isDx, bool isNewCallOnBand, bool isNewCall, bool isNewCountryOnBand, bool isNewCountry, QString country, QString continent, int az, int dist);   //avt 5/7/24
   void postWSPRDecode (bool is_new, QStringList message_parts);
   void enable_DXCC_entity (bool on);

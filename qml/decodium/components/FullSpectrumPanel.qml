@@ -1,7 +1,8 @@
 /* FullSpectrumPanel — DX-Pedition Mode decode table (design §3.6)
  * Phase 2b (1.0.331): real Full Spectrum decode list for the DX-Pedition
- * workspace. Reads bridge.bandActivityModel (the SAME model the classic
- * inline period1Panel uses) via the GLOBAL bridge context — does NOT touch
+ * workspace. Reads a dedicated low-priority native model so a dense refresh
+ * cannot block the classic Band Activity pane. Uses the GLOBAL bridge context
+ * and does NOT touch
  * the classic inline (Main.qml period1Panel stays byte-identical).
  *
  * Lesson 1.0.205: every delegate clause is guarded with `!modelData` first
@@ -301,13 +302,18 @@ Item {
         spacing: 1
         cacheBuffer: 600
         reuseItems: true
-        model: (root.bridge && root.bridge.bandActivityModel) ? root.bridge.bandActivityModel : null
+        model: (root.bridge && root.bridge.fullSpectrumModel) ? root.bridge.fullSpectrumModel : null
 
         property bool followTail: true
         function snapTail() {
             if (followTail) positionViewAtEnd()
         }
-        onCountChanged: Qt.callLater(snapTail)
+        Connections {
+            target: (root.bridge && root.bridge.fullSpectrumModel)
+                    ? root.bridge.fullSpectrumModel : null
+            ignoreUnknownSignals: true
+            function onSnapshotApplied() { Qt.callLater(list.snapTail) }
+        }
         onDraggingChanged: if (dragging) followTail = false
         onContentYChanged: {
             // Re-arm tail-follow when the user scrolls back to the bottom.

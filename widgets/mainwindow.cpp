@@ -29,8 +29,10 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
+#include <chrono>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <fftw3.h>
 #include <thread> // TCI
 #include <QApplication>
@@ -129,6 +131,14 @@ extern "C" void ftx_ft8_a7_save_c (int jseq, float dt, float freq, char const* m
 
 namespace
 {
+  qint64 monotonic_now_ns ()
+  {
+    using Clock = std::chrono::steady_clock;
+    return std::chrono::duration_cast<std::chrono::nanoseconds> (
+               Clock::now ().time_since_epoch ())
+        .count ();
+  }
+
   void play_sound_effect (QObject * parent, QString const& path)
   {
     auto * effect = new QSoundEffect {parent};
@@ -2699,6 +2709,36 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
     }
 
   ui->setupUi(this);
+  auto appendLegacyDelta = [] (QStringList& pending, bool& reset, QString const& text) {
+    for (QString const& line : text.split (QRegularExpression {QStringLiteral ("[\\r\\n]+")},
+                                           Qt::SkipEmptyParts)) {
+      pending.append (line);
+    }
+    constexpr int kMaxPendingLegacyDeltaRows {1024};
+    if (pending.size () > kMaxPendingLegacyDeltaRows) {
+      reset = true;
+      pending.erase (pending.begin (),
+                     pending.begin () + (pending.size () - kMaxPendingLegacyDeltaRows));
+    }
+  };
+  connect (ui->decodedTextBrowser, &DisplayText::lineAppended, this,
+           [this, appendLegacyDelta] (QString const& text) {
+             appendLegacyDelta (m_legacyBandActivityDelta,
+                                m_legacyBandActivityDeltaReset, text);
+           });
+  connect (ui->decodedTextBrowser2, &DisplayText::lineAppended, this,
+           [this, appendLegacyDelta] (QString const& text) {
+             appendLegacyDelta (m_legacyRxFrequencyDelta,
+                                m_legacyRxFrequencyDeltaReset, text);
+           });
+  connect (ui->decodedTextBrowser, &DisplayText::erased, this, [this] {
+    m_legacyBandActivityDelta.clear ();
+    m_legacyBandActivityDeltaReset = true;
+  });
+  connect (ui->decodedTextBrowser2, &DisplayText::erased, this, [this] {
+    m_legacyRxFrequencyDelta.clear ();
+    m_legacyRxFrequencyDeltaReset = true;
+  });
   refreshWriteableDataDirCache ();
 #if defined(Q_OS_MAC)
   // Disable Qt text-heuristic menu-role guessing on macOS for every action
@@ -4041,8 +4081,8 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   m_ft8DecodeWorker = new decodium::ft8::FT8DecodeWorker;
   m_ft8DecodeWorker->moveToThread (&m_ft8DecodeThread);
   connect (&m_ft8DecodeThread, &QThread::finished, m_ft8DecodeWorker, &QObject::deleteLater);
-  connect (m_ft8DecodeWorker, &decodium::ft8::FT8DecodeWorker::decodeReady,
-           this, &MainWindow::processFt8DecodedRows, Qt::QueuedConnection);
+  connect (m_ft8DecodeWorker, &decodium::ft8::FT8DecodeWorker::decodedEntriesReady,
+           this, &MainWindow::processFt8DecodedEntries, Qt::QueuedConnection);
   if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr) {
     connect (m_ft8DecodeWorker, SIGNAL (neuralSyncHit (double)),
              bridge, SLOT (notifyNeuralSyncHit (double)), Qt::QueuedConnection);
@@ -4839,6 +4879,17 @@ QStringList MainWindow::legacyBandActivityLines() const
                                 decodium::legacy::kLiveDecodeSnapshotRows);
 }
 
+QStringList MainWindow::legacyTakeBandActivityDelta(bool * reset)
+{
+  if (reset) {
+    *reset = m_legacyBandActivityDeltaReset;
+  }
+  m_legacyBandActivityDeltaReset = false;
+  QStringList result;
+  result.swap (m_legacyBandActivityDelta);
+  return result;
+}
+
 int MainWindow::legacyRxFrequencyRevision() const
 {
   return (ui && ui->decodedTextBrowser2 && ui->decodedTextBrowser2->document ())
@@ -4854,6 +4905,17 @@ QStringList MainWindow::legacyRxFrequencyLines() const
 
   return recentDecodedTextLines(ui->decodedTextBrowser2->document(),
                                 decodium::legacy::kLiveDecodeSnapshotRows);
+}
+
+QStringList MainWindow::legacyTakeRxFrequencyDelta(bool * reset)
+{
+  if (reset) {
+    *reset = m_legacyRxFrequencyDeltaReset;
+  }
+  m_legacyRxFrequencyDeltaReset = false;
+  QStringList result;
+  result.swap (m_legacyRxFrequencyDelta);
+  return result;
 }
 
 QString MainWindow::legacyTxMessage(int index) const
@@ -5275,6 +5337,16 @@ void MainWindow::legacySetDecodeDepthBits(int bits)
   syncAction(ui->actionInclude_correlation, (m_ndepth & 32) != 0);
   syncAction(ui->actionEnable_AP_DXcall, (m_ndepth & 64) != 0);
   syncAction(ui->actionAuto_Clear_Avg, (m_ndepth & 128) != 0);
+}
+
+void MainWindow::legacySetFt8DeepThreadPenalty(bool enabled)
+{
+  if (m_legacyFt8DeepThreadPenalty == enabled) {
+    return;
+  }
+  m_legacyFt8DeepThreadPenalty = enabled;
+  qInfo().noquote() << "[FT8ADAPT] legacy DEEP thread penalty"
+                    << (enabled ? "enabled" : "disabled");
 }
 
 void MainWindow::legacySetCqOnly(bool enabled)
@@ -13398,6 +13470,10 @@ bool MainWindow::cancelPendingInProcessDecode ()
 
   if (cancelled) {
     m_decodedTransportQueue.clear ();
+    m_ft8PriorityUiQueue.clear ();
+    m_ft8BackgroundUiQueue.clear ();
+    m_ft8StructuredTransportQueue.clear ();
+    clearFt8SecondaryWork ();
   }
 
   return cancelled;
@@ -13907,11 +13983,21 @@ void MainWindow::dispatchFt8DecodeRequest (decodium::ft8::DecodeRequest request,
     return;
   }
 
+  if (m_legacyFt8DeepThreadPenalty && request.ndepth >= 3) {
+    int const unguardedThreads = qMax(1, request.threadCount);
+    request.threadCount = qMax(1, unguardedThreads - 1);
+    qInfo().noquote() << "[FT8ADAPT] legacy DEEP dispatch"
+                      << "depth=" << request.ndepth
+                      << "threads=" << unguardedThreads << "->" << request.threadCount
+                      << "followup=" << (deepFollowup ? 1 : 0);
+  }
+
   request.serial = ++m_ft8DecodeSerial;
   m_ft8DecodePending = true;
   m_ft8DecodeDeepFollowupPending = deepFollowup;
   m_ft8DecodePendingUtc = request.nutc;
   m_decodedTransportQueue.clear ();
+  m_ft8StructuredTransportQueue.clear ();
   m_decodeStartMs = QDateTime::currentMSecsSinceEpoch ();
   debugToFile (QString {"ft8Decode   start utc:%1 nzhsym:%2 depth:%3 maxMs:%4 samples:%5 deep:%6 threads:%7 cores:%8"}
                  .arg (request.nutc)
@@ -14274,12 +14360,19 @@ bool MainWindow::takeNextDecodedTransportRow (QQueue<QByteArray>& splitDecodeQue
 }
 
 bool MainWindow::prepareDecodedRow (QByteArray line_read, bool bDisplayPoints, DecodedRowSource source,
-                                    PreparedDecodedRow& prepared, DecodedRowAction& action)
+                                    PreparedDecodedRow& prepared, DecodedRowAction& action,
+                                    decodium::ft8::DecodedEntry const* structuredFt8Entry)
 {
   Q_UNUSED (source);
   action = DecodedRowAction::Continue;
 
+  bool const deferFt8SecondaryWork = structuredFt8Entry && m_mode == "FT8";
+  bool structuredTextMatches = structuredFt8Entry && m_mode == "FT8";
+
   if (bDisplayPoints) {
+    if (line_read.contains ("a7")) {
+      structuredTextMatches = false;
+    }
     line_read = line_read.replace ("a7", "  ");
   }
 
@@ -14321,6 +14414,7 @@ bool MainWindow::prepareDecodedRow (QByteArray line_read, bool bDisplayPoints, D
     auto const resolvedRawLine = resolve_active_qso_placeholder_decode_line (
         prepared.rawLine, myCallUpper, myBaseUpper, activePartnerCall);
     if (resolvedRawLine != prepared.rawLine) {
+      structuredTextMatches = false;
       debugToFile (QString {"placeholder  resolved active DX:%1 msg:%2"}
                        .arg (activePartnerCall, resolvedRawLine));
       prepared.rawLine = resolvedRawLine;
@@ -14331,8 +14425,14 @@ bool MainWindow::prepareDecodedRow (QByteArray line_read, bool bDisplayPoints, D
     apply_async_ft2_tdelta (prepared.rawLine, m_asyncRxStartMs);
   }
   prepared.message0 = prepared.rawLine;
-  prepared.decodedtext0 = DecodedText {prepared.rawLine};
-  prepared.decodedtext = DecodedText {QString (prepared.rawLine).remove ("TU; ")};
+  if (structuredTextMatches && structuredFt8Entry->decodedText0
+      && structuredFt8Entry->decodedText) {
+    prepared.decodedtext0 = *structuredFt8Entry->decodedText0;
+    prepared.decodedtext = *structuredFt8Entry->decodedText;
+  } else {
+    prepared.decodedtext0 = DecodedText {prepared.rawLine};
+    prepared.decodedtext = DecodedText {QString (prepared.rawLine).remove ("TU; ")};
+  }
 
   QString ghostFilterDetails;
   auto const activeFt2PartnerBase =
@@ -14476,7 +14576,9 @@ bool MainWindow::prepareDecodedRow (QByteArray line_read, bool bDisplayPoints, D
       if (shouldSuppressNearDuplicateDecode (prepared.decodedtext)) {
         return false;
       }
-      write_all ("Rx", prepared.line_read.trimmed ());
+      if (!deferFt8SecondaryWork) {
+        write_all ("Rx", prepared.line_read.trimmed ());
+      }
     }
   else {
     return false;
@@ -14507,14 +14609,37 @@ void MainWindow::readFromStdout()                             //readFromStdout
       (m_specOp==SpecOp::ARRL_DIGI or m_ActiveStationsWidget->isVisible());
   }
   QByteArray line_read;
-  while (takeNextDecodedTransportRow (m_decodedTransportQueue, line_read, all_decodes)) {
+  while ((m_mode == "FT8" && !m_ft8StructuredTransportQueue.isEmpty ())
+         || !m_decodedTransportQueue.isEmpty ()) {
+    std::optional<decodium::ft8::DecodedEntry> structuredFt8Entry;
+    if (m_mode == "FT8" && !m_ft8StructuredTransportQueue.isEmpty ()) {
+      structuredFt8Entry.emplace (m_ft8StructuredTransportQueue.dequeue ());
+      line_read = structuredFt8Entry->row.toUtf8 ();
+      QString const& the_line = structuredFt8Entry->row;
+      if (ui->actionEnable_QSY_Popups->isChecked () || m_qsymonitorWidget) {
+        showQSYMessage (the_line);
+      }
+      if (m_specOp == SpecOp::FOX && m_ActiveStationsWidget != NULL
+          && (!m_ActiveStationsWidget->wantedOnly ()
+              || the_line.contains (" " + m_config.my_callsign () + " ")
+              || the_line.contains (" <" + m_config.my_callsign () + "> "))) {
+        all_decodes.append (line_read);
+      }
+    } else if (!takeNextDecodedTransportRow (m_decodedTransportQueue, line_read, all_decodes)) {
+      break;
+    }
     PreparedDecodedRow prepared;
     DecodedRowAction action;
-    if (!prepareDecodedRow (line_read, bDisplayPoints, DecodedRowSource::InProcess, prepared, action)) {
+    if (!prepareDecodedRow (line_read, bDisplayPoints, DecodedRowSource::InProcess,
+                            prepared, action,
+                            structuredFt8Entry ? &*structuredFt8Entry : nullptr)) {
       if (DecodedRowAction::ReturnFromReader == action) {
         return;
       }
       continue;
+    }
+    if (structuredFt8Entry) {
+      queueFt8LogWork ("Rx", prepared.line_read.trimmed ());
     }
 
     line_read = prepared.line_read;
@@ -15767,8 +15892,13 @@ void MainWindow::readFromStdout()                             //readFromStdout
         m_QSOText = decodedtext.string ().trimmed ();
       }
 
-      if (!blockUDP)    // block udp spotting for false decodes (JTAlert)
-      postDecode (true, decodedtext);   //avt 9/30/25
+      if (!blockUDP) {   // block udp spotting for false decodes (JTAlert)
+        if (structuredFt8Entry) {
+          queueFt8PostDecodeWork (decodedtext);
+        } else {
+          postDecode (true, decodedtext);   //avt 9/30/25
+        }
+      }
 
       if((m_mode=="FT8" or m_mode=="FT2") and SpecOp::HOUND==m_specOp) {
         if(decodedtext.string().contains(";")) {
@@ -15852,7 +15982,13 @@ void MainWindow::readFromStdout()                             //readFromStdout
           DecodedText FST4W_post {QString::fromUtf8 (line_read.left (p).constData ())};
           pskPost(FST4W_post);
         } else {
-          if (stdMsg && okToPost) pskPost(decodedtext);
+          if (stdMsg && okToPost) {
+            if (structuredFt8Entry) {
+              queueFt8ReportingWork (decodedtext);
+            } else {
+              pskPost(decodedtext);
+            }
+          }
         }
         if((m_mode=="JT4" or m_mode=="JT65" or m_mode=="Q65") and
            m_msgAvgWidget!=NULL) {
@@ -26900,6 +27036,16 @@ void MainWindow::replayDecodes ()
 
 void MainWindow::postDecode (bool is_new, DecodedText decoded_text)      //avt 12/5/20
 {
+  publishDecodeTransport (is_new, decoded_text);
+  if (!is_new) {
+    return;
+  }
+  postDecodeMap (decoded_text);
+  postDecodeDxcc (decoded_text);
+}
+
+void MainWindow::publishDecodeTransport (bool is_new, DecodedText const& decoded_text)
+{
   QString message = decoded_text.string();      //avt 1/5/24
   auto const& decode = message.trimmed ();
   auto const message_text = udp_decode_message_text (decode);
@@ -26943,14 +27089,19 @@ void MainWindow::postDecode (bool is_new, DecodedText decoded_text)      //avt 1
         }
     }
 
-  if (!is_new) return;    //avt 8/22/23
+}
 
+void MainWindow::postDecodeMap (DecodedText const& decoded_text)
+{
   if (m_worldMapWidget)
     {
       m_worldMapWidget->setHomeGrid(m_config.my_grid());
       updateWorldMapFromDecode(decoded_text);
     }
+}
 
+void MainWindow::postDecodeDxcc (DecodedText const& decoded_text)
+{
   //avt 1/2/21
   bool callB4;
   bool callB4onBand;
@@ -30203,7 +30354,303 @@ void MainWindow::processFst4DecodedRows (quint64 serial, QStringList const& rows
   decodeDone ();
 }
 
-void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
+void MainWindow::enqueueFt8DecodedEntries (
+    QVector<decodium::ft8::DecodedEntry> const& entries)
+{
+  for (auto const& entry : entries) {
+    if (entry.row.trimmed ().isEmpty ()) {
+      continue;
+    }
+    if (entry.isUiPriority ()) {
+      m_ft8PriorityUiQueue.enqueue (entry);
+    } else {
+      m_ft8BackgroundUiQueue.enqueue (entry);
+    }
+  }
+}
+
+void MainWindow::queueFt8LogWork (QString const& txRx, QString const& message)
+{
+  m_ft8LogQueue.enqueue ({txRx, message});
+  scheduleFt8SecondaryDispatch ();
+}
+
+void MainWindow::queueFt8PostDecodeWork (DecodedText const& decodedText)
+{
+  m_ft8TransportQueue.enqueue (decodedText);
+  m_ft8MapQueue.enqueue (decodedText);
+  m_ft8DxccQueue.enqueue (decodedText);
+  scheduleFt8SecondaryDispatch ();
+}
+
+void MainWindow::queueFt8ReportingWork (DecodedText const& decodedText)
+{
+  m_ft8ReportingQueue.enqueue (decodedText);
+  scheduleFt8SecondaryDispatch ();
+}
+
+void MainWindow::clearFt8SecondaryWork ()
+{
+  m_ft8LogQueue.clear ();
+  m_ft8TransportQueue.clear ();
+  m_ft8MapQueue.clear ();
+  m_ft8DxccQueue.clear ();
+  m_ft8ReportingQueue.clear ();
+  m_ft8SecondaryNextQueue = 0;
+}
+
+void MainWindow::scheduleFt8SecondaryDispatch (int delayMs)
+{
+  if (m_ft8SecondaryDispatchScheduled) {
+    return;
+  }
+  m_ft8SecondaryDispatchScheduled = true;
+  QTimer::singleShot (qMax (0, delayMs), this, [this] {
+    m_ft8SecondaryDispatchScheduled = false;
+    drainFt8SecondaryDispatch ();
+  });
+}
+
+void MainWindow::drainFt8SecondaryDispatch ()
+{
+  if (m_mode != "FT8" || !m_valid || !ui) {
+    clearFt8SecondaryWork ();
+    return;
+  }
+
+  // Do not let persistence, maps or reporters delay a directed reply.
+  if (!m_ft8PriorityUiQueue.isEmpty ()) {
+    scheduleFt8SecondaryDispatch (1);
+    return;
+  }
+
+  constexpr qint64 kSecondaryBudgetMs {4};
+  constexpr int kSecondaryTasksPerCycle {5};
+  constexpr int kQueueCount {5};
+  QElapsedTimer budget;
+  budget.start ();
+  int processed = 0;
+
+  auto queueHasWork = [this] (int queue) {
+    switch (queue) {
+    case 0: return !m_ft8LogQueue.isEmpty ();
+    case 1: return !m_ft8TransportQueue.isEmpty ();
+    case 2: return !m_ft8MapQueue.isEmpty ();
+    case 3: return !m_ft8DxccQueue.isEmpty ();
+    case 4: return !m_ft8ReportingQueue.isEmpty ();
+    default: return false;
+    }
+  };
+
+  while (processed < kSecondaryTasksPerCycle
+         && (processed == 0 || budget.elapsed () < kSecondaryBudgetMs)) {
+    int selectedQueue = -1;
+    for (int offset = 0; offset < kQueueCount; ++offset) {
+      int const candidate = (m_ft8SecondaryNextQueue + offset) % kQueueCount;
+      if (queueHasWork (candidate)) {
+        selectedQueue = candidate;
+        break;
+      }
+    }
+    if (selectedQueue < 0) {
+      break;
+    }
+
+    m_ft8SecondaryNextQueue = (selectedQueue + 1) % kQueueCount;
+    switch (selectedQueue) {
+    case 0: {
+      auto const work = m_ft8LogQueue.dequeue ();
+      write_all (work.txRx, work.message);
+      break;
+    }
+    case 1:
+      publishDecodeTransport (true, m_ft8TransportQueue.dequeue ());
+      break;
+    case 2:
+      postDecodeMap (m_ft8MapQueue.dequeue ());
+      break;
+    case 3:
+      postDecodeDxcc (m_ft8DxccQueue.dequeue ());
+      break;
+    case 4:
+      pskPost (m_ft8ReportingQueue.dequeue ());
+      break;
+    default:
+      break;
+    }
+    ++processed;
+  }
+
+  bool const hasMore = !m_ft8LogQueue.isEmpty ()
+      || !m_ft8TransportQueue.isEmpty ()
+      || !m_ft8MapQueue.isEmpty ()
+      || !m_ft8DxccQueue.isEmpty ()
+      || !m_ft8ReportingQueue.isEmpty ();
+  if (hasMore) {
+    scheduleFt8SecondaryDispatch ();
+  }
+}
+
+void MainWindow::scheduleFt8UiDispatch ()
+{
+  if (m_ft8UiDispatchScheduled) {
+    return;
+  }
+  m_ft8UiDispatchScheduled = true;
+  m_ft8UiDispatchScheduledNs = monotonic_now_ns ();
+  QTimer::singleShot (0, this, [this] {
+    qint64 const resumedNs = monotonic_now_ns ();
+    if (m_ft8UiDispatchScheduledNs > 0) {
+      qint64 const lagNs = qMax<qint64> (0, resumedNs - m_ft8UiDispatchScheduledNs);
+      m_ft8UiDispatchResumeLagNs += lagNs;
+      m_ft8UiDispatchMaxResumeLagNs = qMax (m_ft8UiDispatchMaxResumeLagNs, lagNs);
+    }
+    m_ft8UiDispatchScheduledNs = 0;
+    m_ft8UiDispatchScheduled = false;
+    drainFt8UiDispatch ();
+  });
+}
+
+bool MainWindow::dispatchNextQueuedFt8Decode ()
+{
+  if (!m_ft8QueuedDecodePending) {
+    return false;
+  }
+  auto request = m_ft8QueuedDecodeRequest;
+  auto deepRequest = m_ft8QueuedDeepFollowupRequest;
+  bool const hasDeepRequest = m_ft8QueuedDeepFollowupPending;
+  m_ft8QueuedDecodePending = false;
+  m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
+  m_ft8QueuedDeepFollowupPending = false;
+  m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
+  m_ft8DeepFollowupQueued = false;
+  m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
+  if (hasDeepRequest) {
+    m_ft8DeepFollowupRequest = std::move (deepRequest);
+    m_ft8DeepFollowupQueued = true;
+  }
+  dispatchFt8DecodeRequest (std::move (request));
+  return true;
+}
+
+void MainWindow::finishFt8UiDispatch ()
+{
+  if (!m_ft8UiDispatchCompletionPending) {
+    m_ft8UiDispatchCycles = 0;
+    m_ft8UiDispatchStartedMs = 0;
+    m_ft8UiDispatchScheduledNs = 0;
+    m_ft8UiDispatchCycleCpuNs = 0;
+    m_ft8UiDispatchMaxCycleCpuNs = 0;
+    m_ft8UiDispatchResumeLagNs = 0;
+    m_ft8UiDispatchMaxResumeLagNs = 0;
+    return;
+  }
+  bool const completedDeepFollowup = m_ft8UiDispatchCompletedDeepFollowup;
+  int const completedUtc = m_ft8UiDispatchCompletedUtc;
+  int const batchRows = m_ft8UiDispatchBatchRows;
+  int const cycles = m_ft8UiDispatchCycles;
+  qint64 const dispatchMs = m_ft8UiDispatchStartedMs > 0
+      ? QDateTime::currentMSecsSinceEpoch () - m_ft8UiDispatchStartedMs
+      : 0;
+  double const cycleCpuMs = static_cast<double> (m_ft8UiDispatchCycleCpuNs) / 1.e6;
+  double const maxCycleCpuMs = static_cast<double> (m_ft8UiDispatchMaxCycleCpuNs) / 1.e6;
+  double const resumeLagMs = static_cast<double> (m_ft8UiDispatchResumeLagNs) / 1.e6;
+  double const maxResumeLagMs = static_cast<double> (m_ft8UiDispatchMaxResumeLagNs) / 1.e6;
+  m_ft8UiDispatchCompletionPending = false;
+  m_ft8UiDispatchCompletedDeepFollowup = false;
+  m_ft8UiDispatchCompletedUtc = 0;
+  m_ft8UiDispatchBatchRows = 0;
+  m_ft8UiDispatchCycles = 0;
+  m_ft8UiDispatchStartedMs = 0;
+  m_ft8UiDispatchScheduledNs = 0;
+  m_ft8UiDispatchCycleCpuNs = 0;
+  m_ft8UiDispatchMaxCycleCpuNs = 0;
+  m_ft8UiDispatchResumeLagNs = 0;
+  m_ft8UiDispatchMaxResumeLagNs = 0;
+
+  QString const dispatchMetric =
+      QString {"[FT8UIDISPATCH] delivered utc=%1 rows=%2 cycles=%3 wall_ms=%4 cycle_cpu_ms=%5 max_cycle_cpu_ms=%6 resume_lag_ms=%7 max_resume_lag_ms=%8"}
+          .arg (completedUtc)
+          .arg (batchRows)
+          .arg (cycles)
+          .arg (dispatchMs)
+          .arg (cycleCpuMs, 0, 'f', 2)
+          .arg (maxCycleCpuMs, 0, 'f', 2)
+          .arg (resumeLagMs, 0, 'f', 2)
+          .arg (maxResumeLagMs, 0, 'f', 2);
+  // One line per completed FT8 batch is low-volume and must remain available
+  // even when the optional legacy debug.txt logger is disabled.
+  qInfo ().noquote () << dispatchMetric;
+  debugToFile (dispatchMetric);
+
+  if (dispatchNextQueuedFt8Decode ()) {
+    return;
+  }
+  if (!completedDeepFollowup && dispatchQueuedEmbeddedFt8DeepFollowup ()) {
+    return;
+  }
+  decodeDone ();
+}
+
+void MainWindow::drainFt8UiDispatch ()
+{
+  if (m_mode != "FT8" || !m_valid || !ui) {
+    m_ft8PriorityUiQueue.clear ();
+    m_ft8BackgroundUiQueue.clear ();
+    m_ft8StructuredTransportQueue.clear ();
+    m_ft8UiDispatchCompletionPending = false;
+    m_ft8UiDispatchCompletedDeepFollowup = false;
+    m_ft8UiDispatchCompletedUtc = 0;
+    m_ft8UiDispatchBatchRows = 0;
+    m_ft8UiDispatchCycles = 0;
+    m_ft8UiDispatchStartedMs = 0;
+    m_ft8UiDispatchScheduledNs = 0;
+    m_ft8UiDispatchCycleCpuNs = 0;
+    m_ft8UiDispatchMaxCycleCpuNs = 0;
+    m_ft8UiDispatchResumeLagNs = 0;
+    m_ft8UiDispatchMaxResumeLagNs = 0;
+    clearFt8SecondaryWork ();
+    if (m_decoderBusy) {
+      decodeBusy (false);
+    }
+    return;
+  }
+
+  constexpr qint64 kUiBudgetMs {5};
+  constexpr int kMaxRowsPerCycle {6};
+  qint64 const cycleStartedNs = monotonic_now_ns ();
+  QElapsedTimer budget;
+  budget.start ();
+  int processed = 0;
+  ++m_ft8UiDispatchCycles;
+
+  while (processed < kMaxRowsPerCycle
+         && (!m_ft8PriorityUiQueue.isEmpty () || !m_ft8BackgroundUiQueue.isEmpty ())) {
+    auto entry = !m_ft8PriorityUiQueue.isEmpty ()
+        ? m_ft8PriorityUiQueue.dequeue ()
+        : m_ft8BackgroundUiQueue.dequeue ();
+    m_ft8StructuredTransportQueue.enqueue (std::move (entry));
+    // The renderer sees at most one structured FT8 entry per call.
+    readFromStdout ();
+    ++processed;
+    if (budget.elapsed () >= kUiBudgetMs) {
+      break;
+    }
+  }
+
+  qint64 const cycleCpuNs = qMax<qint64> (0, monotonic_now_ns () - cycleStartedNs);
+  m_ft8UiDispatchCycleCpuNs += cycleCpuNs;
+  m_ft8UiDispatchMaxCycleCpuNs = qMax (m_ft8UiDispatchMaxCycleCpuNs, cycleCpuNs);
+
+  if (!m_ft8PriorityUiQueue.isEmpty () || !m_ft8BackgroundUiQueue.isEmpty ()) {
+    scheduleFt8UiDispatch ();
+    return;
+  }
+  finishFt8UiDispatch ();
+}
+
+void MainWindow::processFt8DecodedEntries (
+    quint64 serial, QVector<decodium::ft8::DecodedEntry> const& entries)
 {
   if (serial != m_ft8DecodeSerial) {
     bool const timelyLateLiveFt8 =
@@ -30212,7 +30659,7 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
     bool const acceptLateLiveFt8 =
         m_mode == "FT8"
         && !m_diskData
-        && !rows.isEmpty ()
+        && !entries.isEmpty ()
         && timelyLateLiveFt8
         && serial < m_ft8DecodeSerial
         && (m_ft8DecodeSerial - serial) <= 4;
@@ -30220,13 +30667,9 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
       debugToFile (QString {"ft8Decode   accept late serial:%1 current:%2 rows:%3"}
                      .arg (serial)
                      .arg (m_ft8DecodeSerial)
-                     .arg (rows.size ()));
-      for (auto const& row : rows) {
-        if (!row.trimmed ().isEmpty ()) {
-          m_decodedTransportQueue.enqueue (row.toUtf8 ());
-        }
-      }
-      readFromStdout ();
+                     .arg (entries.size ()));
+      enqueueFt8DecodedEntries (entries);
+      scheduleFt8UiDispatch ();
     }
     return;
   }
@@ -30234,7 +30677,7 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
   // Aggiorna rolling history del bridge per auto-trigger features.
   if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr) {
     QMetaObject::invokeMethod (bridge, "recordFt8DecodeCount", Qt::QueuedConnection,
-                               Q_ARG (int, rows.size ()));
+                               Q_ARG (int, entries.size ()));
   }
 
   int const completedUtc = m_ft8DecodePendingUtc;
@@ -30261,57 +30704,36 @@ void MainWindow::processFt8DecodedRows (quint64 serial, QStringList const& rows)
 
   debugToFile (QString {"ft8Decode   done utc:%1 rows:%2 elapsedMs:%3 queued:%4 deep:%5"}
                  .arg (completedUtc)
-                 .arg (rows.size ())
+                 .arg (entries.size ())
                  .arg (elapsedMs)
                  .arg (m_ft8QueuedDecodePending ? 1 : 0)
                  .arg (completedDeepFollowup ? 1 : 0));
 
-  auto dispatchQueuedFt8Decode = [this] () -> bool {
-    if (!m_ft8QueuedDecodePending) {
-      return false;
-    }
-    auto request = m_ft8QueuedDecodeRequest;
-    auto deepRequest = m_ft8QueuedDeepFollowupRequest;
-    bool const hasDeepRequest = m_ft8QueuedDeepFollowupPending;
-    m_ft8QueuedDecodePending = false;
-    m_ft8QueuedDecodeRequest = decodium::ft8::DecodeRequest {};
-    m_ft8QueuedDeepFollowupPending = false;
-    m_ft8QueuedDeepFollowupRequest = decodium::ft8::DecodeRequest {};
-    m_ft8DeepFollowupQueued = false;
-    m_ft8DeepFollowupRequest = decodium::ft8::DecodeRequest {};
-    if (hasDeepRequest) {
-      m_ft8DeepFollowupRequest = std::move (deepRequest);
-      m_ft8DeepFollowupQueued = true;
-    }
-    dispatchFt8DecodeRequest (std::move (request));
-    return true;
-  };
-
   if (!m_diskData && completedUtc > 0 && elapsedMs > 6500 && !completedDeepFollowup) {
     debugToFile (QString {"ft8Decode   slow utc:%1 rows:%2 elapsedMs:%3 queued:%4 processing"}
                    .arg (completedUtc)
-                   .arg (rows.size ())
+                   .arg (entries.size ())
                    .arg (elapsedMs)
                    .arg (m_ft8QueuedDecodePending ? 1 : 0));
   }
 
-  for (auto const& row : rows) {
-    if (!row.trimmed ().isEmpty ()) {
-      m_decodedTransportQueue.enqueue (row.toUtf8 ());
-    }
+  if (m_ft8UiDispatchCompletionPending) {
+    qWarning ().noquote ()
+        << "[FT8DISPATCH] completion overlap; preserving queued rows and newest completion";
   }
-
-  readFromStdout ();
-
-  if (dispatchQueuedFt8Decode ()) {
-    return;
+  m_ft8UiDispatchCompletionPending = true;
+  m_ft8UiDispatchCompletedDeepFollowup = completedDeepFollowup;
+  m_ft8UiDispatchCompletedUtc = completedUtc;
+  m_ft8UiDispatchBatchRows += entries.size ();
+  if (m_ft8UiDispatchStartedMs <= 0) {
+    m_ft8UiDispatchStartedMs = QDateTime::currentMSecsSinceEpoch ();
+    m_ft8UiDispatchCycleCpuNs = 0;
+    m_ft8UiDispatchMaxCycleCpuNs = 0;
+    m_ft8UiDispatchResumeLagNs = 0;
+    m_ft8UiDispatchMaxResumeLagNs = 0;
   }
-
-  if (!completedDeepFollowup && dispatchQueuedEmbeddedFt8DeepFollowup ()) {
-    return;
-  }
-
-  decodeDone ();
+  enqueueFt8DecodedEntries (entries);
+  scheduleFt8UiDispatch ();
 }
 
 void MainWindow::processJt9FastDecodedRows (quint64 serial, QStringList const& rows)

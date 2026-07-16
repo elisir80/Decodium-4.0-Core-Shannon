@@ -212,6 +212,7 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
 {
     constexpr int kIntervalMs = 25;
     constexpr qint64 kStallThresholdMs = 90;
+    constexpr qint64 kAdaptiveStartupGraceMs = 15000;
 
     auto* timer = new QTimer(parent);
     timer->setObjectName(QStringLiteral("decodiumMainThreadWatchdog"));
@@ -243,6 +244,10 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
         if (deltaMs < kStallThresholdMs)
             return;
 
+        if (bridge && nowMs >= kAdaptiveStartupGraceMs) {
+            bridge->noteMainThreadMicroStall(deltaMs);
+        }
+
         ++(*stallCount);
         ++(*metricSamples);
         *metricAccumMs += deltaMs;
@@ -273,7 +278,8 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
     qInfo().noquote()
         << "[MAINWATCH] event loop watchdog active"
         << "interval_ms=" << kIntervalMs
-        << "threshold_ms=" << kStallThresholdMs;
+        << "threshold_ms=" << kStallThresholdMs
+        << "adaptive_grace_ms=" << kAdaptiveStartupGraceMs;
 }
 
 #ifdef Q_OS_WIN

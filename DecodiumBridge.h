@@ -12,6 +12,7 @@
 #include <QHash>
 #include <QMap>
 #include <QPointer>
+#include <QQueue>
 #include <QSet>
 #include <QDateTime>
 #include <QMutex>
@@ -27,6 +28,7 @@
 #include "DecodiumOmniRigManager.h"
 #include "DecodiumTransceiverManager.h"
 #include "Network/DecoSyncTime.hpp"
+#include "FtRuntimeAdaptivePolicy.hpp"
 
 class ActiveStationsModel;
 class DecodiumAlertManager;
@@ -55,6 +57,7 @@ class Modulator;
 class QAudioSink;
 class QBuffer;
 class QMediaDevices;
+class QThreadPool;
 class NtpClient;
 class DecoSyncTime;
 class DecodiumWebServer;
@@ -133,6 +136,7 @@ class DecodiumBridge : public QObject
     // array (filteredDecodeEntries, currentRxDecodes) con QAbstractListModel +
     // diff incrementale → elimina rebuild totale ad ogni decodeListChanged.
     Q_PROPERTY(DecodeListModel* bandActivityModel READ bandActivityModel CONSTANT)
+    Q_PROPERTY(DecodeListModel* fullSpectrumModel READ fullSpectrumModel CONSTANT)
     Q_PROPERTY(DecodeListModel* rxDecodeModel READ rxDecodeModel CONSTANT)
     Q_PROPERTY(QVariantList rxDecodeList READ rxDecodeList NOTIFY rxDecodeListChanged)
     Q_PROPERTY(int periodProgress READ periodProgress NOTIFY periodProgressChanged)
@@ -757,6 +761,7 @@ public:
     // only the legacy FT8threads setting and could therefore consume every
     // logical core even though the QML bridge had reserved cores for the UI.
     Q_INVOKABLE int effectiveFtThreadLimitForDecode() const;
+    void noteMainThreadMicroStall(qint64 deltaMs);
     Q_INVOKABLE void setFtThreads(int v);
     Q_INVOKABLE void setFtThreadsAuto(bool enabled);
     Q_INVOKABLE void cycleFtThreads();
@@ -2102,7 +2107,20 @@ private:
     // dal slot di decodeListChanged via setEntries() che applica diff
     // incrementale (no rebuild totale dei delegate QML).
     DecodeListModel* m_bandActivityModel {nullptr};
+    DecodeListModel* m_fullSpectrumModel {nullptr};
     DecodeListModel* m_rxDecodeModel {nullptr};
+    QTimer* m_decodeUiRefreshTimer {nullptr};
+    QTimer* m_fullSpectrumRefreshTimer {nullptr};
+    QThreadPool* m_decodeUiThreadPool {nullptr};
+    int m_decodeUiPendingFlags {0};
+    bool m_decodeUiSnapshotInFlight {false};
+    quint64 m_decodeUiSnapshotGeneration {0};
+    qint64 m_decodeUiBurstUntilMs {0};
+    QVector<QVariantMap> m_pendingFullSpectrumModelEntries;
+    QVector<QString> m_pendingFullSpectrumModelKeys;
+    bool m_fullSpectrumSnapshotPending {false};
+    QHash<QString, bool> m_decodeUiGhostCache;
+    QHash<QString, bool> m_decodeUiRxMembershipCache;
     bool m_decodeShowPeriodSeparator {true};
     bool m_decodeNewestFirst {false};
     bool m_hideTelemetryOnlyDecodes {true};
@@ -2702,6 +2720,18 @@ private:
     QSet<QString> m_legacyPrunedBandMirrorKeys;
     QSet<QString> m_legacyClearedRxMirrorKeys;
     QSet<QString> m_clearedRxDecodeKeys;
+    struct LegacyDecodeSecondaryWork {
+        QVariantMap entry;
+        QString source;
+        QString key;
+    };
+    QQueue<LegacyDecodeSecondaryWork> m_legacyDecodeSecondaryQueue;
+    QSet<QString> m_legacyDecodeSecondaryPendingKeys;
+    bool m_legacyDecodeSecondaryDrainScheduled {false};
+    bool m_skipNextLegacyBandModelSnapshot {false};
+    bool m_skipNextLegacyRxModelSnapshot {false};
+    QVariantList m_pendingLegacyFullSpectrumDelta;
+    QTimer* m_legacyFullSpectrumDeltaTimer {nullptr};
 
     // === GitHub TxController clone ===
     int  m_nTx73            {0};   // completed 73/RR73 transmissions in current QSO
@@ -3058,6 +3088,8 @@ private:
     QVector<float> m_lastPanadapterData;   // ultimo spettro valido (evita fasce nere)
     qint64 m_lastPanadapterFrameMs {0};     // throttle visual FFT so decode keeps priority
     qint64 m_lastPanadapterPressureLogMs {0};
+    qint64 m_deepDecodeVisualThrottleUntilMs {0};
+    quint64 m_deepDecodeVisualSerial {0};
     qint64 m_lastSpectrumRecoveryMs {0};
     qint64 m_lastLegacyPcmSampleMs {0};
     float m_lastPanMinDb {0.f};
@@ -3072,6 +3104,9 @@ private:
     std::atomic_bool m_forceGpuPanadapterFft {true};
     qint64 m_lastGpuPanadapterProbeMs {0};
     QList<QPointer<PanadapterItem>> m_panadapterItems;
+
+    mutable QMutex m_ft8MicroStallGuardMutex;
+    decodium::decode::Ft8MicroStallGuard m_ft8MicroStallGuard;
 
     struct PanadapterFrameResult
     {
@@ -3096,13 +3131,21 @@ private:
     // 1.0.143 fase 2: rebuild dei 2 model nativi dalla m_decodeList.
     void rebuildBandActivityModel();
     void rebuildRxDecodeModel();
+    void scheduleDecodeUiRefresh(int flags, int delayMs = 60);
+    void startDecodeUiSnapshotRefresh();
+    void scheduleFullSpectrumModelRefresh();
+    void applyPendingFullSpectrumSnapshot();
+    void invalidateDecodeUiPredicateCaches();
+    bool decodeUiBurstActive() const;
+    int decodeUiRowsPerCycle() const;
     QVariantList filterEntriesForBandActivity(QVariantList const& source) const;
     QVariantList filterEntriesForRxDecode(QVariantList const& source) const;
     bool shouldDisplayEntryForBandActivity(QVariantMap const& entry) const;
     bool shouldDisplayEntryForBandActivity(QVariantMap const& entry,
                                            bool hideWorkedBand,
                                            bool hideWorkedToday) const;
-    bool entryBelongsToCurrentQso(QVariantMap const& entry) const;
+    bool entryBelongsToCurrentQso(QVariantMap const& entry,
+                                  bool ghostAlreadyAccepted = false) const;
     void injectPeriodSeparators(QVariantList& filtered) const;
     // 1.0.145: detection ghost decode (SNR marginale + AP-aided high-FP-rate).
     bool looksLikeGhostDecode(QVariantMap const& entry) const;
@@ -3305,6 +3348,7 @@ private:
 
 public:
     DecodeListModel* bandActivityModel() const { return m_bandActivityModel; }
+    DecodeListModel* fullSpectrumModel() const { return m_fullSpectrumModel; }
     DecodeListModel* rxDecodeModel() const { return m_rxDecodeModel; }
 
 private:
@@ -3469,6 +3513,7 @@ private:
                                     const QString& dxGrid = QString()) const;
     bool legacyBackendAvailable() const;
     bool ensureLegacyBackendAvailable();
+    void noteFt8AdaptivePeriod(qint64 periodId);
     bool legacyTxBackendRequested() const;
     bool specialOperationRequiresLegacyTx() const;
     bool usingLegacyBackendForTx() const;
@@ -3501,6 +3546,15 @@ private:
     void clearDecodeWindowsForModeChange(const QString& previousMode, const QString& nextMode);
     void reloadBridgeSettingsFromPersistentStore();
     void syncLegacyBackendDecodeList();
+    void queueLegacyDecodeSecondaryWork(QVariantList const& entries,
+                                        QString const& source);
+    void scheduleLegacyDecodeSecondaryDrain(int delayMs = 12);
+    void drainLegacyDecodeSecondaryWork();
+    bool applyLegacyBandModelDelta(QVariantList const& entries);
+    bool applyLegacyRxModelDelta(QVariantList const& entries);
+    void queueLegacyFullSpectrumModelDelta(QVariantList const& entries);
+    void applyLegacyFullSpectrumModelDelta();
+    void invalidateLegacyDecodeModelDeltaFastPath();
     DecodeUserFilterConfig readDecodeUserFilterConfig() const;
     QVariantList mirrorLegacyDecodeLines(QStringList const& lines,
                                          bool rxPane,
@@ -3513,7 +3567,8 @@ private:
                                                bool rxPane) const;
     QStringList localDecodeCallCandidates() const;
     bool messageMentionsLocalCall(const QString& message, QString* matchedCall = nullptr) const;
-    bool shouldMirrorToRxPane(const QVariantMap& entry) const;
+    bool shouldMirrorToRxPane(const QVariantMap& entry,
+                              bool ghostAlreadyAccepted = false) const;
     void appendTxDecodeEntry(const QString& message);
     void appendRxDecodeEntry(const QVariantMap& entry);
     void rebuildRxDecodeList();

@@ -6766,18 +6766,47 @@ ApplicationWindow {
                     property var rxDecodes: (bridge && bridge.rxDecodeModel) ? [] : currentRxDecodes()
                     property var clearedRxDecodeKeys: ({})
                     property int decodeListVersion: 0
-                    // 1.0.412 — versione dedicata al conteggio, bumpata dai segnali NATIVI
-                    // del modello band-activity (rowsInserted/removed/reset): il badge
-                    // "N decodes" si aggiorna LIVE come la lista, non solo sull'emit
-                    // throttled 500ms di decodeListChanged (prima sembrava contare solo
-                    // i decode tardivi perché il numero scattava in step poco percepibili).
+                    // Il modello applica le righe a tranche, ma QML aggiorna contatori
+                    // e tail-follow una sola volta quando la snapshot e' completa.
                     property int bandActivityCountVersion: 0
+                    property bool bandActivitySnapshotPending: false
+                    property bool rxSnapshotPending: false
+                    function queueDecodeSnapshotUiCommit(bandPending, rxPending) {
+                        bandActivitySnapshotPending = bandActivitySnapshotPending || bandPending
+                        rxSnapshotPending = rxSnapshotPending || rxPending
+                        decodeSnapshotUiCommitTimer.restart()
+                    }
+                    Timer {
+                        id: decodeSnapshotUiCommitTimer
+                        interval: 60
+                        repeat: false
+                        onTriggered: {
+                            if (decodePanel.bandActivitySnapshotPending) {
+                                decodePanel.bandActivitySnapshotPending = false
+                                decodePanel.bandActivityCountVersion++
+                                decodePanel.decodeListVersion++
+                                decodePanel.updateCurrentPeriodDecodeCountFromCount(
+                                            bridge.bandActivityModel.count())
+                            }
+                            if (decodePanel.rxSnapshotPending) {
+                                decodePanel.rxSnapshotPending = false
+                                decodePanel.rxDecodeListVersion++
+                            }
+                        }
+                    }
                     Connections {
-                        target: bridge.bandActivityModel
+                        target: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : null
                         ignoreUnknownSignals: true
-                        function onRowsInserted() { decodePanel.bandActivityCountVersion++ }
-                        function onRowsRemoved() { decodePanel.bandActivityCountVersion++ }
-                        function onModelReset() { decodePanel.bandActivityCountVersion++ }
+                        function onSnapshotApplied() {
+                            decodePanel.queueDecodeSnapshotUiCommit(true, false)
+                        }
+                    }
+                    Connections {
+                        target: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : null
+                        ignoreUnknownSignals: true
+                        function onSnapshotApplied() {
+                            decodePanel.queueDecodeSnapshotUiCommit(false, true)
+                        }
                     }
                     property int rxDecodeListVersion: 0
                     property int lastSyncCount: 0
@@ -6867,8 +6896,9 @@ ApplicationWindow {
 	                    function refreshRxDecodeModel(resetCleared) {
 	                        if (resetCleared)
 	                            decodePanel.clearedRxDecodeKeys = ({})
-	                        if (!decodePanel.hasNativeRxDecodeModel())
-	                            decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+	                        if (decodePanel.hasNativeRxDecodeModel())
+	                            return
+	                        decodePanel.rxDecodes = decodePanel.currentRxDecodes()
 	                        decodePanel.rxDecodeListVersion++
 	                        if (rxFrequencyList)
 	                            rxFrequencyList.forceTailFollow()
@@ -6904,54 +6934,50 @@ ApplicationWindow {
 	                            decodePanel.clearedRxDecodeKeys = hidden
 	                            decodePanel.rxDecodes = []
 	                        }
-	                        decodePanel.rxDecodeListVersion++
 	                        bridge.clearRxDecodes()
-	                        if (rxFrequencyList)
-	                            rxFrequencyList.forceTailFollow()
-	                        if (rxFrequencyFloatingList)
-	                            rxFrequencyFloatingList.forceTailFollow()
+	                        if (!decodePanel.hasNativeRxDecodeModel()) {
+	                            decodePanel.rxDecodeListVersion++
+	                            if (rxFrequencyList)
+	                                rxFrequencyList.forceTailFollow()
+	                            if (rxFrequencyFloatingList)
+	                                rxFrequencyFloatingList.forceTailFollow()
+	                        }
 	                    }
 
 	                    // Update decode list incrementalmente (solo nuovi elementi)
 	                    Connections {
                         target: bridge
                         function onDecodeListChanged() {
-                            decodePanel.decodeListVersion++
-                            if (decodePanel.hasNativeBandActivityModel()) {
-                                decodePanel.updateCurrentPeriodDecodeCountFromCount(bridge.bandActivityModel.count())
-                            } else {
-                                var src = decodePanel.visibleDecodeEntries(bridge.decodeList)
-                                decodePanel.updateCurrentPeriodDecodeCount(src)
-                                decodePanel.allDecodes = src
-                            }
-                            if (!decodePanel.hasNativeRxDecodeModel())
-                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
-                            decodePanel.rxDecodeListVersion++
-                            // 1.0.227 — forceTailFollow solo sulla ListView attiva
-                            // (embedded VS floating in base a period1Detached).
-                            // Pre-1.0.227 chiamava SEMPRE entrambe: ognuna schedulava
-                            // Qt.callLater + NumberAnimation main thread anche se
-                            // invisibile = main saturation = freeze Full Spectrum.
-                            if (period1Detached) {
-                                if (period1FloatingList)
-                                    period1FloatingList.forceTailFollow()
-                            } else {
-                                if (evenPeriodList)
-                                    evenPeriodList.forceTailFollow()
-                            }
-                            if (rxFrequencyList)
-                                rxFrequencyList.forceTailFollow()
-                            if (rxFrequencyFloatingList)
-                                rxFrequencyFloatingList.forceTailFollow()
+	                            if (!decodePanel.hasNativeBandActivityModel()) {
+	                                decodePanel.decodeListVersion++
+	                                var src = decodePanel.visibleDecodeEntries(bridge.decodeList)
+	                                decodePanel.updateCurrentPeriodDecodeCount(src)
+	                                decodePanel.allDecodes = src
+	                                if (period1Detached) {
+	                                    if (period1FloatingList)
+	                                        period1FloatingList.forceTailFollow()
+	                                } else if (evenPeriodList) {
+	                                    evenPeriodList.forceTailFollow()
+	                                }
+	                            }
+	                            if (!decodePanel.hasNativeRxDecodeModel()) {
+	                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+	                                decodePanel.rxDecodeListVersion++
+	                                if (rxFrequencyList)
+	                                    rxFrequencyList.forceTailFollow()
+	                                if (rxFrequencyFloatingList)
+	                                    rxFrequencyFloatingList.forceTailFollow()
+	                            }
                         }
                         function onRxDecodeListChanged() {
-                            decodePanel.rxDecodeListVersion++
-                            if (!decodePanel.hasNativeRxDecodeModel())
-                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
-                            if (rxFrequencyList)
-                                rxFrequencyList.forceTailFollow()
-	                            if (rxFrequencyFloatingList)
-	                                rxFrequencyFloatingList.forceTailFollow()
+	                            if (!decodePanel.hasNativeRxDecodeModel()) {
+	                                decodePanel.rxDecodes = decodePanel.currentRxDecodes()
+	                                decodePanel.rxDecodeListVersion++
+	                                if (rxFrequencyList)
+	                                    rxFrequencyList.forceTailFollow()
+	                                if (rxFrequencyFloatingList)
+	                                    rxFrequencyFloatingList.forceTailFollow()
+	                            }
 	                        }
 	                        function onDxCallChanged() {
 	                            decodePanel.refreshRxDecodeModel(true)
@@ -6962,13 +6988,14 @@ ApplicationWindow {
 	                    }
 
                     onShowTxMessagesInRxChanged: {
-                        if (!decodePanel.hasNativeRxDecodeModel())
-                            decodePanel.rxDecodes = currentRxDecodes()
-                        decodePanel.rxDecodeListVersion++
-                        if (rxFrequencyList)
-                            rxFrequencyList.forceTailFollow()
-                        if (rxFrequencyFloatingList)
-                            rxFrequencyFloatingList.forceTailFollow()
+	                        if (decodePanel.hasNativeRxDecodeModel())
+	                            return
+	                        decodePanel.rxDecodes = currentRxDecodes()
+	                        decodePanel.rxDecodeListVersion++
+	                        if (rxFrequencyList)
+	                            rxFrequencyList.forceTailFollow()
+	                        if (rxFrequencyFloatingList)
+	                            rxFrequencyFloatingList.forceTailFollow()
                     }
 
                     Timer {
@@ -8149,6 +8176,7 @@ NumberAnimation {
                                         // thread saturation -> Full Spectrum freeze.
                                         onCountChanged: {
                                             if (period1Detached) return
+	                                            if (decodePanel.hasNativeBandActivityModel()) return
                                             // 1.0.231 — se user e' in scroll-back, no forced tail
                                             // ma incrementa counter per il floating "↓ N new" button.
 	                                            if (!followTail) {
@@ -8793,6 +8821,7 @@ NumberAnimation {
 	                                        }
                                         onCountChanged: {
                                             if (rxFreqDetached) return
+	                                            if (decodePanel.hasNativeRxDecodeModel()) return
                                             if (!followTail) {
                                                 rxFrequencyList.pendingNewDecodes++
                                                 return
@@ -13060,6 +13089,7 @@ NumberAnimation {
                         // floating ListView e' attivo solo quando period1Detached=true.
                         onCountChanged: {
                             if (!period1Detached) return
+	                            if (decodePanel.hasNativeBandActivityModel()) return
                             // 1.0.231 — se user in scroll-back, counter ↓N
                             if (!followTail) {
                                 period1FloatingList.pendingNewDecodes++
@@ -13662,6 +13692,7 @@ NumberAnimation {
 	                        }
 	                        onCountChanged: {
 	                            if (!rxFreqDetached) return
+	                            if (decodePanel.hasNativeRxDecodeModel()) return
 	                            if (!followTail) {
 	                                rxFrequencyFloatingList.pendingNewDecodes++
 	                                return

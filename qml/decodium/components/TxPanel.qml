@@ -325,13 +325,14 @@ Item {
     readonly property int toolbarButtonHPad: Math.max(11, Math.round(12 * toolbarScale))
     readonly property int toolbarMinButtonWidth: showBandBar ? Math.max(54, Math.round(56 * toolbarScale)) : 44
     readonly property int toolbarMaxButtonWidth: showBandBar ? Math.max(98, Math.round(104 * toolbarScale)) : 86
-    readonly property int toolbarButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
-    readonly property int toolbarHoldButtonWidth: toolbarActionWidth("HOLD", "\uD83D\uDD13")
-    readonly property int toolbarWideButtonWidth: toolbarActionWidth("CLEAR", "")
-    readonly property int toolbarLongButtonWidth: toolbarActionWidth("ALT 1/2", "\u21C4")
+    readonly property int toolbarButtonWidth: Math.max(54, Math.round(58 * toolbarScale))
+    readonly property int toolbarLongButtonWidth: Math.max(toolbarButtonWidth,
+                                                           Math.round(70 * toolbarScale))
+    readonly property int toolbarHoldButtonWidth: toolbarButtonWidth
+    readonly property int toolbarWideButtonWidth: toolbarButtonWidth
     readonly property int toolbarModeWidth: isFt2LinkMode
-                                            ? Math.max(132, toolbarActionWidth("FT2-Link", "\u25BE") + 24)
-                                            : toolbarActionWidth("FT2-Link", "\u25BE")
+                                            ? Math.max(132, toolbarMeasuredWidth("FT2-Link", "\u25BE") + 24)
+                                            : toolbarMeasuredWidth("FT2-Link", "\u25BE")
     readonly property int toolbarLabelSize: Math.max(9, Math.round(9 * toolbarScale))
     readonly property int toolbarGlyphSize: Math.max(12, Math.round(13 * toolbarScale))
     readonly property int qsoInfoControlHeight: 30
@@ -345,7 +346,7 @@ Item {
                                                 + (toolbarSpacing * 15)
     readonly property int toolbarBandWidth: Math.max(220, Math.min(520, topControlsFlow.width))
 
-    function toolbarActionWidth(label, glyph) {
+    function toolbarMeasuredWidth(label, glyph) {
         var text = String(label || "")
         var icon = String(glyph || "")
         var charPx = Math.max(6.2, 6.8 * toolbarScale)
@@ -353,6 +354,15 @@ Item {
         return Math.max(toolbarMinButtonWidth,
                         Math.min(toolbarMaxButtonWidth,
                                  Math.round(text.length * charPx + iconPx + toolbarButtonHPad * 2)))
+    }
+
+    function toolbarActionWidth(label, glyph) {
+        // Keep action controls visually consistent. Only labels longer than
+        // five characters need the wider variant; glyph/emoji metrics must
+        // not resize neighbouring buttons from platform to platform.
+        return String(label || "").length > 5
+                ? toolbarLongButtonWidth
+                : toolbarButtonWidth
     }
 
     function displayModeName(mode) {
@@ -473,15 +483,15 @@ Item {
         RowLayout {
             id: contentLayout
             anchors.fill: parent
-            anchors.leftMargin: 3
-            anchors.rightMargin: 3
+            anchors.leftMargin: 1
+            anchors.rightMargin: 1
             anchors.topMargin: 1
             anchors.bottomMargin: 1
-            spacing: glyph.length > 0 ? 3 : 0
+            spacing: glyph.length > 0 ? 1 : 0
 
             Text {
                 visible: glyph.length > 0
-                Layout.preferredWidth: Math.max(glyphSize + 4, 15)
+                Layout.preferredWidth: Math.max(glyphSize, 12)
                 Layout.fillHeight: true
                 text: glyph
                 color: foreground

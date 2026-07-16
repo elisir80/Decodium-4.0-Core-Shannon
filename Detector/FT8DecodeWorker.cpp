@@ -26,6 +26,7 @@
 #include "Logger.hpp"
 #include "commons.h"
 #include "Detector/DecodeMetricLogging.hpp"
+#include "Detector/DecodeWorkerScheduling.hpp"
 #include "Detector/FortranRuntimeGuard.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -1622,18 +1623,95 @@ namespace
     return row;
   }
 
-  QStringList build_rows (QString const& utcPrefix, int nout,
-                          int const* snrs, float const* dts, float const* freqs,
-                          int const* naps, float const* quals, char const* decodeds)
+  QString normalized_call_token (QByteArray const& raw)
   {
-    QStringList rows;
-    rows.reserve (qBound (0, nout, kFt8MaxLines));
-    for (int i = 0; i < qBound (0, nout, kFt8MaxLines); ++i)
+    return QString::fromLatin1 (raw).trimmed ().toUpper ().remove (QLatin1Char {'<'})
+        .remove (QLatin1Char {'>'});
+  }
+
+  QString base_call_token (QString const& call)
+  {
+    if (!call.contains (QLatin1Char {'/'}))
       {
-        rows << build_row (utcPrefix, snrs[i], dts[i], freqs[i], naps[i], quals[i],
-                           decodeds, i);
+        return call;
       }
-    return rows;
+    QString best;
+    for (QString const& part : call.split (QLatin1Char {'/'}, Qt::SkipEmptyParts))
+      {
+        bool hasLetter = false;
+        bool hasDigit = false;
+        for (QChar const ch : part)
+          {
+            hasLetter = hasLetter || ch.isLetter ();
+            hasDigit = hasDigit || ch.isDigit ();
+          }
+        if (hasLetter && hasDigit && part.size () > best.size ())
+          {
+            best = part;
+          }
+      }
+    return best.isEmpty () ? call : best;
+  }
+
+  bool message_has_call (QString const& message, QString const& call)
+  {
+    if (call.isEmpty ())
+      {
+        return false;
+      }
+    QString const base = base_call_token (call);
+    QString normalized = message.toUpper ();
+    normalized.replace (QLatin1Char {'<'}, QLatin1Char {' '});
+    normalized.replace (QLatin1Char {'>'}, QLatin1Char {' '});
+    static QRegularExpression const split {QStringLiteral (R"([^A-Z0-9/]+)")};
+    for (QString const& token : normalized.split (split, Qt::SkipEmptyParts))
+      {
+        if (token == call || token == base || base_call_token (token) == base)
+          {
+            return true;
+          }
+      }
+    return false;
+  }
+
+  bool is_qso_exchange (QString const& message)
+  {
+    static QRegularExpression const exchange {
+      QStringLiteral (R"((?:^|\s)(?:R?[+-]\d{1,2}|RRR|RR73|73)(?:\s|$))"),
+      QRegularExpression::CaseInsensitiveOption
+    };
+    return exchange.match (message).hasMatch ();
+  }
+
+  QVector<decodium::ft8::DecodedEntry> build_entries (
+      QString const& utcPrefix, decodium::ft8::DecodeRequest const& request, int nout,
+      int const* snrs, float const* dts, float const* freqs,
+      int const* naps, float const* quals, char const* decodeds)
+  {
+    QVector<decodium::ft8::DecodedEntry> entries;
+    int const count = qBound (0, nout, kFt8MaxLines);
+    entries.reserve (count);
+    QString const myCall = normalized_call_token (request.mycall);
+    QString const hisCall = normalized_call_token (request.hiscall);
+    for (int i = 0; i < count; ++i)
+      {
+        decodium::ft8::DecodedEntry entry;
+        entry.row = build_row (utcPrefix, snrs[i], dts[i], freqs[i], naps[i], quals[i],
+                               decodeds, i);
+        entry.message = decode_fallback (decodeds, i).trimmed ();
+        entry.decodedText0.emplace (entry.row);
+        entry.decodedText.emplace (QString {entry.row}.remove ("TU; "));
+        entry.snr = snrs[i];
+        entry.dt = dts[i];
+        entry.audioFrequency = qRound (freqs[i]);
+        entry.apType = naps[i];
+        entry.quality = quals[i];
+        entry.addressedToMe = message_has_call (entry.message, myCall);
+        entry.fromActivePartner = message_has_call (entry.message, hisCall);
+        entry.qsoExchange = is_qso_exchange (entry.message);
+        entries.append (std::move (entry));
+      }
+    return entries;
   }
 
   void log_ft8_dsp_rollout_once ()
@@ -1683,8 +1761,11 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
-  apply_decode_thread_limit (request.threadCount);
+  decodium::decode::applyCurrentDecodeWorkerPriority ();
+  int const reservedThreadLimit = decodium::decode::threadLimitWithUiReserve (request.threadCount);
+  apply_decode_thread_limit (reservedThreadLimit);
   int const activeThreads = active_decode_thread_limit ();
+  decodium::decode::applyOpenMpDecodeWorkerPriority (activeThreads);
   set_ft8_stage4_cancel (false);
   bool const pressureLimitedRequest =
       request.maxDecodeMs > 0
@@ -1828,7 +1909,14 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       return;
     }
   QString const utcPrefix = format_decode_utc (request.nutc);
-  QStringList rows = build_rows (utcPrefix, nout, snrs, dts, freqs, naps, quals, decodeds);
+  auto entries = build_entries (utcPrefix, request, nout, snrs, dts, freqs, naps, quals,
+                                decodeds);
+  QStringList rows;
+  rows.reserve (entries.size ());
+  for (auto const& entry : entries)
+    {
+      rows.append (entry.row);
+    }
   if (request.neuralSyncEnabled)
     {
       // Stage4 OSD non espone counter; proxy: rapporto decodi vs cap di 5.
@@ -1878,6 +1966,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (ftx_ft8_freqpart_bins_used_c ());
     }
   Q_EMIT decodeReady (request.serial, rows);
+  Q_EMIT decodedEntriesReady (request.serial, entries);
 }
 
 void FT8DecodeWorker::resetDecoderState ()
